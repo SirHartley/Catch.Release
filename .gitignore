@@ -1,0 +1,6 @@
+# Project exclude paths
+/jars/production
+/jars/catchrelease.jar
+
+# Project exclude paths
+/jars/

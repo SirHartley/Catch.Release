@@ -1,0 +1,24 @@
+{
+    "id": "catchrelease",
+    "name": "Catch.Release",
+    "author": "SirHartley",
+    "version": "1.0.a",
+    "description": "Adds fishing to Starsector, complete with an encyclopedia, seasons and roughly a hundred fish to catch.",
+    "gameVersion": "0.97a",
+    "jars":["jars/catchrelease.jar"],
+    "modPlugin":"catchrelease.plugins.ModPlugin",
+    "dependencies": [
+        {
+            "id": "lw_lazylib",
+            "name": "LazyLib",
+        },
+        {
+            "id": "lunalib",
+            "name": "LunaLib",
+        },
+        {
+            "id": "MagicLib",
+            "name": "MagicLib",
+        }
+    ]
+}
