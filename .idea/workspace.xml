@@ -5,31 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/catchrelease_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/demandindicators_jar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/csv-plugin.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Changelog" beforeDir="false" afterPath="$PROJECT_DIR$/Changelog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/LunaSettingsConfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/LunaSettingsConfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/version/version_files.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/version/version_files.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demandIndicators.version" beforeDir="false" afterPath="$PROJECT_DIR$/catchrelease.version" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demandindicators.iml" beforeDir="false" afterPath="$PROJECT_DIR$/catchrelease.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/icon/small_icon_demInd.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/icon/small_icon_catchrelease.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_excess.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_excess_high.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_excess_low.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_shortage.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_shortage_high.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/ui/commodity_shortage_low.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/demandindicators/listener/CargoStackAvailabilityIconProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/listener/CargoStackAvailabilityIconProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/demandindicators/plugins/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/plugins/ModPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mod_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/mod_info.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,38 +15,39 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "SirHartley"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;SirHartley&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
-    "url": "https://github.com/SirHartley/Demand.Indicators.git",
+    "url": "https://github.com/SirHartley/Catch.Release.git",
     "accountId": "d912d041-a01d-4fc0-ab05-9eb4e33ec028"
   }
 }]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2uLZFDNKcqyKJJjl0sXmPLoXxLe" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "master",
-    "kotlin-language-version-configured": "true",
-    "project.structure.last.edited": "Artifacts",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease\effects" />
