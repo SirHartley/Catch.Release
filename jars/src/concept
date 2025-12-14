@@ -1,15 +1,1 @@
-- use item to make fishing hole
-- motes in diff colours depending on rarity swim across
-- use drones to catch fish via skillshot
-- when caught, go "click" and throw up spacebar minigame
-- spacebar to move funny stardew fishing bar
-- catch fish
-
-Fish behaviour values for
-    - Target ranges [Bottom, middle, top] can spec multiple
-    - Speed (Accell?)
-    - Pauses
-    - custom plugin (phase, teleport, scrolling through limits)
-
-- drones pull it back, open cargo window, get fish
-- Fish does animation if new, rare or record size
+fish
