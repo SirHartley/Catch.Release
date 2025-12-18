@@ -1,4 +1,4 @@
-package catchrelease.testing;
+package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.rendering.Stencil;
@@ -8,22 +8,29 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WarpingSpriteRendererUtil;
-import lunalib.lunaUtil.campaign.LunaCampaignRenderingPlugin;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.EnumSet;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
+public class FishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
-    public static final float SIZE = 500f;
+    public static class PondParams {
+        public long seed;
+
+        public PondParams(long seed){
+            this.seed = seed;
+        }
+    }
+
+    public static final String ENTITY_ID = "catchrelease_StaticPond";
 
     public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
 
@@ -31,11 +38,6 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
     transient protected SpriteAPI stencil;
 
     transient protected WarpingSpriteRendererUtil warp;
-
-    @Override
-    public boolean isExpired() {
-        return false;
-    }
 
     @Override
     public void advance(float amount) {
@@ -47,43 +49,15 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    public void spawnRandomMote() {
-        Vector2f loc = Global.getSector().getPlayerFleet().getLocation();
-
-        float angle = MathUtils.getRandomNumberInRange(0, 360);
-        Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle);
-        Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle - 180);
-        SectorEntityToken mote = Global.getSector().getPlayerFleet().getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null, new FishEntityPlugin.Params(targetLoc, getRandomRarityColor()));
-        mote.setLocation(spawnLoc.x, spawnLoc.y);
-    }
-
-    public static Color getRandomRarityColor() {
-        Color[] rarityColors = {
-                Color.GRAY,                    // Common
-                Color.GREEN,                   // Uncommon
-                Color.BLUE,                    // Rare
-                new Color(163, 53, 238),        // Epic (purple)
-                new Color(255, 128, 0)          // Legendary (orange)
-        };
-
-        return rarityColors[
-                ThreadLocalRandom.current().nextInt(rarityColors.length)
-                ];
-    }
-
-    @Override
-    public EnumSet<CampaignEngineLayers> getActiveLayers() {
-        return EnumSet.of(CampaignEngineLayers.TERRAIN_1, CampaignEngineLayers.ABOVE);
-    }
-
-
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
+        super.render(layer, viewport);
+
         loadSpritesIfNeeded();
 
         LocationAPI containingLoc = Global.getSector().getPlayerFleet().getContainingLocation();
         Vector2f loc = Global.getSector().getPlayerFleet().getLocation();
-        Stencil.startDepthMask(stencil, SIZE, SIZE, loc, true);
+        Stencil.startDepthMask(stencil, entity.getRadius(), entity.getRadius(), loc, true);
 
         //background
         if (layer == CampaignEngineLayers.TERRAIN_1) {
@@ -110,6 +84,31 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
         }
 
         Stencil.endDepthMask();
+    }
+
+
+    public void spawnRandomMote() {
+        Vector2f loc = Global.getSector().getPlayerFleet().getLocation();
+
+        float angle = MathUtils.getRandomNumberInRange(0, 360);
+        Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle);
+        Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle - 180);
+        SectorEntityToken mote = Global.getSector().getPlayerFleet().getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null, new FishEntityPlugin.Params(targetLoc, getRandomRarityColor()));
+        mote.setLocation(spawnLoc.x, spawnLoc.y);
+    }
+
+    public static Color getRandomRarityColor() {
+        Color[] rarityColors = {
+                Color.GRAY,                    // Common
+                Color.GREEN,                   // Uncommon
+                Color.BLUE,                    // Rare
+                new Color(163, 53, 238),        // Epic (purple)
+                new Color(255, 128, 0)          // Legendary (orange)
+        };
+
+        return rarityColors[
+                ThreadLocalRandom.current().nextInt(rarityColors.length)
+                ];
     }
 
     public void loadSpritesIfNeeded() {

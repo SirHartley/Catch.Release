@@ -5,12 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="fishing spot alpha test">
-      <change afterPath="$PROJECT_DIR$/data/config/custom_entities.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/entities/MoteEntityPlugin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/testing/StencilHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/testing/TestStencilRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/spawner/PondFishSpawner.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/helper/RandomMemoryHelper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/constants/PondConstants.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/FishingPondEntityPlugin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/listener/OnJumpPondSpawner.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/listener/PondCreator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/plugins/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/plugins/ModPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/custom_entities.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/custom_entities.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/entities/MoteEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/FishEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/plugins/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/scripts/FishingHole.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/testing/StencilHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/Stencil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/testing/TestStencilRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/testing/TestStencilRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mod_info.json" beforeDir="false" afterPath="$PROJECT_DIR$/mod_info.json" afterDir="false" />
     </list>
@@ -52,20 +61,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Run Starsector.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Starsector/mods/Catch.Release/data/config&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Run Starsector.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Starsector/mods/Catch.Release/data/config",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Starsector\mods\Catch.Release\data\config" />
@@ -73,6 +82,9 @@
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease\effects" />
       <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease" />
+    </key>
+    <key name="MoveMembersDialog.RECENTS_KEY">
+      <recent name="catchrelease.hyperrift.constants.PondConstants" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="catchrelease.entities" />
@@ -115,7 +127,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765720622686</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fishing spot alpha test">
+      <option name="closed" value="true" />
+      <created>1765755869548</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765755869548</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -132,6 +152,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Smth broke" />
     <MESSAGE value="Initial Commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial Commit" />
+    <MESSAGE value="fishing spot alpha test" />
+    <option name="LAST_COMMIT_MESSAGE" value="fishing spot alpha test" />
   </component>
 </project>

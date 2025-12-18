@@ -1,4 +1,4 @@
-package catchrelease.entities;
+package catchrelease.campaign.fish.entities;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -13,7 +13,7 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-public class MoteEntityPlugin extends BaseCustomEntityPlugin {
+public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String MOTE_TAG = "catchrelease_mote";
 

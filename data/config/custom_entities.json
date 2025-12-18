@@ -8,7 +8,19 @@
 		"interactable":false,
 		"layers":[ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
 		"tags":["catchrelease_mote"],
-		"pluginClass":"catchrelease.entities.MoteEntityPlugin"
+		"pluginClass":"catchrelease.campaign.fish.entities.FishEntityPlugin"
+	},
+
+	"catchrelease_StaticPond":{
+		"defaultRadius":500, # used if radius<0 in addCustomEntity()
+		"showInCampaign":true, # show in campaign layer
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false, # make clickable,
+		"interactable":false,
+		"layers":[TERRAIN_1, ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
+		"tags":["catchrelease_StaticPond"],
+		"pluginClass":"catchrelease.campaign.ponds.entities.FishingPondEntityPlugin"
 	}
 }
 

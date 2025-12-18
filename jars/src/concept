@@ -1,1 +1,67 @@
 fish
+
+Pond fishing
+- spawn ponds
+    -> fish spawn decided by table pull on mote spawn
+- extend ponds into lake with item (? - different spot types for drone fishing, standard spot type for hook fishing)
+
+broken: spots don't render.
+
+roadmap
+- mvp
+    - Pond fishing
+        - unstable areas
+        - Key (P.O.N.D.)
+        - catcher drones / Rod
+        - Minigame (Stardew)
+    - Bomb fishing
+        - Searchlights
+        - Hyperdepth Charges
+        - Harpoon
+        - Minigame (hit the bar)
+    - Universal
+        - Loot animation
+        - Treasure handling
+        - Fish framework
+        - Stencil Tech & Shaders
+
+Fish Behaviour
+    - Seasons (slipstreams), Locations (sun colour) & fish
+    - Abyss fish
+    - Different sizes
+    - Different rarities
+
+- Full release
+    - Pond fishing
+    - Bomb fishing
+    - Upgrade systems
+        - Pond
+            - Easier minigame
+            - Rarity identification
+            - More mote spawns
+            - Higher chance for rare motes
+            - Lower drone CD (for catcher drones)
+            - Slower motes (for catcher drones)
+            - Bigger Pond (for catcher drones)
+        - Bomb
+            - More Search lights (ship-based)
+            - Reticules that track motes leaving searchlights for a while
+            - Rarity indicator reticules (? might want to keep this pond-only or make it only identify some, not all motes + false positives?)
+            - Faster harpoons
+            - Stun bombs
+            - Lower cooldowns
+    - NPCs (Fisherman & Scientist)
+    - Upgrade Shop (trade in fish for scrip)
+    - Codex plug-in
+    - Fish Scoreboard (largest caught...)
+    - The Ribcage fishing hub
+    - Main quest tie-in (fish the 4th drone for galatia)
+    - Tutorial
+    - Bar quests
+    - Fleet quests
+    - Fishing logistics ships (for bomb fishing)
+    - Fleet interactions
+    - Colony Aquarium
+
+Pond fishing: Slower, relaxing with a longer minigame section, easier to target rare fish, easier to catch rare (or other) fish once upgraded. No requirements to do.
+Bomb fishing: Faster, more exciting, short minigame section, easier to catch more fish but harder to target specific rarity. Doesn't get easier, just faster. Illegal in civilized volumes. Requires a fishing logi ship.

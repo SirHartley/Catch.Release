@@ -1,11 +1,10 @@
-package catchrelease.testing;
+package catchrelease.rendering;
 
-import com.fs.graphics.Sprite;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
-public class StencilHelper {
+public class Stencil {
 
     public static void startDepthMask(SpriteAPI mask,
                                       float width,
