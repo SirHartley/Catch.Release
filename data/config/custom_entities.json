@@ -12,13 +12,23 @@
 	},
 
 	"catchrelease_StaticPond":{
-		"defaultRadius":500, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true, # show in campaign layer
-		"showIconOnMap":false,
+		"defaultName":"Hyperrift", # used if name=null in addCustomEntity()
+		"defaultRadius":500, # used if radius<0 in addCustomEntity(),
+		"nameInText":"hyperrift",
+		"shortName":"hyperrift",
+		"aOrAn":"a",
+		"isOrAre":"is",
+		"icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
+		"iconWidth":10,
+		"iconHeight":10,
+		"customDescriptionId":"IndEvo_yeetopult",
+		"showInCampaign":true,
+		"showIconOnMap":true,
 		"showNameOnMap":false,
+		"scaleNameWithZoom":false,
+		"scaleIconWithZoom":true,
 		"renderCircleIndicator":false, # make clickable,
-		"interactable":false,
-		"layers":[TERRAIN_1, ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
+		"layers":[TERRAIN_1, TERRAIN_2, ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
 		"tags":["catchrelease_StaticPond"],
 		"pluginClass":"catchrelease.campaign.ponds.entities.FishingPondEntityPlugin"
 	}
