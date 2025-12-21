@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.rendering.Stencil;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
-import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -13,7 +12,6 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WarpingSpriteRendererUtil;
 import org.lazywizard.lazylib.MathUtils;
-import org.lazywizard.lazylib.VectorUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -21,7 +19,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class FishingPondEntityPlugin extends BaseCustomEntityPlugin {
+public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
     public static class PondParams {
         public long seed;

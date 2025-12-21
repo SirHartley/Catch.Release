@@ -1,7 +1,6 @@
 package catchrelease;
 
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
-import catchrelease.testing.TestStencilRenderer;
 import com.fs.starfarer.api.BaseModPlugin;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 
@@ -14,6 +13,7 @@ public class ModPlugin extends BaseModPlugin {
         OnJumpPondSpawner.register();
 
         //Testing
+        //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
         //LunaCampaignRenderer.addTransientRenderer(new TestStencilRenderer());
     }
 }

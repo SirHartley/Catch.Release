@@ -30,7 +30,7 @@
 		"renderCircleIndicator":false, # make clickable,
 		"layers":[TERRAIN_1, TERRAIN_2, ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
 		"tags":["catchrelease_StaticPond"],
-		"pluginClass":"catchrelease.campaign.ponds.entities.FishingPondEntityPlugin"
+		"pluginClass":"catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin"
 	}
 }
 
