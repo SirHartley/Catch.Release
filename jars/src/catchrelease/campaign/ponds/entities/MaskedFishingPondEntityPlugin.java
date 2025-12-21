@@ -1,9 +1,7 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.rendering.MaskedWarpedSpriteRenderer;
-import catchrelease.rendering.ParallaxUtil;
-import catchrelease.rendering.WarpGrid;
+import catchrelease.rendering.*;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -12,6 +10,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.WarpingSpriteRendererUtil;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
@@ -37,10 +36,11 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
+    transient protected MaskGlowRenderer maskGlowRenderer;
 
     @Override
     public void advance(float amount) {
-        //moteSpawnInterval.advance(amount);
+        moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed()) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
     }
@@ -53,30 +53,27 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
         if (starfield == null || mask == null) return;
 
+        initRenderer();
+
+        float alpha = viewport.getAlphaMult()
+                * entity.getSensorFaderBrightness()
+                * entity.getSensorContactFaderBrightness();
+
+        if (alpha <= 0f) return;
+
+        Vector2f loc = entity.getLocation();
+
+        float maxDispWorld = starfield.getWidth() * 0.15f;
+        float fillSize = starfield.getWidth() * 2f;
+        float maskSize = entity.getRadius() * 2f;
+
         if (layer == CampaignEngineLayers.TERRAIN_1) {
-            renderGlow(viewport);
-            return;
-        }
-
-        if (layer == CampaignEngineLayers.TERRAIN_2) {
-            initRenderer();
-
-            float alpha = viewport.getAlphaMult()
-                    * entity.getSensorFaderBrightness()
-                    * entity.getSensorContactFaderBrightness();
-            if (alpha <= 0f) return;
 
             starfield.setAlphaMult(1f);
             starfield.setNormalBlend();
 
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-            Vector2f loc = entity.getLocation();
-
-            float maxDispWorld = starfield.getWidth() * 0.5f;
-            float fillSize = starfield.getWidth() * 2;
-            float maskSize = entity.getRadius() * 2f;
 
             Vector2f fillUvOffsetPx = ParallaxUtil.computeFillUvOffsetPx(
                     viewport,
@@ -94,47 +91,63 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
                     fillSize,
                     maskSize,
                     alpha,
-                    fillUvOffsetPx);
+                    fillUvOffsetPx
+            );
+            return;
+        }
+
+        if (layer == CampaignEngineLayers.TERRAIN_2) {
+            Color purple = new Color(170, 20, 200);
+
+            maskGlowRenderer.setThreshold(0.2f); // keep gradients
+            maskGlowRenderer.renderAdditive(
+                    mask,
+                    loc,
+                    maskSize*1.1f,
+                    purple,
+                    0.15f * alpha,
+                    1f,
+                    1f
+            );
+
+            Color lpurple = new Color(255, 120, 255);
+            maskGlowRenderer.setThreshold(0.1f); // keep gradients
+            maskGlowRenderer.renderAdditive(
+                    mask,
+                    loc,
+                    maskSize*1.15f,
+                    lpurple,
+                    0.2f * alpha,
+                    8f,
+                    0f
+            );
 
             return;
         }
 
         if (layer == CampaignEngineLayers.ABOVE) {
+            Stencil.startDepthMask(mask, maskSize, maskSize, loc, true);
+
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
                 ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);
             }
-        }
-    }
 
-    private void renderGlow(ViewportAPI viewport) {
-        if (background == null) background = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
-
-        float alpha = viewport.getAlphaMult()
-                * entity.getSensorFaderBrightness()
-                * entity.getSensorContactFaderBrightness();
-        if (alpha <= 0f) return;
-
-        float spriteAlpha = alpha * 0.5f;
-        Vector2f loc = entity.getLocation();
-
-        background.setColor(Color.BLACK);
-        background.setNormalBlend();
-
-        float size = entity.getRadius() * 3f;
-        for (int i = 0; i < 6; i++) {
-            background.setSize(size, size);
-            background.setAlphaMult(spriteAlpha * (i == 0 ? 1f : 0.67f));
-            background.renderAtCenter(loc.x, loc.y);
+            Stencil.endDepthMask();
         }
     }
 
     private void initRenderer() {
-        if (maskedRenderer != null) return;
-        int cells = 6;
-        float cs = starfield.getWidth() / 10f;
-        warpGrid = new WarpGrid(cells, cells, cs * 0.2f, cs * 0.2f, 1f);
-        maskedRenderer = new MaskedWarpedSpriteRenderer(warpGrid);
-        maskedRenderer.setMaskThreshold(0f);
+        if (maskedRenderer == null){
+            int cells = 6;
+            float cs = starfield.getWidth() / 10f;
+            warpGrid = new WarpGrid(cells, cells, cs * 0.2f, cs * 0.2f, 1f);
+            maskedRenderer = new MaskedWarpedSpriteRenderer(warpGrid);
+            maskedRenderer.setMaskThreshold(0f);
+        }
+
+        if (maskGlowRenderer == null) {
+            maskGlowRenderer = new MaskGlowRenderer();
+        }
     }
 
     public void spawnRandomMote() {

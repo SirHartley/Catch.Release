@@ -25,7 +25,10 @@ public class ParallaxUtil {
         float t = distToCenter / radius;
         if (t > 1f) t = 1f;
 
-        float displacementWorld = maxDisplacementWorld * t;
+        float zoom = viewport.getViewMult();
+        if (zoom <= 0f) zoom = 1f;
+
+        float displacementWorld = (maxDisplacementWorld * t) / (1/zoom);
 
         direction.normalise(direction);
         direction.scale(displacementWorld);
@@ -36,4 +39,3 @@ public class ParallaxUtil {
         return new Vector2f(uvOffX, uvOffY);
     }
 }
-
