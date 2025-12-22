@@ -4,14 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="shader-based render setup instead of stencil-based">
-      <change afterPath="$PROJECT_DIR$/data/catchrelease/shaders/mask_glow_fragment.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/catchrelease/shaders/mask_glow_vertex.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/MaskGlowRenderer.java" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="fishing pond glow border">
+      <change afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/spawner/StarSystemFishSpawner.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/ability/SearchlightAbilityPlugin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_1.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/ParallaxUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/ParallaxUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,26 +52,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Run Starsector.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Starsector/mods/Catch.Release/data/catchrelease/shaders&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Run Starsector.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Starsector/mods/Catch.Release/data/config",
+    "project.structure.last.edited": "Global Libraries",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
       <recent name="D:\Starsector\mods\Catch.Release\data\config" />
+      <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
+      <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease\spotlight" />
+      <recent name="D:\Starsector\mods\Catch.Release" />
       <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease\effects" />
       <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease" />
     </key>
@@ -151,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766334208562</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fishing pond glow border">
+      <option name="closed" value="true" />
+      <created>1766359419546</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1766359419546</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -172,6 +184,7 @@
     <MESSAGE value="file structure&#10;basic fish pond spawning" />
     <MESSAGE value="parallax, pond visuals" />
     <MESSAGE value="shader-based render setup instead of stencil-based" />
-    <option name="LAST_COMMIT_MESSAGE" value="shader-based render setup instead of stencil-based" />
+    <MESSAGE value="fishing pond glow border" />
+    <option name="LAST_COMMIT_MESSAGE" value="fishing pond glow border" />
   </component>
 </project>

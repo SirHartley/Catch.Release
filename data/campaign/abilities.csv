@@ -1,0 +1,2 @@
+name,id,type,tags,activationDays,activationCooldown,durationDays,deactivationDays,deactivationCooldown,unlockedAtStart,defaultForAIFleet,musicSuppression,uiOn,uiOff,uiLoop,worldOn,worldOff,worldLoop,icon,plugin,ai,desc,sortOrder
+Search lights,catchrelease_searchlights,TOGGLE,stealth-,0.5,,,0.1,,TRUE,FALSE,,catchrelease_ui_searchlight_on,catchrelease_ui_searchlight_off,catchrelease_ui_searchlight_loop,,,,graphics/icons/abilities/travel_drive.png,catchrelease.campaign.searchlight.ability.SearchlightAbilityPlugin,,Project search lights to see fish!,871

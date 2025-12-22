@@ -50,6 +50,10 @@ Fish Behaviour
             - Faster harpoons
             - Stun bombs
             - Lower cooldowns
+            - For any of the "harpoon" minigame types like circle:
+                - More "lives", eg, allowed misses before the line breaks
+                - bigger hit window
+                - slower indicator
     - NPCs (Fisherman & Scientist)
     - Upgrade Shop (trade in fish for scrip)
     - Codex plug-in

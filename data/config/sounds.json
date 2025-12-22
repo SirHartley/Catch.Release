@@ -1,0 +1,21 @@
+{
+	"catchrelease_ui_searchlight_loop":[
+		{"file":"sounds/catchrelease/spotlight/spotlight_loop.ogg","pitch":1.0,"volume":0.8},
+	],
+	"catchrelease_ui_searchlight_on":{
+		"sounds":[
+			{"file":"sounds/catchrelease/spotlight/spotlight_ability_on.ogg","pitch":0.9,"volume":0.6},
+		],
+	},
+	"catchrelease_ui_searchlight_off":{
+		"sounds":[
+			{"file":"sounds/catchrelease/spotlight/spotlight_ability_off.ogg","pitch":1,"volume":1},
+		],
+	},
+
+	"catchrelease_ui_searchlight_toggle":{
+		"sounds":[
+			{"file":"sounds/catchrelease/spotlight/spotlight_toggle.ogg","pitch":1,"volume":1},
+		],
+	}
+}
