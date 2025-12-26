@@ -22,8 +22,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     protected void activateImpl() {
-        CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return;
+        
     }
 
     @Override
