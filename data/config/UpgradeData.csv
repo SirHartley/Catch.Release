@@ -1,0 +1,8 @@
+id,baseValue,type,increasePerLevel,increaseType,maxLevel,description
+Example,0.5,DOUBLE,1,FLAT,5,
+searchlight_area,300,INT,100,FLAT,3,The radius covered by each spotlight.
+searchlight_speed,30,INT,0.2,MULT,3,The speed the spotlight moves at.
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,

@@ -4,17 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="start on search lights&#10;search light soundwork">
-      <change afterPath="$PROJECT_DIR$/data/catchrelease/shaders/ripple_circle_fragment.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/catchrelease/shaders/ripple_circle_vertex.shader" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/RippleRingRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightRippleRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/RippleMaker.java" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="searchlight water ripple effect">
+      <change afterPath="$PROJECT_DIR$/data/config/UpgradeData.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/TransientMemory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/loading/UpgradeStatLoader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/StatIds.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/UpgradeManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/UpgradeStat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/SearchAreaProfile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/Searchlight.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/ability/SearchlightAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/ability/SearchlightAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightRenderer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/RippleRingRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/RippleMaker.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +67,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Starsector/mods/Catch.Release/data/catchrelease/shaders",
+    "last_opened_file_path": "D:/Starsector/mods/Catch.Release/data/config",
     "project.structure.last.edited": "Global Libraries",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"
@@ -70,8 +75,8 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
       <recent name="D:\Starsector\mods\Catch.Release\data\config" />
+      <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
       <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -173,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766443850490</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="searchlight water ripple effect">
+      <option name="closed" value="true" />
+      <created>1766783045825</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1766783045825</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -196,6 +209,7 @@
     <MESSAGE value="shader-based render setup instead of stencil-based" />
     <MESSAGE value="fishing pond glow border" />
     <MESSAGE value="start on search lights&#10;search light soundwork" />
-    <option name="LAST_COMMIT_MESSAGE" value="start on search lights&#10;search light soundwork" />
+    <MESSAGE value="searchlight water ripple effect" />
+    <option name="LAST_COMMIT_MESSAGE" value="searchlight water ripple effect" />
   </component>
 </project>
