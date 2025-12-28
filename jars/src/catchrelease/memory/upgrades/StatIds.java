@@ -1,4 +1,4 @@
-package catchrelease.campaign.memory.upgrades;
+package catchrelease.memory.upgrades;
 
 public class StatIds {
 

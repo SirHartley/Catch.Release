@@ -1,4 +1,4 @@
-package catchrelease.campaign.searchlight.rendering;
+package catchrelease.rendering.plugins;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -11,7 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.io.IOException;
 
-public class SearchlightRippleRenderer {
+public class NoiseMappedCircularRingRenderer {
     private transient int program = 0;
 
     private transient int uNoiseTex = -1;

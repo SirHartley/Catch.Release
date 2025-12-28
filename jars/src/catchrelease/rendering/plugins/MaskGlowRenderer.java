@@ -1,4 +1,4 @@
-package catchrelease.rendering;
+package catchrelease.rendering.plugins;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;

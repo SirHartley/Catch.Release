@@ -1,4 +1,4 @@
-package catchrelease.campaign.searchlight.scripts;
+package catchrelease.abilities.searchlight.scripts;
 
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;

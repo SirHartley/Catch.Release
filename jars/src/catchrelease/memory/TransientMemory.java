@@ -1,4 +1,4 @@
-package catchrelease.campaign.memory;
+package catchrelease.memory;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.GenericPluginManagerAPI;

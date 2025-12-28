@@ -1,7 +1,8 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.rendering.Stencil;
+import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.rendering.helper.Stencil;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -16,7 +17,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
@@ -164,21 +164,7 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void loadSpritesIfNeeded() {
-        if (starfield == null) {
-            try {
-                Global.getSettings().loadTexture("graphics/backgrounds/hyperspace_bg_cool.jpg");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            starfield = Global.getSettings().getSprite("graphics/backgrounds/hyperspace_bg_cool.jpg"); //large, unload later!
-        }
-        if (stencil == null) {
-            try {
-                Global.getSettings().loadTexture("graphics/catchrelease/effects/fishing_hole_1.png");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            stencil = Global.getSettings().getSprite("graphics/catchrelease/effects/fishing_hole_1.png");
-        }
+        if (starfield == null) starfield = SpriteLoader.getSprite("hs_bg");
+        if (stencil == null) stencil = SpriteLoader.getSprite("pond_1");
     }
 }

@@ -1,0 +1,10 @@
+{
+  "graphics": {
+    "catchrelease": {
+          "hs_bg":"graphics/backgrounds/hyperspace_bg_cool.jpg",
+          "pond_1":"graphics/catchrelease/effects/fishing_hole_1.png",
+          "spotlight_circle":"graphics/catchrelease/effects/spotlight_circle.png",
+          "ring_noise":"graphics/catchrelease/effects/ripple_map_1.png",
+    },
+  },
+}

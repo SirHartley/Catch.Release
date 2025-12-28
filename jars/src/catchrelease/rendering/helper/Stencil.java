@@ -1,4 +1,4 @@
-package catchrelease.rendering;
+package catchrelease.rendering.helper;
 
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.lwjgl.opengl.GL11;

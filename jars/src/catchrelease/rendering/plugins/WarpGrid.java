@@ -1,6 +1,7 @@
-package catchrelease.rendering;
+package catchrelease.rendering.plugins;
 
-public final class WarpGrid {
+public class WarpGrid {
+
     public static final class MutatingValue {
         public float value;
         public float min;
@@ -8,8 +9,6 @@ public final class WarpGrid {
         public float rate;
         public float rateSign;
         public float sign = 0f;
-
-        public MutatingValue() {}
 
         public MutatingValue(float min, float max, float rate) {
             this.min = min;

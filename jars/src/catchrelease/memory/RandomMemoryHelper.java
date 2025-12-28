@@ -1,4 +1,4 @@
-package catchrelease.campaign.helper;
+package catchrelease.memory;
 
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;

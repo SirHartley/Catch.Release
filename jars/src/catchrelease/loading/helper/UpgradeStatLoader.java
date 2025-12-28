@@ -1,8 +1,8 @@
-package catchrelease.campaign.memory.loading;
+package catchrelease.loading.helper;
 
 import catchrelease.ModPlugin;
-import catchrelease.campaign.memory.TransientMemory;
-import catchrelease.campaign.memory.upgrades.UpgradeStat;
+import catchrelease.memory.TransientMemory;
+import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import org.json.JSONArray;
 import org.json.JSONException;

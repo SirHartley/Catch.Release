@@ -1,14 +1,12 @@
-package catchrelease.campaign.searchlight.ability;
+package catchrelease.abilities.searchlight.ability;
 
-import catchrelease.campaign.memory.upgrades.StatIds;
-import catchrelease.campaign.memory.upgrades.UpgradeManager;
-import catchrelease.campaign.searchlight.scripts.SearchAreaProfile;
-import catchrelease.campaign.searchlight.scripts.Searchlight;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.abilities.searchlight.scripts.SearchAreaProfile;
+import catchrelease.abilities.searchlight.scripts.Searchlight;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
-import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.impl.campaign.abilities.BaseToggleAbility;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;

@@ -1,9 +1,9 @@
-package catchrelease.campaign.searchlight.scripts;
+package catchrelease.abilities.searchlight.scripts;
 
-import catchrelease.campaign.memory.upgrades.StatIds;
-import catchrelease.campaign.memory.upgrades.UpgradeManager;
-import catchrelease.campaign.searchlight.rendering.RippleRingRenderer;
-import catchrelease.campaign.searchlight.rendering.SearchlightGlowRenderer;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.rendering.renderers.RippleRingRenderer;
+import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.IntervalUtil;
@@ -60,14 +60,31 @@ public class Searchlight implements EveryFrameScript {
         return x;
     }
 
-    // Smoothest common ease-in/out for endpoints: 6x^5 - 15x^4 + 10x^3
-    private static float smootherStep(float x) {
-        x = clamp01(x);
-        return x * x * x * (x * (x * 6f - 15f) + 10f);
-    }
+    public void init(SearchAreaProfile profile) {
+        this.profile = profile;
 
-    private static float lerp(float a, float b, float t) {
-        return a + (b - a) * t;
+        // Randomize initial 0-1 positions, then derive angle/dist from eased mapping
+        angleT01 = (float) Math.random();
+        distT01 = (float) Math.random();
+
+        angleTDir = (Math.random() < 0.5) ? -1f : 1f;
+        distTDir = (Math.random() < 0.5) ? -1f : 1f;
+
+        float angleE = smootherStep(angleT01);
+        float distE = smootherStep(distT01);
+
+        angleDeg = lerp(profile.minAngle, profile.maxAngle, angleE);
+        dist = lerp(profile.minDist, profile.maxDist, distE);
+
+        // update, not replace, because it is used by the other renderers
+        Vector2f loc = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), dist, angleDeg);
+        currentRenderLoc.x = loc.x;
+        currentRenderLoc.y = loc.y;
+
+        float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+        glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
+
+        LunaCampaignRenderer.addTransientRenderer(glow);
     }
 
     @Override
@@ -138,30 +155,14 @@ public class Searchlight implements EveryFrameScript {
         expired = true;
     }
 
-    public void init(SearchAreaProfile profile) {
-        this.profile = profile;
-
-        // Randomize initial 0..1 positions, then derive angle/dist from eased mapping
-        angleT01 = (float) Math.random();
-        distT01 = (float) Math.random();
-
-        angleTDir = (Math.random() < 0.5) ? -1f : 1f;
-        distTDir = (Math.random() < 0.5) ? -1f : 1f;
-
-        float angleE = smootherStep(angleT01);
-        float distE = smootherStep(distT01);
-
-        angleDeg = lerp(profile.minAngle, profile.maxAngle, angleE);
-        dist = lerp(profile.minDist, profile.maxDist, distE);
-
-        // update, not replace, because it is used by the other renderers
-        Vector2f loc = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), dist, angleDeg);
-        currentRenderLoc.x = loc.x;
-        currentRenderLoc.y = loc.y;
-
-        float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
-        glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
-
-        LunaCampaignRenderer.addTransientRenderer(glow);
+    // Smoothest common ease-in/out for endpoints: 6x^5 - 15x^4 + 10x^3
+    private static float smootherStep(float x) {
+        x = clamp01(x);
+        return x * x * x * (x * (x * 6f - 15f) + 10f);
     }
+
+    private static float lerp(float a, float b, float t) {
+        return a + (b - a) * t;
+    }
+
 }

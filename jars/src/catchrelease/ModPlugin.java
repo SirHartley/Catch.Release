@@ -1,11 +1,8 @@
 package catchrelease;
 
-import catchrelease.campaign.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
-import catchrelease.campaign.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.BaseModPlugin;
-import com.fs.starfarer.api.Global;
-import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 
 public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";

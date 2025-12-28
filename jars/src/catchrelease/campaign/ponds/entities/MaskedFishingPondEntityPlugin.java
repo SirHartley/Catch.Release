@@ -1,8 +1,14 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.rendering.*;
-import com.fs.starfarer.api.Global;
+import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.campaign.ponds.renderer.PondRippleRenderer;
+import catchrelease.campaign.ponds.renderer.RippleData;
+import catchrelease.rendering.helper.ParallaxUtil;
+import catchrelease.rendering.helper.Stencil;
+import catchrelease.rendering.plugins.MaskGlowRenderer;
+import catchrelease.rendering.plugins.MaskedWarpedSpriteRenderer;
+import catchrelease.rendering.plugins.WarpGrid;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -10,13 +16,11 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.WarpingSpriteRendererUtil;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
@@ -26,13 +30,17 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         public PondParams(long seed) { this.seed = seed; }
     }
 
+    public static final float ACTIVATION_SPOOL_UP_TIME = 5f;
+
     public static final String ENTITY_ID = "catchrelease_StaticPond";
 
-    public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
+    public PondRippleRenderer rippleRenderer;
+    public IntervalUtil moteSpawnInterval = new IntervalUtil(1f, 5f);
+    public boolean isActive = false;
+    public float activity = 0; //0 - 1
 
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
-    transient protected SpriteAPI background;
 
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
@@ -40,14 +48,33 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        init();
+
+        if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
+
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed()) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
     }
 
+    public void init(){
+        if (rippleRenderer == null){
+            RippleData data = new RippleData(entity.getLocation(), 3f, 6f,PondRippleRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f); //magic bullshit go
+            rippleRenderer = new PondRippleRenderer(data, entity);
+            entity.addScript(rippleRenderer);
+        }
+    }
+
+    public void activate(){
+        isActive = true;
+        rippleRenderer.fadeAndExpire(1);
+    }
+
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
+
+        if (!isActive) return;
 
         loadSpritesIfNeeded();
 
@@ -65,7 +92,7 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
         float maxDispWorld = starfield.getWidth() * 0.15f;
         float fillSize = starfield.getWidth() * 2f;
-        float maskSize = entity.getRadius() * 2f;
+        float maskSize = entity.getRadius() * 2f * activity;
 
         if (layer == CampaignEngineLayers.TERRAIN_1) {
 
@@ -136,20 +163,6 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    private void initRenderer() {
-        if (maskedRenderer == null){
-            int cells = 6;
-            float cs = starfield.getWidth() / 10f;
-            warpGrid = new WarpGrid(cells, cells, cs * 0.2f, cs * 0.2f, 1f);
-            maskedRenderer = new MaskedWarpedSpriteRenderer(warpGrid);
-            maskedRenderer.setMaskThreshold(0f);
-        }
-
-        if (maskGlowRenderer == null) {
-            maskGlowRenderer = new MaskGlowRenderer();
-        }
-    }
-
     public void spawnRandomMote() {
         Vector2f loc = entity.getLocation();
 
@@ -174,22 +187,22 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         return rarityColors[ThreadLocalRandom.current().nextInt(rarityColors.length)];
     }
 
+    private void initRenderer() {
+        if (maskedRenderer == null){
+            int cells = 6;
+            float cs = starfield.getWidth() / 10f;
+            warpGrid = new WarpGrid(cells, cells, cs * 0.2f, cs * 0.2f, 1f);
+            maskedRenderer = new MaskedWarpedSpriteRenderer(warpGrid);
+            maskedRenderer.setMaskThreshold(0f);
+        }
+
+        if (maskGlowRenderer == null) {
+            maskGlowRenderer = new MaskGlowRenderer();
+        }
+    }
+
     public void loadSpritesIfNeeded() {
-        if (starfield == null) {
-            try {
-                Global.getSettings().loadTexture("graphics/backgrounds/hyperspace_bg_cool.jpg");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            starfield = Global.getSettings().getSprite("graphics/backgrounds/hyperspace_bg_cool.jpg");
-        }
-        if (mask == null) {
-            try {
-                Global.getSettings().loadTexture("graphics/catchrelease/effects/fishing_hole_1.png");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            mask = Global.getSettings().getSprite("graphics/catchrelease/effects/fishing_hole_1.png");
-        }
+        if (starfield == null) starfield = SpriteLoader.getSprite("hs_bg");
+        if (mask == null) mask = SpriteLoader.getSprite("pond_1");
     }
 }

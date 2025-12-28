@@ -1,6 +1,6 @@
 package catchrelease.campaign.ponds.listener;
 
-import catchrelease.campaign.helper.RandomMemoryHelper;
+import catchrelease.memory.RandomMemoryHelper;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -41,8 +41,10 @@ public class PondCreator {
 
     public void spawnPond(Vector2f loc){
         SectorEntityToken pond = system.addCustomEntity(Misc.genUID(), null, MaskedFishingPondEntityPlugin.ENTITY_ID,null, 500f, 0f, 0f,new MaskedFishingPondEntityPlugin.PondParams(random.nextLong()));
+        pond.setLocation(loc.x, loc.y);
 
-        if (system.isNebula()) pond.setLocation(loc.x, loc.y);
+        //Decided that ponds should not orbit because it sucks to follow them around
+        /*if (system.isNebula()) pond.setLocation(loc.x, loc.y);
         else {
             float orbitRadius = Misc.getDistance(loc, system.getCenter().getLocation());
             pond.setCircularOrbit(
@@ -50,7 +52,7 @@ public class PondCreator {
                     random.nextFloat(0f, 360f),
                     orbitRadius,
                     orbitRadius / (20f + random.nextFloat() * 5f)); //similar to vanilla planets
-        }
+        }*/
     }
 
     private Vector2f getPondSpawnLoc() {

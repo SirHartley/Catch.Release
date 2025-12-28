@@ -1,4 +1,4 @@
-package catchrelease.rendering;
+package catchrelease.rendering.helper;
 
 import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;

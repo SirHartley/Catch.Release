@@ -1,6 +1,7 @@
-package catchrelease.campaign.searchlight.rendering;
+package catchrelease.rendering.renderers;
 
-import com.fs.starfarer.api.Global;
+import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.rendering.plugins.NoiseMappedCircularRingRenderer;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -10,26 +11,28 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.EnumSet;
 
+//each ripple has its own renderer which is inefficient, but cpu cycles are free
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
-    public static final String NOISE_TEX_PATH = "graphics/catchrelease/effects/ripple_map_1.png";
-
+    //default params for searchlight
     public static final float START_RADIUS_OFFSET = 0.7f;
-
-    public static final float RING_WIDTH_PX = 2f;
     public static final float FEATHER_PX = 2f;
+    public static final float RING_WIDTH_PX = 2f;
     public static final float GROW_TIME = 7.0f;
 
     transient protected SpriteAPI noise;
-    transient protected SearchlightRippleRenderer ringRenderer;
+    transient protected NoiseMappedCircularRingRenderer ringRenderer;
 
     private float age = 0f;
     private boolean expired = false;
 
-    // Fade-and-expire support
+    public float ringWidth = RING_WIDTH_PX;
+    public float growTime = GROW_TIME;
+    public float startRadiusOffsetMult = START_RADIUS_OFFSET;
+
+    //fade
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -42,6 +45,18 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         this.location = loc;
         this.size = size;
         this.color = color;
+    }
+
+    /**
+     * @param startRadiusOffsetMult multiplies the max radius by 0.x to get the start radius
+     */
+    public RippleRingRenderer(Color color, float maxSize, Vector2f location, float ringWidth, float growTime, float startRadiusOffsetMult) {
+        this.color = color;
+        this.size = maxSize;
+        this.location = location;
+        this.ringWidth = ringWidth;
+        this.growTime = growTime;
+        this.startRadiusOffsetMult = startRadiusOffsetMult;
     }
 
     @Override
@@ -71,7 +86,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
             }
         }
 
-        if (!fading && age >= GROW_TIME) {
+        if (!fading && age >= growTime) {
             expired = true;
         }
     }
@@ -94,21 +109,21 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     }
 
     private void renderGrowingFadingRing(Vector2f center) {
-        if (ringRenderer == null) ringRenderer = new SearchlightRippleRenderer();
+        if (ringRenderer == null) ringRenderer = new NoiseMappedCircularRingRenderer();
 
         float maxRadius = size;
-        float minRadius = size * START_RADIUS_OFFSET;
+        float minRadius = size * startRadiusOffsetMult;
 
         float maxRadiusPx = Math.max(minRadius, maxRadius);
-        float halfExtent = maxRadiusPx + (RING_WIDTH_PX * 0.5f) + FEATHER_PX + 2f;
+        float halfExtent = maxRadiusPx + (ringWidth * 0.5f) + FEATHER_PX + 2f;
         float sizePx = halfExtent * 2f;
 
-        float t = MathUtils.clamp(age / GROW_TIME, 0f, 1f);
-        float rT = smootherSmootherStep(t);
+        float t = MathUtils.clamp(age / growTime, 0f, 1f);
+        float rT = smootherStep(t);
         float radiusPx = lerp(minRadius, maxRadius, rT);
 
-        float up = smootherSmootherStep(t);
-        float down = smootherSmootherStep(1f - t);
+        float up = smootherStep(2 * t); //Fade in twice as fast
+        float down = smootherStep(1f - t);
         float alphaMult = up * down * 4f; // *4 normalizes peak to ~1 at t=0.5
 
         // Apply forced fade-out multiplier if active
@@ -120,7 +135,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         if (alphaMult <= 0f) return;
 
         float radiusUv = radiusPx / sizePx;
-        float ringWidthUv = RING_WIDTH_PX / sizePx;
+        float ringWidthUv = ringWidth / sizePx;
         float featherUv = FEATHER_PX / sizePx;
 
         float angularTiling = 1f;
@@ -149,18 +164,10 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     }
 
     private void loadSpritesIfNeeded() {
-        if (noise != null) return;
-
-        try {
-            Global.getSettings().loadTexture(NOISE_TEX_PATH);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        noise = Global.getSettings().getSprite(NOISE_TEX_PATH);
+        if (noise == null) noise = SpriteLoader.getSprite("ring_noise");
     }
 
-    private static float smootherSmootherStep(float t) {
+    private static float smootherStep(float t) {
         t = MathUtils.clamp(t, 0f, 1f);
         return t * t * t * (t * (t * 6f - 15f) + 10f);
     }

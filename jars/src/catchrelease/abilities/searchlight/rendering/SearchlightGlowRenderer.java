@@ -1,8 +1,6 @@
-package catchrelease.campaign.searchlight.rendering;
+package catchrelease.abilities.searchlight.rendering;
 
-import catchrelease.campaign.memory.upgrades.StatIds;
-import catchrelease.campaign.memory.upgrades.UpgradeManager;
-import com.fs.starfarer.api.Global;
+import catchrelease.loading.helper.SpriteLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -11,7 +9,6 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.EnumSet;
 
 // render search light in center of... search light
@@ -20,7 +17,7 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
 
     private boolean expired = false;
 
-    // Fade-and-expire support
+    // Fade-and-fadeAndExpire support
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -89,13 +86,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     }
 
     public void loadSpritesIfNeeded() {
-        if (sprite != null) return;
-
-        try {
-            Global.getSettings().loadTexture("graphics/catchrelease/effects/spotlight_circle.png");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        sprite = Global.getSettings().getSprite("graphics/catchrelease/effects/spotlight_circle.png");
+        if (sprite == null) sprite = SpriteLoader.getSprite("spotlight_circle");
     }
 }

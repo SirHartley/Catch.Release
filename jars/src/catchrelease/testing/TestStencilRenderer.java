@@ -1,7 +1,7 @@
 package catchrelease.testing;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.rendering.Stencil;
+import catchrelease.rendering.helper.Stencil;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.LocationAPI;
