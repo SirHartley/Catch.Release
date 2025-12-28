@@ -1,6 +1,6 @@
 package catchrelease.memory.upgrades;
 
-import catchrelease.loading.helper.UpgradeStatLoader;
+import catchrelease.helper.loading.UpgradeStatLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 

@@ -1,6 +1,6 @@
 package catchrelease.rendering.renderers;
 
-import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.plugins.NoiseMappedCircularRingRenderer;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;

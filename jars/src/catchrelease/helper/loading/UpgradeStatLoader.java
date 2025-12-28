@@ -1,4 +1,4 @@
-package catchrelease.loading.helper;
+package catchrelease.helper.loading;
 
 import catchrelease.ModPlugin;
 import catchrelease.memory.TransientMemory;

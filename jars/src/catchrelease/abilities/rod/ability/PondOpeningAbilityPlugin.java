@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.ability;
 
+import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -22,7 +23,9 @@ public class PondOpeningAbilityPlugin extends BaseDurationAbility {
     @Override
     protected void activateImpl() {
         if (entity.isPlayerFleet()) {
-            getPond().activate();
+            SectorEntityToken t = entity.getContainingLocation().addCustomEntity(Misc.genUID(), null, RodMoteEntityPlugin.ENTITY_ID, null,
+                    new RodMoteEntityPlugin.RodMoteEntityPluginData(entity.getLocation(),getPond(),Color.CYAN));
+            t.setLocation(entity.getLocation().x, entity.getLocation().y);
         }
     }
 
@@ -44,20 +47,19 @@ public class PondOpeningAbilityPlugin extends BaseDurationAbility {
 
     @Override
     public boolean isUsable() {
-        MaskedFishingPondEntityPlugin pond = getPond();
+        SectorEntityToken pond = getPond();
         if (pond == null) return false;
         return super.isUsable();
     }
 
-    protected MaskedFishingPondEntityPlugin getPond() {
+    protected SectorEntityToken getPond() {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null) return null;
 
-        MaskedFishingPondEntityPlugin pond = null;
+        SectorEntityToken pond = null;
         for (SectorEntityToken t : fleet.getContainingLocation().getEntitiesWithTag(MaskedFishingPondEntityPlugin.ENTITY_ID)){
             float distance = Misc.getDistance(t, fleet);
-            MaskedFishingPondEntityPlugin plugin = (MaskedFishingPondEntityPlugin) t.getCustomPlugin();
-            if (distance < t.getRadius() * 1.5f) pond = plugin;
+            if (distance < t.getRadius() * 1.5f) pond = t;
         }
 
         return pond;
@@ -78,7 +80,7 @@ public class PondOpeningAbilityPlugin extends BaseDurationAbility {
         tooltip.addPara("Forces open a pond rupture.", pad);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            MaskedFishingPondEntityPlugin pond = getPond();
+            SectorEntityToken pond = getPond();
             if (pond == null) {
                 tooltip.addPara("Your fleet is not currently near a pond rupture.", Misc.getNegativeHighlightColor(), pad);
             }

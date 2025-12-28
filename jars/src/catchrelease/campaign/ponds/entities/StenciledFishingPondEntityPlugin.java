@@ -1,7 +1,7 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Stencil;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;

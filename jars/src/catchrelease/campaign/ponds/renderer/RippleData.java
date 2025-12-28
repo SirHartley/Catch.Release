@@ -45,7 +45,6 @@ public class RippleData {
         this.amount = 1;
     }
 
-
     public void advance(float amt) {
         if (isExpired()) {
             renderers.clear();

@@ -10,7 +10,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PondRippleRenderer implements EveryFrameScript {
+/**
+ * spawns extra ripples like water drops around the main one
+ */
+public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
 
     public static final Color BASE_RIPPLE_COLOR = new Color(100, 120, 160);
 
@@ -31,7 +34,7 @@ public class PondRippleRenderer implements EveryFrameScript {
     /**
      * @param mainRipple should be infinite
      */
-    public PondRippleRenderer(RippleData mainRipple, SectorEntityToken attachedEntity){
+    public UnstableFabricRippleTerrainRenderer(RippleData mainRipple, SectorEntityToken attachedEntity){
         this.attachedEntity = attachedEntity;
         this.size = mainRipple.maxSize;
         ripples.add(mainRipple);

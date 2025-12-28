@@ -1,6 +1,6 @@
 package catchrelease.abilities.searchlight.rendering;
 
-import catchrelease.loading.helper.SpriteLoader;
+import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;

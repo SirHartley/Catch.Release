@@ -4,38 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="more searchlights, stats">
-      <change afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/PondRippleRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/RippleData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/SpriteLoader.java" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon">
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/animation/Flash.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/animation/ArchedTrajectoryFollowingMote.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/animation/BaseCircleTrajectoryFollowingParticle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/Circle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/CircularArc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/TrigHelper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/SimpleRippleDataRunner.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/abilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/config/custom_entities.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/custom_entities.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/small_icon_catchrelease.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/icon/small_icon_catchrelease.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/helper/RandomMemoryHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/RandomMemoryHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/TransientMemory.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/TransientMemory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/loading/UpgradeStatLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/UpgradeStatLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/StatIds.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/StatIds.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/UpgradeManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/memory/upgrades/UpgradeStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeStat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/StenciledFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/StenciledFishingPondEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/listener/PondCreator.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/listener/PondCreator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/ability/SearchlightAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/ability/SearchlightAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/rendering/SearchlightRippleRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/NoiseMappedCircularRingRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/SearchAreaProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/SearchAreaProfile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/searchlight/scripts/Searchlight.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/Searchlight.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/MaskGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/MaskGlowRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/MaskedWarpedSpriteRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/MaskedWarpedSpriteRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/ParallaxUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/helper/ParallaxUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/Stencil.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/helper/Stencil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/WarpGrid.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/WarpGrid.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/testing/TestStencilRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/testing/TestStencilRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/PondRippleRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/RippleData.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/RippleData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/SpriteLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/SpriteLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/UpgradeStatLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/UpgradeStatLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,22 +64,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Run Starsector.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Starsector/mods/Catch.Release/data/config&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Global Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Run Starsector.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Starsector/mods/Catch.Release/jars/src/catchrelease/helper/math",
+    "project.structure.last.edited": "Global Libraries",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\helper\math" />
       <recent name="D:\Starsector\mods\Catch.Release\data\config" />
       <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
       <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
@@ -105,6 +95,9 @@
       <recent name="catchrelease.hyperrift.constants.PondConstants" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="catchrelease.abilities.rod.entities" />
+      <recent name="catchrelease.abilities.rod.animation" />
+      <recent name="catchrelease.animation.particles" />
       <recent name="catchrelease.campaign.ponds.entities" />
       <recent name="catchrelease.entities" />
     </key>
@@ -210,7 +203,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766862873966</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon">
+      <option name="closed" value="true" />
+      <created>1766934729455</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1766934729455</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -235,6 +236,7 @@
     <MESSAGE value="start on search lights&#10;search light soundwork" />
     <MESSAGE value="searchlight water ripple effect" />
     <MESSAGE value="more searchlights, stats" />
-    <option name="LAST_COMMIT_MESSAGE" value="more searchlights, stats" />
+    <MESSAGE value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
+    <option name="LAST_COMMIT_MESSAGE" value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
   </component>
 </project>

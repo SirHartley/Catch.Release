@@ -1,8 +1,8 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.loading.helper.SpriteLoader;
-import catchrelease.campaign.ponds.renderer.PondRippleRenderer;
+import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.rendering.helper.ParallaxUtil;
 import catchrelease.rendering.helper.Stencil;
@@ -34,7 +34,7 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_StaticPond";
 
-    public PondRippleRenderer rippleRenderer;
+    public UnstableFabricRippleTerrainRenderer rippleRenderer;
     public IntervalUtil moteSpawnInterval = new IntervalUtil(1f, 5f);
     public boolean isActive = false;
     public float activity = 0; //0 - 1
@@ -59,8 +59,8 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
     public void init(){
         if (rippleRenderer == null){
-            RippleData data = new RippleData(entity.getLocation(), 3f, 6f,PondRippleRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f); //magic bullshit go
-            rippleRenderer = new PondRippleRenderer(data, entity);
+            RippleData data = new RippleData(entity.getLocation(), 3f, 6f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f); //magic bullshit go
+            rippleRenderer = new UnstableFabricRippleTerrainRenderer(data, entity);
             entity.addScript(rippleRenderer);
         }
     }
