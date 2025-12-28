@@ -4,27 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon">
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/animation/Flash.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/animation/ArchedTrajectoryFollowingMote.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/animation/BaseCircleTrajectoryFollowingParticle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/Circle.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/CircularArc.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/TrigHelper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/SimpleRippleDataRunner.java" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="ROD animation&#10;More moving things around">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/custom_entities.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/custom_entities.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/StenciledFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/StenciledFishingPondEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/PondRippleRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/RippleData.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/RippleData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/SpriteLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/SpriteLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/loading/helper/UpgradeStatLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/UpgradeStatLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/memory/upgrades/UpgradeManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -211,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766934729455</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="ROD animation&#10;More moving things around">
+      <option name="closed" value="true" />
+      <created>1766940719945</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1766940719945</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -237,6 +226,7 @@
     <MESSAGE value="searchlight water ripple effect" />
     <MESSAGE value="more searchlights, stats" />
     <MESSAGE value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
-    <option name="LAST_COMMIT_MESSAGE" value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
+    <MESSAGE value="ROD animation&#10;More moving things around" />
+    <option name="LAST_COMMIT_MESSAGE" value="ROD animation&#10;More moving things around" />
   </component>
 </project>
