@@ -6,6 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="fish images">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/abyssal_rockfish.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/batfish.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/carp.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/jellyfish_pink.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/perch.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/perch.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/shad.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/shad.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/silver_dollar_fish.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/skelleton2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/tench.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/unicornfish.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -209,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766962865932</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="fish images">
+      <option name="closed" value="true" />
+      <created>1767051143546</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1767051143546</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
