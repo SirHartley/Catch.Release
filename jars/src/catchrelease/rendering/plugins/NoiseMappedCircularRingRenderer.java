@@ -52,6 +52,11 @@ public class NoiseMappedCircularRingRenderer {
         ensureShader();
         if (program == 0) return;
 
+        // (2) Snapshot blend state so we can restore it
+        final boolean blendWasEnabled = GL11.glIsEnabled(GL11.GL_BLEND);
+        final int prevBlendSrc = GL11.glGetInteger(GL11.GL_BLEND_SRC);
+        final int prevBlendDst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+
         GL20.glUseProgram(program);
 
         if (uTime >= 0) GL20.glUniform1f(uTime, timeSec);
@@ -68,7 +73,15 @@ public class NoiseMappedCircularRingRenderer {
         if (uNoiseCutoff >= 0) GL20.glUniform1f(uNoiseCutoff, noiseCutoff);
         if (uNoiseSoft >= 0) GL20.glUniform1f(uNoiseSoft, noiseSoft);
 
-        if (uRingColor >= 0) GL20.glUniform4f(uRingColor, color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
+        if (uRingColor >= 0) {
+            GL20.glUniform4f(
+                    uRingColor,
+                    color.getRed() / 255f,
+                    color.getGreen() / 255f,
+                    color.getBlue() / 255f,
+                    color.getAlpha() / 255f
+            );
+        }
 
         // unit0 = noise
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -81,9 +94,13 @@ public class NoiseMappedCircularRingRenderer {
         GL11.glTranslatef(center.x - w * 0.5f, center.y - h * 0.5f, 0f);
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+        // (1) Force fixed-function color to white so no external tint can modulate your quad
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
+        // Your blend choice
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
         GL11.glBegin(GL11.GL_QUADS);
         {
@@ -103,7 +120,15 @@ public class NoiseMappedCircularRingRenderer {
 
         GL11.glPopMatrix();
 
+
+        // Always restore program and blend state even if something throws
         GL20.glUseProgram(0);
+
+        GL11.glBlendFunc(prevBlendSrc, prevBlendDst);
+        if (!blendWasEnabled) {
+            GL11.glDisable(GL11.GL_BLEND);
+        }
+
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }
 

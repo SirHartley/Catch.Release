@@ -4,17 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="fish images">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="spotlight visuals, behaviour and sound">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/UpgradeData.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/UpgradeData.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/animation/Flash.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/animation/Flash.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/ability/SearchlightAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/ability/SearchlightAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/rendering/SearchlightGlowRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/SearchAreaProfile.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/Searchlight.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/Searchlight.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/CircularArc.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/CircularArc.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/TrigHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/math/TrigHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/NoiseMappedCircularRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/NoiseMappedCircularRingRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle.ogg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle2.ogg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -234,7 +229,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767130273390</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="spotlight visuals, behaviour and sound">
+      <option name="closed" value="true" />
+      <created>1767191460314</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1767191460314</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -262,6 +265,7 @@
     <MESSAGE value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
     <MESSAGE value="ROD animation&#10;More moving things around" />
     <MESSAGE value="fish images" />
-    <option name="LAST_COMMIT_MESSAGE" value="fish images" />
+    <MESSAGE value="spotlight visuals, behaviour and sound" />
+    <option name="LAST_COMMIT_MESSAGE" value="spotlight visuals, behaviour and sound" />
   </component>
 </project>

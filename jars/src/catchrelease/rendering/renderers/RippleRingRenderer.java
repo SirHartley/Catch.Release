@@ -18,6 +18,8 @@ import static catchrelease.helper.math.TrigHelper.smootherStep;
 //each ripple has its own renderer which is inefficient, but cpu cycles are free
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
+    public static final float MAX_ALPHA = 0.7f;
+
     //default params for searchlight
     public static final float START_RADIUS_OFFSET = 0.7f;
     public static final float FEATHER_PX = 2f;
@@ -152,7 +154,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
                 center,
                 sizePx,
                 age,
-                alphaMult,
+                alphaMult* MAX_ALPHA,
                 radiusUv,
                 ringWidthUv,
                 featherUv,
