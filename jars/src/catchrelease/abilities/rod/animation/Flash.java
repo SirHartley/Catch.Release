@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.animation;
 
+import catchrelease.helper.math.TrigHelper;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -67,7 +68,7 @@ public class Flash implements LunaCampaignRenderingPlugin {
         float fract = MathUtils.clamp(animProgress / ANIM_TIME, 0f, 1f);
 
         // Expansion curve (0 -> peak -> 0)
-        float scale = getQuadFunctAlpha(fract) * size;
+        float scale = TrigHelper.quadFuncSmooth(fract) * size;
 
         float w = scale;
         float h = scale;
@@ -84,9 +85,4 @@ public class Flash implements LunaCampaignRenderingPlugin {
             glow.renderAtCenter(loc.x, loc.y);
         }
     }
-
-    public float getQuadFunctAlpha(float fract) {
-        return (float) (0.5f * Math.sin(1.5f + Math.PI * fract) + 0.5f);
-    }
-
 }

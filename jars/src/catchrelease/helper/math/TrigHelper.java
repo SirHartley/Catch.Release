@@ -11,6 +11,20 @@ public class TrigHelper {
         return (float) Math.random() * arc - arc / 2f;
     }
 
+    /**
+     *
+     * @param fract 0..1
+     * @return smoothed, 0.5 at 0.5
+     */
+    public static float quadFuncSmooth(float fract) {
+        return (float) (0.5f * Math.sin(1.5f + Math.PI * fract) + 0.5f);
+    }
+
+    public static float smootherStep(float t) {
+        t = MathUtils.clamp(t, 0f, 1f);
+        return t * t * t * (t * (t * 6f - 15f) + 10f);
+    }
+
     public static Vector2f findClosestCircleIntersectToPoint(Vector2f center0, double r0,
                                                              Vector2f center1, double r1,
                                                              Vector2f targetPoint) {

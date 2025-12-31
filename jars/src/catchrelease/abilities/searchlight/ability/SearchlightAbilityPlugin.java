@@ -1,8 +1,8 @@
 package catchrelease.abilities.searchlight.ability;
 
+import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
-import catchrelease.abilities.searchlight.scripts.SearchAreaProfile;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
@@ -11,6 +11,7 @@ import com.fs.starfarer.api.impl.campaign.abilities.BaseToggleAbility;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private boolean spoolDone = false;
 
     private List<Searchlight> activeSearchlights = new ArrayList<>();
-    private List<SearchAreaProfile> profiles = new ArrayList<>();
+    private List<CircularArc> searchlightArcs = new ArrayList<>();
 
     @Override
     protected void activateImpl() {
@@ -38,7 +39,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         lightsToActivate = getSearchlightNum();
         spoolDone = false;
         activeSearchlights.clear();
-        profiles.clear();
+        searchlightArcs.clear();
 
         float areaPerLight = 360f / lightsToActivate;
 
@@ -48,7 +49,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             float minAngle = areaPerLight * (i - 1);
             float maxAngle = areaPerLight * i;
 
-            profiles.add(new SearchAreaProfile(minAngle, maxAngle, size, size * 6));
+            searchlightArcs.add(new CircularArc(getFleet().getLocation(), size * 2, minAngle, maxAngle));
         }
     }
 
@@ -75,8 +76,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             addSearchlight();
             lightsToActivate--;
             timePassed = 0f;
-
-            Global.getSoundPlayer().playUISound("catchrelease_ui_searchlight_toggle", 0.8f, 0.8f);
         }
 
         fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Searchlights");
@@ -87,10 +86,11 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     private void addSearchlight(){
-        Searchlight searchlight = new Searchlight(getFleet());
+        Searchlight searchlight = new Searchlight();
 
-        searchlight.init(profiles.get(profiles.size()-1));
-        profiles.remove(profiles.size()-1);
+        //the arcs keep a direct reference to the fleets movement vector
+        searchlight.init(searchlightArcs.get(searchlightArcs.size()-1));
+        searchlightArcs.remove(searchlightArcs.size()-1);
 
         getFleet().addScript(searchlight);
         activeSearchlights.add(searchlight);

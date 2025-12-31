@@ -13,6 +13,8 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.util.EnumSet;
 
+import static catchrelease.helper.math.TrigHelper.smootherStep;
+
 //each ripple has its own renderer which is inefficient, but cpu cycles are free
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
@@ -165,11 +167,6 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
     private void loadSpritesIfNeeded() {
         if (noise == null) noise = SpriteLoader.getSprite("ring_noise");
-    }
-
-    private static float smootherStep(float t) {
-        t = MathUtils.clamp(t, 0f, 1f);
-        return t * t * t * (t * (t * 6f - 15f) + 10f);
     }
 
     private static float lerp(float a, float b, float t) {

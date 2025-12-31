@@ -1,9 +1,11 @@
 package catchrelease.abilities.searchlight.rendering;
 
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.helper.math.TrigHelper;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.util.FlickerUtilV2;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderingPlugin;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
@@ -17,7 +19,9 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
 
     private boolean expired = false;
 
-    // Fade-and-fadeAndExpire support
+    public static final float SUPERLUMINAL_TIME = 0.4f;
+
+    //fadeAndExpire
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -25,6 +29,12 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     private float size;
     private Color color;
     private Vector2f loc;
+
+    private float timePassed = 0f;
+    private float extraAlphaMult = 1f;
+
+    //flicker
+    private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightGlowRenderer(Vector2f loc, float size, Color color) {
         this.size = size;
@@ -49,6 +59,14 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     public void advance(float amount) {
         if (expired) return;
 
+        // superluminance
+        timePassed += amount;
+        float progress = Math.min(timePassed / SUPERLUMINAL_TIME, 1f);
+        extraAlphaMult = 0.8f * TrigHelper.smootherStep(1f - progress);
+
+        //flicker
+        flicker.advance(amount);
+
         if (fading) {
             fadeElapsed += amount;
             if (fadeElapsed >= fadeDuration) {
@@ -71,7 +89,10 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
         if (expired) return;
         loadSpritesIfNeeded();
 
-        float alpha = 0.1f;
+        float alpha;
+        if (extraAlphaMult > 0) alpha = extraAlphaMult;
+        else alpha = 0.12f - 0.03f * flicker.getBrightness();
+
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);
             alpha *= fadeT;

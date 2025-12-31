@@ -1,12 +1,16 @@
 package catchrelease.abilities.searchlight.scripts;
 
+import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.IntervalUtil;
+import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
@@ -18,31 +22,21 @@ import java.util.List;
 public class Searchlight implements EveryFrameScript {
     public static final Color COLOR = new Color(255, 180, 50, 255);
 
+    public static final float SINE_CADENCE = 90f; //distance the sine wave takes off the arc
+    public static final float OSCILLATION_TIME_MULT = 0.7f; //this affects how nervous the searchlights feel
+
     private SearchlightGlowRenderer glow;
     private final List<RippleRingRenderer> rings = new ArrayList<>();
-
     private final Vector2f currentRenderLoc = new Vector2f();
 
-    private SearchAreaProfile profile;
+    //travel
+    private CircularArc arc;
+    private float baseArcAngle;
+    private int travelDirection = 1; //1 or -1, flips on each limit
+    private float oscillationTime = 0f;
 
     private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
-    private final SectorEntityToken attachedEntity;
     private boolean expired = false;
-
-    // Smooth sweep parameters (0..1 ping-pong, eased with S-curve)
-    private float angleT01;
-    private float angleTDir = 1f;
-
-    private float distT01;
-    private float distTDir = 1f;
-
-    // Output values
-    private float angleDeg;
-    private float dist;
-
-    public Searchlight(SectorEntityToken attachedEntity) {
-        this.attachedEntity = attachedEntity;
-    }
 
     @Override
     public boolean isDone() {
@@ -54,85 +48,21 @@ public class Searchlight implements EveryFrameScript {
         return false;
     }
 
-    private static float clamp01(float x) {
-        if (x < 0f) return 0f;
-        if (x > 1f) return 1f;
-        return x;
-    }
-
-    public void init(SearchAreaProfile profile) {
-        this.profile = profile;
-
-        // Randomize initial 0-1 positions, then derive angle/dist from eased mapping
-        angleT01 = (float) Math.random();
-        distT01 = (float) Math.random();
-
-        angleTDir = (Math.random() < 0.5) ? -1f : 1f;
-        distTDir = (Math.random() < 0.5) ? -1f : 1f;
-
-        float angleE = smootherStep(angleT01);
-        float distE = smootherStep(distT01);
-
-        angleDeg = lerp(profile.minAngle, profile.maxAngle, angleE);
-        dist = lerp(profile.minDist, profile.maxDist, distE);
-
-        // update, not replace, because it is used by the other renderers
-        Vector2f loc = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), dist, angleDeg);
-        currentRenderLoc.x = loc.x;
-        currentRenderLoc.y = loc.y;
-
+    public void init(CircularArc circularArc) {
+        this.arc = circularArc;
+        baseArcAngle = arc.startAngle;
         float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
         glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
 
         LunaCampaignRenderer.addTransientRenderer(glow);
+        Global.getSoundPlayer().playSound("catchrelease_ui_searchlight_toggle", 1.1f, 1.3f, arc.getPointForAngle(baseArcAngle), new Vector2f(0,0));
     }
 
     @Override
     public void advance(float amt) {
-        if (expired || profile == null) return;
+        if (expired || arc == null) return;
 
-        float angleSpeedDeg = 35f; // deg/sec
-        float distSpeed = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_SPEED); // units/sec
-
-        // Convert desired linear speeds into 0..1 parameter speeds
-        float angleRange = Math.max(1e-4f, profile.maxAngle - profile.minAngle);
-        float distRange = Math.max(1e-4f, profile.maxDist - profile.minDist);
-
-        float angleTSpeed = angleSpeedDeg / angleRange; // (0..1)/sec
-        float distTSpeed = distSpeed / distRange;       // (0..1)/sec
-
-        // 1) Ping-pong angleT01 in [0,1]
-        angleT01 += angleTDir * angleTSpeed * amt;
-        if (angleT01 > 1f) {
-            angleT01 = 1f;
-            angleTDir = -1f;
-        } else if (angleT01 < 0f) {
-            angleT01 = 0f;
-            angleTDir = 1f;
-        }
-
-        // 2) Ping-pong distT01 in [0,1]
-        distT01 += distTDir * distTSpeed * amt;
-        if (distT01 > 1f) {
-            distT01 = 1f;
-            distTDir = -1f;
-        } else if (distT01 < 0f) {
-            distT01 = 0f;
-            distTDir = 1f;
-        }
-
-        // 3) Apply S-curve easing and map back into actual angle/dist ranges
-        float angleE = smootherStep(angleT01);
-        float distE = smootherStep(distT01);
-
-        angleDeg = lerp(profile.minAngle, profile.maxAngle, angleE);
-        dist = lerp(profile.minDist, profile.maxDist, distE);
-
-        Vector2f point = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), dist, angleDeg);
-
-        // update, not replace, because it is used by the other renderers
-        currentRenderLoc.x = point.x;
-        currentRenderLoc.y = point.y;
+        advanceMovement(amt);
 
         // splash
         ringInterval.advance(amt);
@@ -146,6 +76,34 @@ public class Searchlight implements EveryFrameScript {
         rings.removeIf(RippleRingRenderer::isExpired);
     }
 
+    public void advanceMovement(float amt) {
+        oscillationTime += amt;
+
+        float speed = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_SPEED);
+        float progress = arc.getTraversalProgress(baseArcAngle);
+        float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
+
+        if (normalizedProgress > 0.99f) travelDirection *= -1; //flip dir on last percent so it doesn't go 0
+
+        float degPerSec = arc.convertToDegreesPerSecond(speed);
+        baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
+
+        Vector2f basePos = arc.getPointForAngle(baseArcAngle);
+
+        float sine = (float) Math.sin(oscillationTime * OSCILLATION_TIME_MULT);
+        float offset = sine * SINE_CADENCE;
+
+        float tangentAngle = baseArcAngle + 90f;
+        Vector2f renderPos = MathUtils.getPointOnCircumference(basePos, offset, tangentAngle);
+
+        updateRenderLoc(renderPos);
+    }
+
+    public void updateRenderLoc(Vector2f newLoc){
+        currentRenderLoc.x = newLoc.x;
+        currentRenderLoc.y = newLoc.y;
+    }
+
     public void expire(boolean withFade) {
         float fadeSeconds = withFade ? 1f : 0f;
         for (RippleRingRenderer ring : rings) ring.fadeAndExpire(fadeSeconds);
@@ -153,16 +111,6 @@ public class Searchlight implements EveryFrameScript {
 
         rings.clear();
         expired = true;
-    }
-
-    // Smoothest common ease-in/out for endpoints: 6x^5 - 15x^4 + 10x^3
-    private static float smootherStep(float x) {
-        x = clamp01(x);
-        return x * x * x * (x * (x * 6f - 15f) + 10f);
-    }
-
-    private static float lerp(float a, float b, float t) {
-        return a + (b - a) * t;
     }
 
 }
