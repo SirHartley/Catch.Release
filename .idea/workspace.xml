@@ -4,12 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="spotlight visuals, behaviour and sound">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="added rod trail&#10;decrease ripple width to 0 over lifetime">
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/NoiseMappedCircularRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/plugins/NoiseMappedCircularRingRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle.ogg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle2.ogg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,7 +239,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767191460314</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="some more searchlight fiddling">
+      <option name="closed" value="true" />
+      <created>1767192477015</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1767192477015</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -266,6 +276,7 @@
     <MESSAGE value="ROD animation&#10;More moving things around" />
     <MESSAGE value="fish images" />
     <MESSAGE value="spotlight visuals, behaviour and sound" />
-    <option name="LAST_COMMIT_MESSAGE" value="spotlight visuals, behaviour and sound" />
+    <MESSAGE value="some more searchlight fiddling" />
+    <option name="LAST_COMMIT_MESSAGE" value="some more searchlight fiddling" />
   </component>
 </project>

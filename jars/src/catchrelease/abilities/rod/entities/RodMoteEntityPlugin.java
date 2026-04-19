@@ -17,6 +17,8 @@ import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+import org.magiclib.plugins.MagicCampaignTrailPlugin;
+import org.magiclib.plugins.MagicTrailPlugin;
 
 import java.awt.*;
 
@@ -68,6 +70,22 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         super.advance(amount);
 
         if (flashed) return;
+
+        //trail w/ buncha magic numbers
+        MagicCampaignTrailPlugin.addTrailMemberSimple(
+                entity,
+                entity.getId().hashCode(),
+                Global.getSettings().getSprite("catchrelease", "trail_foggy"),
+                entity.getLocation(),
+                0f,
+                entity.getFacing() + 90f,
+                GLOW_SIZE,
+                1f,
+                color,
+                0.5f,
+                0.5f,
+                true,
+                new Vector2f(0, 0));
 
         //making sure the flash doesn't carry over
         if (!entity.isInCurrentLocation()){

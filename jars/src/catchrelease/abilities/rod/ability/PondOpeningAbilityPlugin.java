@@ -15,6 +15,9 @@ import java.awt.*;
 
 public class PondOpeningAbilityPlugin extends BaseDurationAbility {
 
+    //Press once to unlock nearby pond
+    //once unlocked, this ability changes to a targetted skillshot instead for the angler behaviour
+
     @Override
     protected String getActivationText() {
         return "Unlocking Pond";
@@ -27,6 +30,11 @@ public class PondOpeningAbilityPlugin extends BaseDurationAbility {
                     new RodMoteEntityPlugin.RodMoteEntityPluginData(entity.getLocation(),getPond(),Color.CYAN));
             t.setLocation(entity.getLocation().x, entity.getLocation().y);
         }
+    }
+
+    @Override
+    public boolean isActiveOrInProgress() {
+        return super.isActiveOrInProgress();
     }
 
     @Override

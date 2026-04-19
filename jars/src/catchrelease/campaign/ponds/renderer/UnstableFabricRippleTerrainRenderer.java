@@ -22,6 +22,7 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
     public static final float EXTRA_RIPPLE_BASE_MAX_INTERVAL = 6f;
     public static final float EXTRA_RIPPLE_BASE_SIZE = 150f;
     public static final float EXTRA_RIPPLE_BASE_GROW_TIME = 10f;
+    public static final float BASE_RING_WIDTH = 2f;
 
     private IntervalUtil extraRippleInterval = new IntervalUtil(6f, 10f);
 
@@ -68,7 +69,7 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
 
             float growTime = EXTRA_RIPPLE_BASE_GROW_TIME * mult;
 
-            RippleData data = new RippleData(loc, EXTRA_RIPPLE_BASE_MIN_INTERVAL * mult, EXTRA_RIPPLE_BASE_MAX_INTERVAL * mult, BASE_RIPPLE_COLOR, maxSize, 2f, growTime, 0.1f, amt);
+            RippleData data = new RippleData(loc, EXTRA_RIPPLE_BASE_MIN_INTERVAL * mult, EXTRA_RIPPLE_BASE_MAX_INTERVAL * mult, BASE_RIPPLE_COLOR, maxSize, BASE_RING_WIDTH, growTime, 0.1f, amt);
             ripples.add(data);
         }
 

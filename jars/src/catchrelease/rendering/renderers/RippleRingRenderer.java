@@ -32,7 +32,8 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     private float age = 0f;
     private boolean expired = false;
 
-    public float ringWidth = RING_WIDTH_PX;
+    public float startWidth = RING_WIDTH_PX;
+    public float currentWidth;
     public float growTime = GROW_TIME;
     public float startRadiusOffsetMult = START_RADIUS_OFFSET;
 
@@ -54,13 +55,14 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     /**
      * @param startRadiusOffsetMult multiplies the max radius by 0.x to get the start radius
      */
-    public RippleRingRenderer(Color color, float maxSize, Vector2f location, float ringWidth, float growTime, float startRadiusOffsetMult) {
+    public RippleRingRenderer(Color color, float maxSize, Vector2f location, float startWidth, float growTime, float startRadiusOffsetMult) {
         this.color = color;
         this.size = maxSize;
         this.location = location;
-        this.ringWidth = ringWidth;
+        this.startWidth = startWidth;
         this.growTime = growTime;
         this.startRadiusOffsetMult = startRadiusOffsetMult;
+        this.currentWidth = startWidth;
     }
 
     @Override
@@ -118,19 +120,22 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         float maxRadius = size;
         float minRadius = size * startRadiusOffsetMult;
 
+        float t = MathUtils.clamp(age / growTime, 0f, 1f);
+
+        // Ring width decreases linearly to 0 over lifetime
+        currentWidth = Math.max(0f, startWidth * (1f - t));
+
         float maxRadiusPx = Math.max(minRadius, maxRadius);
-        float halfExtent = maxRadiusPx + (ringWidth * 0.5f) + FEATHER_PX + 2f;
+        float halfExtent = maxRadiusPx + (currentWidth * 0.5f) + FEATHER_PX + 2f;
         float sizePx = halfExtent * 2f;
 
-        float t = MathUtils.clamp(age / growTime, 0f, 1f);
         float rT = smootherStep(t);
         float radiusPx = lerp(minRadius, maxRadius, rT);
 
-        float up = smootherStep(2 * t); //Fade in twice as fast
+        float up = smootherStep(2 * t); // Fade in twice as fast
         float down = smootherStep(1f - t);
         float alphaMult = up * down * 4f; // *4 normalizes peak to ~1 at t=0.5
 
-        // Apply forced fade-out multiplier if active
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);
             alphaMult *= fadeT;
@@ -139,7 +144,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         if (alphaMult <= 0f) return;
 
         float radiusUv = radiusPx / sizePx;
-        float ringWidthUv = ringWidth / sizePx;
+        float ringWidthUv = currentWidth / sizePx; // use shrinking width
         float featherUv = FEATHER_PX / sizePx;
 
         float angularTiling = 1f;
@@ -154,7 +159,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
                 center,
                 sizePx,
                 age,
-                alphaMult* MAX_ALPHA,
+                alphaMult * MAX_ALPHA,
                 radiusUv,
                 ringWidthUv,
                 featherUv,
