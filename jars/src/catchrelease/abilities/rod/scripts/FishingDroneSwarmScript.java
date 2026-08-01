@@ -15,9 +15,10 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * One cast: sends drones to the spot the rod was aimed at, keeps them circling it while it watches
@@ -33,6 +34,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     protected List<SectorEntityToken> drones = new ArrayList<>();
     protected IntervalUtil searchInterval = new IntervalUtil(RodConstants.DRONE_SEARCH_INTERVAL, RodConstants.DRONE_SEARCH_INTERVAL);
+
+    /** Motes already dealt with, so a drone does not intercept the same one over and over. */
+    protected Set<String> handled = new HashSet<>();
 
     protected boolean recalling = false;
     protected boolean done = false;
@@ -121,6 +125,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         if (recalling) return;
 
+        //chasers are checked every frame - a mote it has run down should not sit there for a tick
+        checkChasers();
+
         searchInterval.advance(amount);
         if (searchInterval.intervalElapsed()) lookForCatch();
     }
@@ -143,29 +150,69 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     /**
-     * Looks for a mote inside the ring for an idle drone to work on. Motes drift, so the answer is
-     * usually "not yet" - the swarm simply keeps circling until one wanders in.
+     * Sends idle drones after any mote inside the ring. Motes drift, so mostly there is nothing to
+     * send anyone after and the swarm just keeps circling until one wanders in.
      */
     protected void lookForCatch() {
         if (pond == null || target == null) return;
 
-        SectorEntityToken drone = getIdleDrone();
-        if (drone == null) return;
-
         for (SectorEntityToken mote : pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (mote.isExpired()) continue;
-            if (Misc.getDistance(mote.getLocation(), target) > RodConstants.DRONE_ORBIT_RADIUS) continue;
+            if (!isCatchable(mote)) continue;
+            if (isTaken(mote)) continue;
 
-            onMoteFound(drone, mote);
-            return;
+            SectorEntityToken drone = getClosestIdleDrone(mote);
+            if (drone == null) return; //everyone is busy, the rest can wait for a free one
+
+            getPlugin(drone).chase(mote);
+        }
+    }
+
+    /** A mote is worth going after while it is alive, inside the ring, and not already dealt with. */
+    protected boolean isCatchable(SectorEntityToken mote) {
+        if (mote.isExpired() || !mote.isAlive()) return false;
+        if (handled.contains(mote.getId())) return false;
+
+        return Misc.getDistance(mote.getLocation(), target) <= RodConstants.DRONE_ORBIT_RADIUS;
+    }
+
+    /** Whether some drone is already on this one. */
+    protected boolean isTaken(SectorEntityToken mote) {
+        for (SectorEntityToken drone : drones) {
+            FishingDroneEntityPlugin plugin = getPlugin(drone);
+            if (plugin != null && plugin.getChaseTarget() == mote) return true;
+        }
+
+        return false;
+    }
+
+    /** Watches the drones that are running something down, and calls it once one catches up. */
+    protected void checkChasers() {
+        for (SectorEntityToken drone : new ArrayList<>(drones)) {
+            FishingDroneEntityPlugin plugin = getPlugin(drone);
+            if (plugin == null || !plugin.isChasing()) continue;
+
+            SectorEntityToken mote = plugin.getChaseTarget();
+            if (mote == null) continue;
+
+            //drifted back out of the ring - let it go rather than chasing it across the system
+            if (Misc.getDistance(mote.getLocation(), target) > RodConstants.DRONE_ORBIT_RADIUS) {
+                plugin.returnToOrbit();
+                continue;
+            }
+
+            if (Misc.getDistance(drone.getLocation(), mote.getLocation()) <= RodConstants.DRONE_CATCH_DISTANCE) {
+                onMoteReached(drone, mote);
+            }
         }
     }
 
     /**
-     * A mote drifted into the ring with a drone free to take it. The minigame hangs off here; until
-     * it exists the swarm just notes the fish and carries on circling.
+     * A drone has caught up with a mote. The minigame hangs off exactly here; until it exists the
+     * swarm notes the fish, leaves that mote alone from then on, and sends the drone back to its slot.
      */
-    protected void onMoteFound(SectorEntityToken drone, SectorEntityToken mote) {
+    protected void onMoteReached(SectorEntityToken drone, SectorEntityToken mote) {
+        handled.add(mote.getId());
+
         FishEntityPlugin plugin = mote.getCustomPlugin() instanceof FishEntityPlugin
                 ? (FishEntityPlugin) mote.getCustomPlugin()
                 : null;
@@ -174,17 +221,28 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 ? "nothing in particular"
                 : plugin.getFishSpec().getDisplayName();
 
-        Global.getLogger(FishingDroneSwarmScript.class).info("Drone found a mote in the ring: " + fish);
+        Global.getLogger(FishingDroneSwarmScript.class).info("Drone intercepted a mote: " + fish);
+
+        getPlugin(drone).returnToOrbit();
     }
 
-    /** A drone that is on station and not already carrying something home. */
-    protected SectorEntityToken getIdleDrone() {
+    /** The free drone with least distance to cover to reach a given mote. */
+    protected SectorEntityToken getClosestIdleDrone(SectorEntityToken mote) {
+        SectorEntityToken closest = null;
+        float closestDistance = Float.MAX_VALUE;
+
         for (SectorEntityToken drone : drones) {
             FishingDroneEntityPlugin plugin = getPlugin(drone);
-            if (plugin != null && plugin.isOrbiting()) return drone;
+            if (plugin == null || !plugin.isAvailable()) continue;
+
+            float distance = Misc.getDistance(drone.getLocation(), mote.getLocation());
+            if (distance >= closestDistance) continue;
+
+            closest = drone;
+            closestDistance = distance;
         }
 
-        return null;
+        return closest;
     }
 
     /** Sends every drone home. They despawn as they arrive, and the script ends with the last one. */
