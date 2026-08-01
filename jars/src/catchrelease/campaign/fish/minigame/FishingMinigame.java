@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
+import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 
 /**
@@ -54,6 +55,9 @@ public class FishingMinigame {
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
     protected State state = State.RUNNING;
 
+    /** Set from dev mode at the start - kept as a field so this stays testable without a game. */
+    protected boolean cannotLose = false;
+
     /** Seconds the fish has been held, for the summary afterwards. */
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
@@ -70,6 +74,7 @@ public class FishingMinigame {
 
         this.barHeight = getBarHeight();
         this.fishTarget = pickFishTarget();
+        this.cannotLose = Global.getSettings().isDevMode();
     }
 
     /** Puts the fish back at the start with its current numbers - for the dev controls. */
@@ -166,6 +171,13 @@ public class FishingMinigame {
             return;
         }
 
+        //in dev mode the meter bottoms out instead of ending it, so a fish can be sat with and
+        //retuned for as long as it takes rather than escaping the moment it gets away from you
+        if (cannotLose) {
+            progress = Math.max(progress, FishConstants.MINIGAME_DEV_PROGRESS_FLOOR);
+            return;
+        }
+
         if (progress <= 0f) {
             progress = 0f;
             state = State.ESCAPED;
@@ -242,6 +254,14 @@ public class FishingMinigame {
 
     public void setMotionSpeed(float value) {
         motionSpeed = MathUtils.clamp(value, FishConstants.MINIGAME_SPEED_MIN, FishConstants.MINIGAME_SPEED_MAX);
+    }
+
+    public boolean isCannotLose() {
+        return cannotLose;
+    }
+
+    public void setCannotLose(boolean cannotLose) {
+        this.cannotLose = cannotLose;
     }
 
     public FishMotion getMotion() {

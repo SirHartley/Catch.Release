@@ -34,9 +34,9 @@ public class FishConstants {
 
     //minigame - the fish
     /** Track fractions per second, before the fish's own speed and difficulty are applied. */
-    public static final float MINIGAME_FISH_BASE_SPEED = 0.62f;
-    public static final float MINIGAME_THINK_TIME_MIN = 0.3f;
-    public static final float MINIGAME_THINK_TIME_MAX = 1.2f;
+    public static final float MINIGAME_FISH_BASE_SPEED = 0.5f;
+    public static final float MINIGAME_THINK_TIME_MIN = 0.4f;
+    public static final float MINIGAME_THINK_TIME_MAX = 1.4f;
 
     /** Darters are the wait as much as the bolt, so they keep more of their thinking time. */
     public static final float MINIGAME_DARTER_PATIENCE = 1.3f;
@@ -45,10 +45,14 @@ public class FishConstants {
      * Difficulty curve: a fish plays at DIFFICULTY_FLOOR + SCALE * (difficulty / BASELINE) times the
      * base speed and restlessness. Deliberately compressed - scaling straight off difficulty made a
      * 90 unwinnable and a 25 trivial, since it compounds across both speed and how often it turns.
+     * <p>
+     * Everything here was retuned against a player model with a 160ms reaction and a 120ms decision
+     * cadence, rather than one that reacts every frame. The difference is not small: the first set of
+     * numbers played at 86% for the perfect model and 7% for the realistic one.
      */
     public static final float MINIGAME_DIFFICULTY_BASELINE = 50f;
-    public static final float MINIGAME_DIFFICULTY_FLOOR = 0.6f;
-    public static final float MINIGAME_DIFFICULTY_SCALE = 0.4f;
+    public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
+    public static final float MINIGAME_DIFFICULTY_SCALE = 0.3f;
 
     //minigame - dev controls
     public static final float MINIGAME_DIFFICULTY_MIN = 1f;
@@ -57,6 +61,8 @@ public class FishConstants {
     public static final float MINIGAME_SPEED_MIN = 0.1f;
     public static final float MINIGAME_SPEED_MAX = 4f;
     public static final float MINIGAME_SPEED_STEP = 0.2f;
+    /** Dev mode only: the meter stops here instead of running out, so nothing is ever lost. */
+    public static final float MINIGAME_DEV_PROGRESS_FLOOR = 0.02f;
     public static final float MINIGAME_DEV_ROW_HEIGHT = 74f;
     public static final float MINIGAME_DEV_BUTTON_WIDTH = 62f;
     public static final float MINIGAME_DEV_BUTTON_HEIGHT = 22f;
@@ -65,8 +71,8 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     //minigame - the meter
-    public static final float MINIGAME_PROGRESS_START = 0.35f;
-    public static final float MINIGAME_CATCH_RATE = 0.16f;
-    public static final float MINIGAME_ESCAPE_RATE = 0.26f;
+    public static final float MINIGAME_PROGRESS_START = 0.4f;
+    public static final float MINIGAME_CATCH_RATE = 0.2f;
+    public static final float MINIGAME_ESCAPE_RATE = 0.2f;
 
 }
