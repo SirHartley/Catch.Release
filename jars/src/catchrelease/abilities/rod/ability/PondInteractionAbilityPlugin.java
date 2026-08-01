@@ -2,6 +2,7 @@ package catchrelease.abilities.rod.ability;
 
 import catchrelease.ModPlugin;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
+import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
@@ -117,7 +118,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         SectorEntityToken pond = null;
         for (SectorEntityToken t : fleet.getContainingLocation().getEntitiesWithTag(MaskedFishingPondEntityPlugin.ENTITY_ID)) {
             float distance = Misc.getDistance(t, fleet);
-            if (distance < t.getRadius() * 1.5f) pond = t;
+            if (distance < t.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) pond = t;
         }
 
         return pond;
