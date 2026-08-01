@@ -119,22 +119,27 @@ fire, not on button press.
 
 | Class | Looks like | For |
 | --- | --- | --- |
-| `DirectionReticuleRenderer` | Arrow at the cursor, optional trajectory / bounds lines | Things fired in a direction |
+| `DirectionReticuleRenderer` | Arrow at the cursor | Things fired in a direction |
 | `AreaReticuleRenderer(size)` | Circle at the cursor, sized to the effect | Things that land on a spot |
 | `ValidatedAreaReticuleRenderer(size, validator)` | Same, but turns red and refuses to fire on rejected positions | Restricted targeting |
 
-`DirectionReticuleRenderer` can also draw guide lines out from the fleet along the aim direction.
-Both are opt-in — without them it renders exactly as before:
+### Guide lines
+
+Any reticule can draw lines out from the fleet along the aim direction — they live on
+`BaseReticuleRenderer`, so the arrow, the circle, and anything you subclass yourself all take them.
+All three are opt-in; without them a reticule renders exactly as before:
 
 ```java
-new DirectionReticuleRenderer().withTrajectory()             // one line: where the shot goes
-new DirectionReticuleRenderer().withBounds(30f)              // two lines: the edges of a 30 degree spread
+new DirectionReticuleRenderer().withTrajectory()   // one line: where the shot goes
+new AreaReticuleRenderer(400f).withBounds(30f)     // two lines: the edges of a 30 degree spread
 new DirectionReticuleRenderer().withTrajectory().withBounds(30f).withLength(2000f)
 ```
 
 `withLength(range)` stops the lines at the ability's range; without it they run out to the cursor.
-The lines pick up the reticule's valid/invalid tint, and `SkillshotSettings.GUIDE_LINE_WIDTH` /
-`GUIDE_LINE_ALPHA_MULT` control how they look.
+Lines always start outside the fleet ring, and stop short of whatever the reticule draws at the
+cursor — the area circle stops them at its edge, the direction arrow lets them run in. Override
+`getGuideLineEndPadding()` to change that. They pick up the reticule's valid/invalid tint, and
+`SkillshotSettings.GUIDE_LINE_WIDTH` / `GUIDE_LINE_ALPHA_MULT` control how they look.
 
 A `PositionValidator` is one method — `boolean isValid(Vector2f worldPos)`. `MarketProximityValidator`
 ships with the framework and rejects aim points near inhabited worlds:
