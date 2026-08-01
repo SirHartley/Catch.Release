@@ -23,6 +23,11 @@ import catchrelease.skillshot.util.SkillshotUtils;
  * <p>
  * Nothing here assumes the ability is a consumable. If yours is, override {@link #onConsume()} to
  * take the item out of the cargo.
+ * <p>
+ * An ability that is only sometimes aimed can override {@link #showReticuleOnActivation()}. While it
+ * returns false the framework does not get involved at all: the press goes down the vanilla
+ * activation path and lands in {@link #onActivatedWithoutReticule()} instead of
+ * {@link #onSkillshotFired(Vector2f, float)}.
  */
 public abstract class BaseSkillshotAbility extends BaseDurationAbility implements SkillshotAbility {
 
@@ -44,8 +49,20 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     /** Ability-specific tooltip body. The framework appends its own "can't fire right now" lines. */
     public abstract void addTooltip(TooltipMakerAPI tooltip);
 
+    /**
+     * Runs instead of {@link #onSkillshotFired(Vector2f, float)} when
+     * {@link #showReticuleOnActivation()} is false, i.e. when the ability was activated the vanilla
+     * way without a targeting session. Default does nothing.
+     */
+    protected void onActivatedWithoutReticule() {
+    }
+
     @Override
     public boolean isUsable() {
+        //without a targeting session there is nothing to block - the ability is usable wherever a
+        //vanilla one would be, including from the core UI tabs
+        if (!showReticuleOnActivation()) return super.isUsable();
+
         return super.isUsable() && !isTargetingBlocked();
     }
 
@@ -53,6 +70,8 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
      * True while a skillshot cannot start: another ability is already aiming, or the player is in a
      * dialog or a core UI tab (where the reticule would render over the wrong thing and the click
      * would never reach us).
+     * <p>
+     * Only consulted while {@link #showReticuleOnActivation()} is true.
      */
     public boolean isTargetingBlocked() {
         if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return true;
@@ -67,12 +86,20 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     }
 
     /**
-     * Entry point for the click path. The hotkey path never gets here - OnKeyPressSkillshotListener
-     * consumes the keypress before the UI turns it into a button press, so it can hold the reticule
-     * open until the key comes back up.
+     * Entry point for the click path. While a reticule is wanted the hotkey path never gets here -
+     * OnKeyPressSkillshotListener consumes the keypress before the UI turns it into a button press,
+     * so it can hold the reticule open until the key comes back up. When it is not, that listener
+     * leaves the key alone and the hotkey arrives here as an ordinary button press.
      */
     @Override
     public void pressButton() {
+        //no reticule wanted right now - hand the press back to the vanilla path, which activates
+        //straight away (and plays the activation sound itself)
+        if (!showReticuleOnActivation()) {
+            super.pressButton();
+            return;
+        }
+
         if (!isUsable() || turnedOn) return;
         if (entity == null || !entity.isPlayerFleet()) return;
 
@@ -121,6 +148,13 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
 
     @Override
     protected void activateImpl() {
+        //vanilla activation - the cursor was never an aim point, so firing a skillshot at it would
+        //shoot wherever the mouse happened to sit
+        if (!showReticuleOnActivation()) {
+            onActivatedWithoutReticule();
+            return;
+        }
+
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null) return;
 
@@ -135,6 +169,8 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     }
 
     protected void addBlockedReasonsToTooltip(TooltipMakerAPI tooltip) {
+        if (!showReticuleOnActivation()) return;
+
         float opad = 10f;
 
         if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) {

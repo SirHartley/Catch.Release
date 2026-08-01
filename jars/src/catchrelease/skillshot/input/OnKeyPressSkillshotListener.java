@@ -82,7 +82,11 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
         if (keyValue < FIRST_SLOT_KEY || keyValue > LAST_SLOT_KEY) return;
 
         SkillshotAbility ability = getSlottedSkillshotAbility(keyValue - FIRST_SLOT_KEY);
-        if (ability == null || !ability.isUsable() || !ability.showReticuleOnActivation()) return;
+        if (ability == null || !ability.isUsable()) return;
+
+        //the ability does not want a reticule right now - leave the key unconsumed so the UI turns it
+        //into an ordinary button press and the ability activates the vanilla way
+        if (!ability.showReticuleOnActivation()) return;
 
         SkillshotFramework.log("Starting hotkey targeting for " + ability.getId());
 

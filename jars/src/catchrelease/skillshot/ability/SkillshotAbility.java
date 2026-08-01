@@ -23,5 +23,14 @@ public interface SkillshotAbility extends AbilityPlugin {
      * normal activation path (which would fire the moment the button is pressed, before aiming).
      */
     void forceActivation();
+
+    /**
+     * Whether pressing this ability should open a targeting session at all. May change over the
+     * ability's life - it is asked every time the player presses the key or the button.
+     * <p>
+     * When false the framework stays out of the way entirely: no reticule, no input interception, no
+     * targeting-blocked restrictions. The press runs the plain vanilla ability path instead, so the
+     * ability behaves like any other {@code BaseDurationAbility} until it returns true again.
+     */
     boolean showReticuleOnActivation();
 }
