@@ -2,6 +2,7 @@ package catchrelease.abilities.rod.scripts;
 
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
+import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
@@ -13,6 +14,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
@@ -52,6 +54,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         script.spawnDrones();
 
         Global.getSector().addScript(script);
+
+        //the ring and where each drone thinks it should be, so flight problems are visible rather
+        //than inferred from how it looks
+        if (Global.getSettings().isDevMode()) {
+            LunaCampaignRenderer.addRenderer(new FishingDroneDebugRenderer(script));
+        }
+
         return script;
     }
 

@@ -54,6 +54,14 @@ public class RodConstants {
     /** Seconds to bleed off the heading error a drone joined the circle with. */
     public static final float DRONE_FACING_RESPONSE = 0.4f;
 
+    /**
+     * Degrees per second a drone may trim its position round the ring, on top of the ring's own
+     * rotation, while closing on its slot. This is what keeps it from sprinting round to its place:
+     * uncapped, a drone rejoining from the far side turns two to three times faster than one simply
+     * flying the circle, which reads as a sharp snap rather than drifting back into formation.
+     */
+    public static final float DRONE_TRIM_RATE = 25f;
+
     /** Seconds for a drone on the circle to settle into its exact slot and radius. */
     public static final float DRONE_SETTLE_RESPONSE = 1.2f;
 

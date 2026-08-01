@@ -83,6 +83,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected Vector2f velocity = new Vector2f();
     protected float wanderPhase;
 
+    /** This trail's own id - segments sharing an id are strung together, so it must not be shared. */
+    protected float trailId;
+
     /** The mote being run down, if any. */
     protected SectorEntityToken chaseTarget;
 
@@ -105,6 +108,8 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         //so the drones do not all wander in step
         this.wanderPhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2f));
+
+        this.trailId = MagicCampaignTrailPlugin.getUniqueID();
     }
 
     @Override
@@ -214,7 +219,12 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         currentAngle += RodConstants.DRONE_ORBIT_SPEED * amount;
 
         //shortest way round, so a drone never takes the long way to its own slot
-        currentAngle += getAngleDifference(getSlotAngle(), currentAngle) * settle;
+        float trim = getAngleDifference(getSlotAngle(), currentAngle) * settle;
+
+        //and capped, so closing a wide gap is a drift back into place over several seconds rather
+        //than a sprint round the ring. Uncapped this doubles or triples how fast the drone is turning
+        float cap = RodConstants.DRONE_TRIM_RATE * amount;
+        currentAngle += Math.max(-cap, Math.min(cap, trim));
         currentRadius += (RodConstants.DRONE_ORBIT_RADIUS - currentRadius) * settle;
 
         Vector2f position = MathUtils.getPointOnCircumference(orbitCenter, currentRadius, currentAngle);
@@ -358,13 +368,16 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void renderTrail() {
+        //the trail builds each quad's corners at angle +/- 90, so the angle it wants is the direction
+        //of travel itself. Handing it facing + 90 lays every quad across the path instead of along it,
+        //which is what tore the trail apart on every turn
         MagicCampaignTrailPlugin.addTrailMemberSimple(
                 entity,
-                entity.getId().hashCode(),
+                trailId,
                 Global.getSettings().getSprite("catchrelease", "trail_foggy"),
                 entity.getLocation(),
                 0f,
-                entity.getFacing() + 90f,
+                entity.getFacing(),
                 RodConstants.DRONE_TRAIL_SIZE,
                 1f,
                 color,

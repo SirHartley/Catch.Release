@@ -78,7 +78,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
                 Global.getSettings().getSprite("catchrelease", "trail_foggy"),
                 entity.getLocation(),
                 0f,
-                entity.getFacing() + 90f,
+                entity.getFacing(),
                 GLOW_SIZE,
                 1f,
                 color,
@@ -148,6 +148,10 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         Vector2f nextPos = MathUtils.getPointOnCircumference(entity.getLocation(), dist, angle);
         entity.setLocation(nextPos.x, nextPos.y);
+
+        //the trail is laid out relative to facing, and this mote flies a curve - without this every
+        //trail segment comes out at the same angle regardless of where the mote is actually going
+        entity.setFacing(angle);
     }
 
     @Override
