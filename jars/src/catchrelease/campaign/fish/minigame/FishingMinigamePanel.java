@@ -41,6 +41,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Held after the game ends, so the result is readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
+    /** Drives the icon's twitch. Visual only - it never moves what the bar has to be over. */
+    protected float jitterTime = 0f;
+
     transient protected SpriteAPI fishSprite;
     transient protected boolean fishSpriteChecked = false;
 
@@ -56,6 +59,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     @Override
     public void advance(float amount) {
+        jitterTime += amount;
+
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
             return;
@@ -128,8 +133,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
         float size = FishConstants.MINIGAME_FISH_ICON_SIZE;
-        float centerX = layout.getTrackCenterX();
-        float centerY = layout.getTrackY(minigame.getFishPosition());
+
+        //the twitch goes on the drawing only. The fish the bar has to cover is exactly where the
+        //rules say it is, so nothing here can make a catch feel stolen
+        float centerX = layout.getTrackCenterX() + getJitter(0f);
+        float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
 
         SpriteAPI sprite = getFishSprite();
 
@@ -156,6 +164,27 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         drawQuad(layout.meterX, layout.meterY, layout.meterWidth, minigame.getProgress() * layout.meterHeight,
                 color, 0.8f * alphaMult);
+    }
+
+    /**
+     * A few pixels of twitch, from three sines that do not divide into each other - so it never
+     * repeats on a beat the eye can catch, and never jumps the way frame-by-frame randomness would.
+     * <p>
+     * A fish thrashing about is livelier than one gliding, so the amount rises with how fast it is
+     * actually moving.
+     *
+     * @param offset phase shift, so the two axes are not the same wobble twice
+     */
+    protected float getJitter(float offset) {
+        float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
+
+        float wobble = (float) (Math.sin(time) * 0.5f
+                + Math.sin(time * 1.73f) * 0.3f
+                + Math.sin(time * 2.61f) * 0.2f);
+
+        float effort = 1f + Math.abs(minigame.getFishVelocity()) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
+
+        return wobble * FishConstants.MINIGAME_FISH_JITTER * effort;
     }
 
     /** The fish's own icon from the table, loaded on first use. */

@@ -32,11 +32,25 @@ public class FishConstants {
     public static final float MINIGAME_BAR_GRAVITY = 2.0f;
     public static final float MINIGAME_BAR_MAX_SPEED = 1.1f;
 
+    /** Share of its speed the bar keeps on hitting an end, and the crawl below which it rests. */
+    public static final float MINIGAME_BAR_RESTITUTION = 0.72f;
+    public static final float MINIGAME_BAR_REST_SPEED = 0.04f;
+
     //minigame - the fish
     /** Track fractions per second, before the fish's own speed and difficulty are applied. */
-    public static final float MINIGAME_FISH_BASE_SPEED = 0.5f;
-    public static final float MINIGAME_THINK_TIME_MIN = 0.4f;
-    public static final float MINIGAME_THINK_TIME_MAX = 1.4f;
+    public static final float MINIGAME_FISH_BASE_SPEED = 0.68f;
+    /** How hard the fish pulls towards where it is going, and how long it takes to get up to it. */
+    public static final float MINIGAME_FISH_STIFFNESS = 3.6f;
+    public static final float MINIGAME_FISH_RESPONSE = 0.3f;
+
+    /** Visual only: how far the icon twitches, in pixels, and how quickly. */
+    public static final float MINIGAME_FISH_JITTER = 3.5f;
+    public static final float MINIGAME_FISH_JITTER_SPEED = 9f;
+    /** How much harder it twitches when swimming hard, per unit of track speed. */
+    public static final float MINIGAME_FISH_JITTER_EFFORT = 0.8f;
+
+    public static final float MINIGAME_THINK_TIME_MIN = 0.35f;
+    public static final float MINIGAME_THINK_TIME_MAX = 1.2f;
 
     /** Darters are the wait as much as the bolt, so they keep more of their thinking time. */
     public static final float MINIGAME_DARTER_PATIENCE = 1.3f;
@@ -50,6 +64,13 @@ public class FishConstants {
      * cadence, rather than one that reacts every frame. The difference is not small: the first set of
      * numbers played at 86% for the perfect model and 7% for the realistic one.
      */
+    /**
+     * The one knob. Everything about how hard a fish is runs through this: lower is easier across
+     * the board, higher is harder, and the per-fish numbers in fish.csv keep their relative shape
+     * either way. 1 is as tuned.
+     */
+    public static final float MINIGAME_GLOBAL_DIFFICULTY = 1f;
+
     public static final float MINIGAME_DIFFICULTY_BASELINE = 50f;
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
     public static final float MINIGAME_DIFFICULTY_SCALE = 0.3f;
@@ -73,6 +94,6 @@ public class FishConstants {
     //minigame - the meter
     public static final float MINIGAME_PROGRESS_START = 0.4f;
     public static final float MINIGAME_CATCH_RATE = 0.2f;
-    public static final float MINIGAME_ESCAPE_RATE = 0.2f;
+    public static final float MINIGAME_ESCAPE_RATE = 0.21f;
 
 }
