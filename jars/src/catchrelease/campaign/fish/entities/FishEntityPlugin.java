@@ -18,8 +18,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public static final String MOTE_TAG = "catchrelease_mote";
 
     private static final float GLOW_SIZE = 25f;
-    private static final float MOVE_SPEED = 60f;
-    private static final float MAX_SINE_VARIANCE = 70f;
+    private static final float MOVE_SPEED = 90f;
+    private static final float MAX_SINE_VARIANCE = 90f;
 
     private float time = 0f;
     private float sineVariance;

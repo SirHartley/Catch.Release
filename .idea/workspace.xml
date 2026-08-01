@@ -5,13 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="added rod trail&#10;decrease ripple width to 0 over lifetime">
-      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_arrow.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_direction_reticule.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_target.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/render/validators/PondProximityValidator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sounds/catchrelease/skillshot/skillshot_denied.ogg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/abilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/renderer/UnstableFabricRippleTerrainRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/rendering/renderers/RippleRingRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/FishEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/FishEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,10 +81,11 @@
       <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease\spotlight" />
-      <recent name="D:\Starsector\mods\Catch.Release" />
-      <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease\effects" />
-      <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease" />
+      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\skillshot" />
+      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease" />
+      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease\skillshot" />
+      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease" />
+      <recent name="D:\Starsector\mods\Catch.Release\graphics\catchrelease\fx" />
     </key>
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="catchrelease.hyperrift.constants.PondConstants" />

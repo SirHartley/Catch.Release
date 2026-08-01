@@ -6,6 +6,14 @@
           "spotlight_circle":"graphics/catchrelease/effects/spotlight_circle.png",
           "trail_foggy": "graphics/catchrelease/fx/trails_foggy.png",
           "ring_noise":"graphics/catchrelease/effects/ripple_map_1.png",
+          "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
+          "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
+    },
+
+    "fx": {
+      "skillshot_direction_reticule": "graphics/catchrelease/fx/skillshot_direction_reticule.png",
+      "skillshot_arrow": "graphics/catchrelease/fx/skillshot_arrow.png",
+      "skillshot_target": "graphics/catchrelease/fx/skillshot_target.png",
     },
   },
 }

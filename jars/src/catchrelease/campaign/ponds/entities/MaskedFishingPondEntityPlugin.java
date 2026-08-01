@@ -70,6 +70,10 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         rippleRenderer.fadeAndExpire(1);
     }
 
+    public boolean isActive(){
+        return isActive;
+    }
+
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);

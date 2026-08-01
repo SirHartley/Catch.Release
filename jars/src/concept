@@ -5,7 +5,14 @@ Pond fishing
     -> fish spawn decided by table pull on mote spawn
 - extend ponds into lake with item (? - different spot types for drone fishing, standard spot type for hook fishing)
 
-broken: spots don't render.
+fishing pond fishing
+click to open
+click again for target reticule
+hold to increase drones (increases catch circle size)
+once fish enters ring, go "ping"
+if user clicks, get catch and throw up minigame with however many fish are in the ring
+if multiple, you'll have to get each, with the selectors turning red when they are close to getting away, and getting locked "green" when caught
+max 3 fish
 
 roadmap
 - mvp

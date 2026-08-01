@@ -17,5 +17,9 @@
 		"sounds":[
 			{"file":"sounds/catchrelease/spotlight/spotlight_toggle.ogg","pitch":1,"volume":1},
 		],
-	}
+	},
+
+	"skillshot_denied": [
+		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 1},
+	]
 }
