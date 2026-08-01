@@ -3,7 +3,9 @@ package catchrelease.abilities.rod.scripts;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import catchrelease.memory.upgrades.StatIds;
@@ -216,23 +218,49 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     /**
-     * A drone has caught up with a mote. The minigame hangs off exactly here; until it exists the
-     * swarm notes the fish, leaves that mote alone from then on, and sends the drone back to its slot.
+     * A drone has caught up with a mote, so the catch begins. Opening the dialog pauses the campaign,
+     * which stops this script and holds the drones still until it is done with.
      */
-    protected void onMoteReached(SectorEntityToken drone, SectorEntityToken mote) {
-        handled.add(mote.getId());
-
+    protected void onMoteReached(final SectorEntityToken drone, final SectorEntityToken mote) {
         FishEntityPlugin plugin = mote.getCustomPlugin() instanceof FishEntityPlugin
                 ? (FishEntityPlugin) mote.getCustomPlugin()
                 : null;
 
-        String fish = plugin == null || plugin.getFishSpec() == null
-                ? "nothing in particular"
-                : plugin.getFishSpec().getDisplayName();
+        FishSpec fish = plugin == null ? null : plugin.getFishSpec();
 
-        Global.getLogger(FishingDroneSwarmScript.class).info("Drone intercepted a mote: " + fish);
+        //nothing to play against - an unidentified mote is simply taken
+        if (fish == null) {
+            handled.add(mote.getId());
+            getPlugin(drone).recall(mote);
+            return;
+        }
 
-        getPlugin(drone).returnToOrbit();
+        boolean opened = FishingMinigameDialogPlugin.open(pond, fish, new FishingMinigameDialogPlugin.Callback() {
+            @Override
+            public void onCatchResolved(boolean caught) {
+                resolveCatch(drone, mote, caught);
+            }
+        });
+
+        //the UI was busy - the drone stays on the mote and it comes round again next tick
+        if (!opened) return;
+
+        handled.add(mote.getId());
+    }
+
+    /**
+     * The catch is over. A landed fish rides home on the drone that took it; one that got away takes
+     * its mote with it. Either way that drone is done for this trip - the rest keep fishing.
+     */
+    protected void resolveCatch(SectorEntityToken drone, SectorEntityToken mote, boolean caught) {
+        FishingDroneEntityPlugin plugin = getPlugin(drone);
+        if (plugin == null) return;
+
+        plugin.recall(caught ? mote : null);
+
+        if (!caught && !mote.isExpired()) Misc.fadeAndExpire(mote, 1f);
+
+        Global.getLogger(FishingDroneSwarmScript.class).info(caught ? "Landed a catch" : "The fish got away");
     }
 
     /** The free drone with least distance to cover to reach a given mote. */
