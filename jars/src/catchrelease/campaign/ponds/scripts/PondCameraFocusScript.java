@@ -40,6 +40,10 @@ public class PondCameraFocusScript implements EveryFrameScript {
     /** Not saved - the viewport is rebuilt on load, so nobody is holding it at that point. */
     transient protected boolean holdingCamera = false;
 
+    /** Visible area at zoom factor 1, captured when the camera is taken over. */
+    transient protected float widthAtZoomOne = 0f;
+    transient protected float heightAtZoomOne = 0f;
+
     public PondCameraFocusScript(SectorEntityToken pond) {
         this.pond = pond;
     }
@@ -147,15 +151,32 @@ public class PondCameraFocusScript implements EveryFrameScript {
         return current + (target - current) * travelled;
     }
 
-    /** Takes the camera off the game for this frame and puts it where we want it. */
+    /**
+     * Takes the camera off the game for this frame and puts it where we want it.
+     * <p>
+     * Sets the whole viewport rather than just its centre, because external control means the game
+     * stops sizing the viewport too - and it never stops feeding the player's scrolling into the zoom
+     * tracker. Left on its own the visible size would be frozen at whatever it was when we took over,
+     * so scrolling would do nothing until the camera was handed back and the whole accumulated zoom
+     * arrived at once. Reading the zoom factor back every frame keeps scrolling live throughout.
+     */
     protected void holdCameraAt(Vector2f center) {
         ViewportAPI viewport = Global.getSector().getViewport();
+        float zoom = Global.getSector().getCampaignUI().getZoomFactor();
 
-        //stops the game from writing the viewport itself every frame, leaving the centre to us
-        viewport.setExternalControl(true);
-        holdingCamera = true;
+        if (!holdingCamera) {
+            //while the game still owns the viewport, its size is the zoom-one size times the zoom
+            widthAtZoomOne = zoom > 0f ? viewport.getVisibleWidth() / zoom : viewport.getVisibleWidth();
+            heightAtZoomOne = zoom > 0f ? viewport.getVisibleHeight() / zoom : viewport.getVisibleHeight();
 
-        viewport.setCenter(center);
+            viewport.setExternalControl(true);
+            holdingCamera = true;
+        }
+
+        float width = widthAtZoomOne * zoom;
+        float height = heightAtZoomOne * zoom;
+
+        viewport.set(center.x - width * 0.5f, center.y - height * 0.5f, width, height);
     }
 
     /** Hands the camera back, but only if we were the ones holding it. */
