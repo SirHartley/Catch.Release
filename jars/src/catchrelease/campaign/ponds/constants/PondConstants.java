@@ -17,7 +17,7 @@ public class PondConstants {
 
     //camera
     /** Seconds for the focus to close most of the distance - higher is softer and slower. */
-    public static final float POND_FOCUS_TIME_CONSTANT = 0.75f;
+    public static final float POND_FOCUS_TIME_CONSTANT = 1f;
 
     /** World units. Once the camera is this close to the fleet again, control goes back to the game. */
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;

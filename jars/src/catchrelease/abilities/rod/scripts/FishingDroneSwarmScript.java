@@ -100,11 +100,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     public static int getDroneCount() {
-        UpgradeManager upgrades = UpgradeManager.getInstance();
+        return 4;
+        /*UpgradeManager upgrades = UpgradeManager.getInstance();
 
         if (!upgrades.hasStat(StatIds.FISHING_DRONE_COUNT)) return RodConstants.DRONE_COUNT_FALLBACK;
 
-        return Math.max(1, Math.round(upgrades.getCurrentValue(StatIds.FISHING_DRONE_COUNT)));
+        return Math.max(1, Math.round(upgrades.getCurrentValue(StatIds.FISHING_DRONE_COUNT)));*/
     }
 
     @Override

@@ -29,7 +29,7 @@ public class RodConstants {
     public static final float DRONE_NOISE_FREQUENCY = 0.9f;
 
     /** How close a drone has to get to a mote to have hold of it. */
-    public static final float DRONE_CATCH_DISTANCE = 10f;
+    public static final float DRONE_CATCH_DISTANCE = 15f;
 
     /**
      * Degrees per second around the ring. At 250 units out this is about 130 units/second of
@@ -39,7 +39,7 @@ public class RodConstants {
     public static final float DRONE_ORBIT_SPEED = 30f;
 
     /** How close to the ring counts as being on it, in world units. */
-    public static final float DRONE_JOIN_DISTANCE = 50f;
+    public static final float DRONE_JOIN_DISTANCE = 15f;
 
     /**
      * Degrees ahead of its own slot a launching drone aims for. Aiming straight at the slot means

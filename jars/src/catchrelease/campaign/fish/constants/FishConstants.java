@@ -11,10 +11,10 @@ public class FishConstants {
     //minigame - panel
     public static final float MINIGAME_PANEL_WIDTH = 420f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
-    public static final float MINIGAME_TRACK_WIDTH = 60f;
+    public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
-    public static final float MINIGAME_METER_WIDTH = 26f;
-    public static final float MINIGAME_METER_GAP = 14f;
+    public static final float MINIGAME_METER_WIDTH = 10f;
+    public static final float MINIGAME_METER_GAP = 6f;
     /** Below this share of the meter it reads as losing. */
     public static final float MINIGAME_METER_DANGER = 0.3f;
     /** Seconds the result stays up before the dialog closes itself. */
