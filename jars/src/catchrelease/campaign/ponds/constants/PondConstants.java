@@ -9,4 +9,15 @@ public class PondConstants {
     public static final int MIN_POND_AMT_PER_SYSTEM = 1;
     public static final int PLANETS_PER_ADDITIONAL_POND = 4;
 
+    //interaction - multiplied by the pond radius. The fleet is "at" the pond within this, which is
+    //both where the rod ability can be used and where the camera holds onto the pond
+    public static final float POND_INTERACT_RANGE_MULT = 1.5f;
+
+    //camera
+    /** Seconds for the focus to close most of the distance - higher is softer and slower. */
+    public static final float POND_FOCUS_TIME_CONSTANT = 0.35f;
+
+    /** World units. Once the camera is this close to the fleet again, control goes back to the game. */
+    public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
+
 }

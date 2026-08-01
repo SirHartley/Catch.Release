@@ -4,11 +4,13 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.renderer.RippleData;
+import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
 import catchrelease.rendering.helper.ParallaxUtil;
 import catchrelease.rendering.helper.Stencil;
 import catchrelease.rendering.plugins.MaskGlowRenderer;
 import catchrelease.rendering.plugins.MaskedWarpedSpriteRenderer;
 import catchrelease.rendering.plugins.WarpGrid;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -51,6 +53,8 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         init();
 
         if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
+        if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
+        activity = Math.max(0f, Math.min(1f, activity));
 
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed()) spawnRandomMote();
@@ -66,8 +70,25 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void activate(){
+        if (isActive) return;
+
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
+
+        //holds the camera while the player is here, and closes the pond once they have left. Sector
+        //level rather than on the entity: entity scripts do not advance while the game is paused
+        Global.getSector().addScript(new PondCameraFocusScript(entity));
+    }
+
+    /**
+     * Closes the rupture. The visuals spool back down over {@link #ACTIVATION_SPOOL_UP_TIME} rather
+     * than vanishing, and the idle ripples come back once {@link #init()} rebuilds them.
+     */
+    public void deactivate(){
+        if (!isActive) return;
+
+        isActive = false;
+        rippleRenderer = null;
     }
 
     public boolean isActive(){
@@ -78,7 +99,8 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
 
-        if (!isActive) return;
+        //not !isActive: a closing pond keeps rendering while it spools back down
+        if (activity <= 0f) return;
 
         loadSpritesIfNeeded();
 
