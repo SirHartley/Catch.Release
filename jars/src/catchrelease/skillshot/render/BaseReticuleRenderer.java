@@ -7,6 +7,7 @@ import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
+import catchrelease.skillshot.GuideLineStyle;
 import catchrelease.skillshot.SkillshotSettings;
 import catchrelease.skillshot.util.SkillshotUtils;
 
@@ -33,6 +34,9 @@ import java.util.List;
  *
  * //30 degree spread out to a fixed range, two lines showing what it can hit
  * return new AreaReticuleRenderer(400f).withBounds(30f).withLength(2000f);
+ *
+ * //dashed instead of solid
+ * return new DirectionReticuleRenderer().withTrajectory().withLineStyle(GuideLineStyle.DASHED);
  * </pre>
  *
  * The lines share the reticule's valid/invalid tint.
@@ -50,6 +54,9 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
     protected boolean showBounds = false;
     protected float boundsSpread = 0f;
     protected float length = 0f;
+
+    /** null means "whatever {@link SkillshotSettings#GUIDE_LINE_STYLE} says at render time". */
+    protected GuideLineStyle lineStyle = null;
 
     /** Draws one line from the fleet along the aim direction - where the shot is going. */
     public BaseReticuleRenderer withTrajectory() {
@@ -75,6 +82,16 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
      */
     public BaseReticuleRenderer withLength(float worldUnits) {
         length = worldUnits;
+        return this;
+    }
+
+    /**
+     * Solid, dashed or dotted. Without this the lines follow
+     * {@link SkillshotSettings#GUIDE_LINE_STYLE}, and the dash lengths come from
+     * {@link SkillshotSettings} either way.
+     */
+    public BaseReticuleRenderer withLineStyle(GuideLineStyle style) {
+        lineStyle = style;
         return this;
     }
 
@@ -176,7 +193,8 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
 
         SkillshotUtils.drawLines(vertices, colour,
                 SkillshotSettings.RETICULE_ALPHA * SkillshotSettings.GUIDE_LINE_ALPHA_MULT,
-                SkillshotSettings.GUIDE_LINE_WIDTH);
+                SkillshotSettings.GUIDE_LINE_WIDTH,
+                lineStyle != null ? lineStyle : SkillshotSettings.GUIDE_LINE_STYLE);
     }
 
     /** Appends the two endpoints of a line running out from origin at the given angle. */

@@ -138,8 +138,31 @@ new DirectionReticuleRenderer().withTrajectory().withBounds(30f).withLength(2000
 `withLength(range)` stops the lines at the ability's range; without it they run out to the cursor.
 Lines always start outside the fleet ring, and stop short of whatever the reticule draws at the
 cursor — the area circle stops them at its edge, the direction arrow lets them run in. Override
-`getGuideLineEndPadding()` to change that. They pick up the reticule's valid/invalid tint, and
-`SkillshotSettings.GUIDE_LINE_WIDTH` / `GUIDE_LINE_ALPHA_MULT` control how they look.
+`getGuideLineEndPadding()` to change that. They pick up the reticule's valid/invalid tint.
+
+#### Styling
+
+`withLineStyle(GuideLineStyle.DASHED)` — `SOLID`, `DASHED` or `DOTTED`:
+
+```java
+new AreaReticuleRenderer(400f).withTrajectory().withLineStyle(GuideLineStyle.DOTTED)
+```
+
+Everything about how they look sits in `SkillshotSettings`, so a mod can retune it once at startup
+rather than at every call site:
+
+| Setting | Default | Applies to |
+| --- | --- | --- |
+| `GUIDE_LINE_STYLE` | `SOLID` | Reticules that don't call `withLineStyle()` |
+| `GUIDE_LINE_WIDTH` | `2f` | Every style — line thickness in screen pixels |
+| `GUIDE_LINE_ALPHA_MULT` | `0.45f` | Every style — multiplier on `RETICULE_ALPHA` |
+| `GUIDE_LINE_DASH_PX` / `GUIDE_LINE_DASH_GAP_PX` | `24f` / `24f` | `DASHED` — stroke and gap length |
+| `GUIDE_LINE_DOT_PX` / `GUIDE_LINE_DOT_GAP_PX` | `4f` / `28f` | `DOTTED` — same two lengths |
+
+All lengths are in **screen pixels**, not world units, so dashes keep their spacing however far the
+map is zoomed out. They are snapped to the nearest pattern GL can stipple — the stroke keeps its
+share of the stroke-plus-gap period, and the period rounds to a multiple of 16 pixels — so read them
+as the look you're after rather than an exact measurement.
 
 A `PositionValidator` is one method — `boolean isValid(Vector2f worldPos)`. `MarketProximityValidator`
 ships with the framework and rejects aim points near inhabited worlds:
