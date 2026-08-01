@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -31,6 +32,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected Listener listener;
 
     protected PositionAPI position;
+
+    /** Rebuilt each frame from the panel's position; also what custom framing should line up against. */
+    protected FishingMinigameLayout layout;
     protected boolean reeling = false;
     protected boolean reported = false;
 
@@ -88,35 +92,44 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     public void render(float alphaMult) {
         if (position == null) return;
 
-        float trackX = position.getCenterX() - FishConstants.MINIGAME_TRACK_WIDTH * 0.5f
-                - FishConstants.MINIGAME_METER_WIDTH;
-        float trackY = position.getCenterY() - FishConstants.MINIGAME_TRACK_HEIGHT * 0.5f;
+        layout = new FishingMinigameLayout(position);
 
-        renderTrack(trackX, trackY, alphaMult);
-        renderBar(trackX, trackY, alphaMult);
-        renderFish(trackX, trackY, alphaMult);
-        renderMeter(trackX, trackY, alphaMult);
+        renderFrame(layout, alphaMult);
+        renderTrack(layout, alphaMult);
+        renderBar(layout, alphaMult);
+        renderFish(layout, alphaMult);
+        renderMeter(layout, alphaMult);
     }
 
-    protected void renderTrack(float x, float y, float alphaMult) {
-        drawQuad(x, y, FishConstants.MINIGAME_TRACK_WIDTH, FishConstants.MINIGAME_TRACK_HEIGHT,
+    /**
+     * Whatever frames the playfield. Empty on purpose - this is the seam for the custom UI: draw
+     * against {@link FishingMinigameLayout#frameX} and friends and it will stay lined up with the
+     * track wherever the dialog puts the panel.
+     * <p>
+     * Anything that wants to be a real UI element rather than a drawn one goes in the dialog plugin's
+     * addFramingElements() instead, so it can take part in layout and mouse-over.
+     */
+    protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
+    }
+
+    protected void renderTrack(FishingMinigameLayout layout, float alphaMult) {
+        drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
                 Misc.getDarkPlayerColor(), 0.55f * alphaMult);
     }
 
     /** The window the player flies. Green while it has the fish, dim while it does not. */
-    protected void renderBar(float x, float y, float alphaMult) {
-        float height = minigame.getBarHeightFraction() * FishConstants.MINIGAME_TRACK_HEIGHT;
-        float barY = y + minigame.getBarPosition() * FishConstants.MINIGAME_TRACK_HEIGHT;
-
+    protected void renderBar(FishingMinigameLayout layout, float alphaMult) {
+        float height = minigame.getBarHeightFraction() * layout.trackHeight;
         Color color = minigame.isFishInBar() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
 
-        drawQuad(x, barY, FishConstants.MINIGAME_TRACK_WIDTH, height, color, 0.45f * alphaMult);
+        drawQuad(layout.trackX, layout.getTrackY(minigame.getBarPosition()), layout.trackWidth, height,
+                color, 0.45f * alphaMult);
     }
 
-    protected void renderFish(float x, float y, float alphaMult) {
+    protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
         float size = FishConstants.MINIGAME_FISH_ICON_SIZE;
-        float centerX = x + FishConstants.MINIGAME_TRACK_WIDTH * 0.5f;
-        float centerY = y + minigame.getFishPosition() * FishConstants.MINIGAME_TRACK_HEIGHT;
+        float centerX = layout.getTrackCenterX();
+        float centerY = layout.getTrackY(minigame.getFishPosition());
 
         SpriteAPI sprite = getFishSprite();
 
@@ -133,18 +146,16 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /** Progress towards landing it, beside the track. */
-    protected void renderMeter(float x, float y, float alphaMult) {
-        float meterX = x + FishConstants.MINIGAME_TRACK_WIDTH + FishConstants.MINIGAME_METER_GAP;
-
-        drawQuad(meterX, y, FishConstants.MINIGAME_METER_WIDTH, FishConstants.MINIGAME_TRACK_HEIGHT,
+    protected void renderMeter(FishingMinigameLayout layout, float alphaMult) {
+        drawQuad(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight,
                 Misc.getDarkPlayerColor(), 0.55f * alphaMult);
 
-        float filled = minigame.getProgress() * FishConstants.MINIGAME_TRACK_HEIGHT;
         Color color = minigame.getProgress() < FishConstants.MINIGAME_METER_DANGER
                 ? Misc.getNegativeHighlightColor()
                 : Misc.getPositiveHighlightColor();
 
-        drawQuad(meterX, y, FishConstants.MINIGAME_METER_WIDTH, filled, color, 0.8f * alphaMult);
+        drawQuad(layout.meterX, layout.meterY, layout.meterWidth, minigame.getProgress() * layout.meterHeight,
+                color, 0.8f * alphaMult);
     }
 
     /** The fish's own icon from the table, loaded on first use. */
@@ -187,8 +198,39 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         GL11.glPopAttrib();
     }
 
+    /** Dev control presses arrive here, routed from the buttons the dialog plugin adds. */
     @Override
     public void buttonPressed(Object buttonId) {
+        if (!(buttonId instanceof DevControl)) return;
+
+        switch ((DevControl) buttonId) {
+            case DIFFICULTY_DOWN:
+                minigame.setDifficulty(minigame.getDifficulty() - FishConstants.MINIGAME_DIFFICULTY_STEP);
+                break;
+            case DIFFICULTY_UP:
+                minigame.setDifficulty(minigame.getDifficulty() + FishConstants.MINIGAME_DIFFICULTY_STEP);
+                break;
+            case SPEED_DOWN:
+                minigame.setMotionSpeed(minigame.getMotionSpeed() - FishConstants.MINIGAME_SPEED_STEP);
+                break;
+            case SPEED_UP:
+                minigame.setMotionSpeed(minigame.getMotionSpeed() + FishConstants.MINIGAME_SPEED_STEP);
+                break;
+            case MOTION:
+                minigame.setMotion(getNextMotion(minigame.getMotion()));
+                break;
+            case RESTART:
+                minigame.restart();
+                reported = false;
+                endLingerLeft = FishConstants.MINIGAME_END_LINGER;
+                break;
+        }
+    }
+
+    protected static FishMotion getNextMotion(FishMotion current) {
+        FishMotion[] values = FishMotion.values();
+
+        return values[(current.ordinal() + 1) % values.length];
     }
 
     public FishingMinigame getMinigame() {

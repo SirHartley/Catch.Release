@@ -50,6 +50,20 @@ public class FishConstants {
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.6f;
     public static final float MINIGAME_DIFFICULTY_SCALE = 0.4f;
 
+    //minigame - dev controls
+    public static final float MINIGAME_DIFFICULTY_MIN = 1f;
+    public static final float MINIGAME_DIFFICULTY_MAX = 200f;
+    public static final float MINIGAME_DIFFICULTY_STEP = 10f;
+    public static final float MINIGAME_SPEED_MIN = 0.1f;
+    public static final float MINIGAME_SPEED_MAX = 4f;
+    public static final float MINIGAME_SPEED_STEP = 0.2f;
+    public static final float MINIGAME_DEV_ROW_HEIGHT = 74f;
+    public static final float MINIGAME_DEV_BUTTON_WIDTH = 62f;
+    public static final float MINIGAME_DEV_BUTTON_HEIGHT = 22f;
+
+    /** Padding between the playfield and whatever frames it. */
+    public static final float MINIGAME_FRAME_PAD = 12f;
+
     //minigame - the meter
     public static final float MINIGAME_PROGRESS_START = 0.35f;
     public static final float MINIGAME_CATCH_RATE = 0.16f;

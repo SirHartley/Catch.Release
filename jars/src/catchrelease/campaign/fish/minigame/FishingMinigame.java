@@ -28,6 +28,19 @@ public class FishingMinigame {
 
     protected FishSpec fish;
 
+    /**
+     * The fish's numbers, copied rather than read through.
+     * <p>
+     * Two reasons: the spec comes from a loader cache shared by every mote in the session, so writing
+     * to it would quietly retune the whole species - and the dev controls need somewhere to write.
+     */
+    protected float difficulty;
+    protected float motionSpeed;
+    protected float restlessness;
+    protected float progressRateMult;
+    protected float escapeRateMult;
+    protected FishMotion motion;
+
     /** Bar window, as a fraction of the track: where its bottom is, and how tall it is. */
     protected float barPosition = 0.4f;
     protected float barHeight;
@@ -47,8 +60,29 @@ public class FishingMinigame {
 
     public FishingMinigame(FishSpec fish) {
         this.fish = fish;
+
+        this.difficulty = fish.difficulty;
+        this.motionSpeed = fish.motionSpeed;
+        this.restlessness = fish.restlessness;
+        this.progressRateMult = fish.progressRateMult;
+        this.escapeRateMult = fish.escapeRateMult;
+        this.motion = fish.motion;
+
         this.barHeight = getBarHeight();
         this.fishTarget = pickFishTarget();
+    }
+
+    /** Puts the fish back at the start with its current numbers - for the dev controls. */
+    public void restart() {
+        barPosition = 0.4f;
+        barVelocity = 0f;
+        fishPosition = 0.5f;
+        fishThinkTimer = 0f;
+        fishTarget = pickFishTarget();
+        progress = FishConstants.MINIGAME_PROGRESS_START;
+        state = State.RUNNING;
+        timeHeld = 0f;
+        timeTotal = 0f;
     }
 
     /** The bar's share of the track, from the upgrade, clamped so it is always playable. */
@@ -109,7 +143,7 @@ public class FishingMinigame {
             fishThinkTimer = pickThinkTime();
         }
 
-        float speed = FishConstants.MINIGAME_FISH_BASE_SPEED * fish.motionSpeed * getDifficultyMult();
+        float speed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
         float step = speed * amount;
         float remaining = fishTarget - fishPosition;
 
@@ -121,9 +155,9 @@ public class FishingMinigame {
     protected void advanceProgress(float amount) {
         if (isFishInBar()) {
             timeHeld += amount;
-            progress += FishConstants.MINIGAME_CATCH_RATE * fish.progressRateMult * amount;
+            progress += FishConstants.MINIGAME_CATCH_RATE * progressRateMult * amount;
         } else {
-            progress -= FishConstants.MINIGAME_ESCAPE_RATE * fish.escapeRateMult * amount;
+            progress -= FishConstants.MINIGAME_ESCAPE_RATE * escapeRateMult * amount;
         }
 
         if (progress >= 1f) {
@@ -144,7 +178,7 @@ public class FishingMinigame {
 
     /** Where this fish would like to be next, according to its archetype. */
     protected float pickFishTarget() {
-        FishMotion motion = fish.motion == FishMotion.MIXED ? pickMixedMotion() : fish.motion;
+        FishMotion motion = this.motion == FishMotion.MIXED ? pickMixedMotion() : this.motion;
 
         switch (motion) {
             case DARTER:
@@ -175,10 +209,10 @@ public class FishingMinigame {
         float base = MathUtils.getRandomNumberInRange(
                 FishConstants.MINIGAME_THINK_TIME_MIN, FishConstants.MINIGAME_THINK_TIME_MAX);
 
-        float divisor = Math.max(0.1f, fish.restlessness * getDifficultyMult());
+        float divisor = Math.max(0.1f, restlessness * getDifficultyMult());
 
         //a darter is defined by the wait before the bolt, so it gets to keep more of it
-        if (fish.motion == FishMotion.DARTER) base *= FishConstants.MINIGAME_DARTER_PATIENCE;
+        if (motion == FishMotion.DARTER) base *= FishConstants.MINIGAME_DARTER_PATIENCE;
 
         return base / divisor;
     }
@@ -186,11 +220,37 @@ public class FishingMinigame {
     /** Difficulty as a multiplier around 1 - see the curve's note in {@link FishConstants}. */
     protected float getDifficultyMult() {
         return Math.max(0.2f, FishConstants.MINIGAME_DIFFICULTY_FLOOR
-                + FishConstants.MINIGAME_DIFFICULTY_SCALE * (fish.difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE));
+                + FishConstants.MINIGAME_DIFFICULTY_SCALE * (difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE));
     }
 
     public FishSpec getFish() {
         return fish;
+    }
+
+    public float getDifficulty() {
+        return difficulty;
+    }
+
+    /** Dev controls. Clamped, so nothing can be tuned into a state that cannot be played. */
+    public void setDifficulty(float value) {
+        difficulty = MathUtils.clamp(value, FishConstants.MINIGAME_DIFFICULTY_MIN, FishConstants.MINIGAME_DIFFICULTY_MAX);
+    }
+
+    public float getMotionSpeed() {
+        return motionSpeed;
+    }
+
+    public void setMotionSpeed(float value) {
+        motionSpeed = MathUtils.clamp(value, FishConstants.MINIGAME_SPEED_MIN, FishConstants.MINIGAME_SPEED_MAX);
+    }
+
+    public FishMotion getMotion() {
+        return motion;
+    }
+
+    public void setMotion(FishMotion value) {
+        motion = value;
+        fishThinkTimer = 0f;
     }
 
     public State getState() {

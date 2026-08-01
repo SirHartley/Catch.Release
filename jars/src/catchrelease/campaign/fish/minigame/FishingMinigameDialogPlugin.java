@@ -11,6 +11,8 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.HashMap;
@@ -35,6 +37,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     protected InteractionDialogAPI dialog;
     protected FishingMinigame minigame;
     protected boolean resolved = false;
+
+    /** Dev mode only - the line under the buttons showing what they have done. */
+    transient protected LabelAPI devLabel;
 
     /**
      * Opens the catch on a fish, if the UI will have it.
@@ -85,6 +90,36 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         @Override
         public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+            addFramingElements(panel);
+
+            if (Global.getSettings().isDevMode()) addDevControls(panel);
+        }
+
+        /**
+         * Where the custom framing goes: titles, borders, portraits, anything that wants to be a real
+         * UI element rather than something drawn.
+         * <p>
+         * Deliberately empty and deliberately separate. Elements added here take part in layout and
+         * mouse-over as normal; anything that has to line up with the track itself is better drawn in
+         * {@link FishingMinigamePanel#renderFrame}, which has the same layout the track uses.
+         */
+        protected void addFramingElements(CustomPanelAPI panel) {
+        }
+
+        /** Retunes the fish in front of you, so difficulty can be felt rather than guessed at. */
+        protected void addDevControls(CustomPanelAPI panel) {
+            TooltipMakerAPI element = panel.createUIElement(
+                    FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_DEV_ROW_HEIGHT, false);
+
+            devLabel = element.addPara(getDevStatusText(), Misc.getGrayColor(), 0f);
+            element.addSpacer(6f);
+
+            for (DevControl control : DevControl.values()) {
+                element.addButton(control.label, control, FishConstants.MINIGAME_DEV_BUTTON_WIDTH,
+                        FishConstants.MINIGAME_DEV_BUTTON_HEIGHT, 4f);
+            }
+
+            panel.addUIElement(element).inBL(8f, 8f);
         }
 
         @Override
@@ -119,8 +154,17 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         }
     }
 
+    /** Live readout of what the dev buttons have done to this fish. */
+    protected String getDevStatusText() {
+        if (minigame == null) return "";
+
+        return String.format("difficulty %.0f   speed %.1f   %s",
+                minigame.getDifficulty(), minigame.getMotionSpeed(), minigame.getMotion());
+    }
+
     @Override
     public void advance(float amount) {
+        if (devLabel != null) devLabel.setText(getDevStatusText());
     }
 
     @Override
