@@ -2,7 +2,5 @@ id,baseValue,type,increasePerLevel,increaseType,maxLevel,description
 Example,0.5,DOUBLE,1,FLAT,5,
 searchlight_area,350,INT,100,FLAT,3,The radius covered by each spotlight.
 searchlight_speed,30,INT,0.2,MULT,3,The speed the spotlight moves at.
-,,,,,,
-,,,,,,
-,,,,,,
-,,,,,,
+fishing_drone_count,1,INT,1,FLAT,3,The number of fishing drones sent out per cast. Each one can bring back a catch.
+fishing_bar_size,120,INT,20,FLAT,4,The size of the catch bar in the fishing minigame.

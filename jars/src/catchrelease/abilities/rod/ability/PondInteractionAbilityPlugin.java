@@ -1,13 +1,14 @@
 package catchrelease.abilities.rod.ability;
 
 import catchrelease.ModPlugin;
+import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
+import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
-import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -60,19 +61,15 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public SkillshotRenderer createReticule() {
-        //for an ability that lands on a spot instead, return new AreaReticuleRenderer(400f) - or
-        //new ValidatedAreaReticuleRenderer(400f, new MarketProximityValidator(500f)) to forbid
-        //firing near inhabited worlds
-        return new DirectionReticuleRenderer(100f).withTrajectory();
+        //sized to the ring the drones will fly, so the reticule shows exactly what the cast covers
+        return new AreaReticuleRenderer(RodConstants.DRONE_ORBIT_RADIUS * 2f).withTrajectory();
     }
 
     @Override
     protected void onSkillshotFired(Vector2f worldTarget, float angleFromFleet) {
-        SkillshotFramework.log("Example skillshot fired at " + worldTarget + " (" + angleFromFleet + " degrees)");
+        SkillshotFramework.log("Casting at " + worldTarget + " (" + angleFromFleet + " degrees)");
 
-        SectorEntityToken marker = getFleet().getContainingLocation().createToken(worldTarget);
-        getFleet().getContainingLocation().addEntity(marker);
-        Misc.fadeAndExpire(marker, 1f);
+        FishingDroneSwarmScript.dispatch(getPond(), worldTarget);
     }
 
     @Override
