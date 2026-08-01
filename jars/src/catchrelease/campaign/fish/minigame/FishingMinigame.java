@@ -51,6 +51,7 @@ public class FishingMinigame {
     protected float fishPosition = 0.5f;
     protected float fishTarget = 0.5f;
     protected float fishThinkTimer = 0f;
+    protected float fishVelocity = 0f;
 
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
     protected State state = State.RUNNING;
@@ -82,6 +83,7 @@ public class FishingMinigame {
         barPosition = 0.4f;
         barVelocity = 0f;
         fishPosition = 0.5f;
+        fishVelocity = 0f;
         fishThinkTimer = 0f;
         fishTarget = pickFishTarget();
         progress = FishConstants.MINIGAME_PROGRESS_START;
@@ -122,17 +124,26 @@ public class FishingMinigame {
 
         barPosition += barVelocity * amount;
 
-        //the ends of the track are walls, not bounces - hitting one kills the momentum into it
-        if (barPosition < 0f) {
-            barPosition = 0f;
-            barVelocity = 0f;
+        bounce(0f, 1f - barHeight);
+    }
+
+    /**
+     * Elastic ends. The bar keeps a share of its speed back the other way on contact, so dropping it
+     * on the floor gives a run of smaller and smaller bounces before it settles rather than one dead
+     * stop - and below a crawl it is put to rest, which is what stops it juddering there forever.
+     */
+    protected void bounce(float lowest, float highest) {
+        if (barPosition < lowest) {
+            barPosition = lowest;
+            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+        } else if (barPosition > highest) {
+            barPosition = highest;
+            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+        } else {
+            return;
         }
 
-        float highest = 1f - barHeight;
-        if (barPosition > highest) {
-            barPosition = highest;
-            barVelocity = 0f;
-        }
+        if (Math.abs(barVelocity) < FishConstants.MINIGAME_BAR_REST_SPEED) barVelocity = 0f;
     }
 
     /**
@@ -148,11 +159,20 @@ public class FishingMinigame {
             fishThinkTimer = pickThinkTime();
         }
 
-        float speed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
-        float step = speed * amount;
-        float remaining = fishTarget - fishPosition;
+        float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
 
-        fishPosition += Math.abs(remaining) <= step ? remaining : Math.signum(remaining) * step;
+        //the speed it would like: proportional to how far it still has to go, so it eases off as it
+        //arrives instead of stopping dead on the spot
+        float desired = MathUtils.clamp((fishTarget - fishPosition) * FishConstants.MINIGAME_FISH_STIFFNESS,
+                -maxSpeed, maxSpeed);
+
+        //and it takes a moment to get to that speed, which is what rounds off the turns
+        float response = 1f - (float) Math.exp(-amount / FishConstants.MINIGAME_FISH_RESPONSE);
+        fishVelocity += (desired - fishVelocity) * response;
+
+        fishPosition += fishVelocity * amount;
+
+        if (fishPosition < 0f || fishPosition > 1f) fishVelocity = 0f;
         fishPosition = MathUtils.clamp(fishPosition, 0f, 1f);
     }
 
@@ -231,8 +251,10 @@ public class FishingMinigame {
 
     /** Difficulty as a multiplier around 1 - see the curve's note in {@link FishConstants}. */
     protected float getDifficultyMult() {
-        return Math.max(0.2f, FishConstants.MINIGAME_DIFFICULTY_FLOOR
-                + FishConstants.MINIGAME_DIFFICULTY_SCALE * (difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE));
+        float scaled = FishConstants.MINIGAME_DIFFICULTY_FLOOR
+                + FishConstants.MINIGAME_DIFFICULTY_SCALE * (difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE);
+
+        return Math.max(0.2f, scaled * FishConstants.MINIGAME_GLOBAL_DIFFICULTY);
     }
 
     public FishSpec getFish() {
@@ -295,6 +317,10 @@ public class FishingMinigame {
 
     public float getBarHeightFraction() {
         return barHeight;
+    }
+
+    public float getFishVelocity() {
+        return fishVelocity;
     }
 
     public float getFishPosition() {
