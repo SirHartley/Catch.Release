@@ -68,7 +68,13 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
             if (input.isConsumed()) continue;
 
             if (input.getEventType().equals(InputEventType.KEY_DOWN)) {
-                if (isActive()) return; //macros can re-send a down event without an up event
+                //already aiming: this is the held key auto-repeating, or a macro re-sending a down
+                //event without an up. Eat our own key so the ability bar cannot turn the repeat into
+                //a button press, and keep scanning - the release can be later in this same frame
+                if (isActive()) {
+                    if (input.getEventValue() == heldSlotKey) input.consume();
+                    continue;
+                }
 
                 onSlotKeyDown(input);
             } else if (input.getEventType().equals(InputEventType.KEY_UP)) {
