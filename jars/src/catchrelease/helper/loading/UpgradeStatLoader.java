@@ -57,11 +57,15 @@ public class UpgradeStatLoader {
         if (s.id == null || s.id.isBlank()) return null;
 
         s.baseValue = optDouble(row, "baseValue", 0d);
-        s.baseType = parseEnum(optString(row, "baseType", "DOUBLE"),
+
+        //the sheet calls these "type" and "increaseType" - reading them under the old names meant
+        //every row silently fell back to DOUBLE/FLAT, so MULT never applied. Both spellings are
+        //accepted, in case anything out there wrote the other one
+        s.baseType = parseEnum(optString(row, "type", optString(row, "baseType", "DOUBLE")),
                 UpgradeStat.BaseType.class, UpgradeStat.BaseType.DOUBLE);
 
         s.increasePerLevel = optDouble(row, "increasePerLevel", 0d);
-        s.upgradeType = parseEnum(optString(row, "upgradeType", "FLAT"),
+        s.upgradeType = parseEnum(optString(row, "increaseType", optString(row, "upgradeType", "FLAT")),
                 UpgradeStat.UpgradeType.class, UpgradeStat.UpgradeType.FLAT);
 
         s.maxLevel = optInt(row, "maxLevel", 0);
