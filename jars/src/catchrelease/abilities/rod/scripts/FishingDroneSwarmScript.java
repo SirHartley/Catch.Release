@@ -7,7 +7,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
-import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -151,10 +151,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (!pond.isInCurrentLocation()) return true;
         if (fleet.getContainingLocation() != pond.getContainingLocation()) return true;
 
-        if (pond.getCustomPlugin() instanceof MaskedFishingPondEntityPlugin
-                && !((MaskedFishingPondEntityPlugin) pond.getCustomPlugin()).isActive()) {
-            return true;
-        }
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+        if (plugin != null && !plugin.isActive()) return true;
 
         return Misc.getDistance(fleet.getLocation(), pond.getLocation())
                 > pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;

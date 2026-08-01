@@ -1,0 +1,8 @@
+{
+	# The pond. Merged into the vanilla terrain list, so only our own entries belong here.
+	# A terrain spec carries the plugin and sound/music keys only - name, radius, render layers,
+	# tags and map icon all come from the plugin.
+	"catchrelease_StaticPond":{
+		"plugin":"catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin",
+	},
+}
