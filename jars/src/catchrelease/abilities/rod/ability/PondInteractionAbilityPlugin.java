@@ -26,12 +26,11 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         return "Unlocking Pond";
     }
 
+    /** Pond still locked: no aiming involved, the press just forces it open. */
     @Override
-    protected void activateImpl() {
-        if (entity.isPlayerFleet()) {
-            if (closestPondActive()) super.activateImpl();
-            else unlockClosestPond();
-        }
+    protected void onActivatedWithoutReticule() {
+        if (!entity.isPlayerFleet()) return;
+        unlockClosestPond();
     }
 
     public void unlockClosestPond() {

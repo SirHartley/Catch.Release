@@ -89,6 +89,28 @@ Useful hooks on `BaseSkillshotAbility`:
 | `onConsume()` | Runs once per successful shot — remove the item, spend a charge |
 | `isTargetingBlocked()` | Why aiming can't start right now; override to add your own conditions |
 | `addTooltip(tooltip)` | Ability tooltip body; the framework appends its own blocked-reason lines |
+| `showReticuleOnActivation()` | Whether this press should be aimed at all; default true |
+| `onActivatedWithoutReticule()` | The payload for an unaimed press, i.e. when the above is false |
+
+## Abilities that are only sometimes aimed
+
+Override `showReticuleOnActivation()`. It is asked on every press, so it can depend on game state:
+
+```java
+@Override
+public boolean showReticuleOnActivation() {
+    return closestPondActive();
+}
+```
+
+While it returns **false** the framework stays out of the way completely — the hotkey is left
+unconsumed, `pressButton()` falls through to the vanilla `BaseDurationAbility` path, no reticule is
+created, and `isTargetingBlocked()` stops restricting the ability (so it works from the core UI tabs
+like any vanilla ability, and its blocked-reason tooltip lines disappear). The activation lands in
+`onActivatedWithoutReticule()` instead of `onSkillshotFired(...)`, because there is no aim point —
+firing at the cursor would just shoot wherever the mouse happened to sit.
+
+While it returns **true** everything behaves as described above.
 
 The `deactivationCooldown` column in `abilities.csv` is the rearm time — the framework applies it on
 fire, not on button press.
@@ -130,6 +152,8 @@ Two input paths lead to the same place.
 0. It intercepts the 1-9 keys before the UI can turn them into a button press (a button press would
 fire the ability instantly, leaving nothing to aim), checks the slotted ability for the skillshot tag,
 and opens a session. Releasing the same key fires.
+
+Both paths ask `showReticuleOnActivation()` first and do nothing themselves if it says no.
 
 **Click** — `BaseSkillshotAbility.pressButton()` starts a per-session `OnClickSkillshotListener`.
 Registration is deferred by one frame via `DelayedActionScriptRunWhilePaused`, because the UI outranks
