@@ -127,14 +127,15 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             return panel;
         }
 
+        /** No buttons - the catch ends itself, and escape is still there to back out with. */
         @Override
         public boolean hasCancelButton() {
-            return true;
+            return false;
         }
 
         @Override
         public String getCancelText() {
-            return "Cut the line";
+            return null;
         }
 
         @Override
@@ -142,7 +143,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             return null;
         }
 
-        /** Escape, or cutting the line on purpose - either way the fish is gone. */
+        /** Escape still reaches here with the buttons gone, and the fish is gone with it. */
         @Override
         public void customDialogCancel() {
             resolve(false);
