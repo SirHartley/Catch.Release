@@ -27,6 +27,9 @@ public class ExampleSkillshotAbility extends BaseSkillshotAbility {
         //for an ability that lands on a spot instead, return new AreaReticuleRenderer(400f) - or
         //new ValidatedAreaReticuleRenderer(400f, new MarketProximityValidator(500f)) to forbid
         //firing near inhabited worlds
+        //
+        //.withTrajectory() adds a line down the aim direction, .withBounds(30f) a pair of lines
+        //around it, .withLength(2000f) stops them at the ability's range
         return new DirectionReticuleRenderer();
     }
 

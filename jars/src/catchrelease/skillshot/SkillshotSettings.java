@@ -47,6 +47,15 @@ public class SkillshotSettings {
     /** Default diameter of the area reticule, in world units. */
     public static float DEFAULT_AREA_SIZE = 400f;
 
+    /**
+     * Width in screen pixels of the optional trajectory / bounds lines drawn by
+     * {@link catchrelease.skillshot.render.DirectionReticuleRenderer}.
+     */
+    public static float GUIDE_LINE_WIDTH = 2f;
+
+    /** Alpha of those lines, as a multiplier on {@link #RETICULE_ALPHA}. */
+    public static float GUIDE_LINE_ALPHA_MULT = 0.45f;
+
     /** Colour of the reticule while the aim point is rejected. */
     public static Color INVALID_COLOR = Color.RED.darker();
 
