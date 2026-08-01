@@ -15,12 +15,9 @@ public class ModPlugin extends BaseModPlugin {
         //Static fishing spots
         OnJumpPondSpawner.register();
 
-        //skillshot abilities - installs the hotkey listener. Without it nothing intercepts the
-        //ability bar keys, so holding one to aim never starts a hotkey session
-        SkillshotFramework.register();
-
         //data
         UpgradeManager.getInstance().updateBaseValues();
+        SkillshotFramework.register();
 
         //Testing
         //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
@@ -31,8 +28,6 @@ public class ModPlugin extends BaseModPlugin {
     @Override
     public void beforeGameSave() {
         super.beforeGameSave();
-
-        //so a half-aimed skillshot never ends up in the save
         SkillshotFramework.reset();
     }
 }

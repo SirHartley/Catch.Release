@@ -4,21 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="added rod trail&#10;decrease ripple width to 0 over lifetime">
-      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_arrow.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_direction_reticule.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_target.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/render/validators/PondProximityValidator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/catchrelease/skillshot/skillshot_denied.ogg" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Added skillshot framework">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/abilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondOpeningAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/FishEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/FishEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/entities/MaskedFishingPondEntityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -255,7 +244,23 @@
       <option name="project" value="LOCAL" />
       <updated>1767192477015</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Added skillshot framework">
+      <option name="closed" value="true" />
+      <created>1785594228093</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1785594228093</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Added skillshot framework">
+      <option name="closed" value="true" />
+      <created>1785594236628</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1785594236628</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -285,6 +290,7 @@
     <MESSAGE value="fish images" />
     <MESSAGE value="spotlight visuals, behaviour and sound" />
     <MESSAGE value="some more searchlight fiddling" />
-    <option name="LAST_COMMIT_MESSAGE" value="some more searchlight fiddling" />
+    <MESSAGE value="Added skillshot framework" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added skillshot framework" />
   </component>
 </project>

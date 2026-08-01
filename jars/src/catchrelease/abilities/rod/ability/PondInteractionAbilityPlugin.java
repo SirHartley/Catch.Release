@@ -7,6 +7,7 @@ import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
+import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -62,7 +63,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         //for an ability that lands on a spot instead, return new AreaReticuleRenderer(400f) - or
         //new ValidatedAreaReticuleRenderer(400f, new MarketProximityValidator(500f)) to forbid
         //firing near inhabited worlds
-        return new AreaReticuleRenderer(100f);
+        return new DirectionReticuleRenderer(100f).withTrajectory();
     }
 
     @Override
