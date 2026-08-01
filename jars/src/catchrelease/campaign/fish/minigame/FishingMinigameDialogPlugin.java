@@ -66,9 +66,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.dialog = dialog;
         this.minigame = new FishingMinigame(fish);
 
-        dialog.getTextPanel().addPara("Something takes the line: " + fish.getDisplayName() + ".");
-        dialog.getTextPanel().addPara("Hold the left mouse button to reel in. Keep it in the bracket.",
-                Misc.getGrayColor());
+        dialog.setPromptText("");
+        dialog.hideVisualPanel();
+        dialog.hideTextPanel();
+        //dialog.setOpacity(0.3f);
+        dialog.setBackgroundDimAmount(0.05f);
 
         dialog.showCustomDialog(FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_PANEL_HEIGHT,
                 new Delegate());
@@ -140,7 +142,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         @Override
         public String getConfirmText() {
-            return null;
+            return "Return";
         }
 
         /** Escape still reaches here with the buttons gone, and the fish is gone with it. */

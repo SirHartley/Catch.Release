@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Added skillshot framework">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="adjusting constants">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/constants/RodConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/constants/RodConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/entities/RodMoteEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/minigame/FishingMinigameDialogPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/minigame/FishingMinigameDialogPlugin.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -260,7 +262,15 @@
       <option name="project" value="LOCAL" />
       <updated>1785594236628</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="adjusting constants">
+      <option name="closed" value="true" />
+      <created>1785598155320</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1785598155320</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -291,6 +301,7 @@
     <MESSAGE value="spotlight visuals, behaviour and sound" />
     <MESSAGE value="some more searchlight fiddling" />
     <MESSAGE value="Added skillshot framework" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added skillshot framework" />
+    <MESSAGE value="adjusting constants" />
+    <option name="LAST_COMMIT_MESSAGE" value="adjusting constants" />
   </component>
 </project>

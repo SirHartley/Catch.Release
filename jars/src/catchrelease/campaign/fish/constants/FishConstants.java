@@ -11,7 +11,7 @@ public class FishConstants {
     //minigame - panel
     public static final float MINIGAME_PANEL_WIDTH = 420f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
-    public static final float MINIGAME_TRACK_WIDTH = 84f;
+    public static final float MINIGAME_TRACK_WIDTH = 60f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
     public static final float MINIGAME_METER_WIDTH = 26f;
     public static final float MINIGAME_METER_GAP = 14f;
@@ -19,7 +19,7 @@ public class FishConstants {
     public static final float MINIGAME_METER_DANGER = 0.3f;
     /** Seconds the result stays up before the dialog closes itself. */
     public static final float MINIGAME_END_LINGER = 0.9f;
-    public static final float MINIGAME_FISH_ICON_SIZE = 46f;
+    public static final float MINIGAME_FISH_ICON_SIZE = 28f;
 
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */

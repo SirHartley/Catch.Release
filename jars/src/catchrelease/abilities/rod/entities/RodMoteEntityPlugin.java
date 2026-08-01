@@ -70,6 +70,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         super.advance(amount);
 
         if (flashed) return;
+        if (target == null) return;
 
         //trail w/ buncha magic numbers
         MagicCampaignTrailPlugin.addTrailMemberSimple(

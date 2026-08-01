@@ -5,11 +5,11 @@ import java.awt.Color;
 public class RodConstants {
 
     /** Drone hull and trail colour. */
-    public static final Color DRONE_COLOR = Color.CYAN;
+    public static final Color DRONE_COLOR = Color.ORANGE;
 
     //drones
     /** Radius of the ring the drones fly once they arrive. The reticule is sized to match. */
-    public static final float DRONE_ORBIT_RADIUS = 250f;
+    public static final float DRONE_ORBIT_RADIUS = 60f;
 
     /** World units per second on the way out and the way home. */
     public static final float DRONE_SPEED = 300f;
@@ -29,7 +29,7 @@ public class RodConstants {
     public static final float DRONE_NOISE_FREQUENCY = 0.9f;
 
     /** How close a drone has to get to a mote to have hold of it. */
-    public static final float DRONE_CATCH_DISTANCE = 30f;
+    public static final float DRONE_CATCH_DISTANCE = 10f;
 
     /**
      * Degrees per second around the ring. At 250 units out this is about 130 units/second of
@@ -39,7 +39,7 @@ public class RodConstants {
     public static final float DRONE_ORBIT_SPEED = 30f;
 
     /** How close to the ring counts as being on it, in world units. */
-    public static final float DRONE_JOIN_DISTANCE = 40f;
+    public static final float DRONE_JOIN_DISTANCE = 50f;
 
     /**
      * Degrees ahead of its own slot a launching drone aims for. Aiming straight at the slot means
@@ -68,8 +68,8 @@ public class RodConstants {
     /** How close counts as arrived, in world units. */
     public static final float DRONE_ARRIVAL_DISTANCE = 20f;
 
-    public static final float DRONE_SPRITE_SIZE = 24f;
-    public static final float DRONE_TRAIL_SIZE = 12f;
+    public static final float DRONE_SPRITE_SIZE = 10;
+    public static final float DRONE_TRAIL_SIZE = 20f;
 
     /** Used when the upgrade stat is missing entirely, so a fresh save still fishes. */
     public static final int DRONE_COUNT_FALLBACK = 1;
