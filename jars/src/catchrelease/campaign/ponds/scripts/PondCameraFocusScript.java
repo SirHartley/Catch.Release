@@ -32,7 +32,9 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
     protected SectorEntityToken pond;
 
-    protected boolean focusing = false;
+    /** 0 puts the camera on the fleet, 1 on the pond, and it eases between the two. */
+    protected float focus = 0f;
+
     protected boolean done = false;
 
     /** Not saved - the viewport is rebuilt on load, so nobody is holding it at that point. */
@@ -77,25 +79,24 @@ public class PondCameraFocusScript implements EveryFrameScript {
             return;
         }
 
-        if (shouldFocus(fleet)) {
-            focusing = true;
-            moveCameraTowards(pond.getLocation(), amount);
-            return;
-        }
+        focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
 
-        //out of range: give the camera back where the player left it rather than cutting
-        if (focusing) {
-            if (moveCameraTowards(fleet.getLocation(), amount)) {
-                focusing = false;
-                releaseCamera();
+        Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
+
+        //all the way back on the fleet - hand the camera over and leave it alone
+        if (Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
+            focus = 0f;
+            releaseCamera();
+
+            if (isOutOfSight()) {
+                plugin.deactivate();
+                stop();
             }
+
             return;
         }
 
-        if (isOutOfSight()) {
-            plugin.deactivate();
-            stop();
-        }
+        holdCameraAt(center);
     }
 
     /**
@@ -118,33 +119,43 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Eases the camera a frame's worth of the way towards a point. Exponential, so it covers the same
-     * fraction of what is left every second no matter the frame rate - fast at first, gentle as it
+     * Where the camera sits for the current {@link #focus} - on the fleet at 0, on the pond at 1.
+     * <p>
+     * Deliberately anchored to the fleet rather than eased from wherever the camera happens to be: a
+     * fleet under way is a moving target, and easing towards one leaves a permanent lag of about its
+     * speed times {@link PondConstants#POND_FOCUS_TIME_CONSTANT}. The camera would never arrive, so
+     * it would never be handed back - and the fleet would sit that far off centre, which runs it off
+     * the top or bottom of the screen first, there being less room that way.
+     */
+    protected Vector2f getFocusedCenter(Vector2f fleetLocation, Vector2f pondLocation) {
+        return new Vector2f(
+                fleetLocation.x + (pondLocation.x - fleetLocation.x) * focus,
+                fleetLocation.y + (pondLocation.y - fleetLocation.y) * focus);
+    }
+
+    /**
+     * Eases a value a frame's worth of the way towards a target. Exponential, so it covers the same
+     * fraction of what is left every second no matter the frame rate - quick at first, gentle as it
      * arrives.
      * <p>
      * Sector-level scripts are handed the real frame time even while the campaign is paused, so this
      * needs no special case for it.
-     *
-     * @return true once the camera is close enough to call it arrived
      */
-    protected boolean moveCameraTowards(Vector2f target, float delta) {
+    protected float approach(float current, float target, float delta) {
+        float travelled = 1f - (float) Math.exp(-delta / PondConstants.POND_FOCUS_TIME_CONSTANT);
+
+        return current + (target - current) * travelled;
+    }
+
+    /** Takes the camera off the game for this frame and puts it where we want it. */
+    protected void holdCameraAt(Vector2f center) {
         ViewportAPI viewport = Global.getSector().getViewport();
 
         //stops the game from writing the viewport itself every frame, leaving the centre to us
         viewport.setExternalControl(true);
         holdingCamera = true;
 
-        Vector2f center = viewport.getCenter();
-        float travelled = 1f - (float) Math.exp(-delta / PondConstants.POND_FOCUS_TIME_CONSTANT);
-
-        //a fresh vector: getCenter() may well hand out the viewport's own
-        Vector2f next = new Vector2f(
-                center.x + (target.x - center.x) * travelled,
-                center.y + (target.y - center.y) * travelled);
-
-        viewport.setCenter(next);
-
-        return Misc.getDistance(next, target) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE;
+        viewport.setCenter(center);
     }
 
     /** Hands the camera back, but only if we were the ones holding it. */
@@ -157,7 +168,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
     protected void stop() {
         releaseCamera();
-        focusing = false;
+        focus = 0f;
         done = true;
     }
 
