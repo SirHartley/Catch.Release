@@ -5,7 +5,7 @@ import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.campaign.ponds.constants.PondConstants;
-import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
@@ -45,8 +45,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     public boolean closestPondActive() {
-        SectorEntityToken pond = getPond();
-        return pond != null && ((MaskedFishingPondEntityPlugin) pond.getCustomPlugin()).isActive();
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(getPond());
+        return plugin != null && plugin.isActive();
     }
 
     @Override
@@ -114,7 +114,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         if (fleet == null) return null;
 
         SectorEntityToken pond = null;
-        for (SectorEntityToken t : fleet.getContainingLocation().getEntitiesWithTag(MaskedFishingPondEntityPlugin.ENTITY_ID)) {
+        for (SectorEntityToken t : fleet.getContainingLocation().getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
             float distance = Misc.getDistance(t, fleet);
             if (distance < t.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) pond = t;
         }

@@ -2,7 +2,7 @@ package catchrelease.campaign.ponds.listener;
 
 import catchrelease.memory.RandomMemoryHelper;
 import catchrelease.campaign.ponds.constants.PondConstants;
-import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -22,7 +22,7 @@ public class PondCreator {
     public PondCreator(StarSystemAPI system){
         this.system = system;
 
-        int presentSpots = system.getEntitiesWithTag(MaskedFishingPondEntityPlugin.ENTITY_ID).size();
+        int presentSpots = system.getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID).size();
         int planetAmt = system.getPlanets().size();
         this.pondsToCreate = PondConstants.MIN_POND_AMT_PER_SYSTEM + (int) Math.floor(planetAmt / PondConstants.PLANETS_PER_ADDITIONAL_POND) - presentSpots;
 
@@ -40,7 +40,11 @@ public class PondCreator {
     }
 
     public void spawnPond(Vector2f loc){
-        SectorEntityToken pond = system.addCustomEntity(Misc.genUID(), null, MaskedFishingPondEntityPlugin.ENTITY_ID,null, 500f, 0f, 0f,new MaskedFishingPondEntityPlugin.PondParams(random.nextLong()));
+        //terrain rather than a custom entity: no id, name or radius arguments - the plugin names the
+        //entity and sizes it from the params in its init()
+        SectorEntityToken pond = system.addTerrain(
+                MaskedFishingPondTerrainPlugin.TERRAIN_ID,
+                new MaskedFishingPondTerrainPlugin.PondParams(random.nextLong(), PondConstants.POND_RADIUS));
         pond.setLocation(loc.x, loc.y);
 
         //Decided that ponds should not orbit because it sucks to follow them around

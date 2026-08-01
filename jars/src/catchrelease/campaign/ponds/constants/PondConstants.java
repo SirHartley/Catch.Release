@@ -3,6 +3,8 @@ package catchrelease.campaign.ponds.constants;
 public class PondConstants {
 
     //spawning
+    /** Terrain entities start at radius 0, so the pond sets its own. */
+    public static final float POND_RADIUS = 500f;
     public static final float MIN_EMPTY_RADIUS_AROUND_POND = 1000;
     public static final float MIN_DISTANCE = 10000f;
     public static final float DIST_PER_FITTING_ATTEMPT = 500f; //technical

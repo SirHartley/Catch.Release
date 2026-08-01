@@ -1,7 +1,7 @@
 package catchrelease.abilities.rod.entities;
 
 import catchrelease.abilities.rod.animation.Flash;
-import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.rendering.renderers.SimpleRippleDataRunner;
@@ -111,10 +111,11 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         ripples = new SimpleRippleDataRunner(data);
         entity.addScript(ripples);
 
-        if (target.getCustomPlugin() instanceof MaskedFishingPondEntityPlugin) target.addScript(new DelayedActionScript(0.2f) {
+        final MaskedFishingPondTerrainPlugin pond = MaskedFishingPondTerrainPlugin.getPondPlugin(target);
+        if (pond != null) target.addScript(new DelayedActionScript(0.2f) {
             @Override
             public void doAction() {
-                ((MaskedFishingPondEntityPlugin) target.getCustomPlugin()).activate();
+                pond.activate();
             }
         });
 

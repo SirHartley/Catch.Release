@@ -1,7 +1,7 @@
 package catchrelease.campaign.ponds.scripts;
 
 import catchrelease.campaign.ponds.constants.PondConstants;
-import catchrelease.campaign.ponds.entities.MaskedFishingPondEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -62,7 +62,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
     public void advance(float amount) {
         if (done) return;
 
-        MaskedFishingPondEntityPlugin plugin = getPondPlugin();
+        MaskedFishingPondTerrainPlugin plugin = getPondPlugin();
 
         //something else already closed it
         if (plugin == null || !plugin.isActive()) {
@@ -193,9 +193,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
         done = true;
     }
 
-    protected MaskedFishingPondEntityPlugin getPondPlugin() {
-        if (pond == null || !(pond.getCustomPlugin() instanceof MaskedFishingPondEntityPlugin)) return null;
-
-        return (MaskedFishingPondEntityPlugin) pond.getCustomPlugin();
+    protected MaskedFishingPondTerrainPlugin getPondPlugin() {
+        return MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
     }
 }
