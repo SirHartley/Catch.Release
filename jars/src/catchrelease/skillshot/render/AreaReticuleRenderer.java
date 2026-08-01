@@ -12,6 +12,10 @@ import java.awt.*;
 /**
  * Reticule for abilities that land on a spot rather than fly in a direction: a circle at the cursor
  * sized to the effect radius.
+ * <p>
+ * The guide lines on {@link BaseReticuleRenderer} work here too - {@code withTrajectory()} draws the
+ * path from the fleet to the impact point, {@code withBounds(30f)} the arc it can land in. They stop
+ * at the circle's edge instead of running across it.
  */
 public class AreaReticuleRenderer extends BaseReticuleRenderer {
 
@@ -41,5 +45,11 @@ public class AreaReticuleRenderer extends BaseReticuleRenderer {
         area.setAngle(angleToCursor - 90f);
         area.setColor(colour);
         area.renderAtCenter(cursorPos.x, cursorPos.y);
+    }
+
+    /** Stop the guide lines at the edge of the circle rather than drawing them across it. */
+    @Override
+    protected float getGuideLineEndPadding() {
+        return size * 0.5f;
     }
 }

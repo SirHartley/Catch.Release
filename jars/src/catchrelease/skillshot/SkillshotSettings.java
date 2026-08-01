@@ -56,6 +56,26 @@ public class SkillshotSettings {
     /** Alpha of those lines, as a multiplier on {@link #RETICULE_ALPHA}. */
     public static float GUIDE_LINE_ALPHA_MULT = 0.45f;
 
+    /**
+     * Style used by reticules that do not ask for a specific one with
+     * {@link catchrelease.skillshot.render.BaseReticuleRenderer#withLineStyle(GuideLineStyle)}.
+     */
+    public static GuideLineStyle GUIDE_LINE_STYLE = GuideLineStyle.SOLID;
+
+    /**
+     * {@link GuideLineStyle#DASHED}: length of one dash, and of the gap after it, in screen pixels.
+     * <p>
+     * Both get snapped to the nearest pattern GL can stipple - the dash keeps its share of the
+     * dash-plus-gap period, and the period rounds to a multiple of 16 pixels - so treat them as the
+     * look you are after rather than an exact measurement.
+     */
+    public static float GUIDE_LINE_DASH_PX = 24f;
+    public static float GUIDE_LINE_DASH_GAP_PX = 24f;
+
+    /** {@link GuideLineStyle#DOTTED}: same two lengths, snapped the same way. */
+    public static float GUIDE_LINE_DOT_PX = 4f;
+    public static float GUIDE_LINE_DOT_GAP_PX = 28f;
+
     /** Colour of the reticule while the aim point is rejected. */
     public static Color INVALID_COLOR = Color.RED.darker();
 
