@@ -1,6 +1,7 @@
 package catchrelease.testing;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.rendering.helper.Stencil;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -19,7 +20,6 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.io.IOException;
 import java.util.EnumSet;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
 
@@ -53,22 +53,9 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
         float angle = MathUtils.getRandomNumberInRange(0, 360);
         Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle);
         Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle - 180);
-        SectorEntityToken mote = Global.getSector().getPlayerFleet().getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null, new FishEntityPlugin.Params(targetLoc, getRandomRarityColor()));
+        SectorEntityToken mote = Global.getSector().getPlayerFleet().getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(Global.getSector().getPlayerFleet().getContainingLocation())));
         mote.setLocation(spawnLoc.x, spawnLoc.y);
-    }
-
-    public static Color getRandomRarityColor() {
-        Color[] rarityColors = {
-                Color.GRAY,                    // Common
-                Color.GREEN,                   // Uncommon
-                Color.BLUE,                    // Rare
-                new Color(163, 53, 238),        // Epic (purple)
-                new Color(255, 128, 0)          // Legendary (orange)
-        };
-
-        return rarityColors[
-                ThreadLocalRandom.current().nextInt(rarityColors.length)
-                ];
     }
 
     @Override
