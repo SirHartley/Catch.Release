@@ -1,5 +1,8 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -26,17 +29,36 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private Vector2f target;
     private Color color;
 
+    /** Which fish this mote is - the thing the minigame will be played against. */
+    private String fishId;
+
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
 
     public static class Params {
         public final Vector2f target;
-        public final Color color;
+        public final String fishId;
 
-        public Params(Vector2f target, Color color) {
+        public Params(Vector2f target, String fishId) {
             this.target = target;
-            this.color = color;
+            this.fishId = fishId;
         }
+    }
+
+    /** The fish this mote carries, or null if it was spawned without one or its row has since gone. */
+    public FishSpec getFishSpec() {
+        return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
+    }
+
+    public String getFishId() {
+        return fishId;
+    }
+
+    /** Rarity decides the colour, so a mote reads as what it is before it is ever caught. */
+    protected Color resolveColor() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON.color : spec.rarity.color;
     }
 
     @Override
@@ -45,7 +67,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         Params p = (Params) params;
         this.target = p.target;
-        this.color = p.color;
+        this.fishId = p.fishId;
+        this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
                 MAX_SINE_VARIANCE

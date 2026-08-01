@@ -1,6 +1,7 @@
 package catchrelease.campaign.ponds.entities;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.renderer.RippleData;
@@ -23,7 +24,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
@@ -195,22 +195,12 @@ public class MaskedFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         float angle = MathUtils.getRandomNumberInRange(0, 360);
         Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle);
         Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle - 180);
+        //what lives here depends on the system, and the mote carries it from here on
         SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(targetLoc, getRandomRarityColor())
+                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation()))
         );
         mote.setLocation(spawnLoc.x, spawnLoc.y);
-    }
-
-    public static Color getRandomRarityColor() {
-        Color[] rarityColors = {
-                Color.GRAY,
-                Color.GREEN,
-                Color.BLUE,
-                new Color(163, 53, 238),
-                new Color(255, 128, 0)
-        };
-        return rarityColors[ThreadLocalRandom.current().nextInt(rarityColors.length)];
     }
 
     private void initRenderer() {
