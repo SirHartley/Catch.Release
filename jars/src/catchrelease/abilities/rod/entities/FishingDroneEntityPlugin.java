@@ -138,7 +138,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
             applyVelocity(amount);
 
             if (mode == Mode.LAUNCHING && isOnTheRing()) joinCircle();
-            if (mode == Mode.RETURNING) checkArrivedHome();
+            if (mode == Mode.RETURNING) checkArrivedHome(amount);
         }
 
         //a caught mote rides along rather than being left behind mid-pond
@@ -260,10 +260,10 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         float distance = offset.length();
 
         //ease off on the approach rather than arriving at full tilt
-        float speed = getTravelSpeed();
-        if (distance < RodConstants.DRONE_SLOWING_DISTANCE && RodConstants.DRONE_SLOWING_DISTANCE > 0f) {
-            speed *= distance / RodConstants.DRONE_SLOWING_DISTANCE;
-        }
+        float speed = getApproachSpeed(distance);
+
+        //0 at the goal, 1 while still going flat out - what is left of the approach
+        float approach = Math.min(1f, speed / Math.max(1f, getTravelSpeed()));
 
         Vector2f desired = new Vector2f();
 
@@ -273,12 +273,24 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
             //two out-of-step sines: a drift that never quite repeats, and never jitters
             wanderPhase += amount * RodConstants.DRONE_NOISE_FREQUENCY;
+
+            //eased out along with the speed: at full strength the drift is a sizeable fraction of
+            //what is left of the approach, and it pushes the drone off the goal it is settling onto
             float wander = (float) (Math.sin(wanderPhase) + 0.5f * Math.sin(wanderPhase * 2.3f))
-                    * RodConstants.DRONE_NOISE_STRENGTH;
+                    * RodConstants.DRONE_NOISE_STRENGTH * approach;
 
             //push sideways, so the drift bends the path instead of changing how fast it gets there
             desired.x += -offset.y * wander;
             desired.y += offset.x * wander;
+        }
+
+        //settle onto what the goal is doing rather than onto a standstill - easing to a stop on a
+        //fleet under way leaves the drone trailing it at whatever distance the two speeds match at,
+        //which is short of arriving
+        Vector2f goalVelocity = getGoalVelocity();
+        if (goalVelocity != null) {
+            desired.x += goalVelocity.x;
+            desired.y += goalVelocity.y;
         }
 
         float response = 1f - (float) Math.exp(-amount / RodConstants.DRONE_STEER_RESPONSE);
@@ -301,6 +313,47 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         return RodConstants.DRONE_SPEED * (1f + gain);
     }
 
+    /**
+     * How fast to be going with this much left to cover.
+     * <p>
+     * A returning drone works it out from the gap rather than from a fixed distance: it asks for the
+     * closing speed that would cover what is left over {@link RodConstants#DRONE_BRAKE_MARGIN} of
+     * its steering response, capped at what it can actually do. A drone wound up to
+     * {@link RodConstants#DRONE_RETURN_MAX_MULT} closes on a fleet several times faster than the
+     * flat distance was tuned for, and the fleet it is chasing is usually burning away from it -
+     * both of which had it swinging past and coming round again.
+     * <p>
+     * Everything else keeps the flat ease-off: those fly at {@link RodConstants#DRONE_SPEED}, which
+     * is the speed that distance was tuned against.
+     */
+    protected float getApproachSpeed(float distance) {
+        float speed = getTravelSpeed();
+
+        if (mode == Mode.RETURNING) {
+            return Math.min(speed,
+                    distance / (RodConstants.DRONE_STEER_RESPONSE * RodConstants.DRONE_BRAKE_MARGIN));
+        }
+
+        if (RodConstants.DRONE_SLOWING_DISTANCE <= 0f || distance >= RodConstants.DRONE_SLOWING_DISTANCE) {
+            return speed;
+        }
+
+        return speed * distance / RodConstants.DRONE_SLOWING_DISTANCE;
+    }
+
+    /**
+     * What the thing being flown at is doing, for goals worth matching speed with - null for the
+     * ones where it makes no odds. Motes drift slowly and get caught on contact, and a slot on the
+     * ring is somewhere to be rather than something to keep pace with.
+     */
+    protected Vector2f getGoalVelocity() {
+        if (mode != Mode.RETURNING) return null;
+
+        SectorEntityToken fleet = Global.getSector().getPlayerFleet();
+
+        return fleet == null ? null : fleet.getVelocity();
+    }
+
     public float getReturnTime() {
         return returnTime;
     }
@@ -317,7 +370,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    protected void checkArrivedHome() {
+    protected void checkArrivedHome(float amount) {
         SectorEntityToken fleet = Global.getSector().getPlayerFleet();
 
         if (fleet == null) {
@@ -325,9 +378,11 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        if (Misc.getDistance(entity.getLocation(), fleet.getLocation()) <= RodConstants.DRONE_ARRIVAL_DISTANCE) {
-            expire();
-        }
+        //at least this frame's worth of travel: a drone moving faster than the arrival radius per
+        //frame would otherwise step straight over it without ever being inside it
+        float arrival = Math.max(RodConstants.DRONE_ARRIVAL_DISTANCE, velocity.length() * amount);
+
+        if (Misc.getDistance(entity.getLocation(), fleet.getLocation()) <= arrival) expire();
     }
 
     /** Send this one after a mote. */

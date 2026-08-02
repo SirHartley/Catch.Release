@@ -21,8 +21,23 @@ public class RodConstants {
      */
     public static final float DRONE_STEER_RESPONSE = 0.45f;
 
-    /** Distance over which a drone eases off as it closes on whatever it is heading for. */
+    /**
+     * Distance over which a drone eases off as it closes on whatever it is heading for. Tuned
+     * against {@link #DRONE_SPEED}; a returning drone works out its own from the speed it is
+     * actually doing, and uses this as the floor.
+     */
     public static final float DRONE_SLOWING_DISTANCE = 120f;
+
+    /**
+     * How hard a returning drone brakes, as a multiple of {@link #DRONE_STEER_RESPONSE}: it asks for
+     * the closing speed that would cover what is left of the gap in that long. Lower brakes later
+     * and flies straighter, higher eases off sooner and takes the long way round.
+     * <p>
+     * Tuned by simulating returns from 200 to 1200 units against a fleet burning away at up to 300
+     * units a second, from every start angle on the ring. This is where the path is shortest without
+     * the approach to a stationary fleet changing at all.
+     */
+    public static final float DRONE_BRAKE_MARGIN = 0.5f;
 
     /** Sideways drift in world units per second, and how quickly it wanders. */
     public static final float DRONE_NOISE_STRENGTH = 40f;
