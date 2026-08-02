@@ -44,6 +44,13 @@ public class PondCameraFocusScript implements EveryFrameScript {
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;
 
+    /**
+     * Where the camera actually was when this started, as an offset from the fleet - free look, in
+     * practice. Eased away rather than dropped, so the move begins from where the player is looking
+     * instead of snapping to the fleet first.
+     */
+    transient protected Vector2f carry = null;
+
     public PondCameraFocusScript(SectorEntityToken pond) {
         this.pond = pond;
     }
@@ -83,9 +90,20 @@ public class PondCameraFocusScript implements EveryFrameScript {
             return;
         }
 
+        start(fleet);
+
+        //every frame, not just at the start: free look toggled on mid-hold would pan against this and
+        //leave an offset behind to jump on when the camera goes back
+        Global.getSector().getCampaignUI().resetViewOffset();
+
         focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
 
+        carry.x = approach(carry.x, 0f, amount);
+        carry.y = approach(carry.y, 0f, amount);
+
         Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
+        center.x += carry.x;
+        center.y += carry.y;
 
         //all the way back on the fleet - hand the camera over and leave it alone
         if (Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
@@ -101,6 +119,25 @@ public class PondCameraFocusScript implements EveryFrameScript {
         }
 
         holdCameraAt(center);
+    }
+
+    /**
+     * Notes where the camera is before anything is done to it, and puts free look away.
+     * <p>
+     * Both halves matter. Free look pans the camera off the fleet, so a hold that assumes the fleet
+     * position starts by jumping the width of that pan - and a pan still set when the camera goes
+     * back jumps again on the way out. Turning it off clears the pan; carrying the offset the camera
+     * already had covers the gap that clearing it would otherwise leave.
+     */
+    protected void start(CampaignFleetAPI fleet) {
+        if (carry != null) return;
+
+        Vector2f center = Global.getSector().getViewport().getCenter();
+        carry = new Vector2f(
+                center.x - fleet.getLocation().x,
+                center.y - fleet.getLocation().y);
+
+        Global.getSector().getCampaignUI().resetViewOffset();
     }
 
     /**
