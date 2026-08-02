@@ -3,6 +3,7 @@ package catchrelease.abilities.rod.scripts;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
+import catchrelease.abilities.rod.rendering.FishingRingRenderer;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
@@ -45,6 +46,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected boolean recalling = false;
     protected boolean done = false;
 
+    /** Whether anything catchable is currently inside the ring - drives the ring's own brightening. */
+    protected boolean moteInRing = false;
+
     /**
      * Sends a swarm to a spot, recalling whatever was already out there. The drone count is the
      * {@link StatIds#FISHING_DRONE_COUNT} upgrade.
@@ -57,7 +61,10 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         Global.getSector().addScript(script);
 
-        //the ring and where each drone thinks it should be, so flight problems are visible rather
+        //shows where a mote has to drift to for the swarm to do anything about it
+        LunaCampaignRenderer.addRenderer(new FishingRingRenderer(script));
+
+        //and, for us, where each drone thinks it should be, so flight problems are visible rather
         //than inferred from how it looks
         if (Global.getSettings().isDevMode()) {
             LunaCampaignRenderer.addRenderer(new FishingDroneDebugRenderer(script));
@@ -166,8 +173,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected void lookForCatch() {
         if (pond == null || target == null) return;
 
+        moteInRing = false;
+
         for (SectorEntityToken mote : pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (!isCatchable(mote)) continue;
+
+            moteInRing = true;
             if (isTaken(mote)) continue;
 
             SectorEntityToken drone = getClosestIdleDrone(mote);
@@ -305,6 +316,14 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     public List<SectorEntityToken> getDrones() {
         return drones;
+    }
+
+    public boolean isRecalling() {
+        return recalling;
+    }
+
+    public boolean isMoteInRing() {
+        return moteInRing;
     }
 
     public Vector2f getTarget() {

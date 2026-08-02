@@ -83,6 +83,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected Vector2f velocity = new Vector2f();
     protected float wanderPhase;
 
+    /** How long this drone has been on its way home, which is what winds its speed up. */
+    protected float returnTime = 0f;
+
     /** This trail's own id - segments sharing an id are strung together, so it must not be shared. */
     protected float trailId;
 
@@ -121,6 +124,10 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         //the circle turns whatever this drone is up to, so anything off it rejoins where its share
         //has got to rather than where it left
         ringPhase += RodConstants.DRONE_ORBIT_SPEED * amount;
+
+        //a drone on its way home winds up the longer it has been running, so a long haul back does
+        //not crawl - reset the moment it is doing anything else
+        returnTime = mode == Mode.RETURNING ? returnTime + amount : 0f;
 
         if (mode == Mode.CHASING && !isChaseTargetValid()) returnToOrbit();
 
@@ -253,7 +260,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         float distance = offset.length();
 
         //ease off on the approach rather than arriving at full tilt
-        float speed = RodConstants.DRONE_SPEED;
+        float speed = getTravelSpeed();
         if (distance < RodConstants.DRONE_SLOWING_DISTANCE && RodConstants.DRONE_SLOWING_DISTANCE > 0f) {
             speed *= distance / RodConstants.DRONE_SLOWING_DISTANCE;
         }
@@ -278,6 +285,24 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         velocity.x += (desired.x - velocity.x) * response;
         velocity.y += (desired.y - velocity.y) * response;
+    }
+
+    /**
+     * Flight speed. Flat everywhere except on the way home, where it builds with how long the drone
+     * has been running for - a drone recalled from across the pond should be moving by the time it
+     * gets there, not still ambling.
+     */
+    protected float getTravelSpeed() {
+        if (mode != Mode.RETURNING) return RodConstants.DRONE_SPEED;
+
+        float gain = Math.min(returnTime * RodConstants.DRONE_RETURN_ACCELERATION,
+                RodConstants.DRONE_RETURN_MAX_MULT - 1f);
+
+        return RodConstants.DRONE_SPEED * (1f + gain);
+    }
+
+    public float getReturnTime() {
+        return returnTime;
     }
 
     protected void applyVelocity(float amount) {
