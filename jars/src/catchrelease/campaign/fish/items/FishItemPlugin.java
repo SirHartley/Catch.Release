@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.items;
 
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -98,15 +99,28 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
 
-        super.render(x, y, w, h, alphaMult, glowMult, renderer);
-
         FishCatch entry = getCatch();
-        if (entry == null) return;
+        FishSpec spec = entry == null ? null : entry.getSpec();
 
-        FishSpec spec = entry.getSpec();
+        //the spec's own icon is blank, so this is the icon rather than something drawn over one
+        FishItemRenderer.renderIcon(x, y, w, h, alphaMult, glowMult, getIconPath(spec));
+
+        if (entry == null) return;
 
         FishItemRenderer.render(x, y, w, h, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
+    }
+
+    /**
+     * The species' icon where there is a species. The stand-in covers the codex, which builds a
+     * plugin with no stack behind it and so has no specimen to read one off.
+     */
+    protected String getIconPath(FishSpec spec) {
+        if (spec == null || spec.icon == null || spec.icon.isEmpty()) {
+            return FishConstants.ITEM_ICON_FALLBACK;
+        }
+
+        return spec.icon;
     }
 
     protected boolean isShiftDown() {

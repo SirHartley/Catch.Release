@@ -158,6 +158,21 @@ public class FishConstants {
     public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
 
     /**
+     * A specimen shows its own species' icon rather than a stand-in, which means the item spec's icon
+     * has to be nothing at all - the cargo view draws that before the plugin gets to draw anything,
+     * and there is no asking it not to. ITEM_ICON_FALLBACK is what stands in where there is no
+     * specimen to read a species off, the codex being the case that matters.
+     * <p>
+     * INSET is per side, off a cell that is not ours to size; MOUSEOVER_MULT matches the extra
+     * additive pass the cargo view gives every other icon, so a catch lights up under the cursor
+     * along with the rest of the hold.
+     */
+    public static final String ITEM_ICON_BLANK = "graphics/catchrelease/icon/blank.png";
+    public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+    public static final float ITEM_ICON_INSET = 4f;
+    public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
