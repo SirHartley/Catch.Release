@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.helper.ui.CustomDialogUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -92,6 +93,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         @Override
         public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+            //the frame builds a confirm button whatever the delegate says, so it goes back out here
+            CustomDialogUtils.removeConfirmButton(panel);
+
             addFramingElements(panel);
 
             if (Global.getSettings().isDevMode()) addDevControls(panel);
@@ -140,14 +144,26 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             return null;
         }
 
+        /** Nothing reads this with the button gone, and a null would only have it say "Confirm". */
         @Override
         public String getConfirmText() {
-            return "Return";
+            return null;
         }
 
         /** Escape still reaches here with the buttons gone, and the fish is gone with it. */
         @Override
         public void customDialogCancel() {
+            resolve(false);
+        }
+
+        /**
+         * The frame wires enter and space straight to the confirm button, and keeps doing it once
+         * the button itself is gone. Treated as backing out, same as escape - otherwise the dialog
+         * would close on a stray keypress without the catch ever being resolved, and the drone
+         * holding that mote would wait on a callback that never comes.
+         */
+        @Override
+        public void customDialogConfirm() {
             resolve(false);
         }
 
