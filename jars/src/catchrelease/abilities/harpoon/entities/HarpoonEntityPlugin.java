@@ -49,10 +49,20 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         RETURNING
     }
 
+    /**
+     * Where the shot was fired from and where it was aimed.
+     * <p>
+     * The origin is passed in rather than read off the entity because init runs inside
+     * addCustomEntity, before the caller has had a chance to put the entity anywhere - so at that
+     * point the entity is still at the origin of the world, and a heading worked out from its
+     * location would be the direction from the map's corner to the cursor.
+     */
     public static class Params {
+        public final Vector2f from;
         public final Vector2f target;
 
-        public Params(Vector2f target) {
+        public Params(Vector2f from, Vector2f target) {
+            this.from = from;
             this.target = target;
         }
     }
@@ -80,10 +90,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         Params p = (Params) pluginParams;
         trailId = MagicCampaignTrailPlugin.getUniqueID();
 
-        Vector2f from = entity.getLocation();
-        Vector2f to = p == null ? from : p.target;
-
-        heading = Vector2f.sub(to, from, null);
+        if (p != null) heading = Vector2f.sub(p.target, p.from, null);
         if (heading.lengthSquared() > 0f) heading.normalise(heading);
     }
 
