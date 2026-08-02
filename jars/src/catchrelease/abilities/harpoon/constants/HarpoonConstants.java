@@ -11,9 +11,14 @@ public class HarpoonConstants {
     public static final Color CORE_COLOR = new Color(230, 250, 255);
 
     //flight
-    /** World units per second on the way out, and how far it will go before giving up. */
+    /**
+     * World units per second on the way out, and how far it will go before giving up.
+     * <p>
+     * The range is what a miss costs: the line runs all of it before it turns round, so a long one
+     * is a long wait watching nothing happen. This is about a second and a half out.
+     */
     public static final float SPEED = 900f;
-    public static final float RANGE = 2200f;
+    public static final float RANGE = 1300f;
 
     /** How close the head has to pass a mote to take it. */
     public static final float CATCH_RADIUS = 30f;
@@ -25,9 +30,12 @@ public class HarpoonConstants {
     /** Seconds the line spends snapping straight after the push, before the catch begins. */
     public static final float TAUT_TIME = 0.3f;
 
-    //coming home: hard on a landed specimen, unhurried on an empty line
+    /**
+     * Coming home. Both hard: a miss is dead time, and there is nothing to be gained by making the
+     * player watch a slow line come back before they can fire the next one.
+     */
     public static final float REEL_SPEED = 1400f;
-    public static final float RETURN_SPEED = 700f;
+    public static final float RETURN_SPEED = 1400f;
 
     /** How close to the fleet counts as home. */
     public static final float ARRIVAL_DISTANCE = 30f;

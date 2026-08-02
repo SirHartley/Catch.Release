@@ -328,6 +328,20 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 new Vector2f(0f, 0f));
     }
 
+    /**
+     * The head is not the harpoon: the line runs all the way back to the fleet, and is drawn from
+     * the head's own render pass.
+     * <p>
+     * The default is the entity's radius and a little over, which culls the whole thing the moment
+     * the head leaves the screen - so a line fired towards the edge of the view vanished on the way
+     * out and reappeared on the way back. Covering the full length of line means the harpoon is
+     * drawn whenever any part of it could be seen.
+     */
+    @Override
+    public float getRenderRange() {
+        return HarpoonConstants.RANGE + entity.getRadius() + 100f;
+    }
+
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
