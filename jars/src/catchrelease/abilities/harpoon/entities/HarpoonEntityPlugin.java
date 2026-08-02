@@ -85,6 +85,20 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     /** Total seconds since firing. What the whip in the line runs off, since it outlives one state. */
     protected float age = 0f;
 
+    /**
+     * Where the middle of the rope actually is, and how fast it is moving - as opposed to where a
+     * straight line between the fleet and the head would put it.
+     * <p>
+     * This is the only state the rope's shape has. Everything the line does is this point failing to
+     * keep up with its own ends.
+     */
+    protected Vector2f slack;
+    protected Vector2f slackVelocity = new Vector2f();
+
+    /** How much line is in the air, and which side the extra hangs off. */
+    protected float paidOut = 0f;
+    protected float side = 1f;
+
     /** What the head has hold of, if anything. */
     protected SectorEntityToken hooked;
 
@@ -104,6 +118,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         if (p != null) heading = Vector2f.sub(p.target, p.from, null);
         if (heading.lengthSquared() > 0f) heading.normalise(heading);
+
+        //which way the spare rope hangs. No reason to prefer one, and two shots running should differ
+        side = MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f;
     }
 
     @Override
@@ -127,6 +144,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case REELING:
             case RETURNING: advanceHomeward(amount, fleet); break;
         }
+
+        //after the head has moved, so the rope is chasing this frame's ends rather than last frame's
+        advanceSlack(amount, fleet);
 
         renderTrail();
     }
@@ -263,6 +283,87 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         else enter(State.HELD);
     }
 
+    /**
+     * The middle of the rope, chasing the middle of the straight line between the fleet and the head.
+     * <p>
+     * A spring with drag on it and nothing else. It lags behind while either end is moving, swings
+     * across when the head reverses, and rings down to straight when everything stops - which is what
+     * a heavy line does, and none of which has to be scripted per state.
+     */
+    protected void advanceSlack(float amount, CampaignFleetAPI fleet) {
+        Vector2f rest = getRestPoint(amount, fleet);
+
+        if (slack == null) {
+            slack = rest;
+            return;
+        }
+
+        //walked through in pieces: campaign time arrives in chunks a spring this stiff would fly apart on
+        int steps = Math.max(1, (int) Math.ceil(amount / HarpoonConstants.LINE_MAX_STEP));
+        float step = amount / steps;
+
+        for (int i = 0; i < steps; i++) {
+            slackVelocity.x += ((rest.x - slack.x) * HarpoonConstants.LINE_SPRING
+                    - slackVelocity.x * HarpoonConstants.LINE_DRAG) * step;
+            slackVelocity.y += ((rest.y - slack.y) * HarpoonConstants.LINE_SPRING
+                    - slackVelocity.y * HarpoonConstants.LINE_DRAG) * step;
+
+            slack.x += slackVelocity.x * step;
+            slack.y += slackVelocity.y * step;
+        }
+    }
+
+    /**
+     * Where the middle of the rope would hang if it were left alone: halfway along, and off to one
+     * side by however much more rope is in the air than there is distance to cover.
+     * <p>
+     * That excess is the whole reason a line moves at all. Going out, a launcher throws more rope
+     * than it measures. Pulled taut, the slack is hauled in and the belly disappears. Coming home,
+     * the winch is slower than the head, so the harpoon runs ahead of its own rope and the belly
+     * grows behind it - which is the wobble, and it is the rope's own doing rather than an animation
+     * played over the top of it.
+     */
+    protected Vector2f getRestPoint(float amount, CampaignFleetAPI fleet) {
+        Vector2f from = fleet.getLocation();
+        Vector2f to = entity.getLocation();
+
+        float distance = Misc.getDistance(from, to);
+
+        switch (state) {
+            case OUTBOUND:
+            case PUSHING:
+                paidOut = Math.max(paidOut, distance * HarpoonConstants.LINE_PAYOUT);
+                break;
+            case TAUT:
+                paidOut = approach(paidOut, distance, HarpoonConstants.LINE_TAKEUP * amount);
+                break;
+            default:
+                paidOut = approach(paidOut, distance, HarpoonConstants.LINE_REEL_IN * amount);
+        }
+
+        Vector2f middle = midpoint(from, to);
+        if (distance <= 0f) return middle;
+
+        float excess = Math.max(0f, paidOut - distance);
+        float sag = Math.min((float) Math.sqrt(excess * distance) * HarpoonConstants.LINE_SAG_MULT,
+                distance * HarpoonConstants.LINE_SAG_MAX);
+
+        //across the line, since that is the only direction spare rope has to go
+        Vector2f across = new Vector2f(-(to.y - from.y) / distance, (to.x - from.x) / distance);
+
+        return new Vector2f(middle.x + across.x * sag * side, middle.y + across.y * sag * side);
+    }
+
+    protected static float approach(float value, float target, float step) {
+        if (value > target) return Math.max(target, value - step);
+
+        return Math.min(target, value + step);
+    }
+
+    protected static Vector2f midpoint(Vector2f a, Vector2f b) {
+        return new Vector2f((a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f);
+    }
+
     protected void move(Vector2f direction, float distance) {
         Vector2f loc = entity.getLocation();
 
@@ -385,16 +486,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Straight while the line is under tension, and thrown about while it is not.
+     * A curve bent through wherever the rope's middle has got to, with a shiver laid over it.
      * <p>
-     * A fired line has more rope in the air than there is distance to cover, and something faster
-     * than it on the far end pulling it straight. So it leaves in a whip: several bends at once,
-     * running down the rope from the fleet towards the head and dying out as the slack is taken up.
-     * Under that is the old one-way bow, which is what the whip settles into.
+     * Nothing here decides what the line should look like in a given state. The curve passes through
+     * {@link #slack}, which is a weight on a spring that spends its life failing to keep up with the
+     * two ends - so the bow on the way out, the swing when the head turns round, the wobble on the
+     * way back and the settling to straight are all one behaviour seen at different moments.
      * <p>
-     * Both are pinned at the ends and the whip is weighted towards the fleet - the head end is being
-     * pulled and has no slack to wave with. The line visibly straightening is what makes taut read
-     * as taut, so all of it has to be gone by the time the catch begins.
+     * The shiver is the small stuff a curve cannot say: bends running down the rope, fed by the
+     * throw and by how hard the middle is being swung about, pinned at both ends and weighted
+     * towards the fleet since the head end is the end under tension.
      */
     protected List<Vector2f> getLinePath(Vector2f from, Vector2f to) {
         List<Vector2f> path = new ArrayList<>();
@@ -407,47 +508,44 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
         along.scale(1f / length);
 
-        float slack = getSlack();
-        float bow = slack * length * HarpoonConstants.SLACK_BOW;
-        float whip = slack * length * HarpoonConstants.WAVE_AMPLITUDE * getWhip();
+        //a quadratic through the rope's middle: the control point is placed so t=0.5 lands on it
+        Vector2f middle = slack == null ? midpoint(from, to) : slack;
+        float controlX = middle.x * 2f - (from.x + to.x) * 0.5f;
+        float controlY = middle.y * 2f - (from.y + to.y) * 0.5f;
 
-        //perpendicular, so the sag is across the line rather than along it
+        float shiver = length * HarpoonConstants.WAVE_AMPLITUDE * getShiver();
+
+        //perpendicular, so the shiver is across the line rather than along it
         Vector2f across = new Vector2f(-along.y, along.x);
 
         for (int i = 0; i <= HarpoonConstants.LINE_SEGMENTS; i++) {
             float t = i / (float) HarpoonConstants.LINE_SEGMENTS;
+            float inverse = 1f - t;
 
-            //nothing at the ends, most in the middle
-            float envelope = (float) Math.sin(t * Math.PI);
+            float x = inverse * inverse * from.x + 2f * inverse * t * controlX + t * t * to.x;
+            float y = inverse * inverse * from.y + 2f * inverse * t * controlY + t * t * to.y;
 
-            float offset = envelope * bow
-                    + envelope * (1f - t) * whip * (float) Math.sin(
-                            t * Math.PI * HarpoonConstants.WAVE_COUNT - age * HarpoonConstants.WAVE_SPEED);
+            //nothing at the ends, most of it towards the fleet
+            float envelope = (float) Math.sin(t * Math.PI) * inverse;
 
-            path.add(new Vector2f(
-                    from.x + along.x * length * t + across.x * offset,
-                    from.y + along.y * length * t + across.y * offset));
+            float offset = envelope * shiver * (float) Math.sin(
+                    t * Math.PI * HarpoonConstants.WAVE_COUNT - age * HarpoonConstants.WAVE_SPEED);
+
+            path.add(new Vector2f(x + across.x * offset, y + across.y * offset));
         }
 
         return path;
     }
 
-    /** 1 at the moment of firing, falling away as the rope is dragged straight. */
-    protected float getWhip() {
-        return (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
-    }
+    /**
+     * How much the rope is shivering: the throw itself, dying off, or being swung about hard enough
+     * to shake - whichever is greater at the time.
+     */
+    protected float getShiver() {
+        float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
+        float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
 
-    /** 1 while the line is loose, easing to 0 as it comes under tension. */
-    protected float getSlack() {
-        switch (state) {
-            case OUTBOUND:
-            case PUSHING:
-                return 1f;
-            case TAUT:
-                return 1f - MathUtils.clamp(stateTime / HarpoonConstants.TAUT_TIME, 0f, 1f);
-            default:
-                return 0f;
-        }
+        return MathUtils.clamp(Math.max(thrown, swung), 0f, 1f);
     }
 
     protected void renderHead(float alpha) {
