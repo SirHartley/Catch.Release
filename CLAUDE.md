@@ -36,7 +36,6 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 | `jars/src/catchrelease/campaign/fish/` | Fish specs, mote entities, spawning, and the catch minigame. |
 | `jars/src/catchrelease/abilities/` | The searchlight and the R.O.D. - drones, motes, the ring. |
 | `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire ability framework; see its README. |
-| `jars/src/catchrelease/helper/reflection/` | `ReflectionUtils` - the game blocks `java.lang.reflect` for mod code, so it goes through `MethodHandles`. |
 | `jars/src/catchrelease/rendering/` | Shader and sprite renderers, stencils, warp grids. |
 | `data/config/custom_entities.json` | Motes and drones. The pond is **not** here any more. |
 
@@ -49,6 +48,8 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 - **`GL_LINE_STIPPLE` is useless for short segments.** GL restarts the pattern at every
   segment of a `GL_LINES` batch, so anything shorter than one dash draws solid. Dashes are cut
   as geometry in `SkillshotUtils` instead.
-- **`showCustomDialog` always builds a confirm button.** The delegate can drop the cancel
-  button but not that one; it has to be taken back out of the panel by reflection, and enter
-  and space stay wired to it after it is gone.
+- **`showCustomDialog` always builds a confirm button.** The delegate can rename it and can
+  drop the cancel button beside it, but cannot ask for neither, and enter and space are wired
+  straight to it. For a panel that wants no buttons use `showCustomVisualDialog` with a
+  `CustomVisualDialogDelegate` - it hands the panel the whole frame and leaves the keyboard
+  alone. Vanilla hosts its own minigame that way (`DuelDialogDelegate`).
