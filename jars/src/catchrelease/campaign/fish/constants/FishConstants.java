@@ -184,13 +184,19 @@ public class FishConstants {
     public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
-     * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
-     * bottom. Kept small and inset - the icon has to read as the fish first.
+     * The marks drawn onto a catch's cargo icon, both on one row along the bottom: grade as pips,
+     * then the rarity as a single bar at the end of them.
+     * <p>
+     * The bar is three pips long and unbroken, so it cannot be counted as part of the grade - it is
+     * plainly a different kind of mark on the same scale. Reading left to right, the row is what the
+     * specimen is followed by what the species is. Kept small and inset; the icon has to read as the
+     * fish first.
      */
     public static final float ITEM_MARK_INSET = 3f;
-    public static final float ITEM_RARITY_BAR_WIDTH = 3f;
     public static final float ITEM_GRADE_PIP_SIZE = 3f;
     public static final float ITEM_GRADE_PIP_GAP = 2f;
+    public static final float ITEM_RARITY_BAR_PIPS = 3f;
+    public static final float ITEM_RARITY_BAR_GAP = 4f;
     public static final float ITEM_MARK_ALPHA = 0.9f;
     public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
     public static final float ITEM_MARK_BACKING_PAD = 1f;
