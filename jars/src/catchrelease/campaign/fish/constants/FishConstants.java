@@ -204,7 +204,7 @@ public class FishConstants {
      */
     public static final float BAR_ALPHA_HOLDING = 0.5f;
     public static final float BAR_ALPHA_EMPTY = 0.4f;
-    public static final float BAR_CENTER_MULT = 0.3f;
+    public static final float BAR_CENTER_MULT = 0.75f;
     public static final float BAR_BORDER_RADIUS = 3f;
     public static final float BAR_BORDER_WIDTH = 1f;
     public static final float BAR_BORDER_MULT = 2.2f;

@@ -42,7 +42,7 @@ public class SkillshotSettings {
     public static float FLEET_RETICULE_PADDING = 250f;
 
     /** Edge length of the direction arrow, in world units. */
-    public static float DIRECTION_ARROW_SIZE = 170f;
+    public static float DIRECTION_ARROW_SIZE = 20f;
 
     /** Default diameter of the area reticule, in world units. */
     public static float DEFAULT_AREA_SIZE = 400f;

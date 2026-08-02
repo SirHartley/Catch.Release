@@ -1,3 +1,22 @@
+Todo
+
+- Harpoon line should not trail to one side but stay centered
+- Remove dev controls from minigame (except loss prevention)
+- Minigame base panel too much L/R whitespace, tighten (height is good)
+- upon winning, render a second, fully bordered panel to the right of the panel holding the minigame with the results as currently implemented
+- pressing an button once while results show up should immediately show all of them instead of the animated step-by-step blend in
+- add a "new record" indicator if fish caught beats personal best
+- Quality and rarity badges need to go into the top left
+- the badges on the cargo icons for rarity currently go (- = quality badge, _ = no badge / space, --- = rarity indicator) - - - _ _ --- for a 3-star fish. With the new TL placement, quality badges should go --- - - - _ _
+
+- Pond really needs better rim anim to show depth
+
+self_
+- Adjust skillshot fleet dir indicator for size, arrow too large
+
+
+
+
 fish
 
 Pond fishing
