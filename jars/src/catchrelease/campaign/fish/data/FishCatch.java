@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.data;
 
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.helper.loading.FishSpecLoader;
 import org.lazywizard.lazylib.MathUtils;
 
@@ -88,6 +89,29 @@ public class FishCatch {
 
         return MathUtils.clamp((fraction(length, spec.lengthMin, spec.lengthMax)
                 + fraction(weight, spec.weightMin, spec.weightMax)) * 0.5f, 0f, 1f);
+    }
+
+    public FishGrade getGrade() {
+        return FishGrade.of(getSizeFraction());
+    }
+
+    /**
+     * What one is worth: the species' base value, moved by where the specimen sits in its range and
+     * then by its grade.
+     * <p>
+     * The grade multiplier is applied on top of the size scaling rather than instead of it, so the
+     * step up to a better grade is felt rather than merely recorded - which is what makes a good
+     * specimen worth keeping instead of selling with the rest.
+     */
+    public float getValue() {
+        FishSpec spec = getSpec();
+        if (spec == null) return 0f;
+
+        float size = getSizeFraction();
+        float scaled = spec.baseValue * (FishConstants.VALUE_FLOOR_MULT
+                + (1f - FishConstants.VALUE_FLOOR_MULT) * 2f * size);
+
+        return Math.max(1f, scaled * getGrade().valueMult);
     }
 
     protected static float fraction(float value, float min, float max) {

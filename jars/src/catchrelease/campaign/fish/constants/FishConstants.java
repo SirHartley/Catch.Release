@@ -97,6 +97,13 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     /**
+     * What the smallest specimen of a species is worth as a share of its base value. The largest is
+     * worth twice the base before its grade is applied, so the range either side of the middle is
+     * even and the base value stays the number a typical specimen fetches.
+     */
+    public static final float VALUE_FLOOR_MULT = 0.35f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
