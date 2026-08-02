@@ -65,14 +65,13 @@ public class SkillshotSettings {
     /**
      * {@link GuideLineStyle#DASHED}: length of one dash, and of the gap after it, in screen pixels.
      * <p>
-     * Both get snapped to the nearest pattern GL can stipple - the dash keeps its share of the
-     * dash-plus-gap period, and the period rounds to a multiple of 16 pixels - so treat them as the
-     * look you are after rather than an exact measurement.
+     * Both are drawn as asked at the zoom level they are seen at - the lines are cut into dashes
+     * rather than stippled, so these are exact rather than approximate.
      */
     public static float GUIDE_LINE_DASH_PX = 24f;
     public static float GUIDE_LINE_DASH_GAP_PX = 24f;
 
-    /** {@link GuideLineStyle#DOTTED}: same two lengths, snapped the same way. */
+    /** {@link GuideLineStyle#DOTTED}: same two lengths. */
     public static float GUIDE_LINE_DOT_PX = 4f;
     public static float GUIDE_LINE_DOT_GAP_PX = 28f;
 
