@@ -95,10 +95,12 @@ public class PondCameraFocusScript implements EveryFrameScript {
         boolean uiUp = isUiUp();
 
         if (!uiUp) {
-            focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
+            float target = shouldFocus(fleet) ? 1f : 0f;
 
-            carry.x = approach(carry.x, 0f, amount);
-            carry.y = approach(carry.y, 0f, amount);
+            focus = approach(focus, target, amount, getTimeConstant(target));
+
+            carry.x = approach(carry.x, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
+            carry.y = approach(carry.y, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
         }
 
         Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
@@ -192,10 +194,21 @@ public class PondCameraFocusScript implements EveryFrameScript {
      * Sector-level scripts are handed the real frame time even while the campaign is paused, so this
      * needs no special case for it.
      */
-    protected float approach(float current, float target, float delta) {
-        float travelled = 1f - (float) Math.exp(-delta / PondConstants.POND_FOCUS_TIME_CONSTANT);
+    protected float approach(float current, float target, float delta, float timeConstant) {
+        float travelled = 1f - (float) Math.exp(-delta / Math.max(0.01f, timeConstant));
 
         return current + (target - current) * travelled;
+    }
+
+    /**
+     * Softer going out to the pond than coming back from it. The way back ends with the camera being
+     * handed over, and until it is handed over free look stays suppressed - so the return is the part
+     * that wants to be brisk.
+     */
+    protected float getTimeConstant(float target) {
+        return target > focus
+                ? PondConstants.POND_FOCUS_TIME_CONSTANT
+                : PondConstants.POND_FOCUS_RETURN_TIME_CONSTANT;
     }
 
     /**
