@@ -94,6 +94,21 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         helper.addItems(CargoItemType.SPECIAL, FishItems.toBundle(stowed), 1);
     }
 
+    @Override
+    public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
+                       SpecialItemRendererAPI renderer) {
+
+        super.render(x, y, w, h, alphaMult, glowMult, renderer);
+
+        FishCatch entry = getCatch();
+        if (entry == null) return;
+
+        FishSpec spec = entry.getSpec();
+
+        FishItemRenderer.render(x, y, w, h, alphaMult,
+                spec == null ? null : spec.rarity, entry.getGrade());
+    }
+
     protected boolean isShiftDown() {
         return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
     }

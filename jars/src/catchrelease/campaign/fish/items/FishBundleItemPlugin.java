@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.items;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
+import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
@@ -68,6 +69,26 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         for (FishCatch entry : contents) {
             helper.addItems(CargoItemType.SPECIAL, FishItems.toItem(entry), 1);
         }
+    }
+
+    /** Marked with the species' rarity and the best grade in the crate. */
+    @Override
+    public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
+                       SpecialItemRendererAPI renderer) {
+
+        super.render(x, y, w, h, alphaMult, glowMult, renderer);
+
+        List<FishCatch> contents = getContents();
+        if (contents.isEmpty()) return;
+
+        FishGrade best = FishGrade.TERRIBLE;
+        for (FishCatch entry : contents) {
+            if (entry.getGrade().ordinal() > best.ordinal()) best = entry.getGrade();
+        }
+
+        FishSpec spec = contents.get(0).getSpec();
+
+        FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
     }
 
     @Override

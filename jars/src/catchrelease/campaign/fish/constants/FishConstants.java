@@ -104,6 +104,17 @@ public class FishConstants {
     public static final float VALUE_FLOOR_MULT = 0.35f;
 
     /**
+     * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
+     * bottom. Kept small and inset - the icon has to read as the fish first.
+     */
+    public static final float ITEM_MARK_INSET = 3f;
+    public static final float ITEM_RARITY_BAR_WIDTH = 3f;
+    public static final float ITEM_GRADE_PIP_SIZE = 3f;
+    public static final float ITEM_GRADE_PIP_GAP = 2f;
+    public static final float ITEM_MARK_ALPHA = 0.9f;
+    public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
