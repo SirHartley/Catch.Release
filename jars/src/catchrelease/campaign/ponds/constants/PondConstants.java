@@ -19,6 +19,15 @@ public class PondConstants {
     /** Seconds for the focus to close most of the distance - higher is softer and slower. */
     public static final float POND_FOCUS_TIME_CONSTANT = 1f;
 
+    /**
+     * The same, for the way back. Deliberately quicker than the way out: the camera is handed over
+     * once the eased centre reaches the fleet, and how long that takes scales with how far the pond
+     * has been left behind - at the outbound constant a fleet burning away holds the camera, and the
+     * free look it suppresses, for six or seven seconds after leaving. Long enough that the pond has
+     * usually gone out of sight and closed itself by then, which made the two look connected.
+     */
+    public static final float POND_FOCUS_RETURN_TIME_CONSTANT = 0.4f;
+
     /** World units. Once the camera is this close to the fleet again, control goes back to the game. */
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
 
