@@ -32,15 +32,14 @@ public class HarpoonConstants {
     /** How close to the fleet counts as home. */
     public static final float ARRIVAL_DISTANCE = 30f;
 
-    //the line itself
-    public static final float LINE_WIDTH = 2f;
-    public static final float LINE_GLOW_WIDTH = 7f;
+    /**
+     * The line itself: a hairline core with a soft wider pass under it for the glow. Both are screen
+     * pixels, so the cable stays the same weight however far the camera is pulled back.
+     */
+    public static final float LINE_WIDTH = 1f;
+    public static final float LINE_GLOW_WIDTH = 4f;
     public static final float LINE_ALPHA = 0.9f;
     public static final float LINE_GLOW_ALPHA = 0.25f;
-
-    /** Stripes, in world units, and how much of each period is drawn. */
-    public static final float STRIPE_LENGTH = 26f;
-    public static final float STRIPE_GAP = 18f;
 
     /**
      * How far the slack line bows away from straight before it is pulled taut, as a share of its own

@@ -301,9 +301,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * The line, drawn from where the fleet is now rather than from where it was fired - so it stays
      * anchored while the fleet moves under it.
      * <p>
-     * Three passes: a wide dim one for the glow, a solid thin one for the cable, and the stripes over
-     * the top. The stripes are cut in world units, so they belong to the line rather than to the
-     * screen and do not re-flow when the camera moves.
+     * Two passes: a wide dim one for the glow, and a hairline core over it. Both unbroken - a line
+     * with gaps in it is a line that is not there, which is the opposite of what a cable under
+     * tension should look like.
      */
     protected void renderLine(CampaignFleetAPI fleet, float alpha) {
         List<Vector2f> path = getLinePath(fleet.getLocation(), entity.getLocation());
@@ -316,12 +316,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         SkillshotUtils.drawLines(pairs, HarpoonConstants.LINE_COLOR,
                 HarpoonConstants.LINE_GLOW_ALPHA * alpha, HarpoonConstants.LINE_GLOW_WIDTH);
-        SkillshotUtils.drawLines(pairs, HarpoonConstants.LINE_COLOR,
-                HarpoonConstants.LINE_ALPHA * alpha * 0.5f, HarpoonConstants.LINE_WIDTH);
 
-        SkillshotUtils.drawDashedLines(pairs, HarpoonConstants.CORE_COLOR,
-                HarpoonConstants.LINE_ALPHA * alpha, HarpoonConstants.LINE_WIDTH,
-                HarpoonConstants.STRIPE_LENGTH, HarpoonConstants.STRIPE_GAP);
+        SkillshotUtils.drawLines(pairs, HarpoonConstants.CORE_COLOR,
+                HarpoonConstants.LINE_ALPHA * alpha, HarpoonConstants.LINE_WIDTH);
     }
 
     /**
