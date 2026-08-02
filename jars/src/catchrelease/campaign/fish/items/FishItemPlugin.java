@@ -152,7 +152,14 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         tooltip.addTitle(entry.getDisplayName());
 
-        tooltip.addPara("%s specimen", pad, grade.getColor(), grade.name);
+        //rarity first: it is the mark down the left edge of the icon, and nothing else said so
+        if (spec != null) {
+            tooltip.addPara("%s species, %s specimen", pad,
+                    new java.awt.Color[]{spec.rarity.color, grade.getColor()},
+                    Misc.ucFirst(spec.rarity.name().toLowerCase()), grade.name);
+        } else {
+            tooltip.addPara("%s specimen", pad, grade.getColor(), grade.name);
+        }
         tooltip.addPara("Length: %s   Weight: %s", 3f, Misc.getHighlightColor(),
                 String.format("%.2f m", entry.length), String.format("%.1f kg", entry.weight));
         tooltip.addPara("Coherence: %s", 3f, getAberrationColor(entry.aberration),
@@ -166,8 +173,10 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
                 Misc.getDGSCredits(entry.getValue()));
 
         //said here because the item's own description is not shown once there is a specimen to describe
+        tooltip.addPara("Marked on the icon: rarity down the edge, grade as pips along the bottom.",
+                Misc.getGrayColor(), pad);
         tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every one"
-                + " aboard.", pad, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
+                + " aboard.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
     }
 
     /** Said as how well it is holding rather than as a number, which is not a thing a crew would read off. */

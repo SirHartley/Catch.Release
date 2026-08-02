@@ -69,8 +69,14 @@ public class FishItemRenderer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         if (rarity != null) {
-            quad(x + FishConstants.ITEM_MARK_INSET, y + FishConstants.ITEM_MARK_INSET,
-                    FishConstants.ITEM_RARITY_BAR_WIDTH, h - FishConstants.ITEM_MARK_INSET * 2f,
+            float barX = x + FishConstants.ITEM_MARK_INSET;
+            float barY = y + FishConstants.ITEM_MARK_INSET;
+            float barHeight = h - FishConstants.ITEM_MARK_INSET * 2f;
+
+            //a dark backing under it, or the common grey sits on the art and reads as part of it
+            backing(barX, barY, FishConstants.ITEM_RARITY_BAR_WIDTH, barHeight, alphaMult);
+
+            quad(barX, barY, FishConstants.ITEM_RARITY_BAR_WIDTH, barHeight,
                     rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
         }
 
@@ -94,6 +100,8 @@ public class FishItemRenderer {
         float pipX = x + w - FishConstants.ITEM_MARK_INSET - total;
         float pipY = y + FishConstants.ITEM_MARK_INSET;
 
+        backing(pipX, pipY, total, size, alphaMult);
+
         for (int i = 0; i < steps; i++) {
             boolean on = i < filled;
             Color color = on ? grade.getColor() : Color.BLACK;
@@ -101,6 +109,14 @@ public class FishItemRenderer {
 
             quad(pipX + i * (size + gap), pipY, size, size, color, alpha);
         }
+    }
+
+    /** A dark pad a pixel out from a mark, so the mark reads against the art rather than into it. */
+    protected static void backing(float x, float y, float w, float h, float alphaMult) {
+        float pad = FishConstants.ITEM_MARK_BACKING_PAD;
+
+        quad(x - pad, y - pad, w + pad * 2f, h + pad * 2f, Color.BLACK,
+                FishConstants.ITEM_MARK_BACKING_ALPHA * alphaMult);
     }
 
     protected static void quad(float x, float y, float w, float h, Color color, float alpha) {
