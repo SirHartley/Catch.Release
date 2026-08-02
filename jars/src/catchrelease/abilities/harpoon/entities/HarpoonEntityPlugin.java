@@ -46,7 +46,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         /** Coming home hard, with the specimen on the end. */
         REELING,
         /** Coming home empty. */
-        RETURNING
+        RETURNING,
+        /**
+         * Home. Nothing further happens on this line.
+         * <p>
+         * Needed because expiring is a fade rather than a removal: the entity stays in the location
+         * for as long as it takes to fade out, and its advance keeps being called the whole time.
+         * Without a state that does nothing, arriving home means arriving home again on every frame
+         * of the fade.
+         */
+        DONE
     }
 
     /**
@@ -96,6 +105,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        if (state == State.DONE) return;
+
         stateTime += amount;
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
@@ -200,7 +211,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     /** The specimen goes in the hold, if there is one on the line. */
     protected void land() {
-        if (state == State.REELING && isHookedValid()) {
+        boolean carrying = state == State.REELING && isHookedValid();
+
+        //before anything else, so a frame of the fade cannot land the same specimen twice
+        state = State.DONE;
+
+        if (carrying) {
             FishSpec spec = getHookedSpec();
 
             if (spec != null) {
