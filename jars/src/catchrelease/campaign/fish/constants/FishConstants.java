@@ -14,7 +14,11 @@ public class FishConstants {
     public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
     public static final float MINIGAME_METER_WIDTH = 10f;
-    public static final float MINIGAME_METER_GAP = 6f;
+    /**
+     * Gap from the track to the meter. Wide enough for both to carry their own border dressing with
+     * clear air between them - at the six units this was, the two borders crossed each other.
+     */
+    public static final float MINIGAME_METER_GAP = 16f;
     /** Below this share of the meter it reads as losing. */
     public static final float MINIGAME_METER_DANGER = 0.3f;
     /** Seconds the result stays up before the dialog closes itself. */
@@ -90,6 +94,21 @@ public class FishConstants {
 
     /** Padding between the playfield and whatever frames it. */
     public static final float MINIGAME_FRAME_PAD = 12f;
+
+    /**
+     * The dressing drawn around each of the two bars: a bright rounded outline just off the bar, and
+     * a dimmer one a little further out, the way vanilla dresses its own panels.
+     * <p>
+     * INSET is the gap from the bar to the bright line, SPACING the gap from that to the dim one, and
+     * the radius is clamped to what fits - so the meter, being ten units wide, rounds tighter than
+     * the track does rather than bowing.
+     */
+    public static final float MINIGAME_BORDER_INSET = 2f;
+    public static final float MINIGAME_BORDER_SPACING = 3f;
+    public static final float MINIGAME_BORDER_RADIUS = 3f;
+    public static final float MINIGAME_BORDER_WIDTH = 1f;
+    public static final float MINIGAME_BORDER_ALPHA = 0.9f;
+    public static final float MINIGAME_BORDER_OUTER_ALPHA = 0.35f;
 
     //minigame - the meter
     public static final float MINIGAME_PROGRESS_START = 0.4f;
