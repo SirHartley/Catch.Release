@@ -112,12 +112,46 @@ public class FishConstants {
     public static final float CELEBRATION_FLASH_TIME = 0.35f;
     public static final float CELEBRATION_FLASH_SIZE = 260f;
     public static final float CELEBRATION_FLASH_ALPHA = 0.55f;
-    public static final int CELEBRATION_CONFETTI = 40;
-    public static final float CELEBRATION_CONFETTI_SPEED = 220f;
+    public static final int CELEBRATION_CONFETTI = 70;
+    public static final float CELEBRATION_CONFETTI_SPEED = 380f;
     public static final float CELEBRATION_CONFETTI_GRAVITY = 320f;
-    public static final float CELEBRATION_CONFETTI_SIZE = 5f;
-    public static final float CELEBRATION_FISH_RISE = 60f;
-    public static final float CELEBRATION_FISH_GROW = 0.8f;
+    public static final float CELEBRATION_CONFETTI_SIZE = 6f;
+
+    /**
+     * The shape and the colour of the burst.
+     * <p>
+     * ARC is the half-angle off straight up, so a wider one throws the burst out sideways as well as
+     * over the top; SPREAD is how far apart they start. RARITY_SHARE is the fraction that take the
+     * fish's own colour - enough to keep the burst reading as this catch rather than as any catch,
+     * while the rest are drawn from across the wheel at a fixed saturation so no one of them is
+     * washed out or lurid next to the others.
+     */
+    public static final float CELEBRATION_CONFETTI_ARC = 62f;
+    public static final float CELEBRATION_CONFETTI_SPREAD = 22f;
+    public static final float CELEBRATION_CONFETTI_RARITY_SHARE = 0.3f;
+    public static final float CELEBRATION_CONFETTI_SATURATION = 0.7f;
+    public static final float CELEBRATION_CONFETTI_BRIGHTNESS = 1f;
+    public static final float CELEBRATION_FISH_SIZE = 96f;
+    public static final float CELEBRATION_FISH_GROW = 0.35f;
+
+    /**
+     * What the specimen is shown against: a disc of light behind it, ringed the way the rest of the
+     * panel is ringed - a bright line just off the light and a dimmer one outside that.
+     * <p>
+     * The fish had nothing behind it and sat over a warping hyperspace backing, which is the worst
+     * thing to read a silhouette against. The disc is there for the whole celebration rather than
+     * for the flash's third of a second, and breathes by PULSE either side of its size so it is
+     * clearly lit rather than clearly painted.
+     */
+    public static final float CELEBRATION_BACKLIGHT_SIZE = 78f;
+    public static final float CELEBRATION_BACKLIGHT_ALPHA = 0.55f;
+    public static final float CELEBRATION_BACKLIGHT_EDGE_ALPHA = 0.06f;
+    public static final float CELEBRATION_BACKLIGHT_PULSE = 0.06f;
+    public static final float CELEBRATION_BACKLIGHT_PULSE_RATE = 5f;
+    public static final float CELEBRATION_RING_ALPHA = 0.8f;
+    public static final float CELEBRATION_RING_OUTER_ALPHA = 0.3f;
+    public static final float CELEBRATION_RING_SPACING = 5f;
+    public static final float CELEBRATION_RING_WIDTH = 1f;
     public static final String CELEBRATION_TEXT = "Caught!";
     public static final String CELEBRATION_FONT = "graphics/fonts/orbitron24aabold.fnt";
     public static final float CELEBRATION_TEXT_SIZE = 34f;
@@ -133,18 +167,21 @@ public class FishConstants {
     public static final String SOUND_CATCH = "";
 
     /**
-     * The window the player flies. The body is a gradient rather than a flat fill - brightest along
-     * its middle, falling to EDGE_MULT of that at top and bottom - with a brighter rail at each end
-     * and a tick sticking out either side of both rails, so it reads as a lit window with corners
-     * rather than a painted rectangle.
+     * The window the player flies.
+     * <p>
+     * The body lifts to full at top and bottom and thins to CENTER_MULT of that through the middle,
+     * so it reads as something looked through rather than a painted block. Around it a bright outline
+     * at the edge and a dark one just inside: the pair is what gives the window a lip, and the lip is
+     * what makes it sit above the track rather than in it.
      */
     public static final float BAR_ALPHA_HOLDING = 0.5f;
     public static final float BAR_ALPHA_EMPTY = 0.4f;
-    public static final float BAR_EDGE_MULT = 0.35f;
-    public static final float BAR_RAIL_HEIGHT = 2f;
-    public static final float BAR_RAIL_MULT = 2.2f;
-    public static final float BAR_TICK_LENGTH = 4f;
-    public static final float BAR_TICK_MULT = 2.6f;
+    public static final float BAR_CENTER_MULT = 0.3f;
+    public static final float BAR_BORDER_RADIUS = 3f;
+    public static final float BAR_BORDER_WIDTH = 1f;
+    public static final float BAR_BORDER_MULT = 2.2f;
+    public static final float BAR_BORDER_INNER_INSET = 2f;
+    public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
      * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
@@ -156,6 +193,21 @@ public class FishConstants {
     public static final float ITEM_GRADE_PIP_GAP = 2f;
     public static final float ITEM_MARK_ALPHA = 0.9f;
     public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
+
+    /**
+     * A specimen shows its own species' icon rather than a stand-in, which means the item spec's icon
+     * has to be nothing at all - the cargo view draws that before the plugin gets to draw anything,
+     * and there is no asking it not to. ITEM_ICON_FALLBACK is what stands in where there is no
+     * specimen to read a species off, the codex being the case that matters.
+     * <p>
+     * INSET is per side, off a cell that is not ours to size; MOUSEOVER_MULT matches the extra
+     * additive pass the cargo view gives every other icon, so a catch lights up under the cursor
+     * along with the rest of the hold.
+     */
+    public static final String ITEM_ICON_BLANK = "graphics/catchrelease/icon/blank.png";
+    public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+    public static final float ITEM_ICON_INSET = 4f;
+    public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
 
     /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.

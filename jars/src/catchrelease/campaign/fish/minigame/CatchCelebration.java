@@ -2,8 +2,10 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.opengl.GL11;
@@ -52,20 +54,42 @@ public class CatchCelebration {
     protected Confetto spawn(float x, float y, FishSpec fish) {
         Confetto c = new Confetto();
 
-        float angle = MathUtils.getRandomNumberInRange(60f, 120f);
-        float speed = MathUtils.getRandomNumberInRange(
-                FishConstants.CELEBRATION_CONFETTI_SPEED * 0.4f, FishConstants.CELEBRATION_CONFETTI_SPEED);
+        float arc = FishConstants.CELEBRATION_CONFETTI_ARC;
+        float angle = 90f + MathUtils.getRandomNumberInRange(-arc, arc);
+        float spread = FishConstants.CELEBRATION_CONFETTI_SPREAD;
 
-        c.x = x + MathUtils.getRandomNumberInRange(-10f, 10f);
-        c.y = y;
+        //the slow ones stay near the middle and the fast ones reach the edge of the panel, which is
+        //what makes the burst read as a burst rather than as a ring leaving
+        float speed = MathUtils.getRandomNumberInRange(
+                FishConstants.CELEBRATION_CONFETTI_SPEED * 0.35f, FishConstants.CELEBRATION_CONFETTI_SPEED);
+
+        c.x = x + MathUtils.getRandomNumberInRange(-spread, spread);
+        c.y = y + MathUtils.getRandomNumberInRange(-spread * 0.5f, spread * 0.5f);
         c.vx = (float) Math.cos(Math.toRadians(angle)) * speed;
         c.vy = (float) Math.sin(Math.toRadians(angle)) * speed;
         c.spin = MathUtils.getRandomNumberInRange(-360f, 360f);
         c.angle = MathUtils.getRandomNumberInRange(0f, 360f);
         c.size = MathUtils.getRandomNumberInRange(2f, FishConstants.CELEBRATION_CONFETTI_SIZE);
-        c.color = fish == null ? Color.WHITE : fish.rarity.color;
+        c.color = pickColor(fish);
 
         return c;
+    }
+
+    /**
+     * Most of it is drawn from across the wheel, and a share of it takes the fish's own colour.
+     * <p>
+     * All of one colour said what was caught and nothing about the catching; all of every colour
+     * would say the opposite. The share is what keeps both.
+     */
+    protected Color pickColor(FishSpec fish) {
+        if (fish != null
+                && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
+            return fish.rarity.color;
+        }
+
+        return Color.getHSBColor(MathUtils.getRandomNumberInRange(0f, 1f),
+                FishConstants.CELEBRATION_CONFETTI_SATURATION,
+                FishConstants.CELEBRATION_CONFETTI_BRIGHTNESS);
     }
 
     public void advance(float amount) {
@@ -104,6 +128,7 @@ public class CatchCelebration {
         float centerY = layout.trackY + layout.trackHeight * 0.5f;
 
         renderFlash(centerX, centerY, progress, alpha);
+        renderBacklight(centerX, centerY, progress, alpha);
         renderFish(fishSprite, centerX, centerY, progress, alpha);
         renderConfetti(alpha);
         renderText(centerX, centerY, progress, alpha);
@@ -114,40 +139,53 @@ public class CatchCelebration {
         float share = MathUtils.clamp(progress / FishConstants.CELEBRATION_FLASH_TIME, 0f, 1f);
         if (share >= 1f) return;
 
-        float radius = FishConstants.CELEBRATION_FLASH_SIZE * (0.2f + share * 0.8f);
-        Color color = getAccentColor();
-
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-
-        //a fan rather than a sprite, so it needs no art and takes the rarity colour as it is
-        GL11.glBegin(GL11.GL_TRIANGLE_FAN);
-        GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f,
-                (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha);
-        GL11.glVertex2f(centerX, centerY);
-        GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 0f);
-        for (int i = 0; i <= 24; i++) {
-            double a = Math.toRadians(i * 360.0 / 24.0);
-            GL11.glVertex2f(centerX + (float) Math.cos(a) * radius, centerY + (float) Math.sin(a) * radius);
-        }
-        GL11.glEnd();
-
-        GL11.glPopAttrib();
+        //no art and no shader: a fan takes the rarity colour as it is
+        Disc.draw(centerX, centerY, FishConstants.CELEBRATION_FLASH_SIZE * (0.2f + share * 0.8f),
+                getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha, 0f, true);
     }
 
-    /** The specimen itself, lifted clear of the track and growing as it comes. */
+    /**
+     * What the specimen is read against. The disc is lit in the fish's own colour; the two rings are
+     * in the player's UI colours, the same bright-line-and-dimmer-line the panel is framed with.
+     */
+    protected void renderBacklight(float centerX, float centerY, float progress, float alpha) {
+        float radius = getBacklightRadius(progress);
+
+        Disc.draw(centerX, centerY, radius, getAccentColor(),
+                FishConstants.CELEBRATION_BACKLIGHT_ALPHA * alpha,
+                FishConstants.CELEBRATION_BACKLIGHT_EDGE_ALPHA * alpha, true);
+
+        Disc.drawOutline(centerX, centerY, radius + FishConstants.CELEBRATION_RING_SPACING,
+                Misc.getDarkPlayerColor(), FishConstants.CELEBRATION_RING_OUTER_ALPHA * alpha,
+                FishConstants.CELEBRATION_RING_WIDTH);
+
+        Disc.drawOutline(centerX, centerY, radius, Misc.getBrightPlayerColor(),
+                FishConstants.CELEBRATION_RING_ALPHA * alpha, FishConstants.CELEBRATION_RING_WIDTH);
+    }
+
+    /** Opens out with the same ease the fish grows on, then breathes rather than sitting still. */
+    protected float getBacklightRadius(float progress) {
+        float pulse = 1f + FishConstants.CELEBRATION_BACKLIGHT_PULSE
+                * (float) Math.sin(elapsed * FishConstants.CELEBRATION_BACKLIGHT_PULSE_RATE);
+
+        return FishConstants.CELEBRATION_BACKLIGHT_SIZE * (0.55f + 0.45f * ease(progress)) * pulse;
+    }
+
+    /**
+     * The specimen itself, in the middle of the track and growing as it comes.
+     * <p>
+     * In the middle rather than lifted out of it: the fish is the thing being looked at, and it was
+     * being drawn away from the light that was meant to be behind it.
+     */
     protected void renderFish(SpriteAPI sprite, float centerX, float centerY, float progress, float alpha) {
         if (sprite == null) return;
 
-        float rise = FishConstants.CELEBRATION_FISH_RISE * ease(progress);
-        float size = FishConstants.MINIGAME_FISH_ICON_SIZE
+        float size = FishConstants.CELEBRATION_FISH_SIZE
                 * (1f + FishConstants.CELEBRATION_FISH_GROW * ease(progress));
 
         sprite.setSize(size, size);
         sprite.setAlphaMult(alpha);
-        sprite.renderAtCenter(centerX, centerY + rise);
+        sprite.renderAtCenter(centerX, centerY);
     }
 
     protected void renderConfetti(float alpha) {
