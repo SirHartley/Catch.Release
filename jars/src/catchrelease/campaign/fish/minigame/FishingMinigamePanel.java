@@ -222,10 +222,32 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** The window the player flies. Green while it has the fish, dim while it does not. */
     protected void renderBar(FishingMinigameLayout layout, float alphaMult) {
         float height = minigame.getBarHeightFraction() * layout.trackHeight;
-        Color color = minigame.isFishInBar() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        float y = layout.getTrackY(minigame.getBarPosition());
+        float x = layout.trackX;
+        float w = layout.trackWidth;
 
-        drawQuad(layout.trackX, layout.getTrackY(minigame.getBarPosition()), layout.trackWidth, height,
-                color, 0.45f * alphaMult);
+        boolean holding = minigame.isFishInBar();
+        Color color = holding ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        float alpha = (holding ? FishConstants.BAR_ALPHA_HOLDING : FishConstants.BAR_ALPHA_EMPTY) * alphaMult;
+
+        //body: brighter along the middle and falling away to the ends, so it reads as a lit window
+        //rather than a painted rectangle
+        float mid = height * 0.5f;
+        drawVerticalGradient(x, y, w, mid, color, alpha * FishConstants.BAR_EDGE_MULT, alpha);
+        drawVerticalGradient(x, y + mid, w, height - mid, color, alpha, alpha * FishConstants.BAR_EDGE_MULT);
+
+        //the two rails the fish has to be between, which is the part the player is actually aiming
+        float rail = FishConstants.BAR_RAIL_HEIGHT;
+        drawQuad(x, y, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
+        drawQuad(x, y + height - rail, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
+
+        //and a tick at each end of both rails, so the window has corners to read against the track
+        float tick = FishConstants.BAR_TICK_LENGTH;
+        float tickAlpha = Math.min(1f, alpha * FishConstants.BAR_TICK_MULT);
+        for (float edgeY : new float[]{y, y + height - rail}) {
+            drawQuad(x - tick, edgeY, tick, rail, color, tickAlpha);
+            drawQuad(x + w, edgeY, tick, rail, color, tickAlpha);
+        }
     }
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {

@@ -104,6 +104,20 @@ public class FishConstants {
     public static final float VALUE_FLOOR_MULT = 0.35f;
 
     /**
+     * The window the player flies. The body is a gradient rather than a flat fill - brightest along
+     * its middle, falling to EDGE_MULT of that at top and bottom - with a brighter rail at each end
+     * and a tick sticking out either side of both rails, so it reads as a lit window with corners
+     * rather than a painted rectangle.
+     */
+    public static final float BAR_ALPHA_HOLDING = 0.5f;
+    public static final float BAR_ALPHA_EMPTY = 0.4f;
+    public static final float BAR_EDGE_MULT = 0.35f;
+    public static final float BAR_RAIL_HEIGHT = 2f;
+    public static final float BAR_RAIL_MULT = 2.2f;
+    public static final float BAR_TICK_LENGTH = 4f;
+    public static final float BAR_TICK_MULT = 2.6f;
+
+    /**
      * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
      * bottom. Kept small and inset - the icon has to read as the fish first.
      */
