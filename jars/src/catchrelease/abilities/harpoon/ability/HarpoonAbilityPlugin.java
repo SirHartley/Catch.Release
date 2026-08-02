@@ -20,8 +20,9 @@ import java.awt.Color;
  * The other way to take a specimen: aim, fire, and hit one with a line rather than sending drones to
  * circle a spot and wait.
  * <p>
- * Aimed rather than placed, so the reticule is a direction with the line's own stripes on it - what
- * the guide shows is what the line will look like when it goes out.
+ * Aimed rather than placed, so the reticule is a direction rather than a spot. Dashed on purpose,
+ * and the only dashed thing here: the guide is a guide, and the line that goes out is solid, so
+ * there is never a moment where the two could be mistaken for each other.
  */
 public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
 
@@ -42,12 +43,14 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null || worldTarget == null) return;
 
+        Vector2f from = new Vector2f(fleet.getLocation());
+
         //fired at the aim point rather than at a mote: missing is allowed, and is most of the skill
         SectorEntityToken harpoon = fleet.getContainingLocation().addCustomEntity(
                 Misc.genUID(), null, HarpoonConstants.ENTITY_ID, null,
-                new HarpoonEntityPlugin.Params(new Vector2f(worldTarget)));
+                new HarpoonEntityPlugin.Params(from, new Vector2f(worldTarget)));
 
-        harpoon.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        harpoon.setLocation(from.x, from.y);
         harpoon.setFacing(angleFromFleet);
     }
 
