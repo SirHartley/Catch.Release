@@ -2,7 +2,6 @@ package catchrelease.abilities.rod.rendering;
 
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
-import catchrelease.skillshot.GuideLineStyle;
 import catchrelease.skillshot.util.SkillshotUtils;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -68,8 +67,15 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
         Vector2f center = swarm.getTarget();
         if (center == null) return;
 
-        SkillshotUtils.drawLines(getRingVertices(center), RodConstants.DRONE_COLOR, getAlpha(),
-                RodConstants.RING_WIDTH, GuideLineStyle.DASHED);
+        float period = getCircumference() / RodConstants.RING_DASH_COUNT;
+        float dash = period * RodConstants.RING_DASH_DUTY;
+
+        SkillshotUtils.drawDashedLines(getRingVertices(center), RodConstants.DRONE_COLOR, getAlpha(),
+                RodConstants.RING_WIDTH, dash, period - dash);
+    }
+
+    protected float getCircumference() {
+        return (float) (2f * Math.PI * RodConstants.DRONE_ORBIT_RADIUS);
     }
 
     /** Dim while empty; brighter and breathing while there is something in the ring to go after. */

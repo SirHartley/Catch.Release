@@ -90,6 +90,17 @@ public class RodConstants {
     //the ring the drones fly, drawn so it is clear where a mote has to drift to count
     public static final int RING_SEGMENTS = 72;
     public static final float RING_WIDTH = 1.5f;
+
+    /**
+     * Dashes around the ring, and how much of each one is drawn rather than gap.
+     * <p>
+     * A count rather than a length, so the pattern belongs to the ring: it is the same at every zoom
+     * level and it closes at the seam instead of clipping the last dash short. Sizing dashes in
+     * screen pixels - which is right for a reticule, since that is drawn at whatever zoom the player
+     * is aiming at - would have this circle re-cut its dashes every time the camera changed distance.
+     */
+    public static final int RING_DASH_COUNT = 24;
+    public static final float RING_DASH_DUTY = 0.5f;
     /** Alpha while nothing is in it, and while something is. */
     public static final float RING_ALPHA_IDLE = 0.2f;
     public static final float RING_ALPHA_ACTIVE = 0.55f;

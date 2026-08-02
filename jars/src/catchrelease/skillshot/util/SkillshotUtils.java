@@ -34,19 +34,39 @@ public class SkillshotUtils {
      * Draws straight lines in campaign world coordinates - call it from a renderer's render pass, the
      * campaign layers are already in world space.
      * <p>
+     * Dashes are sized in screen pixels here, which suits a reticule: it is drawn while the player is
+     * aiming and wants the same look whatever the zoom happens to be. The cost is that the pattern
+     * re-flows as the camera moves, since a shape of a fixed world size fits a different number of
+     * dashes at every zoom level. Anything drawn at a fixed size in the world - a ring around a
+     * point, say - wants {@link #drawDashedLines} instead, so its dashes scale with it.
+     * <p>
      * All GL state this touches is pushed and popped, so sprites drawn after the call are unaffected.
      *
      * @param vertices consecutive pairs, i.e. start, end, start, end - a trailing odd vertex is
      *                 dropped
      * @param widthPx  line width in screen pixels, so it stays readable at any zoom level
-     * @param style    dash pattern; its lengths are in screen pixels too, so the dashes do not thin
-     *                 out as the map zooms
+     * @param style    dash pattern; its lengths are in screen pixels
      */
     public static void drawLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx, GuideLineStyle style) {
         if (vertices == null || vertices.size() < 2) return;
 
-        List<Vector2f> toDraw = cutDashes(vertices, style);
-        if (toDraw.size() < 2) return;
+        drawCut(cutDashes(vertices, style), colour, alpha, widthPx);
+    }
+
+    /**
+     * The same, with the dash and gap given in world units rather than screen pixels - so the pattern
+     * is fixed to whatever is being drawn and zooming moves the whole thing together, rather than
+     * re-cutting the dashes every time the camera changes distance.
+     */
+    public static void drawDashedLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx,
+                                       float dashWorld, float gapWorld) {
+        if (vertices == null || vertices.size() < 2) return;
+
+        drawCut(cutDashes(vertices, dashWorld, gapWorld), colour, alpha, widthPx);
+    }
+
+    protected static void drawCut(List<Vector2f> toDraw, Color colour, float alpha, float widthPx) {
+        if (toDraw == null || toDraw.size() < 2) return;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_LINE_BIT | GL11.GL_COLOR_BUFFER_BIT);
 
@@ -90,8 +110,13 @@ public class SkillshotUtils {
         ViewportAPI viewport = Global.getSector().getViewport();
         if (viewport == null) return vertices;
 
-        float dash = viewport.convertScreenWidthToWorldWidth(style.getSegmentPx());
-        float gap = viewport.convertScreenWidthToWorldWidth(style.getGapPx());
+        return cutDashes(vertices,
+                viewport.convertScreenWidthToWorldWidth(style.getSegmentPx()),
+                viewport.convertScreenWidthToWorldWidth(style.getGapPx()));
+    }
+
+    /** The cut itself, in world units. */
+    protected static List<Vector2f> cutDashes(List<Vector2f> vertices, float dash, float gap) {
         if (dash <= 0f || gap <= 0f) return vertices;
 
         float period = dash + gap;
