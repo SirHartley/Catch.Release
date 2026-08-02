@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.helper.CatchReleaseSettings;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.rendering.plugins.WarpGrid;
@@ -83,7 +84,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
 
         //a landed fish gets the celebration, and the dialog waits for it rather than the other way
-        if (minigame.isCaught() && celebration == null) {
+        if (minigame.isCaught() && celebration == null && CatchReleaseSettings.isCelebrationEnabled()) {
             //from the middle of the track, which is where the specimen is shown - not from wherever
             //in the track it happened to be when it was landed
             celebration = new CatchCelebration(minigame.getFish(),
