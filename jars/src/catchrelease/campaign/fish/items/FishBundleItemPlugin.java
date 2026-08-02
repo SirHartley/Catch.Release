@@ -122,8 +122,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara("Longest: %s", pad, Misc.getHighlightColor(), String.format("%.2f m", best));
 
         //the same two marks the crate's icon carries, said once so they are not a mystery
-        tooltip.addPara("Marked on the icon: the species' rarity down the edge, and the best grade in"
-                + " the crate as pips along the bottom.", Misc.getGrayColor(), pad);
+        tooltip.addPara("Marked along the bottom of the icon: the best grade in the crate as pips,"
+                + " then the species' rarity as the bar at the end of them.", Misc.getGrayColor(), pad);
         tooltip.addPara("Right-click to unpack.", Misc.getGrayColor(), 3f);
     }
 }

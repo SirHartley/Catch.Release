@@ -57,30 +57,42 @@ public class FishItemRenderer {
         sprite.setNormalBlend();
     }
 
-    /** Rarity as a bar down the left edge, and grade as up to five pips along the bottom. */
+    /**
+     * One row along the bottom of the icon: the specimen's grade as pips, then the species' rarity as
+     * a single unbroken bar three pips long at the end of them.
+     */
     public static void render(float x, float y, float w, float h, float alphaMult,
                               FishRarity rarity, FishGrade grade) {
 
         if (alphaMult <= 0f) return;
+
+        float size = FishConstants.ITEM_GRADE_PIP_SIZE;
+        float gap = FishConstants.ITEM_GRADE_PIP_GAP;
+
+        int steps = FishGrade.values().length;
+        float pipsWidth = steps * size + (steps - 1) * gap;
+        float barWidth = FishConstants.ITEM_RARITY_BAR_PIPS * size
+                + (FishConstants.ITEM_RARITY_BAR_PIPS - 1f) * gap;
+
+        //laid out from the right, so the row keeps its corner whatever is or is not being drawn
+        float rowRight = x + w - FishConstants.ITEM_MARK_INSET;
+        float rowY = y + FishConstants.ITEM_MARK_INSET;
+        float barX = rowRight - barWidth;
+        float pipX = barX - FishConstants.ITEM_RARITY_BAR_GAP - pipsWidth;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+        if (grade != null) renderPips(pipX, rowY, size, gap, pipsWidth, alphaMult, grade);
+
         if (rarity != null) {
-            float barX = x + FishConstants.ITEM_MARK_INSET;
-            float barY = y + FishConstants.ITEM_MARK_INSET;
-            float barHeight = h - FishConstants.ITEM_MARK_INSET * 2f;
-
             //a dark backing under it, or the common grey sits on the art and reads as part of it
-            backing(barX, barY, FishConstants.ITEM_RARITY_BAR_WIDTH, barHeight, alphaMult);
+            backing(barX, rowY, barWidth, size, alphaMult);
 
-            quad(barX, barY, FishConstants.ITEM_RARITY_BAR_WIDTH, barHeight,
-                    rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
+            quad(barX, rowY, barWidth, size, rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
         }
-
-        if (grade != null) renderPips(x, y, w, h, alphaMult, grade);
 
         GL11.glPopAttrib();
     }
@@ -89,16 +101,11 @@ public class FishItemRenderer {
      * One pip per grade step, filled up to this specimen\'s. The empty ones are still drawn, faintly,
      * so the mark reads as a scale with a position on it rather than as a number of dots.
      */
-    protected static void renderPips(float x, float y, float w, float h, float alphaMult, FishGrade grade) {
+    protected static void renderPips(float pipX, float pipY, float size, float gap, float total,
+                                     float alphaMult, FishGrade grade) {
+
         int steps = FishGrade.values().length;
         int filled = grade.ordinal() + 1;
-
-        float size = FishConstants.ITEM_GRADE_PIP_SIZE;
-        float gap = FishConstants.ITEM_GRADE_PIP_GAP;
-        float total = steps * size + (steps - 1) * gap;
-
-        float pipX = x + w - FishConstants.ITEM_MARK_INSET - total;
-        float pipY = y + FishConstants.ITEM_MARK_INSET;
 
         backing(pipX, pipY, total, size, alphaMult);
 

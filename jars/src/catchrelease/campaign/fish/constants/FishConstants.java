@@ -8,8 +8,33 @@ public class FishConstants {
     public static final float CORE_BAND_HALF_WIDTH = 27000f;
     public static final float CORE_BAND_HALF_HEIGHT = 17000f;
 
+    /**
+     * The readout beside the track: a cargo-square of the specimen, its name under that, and its
+     * numbers under that a line at a time.
+     * <p>
+     * BOX is a hundred to the side because that is what a cargo cell is, and the point of the box is
+     * to be recognisably one. The column sits to the right of the meter, which is why the panel is
+     * wider than the playfield needs - the track stays centred in it either way.
+     * <p>
+     * LINE_DELAY is the wait between one number and the next; each one plays SOUND_RESULT_LINE as it
+     * lands.
+     */
+    public static final float MINIGAME_RESULT_GAP = 24f;
+    public static final float MINIGAME_RESULT_WIDTH = 190f;
+    public static final float MINIGAME_RESULT_BOX = 100f;
+    public static final float MINIGAME_RESULT_BOX_PAD = 12f;
+    public static final float MINIGAME_RESULT_TITLE_GAP = 14f;
+    public static final float MINIGAME_RESULT_LINE_HEIGHT = 19f;
+    public static final float MINIGAME_RESULT_LINE_DELAY = 0.24f;
+    public static final float MINIGAME_RESULT_FADE = 0.15f;
+    public static final String MINIGAME_RESULT_FONT = "graphics/fonts/insignia15LTaa.fnt";
+    public static final String MINIGAME_RESULT_TITLE_FONT = "graphics/fonts/insignia21LTaa.fnt";
+    public static final float MINIGAME_RESULT_TEXT_SIZE = 15f;
+    public static final float MINIGAME_RESULT_TITLE_SIZE = 19f;
+    public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
+
     //minigame - panel
-    public static final float MINIGAME_PANEL_WIDTH = 420f;
+    public static final float MINIGAME_PANEL_WIDTH = 560f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
     public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
@@ -166,6 +191,9 @@ public class FishConstants {
      */
     public static final String SOUND_CATCH = "";
 
+    /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
+    public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
+
     /**
      * The window the player flies.
      * <p>
@@ -184,13 +212,19 @@ public class FishConstants {
     public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
-     * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
-     * bottom. Kept small and inset - the icon has to read as the fish first.
+     * The marks drawn onto a catch's cargo icon, both on one row along the bottom: grade as pips,
+     * then the rarity as a single bar at the end of them.
+     * <p>
+     * The bar is three pips long and unbroken, so it cannot be counted as part of the grade - it is
+     * plainly a different kind of mark on the same scale. Reading left to right, the row is what the
+     * specimen is followed by what the species is. Kept small and inset; the icon has to read as the
+     * fish first.
      */
     public static final float ITEM_MARK_INSET = 3f;
-    public static final float ITEM_RARITY_BAR_WIDTH = 3f;
     public static final float ITEM_GRADE_PIP_SIZE = 3f;
     public static final float ITEM_GRADE_PIP_GAP = 2f;
+    public static final float ITEM_RARITY_BAR_PIPS = 3f;
+    public static final float ITEM_RARITY_BAR_GAP = 4f;
     public static final float ITEM_MARK_ALPHA = 0.9f;
     public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
     public static final float ITEM_MARK_BACKING_PAD = 1f;

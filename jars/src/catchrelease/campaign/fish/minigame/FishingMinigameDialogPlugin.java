@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -35,11 +37,27 @@ import java.util.Map;
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     public interface Callback {
-        void onCatchResolved(boolean caught);
+        /**
+         * @param landed the specimen that was taken, or null if it got away. The same object the
+         *               readout showed, so what goes in the hold is what the player was told they
+         *               caught rather than a second roll of the same species.
+         */
+        void onCatchResolved(FishCatch landed);
     }
 
     protected FishSpec fish;
     protected Callback callback;
+
+    /** Where this one was taken. Only its aberration is read off it, but that has to be read early. */
+    protected SectorEntityToken anchor;
+
+    /**
+     * Rolled when the catch opens rather than when it is won.
+     * <p>
+     * The readout has to show the specimen while the dialog is still up, and the caller has to store
+     * that same specimen after it closes. One roll, held here, is the only way both can be true.
+     */
+    protected FishCatch specimen;
 
     protected InteractionDialogAPI dialog;
     protected FishingMinigame minigame;
@@ -62,13 +80,14 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     public static boolean open(SectorEntityToken anchor, FishSpec fish, Callback callback) {
         if (fish == null) return false;
 
-        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(fish, callback);
+        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(fish, anchor, callback);
 
         return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
     }
 
-    public FishingMinigameDialogPlugin(FishSpec fish, Callback callback) {
+    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor, Callback callback) {
         this.fish = fish;
+        this.anchor = anchor;
         this.callback = callback;
     }
 
@@ -76,6 +95,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
         this.minigame = new FishingMinigame(fish);
+
+        //how loosely it holds to reality comes from where it was taken, not from the fish
+        this.specimen = FishCatch.roll(fish, Aberration.of(anchor));
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
@@ -97,13 +119,13 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         //the panel first, then the dialog behind it - unless the panel closing is what got us here
         if (!dismissed && delegate != null) delegate.dismissPanel();
         if (dialog != null) dialog.dismiss();
-        if (callback != null) callback.onCatchResolved(caught);
+        if (callback != null) callback.onCatchResolved(caught ? specimen : null);
     }
 
     /** Wraps the panel for the dialog. The catch ends itself, so there is nothing to press. */
     protected class Delegate implements CustomVisualDialogDelegate, FishingMinigamePanel.Listener {
 
-        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, this);
+        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, this);
 
         /** The frame's own handle, and the only way to close the panel from in here. */
         protected DialogCallbacks callbacks;
@@ -167,14 +189,18 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         }
 
         /**
-         * The panel has gone, by whatever route - our own catch ending it, or the player pressing
-         * escape. Resolving as a miss covers the second: the fish is gone with the panel, and the
-         * drone holding that mote would otherwise wait on a callback that never comes.
+         * The panel has gone, by whatever route - our own close, or the player pressing escape, or
+         * the frame deciding to dismiss itself.
+         * <p>
+         * The outcome is read off the catch rather than assumed, because the route here is not
+         * knowable from in here. A fish that was landed is landed however the panel came down; one
+         * that was still being played is lost. Getting this wrong either way leaves the drone or the
+         * line holding that mote waiting on a callback that never comes.
          */
         @Override
         public void reportDismissed(int option) {
             dismissed = true;
-            resolve(false);
+            resolve(minigame != null && minigame.isCaught());
         }
 
         @Override

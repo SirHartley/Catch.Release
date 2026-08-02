@@ -1,3 +1,3 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-IndEvo_header1,General,Header,General,,,,,General
-demandIndicators_lowVis,Low Impact Mode,Boolean,FALSE,,Setting this to true makes the mod much less intrusive - showing indicators only when excess or shortage exists and forgoing quantity indication and price guides. Set it to true if you think there is too much stuff happening on your market screen.,,,General
+catchrelease_headerCatch,Catch Header,Header,The catch,,,,,Catch
+catchrelease_celebration,Celebration effects,Boolean,FALSE,,"Confetti, a flash and the specimen thrown up over the track when a fish is landed. The readout beside the track is shown either way, so turning this off costs no information.",,,Catch

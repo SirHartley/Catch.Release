@@ -173,8 +173,8 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
                 Misc.getDGSCredits(entry.getValue()));
 
         //said here because the item's own description is not shown once there is a specimen to describe
-        tooltip.addPara("Marked on the icon: rarity down the edge, grade as pips along the bottom.",
-                Misc.getGrayColor(), pad);
+        tooltip.addPara("Marked along the bottom of the icon: grade as pips, then rarity as the bar"
+                + " at the end of them.", Misc.getGrayColor(), pad);
         tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every one"
                 + " aboard.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
     }
