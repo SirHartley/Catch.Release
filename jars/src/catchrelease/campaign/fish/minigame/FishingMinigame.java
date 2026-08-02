@@ -307,6 +307,11 @@ public class FishingMinigame {
         return state == State.CAUGHT;
     }
 
+    public void setEscaped(){
+        progress = 0f;
+        state = State.ESCAPED;
+    }
+
     public float getProgress() {
         return progress;
     }

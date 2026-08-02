@@ -23,7 +23,7 @@ public class FishConstants {
     public static final float MINIGAME_METER_DANGER = 0.3f;
     /** Seconds the result stays up before the dialog closes itself. */
     public static final float MINIGAME_END_LINGER = 0.9f;
-    public static final float MINIGAME_FISH_ICON_SIZE = 28f;
+    public static final float MINIGAME_FISH_ICON_SIZE = 38f;
 
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */
@@ -48,8 +48,8 @@ public class FishConstants {
     public static final float MINIGAME_FISH_RESPONSE = 0.3f;
 
     /** Visual only: how far the icon twitches, in pixels, and how quickly. */
-    public static final float MINIGAME_FISH_JITTER = 3.5f;
-    public static final float MINIGAME_FISH_JITTER_SPEED = 9f;
+    public static final float MINIGAME_FISH_JITTER = 2.5f;
+    public static final float MINIGAME_FISH_JITTER_SPEED = 7f;
     /** How much harder it twitches when swimming hard, per unit of track speed. */
     public static final float MINIGAME_FISH_JITTER_EFFORT = 0.8f;
 
