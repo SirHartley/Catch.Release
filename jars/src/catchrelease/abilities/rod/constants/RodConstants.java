@@ -84,7 +84,7 @@ public class RodConstants {
      * How much faster a returning drone gets per second on the way home, and the ceiling on it. The
      * slowing distance still applies at the end, so it arrives rather than overshooting the fleet.
      */
-    public static final float DRONE_RETURN_ACCELERATION = 0.7f;
+    public static final float DRONE_RETURN_ACCELERATION = 0.2f;
     public static final float DRONE_RETURN_MAX_MULT = 3.5f;
 
     //the ring the drones fly, drawn so it is clear where a mote has to drift to count
@@ -102,17 +102,17 @@ public class RodConstants {
     public static final int RING_DASH_COUNT = 24;
     public static final float RING_DASH_DUTY = 0.5f;
     /** Alpha while nothing is in it, and while something is. */
-    public static final float RING_ALPHA_IDLE = 0.2f;
-    public static final float RING_ALPHA_ACTIVE = 0.55f;
+    public static final float RING_ALPHA_IDLE = 0.02f;
+    public static final float RING_ALPHA_ACTIVE = 0.1f;
     /** Seconds to fade in on arrival and out on recall, and the pulse rate while something is in. */
     public static final float RING_FADE_TIME = 0.5f;
     public static final float RING_PULSE_SPEED = 4f;
 
     /** How close counts as arrived, in world units. */
-    public static final float DRONE_ARRIVAL_DISTANCE = 20f;
+    public static final float DRONE_ARRIVAL_DISTANCE = 10f;
 
-    public static final float DRONE_SPRITE_SIZE = 10;
-    public static final float DRONE_TRAIL_SIZE = 20f;
+    public static final float DRONE_SPRITE_SIZE = 8f;
+    public static final float DRONE_TRAIL_SIZE = 5f;
 
     /** Used when the upgrade stat is missing entirely, so a fresh save still fishes. */
     public static final int DRONE_COUNT_FALLBACK = 1;

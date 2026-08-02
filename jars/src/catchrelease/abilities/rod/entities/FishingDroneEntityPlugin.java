@@ -2,6 +2,7 @@ package catchrelease.abilities.rod.entities;
 
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.skillshot.SkillshotFramework;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -15,6 +16,7 @@ import org.lwjgl.util.vector.Vector2f;
 import org.magiclib.plugins.MagicCampaignTrailPlugin;
 
 import java.awt.Color;
+import java.util.logging.Logger;
 
 /**
  * One fishing drone.
@@ -97,7 +99,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     protected boolean arrivedHome = false;
 
-    protected final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     transient protected SpriteAPI sprite;
 
     @Override
@@ -118,8 +119,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     @Override
     public void advance(float amount) {
         super.advance(amount);
-
-        flicker.advance(amount);
 
         //the circle turns whatever this drone is up to, so anything off it rejoins where its share
         //has got to rather than where it left
@@ -334,7 +333,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
                     distance / (RodConstants.DRONE_STEER_RESPONSE * RodConstants.DRONE_BRAKE_MARGIN));
         }
 
-        if (RodConstants.DRONE_SLOWING_DISTANCE <= 0f || distance >= RodConstants.DRONE_SLOWING_DISTANCE) {
+        if (distance >= RodConstants.DRONE_SLOWING_DISTANCE) {
             return speed;
         }
 
@@ -456,7 +455,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
                 trailId,
                 Global.getSettings().getSprite("catchrelease", "trail_foggy"),
                 entity.getLocation(),
-                0f,
+                10f,
                 entity.getFacing(),
                 RodConstants.DRONE_TRAIL_SIZE,
                 1f,
@@ -471,7 +470,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
 
-        if (sprite == null) sprite = SpriteLoader.getSprite("placeholder");
+        if (sprite == null) sprite = SpriteLoader.getSprite("drone");
         if (sprite == null) return;
 
         float alpha = viewport.getAlphaMult()
@@ -482,9 +481,8 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         Vector2f loc = entity.getLocation();
 
-        sprite.setColor(color);
-        sprite.setAlphaMult(alpha * (1f - 0.4f * flicker.getBrightness()));
-        sprite.setSize(RodConstants.DRONE_SPRITE_SIZE, RodConstants.DRONE_SPRITE_SIZE);
+        sprite.setWidth(RodConstants.DRONE_SPRITE_SIZE * sprite.getTexWidth());
+        sprite.setHeight(RodConstants.DRONE_SPRITE_SIZE * sprite.getTexHeight());
         sprite.setAngle(entity.getFacing() - 90f);
         sprite.renderAtCenter(loc.x, loc.y);
     }

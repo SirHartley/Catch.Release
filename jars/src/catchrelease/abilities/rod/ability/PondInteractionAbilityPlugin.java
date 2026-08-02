@@ -10,6 +10,8 @@ import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
+import catchrelease.skillshot.render.ValidatedAreaReticuleRenderer;
+import catchrelease.skillshot.render.validators.PondProximityValidator;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -62,7 +64,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     @Override
     public SkillshotRenderer createReticule() {
         //sized to the ring the drones will fly, so the reticule shows exactly what the cast covers
-        return new AreaReticuleRenderer(RodConstants.DRONE_ORBIT_RADIUS * 2f).withTrajectory();
+        float radius = RodConstants.DRONE_ORBIT_RADIUS * 2f;
+        return new ValidatedAreaReticuleRenderer(radius, new PondProximityValidator(radius));
     }
 
     @Override

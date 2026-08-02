@@ -13,6 +13,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -97,6 +98,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             } else if (event.isLMBUpEvent()) {
                 reeling = false;
                 event.consume();
+            } else if (event.getEventValue() == Keyboard.KEY_ESCAPE){
+                event.consume();
+                minigame.setEscaped();
+                endLingerLeft = 0f;
             }
         }
     }
