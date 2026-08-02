@@ -97,6 +97,82 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     /**
+     * What the smallest specimen of a species is worth as a share of its base value. The largest is
+     * worth twice the base before its grade is applied, so the range either side of the middle is
+     * even and the base value stays the number a typical specimen fetches.
+     */
+    public static final float VALUE_FLOOR_MULT = 0.35f;
+
+    /**
+     * The catch celebration. One clock at CELEBRATION_TIME drives all of it; the rest are shares of
+     * that or plain sizes, so the whole thing can be retimed from one number.
+     */
+    public static final float CELEBRATION_TIME = 1.6f;
+    public static final float CELEBRATION_FADE_FROM = 0.7f;
+    public static final float CELEBRATION_FLASH_TIME = 0.35f;
+    public static final float CELEBRATION_FLASH_SIZE = 260f;
+    public static final float CELEBRATION_FLASH_ALPHA = 0.55f;
+    public static final int CELEBRATION_CONFETTI = 40;
+    public static final float CELEBRATION_CONFETTI_SPEED = 220f;
+    public static final float CELEBRATION_CONFETTI_GRAVITY = 320f;
+    public static final float CELEBRATION_CONFETTI_SIZE = 5f;
+    public static final float CELEBRATION_FISH_RISE = 60f;
+    public static final float CELEBRATION_FISH_GROW = 0.8f;
+    public static final String CELEBRATION_TEXT = "Caught!";
+    public static final String CELEBRATION_FONT = "graphics/fonts/orbitron24aabold.fnt";
+    public static final float CELEBRATION_TEXT_SIZE = 34f;
+    public static final float CELEBRATION_TEXT_ANGLE = 12f;
+    public static final float CELEBRATION_TEXT_RISE = 110f;
+    public static final float CELEBRATION_POP_TIME = 0.18f;
+    public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
+
+    /**
+     * Sound for the catch. Blank means nothing plays - these are hooks for sound that does not exist
+     * yet, not ids waiting to be found.
+     */
+    public static final String SOUND_CATCH = "";
+
+    /**
+     * The window the player flies. The body is a gradient rather than a flat fill - brightest along
+     * its middle, falling to EDGE_MULT of that at top and bottom - with a brighter rail at each end
+     * and a tick sticking out either side of both rails, so it reads as a lit window with corners
+     * rather than a painted rectangle.
+     */
+    public static final float BAR_ALPHA_HOLDING = 0.5f;
+    public static final float BAR_ALPHA_EMPTY = 0.4f;
+    public static final float BAR_EDGE_MULT = 0.35f;
+    public static final float BAR_RAIL_HEIGHT = 2f;
+    public static final float BAR_RAIL_MULT = 2.2f;
+    public static final float BAR_TICK_LENGTH = 4f;
+    public static final float BAR_TICK_MULT = 2.6f;
+
+    /**
+     * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the
+     * bottom. Kept small and inset - the icon has to read as the fish first.
+     */
+    public static final float ITEM_MARK_INSET = 3f;
+    public static final float ITEM_RARITY_BAR_WIDTH = 3f;
+    public static final float ITEM_GRADE_PIP_SIZE = 3f;
+    public static final float ITEM_GRADE_PIP_GAP = 2f;
+    public static final float ITEM_MARK_ALPHA = 0.9f;
+    public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
+
+    /**
+     * Aberration - how loosely a specimen holds to reality, from where it was taken.
+     * <p>
+     * The three sources are taken at their strongest rather than summed, so the weights say how bad
+     * each one is at its worst rather than how much it contributes. The abyss reaches 1 on its own;
+     * a hypershunt or a slipstream alone leaves a fish short of the worst there is. The ranges are
+     * light-years, and SPREAD is the jitter between two specimens out of the same rupture.
+     */
+    public static final float ABERRATION_ABYSS_WEIGHT = 1f;
+    public static final float ABERRATION_HYPERSHUNT_WEIGHT = 0.75f;
+    public static final float ABERRATION_SLIPSTREAM_WEIGHT = 0.6f;
+    public static final float ABERRATION_HYPERSHUNT_LY = 12f;
+    public static final float ABERRATION_SLIPSTREAM_LY = 6f;
+    public static final float ABERRATION_SPREAD = 0.05f;
+
+    /**
      * The track's hyperspace backing: how strongly it shows, how far into the sprite it zooms, and
      * the warp that keeps it moving.
      * <p>

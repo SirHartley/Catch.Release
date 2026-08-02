@@ -43,6 +43,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected boolean reeling = false;
     protected boolean reported = false;
 
+    /** Runs once the fish is landed, and holds the dialog open while it does. */
+    transient protected CatchCelebration celebration;
+
     /** Held after the game ends, so the result is readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
@@ -78,6 +81,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             minigame.advance(amount, reeling);
             return;
         }
+
+        //a landed fish gets the celebration, and the dialog waits for it rather than the other way
+        if (minigame.isCaught() && celebration == null) {
+            celebration = new CatchCelebration(minigame.getFish(),
+                    layout == null ? 0f : layout.getTrackCenterX(),
+                    layout == null ? 0f : layout.getTrackY(minigame.getFishPosition()));
+
+            endLingerLeft = Math.max(endLingerLeft, FishConstants.CELEBRATION_TIME);
+        }
+
+        if (celebration != null) celebration.advance(amount);
 
         //let the result sit for a moment rather than the dialog vanishing mid-motion
         endLingerLeft -= amount;
@@ -121,6 +135,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderBar(layout, alphaMult);
         renderFish(layout, alphaMult);
         renderMeter(layout, alphaMult);
+
+        //over everything, since it is the thing being looked at once it starts
+        if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
     /**
@@ -222,10 +239,32 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** The window the player flies. Green while it has the fish, dim while it does not. */
     protected void renderBar(FishingMinigameLayout layout, float alphaMult) {
         float height = minigame.getBarHeightFraction() * layout.trackHeight;
-        Color color = minigame.isFishInBar() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        float y = layout.getTrackY(minigame.getBarPosition());
+        float x = layout.trackX;
+        float w = layout.trackWidth;
 
-        drawQuad(layout.trackX, layout.getTrackY(minigame.getBarPosition()), layout.trackWidth, height,
-                color, 0.45f * alphaMult);
+        boolean holding = minigame.isFishInBar();
+        Color color = holding ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        float alpha = (holding ? FishConstants.BAR_ALPHA_HOLDING : FishConstants.BAR_ALPHA_EMPTY) * alphaMult;
+
+        //body: brighter along the middle and falling away to the ends, so it reads as a lit window
+        //rather than a painted rectangle
+        float mid = height * 0.5f;
+        drawVerticalGradient(x, y, w, mid, color, alpha * FishConstants.BAR_EDGE_MULT, alpha);
+        drawVerticalGradient(x, y + mid, w, height - mid, color, alpha, alpha * FishConstants.BAR_EDGE_MULT);
+
+        //the two rails the fish has to be between, which is the part the player is actually aiming
+        float rail = FishConstants.BAR_RAIL_HEIGHT;
+        drawQuad(x, y, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
+        drawQuad(x, y + height - rail, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
+
+        //and a tick at each end of both rails, so the window has corners to read against the track
+        float tick = FishConstants.BAR_TICK_LENGTH;
+        float tickAlpha = Math.min(1f, alpha * FishConstants.BAR_TICK_MULT);
+        for (float edgeY : new float[]{y, y + height - rail}) {
+            drawQuad(x - tick, edgeY, tick, rail, color, tickAlpha);
+            drawQuad(x + w, edgeY, tick, rail, color, tickAlpha);
+        }
     }
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
@@ -379,6 +418,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             case RESTART:
                 minigame.restart();
                 reported = false;
+                celebration = null;
                 endLingerLeft = FishConstants.MINIGAME_END_LINGER;
                 break;
         }
