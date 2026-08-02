@@ -88,6 +88,12 @@ public class FishSpecLoader {
         s.progressRateMult = optFloat(row, "progressRateMult", 1f);
         s.escapeRateMult = optFloat(row, "escapeRateMult", 1f);
 
+        s.baseValue = optFloat(row, "baseValue", 100f);
+        s.lengthMin = optFloat(row, "lengthMin", 0.3f);
+        s.lengthMax = optFloat(row, "lengthMax", 0.6f);
+        s.weightMin = optFloat(row, "weightMin", 0.5f);
+        s.weightMax = optFloat(row, "weightMax", 2f);
+
         s.starTypes = parseList(optString(row, "starTypes", ""));
         s.systemTags = parseList(optString(row, "systemTags", ""));
         s.regions = parseRegions(optString(row, "regions", ""));

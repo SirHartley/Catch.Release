@@ -33,6 +33,17 @@ public class FishSpec {
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;
 
+    /**
+     * What one is worth before anything is known about the individual, and the range a specimen of
+     * this species comes in. Length is metres and weight kilograms; a catch rolls inside the range
+     * and its value moves with where in that range it landed.
+     */
+    public float baseValue = 100f;
+    public float lengthMin = 0.3f;
+    public float lengthMax = 0.6f;
+    public float weightMin = 0.5f;
+    public float weightMax = 2f;
+
     //where it lives - all empty means "anywhere"
     public Set<String> starTypes = new LinkedHashSet<>();
     public Set<String> systemTags = new LinkedHashSet<>();
