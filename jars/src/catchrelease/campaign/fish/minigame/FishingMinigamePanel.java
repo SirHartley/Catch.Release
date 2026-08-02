@@ -3,7 +3,10 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
+import catchrelease.rendering.plugins.WarpGrid;
+import catchrelease.rendering.plugins.WarpedRectRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -48,6 +51,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     transient protected SpriteAPI fishSprite;
     transient protected boolean fishSpriteChecked = false;
 
+    /** The track's backing, and the warp that keeps it swimming. Built on first use. */
+    transient protected SpriteAPI backgroundSprite;
+    transient protected boolean backgroundChecked = false;
+    transient protected WarpGrid warp;
+
     public FishingMinigamePanel(FishingMinigame minigame, Listener listener) {
         this.minigame = minigame;
         this.listener = listener;
@@ -61,6 +69,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     @Override
     public void advance(float amount) {
         jitterTime += amount;
+
+        //ahead of anything that returns early: the backing swims whether or not the catch is still on
+        getWarp().advance(amount);
 
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
@@ -151,9 +162,56 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
+    /**
+     * The track the fish is played in: hyperspace behind it, swimming, fading into the dark towards
+     * the bottom.
+     */
     protected void renderTrack(FishingMinigameLayout layout, float alphaMult) {
+        //black underneath, so the backing reads against the dialog rather than through it
         drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
-                Misc.getDarkPlayerColor(), 0.55f * alphaMult);
+                Color.BLACK, 0.9f * alphaMult);
+
+        SpriteAPI background = getBackgroundSprite();
+
+        if (background != null) {
+            WarpedRectRenderer.render(background, getWarp(),
+                    layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
+                    Color.WHITE, FishConstants.MINIGAME_TRACK_BG_ALPHA * alphaMult,
+                    FishConstants.MINIGAME_TRACK_BG_ZOOM);
+        }
+
+        //deepening dark down the bar. Over the backing, under everything in play
+        drawVerticalGradient(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
+                Color.BLACK,
+                FishConstants.MINIGAME_TRACK_FADE_BOTTOM * alphaMult,
+                FishConstants.MINIGAME_TRACK_FADE_TOP * alphaMult);
+
+        //the tint the track always had, holding the two bars together as one piece of UI
+        drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
+                Misc.getDarkPlayerColor(), 0.18f * alphaMult);
+    }
+
+    /** The track's backing, loaded on first use. Null if the sprite is missing; the bar just goes dark. */
+    protected SpriteAPI getBackgroundSprite() {
+        if (backgroundChecked) return backgroundSprite;
+        backgroundChecked = true;
+
+        backgroundSprite = SpriteLoader.getSprite("hs_bg");
+
+        return backgroundSprite;
+    }
+
+    protected WarpGrid getWarp() {
+        if (warp == null) {
+            warp = new WarpGrid(
+                    FishConstants.MINIGAME_TRACK_BG_WARP_CELLS,
+                    FishConstants.MINIGAME_TRACK_BG_WARP_CELLS,
+                    FishConstants.MINIGAME_TRACK_BG_WARP_MIN,
+                    FishConstants.MINIGAME_TRACK_BG_WARP_MAX,
+                    FishConstants.MINIGAME_TRACK_BG_WARP_RATE);
+        }
+
+        return warp;
     }
 
     /** The window the player flies. Green while it has the fish, dim while it does not. */
@@ -241,6 +299,36 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /** Flat rectangle in screen coordinates, with everything it touches pushed and popped. */
+    /**
+     * A quad whose alpha runs from one value at the bottom to another at the top - the colour is the
+     * same throughout, only how much of it there is changes.
+     */
+    protected static void drawVerticalGradient(float x, float y, float width, float height,
+                                               Color color, float bottomAlpha, float topAlpha) {
+        if (width <= 0f || height <= 0f) return;
+
+        float r = color.getRed() / 255f;
+        float g = color.getGreen() / 255f;
+        float b = color.getBlue() / 255f;
+
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glColor4f(r, g, b, bottomAlpha);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x + width, y);
+        GL11.glColor4f(r, g, b, topAlpha);
+        GL11.glVertex2f(x + width, y + height);
+        GL11.glVertex2f(x, y + height);
+        GL11.glEnd();
+
+        GL11.glPopAttrib();
+    }
+
     protected static void drawQuad(float x, float y, float width, float height, Color color, float alpha) {
         if (width <= 0f || height <= 0f) return;
 
