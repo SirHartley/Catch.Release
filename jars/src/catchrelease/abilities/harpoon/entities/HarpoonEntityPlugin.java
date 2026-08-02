@@ -82,6 +82,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected float distanceOut = 0f;
     protected float stateTime = 0f;
 
+    /** Total seconds since firing. What the whip in the line runs off, since it outlives one state. */
+    protected float age = 0f;
+
     /** What the head has hold of, if anything. */
     protected SectorEntityToken hooked;
 
@@ -108,6 +111,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (state == State.DONE) return;
 
         stateTime += amount;
+        age += amount;
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) {
@@ -381,13 +385,19 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Straight while the line is under tension, bowed while it is not. The bow is what makes taut
-     * read as taut: the line visibly straightens at the moment the catch begins.
+     * Straight while the line is under tension, and thrown about while it is not.
+     * <p>
+     * A fired line has more rope in the air than there is distance to cover, and something faster
+     * than it on the far end pulling it straight. So it leaves in a whip: several bends at once,
+     * running down the rope from the fleet towards the head and dying out as the slack is taken up.
+     * Under that is the old one-way bow, which is what the whip settles into.
+     * <p>
+     * Both are pinned at the ends and the whip is weighted towards the fleet - the head end is being
+     * pulled and has no slack to wave with. The line visibly straightening is what makes taut read
+     * as taut, so all of it has to be gone by the time the catch begins.
      */
     protected List<Vector2f> getLinePath(Vector2f from, Vector2f to) {
         List<Vector2f> path = new ArrayList<>();
-
-        float bow = getSlack() * Misc.getDistance(from, to) * HarpoonConstants.SLACK_BOW;
 
         Vector2f along = Vector2f.sub(to, from, null);
         float length = along.length();
@@ -397,6 +407,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
         along.scale(1f / length);
 
+        float slack = getSlack();
+        float bow = slack * length * HarpoonConstants.SLACK_BOW;
+        float whip = slack * length * HarpoonConstants.WAVE_AMPLITUDE * getWhip();
+
         //perpendicular, so the sag is across the line rather than along it
         Vector2f across = new Vector2f(-along.y, along.x);
 
@@ -404,14 +418,23 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             float t = i / (float) HarpoonConstants.LINE_SEGMENTS;
 
             //nothing at the ends, most in the middle
-            float sag = (float) Math.sin(t * Math.PI) * bow;
+            float envelope = (float) Math.sin(t * Math.PI);
+
+            float offset = envelope * bow
+                    + envelope * (1f - t) * whip * (float) Math.sin(
+                            t * Math.PI * HarpoonConstants.WAVE_COUNT - age * HarpoonConstants.WAVE_SPEED);
 
             path.add(new Vector2f(
-                    from.x + along.x * length * t + across.x * sag,
-                    from.y + along.y * length * t + across.y * sag));
+                    from.x + along.x * length * t + across.x * offset,
+                    from.y + along.y * length * t + across.y * offset));
         }
 
         return path;
+    }
+
+    /** 1 at the moment of firing, falling away as the rope is dragged straight. */
+    protected float getWhip() {
+        return (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
     }
 
     /** 1 while the line is loose, easing to 0 as it comes under tension. */

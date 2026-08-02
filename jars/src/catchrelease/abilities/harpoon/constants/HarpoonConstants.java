@@ -53,8 +53,23 @@ public class HarpoonConstants {
      * How far the slack line bows away from straight before it is pulled taut, as a share of its own
      * length. A line under tension has none of it.
      */
-    public static final float SLACK_BOW = 0.06f;
-    public static final int LINE_SEGMENTS = 24;
+    public static final float SLACK_BOW = 0.035f;
+    public static final int LINE_SEGMENTS = 32;
+
+    /**
+     * The whip in a freshly thrown line - more rope in the air than there is distance to cover, being
+     * dragged straight by something faster than it.
+     * <p>
+     * WAVE_COUNT is how many bends are in the rope at once and SPEED is how fast they run down it,
+     * from the fleet towards the head. AMPLITUDE is a share of the line's own length, weighted
+     * towards the fleet end where the slack actually is - the head end is being pulled and has none.
+     * DAMPING is the seconds it takes for the whip to fall to a third of itself, so the throw
+     * settles into a bow on its own rather than waving all the way out.
+     */
+    public static final float WAVE_COUNT = 2.5f;
+    public static final float WAVE_SPEED = 9f;
+    public static final float WAVE_AMPLITUDE = 0.07f;
+    public static final float WAVE_DAMPING = 0.5f;
 
     public static final float HEAD_SIZE = 14f;
     public static final float TRAIL_SIZE = 12f;
