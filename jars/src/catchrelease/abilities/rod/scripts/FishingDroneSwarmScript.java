@@ -4,7 +4,10 @@ import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
 import catchrelease.abilities.rod.rendering.FishingRingRenderer;
+import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -248,6 +251,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         boolean opened = FishingMinigameDialogPlugin.open(pond, fish, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(boolean caught) {
+                if (caught) landInCargo(fish);
+
                 resolveCatch(drone, mote, caught);
             }
         });
@@ -262,6 +267,14 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
      * The catch is over. A landed fish rides home on the drone that took it; one that got away takes
      * its mote with it. Either way that drone is done for this trip - the rest keep fishing.
      */
+    /**
+     * Rolls the specimen and puts it in the hold. Its length and weight come from the species; how
+     * loosely it holds to reality comes from where the pond is, not from the fish.
+     */
+    protected void landInCargo(FishSpec fish) {
+        FishItems.addToPlayerCargo(FishCatch.roll(fish, Aberration.of(pond)));
+    }
+
     protected void resolveCatch(SectorEntityToken drone, SectorEntityToken mote, boolean caught) {
         FishingDroneEntityPlugin plugin = getPlugin(drone);
         if (plugin == null) return;
