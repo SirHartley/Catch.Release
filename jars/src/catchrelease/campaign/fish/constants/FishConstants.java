@@ -97,6 +97,21 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     /**
+     * Aberration - how loosely a specimen holds to reality, from where it was taken.
+     * <p>
+     * The three sources are taken at their strongest rather than summed, so the weights say how bad
+     * each one is at its worst rather than how much it contributes. The abyss reaches 1 on its own;
+     * a hypershunt or a slipstream alone leaves a fish short of the worst there is. The ranges are
+     * light-years, and SPREAD is the jitter between two specimens out of the same rupture.
+     */
+    public static final float ABERRATION_ABYSS_WEIGHT = 1f;
+    public static final float ABERRATION_HYPERSHUNT_WEIGHT = 0.75f;
+    public static final float ABERRATION_SLIPSTREAM_WEIGHT = 0.6f;
+    public static final float ABERRATION_HYPERSHUNT_LY = 12f;
+    public static final float ABERRATION_SLIPSTREAM_LY = 6f;
+    public static final float ABERRATION_SPREAD = 0.05f;
+
+    /**
      * The track's hyperspace backing: how strongly it shows, how far into the sprite it zooms, and
      * the warp that keeps it moving.
      * <p>
