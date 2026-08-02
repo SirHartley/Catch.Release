@@ -124,6 +124,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         SectorEntityToken hit = findMote();
         if (hit != null) {
             hooked = hit;
+            setHookedHeld(true);
             enter(State.PUSHING);
             return;
         }
@@ -179,6 +180,24 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (state == State.REELING) dragHooked();
     }
 
+    /**
+     * Tells the mote whether it is being carried. A held mote stops swimming, which is what keeps it
+     * on the head rather than sliding out from under the line as the two write its position in the
+     * same frame.
+     */
+    protected void setHookedHeld(boolean held) {
+        if (!isHookedValid()) return;
+        if (!(hooked.getCustomPlugin() instanceof FishEntityPlugin)) return;
+
+        ((FishEntityPlugin) hooked.getCustomPlugin()).setHeld(held);
+    }
+
+    /** Lets go of whatever is on the end, leaving it free to swim off as it was. */
+    protected void releaseHooked() {
+        setHookedHeld(false);
+        hooked = null;
+    }
+
     /** The specimen goes in the hold, if there is one on the line. */
     protected void land() {
         if (state == State.REELING && isHookedValid()) {
@@ -199,6 +218,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         FishSpec spec = getHookedSpec();
         if (spec == null) {
+            //nothing on the line worth playing, so whatever it was goes back to swimming
+            releaseHooked();
             enter(State.RETURNING);
             return;
         }
@@ -210,8 +231,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 enter(landed ? State.REELING : State.RETURNING);
 
                 //a fish that got away is not coming back on the line
-                if (!landed && isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
-                if (!landed) hooked = null;
+                if (!landed) {
+                    if (isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
+                    releaseHooked();
+                }
             }
         });
 
@@ -238,6 +261,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected SectorEntityToken findMote() {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (mote.isExpired()) continue;
+
+            //something else already has this one
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin
+                    && ((FishEntityPlugin) mote.getCustomPlugin()).isHeld()) {
+                continue;
+            }
 
             if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
