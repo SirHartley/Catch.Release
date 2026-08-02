@@ -52,20 +52,42 @@ public class CatchCelebration {
     protected Confetto spawn(float x, float y, FishSpec fish) {
         Confetto c = new Confetto();
 
-        float angle = MathUtils.getRandomNumberInRange(60f, 120f);
-        float speed = MathUtils.getRandomNumberInRange(
-                FishConstants.CELEBRATION_CONFETTI_SPEED * 0.4f, FishConstants.CELEBRATION_CONFETTI_SPEED);
+        float arc = FishConstants.CELEBRATION_CONFETTI_ARC;
+        float angle = 90f + MathUtils.getRandomNumberInRange(-arc, arc);
+        float spread = FishConstants.CELEBRATION_CONFETTI_SPREAD;
 
-        c.x = x + MathUtils.getRandomNumberInRange(-10f, 10f);
-        c.y = y;
+        //the slow ones stay near the middle and the fast ones reach the edge of the panel, which is
+        //what makes the burst read as a burst rather than as a ring leaving
+        float speed = MathUtils.getRandomNumberInRange(
+                FishConstants.CELEBRATION_CONFETTI_SPEED * 0.35f, FishConstants.CELEBRATION_CONFETTI_SPEED);
+
+        c.x = x + MathUtils.getRandomNumberInRange(-spread, spread);
+        c.y = y + MathUtils.getRandomNumberInRange(-spread * 0.5f, spread * 0.5f);
         c.vx = (float) Math.cos(Math.toRadians(angle)) * speed;
         c.vy = (float) Math.sin(Math.toRadians(angle)) * speed;
         c.spin = MathUtils.getRandomNumberInRange(-360f, 360f);
         c.angle = MathUtils.getRandomNumberInRange(0f, 360f);
         c.size = MathUtils.getRandomNumberInRange(2f, FishConstants.CELEBRATION_CONFETTI_SIZE);
-        c.color = fish == null ? Color.WHITE : fish.rarity.color;
+        c.color = pickColor(fish);
 
         return c;
+    }
+
+    /**
+     * Most of it is drawn from across the wheel, and a share of it takes the fish's own colour.
+     * <p>
+     * All of one colour said what was caught and nothing about the catching; all of every colour
+     * would say the opposite. The share is what keeps both.
+     */
+    protected Color pickColor(FishSpec fish) {
+        if (fish != null
+                && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
+            return fish.rarity.color;
+        }
+
+        return Color.getHSBColor(MathUtils.getRandomNumberInRange(0f, 1f),
+                FishConstants.CELEBRATION_CONFETTI_SATURATION,
+                FishConstants.CELEBRATION_CONFETTI_BRIGHTNESS);
     }
 
     public void advance(float amount) {

@@ -112,10 +112,25 @@ public class FishConstants {
     public static final float CELEBRATION_FLASH_TIME = 0.35f;
     public static final float CELEBRATION_FLASH_SIZE = 260f;
     public static final float CELEBRATION_FLASH_ALPHA = 0.55f;
-    public static final int CELEBRATION_CONFETTI = 40;
-    public static final float CELEBRATION_CONFETTI_SPEED = 220f;
+    public static final int CELEBRATION_CONFETTI = 70;
+    public static final float CELEBRATION_CONFETTI_SPEED = 380f;
     public static final float CELEBRATION_CONFETTI_GRAVITY = 320f;
-    public static final float CELEBRATION_CONFETTI_SIZE = 5f;
+    public static final float CELEBRATION_CONFETTI_SIZE = 6f;
+
+    /**
+     * The shape and the colour of the burst.
+     * <p>
+     * ARC is the half-angle off straight up, so a wider one throws the burst out sideways as well as
+     * over the top; SPREAD is how far apart they start. RARITY_SHARE is the fraction that take the
+     * fish's own colour - enough to keep the burst reading as this catch rather than as any catch,
+     * while the rest are drawn from across the wheel at a fixed saturation so no one of them is
+     * washed out or lurid next to the others.
+     */
+    public static final float CELEBRATION_CONFETTI_ARC = 62f;
+    public static final float CELEBRATION_CONFETTI_SPREAD = 22f;
+    public static final float CELEBRATION_CONFETTI_RARITY_SHARE = 0.3f;
+    public static final float CELEBRATION_CONFETTI_SATURATION = 0.7f;
+    public static final float CELEBRATION_CONFETTI_BRIGHTNESS = 1f;
     public static final float CELEBRATION_FISH_RISE = 60f;
     public static final float CELEBRATION_FISH_GROW = 0.8f;
     public static final String CELEBRATION_TEXT = "Caught!";
