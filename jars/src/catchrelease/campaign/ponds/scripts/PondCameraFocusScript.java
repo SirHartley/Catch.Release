@@ -92,10 +92,6 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         start(fleet);
 
-        //every frame, not just at the start: free look toggled on mid-hold would pan against this and
-        //leave an offset behind to jump on when the camera goes back
-        Global.getSector().getCampaignUI().resetViewOffset();
-
         boolean uiUp = isUiUp();
 
         if (!uiUp) {
@@ -214,6 +210,12 @@ public class PondCameraFocusScript implements EveryFrameScript {
     protected void holdCameraAt(Vector2f center) {
         ViewportAPI viewport = Global.getSector().getViewport();
         float zoom = Global.getSector().getCampaignUI().getZoomFactor();
+
+        //while the camera is ours and only while it is ours: free look switched on under the hold
+        //would pan against it and leave an offset behind to jump on when it goes back. Once the
+        //camera has been handed over this stops being called, which is what lets free look work
+        //again - the script goes on running for as long as the pond is open
+        Global.getSector().getCampaignUI().resetViewOffset();
 
         if (!holdingCamera) {
             //while the game still owns the viewport, its size is the zoom-one size times the zoom
