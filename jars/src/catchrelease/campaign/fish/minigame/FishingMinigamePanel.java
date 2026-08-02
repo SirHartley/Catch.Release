@@ -193,7 +193,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         //the tint the track always had, holding the two bars together as one piece of UI
         drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
-                Misc.getDarkPlayerColor(), 0.18f * alphaMult);
+                Misc.getDarkPlayerColor(), 0.05f * alphaMult);
     }
 
     /** The track's backing, loaded on first use. Null if the sprite is missing; the bar just goes dark. */

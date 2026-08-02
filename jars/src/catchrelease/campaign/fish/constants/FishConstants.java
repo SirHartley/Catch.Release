@@ -114,7 +114,7 @@ public class FishConstants {
      * The dark the backing fades into going down the bar, top and bottom. Drawn over the backing but
      * under everything in play, so the fish and the bar stay as readable at the bottom as the top.
      */
-    public static final float MINIGAME_TRACK_FADE_TOP = 0.15f;
+    public static final float MINIGAME_TRACK_FADE_TOP = 0.05f;
     public static final float MINIGAME_TRACK_FADE_BOTTOM = 0.95f;
 
     /**
