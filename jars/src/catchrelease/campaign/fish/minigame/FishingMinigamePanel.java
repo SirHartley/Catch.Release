@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.rendering.helper.RoundedBorder;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -115,6 +116,39 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
      * addFramingElements() instead, so it can take part in layout and mouse-over.
      */
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
+        drawDressing(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight, alphaMult);
+        drawDressing(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight, alphaMult);
+    }
+
+    /**
+     * The border dressing around one bar: a bright rounded outline just off it, and a dimmer one
+     * outside that. Drawn in the player's own UI colour, so it matches the rest of the interface
+     * rather than being a colour of its own.
+     */
+    protected void drawDressing(float x, float y, float width, float height, float alphaMult) {
+        float inset = FishConstants.MINIGAME_BORDER_INSET;
+        float spacing = FishConstants.MINIGAME_BORDER_SPACING;
+
+        //outer first, so the bright line lands on top of it where they meet at the corners
+        drawBorder(x, y, width, height, inset + spacing,
+                Misc.getDarkPlayerColor(), FishConstants.MINIGAME_BORDER_OUTER_ALPHA * alphaMult);
+
+        drawBorder(x, y, width, height, inset,
+                Misc.getBrightPlayerColor(), FishConstants.MINIGAME_BORDER_ALPHA * alphaMult);
+    }
+
+    /** One outline, grown out from the bar by {@code offset} on every side. */
+    protected void drawBorder(float x, float y, float width, float height, float offset,
+                              Color color, float alpha) {
+        RoundedBorder.draw(
+                x - offset,
+                y - offset,
+                width + offset * 2f,
+                height + offset * 2f,
+                FishConstants.MINIGAME_BORDER_RADIUS + offset,
+                color,
+                alpha,
+                FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
     protected void renderTrack(FishingMinigameLayout layout, float alphaMult) {
