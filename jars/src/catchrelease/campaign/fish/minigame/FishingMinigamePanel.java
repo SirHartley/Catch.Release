@@ -43,6 +43,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected boolean reeling = false;
     protected boolean reported = false;
 
+    /** Runs once the fish is landed, and holds the dialog open while it does. */
+    transient protected CatchCelebration celebration;
+
     /** Held after the game ends, so the result is readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
@@ -78,6 +81,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             minigame.advance(amount, reeling);
             return;
         }
+
+        //a landed fish gets the celebration, and the dialog waits for it rather than the other way
+        if (minigame.isCaught() && celebration == null) {
+            celebration = new CatchCelebration(minigame.getFish(),
+                    layout == null ? 0f : layout.getTrackCenterX(),
+                    layout == null ? 0f : layout.getTrackY(minigame.getFishPosition()));
+
+            endLingerLeft = Math.max(endLingerLeft, FishConstants.CELEBRATION_TIME);
+        }
+
+        if (celebration != null) celebration.advance(amount);
 
         //let the result sit for a moment rather than the dialog vanishing mid-motion
         endLingerLeft -= amount;
@@ -121,6 +135,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderBar(layout, alphaMult);
         renderFish(layout, alphaMult);
         renderMeter(layout, alphaMult);
+
+        //over everything, since it is the thing being looked at once it starts
+        if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
     /**
@@ -401,6 +418,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             case RESTART:
                 minigame.restart();
                 reported = false;
+                celebration = null;
                 endLingerLeft = FishConstants.MINIGAME_END_LINGER;
                 break;
         }

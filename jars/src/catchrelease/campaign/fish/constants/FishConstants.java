@@ -104,6 +104,35 @@ public class FishConstants {
     public static final float VALUE_FLOOR_MULT = 0.35f;
 
     /**
+     * The catch celebration. One clock at CELEBRATION_TIME drives all of it; the rest are shares of
+     * that or plain sizes, so the whole thing can be retimed from one number.
+     */
+    public static final float CELEBRATION_TIME = 1.6f;
+    public static final float CELEBRATION_FADE_FROM = 0.7f;
+    public static final float CELEBRATION_FLASH_TIME = 0.35f;
+    public static final float CELEBRATION_FLASH_SIZE = 260f;
+    public static final float CELEBRATION_FLASH_ALPHA = 0.55f;
+    public static final int CELEBRATION_CONFETTI = 40;
+    public static final float CELEBRATION_CONFETTI_SPEED = 220f;
+    public static final float CELEBRATION_CONFETTI_GRAVITY = 320f;
+    public static final float CELEBRATION_CONFETTI_SIZE = 5f;
+    public static final float CELEBRATION_FISH_RISE = 60f;
+    public static final float CELEBRATION_FISH_GROW = 0.8f;
+    public static final String CELEBRATION_TEXT = "Caught!";
+    public static final String CELEBRATION_FONT = "graphics/fonts/orbitron24aabold.fnt";
+    public static final float CELEBRATION_TEXT_SIZE = 34f;
+    public static final float CELEBRATION_TEXT_ANGLE = 12f;
+    public static final float CELEBRATION_TEXT_RISE = 110f;
+    public static final float CELEBRATION_POP_TIME = 0.18f;
+    public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
+
+    /**
+     * Sound for the catch. Blank means nothing plays - these are hooks for sound that does not exist
+     * yet, not ids waiting to be found.
+     */
+    public static final String SOUND_CATCH = "";
+
+    /**
      * The window the player flies. The body is a gradient rather than a flat fill - brightest along
      * its middle, falling to EDGE_MULT of that at top and bottom - with a brighter rail at each end
      * and a tick sticking out either side of both rails, so it reads as a lit window with corners
