@@ -133,18 +133,21 @@ public class FishConstants {
     public static final String SOUND_CATCH = "";
 
     /**
-     * The window the player flies. The body is a gradient rather than a flat fill - brightest along
-     * its middle, falling to EDGE_MULT of that at top and bottom - with a brighter rail at each end
-     * and a tick sticking out either side of both rails, so it reads as a lit window with corners
-     * rather than a painted rectangle.
+     * The window the player flies.
+     * <p>
+     * The body lifts to full at top and bottom and thins to CENTER_MULT of that through the middle,
+     * so it reads as something looked through rather than a painted block. Around it a bright outline
+     * at the edge and a dark one just inside: the pair is what gives the window a lip, and the lip is
+     * what makes it sit above the track rather than in it.
      */
     public static final float BAR_ALPHA_HOLDING = 0.5f;
     public static final float BAR_ALPHA_EMPTY = 0.4f;
-    public static final float BAR_EDGE_MULT = 0.35f;
-    public static final float BAR_RAIL_HEIGHT = 2f;
-    public static final float BAR_RAIL_MULT = 2.2f;
-    public static final float BAR_TICK_LENGTH = 4f;
-    public static final float BAR_TICK_MULT = 2.6f;
+    public static final float BAR_CENTER_MULT = 0.3f;
+    public static final float BAR_BORDER_RADIUS = 3f;
+    public static final float BAR_BORDER_WIDTH = 1f;
+    public static final float BAR_BORDER_MULT = 2.2f;
+    public static final float BAR_BORDER_INNER_INSET = 2f;
+    public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
      * The marks drawn onto a catch's cargo icon: a rarity bar down one edge and grade pips along the

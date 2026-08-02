@@ -247,24 +247,23 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         Color color = holding ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
         float alpha = (holding ? FishConstants.BAR_ALPHA_HOLDING : FishConstants.BAR_ALPHA_EMPTY) * alphaMult;
 
-        //body: brighter along the middle and falling away to the ends, so it reads as a lit window
-        //rather than a painted rectangle
+        //body: full at top and bottom, thinning through the middle, so the window is something to
+        //look through and the two edges are what the eye lands on
         float mid = height * 0.5f;
-        drawVerticalGradient(x, y, w, mid, color, alpha * FishConstants.BAR_EDGE_MULT, alpha);
-        drawVerticalGradient(x, y + mid, w, height - mid, color, alpha, alpha * FishConstants.BAR_EDGE_MULT);
+        drawVerticalGradient(x, y, w, mid, color, alpha, alpha * FishConstants.BAR_CENTER_MULT);
+        drawVerticalGradient(x, y + mid, w, height - mid, color, alpha * FishConstants.BAR_CENTER_MULT, alpha);
 
-        //the two rails the fish has to be between, which is the part the player is actually aiming
-        float rail = FishConstants.BAR_RAIL_HEIGHT;
-        drawQuad(x, y, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
-        drawQuad(x, y + height - rail, w, rail, color, Math.min(1f, alpha * FishConstants.BAR_RAIL_MULT));
+        //bright at the edge, dark a couple of pixels inside it: two lines rather than one is what
+        //reads as a lip, and the lip is what puts the window above the track instead of in it
+        float inset = FishConstants.BAR_BORDER_INNER_INSET;
 
-        //and a tick at each end of both rails, so the window has corners to read against the track
-        float tick = FishConstants.BAR_TICK_LENGTH;
-        float tickAlpha = Math.min(1f, alpha * FishConstants.BAR_TICK_MULT);
-        for (float edgeY : new float[]{y, y + height - rail}) {
-            drawQuad(x - tick, edgeY, tick, rail, color, tickAlpha);
-            drawQuad(x + w, edgeY, tick, rail, color, tickAlpha);
-        }
+        RoundedBorder.draw(x + inset, y + inset, w - inset * 2f, height - inset * 2f,
+                FishConstants.BAR_BORDER_RADIUS, Color.BLACK,
+                Math.min(1f, alpha * FishConstants.BAR_BORDER_INNER_ALPHA),
+                FishConstants.BAR_BORDER_WIDTH);
+
+        RoundedBorder.draw(x, y, w, height, FishConstants.BAR_BORDER_RADIUS, color,
+                Math.min(1f, alpha * FishConstants.BAR_BORDER_MULT), FishConstants.BAR_BORDER_WIDTH);
     }
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
