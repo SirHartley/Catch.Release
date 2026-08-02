@@ -22,8 +22,12 @@ import java.util.List;
  * One landed specimen in the hold.
  * <p>
  * Every specimen carries its own length, weight and aberration, so no two stack - which is correct
- * but fills a hold quickly. Right-clicking one stows it into that species' bundle, and holding shift
- * stows every one of that species at once.
+ * but fills a hold quickly. Right-clicking one stows it into that species' bundle, and holding
+ * control stows every one of that species at once.
+ * <p>
+ * Control rather than shift, which is what a bulk action would normally be: the cargo screen routes
+ * shift and right-click together to its own mass-transfer path and never asks the item about it, so
+ * a shift-right-click on a fish is a transfer and cannot be anything else.
  */
 public class FishItemPlugin extends BaseSpecialItemPlugin {
 
@@ -66,7 +70,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         List<FishCatch> stowed = new ArrayList<>();
 
-        if (isShiftDown()) {
+        if (isBulkDown()) {
             //every one of the species, the clicked stack included
             for (CargoStackAPI other : FishItems.getFishStacks(stack.getCargo(), clicked.speciesId)) {
                 SpecialItemData data = other.getSpecialDataIfSpecial();
@@ -123,8 +127,14 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return spec.icon;
     }
 
-    protected boolean isShiftDown() {
-        return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+    /**
+     * Whether this click is the bulk one.
+     * <p>
+     * Read off the keyboard because the click never arrives with the modifier attached - the helper
+     * the cargo screen hands us says what may be moved, not what was pressed to ask for it.
+     */
+    protected boolean isBulkDown() {
+        return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
 
     @Override
@@ -142,7 +152,14 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         tooltip.addTitle(entry.getDisplayName());
 
-        tooltip.addPara("%s specimen", pad, grade.getColor(), grade.name);
+        //rarity first: it is the mark down the left edge of the icon, and nothing else said so
+        if (spec != null) {
+            tooltip.addPara("%s species, %s specimen", pad,
+                    new java.awt.Color[]{spec.rarity.color, grade.getColor()},
+                    Misc.ucFirst(spec.rarity.name().toLowerCase()), grade.name);
+        } else {
+            tooltip.addPara("%s specimen", pad, grade.getColor(), grade.name);
+        }
         tooltip.addPara("Length: %s   Weight: %s", 3f, Misc.getHighlightColor(),
                 String.format("%.2f m", entry.length), String.format("%.1f kg", entry.weight));
         tooltip.addPara("Coherence: %s", 3f, getAberrationColor(entry.aberration),
@@ -154,6 +171,12 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         tooltip.addPara("Worth around %s.", pad, Misc.getHighlightColor(),
                 Misc.getDGSCredits(entry.getValue()));
+
+        //said here because the item's own description is not shown once there is a specimen to describe
+        tooltip.addPara("Marked on the icon: rarity down the edge, grade as pips along the bottom.",
+                Misc.getGrayColor(), pad);
+        tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every one"
+                + " aboard.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
     }
 
     /** Said as how well it is holding rather than as a number, which is not a thing a crew would read off. */

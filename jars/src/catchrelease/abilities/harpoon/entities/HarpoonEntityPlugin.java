@@ -46,7 +46,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         /** Coming home hard, with the specimen on the end. */
         REELING,
         /** Coming home empty. */
-        RETURNING
+        RETURNING,
+        /**
+         * Home. Nothing further happens on this line.
+         * <p>
+         * Needed because expiring is a fade rather than a removal: the entity stays in the location
+         * for as long as it takes to fade out, and its advance keeps being called the whole time.
+         * Without a state that does nothing, arriving home means arriving home again on every frame
+         * of the fade.
+         */
+        DONE
     }
 
     /**
@@ -73,6 +82,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected float distanceOut = 0f;
     protected float stateTime = 0f;
 
+    /** Total seconds since firing. What the whip in the line runs off, since it outlives one state. */
+    protected float age = 0f;
+
     /** What the head has hold of, if anything. */
     protected SectorEntityToken hooked;
 
@@ -96,7 +108,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        if (state == State.DONE) return;
+
         stateTime += amount;
+        age += amount;
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) {
@@ -124,6 +139,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         SectorEntityToken hit = findMote();
         if (hit != null) {
             hooked = hit;
+            setHookedHeld(true);
             enter(State.PUSHING);
             return;
         }
@@ -179,9 +195,32 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (state == State.REELING) dragHooked();
     }
 
+    /**
+     * Tells the mote whether it is being carried. A held mote stops swimming, which is what keeps it
+     * on the head rather than sliding out from under the line as the two write its position in the
+     * same frame.
+     */
+    protected void setHookedHeld(boolean held) {
+        if (!isHookedValid()) return;
+        if (!(hooked.getCustomPlugin() instanceof FishEntityPlugin)) return;
+
+        ((FishEntityPlugin) hooked.getCustomPlugin()).setHeld(held);
+    }
+
+    /** Lets go of whatever is on the end, leaving it free to swim off as it was. */
+    protected void releaseHooked() {
+        setHookedHeld(false);
+        hooked = null;
+    }
+
     /** The specimen goes in the hold, if there is one on the line. */
     protected void land() {
-        if (state == State.REELING && isHookedValid()) {
+        boolean carrying = state == State.REELING && isHookedValid();
+
+        //before anything else, so a frame of the fade cannot land the same specimen twice
+        state = State.DONE;
+
+        if (carrying) {
             FishSpec spec = getHookedSpec();
 
             if (spec != null) {
@@ -199,6 +238,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         FishSpec spec = getHookedSpec();
         if (spec == null) {
+            //nothing on the line worth playing, so whatever it was goes back to swimming
+            releaseHooked();
             enter(State.RETURNING);
             return;
         }
@@ -210,8 +251,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 enter(landed ? State.REELING : State.RETURNING);
 
                 //a fish that got away is not coming back on the line
-                if (!landed && isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
-                if (!landed) hooked = null;
+                if (!landed) {
+                    if (isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
+                    releaseHooked();
+                }
             }
         });
 
@@ -238,6 +281,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected SectorEntityToken findMote() {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (mote.isExpired()) continue;
+
+            //something else already has this one
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin
+                    && ((FishEntityPlugin) mote.getCustomPlugin()).isHeld()) {
+                continue;
+            }
 
             if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
@@ -283,6 +332,20 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 new Vector2f(0f, 0f));
     }
 
+    /**
+     * The head is not the harpoon: the line runs all the way back to the fleet, and is drawn from
+     * the head's own render pass.
+     * <p>
+     * The default is the entity's radius and a little over, which culls the whole thing the moment
+     * the head leaves the screen - so a line fired towards the edge of the view vanished on the way
+     * out and reappeared on the way back. Covering the full length of line means the harpoon is
+     * drawn whenever any part of it could be seen.
+     */
+    @Override
+    public float getRenderRange() {
+        return HarpoonConstants.RANGE + entity.getRadius() + 100f;
+    }
+
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
@@ -322,13 +385,19 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Straight while the line is under tension, bowed while it is not. The bow is what makes taut
-     * read as taut: the line visibly straightens at the moment the catch begins.
+     * Straight while the line is under tension, and thrown about while it is not.
+     * <p>
+     * A fired line has more rope in the air than there is distance to cover, and something faster
+     * than it on the far end pulling it straight. So it leaves in a whip: several bends at once,
+     * running down the rope from the fleet towards the head and dying out as the slack is taken up.
+     * Under that is the old one-way bow, which is what the whip settles into.
+     * <p>
+     * Both are pinned at the ends and the whip is weighted towards the fleet - the head end is being
+     * pulled and has no slack to wave with. The line visibly straightening is what makes taut read
+     * as taut, so all of it has to be gone by the time the catch begins.
      */
     protected List<Vector2f> getLinePath(Vector2f from, Vector2f to) {
         List<Vector2f> path = new ArrayList<>();
-
-        float bow = getSlack() * Misc.getDistance(from, to) * HarpoonConstants.SLACK_BOW;
 
         Vector2f along = Vector2f.sub(to, from, null);
         float length = along.length();
@@ -338,6 +407,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
         along.scale(1f / length);
 
+        float slack = getSlack();
+        float bow = slack * length * HarpoonConstants.SLACK_BOW;
+        float whip = slack * length * HarpoonConstants.WAVE_AMPLITUDE * getWhip();
+
         //perpendicular, so the sag is across the line rather than along it
         Vector2f across = new Vector2f(-along.y, along.x);
 
@@ -345,14 +418,23 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             float t = i / (float) HarpoonConstants.LINE_SEGMENTS;
 
             //nothing at the ends, most in the middle
-            float sag = (float) Math.sin(t * Math.PI) * bow;
+            float envelope = (float) Math.sin(t * Math.PI);
+
+            float offset = envelope * bow
+                    + envelope * (1f - t) * whip * (float) Math.sin(
+                            t * Math.PI * HarpoonConstants.WAVE_COUNT - age * HarpoonConstants.WAVE_SPEED);
 
             path.add(new Vector2f(
-                    from.x + along.x * length * t + across.x * sag,
-                    from.y + along.y * length * t + across.y * sag));
+                    from.x + along.x * length * t + across.x * offset,
+                    from.y + along.y * length * t + across.y * offset));
         }
 
         return path;
+    }
+
+    /** 1 at the moment of firing, falling away as the rope is dragged straight. */
+    protected float getWhip() {
+        return (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
     }
 
     /** 1 while the line is loose, easing to 0 as it comes under tension. */

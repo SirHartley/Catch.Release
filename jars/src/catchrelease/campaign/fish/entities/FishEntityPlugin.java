@@ -35,6 +35,16 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
 
+    /**
+     * Set while something has hold of this mote - a harpoon head, at present.
+     * <p>
+     * A held mote does not swim and does not reach its target, because whoever is holding it is the
+     * one saying where it is. Without this the mote keeps travelling under the head that speared it
+     * and slides out from under the line, since the two write the same position in the same frame in
+     * whatever order the engine happens to advance them.
+     */
+    private boolean held = false;
+
     public static class Params {
         public final Vector2f target;
         public final String fishId;
@@ -52,6 +62,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public String getFishId() {
         return fishId;
+    }
+
+    /** Whether something already has this one. Anything looking for a mote to take should skip it. */
+    public boolean isHeld() {
+        return held;
+    }
+
+    public void setHeld(boolean held) {
+        this.held = held;
     }
 
     /** Rarity decides the colour, so a mote reads as what it is before it is ever caught. */
@@ -81,6 +100,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void advance(float amount) {
         time += amount;
         flicker.advance(amount);
+
+        //still lit, still flickering, but going nowhere of its own accord
+        if (held) return;
 
         float step = MOVE_SPEED * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);

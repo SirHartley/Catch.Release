@@ -193,6 +193,8 @@ public class FishConstants {
     public static final float ITEM_GRADE_PIP_GAP = 2f;
     public static final float ITEM_MARK_ALPHA = 0.9f;
     public static final float ITEM_MARK_EMPTY_ALPHA = 0.35f;
+    public static final float ITEM_MARK_BACKING_PAD = 1f;
+    public static final float ITEM_MARK_BACKING_ALPHA = 0.6f;
 
     /**
      * A specimen shows its own species' icon rather than a stand-in, which means the item spec's icon
