@@ -29,6 +29,13 @@ public class FishingMinigameLayout {
     public float frameWidth;
     public float frameHeight;
 
+    /** The readout beside the playfield, and the cargo-square at the top of it. */
+    public float resultX;
+    public float resultWidth;
+    public float boxX;
+    public float boxY;
+    public float boxSize;
+
     public FishingMinigameLayout(PositionAPI position) {
         trackWidth = FishConstants.MINIGAME_TRACK_WIDTH;
         trackHeight = FishConstants.MINIGAME_TRACK_HEIGHT;
@@ -42,6 +49,14 @@ public class FishingMinigameLayout {
 
         meterX = trackX + trackWidth + FishConstants.MINIGAME_METER_GAP;
         meterY = trackY;
+
+        //the readout hangs off the meter's outer edge, and starts level with the top of the track
+        resultX = meterX + meterWidth + FishConstants.MINIGAME_RESULT_GAP;
+        resultWidth = FishConstants.MINIGAME_RESULT_WIDTH;
+
+        boxSize = FishConstants.MINIGAME_RESULT_BOX;
+        boxX = resultX + (resultWidth - boxSize) * 0.5f;
+        boxY = trackY + trackHeight - boxSize;
 
         frameX = trackX - FishConstants.MINIGAME_FRAME_PAD;
         frameY = trackY - FishConstants.MINIGAME_FRAME_PAD;

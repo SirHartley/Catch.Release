@@ -1,7 +1,6 @@
 package catchrelease.abilities.harpoon.entities;
 
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
-import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -104,6 +103,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Set once the catch has been put up, so a busy UI is retried rather than skipped. */
     protected boolean minigameOpened = false;
+
+    /** What was won, rolled by the catch itself so the hold gets the specimen the player was shown. */
+    protected FishCatch caught;
 
     protected float trailId;
 
@@ -235,18 +237,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     /** The specimen goes in the hold, if there is one on the line. */
     protected void land() {
-        boolean carrying = state == State.REELING && isHookedValid();
+        boolean carrying = state == State.REELING && caught != null;
 
         //before anything else, so a frame of the fade cannot land the same specimen twice
         state = State.DONE;
 
-        if (carrying) {
-            FishSpec spec = getHookedSpec();
-
-            if (spec != null) {
-                FishItems.addToPlayerCargo(FishCatch.roll(spec, Aberration.of(entity)));
-            }
-        }
+        if (carrying) FishItems.addToPlayerCargo(caught);
 
         if (isHookedValid()) Misc.fadeAndExpire(hooked, 0.3f);
 
@@ -266,12 +262,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         boolean opened = FishingMinigameDialogPlugin.open(hooked, spec, new FishingMinigameDialogPlugin.Callback() {
             @Override
-            public void onCatchResolved(boolean landed) {
+            public void onCatchResolved(FishCatch landed) {
                 //the state is the outcome: only a reeling line has anything on it
-                enter(landed ? State.REELING : State.RETURNING);
+                caught = landed;
+                enter(landed != null ? State.REELING : State.RETURNING);
 
                 //a fish that got away is not coming back on the line
-                if (!landed) {
+                if (landed == null) {
                     if (isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
                     releaseHooked();
                 }

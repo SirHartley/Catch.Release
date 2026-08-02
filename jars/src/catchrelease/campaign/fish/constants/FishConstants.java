@@ -8,8 +8,33 @@ public class FishConstants {
     public static final float CORE_BAND_HALF_WIDTH = 27000f;
     public static final float CORE_BAND_HALF_HEIGHT = 17000f;
 
+    /**
+     * The readout beside the track: a cargo-square of the specimen, its name under that, and its
+     * numbers under that a line at a time.
+     * <p>
+     * BOX is a hundred to the side because that is what a cargo cell is, and the point of the box is
+     * to be recognisably one. The column sits to the right of the meter, which is why the panel is
+     * wider than the playfield needs - the track stays centred in it either way.
+     * <p>
+     * LINE_DELAY is the wait between one number and the next; each one plays SOUND_RESULT_LINE as it
+     * lands.
+     */
+    public static final float MINIGAME_RESULT_GAP = 24f;
+    public static final float MINIGAME_RESULT_WIDTH = 190f;
+    public static final float MINIGAME_RESULT_BOX = 100f;
+    public static final float MINIGAME_RESULT_BOX_PAD = 12f;
+    public static final float MINIGAME_RESULT_TITLE_GAP = 14f;
+    public static final float MINIGAME_RESULT_LINE_HEIGHT = 19f;
+    public static final float MINIGAME_RESULT_LINE_DELAY = 0.24f;
+    public static final float MINIGAME_RESULT_FADE = 0.15f;
+    public static final String MINIGAME_RESULT_FONT = "graphics/fonts/insignia15LTaa.fnt";
+    public static final String MINIGAME_RESULT_TITLE_FONT = "graphics/fonts/insignia21LTaa.fnt";
+    public static final float MINIGAME_RESULT_TEXT_SIZE = 15f;
+    public static final float MINIGAME_RESULT_TITLE_SIZE = 19f;
+    public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
+
     //minigame - panel
-    public static final float MINIGAME_PANEL_WIDTH = 420f;
+    public static final float MINIGAME_PANEL_WIDTH = 560f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
     public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
@@ -165,6 +190,9 @@ public class FishConstants {
      * yet, not ids waiting to be found.
      */
     public static final String SOUND_CATCH = "";
+
+    /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
+    public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
 
     /**
      * The window the player flies.

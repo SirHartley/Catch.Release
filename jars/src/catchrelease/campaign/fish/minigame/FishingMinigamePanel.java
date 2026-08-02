@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.CatchReleaseSettings;
@@ -37,6 +38,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected FishingMinigame minigame;
     protected Listener listener;
 
+    /** Rolled before the catch begins, shown only if it is won. What the readout reads. */
+    protected FishCatch specimen;
+
     protected PositionAPI position;
 
     /** Rebuilt each frame from the panel's position; also what custom framing should line up against. */
@@ -47,7 +51,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Runs once the fish is landed, and holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
-    /** Held after the game ends, so the result is readable before the dialog closes itself. */
+    /** The readout of what was caught. Up until the player dismisses it. */
+    transient protected CatchResultPanel result;
+
+    /** Held after a fish is lost, so the result is readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
     /** Drives the icon's twitch. Visual only - it never moves what the bar has to be over. */
@@ -61,8 +68,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
 
-    public FishingMinigamePanel(FishingMinigame minigame, Listener listener) {
+    public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, Listener listener) {
         this.minigame = minigame;
+        this.specimen = specimen;
         this.listener = listener;
     }
 
@@ -83,31 +91,56 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
-        //a landed fish gets the celebration, and the dialog waits for it rather than the other way
-        if (minigame.isCaught() && celebration == null && CatchReleaseSettings.isCelebrationEnabled()) {
-            //from the middle of the track, which is where the specimen is shown - not from wherever
-            //in the track it happened to be when it was landed
-            celebration = new CatchCelebration(minigame.getFish(),
-                    layout == null ? 0f : layout.getTrackCenterX(),
-                    layout == null ? 0f : layout.getTrackY(0.5f));
-
-            endLingerLeft = Math.max(endLingerLeft, FishConstants.CELEBRATION_TIME);
+        if (minigame.isCaught()) {
+            advanceCaught(amount);
+            return;
         }
 
-        if (celebration != null) celebration.advance(amount);
-
-        //let the result sit for a moment rather than the dialog vanishing mid-motion
+        //a lost fish has nothing to read, so it closes itself once the result has been seen
         endLingerLeft -= amount;
-        if (endLingerLeft > 0f || reported) return;
+        if (endLingerLeft > 0f) return;
 
+        end(false);
+    }
+
+    /**
+     * A landed fish puts up its readout and waits. Nothing here closes the dialog - the player does
+     * that, once they have read what they caught.
+     */
+    protected void advanceCaught(float amount) {
+        if (result == null) {
+            result = new CatchResultPanel(specimen);
+
+            //from the middle of the track, which is where the specimen is shown - not from wherever
+            //in the track it happened to be when it was landed
+            if (CatchReleaseSettings.isCelebrationEnabled()) {
+                celebration = new CatchCelebration(minigame.getFish(),
+                        layout == null ? 0f : layout.getTrackCenterX(),
+                        layout == null ? 0f : layout.getTrackY(0.5f));
+            }
+        }
+
+        result.advance(amount);
+        if (celebration != null) celebration.advance(amount);
+    }
+
+    /** Reports the outcome once, whatever route got here. */
+    protected void end(boolean caught) {
+        if (reported) return;
         reported = true;
-        if (listener != null) listener.onMinigameEnded(minigame.isCaught());
+
+        if (listener != null) listener.onMinigameEnded(caught);
     }
 
     @Override
     public void processInput(List<InputEventAPI> events) {
         for (InputEventAPI event : events) {
             if (event.isConsumed()) continue;
+
+            if (result != null) {
+                processResultInput(event);
+                continue;
+            }
 
             if (event.isLMBDownEvent()) {
                 reeling = true;
@@ -121,6 +154,29 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 endLingerLeft = 0f;
             }
         }
+    }
+
+    /**
+     * The readout is up, so the fish is already caught and there is nothing left to play.
+     * <p>
+     * Escape takes the catch and closes, rather than meaning "give up" as it did while the fish was
+     * still on. Anything else fills the readout in if it is still arriving, and closes once it has
+     * arrived - so an impatient player skips the tally rather than dismissing a screen they have not
+     * read yet.
+     */
+    protected void processResultInput(InputEventAPI event) {
+        if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
+            event.consume();
+            end(true);
+            return;
+        }
+
+        if (!event.isKeyDownEvent() && !event.isLMBDownEvent() && !event.isRMBDownEvent()) return;
+
+        event.consume();
+
+        if (result.isComplete()) end(true);
+        else result.revealAll();
     }
 
     @Override
@@ -139,8 +195,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderFish(layout, alphaMult);
         renderMeter(layout, alphaMult);
 
-        //over everything, since it is the thing being looked at once it starts
+        //over everything, since they are the thing being looked at once they are up
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
+        if (result != null) result.render(layout, getFishSprite(), alphaMult);
     }
 
     /**
@@ -421,6 +478,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 minigame.restart();
                 reported = false;
                 celebration = null;
+                result = null;
                 endLingerLeft = FishConstants.MINIGAME_END_LINGER;
                 break;
         }
