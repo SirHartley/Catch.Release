@@ -96,6 +96,27 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     /**
+     * The track's hyperspace backing: how strongly it shows, how far into the sprite it zooms, and
+     * the warp that keeps it moving.
+     * <p>
+     * The warp grid's border does not move, so the swim stays inside the bar. CELLS is vertices per
+     * side, and the two radii are in screen pixels - small numbers, since the bar is 52 wide.
+     */
+    public static final float MINIGAME_TRACK_BG_ALPHA = 0.7f;
+    public static final float MINIGAME_TRACK_BG_ZOOM = 1f;
+    public static final int MINIGAME_TRACK_BG_WARP_CELLS = 6;
+    public static final float MINIGAME_TRACK_BG_WARP_MIN = 1.5f;
+    public static final float MINIGAME_TRACK_BG_WARP_MAX = 5f;
+    public static final float MINIGAME_TRACK_BG_WARP_RATE = 1f;
+
+    /**
+     * The dark the backing fades into going down the bar, top and bottom. Drawn over the backing but
+     * under everything in play, so the fish and the bar stay as readable at the bottom as the top.
+     */
+    public static final float MINIGAME_TRACK_FADE_TOP = 0.15f;
+    public static final float MINIGAME_TRACK_FADE_BOTTOM = 0.95f;
+
+    /**
      * The dressing drawn around each of the two bars: a bright rounded outline just off the bar, and
      * a dimmer one a little further out, the way vanilla dresses its own panels.
      * <p>
