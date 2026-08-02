@@ -96,14 +96,27 @@ public class PondCameraFocusScript implements EveryFrameScript {
         //leave an offset behind to jump on when the camera goes back
         Global.getSector().getCampaignUI().resetViewOffset();
 
-        focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
+        boolean uiUp = isUiUp();
 
-        carry.x = approach(carry.x, 0f, amount);
-        carry.y = approach(carry.y, 0f, amount);
+        if (!uiUp) {
+            focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
+
+            carry.x = approach(carry.x, 0f, amount);
+            carry.y = approach(carry.y, 0f, amount);
+        }
 
         Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
         center.x += carry.x;
         center.y += carry.y;
+
+        //a dialog over the top - the catch, most likely. Everything freezes where it is: sliding back
+        //to the fleet under a panel the player is busy with is a move they did not ask for, cannot
+        //see a reason for, and cannot stop. Only while we already hold it; a dialog is no reason to
+        //take a camera we had given back
+        if (uiUp) {
+            if (holdingCamera) holdCameraAt(center);
+            return;
+        }
 
         //all the way back on the fleet - hand the camera over and leave it alone
         if (Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
@@ -140,15 +153,16 @@ public class PondCameraFocusScript implements EveryFrameScript {
         Global.getSector().getCampaignUI().resetViewOffset();
     }
 
-    /**
-     * Whether the camera should be sitting on the pond right now. False while a dialog or a core UI
-     * tab is up - the camera belongs to the game there.
-     */
+    /** Whether anything is over the campaign view - a dialog, or one of the core UI tabs. */
+    protected boolean isUiUp() {
+        CampaignUIAPI ui = Global.getSector().getCampaignUI();
+
+        return ui.getCurrentInteractionDialog() != null || ui.getCurrentCoreTab() != null;
+    }
+
+    /** Whether the camera should be sitting on the pond right now. */
     protected boolean shouldFocus(CampaignFleetAPI fleet) {
         if (fleet.getContainingLocation() != pond.getContainingLocation()) return false;
-
-        CampaignUIAPI ui = Global.getSector().getCampaignUI();
-        if (ui.getCurrentInteractionDialog() != null || ui.getCurrentCoreTab() != null) return false;
 
         return Misc.getDistance(fleet.getLocation(), pond.getLocation())
                 <= pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;
