@@ -276,7 +276,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         float effort = 1f + Math.abs(minigame.getFishVelocity()) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
 
-        return wobble * FishConstants.MINIGAME_FISH_JITTER * effort;
+        //the constant is the baseline; the fish's own row says how much of it this one gets
+        return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
     }
 
     /** The fish's own icon from the table, loaded on first use. */
