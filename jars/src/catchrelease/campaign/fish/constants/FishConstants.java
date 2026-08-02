@@ -131,8 +131,27 @@ public class FishConstants {
     public static final float CELEBRATION_CONFETTI_RARITY_SHARE = 0.3f;
     public static final float CELEBRATION_CONFETTI_SATURATION = 0.7f;
     public static final float CELEBRATION_CONFETTI_BRIGHTNESS = 1f;
-    public static final float CELEBRATION_FISH_RISE = 60f;
-    public static final float CELEBRATION_FISH_GROW = 0.8f;
+    public static final float CELEBRATION_FISH_SIZE = 96f;
+    public static final float CELEBRATION_FISH_GROW = 0.35f;
+
+    /**
+     * What the specimen is shown against: a disc of light behind it, ringed the way the rest of the
+     * panel is ringed - a bright line just off the light and a dimmer one outside that.
+     * <p>
+     * The fish had nothing behind it and sat over a warping hyperspace backing, which is the worst
+     * thing to read a silhouette against. The disc is there for the whole celebration rather than
+     * for the flash's third of a second, and breathes by PULSE either side of its size so it is
+     * clearly lit rather than clearly painted.
+     */
+    public static final float CELEBRATION_BACKLIGHT_SIZE = 78f;
+    public static final float CELEBRATION_BACKLIGHT_ALPHA = 0.55f;
+    public static final float CELEBRATION_BACKLIGHT_EDGE_ALPHA = 0.06f;
+    public static final float CELEBRATION_BACKLIGHT_PULSE = 0.06f;
+    public static final float CELEBRATION_BACKLIGHT_PULSE_RATE = 5f;
+    public static final float CELEBRATION_RING_ALPHA = 0.8f;
+    public static final float CELEBRATION_RING_OUTER_ALPHA = 0.3f;
+    public static final float CELEBRATION_RING_SPACING = 5f;
+    public static final float CELEBRATION_RING_WIDTH = 1f;
     public static final String CELEBRATION_TEXT = "Caught!";
     public static final String CELEBRATION_FONT = "graphics/fonts/orbitron24aabold.fnt";
     public static final float CELEBRATION_TEXT_SIZE = 34f;

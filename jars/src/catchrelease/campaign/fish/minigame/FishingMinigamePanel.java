@@ -84,9 +84,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         //a landed fish gets the celebration, and the dialog waits for it rather than the other way
         if (minigame.isCaught() && celebration == null) {
+            //from the middle of the track, which is where the specimen is shown - not from wherever
+            //in the track it happened to be when it was landed
             celebration = new CatchCelebration(minigame.getFish(),
                     layout == null ? 0f : layout.getTrackCenterX(),
-                    layout == null ? 0f : layout.getTrackY(minigame.getFishPosition()));
+                    layout == null ? 0f : layout.getTrackY(0.5f));
 
             endLingerLeft = Math.max(endLingerLeft, FishConstants.CELEBRATION_TIME);
         }
