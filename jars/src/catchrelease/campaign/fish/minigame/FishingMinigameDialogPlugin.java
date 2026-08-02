@@ -2,10 +2,9 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.helper.ui.CustomDialogUtils;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
+import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -25,6 +24,13 @@ import java.util.Map;
  * <p>
  * The dialog is only the frame: it names the fish, hands a {@link FishingMinigamePanel} the middle of
  * the screen, and reports the result back to whoever opened it.
+ * <p>
+ * Runs as a custom <i>visual</i> dialog rather than a custom dialog, because that is the one without
+ * buttons. showCustomDialog always builds a confirm button - its delegate can rename it and can drop
+ * the cancel button beside it, but cannot ask for neither - and it wires enter and space straight to
+ * it. showCustomVisualDialog hands the panel the whole frame and leaves the keyboard alone, which is
+ * how vanilla hosts its own minigame in
+ * {@link com.fs.starfarer.api.impl.campaign.eventide.DuelDialogDelegate}.
  */
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
@@ -37,7 +43,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     protected InteractionDialogAPI dialog;
     protected FishingMinigame minigame;
+    protected Delegate delegate;
     protected boolean resolved = false;
+
+    /** Set while the panel is already on its way out, so closing it again is not attempted. */
+    transient protected boolean dismissed = false;
 
     /** Dev mode only - the line under the buttons showing what they have done. */
     transient protected LabelAPI devLabel;
@@ -73,8 +83,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         //dialog.setOpacity(0.3f);
         dialog.setBackgroundDimAmount(0.05f);
 
-        dialog.showCustomDialog(FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_PANEL_HEIGHT,
-                new Delegate());
+        this.delegate = new Delegate();
+
+        dialog.showCustomVisualDialog(FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_PANEL_HEIGHT,
+                delegate);
     }
 
     /** Ends the dialog and tells the caller how it went. Safe to reach twice; it only reports once. */
@@ -82,19 +94,23 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (resolved) return;
         resolved = true;
 
+        //the panel first, then the dialog behind it - unless the panel closing is what got us here
+        if (!dismissed && delegate != null) delegate.dismissPanel();
         if (dialog != null) dialog.dismiss();
         if (callback != null) callback.onCatchResolved(caught);
     }
 
-    /** Wraps the panel for the dialog. The catch ends itself, so neither button is offered. */
-    protected class Delegate extends BaseCustomDialogDelegate implements FishingMinigamePanel.Listener {
+    /** Wraps the panel for the dialog. The catch ends itself, so there is nothing to press. */
+    protected class Delegate implements CustomVisualDialogDelegate, FishingMinigamePanel.Listener {
 
         protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, this);
 
+        /** The frame's own handle, and the only way to close the panel from in here. */
+        protected DialogCallbacks callbacks;
+
         @Override
-        public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
-            //the frame builds a confirm button whatever the delegate says, so it goes back out here
-            CustomDialogUtils.removeConfirmButton(panel);
+        public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
+            this.callbacks = callbacks;
 
             addFramingElements(panel);
 
@@ -133,37 +149,31 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             return panel;
         }
 
-        /** No buttons - the catch ends itself, and escape is still there to back out with. */
+        /** No holographic wash over the playfield - the panel draws its own look. */
         @Override
-        public boolean hasCancelButton() {
-            return false;
+        public float getNoiseAlpha() {
+            return 0f;
         }
 
+        /** Driven by the frame, so the dev readout keeps up whatever else is or is not advancing. */
         @Override
-        public String getCancelText() {
-            return null;
+        public void advance(float amount) {
+            updateDevLabel();
         }
 
-        /** Nothing reads this with the button gone, and a null would only have it say "Confirm". */
-        @Override
-        public String getConfirmText() {
-            return null;
-        }
-
-        /** Escape still reaches here with the buttons gone, and the fish is gone with it. */
-        @Override
-        public void customDialogCancel() {
-            resolve(false);
+        /** Closes the panel, which brings us back through {@link #reportDismissed(int)}. */
+        protected void dismissPanel() {
+            if (callbacks != null) callbacks.dismissDialog();
         }
 
         /**
-         * The frame wires enter and space straight to the confirm button, and keeps doing it once
-         * the button itself is gone. Treated as backing out, same as escape - otherwise the dialog
-         * would close on a stray keypress without the catch ever being resolved, and the drone
-         * holding that mote would wait on a callback that never comes.
+         * The panel has gone, by whatever route - our own catch ending it, or the player pressing
+         * escape. Resolving as a miss covers the second: the fish is gone with the panel, and the
+         * drone holding that mote would otherwise wait on a callback that never comes.
          */
         @Override
-        public void customDialogConfirm() {
+        public void reportDismissed(int option) {
+            dismissed = true;
             resolve(false);
         }
 
@@ -183,6 +193,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     @Override
     public void advance(float amount) {
+        updateDevLabel();
+    }
+
+    protected void updateDevLabel() {
         if (devLabel != null) devLabel.setText(getDevStatusText());
     }
 
