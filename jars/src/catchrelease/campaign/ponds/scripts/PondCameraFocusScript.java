@@ -44,6 +44,13 @@ public class PondCameraFocusScript implements EveryFrameScript {
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;
 
+    /**
+     * Where the camera actually was when this started, as an offset from the fleet - free look, in
+     * practice. Eased away rather than dropped, so the move begins from where the player is looking
+     * instead of snapping to the fleet first.
+     */
+    transient protected Vector2f carry = null;
+
     public PondCameraFocusScript(SectorEntityToken pond) {
         this.pond = pond;
     }
@@ -83,9 +90,33 @@ public class PondCameraFocusScript implements EveryFrameScript {
             return;
         }
 
-        focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
+        start(fleet);
+
+        //every frame, not just at the start: free look toggled on mid-hold would pan against this and
+        //leave an offset behind to jump on when the camera goes back
+        Global.getSector().getCampaignUI().resetViewOffset();
+
+        boolean uiUp = isUiUp();
+
+        if (!uiUp) {
+            focus = approach(focus, shouldFocus(fleet) ? 1f : 0f, amount);
+
+            carry.x = approach(carry.x, 0f, amount);
+            carry.y = approach(carry.y, 0f, amount);
+        }
 
         Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
+        center.x += carry.x;
+        center.y += carry.y;
+
+        //a dialog over the top - the catch, most likely. Everything freezes where it is: sliding back
+        //to the fleet under a panel the player is busy with is a move they did not ask for, cannot
+        //see a reason for, and cannot stop. Only while we already hold it; a dialog is no reason to
+        //take a camera we had given back
+        if (uiUp) {
+            if (holdingCamera) holdCameraAt(center);
+            return;
+        }
 
         //all the way back on the fleet - hand the camera over and leave it alone
         if (Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
@@ -104,14 +135,34 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Whether the camera should be sitting on the pond right now. False while a dialog or a core UI
-     * tab is up - the camera belongs to the game there.
+     * Notes where the camera is before anything is done to it, and puts free look away.
+     * <p>
+     * Both halves matter. Free look pans the camera off the fleet, so a hold that assumes the fleet
+     * position starts by jumping the width of that pan - and a pan still set when the camera goes
+     * back jumps again on the way out. Turning it off clears the pan; carrying the offset the camera
+     * already had covers the gap that clearing it would otherwise leave.
      */
+    protected void start(CampaignFleetAPI fleet) {
+        if (carry != null) return;
+
+        Vector2f center = Global.getSector().getViewport().getCenter();
+        carry = new Vector2f(
+                center.x - fleet.getLocation().x,
+                center.y - fleet.getLocation().y);
+
+        Global.getSector().getCampaignUI().resetViewOffset();
+    }
+
+    /** Whether anything is over the campaign view - a dialog, or one of the core UI tabs. */
+    protected boolean isUiUp() {
+        CampaignUIAPI ui = Global.getSector().getCampaignUI();
+
+        return ui.getCurrentInteractionDialog() != null || ui.getCurrentCoreTab() != null;
+    }
+
+    /** Whether the camera should be sitting on the pond right now. */
     protected boolean shouldFocus(CampaignFleetAPI fleet) {
         if (fleet.getContainingLocation() != pond.getContainingLocation()) return false;
-
-        CampaignUIAPI ui = Global.getSector().getCampaignUI();
-        if (ui.getCurrentInteractionDialog() != null || ui.getCurrentCoreTab() != null) return false;
 
         return Misc.getDistance(fleet.getLocation(), pond.getLocation())
                 <= pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;

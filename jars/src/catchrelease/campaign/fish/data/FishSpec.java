@@ -26,6 +26,9 @@ public class FishSpec {
     public FishMotion motion = FishMotion.SMOOTH;
     public float motionSpeed = 1f;
     public float restlessness = 1f;
+
+    /** Multiplier on how much the fish's icon twitches. Visual only - it never moves the real fish. */
+    public float jitter = 1f;
     public float difficulty = 50f;
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;

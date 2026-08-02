@@ -83,6 +83,7 @@ public class FishSpecLoader {
         s.motion = FishMotion.parse(optString(row, "motion", null), FishMotion.SMOOTH);
         s.motionSpeed = optFloat(row, "motionSpeed", 1f);
         s.restlessness = optFloat(row, "restlessness", 1f);
+        s.jitter = optFloat(row, "jitter", 1f);
         s.difficulty = optFloat(row, "difficulty", 50f);
         s.progressRateMult = optFloat(row, "progressRateMult", 1f);
         s.escapeRateMult = optFloat(row, "escapeRateMult", 1f);

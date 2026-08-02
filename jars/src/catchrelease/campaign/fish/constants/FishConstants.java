@@ -48,6 +48,7 @@ public class FishConstants {
     public static final float MINIGAME_FISH_RESPONSE = 0.3f;
 
     /** Visual only: how far the icon twitches, in pixels, and how quickly. */
+    /** Baseline twitch, in pixels. Each fish scales it with the jitter column in fish.csv. */
     public static final float MINIGAME_FISH_JITTER = 2.5f;
     public static final float MINIGAME_FISH_JITTER_SPEED = 7f;
     /** How much harder it twitches when swimming hard, per unit of track speed. */
