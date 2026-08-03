@@ -9,6 +9,7 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.plugins.FractureRenderer;
+import catchrelease.rendering.plugins.GlassShardBurst;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -70,6 +71,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
     transient protected SpriteAPI bombSprite;
     transient protected SpriteAPI deepSprite;
     transient protected FractureRenderer fracture;
+    transient protected GlassShardBurst shardBurst;
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
@@ -143,6 +145,11 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
             throwShock(DepthBombConstants.SHOCK_ECHO_MULT);
         }
 
+        if (shardBurst != null) {
+            shardBurst.advance(amount);
+            if (shardBurst.isDone()) shardBurst = null;
+        }
+
         if (sinceBreak >= getHealTime()) Misc.fadeAndExpire(entity, 0.4f);
     }
 
@@ -150,6 +157,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.BROKEN);
 
         throwShock(1f);
+        throwShards();
         shakeNearbyMotes();
         unearthBuried();
         shakeLoose();
@@ -158,6 +166,21 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
             Global.getSoundPlayer().playSound(DepthBombConstants.SOUND_DETONATE, 1f, 1f,
                     entity.getLocation(), new Vector2f());
         }
+    }
+
+    /** The pieces of the pane that do not stay: spinning slivers off the broken edge. */
+    protected void throwShards() {
+        shardBurst = new GlassShardBurst(DepthBombConstants.PANE_COLOR, DepthBombConstants.RIM_COLOR);
+
+        //off the hole's own edge, which is the blast radius scaled by the shader's core share
+        float holeRadius = getBlastRadius() * DepthBombConstants.CORE_SIZE;
+
+        shardBurst.spawn(entity.getLocation(), holeRadius,
+                MathUtils.getRandomNumberInRange(DepthBombConstants.SHARD_COUNT_MIN,
+                        DepthBombConstants.SHARD_COUNT_MAX),
+                DepthBombConstants.SHARD_SPEED_MIN, DepthBombConstants.SHARD_SPEED_MAX,
+                DepthBombConstants.SHARD_SIZE_MIN, DepthBombConstants.SHARD_SIZE_MAX,
+                DepthBombConstants.SHARD_LIFE_MIN, DepthBombConstants.SHARD_LIFE_MAX);
     }
 
     /** GraphicsLib's ripple, so what bends is whatever is actually behind the break. */
@@ -313,6 +336,9 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
 
         fracture.render(deepSprite, entity.getLocation(), getBlastRadius() * 2f,
                 seed, getOpen(), sinceBreak, alphaMult);
+
+        //debris over the break, since the break is what it came off
+        if (shardBurst != null) shardBurst.render(alphaMult);
     }
 
     protected void renderBomb(float alphaMult) {
