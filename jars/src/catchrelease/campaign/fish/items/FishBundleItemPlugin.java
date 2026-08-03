@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.items;
 
+import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -101,6 +102,11 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
 
         float pad = 10f;
+
+        //F2 over the crate would otherwise open the codex on the generic bundle item, which is what
+        //vanilla resolves from the item spec; point it at the species the crate holds instead
+        tooltip.setCodexEntryId(FishCodex.getEntryId(contents.get(0).speciesId));
+
         tooltip.addTitle(getName());
 
         tooltip.addPara("%s specimens of %s, stowed together.", pad, Misc.getHighlightColor(),

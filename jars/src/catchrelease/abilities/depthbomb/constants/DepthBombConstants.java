@@ -62,11 +62,21 @@ public class DepthBombConstants {
     public static final float SHARD_LIFE_MIN = 0.9f;
     public static final float SHARD_LIFE_MAX = 1.8f;
 
-    /** The seismic shove, through GraphicsLib's distortion. Size is world units, intensity is bend. */
-    public static final float SHOCK_SIZE = 700f;
-    public static final float SHOCK_INTENSITY = 42f;
-    public static final float SHOCK_GROW = 0.55f;
-    public static final float SHOCK_FADE = 1.1f;
+    /**
+     * The seismic shove, through GraphicsLib's distortion. Size is world units, intensity is bend.
+     * <p>
+     * Intensity is the one that reads: the renderer packs the offset field against whatever the
+     * strongest distortion on screen is and unpacks it against the same number, so this is not a
+     * share of anything - it is how far the screen actually moves, and it was set low enough that
+     * a bomb going off looked like a ripple in a puddle.
+     * <p>
+     * GROW is short because the shove is supposed to arrive rather than swell, and FADE outlasts it
+     * so the bend is still readable once the eye has found it.
+     */
+    public static final float SHOCK_SIZE = 850f;
+    public static final float SHOCK_INTENSITY = 90f;
+    public static final float SHOCK_GROW = 0.35f;
+    public static final float SHOCK_FADE = 1.35f;
 
     /** The second, weaker shove that follows it out - one ring alone reads as a bubble. */
     public static final float SHOCK_ECHO_DELAY = 0.35f;

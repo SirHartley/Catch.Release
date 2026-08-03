@@ -38,8 +38,7 @@ public class FishCodex {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
 
-            category.addChild(new FishCodexEntry(getEntryId(spec.id), spec.id,
-                    spec.getDisplayName(), getIcon(spec)));
+            category.addChild(new FishCodexEntry(getEntryId(spec.id), spec));
         }
 
         CodexDataV2.ROOT.addChild(category);
@@ -55,7 +54,7 @@ public class FishCodex {
     }
 
     /** The row's own art. The stand-in covers a row that never had any. */
-    protected static String getIcon(FishSpec spec) {
+    public static String getIcon(FishSpec spec) {
         if (spec.icon == null || spec.icon.isEmpty()) return FishConstants.ITEM_ICON_FALLBACK;
 
         return spec.icon;

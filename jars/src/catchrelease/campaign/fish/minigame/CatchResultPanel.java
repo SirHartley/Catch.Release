@@ -152,6 +152,10 @@ public class CatchResultPanel {
     public void render(FishingMinigameLayout layout, SpriteAPI fishSprite, float alphaMult) {
         if (entry == null || alphaMult <= 0f) return;
 
+        //before anything is placed, since the fonts are what the column's height is measured with
+        loadFonts();
+        layout.centerResultContent(getContentHeight());
+
         renderPanel(layout, alphaMult);
         renderBox(layout, fishSprite, alphaMult);
 
@@ -161,6 +165,30 @@ public class CatchResultPanel {
         y = renderLines(layout, y, alphaMult);
 
         renderPrompt(layout, y, alphaMult);
+    }
+
+    /**
+     * Box top to prompt bottom, as the render methods will space it. Counted off the full line list
+     * and with the prompt in, not off what has arrived so far - so the column is measured once and
+     * nothing shifts while the tally is still being read out.
+     */
+    protected float getContentHeight() {
+        float height = FishConstants.MINIGAME_RESULT_BOX;
+
+        if (title != null) {
+            height += FishConstants.MINIGAME_RESULT_TITLE_GAP + title.getHeight()
+                    + FishConstants.MINIGAME_RESULT_TITLE_GAP;
+        }
+
+        if (font != null) {
+            height += lines.size() * FishConstants.MINIGAME_RESULT_LINE_HEIGHT;
+        }
+
+        if (prompt != null) {
+            height += FishConstants.MINIGAME_RESULT_TITLE_GAP + prompt.getHeight();
+        }
+
+        return height;
     }
 
     /**
@@ -273,10 +301,12 @@ public class CatchResultPanel {
             line.valueText.draw(right, y);
 
             //a record is marked on the row that set it as well as being said in words below, so the
-            //eye lands on the number rather than on the announcement
+            //eye lands on the number rather than on the announcement. Hung in the gutter past the
+            //value, in the value's own colour - the number column keeps its edge, and the mark
+            //reads as part of the number rather than as a second thing on the row
             if (line.record && line.markText != null) {
-                line.markText.setBaseColor(withAlpha(Misc.getPositiveHighlightColor(), alpha));
-                line.markText.draw(layout.resultX + layout.resultWidth * 0.5f, y);
+                line.markText.setBaseColor(withAlpha(Misc.getHighlightColor(), alpha));
+                line.markText.draw(right + FishConstants.MINIGAME_RESULT_MARK_GAP, y);
             }
 
             y -= FishConstants.MINIGAME_RESULT_LINE_HEIGHT;

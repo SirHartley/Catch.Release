@@ -77,8 +77,12 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
     }
 
     /**
-     * Fixed line length in world units - pass the ability's range so the lines stop where the shot
-     * does. Without this they run out to the cursor, however far away it is.
+     * A ceiling on the line's length in world units - pass the ability's range so the lines stop
+     * where the shot does. Without this they run out to the cursor, however far away it is.
+     * <p>
+     * A ceiling rather than a fixed length: aiming inside the range still ends the line at what is
+     * being aimed at. Set outright, the line ran to the range whatever the cursor was doing, so an
+     * area reticule sat in a puddle of line that carried on past it.
      */
     public BaseReticuleRenderer withLength(float worldUnits) {
         length = worldUnits;
@@ -96,9 +100,10 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
     }
 
     /**
-     * How far short of the cursor the guide lines stop, so they do not run underneath whatever
-     * {@link #renderCursorBoundObject} draws there. Only applies while the lines end at the cursor -
-     * a {@link #withLength(float)} line is showing a range and gets to keep its full length.
+     * How far short of the end the guide lines stop, so they do not run underneath whatever
+     * {@link #renderCursorBoundObject} draws there. Applies wherever the line ends, a
+     * {@link #withLength(float)} one included - the thing at the cursor is drawn at the cursor
+     * either way, so a line that ignored this ran through it.
      */
     protected float getGuideLineEndPadding() {
         return 0f;
@@ -176,9 +181,13 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
         //start outside the fleet reticule ring instead of at the fleet centre, where the lines would
         //just cross the ring sprite
         float from = reticuleSize * 0.5f;
-        float to = length > 0f
-                ? length
-                : Misc.getDistance(origin, cursorPos) - getGuideLineEndPadding();
+
+        //the cursor is where the shot is going, and the range is only as far as it can get - so the
+        //line ends at the nearer of the two, then stops short of whatever is drawn there
+        float reach = Misc.getDistance(origin, cursorPos);
+        if (length > 0f) reach = Math.min(reach, length);
+
+        float to = reach - getGuideLineEndPadding();
 
         if (to <= from) return;
 

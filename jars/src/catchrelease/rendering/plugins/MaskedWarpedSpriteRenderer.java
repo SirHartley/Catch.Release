@@ -19,29 +19,8 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uMaskTex = -1;
     private transient int uAlphaMult = -1;
     private transient int uMaskThreshold = -1;
-    private transient int uMaskFeather = -1;
-    private transient int uTime = -1;
-    private transient int uWaveAmp = -1;
-    private transient int uWaveScale = -1;
-    private transient int uWaveSpeed = -1;
-    private transient int uRingScale = -1;
-    private transient int uRingAmp = -1;
 
     private float maskThreshold = 0f;
-
-    /**
-     * The surface. Amplitudes are in fill texcoords, so they are a share of the sprite rather than a
-     * number of pixels and hold their look at any size the caller draws it at.
-     */
-    private float maskFeather = 0.06f;
-    private float waveAmp = 0.004f;
-    private float waveScale = 1.6f;
-    private float waveSpeed = 0.55f;
-    private float ringScale = 3.5f;
-    private float ringAmp = 0.006f;
-
-    /** Advanced by the caller, since only the caller knows whether it should run while paused. */
-    private float time = 0f;
 
     public MaskedWarpedSpriteRenderer(WarpGrid warp) {
         this.warp = warp;
@@ -49,31 +28,6 @@ public class MaskedWarpedSpriteRenderer {
 
     public void setMaskThreshold(float threshold) {
         this.maskThreshold = threshold;
-    }
-
-    public void setMaskFeather(float feather) {
-        this.maskFeather = feather;
-    }
-
-    /**
-     * @param amp   how far the surface pushes the fill, as a share of the sprite
-     * @param scale roughly how many waves fit across it
-     * @param speed how fast they travel
-     */
-    public void setWaves(float amp, float scale, float speed) {
-        this.waveAmp = amp;
-        this.waveScale = scale;
-        this.waveSpeed = speed;
-    }
-
-    /** The rings running out from the middle, which is what makes it a hole rather than a rectangle. */
-    public void setRings(float scale, float amp) {
-        this.ringScale = scale;
-        this.ringAmp = amp;
-    }
-
-    public void advance(float amount) {
-        time += amount;
     }
 
     public void render(SpriteAPI fillSprite,
@@ -101,13 +55,6 @@ public class MaskedWarpedSpriteRenderer {
 
         if (uAlphaMult >= 0) GL20.glUniform1f(uAlphaMult, alphaMult);
         if (uMaskThreshold >= 0) GL20.glUniform1f(uMaskThreshold, maskThreshold);
-        if (uMaskFeather >= 0) GL20.glUniform1f(uMaskFeather, maskFeather);
-        if (uTime >= 0) GL20.glUniform1f(uTime, time);
-        if (uWaveAmp >= 0) GL20.glUniform1f(uWaveAmp, waveAmp);
-        if (uWaveScale >= 0) GL20.glUniform1f(uWaveScale, waveScale);
-        if (uWaveSpeed >= 0) GL20.glUniform1f(uWaveSpeed, waveSpeed);
-        if (uRingScale >= 0) GL20.glUniform1f(uRingScale, ringScale);
-        if (uRingAmp >= 0) GL20.glUniform1f(uRingAmp, ringAmp);
 
         // unit0 = fill
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -260,13 +207,6 @@ public class MaskedWarpedSpriteRenderer {
         uMaskTex = GL20.glGetUniformLocation(program, "maskTex");
         uAlphaMult = GL20.glGetUniformLocation(program, "alphaMult");
         uMaskThreshold = GL20.glGetUniformLocation(program, "maskThreshold");
-        uMaskFeather = GL20.glGetUniformLocation(program, "maskFeather");
-        uTime = GL20.glGetUniformLocation(program, "time");
-        uWaveAmp = GL20.glGetUniformLocation(program, "waveAmp");
-        uWaveScale = GL20.glGetUniformLocation(program, "waveScale");
-        uWaveSpeed = GL20.glGetUniformLocation(program, "waveSpeed");
-        uRingScale = GL20.glGetUniformLocation(program, "ringScale");
-        uRingAmp = GL20.glGetUniformLocation(program, "ringAmp");
 
         if (uTex >= 0) GL20.glUniform1i(uTex, 0);
         if (uMaskTex >= 0) GL20.glUniform1i(uMaskTex, 1);
