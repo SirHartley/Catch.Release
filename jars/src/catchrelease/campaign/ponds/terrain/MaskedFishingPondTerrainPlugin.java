@@ -9,6 +9,7 @@ import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.helper.ParallaxUtil;
 import catchrelease.rendering.helper.Stencil;
 import catchrelease.rendering.plugins.MaskGlowRenderer;
@@ -24,14 +25,13 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.BaseTerrain;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import org.dark.shaders.distortion.RippleDistortion;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 /**
  * The pond, as terrain rather than as a custom entity.
@@ -83,9 +83,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     /** Seconds the pond has been advancing. What the deep field's own drift runs off. */
     protected float elapsed = 0f;
-
-    /** The rings thrown when the rupture opens. One-shot, so a save mid-wave simply misses it. */
-    transient protected List<RippleData> openingWave;
 
     transient protected PondDepthField depthField;
     transient protected WarpGrid warpGrid;
@@ -199,7 +196,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         elapsed += amount;
         if (depthField != null) depthField.advance(amount);
-        advanceOpeningWave(amount);
 
         if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
@@ -229,7 +225,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
 
-        throwOpeningWave();
+        throwOpeningDistortion();
 
         //holds the camera while the player is here, and closes the pond once they have left. Sector
         //level rather than on the entity: entity scripts do not advance while the game is paused
@@ -237,34 +233,25 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     }
 
     /**
-     * The rupture opening, said with the same rings it makes when it is idle - several of them, one
-     * after another, wider and thinner and going out much faster.
+     * The shove space takes as the rupture opens.
      * <p>
-     * The same rings on purpose. An opening should read as the pond doing hard what it does gently
-     * the rest of the time, not as a different effect borrowed for the occasion.
+     * A real distortion rather than another drawn ring: GraphicsLib's own ripple, run through
+     * {@link CampaignDistortionRenderer}, so what bends is whatever happens to be behind the pond.
+     * Silently does nothing where shaders or framebuffers are off, which is the same thing
+     * GraphicsLib does in combat.
      */
-    protected void throwOpeningWave() {
-        openingWave = new ArrayList<>();
+    protected void throwOpeningDistortion() {
+        if (!CampaignDistortionRenderer.isSupported()) return;
 
-        openingWave.add(new RippleData(
-                new Vector2f(entity.getLocation()),
-                PondConstants.OPEN_WAVE_INTERVAL,
-                PondConstants.OPEN_WAVE_INTERVAL,
-                PondConstants.OPEN_WAVE_COLOR,
-                entity.getRadius() * PondConstants.OPEN_WAVE_SIZE_MULT,
-                PondConstants.OPEN_WAVE_WIDTH,
-                PondConstants.OPEN_WAVE_GROW_TIME,
-                PondConstants.OPEN_WAVE_START_MULT,
-                PondConstants.OPEN_WAVE_RINGS));
-    }
+        RippleDistortion ripple = new RippleDistortion(new Vector2f(entity.getLocation()), new Vector2f());
 
-    protected void advanceOpeningWave(float amount) {
-        if (openingWave == null) return;
+        ripple.setSize(PondConstants.OPEN_DISTORTION_SIZE);
+        ripple.setIntensity(PondConstants.OPEN_DISTORTION_INTENSITY);
+        ripple.fadeInSize(PondConstants.OPEN_DISTORTION_GROW);
+        ripple.fadeOutIntensity(PondConstants.OPEN_DISTORTION_FADE);
+        ripple.setLifetime(Math.max(PondConstants.OPEN_DISTORTION_GROW, PondConstants.OPEN_DISTORTION_FADE));
 
-        for (RippleData wave : openingWave) wave.advance(amount);
-        openingWave.removeIf(RippleData::isExpired);
-
-        if (openingWave.isEmpty()) openingWave = null;
+        CampaignDistortionRenderer.addDistortion(ripple);
     }
 
     /**
