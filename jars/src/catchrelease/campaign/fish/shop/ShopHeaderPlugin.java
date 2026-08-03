@@ -1,0 +1,138 @@
+package catchrelease.campaign.fish.shop;
+
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.helper.loading.SpriteLoader;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
+import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.util.Misc;
+import org.lazywizard.lazylib.ui.LazyFont;
+
+import java.awt.Color;
+import java.util.EnumMap;
+import java.util.Map;
+
+/**
+ * The band across the top: the shop's name on the left, the purse on the right.
+ * <p>
+ * The purse is one chip per rarity - the specimen mark in the rarity's colour and how many are
+ * aboard - because every price below is quoted in exactly those terms, and a buyer should not have
+ * to open the cargo screen to know what they are worth. Counts are read off the dialog's cache and
+ * redrawn when they change, so a purchase shows up in the purse the same frame it is paid.
+ */
+public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
+
+    /** Where the counts come from - the dialog owns the cache, this only draws it. */
+    public interface Purse {
+        Map<FishRarity, Integer> getWallet();
+    }
+
+    public static final String TITLE = "THE OUTFITTER";
+
+    public static final float CHIP_WIDTH = 64f;
+    public static final float CHIP_HEIGHT = 30f;
+    public static final float CHIP_GAP = 8f;
+    public static final float ICON_SIZE = 20f;
+
+    protected final Purse purse;
+
+    protected PositionAPI pos;
+
+    protected transient LazyFont.DrawableString title;
+    protected final Map<FishRarity, LazyFont.DrawableString> counts = new EnumMap<>(FishRarity.class);
+    protected final Map<FishRarity, Integer> drawnCounts = new EnumMap<>(FishRarity.class);
+
+    public ShopHeaderPlugin(Purse purse) {
+        this.purse = purse;
+    }
+
+    @Override
+    public void positionChanged(PositionAPI position) {
+        pos = position;
+    }
+
+    @Override
+    public void render(float alphaMult) {
+        if (pos == null || alphaMult <= 0f) return;
+
+        float x = pos.getX();
+        float y = pos.getY();
+        float width = pos.getWidth();
+        float height = pos.getHeight();
+
+        renderTitle(x, y, height, alphaMult);
+        renderPurse(x, y, width, height, alphaMult);
+
+        //the rule the whole band sits on
+        ShopUi.drawQuad(x, y, width, 1f, Misc.getBrightPlayerColor(), 0.35f * alphaMult);
+    }
+
+    protected void renderTitle(float x, float y, float height, float alphaMult) {
+        LazyFont font = ShopUi.getTitleFont();
+        if (font == null) return;
+
+        if (title == null) {
+            title = font.createText(TITLE, Color.WHITE, 22f);
+            title.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+        }
+
+        title.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
+        title.draw(x + 2f, y + height * 0.5f + title.getHeight() * 0.5f);
+    }
+
+    protected void renderPurse(float x, float y, float width, float height, float alphaMult) {
+        Map<FishRarity, Integer> wallet = purse.getWallet();
+        if (wallet == null) return;
+
+        FishRarity[] ladder = FishRarity.values();
+        float chipX = x + width - ladder.length * CHIP_WIDTH - (ladder.length - 1) * CHIP_GAP;
+        float chipY = y + (height - CHIP_HEIGHT) * 0.5f;
+
+        for (FishRarity rarity : ladder) {
+            renderChip(rarity, wallet.get(rarity) == null ? 0 : wallet.get(rarity),
+                    chipX, chipY, alphaMult);
+
+            chipX += CHIP_WIDTH + CHIP_GAP;
+        }
+    }
+
+    protected void renderChip(FishRarity rarity, int count, float x, float y, float alphaMult) {
+        //an empty pocket goes quiet rather than away, so the ladder itself stays readable
+        float presence = count > 0 ? 1f : 0.4f;
+
+        ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, Color.BLACK, 0.5f * alphaMult);
+        ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, rarity.color, 0.1f * presence * alphaMult);
+
+        SpriteAPI icon = SpriteLoader.getSprite("placeholder");
+        if (icon != null) {
+            icon.setSize(ICON_SIZE, ICON_SIZE);
+            icon.setColor(rarity.color);
+            icon.setNormalBlend();
+            icon.setAlphaMult(presence * alphaMult);
+            icon.renderAtCenter(x + 6f + ICON_SIZE * 0.5f, y + CHIP_HEIGHT * 0.5f);
+        }
+
+        LazyFont.DrawableString text = getCount(rarity, count);
+        if (text == null) return;
+
+        text.setBaseColor(ShopUi.withAlpha(rarity.color, presence * alphaMult));
+        text.draw(x + CHIP_WIDTH - 7f, y + CHIP_HEIGHT * 0.5f + text.getHeight() * 0.5f);
+    }
+
+    /** Rebuilt only when the number it shows stops being true. */
+    protected LazyFont.DrawableString getCount(FishRarity rarity, int count) {
+        LazyFont font = ShopUi.getBodyFont();
+        if (font == null) return null;
+
+        Integer drawn = drawnCounts.get(rarity);
+        if (drawn == null || drawn != count) {
+            LazyFont.DrawableString text = font.createText(String.valueOf(count), Color.WHITE, 15f);
+            text.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+
+            counts.put(rarity, text);
+            drawnCounts.put(rarity, count);
+        }
+
+        return counts.get(rarity);
+    }
+}

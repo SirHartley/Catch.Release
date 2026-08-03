@@ -14,12 +14,17 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Keyboard;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +36,25 @@ import java.util.Map;
  * is an ability that puts the panel up, which is enough to use it and to find out whether the prices
  * are anywhere near right.
  * <p>
- * Rebuilt from scratch after every purchase rather than updated in place. A shop is a list of prices
- * and what is in the hold, and both change when something is bought - rebuilding is both simpler and
- * harder to get wrong than reaching back into the elements that are already there.
+ * Laid out the way every upgrade screen since the dawn of the genre is laid out, because that is
+ * the layout players already know how to read: the purse across the top, the wares down the left
+ * grouped by the gear they bolt onto, and the one selected thing large on the right with its
+ * ladder, its numbers, and one button. The left side is drawn live off the data - a row reads its
+ * own level and price every frame - so only the right side is ever rebuilt, and the list never
+ * loses its scroll under the mouse.
  */
 public class FishShopDialog implements InteractionDialogPlugin {
 
-    public static final float WIDTH = 720f;
-    public static final float HEIGHT = 560f;
+    public static final float WIDTH = 920f;
+    public static final float HEIGHT = 640f;
+
+    public static final float PAD = 12f;
+    public static final float HEADER_HEIGHT = 46f;
+    public static final float LIST_WIDTH = 320f;
+    public static final float ROW_WIDTH = LIST_WIDTH - 18f;
+    public static final float ROW_HEIGHT = 26f;
+    public static final float GROUP_HEIGHT = 30f;
+    public static final float DETAIL_GAP = 14f;
 
     /** Opens the outfitter, if the UI will have it. */
     public static boolean open() {
@@ -63,190 +79,234 @@ public class FishShopDialog implements InteractionDialogPlugin {
         dialog.showCustomVisualDialog(WIDTH, HEIGHT, delegate);
     }
 
-    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin {
+    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
+            ShopRowPlugin.Host, ShopHeaderPlugin.Purse {
 
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
 
-        /** What each button on screen would buy, so the press does not have to be decoded. */
-        protected final Map<Object, Runnable> actions = new HashMap<>();
+        protected final List<ShopEntry> entries = new ArrayList<>();
+        protected String selectedKey;
+
+        /** Counted once per change rather than once per frame - the purse walks the whole hold. */
+        protected Map<FishRarity, Integer> wallet = new HashMap<>();
+
+        /** The right-hand pane, torn down and rebuilt whenever what it shows stops being true. */
+        protected TooltipMakerAPI detail;
+        protected PositionAPI listViewport;
+        protected Object buyId;
 
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
             this.panel = panel;
             this.callbacks = callbacks;
 
-            build();
+            buildEntries();
+            if (!entries.isEmpty()) selectedKey = entries.get(0).getKey();
+
+            refreshWallet();
+            buildHeader();
+            buildList();
+            buildDetail();
         }
 
-        /** Everything torn down and put back, because everything on it can change with one purchase. */
-        protected void rebuild() {
-            if (panel == null) return;
+        /**
+         * Everything on sale, shelf by shelf: every stat the sheet knows grouped by its gear, then
+         * each rig's modules with the empty slot listed last as a way out of all of them.
+         */
+        protected void buildEntries() {
+            List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
 
-            panel.removeComponent(null);
-            build();
-        }
+            //the sheet documents its own format with a row, which is not a thing for sale
+            stats.removeIf(stat -> stat.id == null || stat.id.equalsIgnoreCase("example"));
+            stats.sort(Comparator.comparing(stat -> stat.id));
 
-        protected void build() {
-            actions.clear();
+            for (ShopGroup group : ShopGroup.values()) {
+                for (UpgradeStat stat : stats) {
+                    if (ShopGroup.forStat(stat) == group) entries.add(ShopEntry.of(stat));
+                }
+            }
 
-            float pad = 10f;
-            float column = (WIDTH - pad * 3f) * 0.5f;
+            for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON}) {
+                for (Tackle tackle : TackleManager.getOptions(rig)) {
+                    if (tackle != Tackle.NONE) entries.add(ShopEntry.of(tackle, rig));
+                }
 
-            TooltipMakerAPI left = panel.createUIElement(column, HEIGHT - pad * 2f, true);
-            buildHold(left);
-            buildUpgrades(left, column, UpgradeStat.Category.CAMPAIGN, "Campaign");
-            panel.addUIElement(left).inTL(pad, pad);
-
-            TooltipMakerAPI right = panel.createUIElement(column, HEIGHT - pad * 2f, true);
-            buildUpgrades(right, column, UpgradeStat.Category.MINIGAME, "The catch");
-            buildTackle(right, column);
-            panel.addUIElement(right).inTL(column + pad * 2f, pad);
-        }
-
-        /** What is aboard to spend, since every price below is quoted in it. */
-        protected void buildHold(TooltipMakerAPI info) {
-            info.addSectionHeading("In the hold", Misc.getBasePlayerColor(),
-                    Misc.getDarkPlayerColor(), Alignment.MID, 0f);
-
-            Map<FishRarity, Integer> counts = FishCurrency.count();
-
-            for (FishRarity rarity : FishRarity.values()) {
-                info.addPara("%s   %s", 3f, rarity.color,
-                        Misc.ucFirst(rarity.name().toLowerCase()), "" + counts.get(rarity));
+                entries.add(ShopEntry.of(Tackle.NONE, rig));
             }
         }
 
-        protected void buildUpgrades(TooltipMakerAPI info, float width,
-                                     UpgradeStat.Category category, String title) {
+        protected void refreshWallet() {
+            wallet = FishCurrency.count();
+        }
 
-            info.addSectionHeading(title, Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                    Alignment.MID, 10f);
+        protected void buildHeader() {
+            CustomPanelAPI header = panel.createCustomPanel(WIDTH - PAD * 2f, HEADER_HEIGHT,
+                    new ShopHeaderPlugin(this));
 
-            List<UpgradeStat> stats = UpgradeManager.getInstance().getByCategory(category);
+            panel.addComponent(header).inTL(PAD, PAD);
+        }
 
-            if (stats.isEmpty()) {
-                info.addPara("Nothing here yet.", Misc.getGrayColor(), 5f);
+        protected void buildList() {
+            float top = PAD + HEADER_HEIGHT + 10f;
+            float height = HEIGHT - top - PAD;
+
+            TooltipMakerAPI list = panel.createUIElement(LIST_WIDTH, height, true);
+
+            ShopGroup current = null;
+            for (ShopEntry entry : entries) {
+                if (entry.group != current) {
+                    current = entry.group;
+
+                    CustomPanelAPI groupRow = panel.createCustomPanel(ROW_WIDTH, GROUP_HEIGHT,
+                            new ShopGroupRowPlugin(current, this));
+                    list.addCustom(groupRow, 0f);
+                }
+
+                CustomPanelAPI row = panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
+                        new ShopRowPlugin(entry, this));
+                list.addCustom(row, 3f);
+            }
+
+            listViewport = panel.addUIElement(list);
+            listViewport.inTL(PAD, top);
+        }
+
+        protected void buildDetail() {
+            if (detail != null) panel.removeComponent(detail);
+
+            float top = PAD + HEADER_HEIGHT + 10f;
+            float height = HEIGHT - top - PAD;
+            float width = WIDTH - PAD * 2f - LIST_WIDTH - DETAIL_GAP;
+
+            detail = panel.createUIElement(width, height, false);
+
+            ShopEntry entry = getSelected();
+            if (entry != null) buildDetailContent(detail, width, entry);
+
+            panel.addUIElement(detail).inTL(PAD + LIST_WIDTH + DETAIL_GAP, top);
+        }
+
+        protected void buildDetailContent(TooltipMakerAPI info, float width, ShopEntry entry) {
+            CustomPanelAPI head = panel.createCustomPanel(width - 10f, 84f,
+                    new ShopDetailHeaderPlugin(entry));
+            info.addCustom(head, 0f);
+
+            info.addPara(entry.getDescription(), 12f);
+
+            if (entry.isUpgrade() && !entry.isMaxed()) {
+                info.addPara("Now %s - next level %s", 12f, Misc.getHighlightColor(),
+                        entry.getValueAt(entry.getLevel()), entry.getValueAt(entry.getLevel() + 1));
+            }
+
+            if (entry.kind == ShopEntry.Kind.TACKLE && !entry.isFitted()) {
+                Tackle fitted = TackleManager.get(entry.rig);
+
+                if (fitted != entry.tackle && fitted != Tackle.NONE) {
+                    info.addPara("In the slot now: %s. One slot - fitting this puts that back on"
+                            + " the shelf.", 12f, Misc.getGrayColor(),
+                            Misc.getHighlightColor(), fitted.name);
+                }
+            }
+
+            buildPrice(info, entry);
+            buildBuyButton(info, entry);
+        }
+
+        /** The tag: what the next one costs, and whether the hold can cover it. */
+        protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
+            if (entry.isMaxed()) {
+                info.addPara("Fully upgraded.", Misc.getPositiveHighlightColor(), 16f);
                 return;
             }
 
-            for (final UpgradeStat stat : stats) {
-                addUpgradeRow(info, width, stat);
-            }
-        }
-
-        protected void addUpgradeRow(TooltipMakerAPI info, float width, final UpgradeStat stat) {
-            if (ShopPricing.isMaxed(stat)) {
-                info.addPara("%s - fully upgraded", 5f, Misc.getPositiveHighlightColor(),
-                        describe(stat));
+            if (entry.isFitted()) {
+                info.addPara("Fitted and ready.", Misc.getPositiveHighlightColor(), 16f);
                 return;
             }
 
-            FishRarity rarity = ShopPricing.getRarity(stat);
-            int cost = ShopPricing.getCost(stat);
-            boolean afford = ShopPricing.canAfford(rarity, cost);
-
-            String label = describe(stat) + "   " + cost + " "
-                    + Misc.ucFirst(rarity.name().toLowerCase());
-
-            Object id = new Object();
-            com.fs.starfarer.api.ui.ButtonAPI button = info.addButton(label, id,
-                    afford ? rarity.color : Misc.getGrayColor(), Misc.getDarkPlayerColor(),
-                    width - 10f, 22f, 5f);
-
-            button.setEnabled(afford);
-
-            if (stat.description != null && !stat.description.isEmpty()) {
-                info.addTooltipToPrevious(makeTooltip(stat.description), TooltipMakerAPI.TooltipLocation.LEFT);
+            FishRarity rarity = entry.getPriceRarity();
+            if (rarity == null) {
+                info.addPara("No charge for emptying a slot.", Misc.getGrayColor(), 16f);
+                return;
             }
 
-            actions.put(id, new Runnable() {
-                @Override
-                public void run() {
-                    FishRarity price = ShopPricing.getRarity(stat);
-                    if (!FishCurrency.spend(price, ShopPricing.getCost(stat))) return;
+            int cost = entry.getPriceCost();
+            int held = wallet.get(rarity) == null ? 0 : wallet.get(rarity);
 
-                    UpgradeManager.getInstance().addLevels(stat.id, 1);
-                }
-            });
+            info.addPara("Price: %s", 16f, rarity.color,
+                    cost + " x " + Misc.ucFirst(rarity.name().toLowerCase()) + " specimens");
+
+            info.addPara("In the hold: %s", 4f,
+                    held >= cost ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
+                    String.valueOf(held));
         }
 
-        protected void buildTackle(TooltipMakerAPI info, float width) {
-            for (final Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON}) {
-                info.addSectionHeading(rig == Tackle.Fit.DRONE ? "Drone tackle" : "Harpoon tips",
-                        Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(), Alignment.MID, 10f);
+        protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
+            if (entry.isDone()) return;
 
-                Tackle fitted = TackleManager.get(rig);
-                info.addPara("Fitted: %s", 3f, Misc.getHighlightColor(), fitted.name);
+            FishRarity rarity = entry.getPriceRarity();
+            boolean afford = entry.canAfford();
 
-                for (final Tackle tackle : TackleManager.getOptions(rig)) {
-                    if (tackle == fitted) continue;
+            String label = entry.isUpgrade() ? "UPGRADE" : "FIT";
+            Color base = afford
+                    ? (rarity == null ? Misc.getBasePlayerColor() : rarity.color)
+                    : Misc.getGrayColor();
 
-                    addTackleRow(info, width, rig, tackle);
-                }
-            }
-        }
+            buyId = new Object();
 
-        protected void addTackleRow(TooltipMakerAPI info, float width, final Tackle.Fit rig,
-                                    final Tackle tackle) {
-
-            FishRarity rarity = ShopPricing.getRarity(tackle);
-            int cost = ShopPricing.getCost(tackle);
-            boolean afford = ShopPricing.canAfford(rarity, cost);
-
-            String label = tackle.name
-                    + (rarity == null ? "" : "   " + cost + " " + Misc.ucFirst(rarity.name().toLowerCase()));
-
-            Object id = new Object();
-            com.fs.starfarer.api.ui.ButtonAPI button = info.addButton(label, id,
-                    afford ? Misc.getBasePlayerColor() : Misc.getGrayColor(),
-                    Misc.getDarkPlayerColor(), width - 10f, 22f, 5f);
+            info.setButtonFontOrbitron20Bold();
+            ButtonAPI button = info.addButton(label, buyId, base, Misc.getDarkPlayerColor(),
+                    Alignment.MID, CutStyle.TL_BR, 240f, 34f, 20f);
+            info.setButtonFontDefault();
 
             button.setEnabled(afford);
-            info.addTooltipToPrevious(makeTooltip(tackle.description), TooltipMakerAPI.TooltipLocation.LEFT);
-
-            actions.put(id, new Runnable() {
-                @Override
-                public void run() {
-                    if (!FishCurrency.spend(ShopPricing.getRarity(tackle), ShopPricing.getCost(tackle))) return;
-
-                    TackleManager.fit(rig, tackle);
-                }
-            });
         }
 
-        protected TooltipMakerAPI.TooltipCreator makeTooltip(final String text) {
-            return new com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipCreator() {
-                @Override
-                public boolean isTooltipExpandable(Object tooltipParam) {
-                    return false;
-                }
+        protected ShopEntry getSelected() {
+            for (ShopEntry entry : entries) {
+                if (entry.getKey().equals(selectedKey)) return entry;
+            }
 
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return 320f;
-                }
-
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara(text, 0f);
-                }
-            };
+            return entries.isEmpty() ? null : entries.get(0);
         }
 
-        protected String describe(UpgradeStat stat) {
-            String name = stat.id.replace('_', ' ');
+        @Override
+        public boolean isSelected(ShopEntry entry) {
+            return entry.getKey().equals(selectedKey);
+        }
 
-            return Misc.ucFirst(name) + "  " + stat.level + "/" + Math.max(1, stat.maxLevel);
+        @Override
+        public void onRowClicked(ShopEntry entry) {
+            if (isSelected(entry)) return;
+
+            selectedKey = entry.getKey();
+            buildDetail();
+        }
+
+        @Override
+        public PositionAPI getListViewport() {
+            return listViewport;
+        }
+
+        @Override
+        public Map<FishRarity, Integer> getWallet() {
+            return wallet;
         }
 
         @Override
         public void buttonPressed(Object buttonId) {
-            Runnable action = actions.get(buttonId);
-            if (action == null) return;
+            if (buttonId != buyId) return;
 
-            action.run();
-            rebuild();
+            ShopEntry entry = getSelected();
+            if (entry == null || !entry.buy()) return;
+
+            Global.getSoundPlayer().playUISound("ui_char_increase_aptitude", 1f, 1f);
+
+            //the purse and the pane are stale the moment the money moved; the rows are not,
+            //because a row never stops reading the live data
+            refreshWallet();
+            buildDetail();
         }
 
         @Override
