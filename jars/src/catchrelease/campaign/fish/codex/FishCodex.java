@@ -42,6 +42,17 @@ public class FishCodex {
         }
 
         CodexDataV2.ROOT.addChild(category);
+
+        //Hanging the category off ROOT puts it in the tree, which is enough to browse to and no use
+        //for anything that looks an entry up by id. Those go through CodexDataV2.getEntry, which
+        //reads a flat map built by rebuildIdToEntryMap - and the last rebuild happens before the
+        //onCodexDataGenerated hook we are standing in, with none after it. So every entry added here
+        //is browsable and unfindable at once.
+        //
+        //That is not a cosmetic gap. TooltipMakerAPI.setCodexEntryId silently does nothing when the
+        //id does not resolve, so F2 on a specimen fell back to the generic item entry; showCodex and
+        //related-entry links go the same way.
+        CodexDataV2.rebuildIdToEntryMap();
     }
 
     /**
