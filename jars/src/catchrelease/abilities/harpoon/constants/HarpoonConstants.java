@@ -28,7 +28,7 @@ public class HarpoonConstants {
 
     //the shove the mote takes, and how long the two of them carry it
     public static final float PUSH_SPEED = 420f;
-    public static final float PUSH_TIME = 0.15f;
+    public static final float PUSH_TIME = 0.25f;
 
     /** Seconds the line spends snapping straight after the push, before the catch begins. */
     public static final float TAUT_TIME = 0.2f;

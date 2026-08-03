@@ -1,20 +1,70 @@
-Todo
+ai_
 
-- Harpoon line should not trail to one side but stay centered
-- Remove dev controls from minigame (except loss prevention)
-- Minigame base panel too much L/R whitespace, tighten (height is good)
-- upon winning, render a second, fully bordered panel to the right of the panel holding the minigame with the results as currently implemented
-- pressing an button once while results show up should immediately show all of them instead of the animated step-by-step blend in
-- add a "new record" indicator if fish caught beats personal best
-- Quality and rarity badges need to go into the top left
-- the badges on the cargo icons for rarity currently go (- = quality badge, _ = no badge / space, --- = rarity indicator) - - - _ _ --- for a 3-star fish. With the new TL placement, quality badges should go --- - - - _ _
+Minigame UI
+- Minigame fish checks center for bounds, should use center + icon width / 2. Currently travels out of bounds of the container.
+- Minigame panel looks visually unbalanced, add about 10px to the left side of the panel without moving the minigame UI itself.
+- Catch Card text looks blurry or staunched. Should probably use default orbitron font if you are not. If you are, it's fine and I'm hallucinating.
+- Catch Card Increase space between fish name and image
+- Catch Card center fish name
+- Catch Card "new record" should be above fish icon, on top - centered, with an animation bouncing it up and down
+- Catch Card press any key should be centered and gradually change colour from current grey to muted light grey within 0.5ds and back another 0.5s to indicate that it's waiting for action
+- "celebration" animation should center on the image of the fish in the catch card
+- optional setting: make bubbles rise from the bottom of the catch card to the top with natural movement (sine??)
 
-- Pond really needs better rim anim to show depth
+Minigame
+- Treasure never shows up. Should sometimes show up even without tackle.
+
+Fish shop
+- fish shop UI panels do not properly remove on switch, causing them to stack up over themselves.
+- remove "catch" category, that's only technical stats. Shop is for equipment upgrades only.
+- subcategories lights/drones/harpoon... should probably also have icons, with text below, because the text is currently so small it's almost unreadable if removing the catch cat fixes it -> larger font size, that's fine too.
+- "none" option should be at top of equip selection list
+- remove prefix from selection list eg: Searchlight area -> Area. Title to the right must retain prefix and continue reading "Searchlight area"
+- upgrades should cost credits in addition to costing fish. Cost should change every game and be, for instance, "3 same / different fish of type "crab / fish / ect" of good / bad / excellent [or better] quality", increasing in difficulty for each upgrade, including requiring specific fish. This may also use coherence, where low coherence = rarer (except for abyss fish).
+- you should be able to store fish in the shop via cargo picker
+- you should be able to sell fish in the shop via cargo picker
+
+Harpoon
+- when returning with or without catch, the harpoon lingers for a fraction of a second before despawning and does not completely retract the line, making it look as if it was fading out with the line still extended a bit. line should be fully retracted, then despawn.
+
+Catcher Drone
+- The "pathing" circle now circles the entire pond
+- Drones don't seem to react to things entering the circle anymore. Double check if the patch for the stat upgrades didn't break drone behaviour.
+- Once investigated: Reaction of drones to motes is slightly too slow upon entering the circle. Give them a bit of a reaction radius beyond their orbit by default, to make them react to motes faster.
+
+Search lights
+- Way too few motes encountered
+- Position should be relative to fleet heading, not fixed relative to screen
+- one always in front of the fleet (with current movement, ofc)
+
+Dive bomb
+- Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
+
+Unstable Terrain
+- Unstable terrain can spawn way too close together.
+- Unstable terrain  should never spawn under or close to a nebula tile
+
+Pond
+- depth motes should be more swirly to pull the visuals downwards.
+- Add some kind of whirlpool effect, preferrably via shader. If that's not possible, I will provide a sprite / map, tell me if you need it.
+- Make mote movement more varied, movement mode depending on minigame movement mode, difficulty of pattern on rarity
+
+Fish Map UI
+- General UI still terrible and due a full overhaul
+- Map still doesn't show up, use reflection instead. I know Ashes of the Domain has a working implementation of this for, I think the Orion Sector module, appended to the main map UI as tab on top.
+
+Codex
+- style the codex entry like the minigame / catch card - aim for a fusion between the way the codex is formatted for industry items and the catch card. Aim for good segmentation between informational areas, possibly even in distinct containers (desc, stats, loc data, record)
+- icon should display at native res in a dressed container with the same beautiful styling the catch card uses
+- catch location data should be available if the player caught the fish
+- catch time isn't correctly stored or displayed
+- species type != rarity. Type is specced in the csv, rarity is just rarity.
 
 self_
 - Adjust skillshot fleet dir indicator for size, arrow too large
-
-
+- fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
+- Icons
+- Harpoon needs better tip
 
 
 fish

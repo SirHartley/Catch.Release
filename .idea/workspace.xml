@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="vulcan fish">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="constants, todo">
       <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/constants/HarpoonConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/constants/HarpoonConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/SkillshotSettings.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/skillshot/SkillshotSettings.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -320,7 +318,15 @@
       <option name="project" value="LOCAL" />
       <updated>1785698775225</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="constants, todo">
+      <option name="closed" value="true" />
+      <created>1785713434602</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1785713434602</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -356,6 +362,7 @@
     <MESSAGE value="adjusted constants&#10;esc now closes minigame&#10;new drone sprite &amp; scaling&#10;removed drone flicker&#10;removed trajectory indicator from rod" />
     <MESSAGE value="fixed descriptions" />
     <MESSAGE value="vulcan fish" />
-    <option name="LAST_COMMIT_MESSAGE" value="vulcan fish" />
+    <MESSAGE value="constants, todo" />
+    <option name="LAST_COMMIT_MESSAGE" value="constants, todo" />
   </component>
 </project>
