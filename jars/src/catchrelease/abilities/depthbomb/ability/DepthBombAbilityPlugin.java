@@ -1,11 +1,10 @@
 package catchrelease.abilities.depthbomb.ability;
 
+import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.depthbomb.constants.DepthBombConstants;
 import catchrelease.abilities.depthbomb.entities.DepthBombEntityPlugin;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
-import catchrelease.memory.upgrades.UpgradeManager;
-import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 import com.fs.starfarer.api.Global;
@@ -25,10 +24,22 @@ import java.awt.Color;
  * <p>
  * The rod waits for a rupture that is already there. This does not wait.
  */
-public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
+public class DepthBombAbilityPlugin extends BaseChargedSkillshotAbility {
 
     /** What the charge pool is kept under. */
     public static final String CHARGE_ID = "catchrelease_depthbomb";
+
+    @Override
+    public String getChargeId() {
+        return CHARGE_ID;
+    }
+
+    @Override
+    public ChargeManager.Refill getRefill() {
+        return new ChargeManager.Refill(
+                StatIds.BOMB_CHARGES, DepthBombConstants.CHARGES_FALLBACK,
+                StatIds.BOMB_RECHARGE_TIME, DepthBombConstants.RECHARGE_FALLBACK);
+    }
 
     @Override
     protected String getActivationText() {
@@ -48,10 +59,7 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null || worldTarget == null) return;
 
-        if (!ChargeManager.spend(CHARGE_ID, StatIds.BOMB_CHARGES,
-                DepthBombConstants.CHARGES_FALLBACK)) {
-            return;
-        }
+        if (!spendCharge()) return;
 
         Vector2f from = new Vector2f(fleet.getLocation());
         Vector2f to = clampToRange(from, worldTarget);
@@ -61,20 +69,6 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
                 new DepthBombEntityPlugin.Params(from, to));
 
         bomb.setLocation(from.x, from.y);
-    }
-
-    @Override
-    public boolean isUsable() {
-        return hasCharge() && super.isUsable();
-    }
-
-    protected boolean hasCharge() {
-        ChargeManager.define(CHARGE_ID, new ChargeManager.Refill(
-                StatIds.BOMB_CHARGES, DepthBombConstants.CHARGES_FALLBACK,
-                StatIds.BOMB_RECHARGE_TIME, DepthBombConstants.RECHARGE_FALLBACK));
-
-        return ChargeManager.hasCharge(CHARGE_ID, StatIds.BOMB_CHARGES,
-                DepthBombConstants.CHARGES_FALLBACK);
     }
 
     /**
@@ -108,10 +102,7 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
                 (int) DepthBombConstants.BLAST_RADIUS + " units");
 
         tooltip.addPara("Charges: %s of %s", 3f, highlight,
-                "" + ChargeManager.getCharges(CHARGE_ID, StatIds.BOMB_CHARGES,
-                        DepthBombConstants.CHARGES_FALLBACK),
-                "" + (int) Math.max(1f, UpgradeManager.getValue(StatIds.BOMB_CHARGES,
-                        DepthBombConstants.CHARGES_FALLBACK)));
+                "" + getCharges(), "" + getMaxCharges());
 
         tooltip.addPara("Closes over %s.", pad, highlight,
                 (int) DepthBombConstants.HEAL_TIME + " seconds");

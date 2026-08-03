@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.ability;
 
+import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -8,7 +9,6 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import org.lazywizard.lazylib.MathUtils;
 import catchrelease.skillshot.GuideLineStyle;
-import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 import com.fs.starfarer.api.Global;
@@ -28,13 +28,25 @@ import java.awt.Color;
  * and the only dashed thing here: the guide is a guide, and the line that goes out is solid, so
  * there is never a moment where the two could be mistaken for each other.
  */
-public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
+public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     /**
      * What the charge pool is kept under. Named here rather than in the manager, so another charged
      * ability never means editing the manager.
      */
     public static final String CHARGE_ID = "catchrelease_harpoon";
+
+    @Override
+    public String getChargeId() {
+        return CHARGE_ID;
+    }
+
+    @Override
+    public ChargeManager.Refill getRefill() {
+        return new ChargeManager.Refill(
+                StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
+                StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK);
+    }
 
     @Override
     protected String getActivationText() {
@@ -53,10 +65,7 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null || worldTarget == null) return;
 
-        if (!ChargeManager.spend(CHARGE_ID, StatIds.HARPOON_CHARGES,
-                HarpoonConstants.CHARGES_FALLBACK)) {
-            return;
-        }
+        if (!spendCharge()) return;
 
         Vector2f from = new Vector2f(fleet.getLocation());
         worldTarget = applyAimAssist(from, worldTarget);
@@ -72,16 +81,7 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        return hasCharge() && hasMoteNearby() && super.isUsable();
-    }
-
-    protected boolean hasCharge() {
-        ChargeManager.define(CHARGE_ID, new ChargeManager.Refill(
-                StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
-                StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK));
-
-        return ChargeManager.hasCharge(CHARGE_ID, StatIds.HARPOON_CHARGES,
-                HarpoonConstants.CHARGES_FALLBACK);
+        return hasMoteNearby() && super.isUsable();
     }
 
     /**
@@ -154,10 +154,7 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 
         tooltip.addPara("Charges: %s of %s", 3f, highlight,
-                "" + ChargeManager.getCharges(CHARGE_ID, StatIds.HARPOON_CHARGES,
-                        HarpoonConstants.CHARGES_FALLBACK),
-                "" + (int) Math.max(1f, UpgradeManager.getValue(StatIds.HARPOON_CHARGES,
-                        HarpoonConstants.CHARGES_FALLBACK)));
+                "" + getCharges(), "" + getMaxCharges());
 
         if (!Global.CODEX_TOOLTIP_MODE && !hasCharge()) {
             tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);
