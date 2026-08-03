@@ -43,7 +43,7 @@ public class DepthBombConstants {
     public static final float EDGE_WIDTH = 0.025f;
 
     public static final Color RIM_COLOR = new Color(255, 195, 225);
-    public static final float RIM_ALPHA = 1.4f;
+    public static final float RIM_ALPHA = 1f;
 
     /** Dark, so the hole reads as depth against the lifted panes rather than as a lighter patch. */
     public static final Color DEEP_TINT = new Color(100, 100, 150);
@@ -51,6 +51,16 @@ public class DepthBombConstants {
     /** The panes themselves: pale glass catching the light. */
     public static final Color PANE_COLOR = new Color(255, 212, 222);
     public static final float PANE_ALPHA = 0.55f;
+
+    /** The pieces that fly: how many, how hard, how big, and how long they last. */
+    public static final int SHARD_COUNT_MIN = 10;
+    public static final int SHARD_COUNT_MAX = 16;
+    public static final float SHARD_SPEED_MIN = 140f;
+    public static final float SHARD_SPEED_MAX = 340f;
+    public static final float SHARD_SIZE_MIN = 8f;
+    public static final float SHARD_SIZE_MAX = 22f;
+    public static final float SHARD_LIFE_MIN = 0.9f;
+    public static final float SHARD_LIFE_MAX = 1.8f;
 
     /**
      * The seismic shove, through GraphicsLib's distortion. Size is world units, intensity is bend.
