@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemPlugin;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.rendering.helper.RoundedBorder;
 import com.fs.starfarer.api.Global;
@@ -58,6 +59,10 @@ public class CatchResultPanel {
     protected final FishCatch entry;
     protected final SectorEntityToken where;
     protected final FishLogEntry.Method method;
+
+    /** What else came up, if anything. Read out after the fish, since the fish is what was played. */
+    protected final String treasure;
+    protected final TreasureRarity treasureRarity;
     protected final List<Line> lines = new ArrayList<>();
 
     protected float elapsed = 0f;
@@ -72,10 +77,13 @@ public class CatchResultPanel {
     transient protected LazyFont.DrawableString prompt;
     transient protected boolean fontsChecked = false;
 
-    public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
+    public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method,
+                            String treasure, TreasureRarity treasureRarity) {
         this.entry = entry;
         this.where = where;
         this.method = method;
+        this.treasure = treasure;
+        this.treasureRarity = treasureRarity;
 
         buildLines();
     }
@@ -107,6 +115,11 @@ public class CatchResultPanel {
         lines.add(new Line("Coherence", FishItemPlugin.getAberrationLabel(entry.aberration),
                 FishItemPlugin.getAberrationColor(entry.aberration)));
         lines.add(new Line("Value", Misc.getDGSCredits(entry.getValue()), Misc.getHighlightColor()));
+
+        //after the specimen, because the specimen is what was being played for
+        if (treasure != null && treasureRarity != null) {
+            lines.add(new Line(treasureRarity.name, treasure, treasureRarity.color));
+        }
 
         //last, so it lands after the number it is about rather than interrupting the tally
         if (record) {

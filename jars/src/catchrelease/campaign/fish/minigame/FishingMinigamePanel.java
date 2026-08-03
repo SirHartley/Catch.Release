@@ -4,6 +4,10 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.treasure.MinigameTreasure;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
+import catchrelease.campaign.fish.treasure.TreasureRoller;
+import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.CatchReleaseSettings;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
@@ -59,6 +63,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** The readout of what was caught. Up until the player dismisses it. */
     transient protected CatchResultPanel result;
 
+    /** What came up alongside the fish, if anything, and what tier it was. */
+    protected String treasureTaken;
+    protected TreasureRarity treasureRarity;
+    protected boolean treasureResolved = false;
+
     /** Held after a fish is lost, so the result is readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
@@ -99,6 +108,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
+        //banked whichever way the fish went: treasure that was taken was taken, and losing the
+        //fish afterwards does not put it back
+        resolveTreasure();
+
         if (minigame.isCaught()) {
             advanceCaught(amount);
             return;
@@ -117,7 +130,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
      */
     protected void advanceCaught(float amount) {
         if (result == null) {
-            result = new CatchResultPanel(specimen, where, method);
+            result = new CatchResultPanel(specimen, where, method, treasureTaken, treasureRarity);
 
             //from the middle of the track, which is where the specimen is shown - not from wherever
             //in the track it happened to be when it was landed
@@ -130,6 +143,23 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         result.advance(amount);
         if (celebration != null) celebration.advance(amount);
+    }
+
+    /**
+     * Puts anything that was taken into the hold, once.
+     * <p>
+     * Ship tackle is passed as false because there is no tackle system yet - when there is, this is
+     * the one line that has to know about it.
+     */
+    protected void resolveTreasure() {
+        if (treasureResolved) return;
+        treasureResolved = true;
+
+        MinigameTreasure treasure = minigame.getTreasure();
+        if (treasure == null || !treasure.isTaken()) return;
+
+        treasureTaken = TreasureRoller.award(treasure.rarity, false);
+        treasureRarity = treasure.rarity;
     }
 
     /** Reports the outcome once, whatever route got here. */
@@ -201,6 +231,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderTrack(layout, alphaMult);
         renderBar(layout, alphaMult);
         renderFish(layout, alphaMult);
+        renderTreasure(layout, alphaMult);
         renderMeter(layout, alphaMult);
 
         //over everything, since they are the thing being looked at once they are up
@@ -355,6 +386,58 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.setSize(size, size);
         sprite.setAlphaMult(alphaMult);
         sprite.renderAtCenter(centerX, centerY);
+    }
+
+    /**
+     * The treasure, if there is any: a stand-in icon with its clock running out underneath it.
+     * <p>
+     * The clock is the whole of the pressure. It does not move and it does not fight, so the only
+     * question it asks is whether it is worth leaving the fish for, and the bar under it is what
+     * that question is asked with.
+     */
+    protected void renderTreasure(FishingMinigameLayout layout, float alphaMult) {
+        MinigameTreasure treasure = minigame.getTreasure();
+        if (treasure == null || !treasure.isActive()) return;
+
+        float centerX = layout.getTrackCenterX();
+        float centerY = layout.getTrackY(treasure.position);
+
+        //a wash of its own colour behind it, so the tier reads before the icon does
+        Disc.draw(centerX, centerY, FishConstants.TREASURE_ICON_SIZE * 0.9f, treasure.rarity.color,
+                0.5f * alphaMult, 0f, true);
+
+        SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.TREASURE_ICON);
+        if (sprite != null) {
+            sprite.setSize(FishConstants.TREASURE_ICON_SIZE, FishConstants.TREASURE_ICON_SIZE);
+            sprite.setNormalBlend();
+            sprite.setAlphaMult(alphaMult);
+            sprite.renderAtCenter(centerX, centerY);
+        }
+
+        //the ring closing as it is held, so the player can see the hold landing rather than guess
+        float held = treasure.getHeldFraction();
+        if (held > 0f) {
+            Disc.drawOutline(centerX, centerY,
+                    FishConstants.TREASURE_ICON_SIZE * (1f - 0.35f * held),
+                    treasure.rarity.color, alphaMult, 2f);
+        }
+
+        renderTreasureClock(treasure, centerX, centerY, alphaMult);
+    }
+
+    /** How long is left, under it. Runs down rather than filling up - it is a loss, not a gain. */
+    protected void renderTreasureClock(MinigameTreasure treasure, float centerX, float centerY,
+                                       float alphaMult) {
+
+        float width = FishConstants.TREASURE_BAR_WIDTH;
+        float height = FishConstants.TREASURE_BAR_HEIGHT;
+
+        float x = centerX - width * 0.5f;
+        float y = centerY - FishConstants.TREASURE_ICON_SIZE * 0.5f
+                - FishConstants.TREASURE_BAR_GAP - height;
+
+        drawQuad(x, y, width, height, Color.BLACK, 0.6f * alphaMult);
+        drawQuad(x, y, width * treasure.getTimeLeft(), height, treasure.rarity.color, 0.9f * alphaMult);
     }
 
     /** Progress towards landing it, beside the track. */
