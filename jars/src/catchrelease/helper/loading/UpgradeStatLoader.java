@@ -64,6 +64,10 @@ public class UpgradeStatLoader {
         s.baseType = parseEnum(optString(row, "type", optString(row, "baseType", "DOUBLE")),
                 UpgradeStat.BaseType.class, UpgradeStat.BaseType.DOUBLE);
 
+        //campaign unless the row says otherwise, since that is what most of them are
+        s.category = parseEnum(optString(row, "category", "CAMPAIGN"),
+                UpgradeStat.Category.class, UpgradeStat.Category.CAMPAIGN);
+
         s.increasePerLevel = optDouble(row, "increasePerLevel", 0d);
         s.upgradeType = parseEnum(optString(row, "increaseType", optString(row, "upgradeType", "FLAT")),
                 UpgradeStat.UpgradeType.class, UpgradeStat.UpgradeType.FLAT);

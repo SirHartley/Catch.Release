@@ -110,12 +110,26 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     public static int getDroneCount() {
-        return 4;
-        /*UpgradeManager upgrades = UpgradeManager.getInstance();
+        return Math.max(1, Math.round(UpgradeManager.getValue(
+                StatIds.FISHING_DRONE_COUNT, RodConstants.DRONE_COUNT_FALLBACK)));
+    }
 
-        if (!upgrades.hasStat(StatIds.FISHING_DRONE_COUNT)) return RodConstants.DRONE_COUNT_FALLBACK;
+    /**
+     * How far out the swarm will fish. The ring the player sees is drawn from the same number, so
+     * buying a bigger one is visible before anything is caught with it.
+     */
+    public static float getRingRadius() {
+        return UpgradeManager.getValue(StatIds.DRONE_CATCH_AREA, RodConstants.RING_RADIUS_FALLBACK);
+    }
 
-        return Math.max(1, Math.round(upgrades.getCurrentValue(StatIds.FISHING_DRONE_COUNT)));*/
+    /**
+     * How far past the ring a drone will follow something.
+     * <p>
+     * Zero by default, which is what makes the ring a boundary rather than a suggestion. Buying it
+     * up lets a drone finish a chase that leaves the ring instead of turning back on the line.
+     */
+    public static float getChaseMargin() {
+        return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN, 0f);
     }
 
     @Override
@@ -178,12 +192,22 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         moteInRing = false;
 
+        List<SectorEntityToken> candidates = new ArrayList<>();
+
         for (SectorEntityToken mote : pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (!isCatchable(mote)) continue;
 
             moteInRing = true;
             if (isTaken(mote)) continue;
 
+            candidates.add(mote);
+        }
+
+        //rarest first, if the rig has been taught to care. Without the upgrade the order is whatever
+        //the location handed back, which is what it always was
+        sortByPriority(candidates);
+
+        for (SectorEntityToken mote : candidates) {
             SectorEntityToken drone = getClosestIdleDrone(mote);
             if (drone == null) return; //everyone is busy, the rest can wait for a free one
 
@@ -191,12 +215,39 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
+    /**
+     * Puts the rarest first, in proportion to how much the rig has been taught to care.
+     * <p>
+     * At zero the order is left alone, which is what it always was. Bought up, a swarm with one free
+     * drone and two motes in the ring sends it after the better one rather than the nearer one.
+     */
+    protected void sortByPriority(List<SectorEntityToken> motes) {
+        final float priority = UpgradeManager.getValue(StatIds.DRONE_RARE_PRIORITY, 0f);
+        if (priority <= 0f || motes.size() < 2) return;
+
+        motes.sort(new java.util.Comparator<SectorEntityToken>() {
+            @Override
+            public int compare(SectorEntityToken a, SectorEntityToken b) {
+                return Integer.compare(getRarityOrdinal(b), getRarityOrdinal(a));
+            }
+        });
+    }
+
+    protected static int getRarityOrdinal(SectorEntityToken mote) {
+        if (!(mote.getCustomPlugin() instanceof FishEntityPlugin)) return 0;
+
+        FishSpec spec = ((FishEntityPlugin) mote.getCustomPlugin()).getFishSpec();
+
+        return spec == null ? 0 : spec.rarity.ordinal();
+    }
+
     /** A mote is worth going after while it is alive, inside the ring, and not already dealt with. */
     protected boolean isCatchable(SectorEntityToken mote) {
         if (mote.isExpired() || !mote.isAlive()) return false;
         if (handled.contains(mote.getId())) return false;
 
-        return Misc.getDistance(mote.getLocation(), target) <= RodConstants.DRONE_ORBIT_RADIUS;
+        //the ring, plus however far past it this rig will follow something
+        return Misc.getDistance(mote.getLocation(), target) <= getRingRadius() + getChaseMargin();
     }
 
     /** Whether some drone is already on this one. */

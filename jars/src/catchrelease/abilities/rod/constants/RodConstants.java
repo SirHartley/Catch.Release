@@ -11,6 +11,13 @@ public class RodConstants {
     /** Radius of the ring the drones fly once they arrive. The reticule is sized to match. */
     public static final float DRONE_ORBIT_RADIUS = 60f;
 
+    /**
+     * The ring the swarm fishes inside, when the upgrade sheet has no row for it. Every real read
+     * goes through the upgrade, so this is the number a save with a missing sheet falls back to
+     * rather than the number the game normally uses.
+     */
+    public static final float RING_RADIUS_FALLBACK = 400f;
+
     /** World units per second on the way out and the way home. */
     public static final float DRONE_SPEED = 300f;
 

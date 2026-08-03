@@ -52,6 +52,37 @@ public class UpgradeManager {
         return stat != null ? stat.maxLevel : 0;
     }
 
+    /**
+     * The current value of a stat, or the fallback if the sheet has no row for it.
+     * <p>
+     * The one call anything using an upgrade should make. A stat that is not in the sheet should
+     * cost the upgrade rather than the feature, and every caller writing its own null check is how
+     * that stops being true.
+     */
+    public static float getValue(String statId, float fallback) {
+        UpgradeManager manager = getInstance();
+
+        if (manager == null || !manager.hasStat(statId)) return fallback;
+
+        return manager.getCurrentValue(statId);
+    }
+
+    /** For the ones that are on or off rather than more or less. */
+    public static boolean isUnlocked(String statId) {
+        return getValue(statId, 0f) > 0f;
+    }
+
+    /** Everything in one category, for a shop that shows them apart. */
+    public java.util.List<UpgradeStat> getByCategory(UpgradeStat.Category category) {
+        java.util.List<UpgradeStat> out = new java.util.ArrayList<>();
+
+        for (UpgradeStat stat : levelMap.values()) {
+            if (stat.category == category) out.add(stat);
+        }
+
+        return out;
+    }
+
     public boolean hasStat(String statId) {
         return levelMap.containsKey(statId);
     }

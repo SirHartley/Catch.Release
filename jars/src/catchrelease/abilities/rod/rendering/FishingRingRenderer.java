@@ -75,7 +75,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     }
 
     protected float getCircumference() {
-        return (float) (2f * Math.PI * RodConstants.DRONE_ORBIT_RADIUS);
+        return (float) (2f * Math.PI * FishingDroneSwarmScript.getRingRadius());
     }
 
     /** Dim while empty; brighter and breathing while there is something in the ring to go after. */
@@ -94,8 +94,8 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
         float step = 360f / RodConstants.RING_SEGMENTS;
 
         for (int i = 0; i < RodConstants.RING_SEGMENTS; i++) {
-            vertices.add(MathUtils.getPointOnCircumference(center, RodConstants.DRONE_ORBIT_RADIUS, step * i));
-            vertices.add(MathUtils.getPointOnCircumference(center, RodConstants.DRONE_ORBIT_RADIUS, step * (i + 1)));
+            vertices.add(MathUtils.getPointOnCircumference(center, FishingDroneSwarmScript.getRingRadius(), step * i));
+            vertices.add(MathUtils.getPointOnCircumference(center, FishingDroneSwarmScript.getRingRadius(), step * (i + 1)));
         }
 
         return vertices;
