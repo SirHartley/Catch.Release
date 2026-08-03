@@ -53,8 +53,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float LIST_WIDTH = 320f;
     public static final float ROW_WIDTH = LIST_WIDTH - 18f;
     public static final float ROW_HEIGHT = 26f;
-    public static final float GROUP_HEIGHT = 30f;
     public static final float DETAIL_GAP = 14f;
+
+    public static final float MAIN_TAB_HEIGHT = 28f;
+    public static final float CATEGORY_TAB_HEIGHT = 24f;
+    public static final float TAB_GAP = 4f;
 
     /** Opens the outfitter, if the UI will have it. */
     public static boolean open() {
@@ -88,6 +91,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected final List<ShopEntry> entries = new ArrayList<>();
         protected String selectedKey;
 
+        /** Which shelf is out: the big split first, the gear within it second. */
+        protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
+        protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
+
+        protected final List<TooltipMakerAPI> tabElements = new ArrayList<>();
+        protected TooltipMakerAPI list;
+
         /** Counted once per change rather than once per frame - the purse walks the whole hold. */
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
 
@@ -102,10 +112,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
             this.callbacks = callbacks;
 
             buildEntries();
-            if (!entries.isEmpty()) selectedKey = entries.get(0).getKey();
+            selectFirstVisible();
 
             refreshWallet();
             buildHeader();
+            buildTabs();
             buildList();
             buildDetail();
         }
@@ -147,25 +158,86 @@ public class FishShopDialog implements InteractionDialogPlugin {
             panel.addComponent(header).inTL(PAD, PAD);
         }
 
-        protected void buildList() {
+        /** The gear a main tab sells, in shelf order. */
+        protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
+            return tab == ShopEntry.Kind.UPGRADE
+                    ? new ShopGroup[]{ShopGroup.SEARCHLIGHTS, ShopGroup.DRONES, ShopGroup.HARPOON,
+                            ShopGroup.DEPTH_BOMBS, ShopGroup.THE_CATCH}
+                    : new ShopGroup[]{ShopGroup.DRONE_TACKLE, ShopGroup.HARPOON_TIPS};
+        }
+
+        /** What the current shelf holds - the list and the default selection are both cut from this. */
+        protected List<ShopEntry> getVisible() {
+            List<ShopEntry> visible = new ArrayList<>();
+
+            for (ShopEntry entry : entries) {
+                if (entry.group == category) visible.add(entry);
+            }
+
+            return visible;
+        }
+
+        protected void selectFirstVisible() {
+            List<ShopEntry> visible = getVisible();
+
+            selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
+        }
+
+        /**
+         * Two rows of the game's own checkboxes standing in for tabs: the big split between what is
+         * bought once and levelled (upgrades) and what is fitted to a slot (modifiers), and under
+         * it the gear within the chosen half. Checkboxes rather than buttons because a tab is a
+         * thing that stays pressed, which is the one thing a button will not do.
+         */
+        protected void buildTabs() {
+            for (TooltipMakerAPI element : tabElements) panel.removeComponent(element);
+            tabElements.clear();
+
             float top = PAD + HEADER_HEIGHT + 10f;
+            float mainWidth = (LIST_WIDTH - TAB_GAP) / 2f;
+
+            ShopEntry.Kind[] kinds = ShopEntry.Kind.values();
+            for (int i = 0; i < kinds.length; i++) {
+                addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
+                        kinds[i] == mainTab, PAD + i * (mainWidth + TAB_GAP), top,
+                        mainWidth, MAIN_TAB_HEIGHT);
+            }
+
+            float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
+            ShopGroup[] groups = getCategories(mainTab);
+            float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
+
+            for (int i = 0; i < groups.length; i++) {
+                addTab(groups[i], groups[i].tabTitle, groups[i] == category,
+                        PAD + i * (categoryWidth + TAB_GAP), categoryTop,
+                        categoryWidth, CATEGORY_TAB_HEIGHT);
+            }
+        }
+
+        protected void addTab(Object data, String label, boolean active, float x, float y,
+                              float width, float height) {
+
+            TooltipMakerAPI element = panel.createUIElement(width, height, false);
+
+            ButtonAPI tab = element.addAreaCheckbox(label, data, Misc.getBasePlayerColor(),
+                    Misc.getDarkPlayerColor(), Misc.getBrightPlayerColor(), width, height, 0f);
+            tab.setChecked(active);
+
+            panel.addUIElement(element).inTL(x, y);
+            tabElements.add(element);
+        }
+
+        protected void buildList() {
+            if (list != null) panel.removeComponent(list);
+
+            float top = PAD + HEADER_HEIGHT + 10f + MAIN_TAB_HEIGHT + TAB_GAP
+                    + CATEGORY_TAB_HEIGHT + 8f;
             float height = HEIGHT - top - PAD;
 
-            TooltipMakerAPI list = panel.createUIElement(LIST_WIDTH, height, true);
+            list = panel.createUIElement(LIST_WIDTH, height, true);
 
-            ShopGroup current = null;
-            for (ShopEntry entry : entries) {
-                if (entry.group != current) {
-                    current = entry.group;
-
-                    CustomPanelAPI groupRow = panel.createCustomPanel(ROW_WIDTH, GROUP_HEIGHT,
-                            new ShopGroupRowPlugin(current, this));
-                    list.addCustom(groupRow, 0f);
-                }
-
-                CustomPanelAPI row = panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
-                        new ShopRowPlugin(entry, this));
-                list.addCustom(row, 3f);
+            for (ShopEntry entry : getVisible()) {
+                list.addCustom(ShopRowPlugin.create(panel, entry, this, ROW_WIDTH, ROW_HEIGHT), 3f);
             }
 
             listViewport = panel.addUIElement(list);
@@ -264,11 +336,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected ShopEntry getSelected() {
-            for (ShopEntry entry : entries) {
+            List<ShopEntry> visible = getVisible();
+
+            for (ShopEntry entry : visible) {
                 if (entry.getKey().equals(selectedKey)) return entry;
             }
 
-            return entries.isEmpty() ? null : entries.get(0);
+            return visible.isEmpty() ? null : visible.get(0);
         }
 
         @Override
@@ -296,6 +370,27 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void buttonPressed(Object buttonId) {
+            if (buttonId instanceof ShopEntry.Kind) {
+                mainTab = (ShopEntry.Kind) buttonId;
+                category = getCategories(mainTab)[0];
+                selectFirstVisible();
+
+                buildTabs();
+                buildList();
+                buildDetail();
+                return;
+            }
+
+            if (buttonId instanceof ShopGroup) {
+                category = (ShopGroup) buttonId;
+                selectFirstVisible();
+
+                buildTabs();
+                buildList();
+                buildDetail();
+                return;
+            }
+
             if (buttonId != buyId) return;
 
             ShopEntry entry = getSelected();

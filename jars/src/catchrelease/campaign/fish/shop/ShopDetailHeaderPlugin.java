@@ -98,7 +98,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
             }
 
             name.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
-            name.draw(x, top);
+            name.draw(Math.round(x), Math.round(top));
 
             top -= name.getHeight() + 10f;
         }
@@ -132,7 +132,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         Color color = entry.isMaxed() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
 
         sub.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        sub.draw(x + ShopUi.getPipRowWidth(max, PIP_SIZE, PIP_GAP) + 10f, top + 1f);
+        sub.draw(Math.round(x + ShopUi.getPipRowWidth(max, PIP_SIZE, PIP_GAP) + 10f), Math.round(top + 1f));
     }
 
     /** What kind of slot a module goes in, and whether it is in it. */
@@ -151,6 +151,6 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         Color color = entry.isFitted() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
 
         sub.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        sub.draw(x, top);
+        sub.draw(Math.round(x), Math.round(top));
     }
 }
