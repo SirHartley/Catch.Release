@@ -70,20 +70,4 @@ public class PondConstants {
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
 
-    /**
-     * The wave a rupture throws when it opens: a handful of rings going out from the middle, one
-     * after another, each wider and thinner than the ring the idle pond makes.
-     * <p>
-     * They are the same ripple rings the pond uses the rest of the time - which is deliberate, since
-     * the opening should read as the pond doing hard what it normally does gently, rather than as a
-     * different effect borrowed for the occasion.
-     */
-    public static final int OPEN_WAVE_RINGS = 4;
-    public static final float OPEN_WAVE_INTERVAL = 0.22f;
-    public static final float OPEN_WAVE_SIZE_MULT = 1.35f;
-    public static final float OPEN_WAVE_WIDTH = 6f;
-    public static final float OPEN_WAVE_GROW_TIME = 1.8f;
-    public static final float OPEN_WAVE_START_MULT = 0.02f;
-    public static final java.awt.Color OPEN_WAVE_COLOR = new java.awt.Color(190, 130, 255);
-
 }

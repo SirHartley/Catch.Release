@@ -48,12 +48,6 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 - **`GL_LINE_STIPPLE` is useless for short segments.** GL restarts the pattern at every
   segment of a `GL_LINES` batch, so anything shorter than one dash draws solid. Dashes are cut
   as geometry in `SkillshotUtils` instead.
-- **GraphicsLib's distortion shaders are combat-only.** `DistortionShader` reads
-  `Global.getCombatEngine().getCustomData()` on every path and `DistortionsPlugin` is a
-  `BaseEveryFrameCombatPlugin`, so there is nothing to register against in the campaign - this
-  is why porting it never worked. The campaign-safe stand-in is mesh warping:
-  `WarpGrid` + `MaskedWarpedSpriteRenderer` distort a sprite by moving vertices, no shader
-  state required.
 - **A camera snapped to a thing kills that thing's parallax.** `ParallaxUtil`'s camera term is
   computed from the distance to the middle of the screen, which is zero for whatever the camera
   is centred on. Anything that has to read as deep while centred needs motion of its own - see
