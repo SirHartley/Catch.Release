@@ -61,6 +61,17 @@ public class FishConstants {
     public static final float MINIGAME_END_LINGER = 0.9f;
     public static final float MINIGAME_FISH_ICON_SIZE = 38f;
 
+    /**
+     * What is shown on the track while the catch is running.
+     * <p>
+     * Not the species. You are playing something you cannot see yet - the readout at the end is
+     * where you find out what it was, and knowing beforehand took that away. The real art is still
+     * used for the celebration and the readout, since by then it has been landed.
+     * <p>
+     * Sonar, when it exists, is the thing that puts the species back on the track.
+     */
+    public static final String MINIGAME_TRACK_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */
     public static final float MINIGAME_BAR_SIZE_FALLBACK = 120f;
