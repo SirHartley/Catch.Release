@@ -37,6 +37,18 @@
 		"pluginClass":"catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin"
 	},
 
+	"catchrelease_BuriedMote":{
+		"defaultRadius":20, # used if radius<0 in addCustomEntity()
+		"showInCampaign":true, # it draws nothing of its own - the searchlight draws the dent it makes
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"layers":[ABOVE],
+		"tags":["catchrelease_buried_mote"],
+		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
+	},
+
 	"catchrelease_DepthBomb":{
 		"defaultRadius":15, # used if radius<0 in addCustomEntity()
 		"showInCampaign":true,

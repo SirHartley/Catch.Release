@@ -3,6 +3,7 @@ package catchrelease.abilities.searchlight.scripts;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -12,6 +13,7 @@ import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
+import org.dark.shaders.distortion.WaveDistortion;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -21,6 +23,11 @@ import java.util.List;
 
 public class Searchlight implements EveryFrameScript {
     public static final Color COLOR = new Color(255, 180, 50, 255);
+
+    /** The beam's lens: how much wider than the light it bends, and how hard. */
+    public static final float LENS_SIZE_MULT = 0.8f;
+    public static final float LENS_INTENSITY = 9f;
+    public static final float LENS_FADE_IN = 0.6f;
 
     public static final float SINE_CADENCE = 90f; //distance the sine wave takes off the arc
     public static final float OSCILLATION_TIME_MULT = 0.7f; //this affects how nervous the searchlights feel
@@ -37,6 +44,15 @@ public class Searchlight implements EveryFrameScript {
 
     private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
     private boolean expired = false;
+
+    /**
+     * The beam's own bend, through GraphicsLib's distortion.
+     * <p>
+     * Kept alive and moved rather than respawned, so it is one lens travelling with the light rather
+     * than a trail of them left behind it. Transient: a distortion is worth nothing on load, and the
+     * renderer holds GL state that certainly is not.
+     */
+    private transient WaveDistortion lens;
 
     @Override
     public boolean isDone() {
@@ -63,6 +79,7 @@ public class Searchlight implements EveryFrameScript {
         if (expired || arc == null) return;
 
         advanceMovement(amt);
+        advanceLens();
 
         // splash
         ringInterval.advance(amt);
@@ -99,6 +116,33 @@ public class Searchlight implements EveryFrameScript {
         updateRenderLoc(renderPos);
     }
 
+    /**
+     * A lens under the beam, following it. The light is looking through the fabric, so it ought to
+     * bend what is behind it - and a distortion that moves with the light is what says the beam is
+     * the thing doing the looking.
+     */
+    protected void advanceLens() {
+        if (!CampaignDistortionRenderer.isSupported()) return;
+
+        float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+
+        if (lens == null) {
+            lens = new WaveDistortion(new Vector2f(currentRenderLoc), new Vector2f());
+
+            lens.setSize(size * LENS_SIZE_MULT);
+            lens.setIntensity(LENS_INTENSITY);
+            lens.setLifetime(Float.MAX_VALUE);
+            lens.fadeInSize(LENS_FADE_IN);
+
+            CampaignDistortionRenderer.addDistortion(lens);
+            return;
+        }
+
+        //moved rather than respawned - one lens travelling, not a trail of them left behind
+        lens.setLocation(new Vector2f(currentRenderLoc));
+        lens.setSize(size * LENS_SIZE_MULT);
+    }
+
     public void updateRenderLoc(Vector2f newLoc){
         currentRenderLoc.x = newLoc.x;
         currentRenderLoc.y = newLoc.y;
@@ -110,6 +154,13 @@ public class Searchlight implements EveryFrameScript {
         if (glow != null) glow.fadeAndExpire(fadeSeconds);
 
         rings.clear();
+
+        //the lens has no fade of its own worth waiting on: it goes with the light
+        if (lens != null) {
+            CampaignDistortionRenderer.removeDistortion(lens);
+            lens = null;
+        }
+
         expired = true;
     }
 

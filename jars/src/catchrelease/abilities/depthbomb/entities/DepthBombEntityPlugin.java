@@ -1,6 +1,7 @@
 package catchrelease.abilities.depthbomb.entities;
 
 import catchrelease.abilities.depthbomb.constants.DepthBombConstants;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.loading.SpriteLoader;
@@ -16,6 +17,8 @@ import com.fs.starfarer.api.util.Misc;
 import org.dark.shaders.distortion.RippleDistortion;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.util.ArrayList;
 
 /**
  * The depth bomb: thrown at a spot, and what it leaves behind.
@@ -132,6 +135,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.BROKEN);
 
         throwShock(1f);
+        unearthBuried();
         shakeLoose();
 
         if (!DepthBombConstants.SOUND_DETONATE.isEmpty()) {
@@ -156,8 +160,38 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * What was on the other side. Spawned at the break and swimming outward, which is the difference
-     * between this and a pond: a pond is a place things live, this is a hole somebody made.
+     * Anything the searchlight found under here comes through.
+     * <p>
+     * This is what the light is for: a buried mote is a thing you can see the dent of and do nothing
+     * about, and a bomb over one turns it into something that can actually be taken. Finding one and
+     * breaking it open are two halves of the same job, and this is the seam between them.
+     *
+     * @return how many came through
+     */
+    protected int unearthBuried() {
+        int count = 0;
+
+        for (SectorEntityToken buried : new ArrayList<>(
+                entity.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG))) {
+
+            if (buried.isExpired()) continue;
+            if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
+
+            if (Misc.getDistance(entity.getLocation(), buried.getLocation())
+                    > DepthBombConstants.BLAST_RADIUS) {
+                continue;
+            }
+
+            if (((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth() != null) count++;
+        }
+
+        return count;
+    }
+
+    /**
+     * What was on the other side anyway, over and above anything the light had already found.
+     * Spawned at the break and swimming outward, which is the difference between this and a pond: a
+     * pond is a place things live, this is a hole somebody made.
      */
     protected void shakeLoose() {
         int count = MathUtils.getRandomNumberInRange(
