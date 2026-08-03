@@ -14,15 +14,14 @@ import java.io.IOException;
 /**
  * A break in the fabric, drawn as one quad of procedural shattered glass.
  * <p>
- * The anatomy of a pane hit hard: a dark irregular hole where it was struck with the deep field
- * showing through, the sheet around it in lifted panes that catch the light each at their own
- * angle, black separation between the panes near the hole where they have been shoved apart,
- * hairline cracks running out much further than any pane - a couple much further than the rest -
- * and every broken edge lit by what is spilling out of the hole. Nothing here is authored art: the
- * shape comes out of the seed, so no two breaks are the same one rotated.
+ * A dark irregular hole with the deep field showing through, and a ring of near-black teeth
+ * standing around it with clear sky between them - silhouettes, not glass catching light, with
+ * nothing bright about them but the hairline where each one ends. Nothing here is authored art:
+ * the shape comes out of the seed, so no two breaks are the same one rotated.
  * <p>
- * It heals by retracting rather than by fading. A crack that dissolves in place reads as a decal
- * being switched off; one that pulls its shards back in reads as something closing.
+ * It closes rather than fades: the teeth grow into the centre over the rift's life, meet, and only
+ * then does what is left of them go. A crack that dissolves in place reads as a decal being
+ * switched off; a hole that is swallowed by its own edges reads as something healing.
  */
 public class FractureRenderer {
 
@@ -35,7 +34,7 @@ public class FractureRenderer {
     protected transient int uDeepTex = -1;
     protected transient int uAlphaMult = -1;
     protected transient int uTime = -1;
-    protected transient int uOpen = -1;
+    protected transient int uHeal = -1;
     protected transient int uSeed = -1;
     protected transient int uShards = -1;
     protected transient int uCoreSize = -1;
@@ -68,27 +67,27 @@ public class FractureRenderer {
         this.deepTint = deepTint;
     }
 
-    /** The lifted panes themselves - glass catching the light. */
+    /** The teeth themselves - near-black silhouette, not glass catching light. */
     public void setPanes(Color paneColor, float paneAlpha) {
         this.paneColor = paneColor;
         this.paneAlpha = paneAlpha;
     }
 
     /**
-     * @param open 1 the instant it breaks, 0 once it has closed
+     * @param heal 0 the instant it breaks, 1 once it has healed shut
      * @param time seconds, for the drift of whatever is showing through
      */
-    public void render(SpriteAPI deep, Vector2f center, float size, float seed, float open,
+    public void render(SpriteAPI deep, Vector2f center, float size, float seed, float heal,
                        float time, float alphaMult) {
 
-        if (deep == null || center == null || size <= 0f || open <= 0f || alphaMult <= 0f) return;
+        if (deep == null || center == null || size <= 0f || heal >= 1f || alphaMult <= 0f) return;
         if (!load()) return;
 
         GL20.glUseProgram(program);
 
         if (uAlphaMult >= 0) GL20.glUniform1f(uAlphaMult, alphaMult);
         if (uTime >= 0) GL20.glUniform1f(uTime, time);
-        if (uOpen >= 0) GL20.glUniform1f(uOpen, open);
+        if (uHeal >= 0) GL20.glUniform1f(uHeal, heal);
         if (uSeed >= 0) GL20.glUniform1f(uSeed, seed);
         if (uShards >= 0) GL20.glUniform1f(uShards, shards);
         if (uCoreSize >= 0) GL20.glUniform1f(uCoreSize, coreSize);
@@ -162,7 +161,7 @@ public class FractureRenderer {
         uDeepTex = GL20.glGetUniformLocation(program, "deepTex");
         uAlphaMult = GL20.glGetUniformLocation(program, "alphaMult");
         uTime = GL20.glGetUniformLocation(program, "time");
-        uOpen = GL20.glGetUniformLocation(program, "open");
+        uHeal = GL20.glGetUniformLocation(program, "heal");
         uSeed = GL20.glGetUniformLocation(program, "seed");
         uShards = GL20.glGetUniformLocation(program, "shards");
         uCoreSize = GL20.glGetUniformLocation(program, "coreSize");
