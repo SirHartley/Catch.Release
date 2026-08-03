@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.campaign.fish.data.FishMotion;
@@ -62,6 +63,9 @@ public class FishingMinigame {
      * appear at any moment would be a thing to wait for rather than a thing to react to.
      */
     protected MinigameTreasure treasure;
+
+    /** What is fitted. Read once when the catch starts; changing gear mid-catch is not a thing. */
+    protected Tackle tackle = Tackle.NONE;
     protected State state = State.RUNNING;
 
     /** Set from dev mode at the start - kept as a field so this stays testable without a game. */
@@ -81,7 +85,9 @@ public class FishingMinigame {
         this.escapeRateMult = fish.escapeRateMult;
         this.motion = fish.motion;
 
-        this.barHeight = getBarHeight();
+        //clamped after the tackle has had its say, so a wide window is still a window
+        this.barHeight = MathUtils.clamp(getBarHeight() * tackle.barSizeMult,
+                FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
         this.fishTarget = pickFishTarget();
         this.cannotLose = Global.getSettings().isDevMode();
     }
@@ -96,7 +102,7 @@ public class FishingMinigame {
         fishTarget = pickFishTarget();
         progress = FishConstants.MINIGAME_PROGRESS_START;
 
-        treasure = TreasureRoller.rollForTreasure()
+        treasure = TreasureRoller.rollForTreasure(tackle.treasureChanceMult)
                 ? new MinigameTreasure(TreasureRoller.rollRarity())
                 : null;
         state = State.RUNNING;
@@ -129,7 +135,9 @@ public class FishingMinigame {
 
     /** Hold to lift, let go to fall. The bar keeps its momentum, so it is aimed rather than driven. */
     protected void advanceBar(float amount, boolean reeling) {
-        barVelocity += (reeling ? FishConstants.MINIGAME_BAR_LIFT : -FishConstants.MINIGAME_BAR_GRAVITY) * amount;
+        barVelocity += (reeling
+                ? FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult
+                : -FishConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult) * amount;
         barVelocity = MathUtils.clamp(barVelocity, -FishConstants.MINIGAME_BAR_MAX_SPEED, FishConstants.MINIGAME_BAR_MAX_SPEED);
 
         barPosition += barVelocity * amount;
@@ -191,10 +199,12 @@ public class FishingMinigame {
         if (isFishInBar()) {
             timeHeld += amount;
             progress += FishConstants.MINIGAME_CATCH_RATE * progressRateMult * amount
-                    * UpgradeManager.getValue(StatIds.MINIGAME_PROGRESS_RATE, 1f);
+                    * UpgradeManager.getValue(StatIds.MINIGAME_PROGRESS_RATE, 1f)
+                    * tackle.progressMult;
         } else {
             progress -= FishConstants.MINIGAME_ESCAPE_RATE * escapeRateMult * amount
-                    * UpgradeManager.getValue(StatIds.MINIGAME_ESCAPE_RESIST, 1f);
+                    * UpgradeManager.getValue(StatIds.MINIGAME_ESCAPE_RESIST, 1f)
+                    * tackle.escapeMult;
         }
 
         if (progress >= 1f) {
@@ -236,6 +246,15 @@ public class FishingMinigame {
     }
 
     /** Null when there is nothing down there, which is most catches. */
+    /** Set by whoever opened the catch, before it starts. */
+    public void setTackle(Tackle tackle) {
+        this.tackle = tackle == null ? Tackle.NONE : tackle;
+    }
+
+    public Tackle getTackle() {
+        return tackle;
+    }
+
     public MinigameTreasure getTreasure() {
         return treasure;
     }

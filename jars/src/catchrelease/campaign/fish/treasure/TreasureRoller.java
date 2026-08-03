@@ -39,8 +39,9 @@ public class TreasureRoller {
      * Whether anything at all is down there this time. Deliberately low: treasure that shows up
      * every other catch is not treasure, it is a second reward slot.
      */
-    public static boolean rollForTreasure() {
-        return MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.TREASURE_CHANCE;
+    public static boolean rollForTreasure(float chanceMult) {
+        return MathUtils.getRandomNumberInRange(0f, 1f)
+                < FishConstants.TREASURE_CHANCE * Math.max(0f, chanceMult);
     }
 
     public static TreasureRarity rollRarity() {

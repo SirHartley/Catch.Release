@@ -2,6 +2,8 @@ package catchrelease.campaign.fish.spawner;
 
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -39,7 +41,7 @@ public class PondFishSpawner {
             if (spec.spawnWeight <= 0f) continue;
             if (!spec.matches(starType, tags, region)) continue;
 
-            picker.add(spec, spec.spawnWeight);
+            picker.add(spec, spec.spawnWeight * getRarityWeight(spec));
         }
 
         if (picker.isEmpty()) {
@@ -49,6 +51,21 @@ public class PondFishSpawner {
         }
 
         return picker.pick();
+    }
+
+    /**
+     * How much a rarer species is favoured, from whatever is fitted to the drones.
+     * <p>
+     * The pond is the drones' own ground, so it is the drone slot that is read - a resonator sings
+     * to what is down there whether or not anything has been sent after it yet. One at a time: the
+     * bias is raised to the rarity's own step, so a legendary feels it four times over and a common
+     * not at all.
+     */
+    protected static float getRarityWeight(FishSpec spec) {
+        float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias;
+        if (bias == 1f || spec.rarity == null) return 1f;
+
+        return (float) Math.pow(bias, spec.rarity.ordinal());
     }
 
     /**
