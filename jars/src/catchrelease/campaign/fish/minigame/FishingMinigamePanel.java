@@ -342,12 +342,13 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerX = layout.getTrackCenterX() + getJitter(0f);
         float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
 
-        SpriteAPI sprite = getFishSprite();
+        SpriteAPI sprite = getTrackSprite();
 
         if (sprite == null) {
-            //no icon for this row - a marker is better than nothing to aim at
+            //no stand-in art - a marker is better than nothing to aim at. Deliberately not the
+            //rarity colour: that would say what is on the line as plainly as the art would
             drawQuad(centerX - size * 0.25f, centerY - size * 0.25f, size * 0.5f, size * 0.5f,
-                    minigame.getFish().rarity.color, alphaMult);
+                    Misc.getBrightPlayerColor(), alphaMult);
             return;
         }
 
@@ -391,7 +392,21 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
     }
 
-    /** The fish's own icon from the table, loaded on first use. */
+    /**
+     * What is drawn on the track: a stand-in, not the species.
+     * <p>
+     * The catch is played against something you have not identified yet, and the readout at the end
+     * is where you find out what it was. Showing the art up front answered the question before it
+     * had been asked.
+     * <p>
+     * This is the one place that decides it, so sonar - which is supposed to hand the species back -
+     * is a condition here and nothing else changes.
+     */
+    protected SpriteAPI getTrackSprite() {
+        return SpriteLoader.loadSprite(FishConstants.MINIGAME_TRACK_ICON);
+    }
+
+    /** The fish's own icon from the table, loaded on first use. For the celebration and the readout. */
     protected SpriteAPI getFishSprite() {
         if (fishSpriteChecked) return fishSprite;
         fishSpriteChecked = true;
