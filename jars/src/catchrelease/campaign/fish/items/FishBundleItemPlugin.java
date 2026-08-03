@@ -4,12 +4,14 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
 import com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin;
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -92,6 +94,12 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
     }
 
+    /**
+     * The same anatomy the specimen's tooltip has, which is the anatomy vanilla gives an item:
+     * title, typed line, labelled rows, and the base class's cost label so the price speaks with
+     * the market's voice. The contents are said by grade rather than a line each - a full crate
+     * would run off the screen.
+     */
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -101,18 +109,31 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
             return;
         }
 
-        float pad = 10f;
+        FishSpec spec = contents.get(0).getSpec();
+        float opad = 10f;
 
         //F2 over the crate would otherwise open the codex on the generic bundle item, which is what
         //vanilla resolves from the item spec; point it at the species the crate holds instead
         tooltip.setCodexEntryId(FishCodex.getEntryId(contents.get(0).speciesId));
 
-        tooltip.addTitle(getName());
+        if (!Global.CODEX_TOOLTIP_MODE) {
+            tooltip.addTitle(getName());
+        } else {
+            tooltip.addSpacer(-opad);
+        }
 
-        tooltip.addPara("%s specimens of %s, stowed together.", pad, Misc.getHighlightColor(),
-                "" + contents.size(), contents.get(0).getDisplayName());
+        if (spec != null) {
+            tooltip.addPara("Species type: %s", opad, Misc.getGrayColor(), spec.rarity.color,
+                    Misc.ucFirst(spec.rarity.name().toLowerCase()));
+        }
 
-        //what is in it, by grade, rather than a line each - a full crate would run off the screen
+        if (Global.CODEX_TOOLTIP_MODE) {
+            tooltip.setParaSmallInsignia();
+        }
+
+        tooltip.addPara("Contains: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
+                contents.size() + " specimens of " + contents.get(0).getDisplayName());
+
         Map<FishGrade, Integer> byGrade = new EnumMap<>(FishGrade.class);
         float best = 0f;
         for (FishCatch entry : contents) {
@@ -121,15 +142,17 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
 
         for (Map.Entry<FishGrade, Integer> line : byGrade.entrySet()) {
-            tooltip.addPara("%s   %s", 3f, line.getKey().getColor(),
+            tooltip.addPara(BaseIntelPlugin.BULLET + "%s   %s", 3f, line.getKey().getColor(),
                     line.getKey().name, "x" + line.getValue());
         }
 
-        tooltip.addPara("Longest: %s", pad, Misc.getHighlightColor(), String.format("%.2f m", best));
+        tooltip.addPara("Longest: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
+                String.format("%.2f m", best));
 
-        //the same two marks the crate's icon carries, said once so they are not a mystery
-        tooltip.addPara("Marked across the top of the icon: the species' rarity as the bar, then the best"
-                + " grade in the crate as the pips after it.", Misc.getGrayColor(), pad);
-        tooltip.addPara("Right-click to unpack.", Misc.getGrayColor(), 3f);
+        addCostLabel(tooltip, opad, transferHandler, stackSource);
+
+        if (!Global.CODEX_TOOLTIP_MODE) {
+            tooltip.addPara("Right-click to unpack.", Misc.getGrayColor(), opad);
+        }
     }
 }

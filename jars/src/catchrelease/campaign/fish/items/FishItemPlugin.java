@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
@@ -138,6 +139,12 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
 
+    /**
+     * Laid out the way vanilla lays out a special item: title, the typed line under it, labelled
+     * rows for the numbers, the description in the text colour, and the cost label the base class
+     * builds - which is what makes the price say "Sells for" at a market and "Base value" in the
+     * hold, the same way every other item's does.
+     */
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -149,39 +156,44 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         FishSpec spec = entry.getSpec();
         FishGrade grade = entry.getGrade();
-        float pad = 10f;
+        float opad = 10f;
 
         //F2 over the stack would otherwise open the codex on the generic "Fish" item, which is what
         //vanilla resolves from the item spec; point it at the species being held instead
         tooltip.setCodexEntryId(FishCodex.getEntryId(entry.speciesId));
 
-        tooltip.addTitle(entry.getDisplayName());
-
-        //rarity first: it is the first mark on the icon, and until now nothing said what it was
-        if (spec != null) {
-            tooltip.addPara("%s species, %s specimen", pad,
-                    new java.awt.Color[]{spec.rarity.color, grade.getColor()},
-                    Misc.ucFirst(spec.rarity.name().toLowerCase()), grade.name);
+        if (!Global.CODEX_TOOLTIP_MODE) {
+            tooltip.addTitle(entry.getDisplayName());
         } else {
-            tooltip.addPara("%s specimen", pad, grade.getColor(), grade.name);
+            tooltip.addSpacer(-opad);
         }
-        tooltip.addPara("Length: %s   Weight: %s", 3f, Misc.getHighlightColor(),
+
+        //where a manufactured thing says its design type, a grown one says its species' standing
+        if (spec != null) {
+            tooltip.addPara("Species type: %s", opad, Misc.getGrayColor(), spec.rarity.color,
+                    Misc.ucFirst(spec.rarity.name().toLowerCase()));
+        }
+
+        if (Global.CODEX_TOOLTIP_MODE) {
+            tooltip.setParaSmallInsignia();
+        }
+
+        tooltip.addPara("Specimen grade: %s", opad, Misc.getGrayColor(), grade.getColor(), grade.name);
+        tooltip.addPara("Length: %s   Weight: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 String.format("%.2f m", entry.length), String.format("%.1f kg", entry.weight));
-        tooltip.addPara("Coherence: %s", 3f, getAberrationColor(entry.aberration),
+        tooltip.addPara("Coherence: %s", 3f, Misc.getGrayColor(), getAberrationColor(entry.aberration),
                 getAberrationLabel(entry.aberration));
 
         if (spec != null && spec.desc != null && !spec.desc.isEmpty()) {
-            tooltip.addPara(spec.desc, Misc.getGrayColor(), pad);
+            tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
         }
 
-        tooltip.addPara("Worth around %s.", pad, Misc.getHighlightColor(),
-                Misc.getDGSCredits(entry.getValue()));
+        addCostLabel(tooltip, opad, transferHandler, stackSource);
 
-        //said here because the item's own description is not shown once there is a specimen to describe
-        tooltip.addPara("Marked across the top of the icon: rarity as the bar, then grade as the pips"
-                + " after it.", Misc.getGrayColor(), pad);
-        tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every one"
-                + " aboard.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
+        if (!Global.CODEX_TOOLTIP_MODE) {
+            tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every"
+                    + " one aboard.", opad, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
+        }
     }
 
     /** Said as how well it is holding rather than as a number, which is not a thing a crew would read off. */

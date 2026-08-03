@@ -25,7 +25,10 @@ import java.util.List;
  * <p>
  * Custom throughout, because a fish is not a thing the game has loaded. There is no hull, no weapon,
  * no commodity behind it - only a row in fish.csv and whatever the player has managed to catch - so
- * every part of the entry that vanilla would derive from a spec is built here instead.
+ * every part of the entry that vanilla would derive from a spec is built here instead. Built in the
+ * shape vanilla gives a special item's entry, though: the typed line, the labelled rows, the
+ * description, the effect prose, and a base value line at the bottom - so a fish page and an item
+ * page read as the same book.
  * <p>
  * Hidden until the species has been caught. {@link #isVisible()} is asked at draw time rather than
  * at build time, which matters: the codex is generated once when the game loads and would otherwise
@@ -116,8 +119,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         addIdentity(text, spec, opad);
         addRecord(text, logged, opad);
-        addCatchData(text, spec, logged, opad);
         addLocationData(text, logged, opad);
+        addBaseValue(text, logged, opad);
 
         panel.updateUIElementSizeAndMakeItProcessInput(text);
 
@@ -159,59 +162,34 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         panel.getPosition().setSize(width, height);
     }
 
-    /** What it is, before anything about what was done to it. */
+    /**
+     * What it is, in the shape vanilla gives an item: the typed line first, labelled rows for the
+     * numbers under it, then the description in the text colour - the codex's own title bar has
+     * already said the name, so the box does not say it again.
+     */
     protected void addIdentity(TooltipMakerAPI text, FishSpec spec, float opad) {
         if (spec == null) {
-            text.addPara("The table no longer has a row for this one.", Misc.getNegativeHighlightColor(), opad);
+            text.addPara("The table no longer has a row for this one.", Misc.getNegativeHighlightColor(), 0f);
             return;
         }
 
-        text.addPara("%s species", 0f, spec.rarity.color,
+        text.addPara("Species type: %s", 0f, Misc.getGrayColor(), spec.rarity.color,
                 Misc.ucFirst(spec.rarity.name().toLowerCase()));
 
+        text.addPara("Difficulty: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
+                getDifficultyLabel(spec.difficulty));
+        text.addPara("Behaviour: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                spec.motion.name().toLowerCase() + ", runs at "
+                        + String.format("%.1fx", spec.motionSpeed)
+                        + ", turns " + getRestlessnessLabel(spec.restlessness));
+
         if (spec.desc != null && !spec.desc.isEmpty()) {
-            text.addPara(spec.desc, Misc.getGrayColor(), opad);
+            text.addPara(spec.desc, Misc.getTextColor(), opad);
         }
     }
 
-    /** The best one, and the story of it: how big, from where, when, and by what. */
+    /** The tally and the best of it, as prose with the numbers lit - where an item says its effect. */
     protected void addRecord(TooltipMakerAPI text, FishLogEntry logged, float opad) {
-        if (logged == null) return;
-
-        text.addSectionHeading("Record", Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                com.fs.starfarer.api.ui.Alignment.MID, opad);
-
-        text.addPara("Length: %s   Weight: %s", opad, Misc.getHighlightColor(),
-                String.format("%.2f m", logged.recordLength),
-                String.format("%.1f kg", logged.recordWeight));
-
-        text.addPara("Taken %s in %s, by %s.", 3f, Misc.getHighlightColor(),
-                getDate(logged.recordTimestamp),
-                logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName,
-                logged.recordMethod.name);
-
-        text.addPara("Landed %s of these so far. The first %s in %s.", 3f, Misc.getHighlightColor(),
-                logged.caught + (logged.caught == 1 ? " specimen" : " specimens"),
-                getDate(logged.firstTimestamp),
-                logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
-    }
-
-    /**
-     * What it takes to land one. Written from the row rather than from the catch, because this is
-     * the part a player wants before going out again rather than after coming back.
-     */
-    protected void addCatchData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged, float opad) {
-        if (spec == null) return;
-
-        text.addSectionHeading("Catch data", Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                com.fs.starfarer.api.ui.Alignment.MID, opad);
-
-        text.addPara("Difficulty: %s   Behaviour: %s", opad, Misc.getHighlightColor(),
-                getDifficultyLabel(spec.difficulty), String.valueOf(spec.motion));
-
-        text.addPara("Runs at %s and turns %s.", 3f, Misc.getHighlightColor(),
-                String.format("%.1fx", spec.motionSpeed), getRestlessnessLabel(spec.restlessness));
-
         if (logged == null) return;
 
         //rebuilt from the recorded numbers rather than stored, so a retuned table regrades old
@@ -219,7 +197,21 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishGrade best = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
                 logged.recordAberration).getGrade();
 
-        text.addPara("Best specimen graded %s.", 3f, best.getColor(), best.name);
+        text.addPara("Landed %s so far; the first %s in %s.", opad, Misc.getHighlightColor(),
+                logged.caught + (logged.caught == 1 ? " specimen" : " specimens"),
+                getDate(logged.firstTimestamp),
+                logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
+
+        Color hl = Misc.getHighlightColor();
+
+        text.addPara("The record specimen ran %s at %s, graded %s, taken %s in %s by %s.", 3f,
+                new Color[]{hl, hl, best.getColor(), hl, hl, hl},
+                String.format("%.2f m", logged.recordLength),
+                String.format("%.1f kg", logged.recordWeight),
+                best.name,
+                getDate(logged.recordTimestamp),
+                logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName,
+                logged.recordMethod.name);
     }
 
     /**
@@ -229,16 +221,15 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      * recorded, and a locked block says there is something here to buy.
      */
     protected void addLocationData(TooltipMakerAPI text, FishLogEntry logged, float opad) {
-        text.addSectionHeading("Catch location data", Misc.getBasePlayerColor(),
-                Misc.getDarkPlayerColor(), com.fs.starfarer.api.ui.Alignment.MID, opad);
-
         if (logged == null || !logged.locationDataUnlocked) {
-            text.addPara("Sealed. Survey data for this species can be bought from someone who has"
-                    + " been where it lives.", Misc.getGrayColor(), opad);
+            text.addPara("Catch location data: %s. Survey data for this species can be bought from"
+                    + " someone who has been where it lives.", opad, Misc.getGrayColor(),
+                    Misc.getNegativeHighlightColor(), "sealed");
             return;
         }
 
-        text.addPara("Recorded in %s.", opad, Misc.getHighlightColor(),
+        text.addPara("Catch location data: recorded in %s.", opad, Misc.getGrayColor(),
+                Misc.getHighlightColor(),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
 
         if (logged.recordLocationInHyper == null) {
@@ -246,10 +237,19 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             return;
         }
 
-        text.addPara("The circle is where it was taken, on the sector map.", Misc.getGrayColor(), 3f);
-
         //the map itself, drawn rather than described
         text.addCustom(new FishLocationMap(logged).build(text, opad), opad);
+    }
+
+    /** The line every item ends on, priced at the record specimen since a species has no one price. */
+    protected void addBaseValue(TooltipMakerAPI text, FishLogEntry logged, float opad) {
+        if (logged == null) return;
+
+        FishCatch record = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
+                logged.recordAberration);
+
+        text.addPara("Base value: %s (the record specimen)", opad, Misc.getGrayColor(),
+                Misc.getHighlightColor(), Misc.getDGSCredits(record.getValue()));
     }
 
     protected static String getDate(long timestamp) {
