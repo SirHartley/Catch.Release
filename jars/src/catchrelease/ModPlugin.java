@@ -2,6 +2,7 @@ package catchrelease;
 
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.intel.FishMapIntel;
 import catchrelease.campaign.fish.spawner.BuriedMoteSpawner;
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
 import catchrelease.skillshot.SkillshotFramework;
@@ -29,6 +30,7 @@ public class ModPlugin extends BaseModPlugin {
         //Static fishing spots
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();
+        FishMapIntel.register();
 
         //data
         UpgradeManager.getInstance().updateBaseValues();

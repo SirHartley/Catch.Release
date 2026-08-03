@@ -316,6 +316,23 @@ public class FishConstants {
     public static final float CODEX_MAP_MARK_PULSE_RATE = 2.4f;
 
     /**
+     * The sector map intel entry: where things have been found, and where they are said to be.
+     * <p>
+     * A pin is a fact - somewhere one was actually landed. A shaded region is a hint, which is all
+     * location data amounts to for something never caught. REGION_ALPHA is low because several
+     * species can declare the same quadrant and the shading stacks.
+     */
+    public static final String MAP_INTEL_TITLE = "Catch locations";
+    public static final float MAP_SIDEBAR_WIDTH = 240f;
+    public static final float MAP_PAD = 12f;
+    public static final float MAP_DOT_SIZE = 1f;
+    public static final float MAP_DOT_ALPHA = 0.6f;
+    public static final float MAP_REGION_ALPHA = 0.05f;
+    public static final float MAP_PIN_SIZE = 22f;
+    public static final float MAP_PIN_GLOW = 16f;
+    public static final float MAP_PIN_GLOW_ALPHA = 0.35f;
+
+    /**
      * Buried motes: the things on the other side of the fabric that a searchlight finds and a depth
      * bomb lets through.
      * <p>

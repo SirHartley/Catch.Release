@@ -56,6 +56,39 @@ public enum SectorRegion {
         return east ? RIM_SE : RIM_SW;
     }
 
+    /**
+     * The corner of the sector this region covers, as {minX, minY, maxX, maxY}.
+     * <p>
+     * The same arithmetic {@link #of(LocationAPI)} does, read the other way round - so a map drawn
+     * from these shades exactly the systems that would qualify, rather than approximately them.
+     * <p>
+     * The rim quadrants are open-ended by nature, so they are given the sector's own extent as their
+     * outer edge; the caller passes in how far out that is. ABYSSAL has no corner at all - it is a
+     * tag on a system rather than a place - and returns null.
+     */
+    public float[] getBounds(float sectorHalfWidth, float sectorHalfHeight) {
+        if (this == ABYSSAL) return null;
+
+        float coreW = FishConstants.CORE_BAND_HALF_WIDTH;
+        float coreH = FishConstants.CORE_BAND_HALF_HEIGHT;
+
+        boolean core = name().startsWith("CORE");
+        boolean north = name().endsWith("NE") || name().endsWith("NW");
+        boolean east = name().endsWith("NE") || name().endsWith("SE");
+
+        float minX = east ? 0f : (core ? -coreW : -sectorHalfWidth);
+        float maxX = east ? (core ? coreW : sectorHalfWidth) : 0f;
+        float minY = north ? 0f : (core ? -coreH : -sectorHalfHeight);
+        float maxY = north ? (core ? coreH : sectorHalfHeight) : 0f;
+
+        return new float[]{minX, minY, maxX, maxY};
+    }
+
+    /** Whether this region is one of the four inner quadrants. */
+    public boolean isCore() {
+        return name().startsWith("CORE");
+    }
+
     /** Parses a name from the fish table, or null if it is not one of ours. */
     public static SectorRegion parse(String name) {
         if (name == null) return null;
