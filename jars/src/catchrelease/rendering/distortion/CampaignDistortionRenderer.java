@@ -9,6 +9,8 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderingPlugin;
 import org.apache.log4j.Level;
 import org.dark.shaders.distortion.DistortionAPI;
 import org.dark.shaders.util.ShaderLib;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.lwjgl.opengl.ARBFramebufferObject;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -55,8 +57,14 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected static final String VERT_AUX = "data/shaders/distortion/2dtangent.vert";
     protected static final String FRAG_AUX = "data/shaders/distortion/2dtangent.frag";
 
-    /** Same ceiling GraphicsLib uses, for the same reason: the aux pass is one draw per distortion. */
+    protected static final String SETTINGS = "GRAPHICS_OPTIONS.ini";
+
+    /** GraphicsLib's default and the fallback here; the ceiling that counts is the user's setting. */
     public static final int MAX_DISTORTIONS = 100;
+
+    protected static boolean settingsRead = false;
+    protected static boolean enableDistortion = false;
+    protected static int maxDistortions = MAX_DISTORTIONS;
 
     protected static CampaignDistortionRenderer instance;
 
@@ -72,7 +80,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected final int[] indexAux = new int[7];
 
     /**
-     * Adds a distortion to the campaign, installing the renderer the first time one is asked for.
+     * Adds a distortion to the campaign, hooking the renderer up the first time one is asked for -
+     * and again after a load, see {@link #get()}.
      * <p>
      * Registered transient, so it is never written into a save - the distortions in flight at the
      * moment of saving are worth nothing on load, and a renderer holding GL program ids certainly is
@@ -88,14 +97,62 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         if (instance != null) instance.distortions.remove(distortion);
     }
 
-    /** Whether the campaign can run this at all - shaders and framebuffers both have to be on. */
+    /**
+     * Whether the campaign can run this at all - shaders and framebuffers both have to be on, and the
+     * user has to have left distortion on in GraphicsLib. Somebody who turned it off for combat did
+     * not mean "except in the campaign".
+     */
     public static boolean isSupported() {
-        return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed();
+        readSettings();
+
+        return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed() && enableDistortion;
     }
 
+    /** How many distortions one pass may draw, which the user gets a say in as well. */
+    public static int getMaxDistortions() {
+        readSettings();
+
+        return maxDistortions;
+    }
+
+    /**
+     * The two settings combat obeys, read where GraphicsLib reads them: the file sits in its mod root
+     * and {@code loadJSON} merges it across mods. Once per run, since nothing can change them without
+     * a restart.
+     */
+    protected static void readSettings() {
+        if (settingsRead) return;
+        settingsRead = true;
+
+        try {
+            JSONObject settings = Global.getSettings().loadJSON(SETTINGS);
+
+            enableDistortion = settings.getBoolean("enableDistortion");
+            maxDistortions = settings.getInt("maximumDistortions");
+        } catch (IOException | JSONException e) {
+            //off rather than on, which is what GraphicsLib does with the same file unreadable
+            Global.getLogger(CampaignDistortionRenderer.class).log(Level.ERROR,
+                    "GraphicsLib's graphics options will not read - campaign distortion stays off", e);
+            enableDistortion = false;
+        }
+    }
+
+    /**
+     * The instance is a static and lives as long as the application does; Luna's renderer list does
+     * not. It hangs off a script in sector memory and the transient half of it is {@code @Transient},
+     * so every load and every new game leaves this one still here and no longer registered with
+     * anybody. Hence the check on every ask rather than only the first: the first distortion after a
+     * load is what hooks the pass back in.
+     * <p>
+     * Only the registration has to be rebuilt. The GL programs outlive a load along with the context
+     * they were compiled in.
+     */
     public static CampaignDistortionRenderer get() {
-        if (instance == null) {
-            instance = new CampaignDistortionRenderer();
+        if (instance == null) instance = new CampaignDistortionRenderer();
+
+        if (!LunaCampaignRenderer.hasRenderer(instance)) {
+            //whatever was still in flight belonged to a game that is gone
+            instance.distortions.clear();
             LunaCampaignRenderer.addTransientRenderer(instance);
         }
 
@@ -240,9 +297,11 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
         Vector2f norm = ShaderLib.getTextureDataNormalization(0f, getMaxScale(viewport));
 
+        int max = getMaxDistortions();
+
         int drawn = 0;
         for (DistortionAPI distortion : distortions) {
-            if (drawn >= MAX_DISTORTIONS) break;
+            if (drawn >= max) break;
 
             Vector2f location = distortion.getLocation();
             SpriteAPI sprite = distortion.getSprite();
@@ -280,9 +339,11 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected float getMaxScale(ViewportAPI viewport) {
         float max = 0f;
 
+        int limit = getMaxDistortions();
+
         int counted = 0;
         for (DistortionAPI distortion : distortions) {
-            if (counted++ >= MAX_DISTORTIONS) break;
+            if (counted++ >= limit) break;
 
             max = Math.max(max, unitsToUV(viewport, distortion.getIntensity()));
         }
