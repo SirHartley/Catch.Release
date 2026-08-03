@@ -46,10 +46,16 @@ public class DepthBombAbilityPlugin extends BaseChargedSkillshotAbility {
         return "Depth Bomb";
     }
 
-    /** Sized to the break, so what is shown is what will happen rather than where it will happen. */
+    /**
+     * Sized to the break, so what is shown is what will happen rather than where it will happen.
+     * <p>
+     * Doubled because the reticule is given a diameter and the blast is kept as a radius - passing
+     * the radius drew the circle at half the area the bomb actually breaks, which promised a
+     * tighter shot than it delivers.
+     */
     @Override
     public SkillshotRenderer createReticule() {
-        return (SkillshotRenderer) new AreaReticuleRenderer(DepthBombConstants.BLAST_RADIUS)
+        return (SkillshotRenderer) new AreaReticuleRenderer(DepthBombConstants.BLAST_RADIUS * 2f)
                 .withTrajectory()
                 .withLength(DepthBombConstants.RANGE);
     }
