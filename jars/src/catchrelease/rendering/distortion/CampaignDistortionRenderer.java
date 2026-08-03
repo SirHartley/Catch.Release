@@ -72,7 +72,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected final int[] indexAux = new int[7];
 
     /**
-     * Adds a distortion to the campaign, installing the renderer the first time one is asked for.
+     * Adds a distortion to the campaign, hooking the renderer up the first time one is asked for -
+     * and again after a load, see {@link #get()}.
      * <p>
      * Registered transient, so it is never written into a save - the distortions in flight at the
      * moment of saving are worth nothing on load, and a renderer holding GL program ids certainly is
@@ -93,9 +94,22 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed();
     }
 
+    /**
+     * The instance is a static and lives as long as the application does; Luna's renderer list does
+     * not. It hangs off a script in sector memory and the transient half of it is {@code @Transient},
+     * so every load and every new game leaves this one still here and no longer registered with
+     * anybody. Hence the check on every ask rather than only the first: the first distortion after a
+     * load is what hooks the pass back in.
+     * <p>
+     * Only the registration has to be rebuilt. The GL programs outlive a load along with the context
+     * they were compiled in.
+     */
     public static CampaignDistortionRenderer get() {
-        if (instance == null) {
-            instance = new CampaignDistortionRenderer();
+        if (instance == null) instance = new CampaignDistortionRenderer();
+
+        if (!LunaCampaignRenderer.hasRenderer(instance)) {
+            //whatever was still in flight belonged to a game that is gone
+            instance.distortions.clear();
             LunaCampaignRenderer.addTransientRenderer(instance);
         }
 
