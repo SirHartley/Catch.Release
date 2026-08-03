@@ -37,14 +37,20 @@ public class DepthBombConstants {
      */
     public static final float OPEN_SHARE = 0.06f;
 
-    /** The shape of the glass: spikes out from the middle, the polygon at the middle, the lit edge. */
-    public static final float SHARDS = 11f;
+    /** The shape of the glass: how many panes the sheet breaks into, the hole, the lit edge. */
+    public static final float SHARDS = 9f;
     public static final float CORE_SIZE = 0.2f;
     public static final float EDGE_WIDTH = 0.025f;
 
-    public static final Color RIM_COLOR = new Color(255, 185, 230);
-    public static final float RIM_ALPHA = 1.5f;
-    public static final Color DEEP_TINT = new Color(140, 145, 190);
+    public static final Color RIM_COLOR = new Color(255, 195, 225);
+    public static final float RIM_ALPHA = 1.4f;
+
+    /** Dark, so the hole reads as depth against the lifted panes rather than as a lighter patch. */
+    public static final Color DEEP_TINT = new Color(100, 100, 150);
+
+    /** The panes themselves: pale glass catching the light. */
+    public static final Color PANE_COLOR = new Color(255, 212, 222);
+    public static final float PANE_ALPHA = 0.55f;
 
     /** The seismic shove, through GraphicsLib's distortion. Size is world units, intensity is bend. */
     public static final float SHOCK_SIZE = 700f;

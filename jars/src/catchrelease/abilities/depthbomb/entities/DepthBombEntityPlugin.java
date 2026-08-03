@@ -306,6 +306,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
                     DepthBombConstants.EDGE_WIDTH);
             fracture.setColors(DepthBombConstants.RIM_COLOR, DepthBombConstants.RIM_ALPHA,
                     DepthBombConstants.DEEP_TINT);
+            fracture.setPanes(DepthBombConstants.PANE_COLOR, DepthBombConstants.PANE_ALPHA);
         }
 
         if (deepSprite == null) deepSprite = SpriteLoader.getSprite("hs_bg");
