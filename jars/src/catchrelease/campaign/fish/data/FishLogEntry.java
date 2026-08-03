@@ -63,6 +63,15 @@ public class FishLogEntry implements Serializable {
      */
     public boolean locationDataUnlocked = false;
 
+    /**
+     * Set on an entry that exists only because the location data was bought.
+     * <p>
+     * A hint is worth buying for something you have never caught - that is most of the point of one
+     * - so an entry can exist with nothing in it but the unlock. The codex and the map both check
+     * this rather than assuming an entry means a catch.
+     */
+    public boolean hintOnly = false;
+
     public FishLogEntry(String speciesId) {
         this.speciesId = speciesId;
     }

@@ -43,6 +43,7 @@ public class FishLog {
         }
 
         logged.caught++;
+        logged.hintOnly = false;
 
         boolean record = first || logged.isRecord(entry);
 
@@ -71,8 +72,11 @@ public class FishLog {
         return speciesId == null ? null : getLog().get(speciesId);
     }
 
+    /** Caught means landed at least once - a hint bought for something never seen does not count. */
     public static boolean isCaught(String speciesId) {
-        return get(speciesId) != null;
+        FishLogEntry entry = get(speciesId);
+
+        return entry != null && !entry.hintOnly;
     }
 
     /**
@@ -84,8 +88,17 @@ public class FishLog {
      * @return true if there was something to unlock and it is now unlocked
      */
     public static boolean unlockLocationData(String speciesId) {
+        if (speciesId == null) return false;
+
         FishLogEntry entry = get(speciesId);
-        if (entry == null) return false;
+
+        //a hint is worth buying for something never caught, which is most of the point of one - so
+        //this makes the entry rather than refusing, and marks it as having no catch behind it
+        if (entry == null) {
+            entry = new FishLogEntry(speciesId);
+            entry.hintOnly = true;
+            getLog().put(speciesId, entry);
+        }
 
         entry.locationDataUnlocked = true;
 
