@@ -31,26 +31,22 @@ public class DepthBombConstants {
      */
     public static final float HEAL_TIME = 10f;
 
-    /**
-     * The break opens faster than it closes, which is what makes it read as a break rather than as a
-     * fade in and out. A share of HEAL_TIME.
-     */
-    public static final float OPEN_SHARE = 0.06f;
-
-    /** The shape of the glass: how many panes the sheet breaks into, the hole, the lit edge. */
+    /** The shape of the glass: how many teeth stand around the hole, the hole, the hairline edge. */
     public static final float SHARDS = 9f;
     public static final float CORE_SIZE = 0.2f;
-    public static final float EDGE_WIDTH = 0.025f;
+
+    /** Thin. The edge lines are most of what the rift says, and they say it by being sharp. */
+    public static final float EDGE_WIDTH = 0.008f;
 
     public static final Color RIM_COLOR = new Color(255, 195, 225);
     public static final float RIM_ALPHA = 1f;
 
-    /** Dark, so the hole reads as depth against the lifted panes rather than as a lighter patch. */
+    /** Dark, so the hole reads as depth against everything around it. */
     public static final Color DEEP_TINT = new Color(100, 100, 150);
 
-    /** The panes themselves: pale glass catching the light. */
-    public static final Color PANE_COLOR = new Color(255, 212, 222);
-    public static final float PANE_ALPHA = 0.55f;
+    /** The teeth: near-black silhouette against the sky, not glass catching the light. */
+    public static final Color PANE_COLOR = new Color(14, 10, 22);
+    public static final float PANE_ALPHA = 0.95f;
 
     /** The pieces that fly: how many, how hard, how big, and how long they last. */
     public static final int SHARD_COUNT_MIN = 10;
