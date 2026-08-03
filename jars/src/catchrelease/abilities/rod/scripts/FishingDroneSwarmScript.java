@@ -49,6 +49,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected boolean recalling = false;
     protected boolean done = false;
 
+    /** How many drones were still out when the recall started, so the trip home can be measured. */
+    protected int recallCount = 0;
+
     /** Whether anything catchable is currently inside the ring - drives the ring's own brightening. */
     protected boolean moteInRing = false;
 
@@ -83,6 +86,23 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 ((FishingDroneSwarmScript) script).recall();
             }
         }
+    }
+
+    /**
+     * The swarm currently out, or null if the rod is idle.
+     * <p>
+     * The sector's own script list is the register - a swarm retires itself once the last drone is
+     * home, so anything still in there is still out there.
+     */
+    public static FishingDroneSwarmScript getExisting() {
+        for (EveryFrameScript script : Global.getSector().getScripts()) {
+            if (!(script instanceof FishingDroneSwarmScript)) continue;
+
+            FishingDroneSwarmScript swarm = (FishingDroneSwarmScript) script;
+            if (!swarm.isDone()) return swarm;
+        }
+
+        return null;
     }
 
     public FishingDroneSwarmScript(SectorEntityToken pond, Vector2f target) {
@@ -350,12 +370,29 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     /** Sends every drone home. They despawn as they arrive, and the script ends with the last one. */
     public void recall() {
+        //a second call would restart the count and make the trip home look longer than it is
+        if (recalling) return;
+
         recalling = true;
+        recallCount = drones.size();
 
         for (SectorEntityToken drone : drones) {
             FishingDroneEntityPlugin plugin = getPlugin(drone);
             if (plugin != null && !plugin.isReturning()) plugin.recall(null);
         }
+    }
+
+    /**
+     * How much of the trip home is done, 0 to 1, counted in drones rather than seconds.
+     * <p>
+     * There is no honest time to count down to - a drone that was chasing something across the ring
+     * has further to come than one that never left its slot. Drones landed is the wait the player is
+     * actually waiting on, and it moves every time one of them arrives.
+     */
+    public float getRecallProgress() {
+        if (!recalling || recallCount <= 0) return 1f;
+
+        return 1f - (float) drones.size() / (float) recallCount;
     }
 
     protected void dropExpiredDrones() {
