@@ -1,6 +1,8 @@
 package catchrelease.abilities.rod.entities;
 
 import catchrelease.abilities.rod.constants.RodConstants;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.skillshot.SkillshotFramework;
 import com.fs.starfarer.api.Global;
@@ -114,6 +116,16 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.wanderPhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2f));
 
         this.trailId = MagicCampaignTrailPlugin.getUniqueID();
+    }
+
+    /** The drone's own speed, upgraded. Read per frame so a purchase applies to drones already out. */
+    protected float getSpeed() {
+        return UpgradeManager.getValue(StatIds.DRONE_SPEED, RodConstants.DRONE_SPEED);
+    }
+
+    /** How hard it can change direction. Same story. */
+    protected float getSteerResponse() {
+        return UpgradeManager.getValue(StatIds.DRONE_ACCELERATION, RodConstants.DRONE_STEER_RESPONSE);
     }
 
     @Override
@@ -292,7 +304,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
             desired.y += goalVelocity.y;
         }
 
-        float response = 1f - (float) Math.exp(-amount / RodConstants.DRONE_STEER_RESPONSE);
+        float response = 1f - (float) Math.exp(-amount / getSteerResponse());
 
         velocity.x += (desired.x - velocity.x) * response;
         velocity.y += (desired.y - velocity.y) * response;
@@ -304,12 +316,12 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
      * gets there, not still ambling.
      */
     protected float getTravelSpeed() {
-        if (mode != Mode.RETURNING) return RodConstants.DRONE_SPEED;
+        if (mode != Mode.RETURNING) return getSpeed();
 
         float gain = Math.min(returnTime * RodConstants.DRONE_RETURN_ACCELERATION,
                 RodConstants.DRONE_RETURN_MAX_MULT - 1f);
 
-        return RodConstants.DRONE_SPEED * (1f + gain);
+        return getSpeed() * (1f + gain);
     }
 
     /**
@@ -330,7 +342,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         if (mode == Mode.RETURNING) {
             return Math.min(speed,
-                    distance / (RodConstants.DRONE_STEER_RESPONSE * RodConstants.DRONE_BRAKE_MARGIN));
+                    distance / (getSteerResponse() * RodConstants.DRONE_BRAKE_MARGIN));
         }
 
         if (distance >= RodConstants.DRONE_SLOWING_DISTANCE) {

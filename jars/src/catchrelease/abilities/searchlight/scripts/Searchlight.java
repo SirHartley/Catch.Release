@@ -67,7 +67,7 @@ public class Searchlight implements EveryFrameScript {
     public void init(CircularArc circularArc) {
         this.arc = circularArc;
         baseArcAngle = arc.startAngle;
-        float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+        float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
         glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
 
         LunaCampaignRenderer.addTransientRenderer(glow);
@@ -84,7 +84,7 @@ public class Searchlight implements EveryFrameScript {
         // splash
         ringInterval.advance(amt);
         if (ringInterval.intervalElapsed()) {
-            float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+            float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
             RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size, COLOR);
             rings.add(ring);
             LunaCampaignRenderer.addTransientRenderer(ring);
@@ -96,7 +96,7 @@ public class Searchlight implements EveryFrameScript {
     public void advanceMovement(float amt) {
         oscillationTime += amt;
 
-        float speed = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_SPEED);
+        float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
         float progress = arc.getTraversalProgress(baseArcAngle);
         float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
 
@@ -124,7 +124,7 @@ public class Searchlight implements EveryFrameScript {
     protected void advanceLens() {
         if (!CampaignDistortionRenderer.isSupported()) return;
 
-        float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+        float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
 
         if (lens == null) {
             lens = new WaveDistortion(new Vector2f(currentRenderLoc), new Vector2f());

@@ -1,6 +1,29 @@
-id,baseValue,type,increasePerLevel,increaseType,maxLevel,description
-Example,0.5,DOUBLE,1,FLAT,5,
-searchlight_area,350,INT,100,FLAT,3,The radius covered by each spotlight.
-searchlight_speed,30,INT,0.2,MULT,3,The speed the spotlight moves at.
-fishing_drone_count,1,INT,1,FLAT,3,The number of fishing drones sent out per cast. Each one can bring back a catch.
-fishing_bar_size,120,INT,20,FLAT,4,The size of the catch bar in the fishing minigame.
+id,baseValue,type,increasePerLevel,increaseType,maxLevel,category,description
+Example,0.5,DOUBLE,1,FLAT,5,CAMPAIGN,
+searchlight_area,350,INT,100,FLAT,3,CAMPAIGN,The radius covered by each spotlight.
+searchlight_speed,30,INT,0.2,MULT,3,CAMPAIGN,The speed the spotlight moves at.
+fishing_drone_count,1,INT,1,FLAT,3,CAMPAIGN,The number of fishing drones sent out per cast. Each one can bring back a catch.
+fishing_bar_size,120,INT,20,FLAT,4,CAMPAIGN,The size of the catch bar in the fishing minigame.
+searchlight_count,1,INT,1,FLAT,3,CAMPAIGN,How many spotlights sweep at once.
+searchlight_rare_chance,0,DOUBLE,0.05,FLAT,4,CAMPAIGN,Added chance for a rarer species to surface under the light.
+searchlight_track_time,0,DOUBLE,2,FLAT,4,CAMPAIGN,Seconds a mote stays marked after the light has passed over it.
+searchlight_identify,0,INT,1,FLAT,2,CAMPAIGN,Whether the light gives away roughly how rare what it found is.
+drone_speed,300,INT,0.12,MULT,4,CAMPAIGN,How fast a drone flies.
+drone_acceleration,0.45,DOUBLE,0.1,MULT,4,CAMPAIGN,How hard a drone can change direction.
+drone_catch_area,400,INT,0.15,MULT,4,CAMPAIGN,The radius of the ring drones will fish inside.
+drone_chase_time,8,DOUBLE,2,FLAT,4,CAMPAIGN,Seconds a drone will keep after a mote before giving up.
+drone_chase_margin,0,INT,80,FLAT,3,CAMPAIGN,How far outside the ring a drone will follow a mote.
+drone_rare_priority,0,DOUBLE,0.25,FLAT,4,CAMPAIGN,How strongly drones prefer rarer motes when several are in range.
+harpoon_charges,2,INT,1,FLAT,4,CAMPAIGN,How many harpoons can be fired before waiting.
+harpoon_recharge_time,12,DOUBLE,-0.15,MULT,4,CAMPAIGN,Seconds to replace one harpoon charge.
+harpoon_speed,900,INT,0.12,MULT,4,CAMPAIGN,How fast the harpoon flies.
+harpoon_aim_assist,0,DOUBLE,2.5,FLAT,3,CAMPAIGN,Degrees the harpoon will bend towards a mote it was nearly aimed at.
+bomb_charges,1,INT,1,FLAT,3,CAMPAIGN,How many depth bombs can be thrown before waiting.
+bomb_recharge_time,30,DOUBLE,-0.15,MULT,4,CAMPAIGN,Seconds to replace one bomb charge.
+bomb_blast_radius,420,INT,0.15,MULT,4,CAMPAIGN,How far the break reaches.
+bomb_speed,520,INT,0.15,MULT,3,CAMPAIGN,How fast a thrown bomb travels.
+bomb_slow,0,DOUBLE,0.15,FLAT,4,CAMPAIGN,How much a caught mote is slowed by the blast.
+bomb_stun,0,DOUBLE,0.4,FLAT,3,CAMPAIGN,Seconds a mote caught in the blast stops dead.
+bomb_rupture_time,10,DOUBLE,2,FLAT,4,CAMPAIGN,Seconds the break stays open before it closes.
+minigame_progress_rate,1,DOUBLE,0.08,MULT,4,MINIGAME,How fast the meter fills while the window is on the fish.
+minigame_escape_resist,1,DOUBLE,-0.08,MULT,4,MINIGAME,How fast the meter drains while the window is off the fish.

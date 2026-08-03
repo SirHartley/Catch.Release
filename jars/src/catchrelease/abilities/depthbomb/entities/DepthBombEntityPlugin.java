@@ -5,6 +5,8 @@ import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.plugins.FractureRenderer;
 import com.fs.starfarer.api.Global;
@@ -93,11 +95,24 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /** All three are read per frame, so an upgrade bought mid-flight applies to what is in the air. */
+    protected float getBlastRadius() {
+        return UpgradeManager.getValue(StatIds.BOMB_BLAST_RADIUS, DepthBombConstants.BLAST_RADIUS);
+    }
+
+    protected float getSpeed() {
+        return UpgradeManager.getValue(StatIds.BOMB_SPEED, DepthBombConstants.SPEED);
+    }
+
+    protected float getHealTime() {
+        return UpgradeManager.getValue(StatIds.BOMB_RUPTURE_TIME, DepthBombConstants.HEAL_TIME);
+    }
+
     protected void advanceFalling(float amount) {
         Vector2f toTarget = Vector2f.sub(target, entity.getLocation(), null);
         float distance = toTarget.length();
 
-        float step = DepthBombConstants.SPEED * amount;
+        float step = getSpeed() * amount;
 
         if (distance <= step || distance <= 0f) {
             entity.setLocation(target.x, target.y);
@@ -128,7 +143,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
             throwShock(DepthBombConstants.SHOCK_ECHO_MULT);
         }
 
-        if (sinceBreak >= DepthBombConstants.HEAL_TIME) Misc.fadeAndExpire(entity, 0.4f);
+        if (sinceBreak >= getHealTime()) Misc.fadeAndExpire(entity, 0.4f);
     }
 
     protected void detonate() {
@@ -178,7 +193,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
             if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
 
             if (Misc.getDistance(entity.getLocation(), buried.getLocation())
-                    > DepthBombConstants.BLAST_RADIUS) {
+                    > getBlastRadius()) {
                 continue;
             }
 
@@ -202,9 +217,9 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         for (int i = 0; i < count; i++) {
             float angle = MathUtils.getRandomNumberInRange(0f, 360f);
             Vector2f spawn = MathUtils.getPointOnCircumference(loc,
-                    MathUtils.getRandomNumberInRange(0f, DepthBombConstants.BLAST_RADIUS * 0.3f), angle);
+                    MathUtils.getRandomNumberInRange(0f, getBlastRadius() * 0.3f), angle);
             Vector2f swimTo = MathUtils.getPointOnCircumference(loc,
-                    DepthBombConstants.BLAST_RADIUS * 2f, angle);
+                    getBlastRadius() * 2f, angle);
 
             SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(
                     Misc.genUID(), "Mote", "catchrelease_Mote", null,
@@ -219,11 +234,11 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
     public float getOpen() {
         if (state != State.BROKEN) return 0f;
 
-        float openTime = DepthBombConstants.HEAL_TIME * DepthBombConstants.OPEN_SHARE;
+        float openTime = getHealTime() * DepthBombConstants.OPEN_SHARE;
 
         if (sinceBreak < openTime) return MathUtils.clamp(sinceBreak / Math.max(0.01f, openTime), 0f, 1f);
 
-        float healing = (sinceBreak - openTime) / Math.max(0.01f, DepthBombConstants.HEAL_TIME - openTime);
+        float healing = (sinceBreak - openTime) / Math.max(0.01f, getHealTime() - openTime);
 
         //eased, so it lets go quickly and then takes its time over the last of it
         float left = MathUtils.clamp(1f - healing, 0f, 1f);
@@ -243,7 +258,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
     /** The break reaches well past the entity itself, and is drawn from the entity's own pass. */
     @Override
     public float getRenderRange() {
-        return DepthBombConstants.BLAST_RADIUS * 2f + 100f;
+        return getBlastRadius() * 2f + 100f;
     }
 
     @Override
@@ -268,7 +283,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
 
         if (deepSprite == null) deepSprite = SpriteLoader.getSprite("hs_bg");
 
-        fracture.render(deepSprite, entity.getLocation(), DepthBombConstants.BLAST_RADIUS * 2f,
+        fracture.render(deepSprite, entity.getLocation(), getBlastRadius() * 2f,
                 seed, getOpen(), sinceBreak, alphaMult);
     }
 

@@ -106,11 +106,8 @@ public class FishingMinigame {
 
     /** The bar's share of the track, from the upgrade, clamped so it is always playable. */
     public static float getBarHeight() {
-        UpgradeManager upgrades = UpgradeManager.getInstance();
-
-        float pixels = upgrades.hasStat(StatIds.FISHING_BAR_SIZE)
-                ? upgrades.getCurrentValue(StatIds.FISHING_BAR_SIZE)
-                : FishConstants.MINIGAME_BAR_SIZE_FALLBACK;
+        float pixels = UpgradeManager.getValue(
+                StatIds.FISHING_BAR_SIZE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK);
 
         return MathUtils.clamp(pixels / FishConstants.MINIGAME_TRACK_HEIGHT,
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
@@ -193,9 +190,11 @@ public class FishingMinigame {
     protected void advanceProgress(float amount) {
         if (isFishInBar()) {
             timeHeld += amount;
-            progress += FishConstants.MINIGAME_CATCH_RATE * progressRateMult * amount;
+            progress += FishConstants.MINIGAME_CATCH_RATE * progressRateMult * amount
+                    * UpgradeManager.getValue(StatIds.MINIGAME_PROGRESS_RATE, 1f);
         } else {
-            progress -= FishConstants.MINIGAME_ESCAPE_RATE * escapeRateMult * amount;
+            progress -= FishConstants.MINIGAME_ESCAPE_RATE * escapeRateMult * amount
+                    * UpgradeManager.getValue(StatIds.MINIGAME_ESCAPE_RESIST, 1f);
         }
 
         if (progress >= 1f) {

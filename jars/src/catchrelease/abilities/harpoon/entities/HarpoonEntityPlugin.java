@@ -8,6 +8,8 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.skillshot.util.SkillshotUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -151,10 +153,15 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         renderTrail();
     }
 
+    /** How fast it flies, upgraded. Read per frame so a purchase applies to a line already out. */
+    protected float getSpeed() {
+        return UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
+    }
+
     /** Straight out, until it finds a mote or runs out of line. */
     protected void advanceOutbound(float amount) {
-        move(heading, HarpoonConstants.SPEED * amount);
-        distanceOut += HarpoonConstants.SPEED * amount;
+        move(heading, getSpeed() * amount);
+        distanceOut += getSpeed() * amount;
 
         SectorEntityToken hit = findMote();
         if (hit != null) {

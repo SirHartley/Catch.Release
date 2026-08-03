@@ -11,6 +11,18 @@ public class UpgradeStat {
         MULT
     }
 
+    /**
+     * Which half of the rig this belongs to.
+     * <p>
+     * CAMPAIGN upgrades are bought and are simply on - there is no reason to make a player choose
+     * between a faster drone and a bigger ring. MINIGAME upgrades are the ones that change how the
+     * catch itself plays, and those are fitted into a slot, so taking one means not taking another.
+     */
+    public enum Category {
+        CAMPAIGN,
+        MINIGAME
+    }
+
     public String id;
     public double baseValue;
     public BaseType baseType;
@@ -18,6 +30,7 @@ public class UpgradeStat {
     public UpgradeType upgradeType;
     public int maxLevel;
     public String description;
+    public Category category = Category.CAMPAIGN;
 
     public int level = 0;
 

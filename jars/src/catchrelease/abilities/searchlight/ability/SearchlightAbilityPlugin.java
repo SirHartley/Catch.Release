@@ -44,7 +44,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float areaPerLight = 360f / lightsToActivate;
 
         for (int i = 1; i <= lightsToActivate; i++){
-            float size = UpgradeManager.getInstance().getCurrentValue(StatIds.SEARCHLIGHT_AREA);
+            float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
 
             float minAngle = areaPerLight * (i - 1);
             float maxAngle = areaPerLight * i;
@@ -100,11 +100,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
     }
 
+    /**
+     * How many lights sweep at once.
+     * <p>
+     * The upgrade rather than a fixed three. Eventually this is meant to depend on what the fleet
+     * has mounted; until then it is bought, and the fallback is what it always was.
+     */
     public int getSearchlightNum(){
-        //Searchlight amount depends on ships in fleet with searchlights mounted
-        //could do modular weps
-
-        return 3; //todo adjust later with actual num
+        return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 3f)));
     }
 
     @Override
