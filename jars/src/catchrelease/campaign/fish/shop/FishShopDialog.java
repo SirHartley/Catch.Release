@@ -158,14 +158,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 if (entry.group != current) {
                     current = entry.group;
 
-                    CustomPanelAPI groupRow = panel.createCustomPanel(ROW_WIDTH, GROUP_HEIGHT,
-                            new ShopGroupRowPlugin(current, this));
-                    list.addCustom(groupRow, 0f);
+                    //the game's own heading, in the game's own font - same reason as the rows
+                    list.addSectionHeading(current.title, Misc.getBasePlayerColor(),
+                            Misc.getDarkPlayerColor(), Alignment.MID, 8f);
                 }
 
-                CustomPanelAPI row = panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
-                        new ShopRowPlugin(entry, this));
-                list.addCustom(row, 3f);
+                list.addCustom(ShopRowPlugin.create(panel, entry, this, ROW_WIDTH, ROW_HEIGHT), 3f);
             }
 
             listViewport = panel.addUIElement(list);

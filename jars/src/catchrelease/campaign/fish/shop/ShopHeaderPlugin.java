@@ -77,7 +77,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         }
 
         title.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
-        title.draw(x + 2f, y + height * 0.5f + title.getHeight() * 0.5f);
+        title.draw(Math.round(x + 2f), Math.round(y + height * 0.5f + title.getHeight() * 0.5f));
     }
 
     protected void renderPurse(float x, float y, float width, float height, float alphaMult) {
@@ -116,7 +116,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         if (text == null) return;
 
         text.setBaseColor(ShopUi.withAlpha(rarity.color, presence * alphaMult));
-        text.draw(x + CHIP_WIDTH - 7f, y + CHIP_HEIGHT * 0.5f + text.getHeight() * 0.5f);
+        text.draw(Math.round(x + CHIP_WIDTH - 7f), Math.round(y + CHIP_HEIGHT * 0.5f + text.getHeight() * 0.5f));
     }
 
     /** Rebuilt only when the number it shows stops being true. */
