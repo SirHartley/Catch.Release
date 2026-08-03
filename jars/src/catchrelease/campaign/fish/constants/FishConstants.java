@@ -9,18 +9,20 @@ public class FishConstants {
     public static final float CORE_BAND_HALF_HEIGHT = 17000f;
 
     /**
-     * The readout beside the track: a cargo-square of the specimen, its name under that, and its
-     * numbers under that a line at a time.
+     * The readout: a panel of its own, off the right edge of the one the catch is played in, with a
+     * cargo-square of the specimen at the top of it and its numbers below a line at a time.
+     * <p>
+     * Its own panel rather than a column inside the catch's, because the catch's panel is sized to
+     * the playfield and nothing else - there is no room in there, and making room would leave the
+     * catch sitting in a half-empty box for the whole time it is being played.
      * <p>
      * BOX is a hundred to the side because that is what a cargo cell is, and the point of the box is
-     * to be recognisably one. The column sits to the right of the meter, which is why the panel is
-     * wider than the playfield needs - the track stays centred in it either way.
-     * <p>
-     * LINE_DELAY is the wait between one number and the next; each one plays SOUND_RESULT_LINE as it
-     * lands.
+     * to be recognisably one. LINE_DELAY is the wait between one number and the next; each one plays
+     * SOUND_RESULT_LINE as it lands.
      */
-    public static final float MINIGAME_RESULT_GAP = 24f;
-    public static final float MINIGAME_RESULT_WIDTH = 190f;
+    public static final float MINIGAME_RESULT_GAP = 16f;
+    public static final float MINIGAME_RESULT_WIDTH = 210f;
+    public static final float MINIGAME_RESULT_PAD = 16f;
     public static final float MINIGAME_RESULT_BOX = 100f;
     public static final float MINIGAME_RESULT_BOX_PAD = 12f;
     public static final float MINIGAME_RESULT_TITLE_GAP = 14f;
@@ -33,8 +35,17 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_TITLE_SIZE = 19f;
     public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
 
-    //minigame - panel
-    public static final float MINIGAME_PANEL_WIDTH = 560f;
+    /**
+     * What a personal best is said with. The mark goes on the row that set it, the line goes at the
+     * end of the tally - one so the eye lands on the number, the other so it is stated outright.
+     * <p>
+     * Records are per species and measured on length, since that is what a record is about.
+     */
+    public static final String MINIGAME_RESULT_RECORD_MARK = "* best";
+    public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
+
+    //minigame - panel. Wide enough for the playfield and its dressing, and no wider
+    public static final float MINIGAME_PANEL_WIDTH = 140f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
     public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
