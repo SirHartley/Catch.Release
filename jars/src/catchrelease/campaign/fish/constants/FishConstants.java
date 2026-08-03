@@ -20,7 +20,7 @@ public class FishConstants {
      * to be recognisably one. LINE_DELAY is the wait between one number and the next; each one plays
      * SOUND_RESULT_LINE as it lands.
      */
-    public static final float MINIGAME_RESULT_GAP = 16f;
+    public static final float MINIGAME_RESULT_GAP = 26f;
     public static final float MINIGAME_RESULT_WIDTH = 210f;
     public static final float MINIGAME_RESULT_PAD = 16f;
     public static final float MINIGAME_RESULT_BOX = 100f;
@@ -39,9 +39,14 @@ public class FishConstants {
      * What a personal best is said with. The mark goes on the row that set it, the line goes at the
      * end of the tally - one so the eye lands on the number, the other so it is stated outright.
      * <p>
+     * The mark is a bare asterisk hung MARK_GAP past the value's right edge, in the value's own
+     * colour - a footnote on the number, with the line below as the footnote's text. Anything
+     * wordier in there fought the label for the middle of the row.
+     * <p>
      * Records are per species and measured on length, since that is what a record is about.
      */
-    public static final String MINIGAME_RESULT_RECORD_MARK = "* best";
+    public static final String MINIGAME_RESULT_RECORD_MARK = "*";
+    public static final float MINIGAME_RESULT_MARK_GAP = 4f;
     public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
 
     //minigame - panel. Wide enough for the playfield and its dressing, and no wider

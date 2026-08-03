@@ -60,11 +60,13 @@ public class FishingMinigameLayout {
         meterX = trackX + trackWidth + FishConstants.MINIGAME_METER_GAP;
         meterY = trackY;
 
-        //a panel of its own, off the right edge of this one - not a column inside it
+        //a panel of its own, off the right edge of this one - not a column inside it. It takes the
+        //dialog panel's full vertical extent rather than the playfield frame's, so the two stand as
+        //a pair instead of the readout hanging short beside the catch
         panelX = position.getX() + position.getWidth() + FishConstants.MINIGAME_RESULT_GAP;
-        panelY = trackY - FishConstants.MINIGAME_FRAME_PAD;
+        panelY = position.getY();
         panelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
-        panelHeight = trackHeight + FishConstants.MINIGAME_FRAME_PAD * 2f;
+        panelHeight = position.getHeight();
 
         resultX = panelX + FishConstants.MINIGAME_RESULT_PAD;
         resultWidth = panelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
@@ -77,6 +79,21 @@ public class FishingMinigameLayout {
         frameY = trackY - FishConstants.MINIGAME_FRAME_PAD;
         frameWidth = totalWidth + FishConstants.MINIGAME_FRAME_PAD * 2f;
         frameHeight = trackHeight + FishConstants.MINIGAME_FRAME_PAD * 2f;
+    }
+
+    /**
+     * Drops the readout's content column to the middle of its panel. The panel is taller than the
+     * column ever is, and a column pinned to the top left the difference as a void under the last
+     * line; centred, the spare height splits evenly, the way the playfield sits in its own panel.
+     * <p>
+     * The height has to come from the readout, since only it knows its fonts and how many lines it
+     * ended up with. {@code boxY} stays at its top-anchored default until this is called.
+     */
+    public void centerResultContent(float contentHeight) {
+        float centeredTop = panelY + (panelHeight + contentHeight) * 0.5f;
+        float highestTop = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD;
+
+        boxY = Math.min(centeredTop, highestTop) - boxSize;
     }
 
     /** Screen y of a point in the track, given as a 0..1 position from the bottom. */
