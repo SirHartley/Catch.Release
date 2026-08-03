@@ -6,17 +6,18 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
 import java.awt.Color;
 
 /**
- * The two marks a catch carries on its cargo icon: rarity down the left edge, grade as pips along
- * the bottom.
+ * The species' icon, and the two marks a catch carries over it: rarity as a bar across the top left,
+ * and the specimen's grade as pips after it.
  * <p>
  * Drawn rather than authored as sprites because both vary per specimen, and a hundred and eighty
  * icon variants is not a thing anyone wants to keep in step with the table. Deliberately quiet: the
- * icon has to stay readable as an icon, so the rarity is a bar at the edge rather than a wash over
- * the art, and the pips only fill as far as the grade goes.
+ * icon has to stay readable as an icon, so the marks are a thin row in one corner rather than a wash
+ * over the art, and the pips only fill as far as the grade goes.
  */
 public class FishItemRenderer {
 
@@ -49,6 +50,8 @@ public class FishItemRenderer {
         sprite.setAlphaMult(alphaMult);
         sprite.renderAtCenter(centerX, centerY);
 
+        if (FishConstants.ITEM_ICON_SHARPEN) sharpen(sprite, centerX, centerY, alphaMult);
+
         if (glowMult <= 0f) return;
 
         sprite.setAdditiveBlend();
@@ -58,8 +61,46 @@ public class FishItemRenderer {
     }
 
     /**
-     * One row along the bottom of the icon: the specimen's grade as pips, then the species' rarity as
-     * a single unbroken bar three pips long at the end of them.
+     * An unsharp mask over an icon that has already been drawn.
+     * <p>
+     * The definition of one: image + amount * (image - blurred). The second term is done as two
+     * passes, one adding the image back and one subtracting a blurred copy, and the blurred copy is
+     * the same sprite drawn a couple of pixels wider - which linear filtering makes a soft version
+     * of it. Cheap, needs no shader, and the only thing it can be wrong about is by how much.
+     * <p>
+     * The sprite is left at the size it came in at, since the caller may still be using it.
+     */
+    protected static void sharpen(SpriteAPI sprite, float centerX, float centerY, float alphaMult) {
+        float amount = FishConstants.ITEM_ICON_SHARPEN_AMOUNT;
+        if (amount <= 0f) return;
+
+        float width = sprite.getWidth();
+        float height = sprite.getHeight();
+        float radius = FishConstants.ITEM_ICON_SHARPEN_RADIUS;
+
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
+
+        //the image again, at the strength the difference is being added at
+        sprite.setAdditiveBlend();
+        sprite.setAlphaMult(alphaMult * amount);
+        sprite.renderAtCenter(centerX, centerY);
+
+        //minus its blurred self, at the same strength - what is left is the edges
+        GL14.glBlendEquation(GL14.GL_FUNC_REVERSE_SUBTRACT);
+        sprite.setSize(width + radius * 2f, height + radius * 2f);
+        sprite.renderAtCenter(centerX, centerY);
+        GL14.glBlendEquation(GL14.GL_FUNC_ADD);
+
+        GL11.glPopAttrib();
+
+        sprite.setSize(width, height);
+        sprite.setNormalBlend();
+        sprite.setAlphaMult(alphaMult);
+    }
+
+    /**
+     * One row across the top left of the icon: the species' rarity as a single unbroken bar three
+     * pips long, then the specimen's grade as pips after it.
      */
     public static void render(float x, float y, float w, float h, float alphaMult,
                               FishRarity rarity, FishGrade grade) {
@@ -74,18 +115,15 @@ public class FishItemRenderer {
         float barWidth = FishConstants.ITEM_RARITY_BAR_PIPS * size
                 + (FishConstants.ITEM_RARITY_BAR_PIPS - 1f) * gap;
 
-        //laid out from the right, so the row keeps its corner whatever is or is not being drawn
-        float rowRight = x + w - FishConstants.ITEM_MARK_INSET;
-        float rowY = y + FishConstants.ITEM_MARK_INSET;
-        float barX = rowRight - barWidth;
-        float pipX = barX - FishConstants.ITEM_RARITY_BAR_GAP - pipsWidth;
+        //laid out from the top left corner, so the row keeps that corner whatever is being drawn
+        float barX = x + FishConstants.ITEM_MARK_INSET;
+        float rowY = y + h - FishConstants.ITEM_MARK_INSET - size;
+        float pipX = barX + barWidth + FishConstants.ITEM_RARITY_BAR_GAP;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        if (grade != null) renderPips(pipX, rowY, size, gap, pipsWidth, alphaMult, grade);
 
         if (rarity != null) {
             //a dark backing under it, or the common grey sits on the art and reads as part of it
@@ -93,6 +131,8 @@ public class FishItemRenderer {
 
             quad(barX, rowY, barWidth, size, rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
         }
+
+        if (grade != null) renderPips(pipX, rowY, size, gap, pipsWidth, alphaMult, grade);
 
         GL11.glPopAttrib();
     }

@@ -219,13 +219,13 @@ public class FishConstants {
     public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
-     * The marks drawn onto a catch's cargo icon, both on one row along the bottom: grade as pips,
-     * then the rarity as a single bar at the end of them.
+     * The marks drawn onto a catch's cargo icon, both on one row across the top left: the rarity as a
+     * single unbroken bar, then the grade as pips after it.
      * <p>
-     * The bar is three pips long and unbroken, so it cannot be counted as part of the grade - it is
-     * plainly a different kind of mark on the same scale. Reading left to right, the row is what the
-     * specimen is followed by what the species is. Kept small and inset; the icon has to read as the
-     * fish first.
+     * The bar is three pips long, so it cannot be counted as part of the grade - it is plainly a
+     * different kind of mark on the same scale. Reading left to right the row is what the species is
+     * followed by what this one is, which is the order the two are learned in. Kept small and inset;
+     * the icon has to read as the fish first.
      */
     public static final float ITEM_MARK_INSET = 3f;
     public static final float ITEM_GRADE_PIP_SIZE = 3f;
@@ -249,8 +249,22 @@ public class FishConstants {
      */
     public static final String ITEM_ICON_BLANK = "graphics/catchrelease/icon/blank.png";
     public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
-    public static final float ITEM_ICON_INSET = 4f;
+    public static final float ITEM_ICON_INSET = 5f;
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
+
+    /**
+     * Unsharp masking on the cargo icon, since the art is drawn at whatever size the cell is rather
+     * than at the size it was authored and the game does no sharpening of its own on the way.
+     * <p>
+     * Done the way an unsharp mask is done - the image, plus the difference between the image and a
+     * blurred copy of it - with the blur approximated by the same sprite drawn RADIUS pixels wider,
+     * which linear filtering softens. AMOUNT is how much of that difference is added back.
+     * <p>
+     * SHARPEN is the switch. Turn it off and the icon is drawn in one ordinary pass.
+     */
+    public static final boolean ITEM_ICON_SHARPEN = true;
+    public static final float ITEM_ICON_SHARPEN_AMOUNT = 0.2f;
+    public static final float ITEM_ICON_SHARPEN_RADIUS = 1f;
 
     /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.

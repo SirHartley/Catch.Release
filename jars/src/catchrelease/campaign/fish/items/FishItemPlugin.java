@@ -57,7 +57,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return getCatch() != null;
     }
 
-    /** Handled here rather than by the frame, since what is removed depends on the shift key. */
+    /** Handled here rather than by the frame, since what is removed depends on the control key. */
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
@@ -152,7 +152,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         tooltip.addTitle(entry.getDisplayName());
 
-        //rarity first: it is the mark down the left edge of the icon, and nothing else said so
+        //rarity first: it is the first mark on the icon, and until now nothing said what it was
         if (spec != null) {
             tooltip.addPara("%s species, %s specimen", pad,
                     new java.awt.Color[]{spec.rarity.color, grade.getColor()},
@@ -173,8 +173,8 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
                 Misc.getDGSCredits(entry.getValue()));
 
         //said here because the item's own description is not shown once there is a specimen to describe
-        tooltip.addPara("Marked along the bottom of the icon: grade as pips, then rarity as the bar"
-                + " at the end of them.", Misc.getGrayColor(), pad);
+        tooltip.addPara("Marked across the top of the icon: rarity as the bar, then grade as the pips"
+                + " after it.", Misc.getGrayColor(), pad);
         tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every one"
                 + " aboard.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
     }
