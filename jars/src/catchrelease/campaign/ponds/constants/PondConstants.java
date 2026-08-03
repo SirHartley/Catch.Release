@@ -71,6 +71,29 @@ public class PondConstants {
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
 
     /**
+     * The pond's surface, done in the fragment shader rather than by pushing a mesh about.
+     * <p>
+     * WAVE_AMP is a share of the fill sprite, so it holds its look at any size. WAVE_SCALE is
+     * roughly how many waves fit across it and RING_SCALE how many rings run out from the middle -
+     * the rings are what say this is a hole with something coming up through it rather than a
+     * rectangle of moving texture. MASK_FEATHER softens the rim, which used to be a hard cut and
+     * aliased against whatever was behind it.
+     * <p>
+     * MESH_* is what is left of the old mesh warp: a slow, large flex under the shader's detail,
+     * rather than the whole of the motion. Its radius used to have the same minimum and maximum,
+     * which meant it never actually changed size - it only rotated.
+     */
+    public static final float POND_WAVE_AMP = 0.004f;
+    public static final float POND_WAVE_SCALE = 1.6f;
+    public static final float POND_WAVE_SPEED = 0.55f;
+    public static final float POND_RING_SCALE = 3.5f;
+    public static final float POND_RING_AMP = 0.006f;
+    public static final float POND_MASK_FEATHER = 0.06f;
+    public static final float POND_MESH_MIN = 0.05f;
+    public static final float POND_MESH_MAX = 0.16f;
+    public static final float POND_MESH_RATE = 0.6f;
+
+    /**
      * The shove space takes when a rupture opens - a real screen-space distortion through
      * GraphicsLib, not another ring drawn over the top of the ones that are already there.
      * <p>

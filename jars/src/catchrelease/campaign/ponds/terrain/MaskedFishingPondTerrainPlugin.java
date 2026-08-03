@@ -203,6 +203,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
         //since they are stencilled to the mask - invisible, but real enough to be harpooned
+        if (maskedRenderer != null) maskedRenderer.advance(amount);
+
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed() && isActive) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
@@ -411,9 +413,19 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (maskedRenderer == null){
             int cells = 6;
             float cs = starfield.getWidth() / 10f;
-            warpGrid = new WarpGrid(cells, cells, cs * 0.2f, cs * 0.2f, 1f);
+
+            //a slow flex under the shader's waves rather than the whole of the motion. The old
+            //radius had the same minimum and maximum, so it never changed size - it only turned
+            warpGrid = new WarpGrid(cells, cells,
+                    cs * PondConstants.POND_MESH_MIN, cs * PondConstants.POND_MESH_MAX,
+                    PondConstants.POND_MESH_RATE);
+
             maskedRenderer = new MaskedWarpedSpriteRenderer(warpGrid);
             maskedRenderer.setMaskThreshold(0f);
+            maskedRenderer.setMaskFeather(PondConstants.POND_MASK_FEATHER);
+            maskedRenderer.setWaves(PondConstants.POND_WAVE_AMP, PondConstants.POND_WAVE_SCALE,
+                    PondConstants.POND_WAVE_SPEED);
+            maskedRenderer.setRings(PondConstants.POND_RING_SCALE, PondConstants.POND_RING_AMP);
         }
 
         if (maskGlowRenderer == null) {
