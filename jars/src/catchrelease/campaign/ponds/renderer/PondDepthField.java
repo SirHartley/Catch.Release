@@ -1,8 +1,9 @@
 package catchrelease.campaign.ponds.renderer;
 
 import catchrelease.campaign.ponds.constants.PondConstants;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.lazywizard.lazylib.MathUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -41,6 +42,7 @@ public class PondDepthField {
     }
 
     protected final Particle[] particles;
+    protected transient SpriteAPI sprite;
     protected float time = 0f;
 
     public PondDepthField() {
@@ -100,22 +102,22 @@ public class PondDepthField {
     }
 
     /**
-     * Drawn as one batch of quads rather than as discs, because at this size a four-sided dot and a
-     * thirty-two-sided one are the same handful of pixels and there are a lot of them.
+     * The same soft glow sprite the fish motes use, but a single pass per particle - the motes stack
+     * six shrinking passes into a bloom, and ninety of those would be both a draw-call pile and a
+     * wall of light.
      * <p>
-     * Additive, so they read as light in a medium rather than as objects floating on top of it. The
-     * caller is expected to have the pond's mask stencilled, or they will spill out of the rupture.
+     * Additive, so they read as light in a medium rather than as objects floating on top of it.
+     * Additive can only ever add, though, which is why "darker with depth" lives entirely in the
+     * colour and alpha ramps - a deep particle contributes almost nothing rather than being painted
+     * dark. The caller is expected to have the pond's mask stencilled: the field deliberately
+     * overshoots the rim and relies on being cut, so a particle half-swallowed by the edge reads as
+     * one that continues underneath it.
      */
     public void render(Vector2f center, float pondRadius, float alphaMult) {
         if (alphaMult <= 0f || pondRadius <= 0f) return;
 
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-
-        GL11.glBegin(GL11.GL_QUADS);
+        if (sprite == null) sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+        sprite.setAdditiveBlend();
 
         for (Particle p : particles) {
             float depth = getDepth(p);
@@ -134,30 +136,23 @@ public class PondDepthField {
             float size = p.size * (PondConstants.DEPTH_SIZE_MIN
                     + (PondConstants.DEPTH_SIZE_MAX - PondConstants.DEPTH_SIZE_MIN) * depth);
 
-            //fades out towards the rim as well as with depth, so nothing sits hard against the mask
-            float edge = 1f - MathUtils.clamp((p.radius * reach - PondConstants.DEPTH_EDGE_FROM)
-                    / Math.max(0.01f, 1f - PondConstants.DEPTH_EDGE_FROM), 0f, 1f);
-
-            float alpha = alphaMult * edge * (PondConstants.DEPTH_ALPHA_MIN
+            float alpha = alphaMult * (PondConstants.DEPTH_ALPHA_MIN
                     + (PondConstants.DEPTH_ALPHA_MAX - PondConstants.DEPTH_ALPHA_MIN) * depth);
 
             if (alpha <= 0f) continue;
 
-            Color color = getColor(depth);
-            GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha);
-
-            GL11.glVertex2f(x - size, y - size);
-            GL11.glVertex2f(x + size, y - size);
-            GL11.glVertex2f(x + size, y + size);
-            GL11.glVertex2f(x - size, y + size);
+            sprite.setColor(getColor(depth));
+            sprite.setSize(size, size);
+            sprite.setAlphaMult(alpha);
+            sprite.renderAtCenter(x, y);
         }
-
-        GL11.glEnd();
-
-        GL11.glPopAttrib();
     }
 
-    /** Deep is cold and shallow is warm, which is the other half of what says how far away it is. */
+    /**
+     * Deep is dark and cold, shallow is bright and warm. The brightness half matters more than the
+     * hue half: over a lit background an additive particle is only as dark as how little it adds,
+     * so the deep end of the ramp has to be genuinely dim rather than merely blue.
+     */
     protected static Color getColor(float depth) {
         Color deep = PondConstants.DEPTH_COLOR_DEEP;
         Color near = PondConstants.DEPTH_COLOR_NEAR;
