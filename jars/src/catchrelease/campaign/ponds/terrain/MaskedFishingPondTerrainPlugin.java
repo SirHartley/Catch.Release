@@ -376,8 +376,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (layer == CampaignEngineLayers.ABOVE) {
             Stencil.startDepthMask(mask, maskSize, maskSize, loc, true);
 
-            //under the motes, and inside the same mask - depth first, then the things swimming in it
-            getDepthField().render(loc, entity.getRadius() * activity, alpha);
+            //under the motes, and inside the same mask - depth first, then the things swimming in it.
+            //At full radius whatever the pond is doing: the mask is already spooling up around it, so
+            //an opening pond wipes across a field that was always there. Scaled by activity as well,
+            //the field started as a knot in the middle and fanned outwards, which read as the motes
+            //arriving rather than as the hole widening onto them
+            getDepthField().render(loc, entity.getRadius(), alpha);
 
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
                 ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);
