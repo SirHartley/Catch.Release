@@ -158,7 +158,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         MinigameTreasure treasure = minigame.getTreasure();
         if (treasure == null || !treasure.isTaken()) return;
 
-        treasureTaken = TreasureRoller.award(treasure.rarity, false);
+        treasureTaken = TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle);
         treasureRarity = treasure.rarity;
     }
 
@@ -486,6 +486,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
      * is a condition here and nothing else changes.
      */
     protected SpriteAPI getTrackSprite() {
+        //sonar hands the species back, which is the whole of what it does
+        if (minigame.getTackle().sonar) return getFishSprite();
+
         return SpriteLoader.loadSprite(FishConstants.MINIGAME_TRACK_ICON);
     }
 

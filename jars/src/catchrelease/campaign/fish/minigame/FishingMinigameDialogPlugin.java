@@ -5,6 +5,8 @@ import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
@@ -97,8 +99,12 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.dialog = dialog;
         this.minigame = new FishingMinigame(fish);
 
+        //whatever is fitted to the rig this was hooked on. Read once, before anything is rolled
+        Tackle tackle = TackleManager.get(method);
+        this.minigame.setTackle(tackle);
+
         //how loosely it holds to reality comes from where it was taken, not from the fish
-        this.specimen = FishCatch.roll(fish, Aberration.of(anchor));
+        this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias);
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();

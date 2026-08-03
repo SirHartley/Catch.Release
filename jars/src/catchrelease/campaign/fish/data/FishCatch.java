@@ -50,9 +50,23 @@ public class FishCatch {
      * would read as a mistake. It keeps a little of its own, so two of the same length still differ.
      */
     public static FishCatch roll(FishSpec spec, float aberration) {
+        return roll(spec, aberration, 0f);
+    }
+
+    /**
+     * @param qualityBias how far up its own range the specimen is nudged, 0 to 1. Tackle that grades
+     *                    what it takes moves this rather than rerolling, so a good rig raises the
+     *                    floor without guaranteeing the ceiling
+     */
+    public static FishCatch roll(FishSpec spec, float aberration, float qualityBias) {
         if (spec == null) return null;
 
         float lengthFraction = centred();
+
+        //towards the top of the range rather than replacing the roll - the range still decides
+        if (qualityBias > 0f) {
+            lengthFraction += (1f - lengthFraction) * MathUtils.clamp(qualityBias, 0f, 1f);
+        }
         float weightFraction = MathUtils.clamp(
                 lengthFraction * 0.75f + centred() * 0.25f, 0f, 1f);
 
