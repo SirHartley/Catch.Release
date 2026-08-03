@@ -2,6 +2,7 @@ package catchrelease.abilities.harpoon.entities;
 
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
@@ -257,7 +258,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(hooked, spec, new FishingMinigameDialogPlugin.Callback() {
+        boolean opened = FishingMinigameDialogPlugin.open(hooked, spec, FishLogEntry.Method.HARPOON, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
                 //the state is the outcome: only a reeling line has anything on it
