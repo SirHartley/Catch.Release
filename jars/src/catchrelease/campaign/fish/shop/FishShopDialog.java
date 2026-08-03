@@ -83,7 +83,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
-            ShopRowPlugin.Host, ShopHeaderPlugin.Purse {
+            ShopRowPlugin.Host, ShopTabPlugin.Host, ShopHeaderPlugin.Purse {
 
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
@@ -95,7 +95,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
         protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
 
-        protected final List<TooltipMakerAPI> tabElements = new ArrayList<>();
         protected TooltipMakerAPI list;
 
         /** Counted once per change rather than once per frame - the purse walks the whole hold. */
@@ -113,12 +112,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             buildEntries();
             selectFirstVisible();
-
             refreshWallet();
-            buildHeader();
-            buildTabs();
-            buildList();
-            buildDetail();
+
+            build();
         }
 
         /**
@@ -149,6 +145,35 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void refreshWallet() {
             wallet = FishCurrency.count();
+        }
+
+        protected void build() {
+            buildHeader();
+            buildTabs();
+            buildList();
+            buildDetail();
+        }
+
+        /**
+         * Everything torn down and put back. Not element by element: removing a single element and
+         * re-adding it stacks the new one over the old, and one clean sweep is both simpler and
+         * harder to get wrong than reaching back into what is already there.
+         *
+         * @param keepScroll whether the list should come back at the scroll it was at - true for a
+         *                   click inside the shelf, false when the shelf itself changed
+         */
+        protected void rebuild(boolean keepScroll) {
+            if (panel == null) return;
+
+            float scroll = keepScroll && list != null && list.getExternalScroller() != null
+                    ? list.getExternalScroller().getYOffset() : 0f;
+
+            panel.removeComponent(null);
+            build();
+
+            if (keepScroll && list != null && list.getExternalScroller() != null) {
+                list.getExternalScroller().setYOffset(scroll);
+            }
         }
 
         protected void buildHeader() {
@@ -184,23 +209,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         /**
-         * Two rows of the game's own checkboxes standing in for tabs: the big split between what is
-         * bought once and levelled (upgrades) and what is fitted to a slot (modifiers), and under
-         * it the gear within the chosen half. Checkboxes rather than buttons because a tab is a
-         * thing that stays pressed, which is the one thing a button will not do.
+         * Two rows of tabs over the shelf list, drawn in the rows' own style: the big split
+         * between what is bought once and levelled (upgrades) and what is fitted to a slot
+         * (modifiers), each wearing its icon, and under it the gear within the chosen half.
          */
         protected void buildTabs() {
-            for (TooltipMakerAPI element : tabElements) panel.removeComponent(element);
-            tabElements.clear();
-
             float top = PAD + HEADER_HEIGHT + 10f;
             float mainWidth = (LIST_WIDTH - TAB_GAP) / 2f;
 
             ShopEntry.Kind[] kinds = ShopEntry.Kind.values();
             for (int i = 0; i < kinds.length; i++) {
                 addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
-                        kinds[i] == mainTab, PAD + i * (mainWidth + TAB_GAP), top,
-                        mainWidth, MAIN_TAB_HEIGHT);
+                        kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2", 15f,
+                        PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
             float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
@@ -208,28 +229,42 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
-                addTab(groups[i], groups[i].tabTitle, groups[i] == category,
+                addTab(groups[i], groups[i].tabTitle, null, 13f,
                         PAD + i * (categoryWidth + TAB_GAP), categoryTop,
                         categoryWidth, CATEGORY_TAB_HEIGHT);
             }
         }
 
-        protected void addTab(Object data, String label, boolean active, float x, float y,
-                              float width, float height) {
+        protected void addTab(Object data, String label, String iconId, float textSize,
+                              float x, float y, float width, float height) {
 
-            TooltipMakerAPI element = panel.createUIElement(width, height, false);
+            CustomPanelAPI tab = panel.createCustomPanel(width, height,
+                    new ShopTabPlugin(data, label, iconId, textSize, this));
 
-            ButtonAPI tab = element.addAreaCheckbox(label, data, Misc.getBasePlayerColor(),
-                    Misc.getDarkPlayerColor(), Misc.getBrightPlayerColor(), width, height, 0f);
-            tab.setChecked(active);
+            panel.addComponent(tab).inTL(x, y);
+        }
 
-            panel.addUIElement(element).inTL(x, y);
-            tabElements.add(element);
+        @Override
+        public boolean isActiveTab(Object id) {
+            return id == mainTab || id == category;
+        }
+
+        @Override
+        public void onTabClicked(Object id) {
+            if (id instanceof ShopEntry.Kind) {
+                mainTab = (ShopEntry.Kind) id;
+                category = getCategories(mainTab)[0];
+            } else if (id instanceof ShopGroup) {
+                category = (ShopGroup) id;
+            } else {
+                return;
+            }
+
+            selectFirstVisible();
+            rebuild(false);
         }
 
         protected void buildList() {
-            if (list != null) panel.removeComponent(list);
-
             float top = PAD + HEADER_HEIGHT + 10f + MAIN_TAB_HEIGHT + TAB_GAP
                     + CATEGORY_TAB_HEIGHT + 8f;
             float height = HEIGHT - top - PAD;
@@ -237,7 +272,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             list = panel.createUIElement(LIST_WIDTH, height, true);
 
             for (ShopEntry entry : getVisible()) {
-                list.addCustom(ShopRowPlugin.create(panel, entry, this, ROW_WIDTH, ROW_HEIGHT), 3f);
+                list.addCustom(panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
+                        new ShopRowPlugin(entry, this)), 3f);
             }
 
             listViewport = panel.addUIElement(list);
@@ -245,8 +281,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected void buildDetail() {
-            if (detail != null) panel.removeComponent(detail);
-
             float top = PAD + HEADER_HEIGHT + 10f;
             float height = HEIGHT - top - PAD;
             float width = WIDTH - PAD * 2f - LIST_WIDTH - DETAIL_GAP;
@@ -355,7 +389,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (isSelected(entry)) return;
 
             selectedKey = entry.getKey();
-            buildDetail();
+            rebuild(true);
         }
 
         @Override
@@ -370,27 +404,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void buttonPressed(Object buttonId) {
-            if (buttonId instanceof ShopEntry.Kind) {
-                mainTab = (ShopEntry.Kind) buttonId;
-                category = getCategories(mainTab)[0];
-                selectFirstVisible();
-
-                buildTabs();
-                buildList();
-                buildDetail();
-                return;
-            }
-
-            if (buttonId instanceof ShopGroup) {
-                category = (ShopGroup) buttonId;
-                selectFirstVisible();
-
-                buildTabs();
-                buildList();
-                buildDetail();
-                return;
-            }
-
             if (buttonId != buyId) return;
 
             ShopEntry entry = getSelected();
@@ -398,10 +411,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             Global.getSoundPlayer().playUISound("ui_char_increase_aptitude", 1f, 1f);
 
-            //the purse and the pane are stale the moment the money moved; the rows are not,
-            //because a row never stops reading the live data
             refreshWallet();
-            buildDetail();
+            rebuild(true);
         }
 
         @Override
