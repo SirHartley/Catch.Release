@@ -280,15 +280,20 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /**
-     * 0 the instant it breaks, 1 once it has healed shut. Linear on purpose: the shader owns the
-     * shape of the life - the fast arrival, the teeth's advance, the fade at the end - and shaping
-     * the clock here as well would double the easing up.
-     */
-    public float getHealProgress() {
+    /** 1 the instant it breaks, 0 once it has closed. Opens quickly and closes slowly. */
+    public float getOpen() {
         if (state != State.BROKEN) return 0f;
 
-        return MathUtils.clamp(sinceBreak / Math.max(0.01f, getHealTime()), 0f, 1f);
+        float openTime = getHealTime() * DepthBombConstants.OPEN_SHARE;
+
+        if (sinceBreak < openTime) return MathUtils.clamp(sinceBreak / Math.max(0.01f, openTime), 0f, 1f);
+
+        float healing = (sinceBreak - openTime) / Math.max(0.01f, getHealTime() - openTime);
+
+        //eased, so it lets go quickly and then takes its time over the last of it
+        float left = MathUtils.clamp(1f - healing, 0f, 1f);
+
+        return left * left;
     }
 
     protected void enter(State next) {
@@ -330,7 +335,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         if (deepSprite == null) deepSprite = SpriteLoader.getSprite("hs_bg");
 
         fracture.render(deepSprite, entity.getLocation(), getBlastRadius() * 2f,
-                seed, getHealProgress(), sinceBreak, alphaMult);
+                seed, getOpen(), sinceBreak, alphaMult);
 
         //debris over the break, since the break is what it came off
         if (shardBurst != null) shardBurst.render(alphaMult);
