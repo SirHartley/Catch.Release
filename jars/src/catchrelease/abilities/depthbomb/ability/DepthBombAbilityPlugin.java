@@ -2,6 +2,9 @@ package catchrelease.abilities.depthbomb.ability;
 
 import catchrelease.abilities.depthbomb.constants.DepthBombConstants;
 import catchrelease.abilities.depthbomb.entities.DepthBombEntityPlugin;
+import catchrelease.memory.charges.ChargeManager;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
@@ -24,6 +27,9 @@ import java.awt.Color;
  */
 public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
 
+    /** What the charge pool is kept under. */
+    public static final String CHARGE_ID = "catchrelease_depthbomb";
+
     @Override
     protected String getActivationText() {
         return "Depth Bomb";
@@ -42,6 +48,11 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null || worldTarget == null) return;
 
+        if (!ChargeManager.spend(CHARGE_ID, StatIds.BOMB_CHARGES,
+                DepthBombConstants.CHARGES_FALLBACK)) {
+            return;
+        }
+
         Vector2f from = new Vector2f(fleet.getLocation());
         Vector2f to = clampToRange(from, worldTarget);
 
@@ -50,6 +61,20 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
                 new DepthBombEntityPlugin.Params(from, to));
 
         bomb.setLocation(from.x, from.y);
+    }
+
+    @Override
+    public boolean isUsable() {
+        return hasCharge() && super.isUsable();
+    }
+
+    protected boolean hasCharge() {
+        ChargeManager.define(CHARGE_ID, new ChargeManager.Refill(
+                StatIds.BOMB_CHARGES, DepthBombConstants.CHARGES_FALLBACK,
+                StatIds.BOMB_RECHARGE_TIME, DepthBombConstants.RECHARGE_FALLBACK));
+
+        return ChargeManager.hasCharge(CHARGE_ID, StatIds.BOMB_CHARGES,
+                DepthBombConstants.CHARGES_FALLBACK);
     }
 
     /**
@@ -81,6 +106,12 @@ public class DepthBombAbilityPlugin extends BaseSkillshotAbility {
         tooltip.addPara("Range: %s   Break: %s", pad, highlight,
                 (int) DepthBombConstants.RANGE + " units",
                 (int) DepthBombConstants.BLAST_RADIUS + " units");
+
+        tooltip.addPara("Charges: %s of %s", 3f, highlight,
+                "" + ChargeManager.getCharges(CHARGE_ID, StatIds.BOMB_CHARGES,
+                        DepthBombConstants.CHARGES_FALLBACK),
+                "" + (int) Math.max(1f, UpgradeManager.getValue(StatIds.BOMB_CHARGES,
+                        DepthBombConstants.CHARGES_FALLBACK)));
 
         tooltip.addPara("Closes over %s.", pad, highlight,
                 (int) DepthBombConstants.HEAL_TIME + " seconds");

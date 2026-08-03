@@ -45,6 +45,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
      */
     private boolean held = false;
 
+    /**
+     * Seconds it is still stopped for, and how much of its speed it has back.
+     * <p>
+     * A depth bomb going off near a mote knocks the wind out of it. The stun is a hard stop and the
+     * slow is what is left afterwards, easing back to normal - so a bomb makes a mote catchable for
+     * a while rather than merely moving it.
+     */
+    private float stunLeft = 0f;
+    private float slowLeft = 0f;
+    private float slowStrength = 0f;
+
     public static class Params {
         public final Vector2f target;
         public final String fishId;
@@ -104,7 +115,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         //still lit, still flickering, but going nowhere of its own accord
         if (held) return;
 
-        float step = MOVE_SPEED * getRarity().speedMult * amount;
+        if (stunLeft > 0f) {
+            stunLeft -= amount;
+            return;
+        }
+
+        if (slowLeft > 0f) slowLeft -= amount;
+
+        float step = MOVE_SPEED * getRarity().speedMult * getSlowMult() * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
@@ -139,6 +157,28 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
 
         return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult;
+    }
+
+    /**
+     * Knocked about by a blast: stopped dead for a moment, then slowed for a while after.
+     * <p>
+     * Taken at the strongest rather than added to what is already on it, so two bombs on the same
+     * mote do not stack into a permanent stop.
+     */
+    public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
+        if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
+
+        if (slowStrength > 0f && slowSeconds > 0f) {
+            this.slowStrength = Math.max(this.slowStrength, slowStrength);
+            this.slowLeft = Math.max(this.slowLeft, slowSeconds);
+        }
+    }
+
+    /** 1 when it is fine, less while it is still shaken. */
+    protected float getSlowMult() {
+        if (slowLeft <= 0f) return 1f;
+
+        return Math.max(0.1f, 1f - slowStrength);
     }
 
     /** COMMON where the row has gone, so a missing spec cannot make a mote stand still. */

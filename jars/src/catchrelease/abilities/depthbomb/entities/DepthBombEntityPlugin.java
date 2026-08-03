@@ -150,6 +150,7 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.BROKEN);
 
         throwShock(1f);
+        shakeNearbyMotes();
         unearthBuried();
         shakeLoose();
 
@@ -172,6 +173,32 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         ripple.setLifetime(Math.max(DepthBombConstants.SHOCK_GROW, DepthBombConstants.SHOCK_FADE));
 
         CampaignDistortionRenderer.addDistortion(ripple);
+    }
+
+    /**
+     * Everything already swimming inside the blast gets knocked about - stopped dead for a moment,
+     * then slowed for a while after.
+     * <p>
+     * Both are zero without the upgrades, so by default a bomb moves nothing that was already out.
+     * Bought up, it is what makes a bomb a way of pinning something down rather than only a way of
+     * opening a hole.
+     */
+    protected void shakeNearbyMotes() {
+        float stun = UpgradeManager.getValue(StatIds.BOMB_STUN, 0f);
+        float slow = UpgradeManager.getValue(StatIds.BOMB_SLOW, 0f);
+
+        if (stun <= 0f && slow <= 0f) return;
+
+        for (SectorEntityToken mote : entity.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+
+            if (mote.isExpired()) continue;
+            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin)) continue;
+            if (Misc.getDistance(entity.getLocation(), mote.getLocation()) > getBlastRadius()) continue;
+
+            ((FishEntityPlugin) mote.getCustomPlugin()).applyBlast(
+                    stun, slow, DepthBombConstants.SLOW_TIME);
+        }
     }
 
     /**

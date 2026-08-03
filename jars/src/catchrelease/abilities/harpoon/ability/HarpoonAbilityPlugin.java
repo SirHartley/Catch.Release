@@ -3,6 +3,10 @@ package catchrelease.abilities.harpoon.ability;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.memory.charges.ChargeManager;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import org.lazywizard.lazylib.MathUtils;
 import catchrelease.skillshot.GuideLineStyle;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.DirectionReticuleRenderer;
@@ -26,6 +30,12 @@ import java.awt.Color;
  */
 public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
 
+    /**
+     * What the charge pool is kept under. Named here rather than in the manager, so another charged
+     * ability never means editing the manager.
+     */
+    public static final String CHARGE_ID = "catchrelease_harpoon";
+
     @Override
     protected String getActivationText() {
         return "Harpoon";
@@ -43,7 +53,13 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null || worldTarget == null) return;
 
+        if (!ChargeManager.spend(CHARGE_ID, StatIds.HARPOON_CHARGES,
+                HarpoonConstants.CHARGES_FALLBACK)) {
+            return;
+        }
+
         Vector2f from = new Vector2f(fleet.getLocation());
+        worldTarget = applyAimAssist(from, worldTarget);
 
         //fired at the aim point rather than at a mote: missing is allowed, and is most of the skill
         SectorEntityToken harpoon = fleet.getContainingLocation().addCustomEntity(
@@ -56,7 +72,60 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        return hasMoteNearby() && super.isUsable();
+        return hasCharge() && hasMoteNearby() && super.isUsable();
+    }
+
+    protected boolean hasCharge() {
+        ChargeManager.define(CHARGE_ID, new ChargeManager.Refill(
+                StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
+                StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK));
+
+        return ChargeManager.hasCharge(CHARGE_ID, StatIds.HARPOON_CHARGES,
+                HarpoonConstants.CHARGES_FALLBACK);
+    }
+
+    /**
+     * Bends the shot towards a mote it was nearly aimed at, by however many degrees the rig has been
+     * taught to forgive.
+     * <p>
+     * Deliberately small and deliberately only towards something that is already almost under the
+     * cursor: a shot that finds its own target is not aimed, and the point of the ability is the
+     * aiming. Zero without the upgrade, in which case this returns the aim point untouched.
+     */
+    protected Vector2f applyAimAssist(Vector2f from, Vector2f worldTarget) {
+        float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
+        if (assist <= 0f) return worldTarget;
+
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null) return worldTarget;
+
+        float aimAngle = Misc.getAngleInDegrees(from, worldTarget);
+        float distance = Misc.getDistance(from, worldTarget);
+
+        SectorEntityToken best = null;
+        float bestOff = assist;
+
+        for (SectorEntityToken mote : fleet.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+
+            if (mote.isExpired()) continue;
+            if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
+
+            float off = Math.abs(Misc.getAngleDiff(aimAngle,
+                    Misc.getAngleInDegrees(from, mote.getLocation())));
+
+            if (off > bestOff) continue;
+
+            bestOff = off;
+            best = mote;
+        }
+
+        if (best == null) return worldTarget;
+
+        //aimed at the mote's bearing but kept at the player's own range, so assist never changes how
+        //far the shot goes - only which way
+        return MathUtils.getPointOnCircumference(from, distance,
+                Misc.getAngleInDegrees(from, best.getLocation()));
     }
 
     /** No point firing into empty space - there has to be something out there to hit. */
@@ -83,6 +152,16 @@ public class HarpoonAbilityPlugin extends BaseSkillshotAbility {
                 + " while it is played, and a landed specimen comes home on the line.", pad);
 
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
+
+        tooltip.addPara("Charges: %s of %s", 3f, highlight,
+                "" + ChargeManager.getCharges(CHARGE_ID, StatIds.HARPOON_CHARGES,
+                        HarpoonConstants.CHARGES_FALLBACK),
+                "" + (int) Math.max(1f, UpgradeManager.getValue(StatIds.HARPOON_CHARGES,
+                        HarpoonConstants.CHARGES_FALLBACK)));
+
+        if (!Global.CODEX_TOOLTIP_MODE && !hasCharge()) {
+            tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);
+        }
 
         if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby()) {
             tooltip.addPara("Nothing within range to fire at.", Misc.getNegativeHighlightColor(), pad);
