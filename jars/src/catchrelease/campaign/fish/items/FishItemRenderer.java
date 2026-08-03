@@ -6,7 +6,6 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 
 import java.awt.Color;
 
@@ -27,6 +26,10 @@ public class FishItemRenderer {
      * Fitted rather than stretched: the art is square today and the cell is square today, and neither
      * is ours, so the smaller of the two ratios is taken and a tall fish stays a tall fish.
      * <p>
+     * Never enlarged past what it was drawn at. A cargo cell is bigger than the art, and filling it
+     * meant scaling an eighty pixel fish up to ninety-odd - which is where the softness came from.
+     * At native size there is nothing to sharpen.
+     * <p>
      * The second pass is what the cargo view does for every other icon - the same sprite again,
      * additive, at the mouse-over brightness - so a catch does not sit dead under the cursor while
      * the rest of the hold lights up.
@@ -40,7 +43,7 @@ public class FishItemRenderer {
         float available = Math.min(w, h) - FishConstants.ITEM_ICON_INSET * 2f;
         if (available <= 0f) return;
 
-        float scale = Math.min(available / sprite.getWidth(), available / sprite.getHeight());
+        float scale = Math.min(1f, Math.min(available / sprite.getWidth(), available / sprite.getHeight()));
         sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
 
         float centerX = x + w * 0.5f;
@@ -50,52 +53,12 @@ public class FishItemRenderer {
         sprite.setAlphaMult(alphaMult);
         sprite.renderAtCenter(centerX, centerY);
 
-        if (FishConstants.ITEM_ICON_SHARPEN) sharpen(sprite, centerX, centerY, alphaMult);
-
         if (glowMult <= 0f) return;
 
         sprite.setAdditiveBlend();
         sprite.setAlphaMult(alphaMult * glowMult * FishConstants.ITEM_ICON_MOUSEOVER_MULT);
         sprite.renderAtCenter(centerX, centerY);
         sprite.setNormalBlend();
-    }
-
-    /**
-     * An unsharp mask over an icon that has already been drawn.
-     * <p>
-     * The definition of one: image + amount * (image - blurred). The second term is done as two
-     * passes, one adding the image back and one subtracting a blurred copy, and the blurred copy is
-     * the same sprite drawn a couple of pixels wider - which linear filtering makes a soft version
-     * of it. Cheap, needs no shader, and the only thing it can be wrong about is by how much.
-     * <p>
-     * The sprite is left at the size it came in at, since the caller may still be using it.
-     */
-    protected static void sharpen(SpriteAPI sprite, float centerX, float centerY, float alphaMult) {
-        float amount = FishConstants.ITEM_ICON_SHARPEN_AMOUNT;
-        if (amount <= 0f) return;
-
-        float width = sprite.getWidth();
-        float height = sprite.getHeight();
-        float radius = FishConstants.ITEM_ICON_SHARPEN_RADIUS;
-
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
-
-        //the image again, at the strength the difference is being added at
-        sprite.setAdditiveBlend();
-        sprite.setAlphaMult(alphaMult * amount);
-        sprite.renderAtCenter(centerX, centerY);
-
-        //minus its blurred self, at the same strength - what is left is the edges
-        GL14.glBlendEquation(GL14.GL_FUNC_REVERSE_SUBTRACT);
-        sprite.setSize(width + radius * 2f, height + radius * 2f);
-        sprite.renderAtCenter(centerX, centerY);
-        GL14.glBlendEquation(GL14.GL_FUNC_ADD);
-
-        GL11.glPopAttrib();
-
-        sprite.setSize(width, height);
-        sprite.setNormalBlend();
-        sprite.setAlphaMult(alphaMult);
     }
 
     /**

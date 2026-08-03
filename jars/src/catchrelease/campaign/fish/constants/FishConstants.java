@@ -253,20 +253,6 @@ public class FishConstants {
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
 
     /**
-     * Unsharp masking on the cargo icon, since the art is drawn at whatever size the cell is rather
-     * than at the size it was authored and the game does no sharpening of its own on the way.
-     * <p>
-     * Done the way an unsharp mask is done - the image, plus the difference between the image and a
-     * blurred copy of it - with the blur approximated by the same sprite drawn RADIUS pixels wider,
-     * which linear filtering softens. AMOUNT is how much of that difference is added back.
-     * <p>
-     * SHARPEN is the switch. Turn it off and the icon is drawn in one ordinary pass.
-     */
-    public static final boolean ITEM_ICON_SHARPEN = true;
-    public static final float ITEM_ICON_SHARPEN_AMOUNT = 0.2f;
-    public static final float ITEM_ICON_SHARPEN_RADIUS = 1f;
-
-    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
