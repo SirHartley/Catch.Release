@@ -140,7 +140,9 @@ public class Searchlight implements EveryFrameScript {
 
         //moved rather than respawned - one lens travelling, not a trail of them left behind
         lens.setLocation(new Vector2f(currentRenderLoc));
-        lens.setSize(size * LENS_SIZE_MULT);
+
+        //the size is only here to pick up upgrades, and it has to keep off while the fade-in owns it
+        if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
     }
 
     public void updateRenderLoc(Vector2f newLoc){
