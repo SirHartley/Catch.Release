@@ -253,6 +253,25 @@ public class FishConstants {
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
 
     /**
+     * The codex category, and the little sector map inside a location-data entry.
+     * <p>
+     * The map is drawn rather than composed of elements: every system in the sector is a dot and
+     * there are several hundred of them. DOT is the size of one, MARK the ring around where the
+     * record came from, and PAD keeps the whole thing off the panel's own border.
+     */
+    public static final String CODEX_CATEGORY_TITLE = "Fish";
+    public static final String CODEX_CATEGORY_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+    public static final float CODEX_MAP_WIDTH = 320f;
+    public static final float CODEX_MAP_HEIGHT = 200f;
+    public static final float CODEX_MAP_PAD = 8f;
+    public static final float CODEX_MAP_DOT_SIZE = 1f;
+    public static final float CODEX_MAP_DOT_ALPHA = 0.75f;
+    public static final float CODEX_MAP_MARK_RADIUS = 14f;
+    public static final float CODEX_MAP_MARK_FILL_ALPHA = 0.18f;
+    public static final float CODEX_MAP_MARK_PULSE = 0.12f;
+    public static final float CODEX_MAP_MARK_PULSE_RATE = 2.4f;
+
+    /**
      * Buried motes: the things on the other side of the fabric that a searchlight finds and a depth
      * bomb lets through.
      * <p>
