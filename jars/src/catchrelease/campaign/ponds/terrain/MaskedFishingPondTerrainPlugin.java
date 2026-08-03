@@ -9,6 +9,7 @@ import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.helper.ParallaxUtil;
 import catchrelease.rendering.helper.Stencil;
 import catchrelease.rendering.plugins.MaskGlowRenderer;
@@ -24,6 +25,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.BaseTerrain;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import org.dark.shaders.distortion.RippleDistortion;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
@@ -223,9 +225,33 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
 
+        throwOpeningDistortion();
+
         //holds the camera while the player is here, and closes the pond once they have left. Sector
         //level rather than on the entity: entity scripts do not advance while the game is paused
         Global.getSector().addScript(new PondCameraFocusScript(entity));
+    }
+
+    /**
+     * The shove space takes as the rupture opens.
+     * <p>
+     * A real distortion rather than another drawn ring: GraphicsLib's own ripple, run through
+     * {@link CampaignDistortionRenderer}, so what bends is whatever happens to be behind the pond.
+     * Silently does nothing where shaders or framebuffers are off, which is the same thing
+     * GraphicsLib does in combat.
+     */
+    protected void throwOpeningDistortion() {
+        if (!CampaignDistortionRenderer.isSupported()) return;
+
+        RippleDistortion ripple = new RippleDistortion(new Vector2f(entity.getLocation()), new Vector2f());
+
+        ripple.setSize(PondConstants.OPEN_DISTORTION_SIZE);
+        ripple.setIntensity(PondConstants.OPEN_DISTORTION_INTENSITY);
+        ripple.fadeInSize(PondConstants.OPEN_DISTORTION_GROW);
+        ripple.fadeOutIntensity(PondConstants.OPEN_DISTORTION_FADE);
+        ripple.setLifetime(Math.max(PondConstants.OPEN_DISTORTION_GROW, PondConstants.OPEN_DISTORTION_FADE));
+
+        CampaignDistortionRenderer.addDistortion(ripple);
     }
 
     /**

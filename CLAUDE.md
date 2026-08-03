@@ -48,6 +48,14 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 - **`GL_LINE_STIPPLE` is useless for short segments.** GL restarts the pattern at every
   segment of a `GL_LINES` batch, so anything shorter than one dash draws solid. Dashes are cut
   as geometry in `SkillshotUtils` instead.
+- **GraphicsLib's distortion works in the campaign.** The shaders were never the problem - only
+  the plumbing: `DistortionShader` keeps its list in `Global.getCombatEngine().getCustomData()`,
+  which does not exist outside a battle. `CampaignDistortionRenderer` rebuilds that plumbing
+  against the campaign and drives GraphicsLib's own `.vert`/`.frag` files directly. Only two
+  ShaderLib helpers are unusable out there - `unitsToUV` and `isOnScreen`, both because they
+  read the zoom off the combat viewport - and both are two lines against the campaign viewport.
+  The screen has to be copied by hand (`ShaderLib.copyScreen`); in combat something else already
+  has.
 - **A camera snapped to a thing kills that thing's parallax.** `ParallaxUtil`'s camera term is
   computed from the distance to the middle of the screen, which is zero for whatever the camera
   is centred on. Anything that has to read as deep while centred needs motion of its own - see

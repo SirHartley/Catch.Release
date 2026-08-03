@@ -70,4 +70,17 @@ public class PondConstants {
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
 
+    /**
+     * The shove space takes when a rupture opens - a real screen-space distortion through
+     * GraphicsLib, not another ring drawn over the top of the ones that are already there.
+     * <p>
+     * SIZE is the radius it reaches in world units and INTENSITY how hard it bends what is behind
+     * it. GROW is the seconds it takes to open out and FADE the seconds it takes to die; the ripple
+     * runs for the longer of the two and removes itself.
+     */
+    public static final float OPEN_DISTORTION_SIZE = 620f;
+    public static final float OPEN_DISTORTION_INTENSITY = 26f;
+    public static final float OPEN_DISTORTION_GROW = 0.9f;
+    public static final float OPEN_DISTORTION_FADE = 1.4f;
+
 }
