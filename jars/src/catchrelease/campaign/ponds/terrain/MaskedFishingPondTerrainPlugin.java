@@ -191,8 +191,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
         activity = Math.max(0f, Math.min(1f, activity));
 
+        //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
+        //since they are stencilled to the mask - invisible, but real enough to be harpooned
         moteSpawnInterval.advance(amount);
-        if (moteSpawnInterval.intervalElapsed()) spawnRandomMote();
+        if (moteSpawnInterval.intervalElapsed() && isActive) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
     }
 
@@ -206,6 +208,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     public void activate(){
         if (isActive) return;
+
+        //the idle ripples may not exist yet: activate can arrive before this plugin has advanced once
+        initRippleRenderer();
 
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
@@ -223,6 +228,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!isActive) return;
 
         isActive = false;
+
+        //expired rather than simply dropped: the renderer is an entity script, and letting go of the
+        //reference without ending it leaves it running and spawning ripples for a pond that is shut
+        if (rippleRenderer != null) rippleRenderer.fadeAndExpire(1f);
         rippleRenderer = null;
     }
 
@@ -260,6 +269,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             starfield.setAlphaMult(1f);
             starfield.setNormalBlend();
 
+            //pushed and popped: this used to leave blending enabled for whatever drew next
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -281,6 +292,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                     alpha,
                     fillUvOffsetPx
             );
+
+            GL11.glPopAttrib();
             return;
         }
 
