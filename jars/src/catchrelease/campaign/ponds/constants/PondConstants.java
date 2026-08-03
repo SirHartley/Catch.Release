@@ -42,9 +42,12 @@ public class PondConstants {
      * on purpose: the mask stencil cuts whatever crosses the rim, and a mote cut in half by the edge
      * reads as one that continues underneath it.
      * <p>
-     * SIZE is the full width handed to the glow sprite, most of which is transparent falloff - the
-     * visible core is maybe a third of it, which is why these dwarf the half-extents of the quads
-     * they replaced. The colours are a brightness ramp as much as a hue ramp: additive blending can
+     * SIZE is the full width handed to the glow sprite, most of which is transparent falloff. The
+     * ceiling is set against the catchable motes rather than picked on its own: those draw at
+     * {@code FishEntityPlugin.GLOW_SIZE}, and scenery that outgrows the thing you are there to catch
+     * puts the eye on the wrong light. The shallowest of these lands comfortably under it.
+     * <p>
+     * The colours are a brightness ramp as much as a hue ramp: additive blending can
      * only add light, so a deep mote is dark by contributing nearly nothing - dim colour, low alpha
      * - not by being painted dark.
      * <p>
@@ -57,8 +60,8 @@ public class PondConstants {
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
     public static final float DEPTH_REACH_FLOOR = 0.7f;
     public static final float DEPTH_FILL = 1.15f;
-    public static final float DEPTH_SIZE_MIN = 7f;
-    public static final float DEPTH_SIZE_MAX = 28f;
+    public static final float DEPTH_SIZE_MIN = 3f;
+    public static final float DEPTH_SIZE_MAX = 11f;
     public static final float DEPTH_ALPHA_MIN = 0.1f;
     public static final float DEPTH_ALPHA_MAX = 0.35f;
     public static final float DEPTH_BOB = 0.25f;
