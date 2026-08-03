@@ -104,7 +104,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         //still lit, still flickering, but going nowhere of its own accord
         if (held) return;
 
-        float step = MOVE_SPEED * amount;
+        float step = MOVE_SPEED * getRarity().speedMult * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
@@ -113,7 +113,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         float angle = Misc.getAngleInDegrees(entity.getLocation(), target);
-        angle += (float) (Math.sin(time * 1.5f) * sineVariance);
+        angle += getWander();
 
         Vector2f next = MathUtils.getPointOnCircumference(
                 entity.getLocation(),
@@ -122,6 +122,30 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         );
 
         entity.setLocation(next.x, next.y);
+    }
+
+    /**
+     * How far off course it is this instant, in degrees.
+     * <p>
+     * Two sines whose rates do not divide into each other, so a rare mote does not merely weave
+     * harder - it weaves on a beat that cannot be read off a few seconds of watching it. The second
+     * one only has any weight at all above common, which is what keeps the bottom of the ladder
+     * feeling like a fish drifting rather than a fish evading.
+     */
+    protected float getWander() {
+        FishRarity rarity = getRarity();
+
+        float wander = (float) Math.sin(time * 1.5f) * sineVariance;
+        float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
+
+        return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult;
+    }
+
+    /** COMMON where the row has gone, so a missing spec cannot make a mote stand still. */
+    protected FishRarity getRarity() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON : spec.rarity;
     }
 
     public void externalRender(ViewportAPI viewport){

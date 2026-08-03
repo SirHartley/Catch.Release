@@ -253,6 +253,49 @@ public class FishConstants {
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
 
     /**
+     * Buried motes: the things on the other side of the fabric that a searchlight finds and a depth
+     * bomb lets through.
+     * <p>
+     * POPULATION is how many are kept within RANGE of the player, aimed at as a number rather than
+     * as a spawn rate - so sitting still does not accumulate them and travelling does not outrun
+     * them. SPAWN_MIN_RANGE keeps new ones out past the light's reach, because one appearing inside
+     * the beam reads as the light making them rather than finding them, and CULL_RANGE is where one
+     * left behind stops being worth keeping in the world.
+     * <p>
+     * They wander rather than travel: a heading held for HEADING_TIME and then turned by up to TURN,
+     * with WEAVE on top of it. Rarity divides the time and multiplies both angles, so a rare one
+     * changes its mind sooner and harder - which is most of what makes it hard to stay with.
+     * SURFACE_RUN is how far the mote swims once it is through.
+     */
+    public static final String BURIED_ENTITY_ID = "catchrelease_BuriedMote";
+    public static final int BURIED_POPULATION = 6;
+    public static final float BURIED_RANGE = 3500f;
+    public static final float BURIED_SPAWN_MIN_RANGE = 1600f;
+    public static final float BURIED_CULL_RANGE = 6000f;
+    public static final float BURIED_CHECK_INTERVAL = 3f;
+    public static final float BURIED_SPEED = 55f;
+    public static final float BURIED_TURN = 70f;
+    public static final float BURIED_WEAVE = 25f;
+    public static final float BURIED_HEADING_TIME_MIN = 2.5f;
+    public static final float BURIED_HEADING_TIME_MAX = 6f;
+    public static final float BURIED_SURFACE_RUN = 900f;
+
+    /**
+     * The dent a buried mote makes in the searchlight - a negative impression, not the thing itself.
+     * <p>
+     * Drawn subtractively so it is a hole in the light rather than a mark on top of it, which is the
+     * difference between "something is under there" and "something is drawn there". SIZE is the dent
+     * and RING is the standing wave around it; both are scaled by how near the middle of the beam it
+     * is, so sweeping the light over one makes it swell and fade rather than blink.
+     */
+    public static final float IMPRESSION_SIZE = 34f;
+    public static final float IMPRESSION_ALPHA = 0.85f;
+    public static final float IMPRESSION_RING_SIZE = 1.9f;
+    public static final float IMPRESSION_RING_ALPHA = 0.3f;
+    public static final float IMPRESSION_PULSE = 0.12f;
+    public static final float IMPRESSION_PULSE_RATE = 2.2f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
