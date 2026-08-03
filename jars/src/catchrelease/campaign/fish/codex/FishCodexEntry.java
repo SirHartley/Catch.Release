@@ -40,10 +40,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     protected transient UIPanelAPI box;
     protected transient CodexDialogAPI codex;
 
-    public FishCodexEntry(String id, String speciesId, String title, String icon) {
-        super(id, title, icon);
+    public FishCodexEntry(String id, FishSpec spec) {
+        //the spec rides along as vanilla's param only so isCategory() sees a leaf - it is never
+        //read back as data, since a stored spec would go stale on a reload; see getSpec()
+        super(id, spec.getDisplayName(), FishCodex.getIcon(spec), spec);
 
-        this.speciesId = speciesId;
+        this.speciesId = spec.id;
     }
 
     public FishSpec getSpec() {
@@ -66,9 +68,14 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return Global.getSector() != null && FishLog.isCaught(speciesId);
     }
 
+    /**
+     * A species is always a leaf, never a folder of anything. Stated outright on top of the param
+     * passed up from the constructor, so an edit to either cannot silently turn every fish back
+     * into a category - which loses the entry from search and puts it in the category font.
+     */
     @Override
-    public boolean hasDetail() {
-        return true;
+    public boolean isCategory() {
+        return false;
     }
 
     @Override
@@ -117,10 +124,37 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         box = panel.wrapTooltipWithBox(text);
         panel.addComponent(box).inTL(0f, 0f);
 
-        if (relatedEntries != null) panel.addComponent(relatedEntries).inTR(0f, 0f);
+        //the species' art in the right-hand column, above the related entries the way vanilla puts
+        //an item's image view above them. Scaled by width alone rather than fitted to a box: the
+        //art is square today, and a squarer or taller one from another mod's table should come out
+        //the shape it was drawn rather than stretched to whatever frame suited ours.
+        //A spec-less entry has no art to show and skips the column rather than framing the stand-in.
+        TooltipMakerAPI image = null;
+        float rightHeight = 0f;
 
-        float height = box.getPosition().getHeight();
-        if (relatedEntries != null) height = Math.max(height, relatedEntries.getPosition().getHeight());
+        if (spec != null) {
+            float imageWidth = 145f;
+
+            image = panel.createUIElement(imageWidth, 0, false);
+            image.addImage(FishCodex.getIcon(spec), imageWidth, 0f);
+
+            panel.updateUIElementSizeAndMakeItProcessInput(image);
+            panel.addUIElement(image).inTR(0f, 0f);
+
+            rightHeight = image.getPosition().getHeight();
+        }
+
+        if (relatedEntries != null) {
+            if (image != null) {
+                panel.addComponent(relatedEntries).belowRight(image, opad);
+                rightHeight += opad + relatedEntries.getPosition().getHeight();
+            } else {
+                panel.addComponent(relatedEntries).inTR(0f, 0f);
+                rightHeight = relatedEntries.getPosition().getHeight();
+            }
+        }
+
+        float height = Math.max(box.getPosition().getHeight(), rightHeight);
 
         panel.getPosition().setSize(width, height);
     }
