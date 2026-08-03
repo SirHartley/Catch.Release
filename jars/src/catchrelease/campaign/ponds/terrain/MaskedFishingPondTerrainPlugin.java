@@ -4,6 +4,7 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.ponds.constants.PondConstants;
+import catchrelease.campaign.ponds.renderer.PondDepthField;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
@@ -78,6 +79,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
 
+    /** Seconds the pond has been advancing. What the deep field's own drift runs off. */
+    protected float elapsed = 0f;
+
+    transient protected PondDepthField depthField;
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
     transient protected MaskGlowRenderer maskGlowRenderer;
@@ -187,6 +192,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         initRippleRenderer();
 
+        elapsed += amount;
+        if (depthField != null) depthField.advance(amount);
+
         if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
         activity = Math.max(0f, Math.min(1f, activity));
@@ -274,6 +282,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+            //the camera's contribution, which is nothing at all while the camera is snapped to us
             Vector2f fillUvOffsetPx = ParallaxUtil.computeFillUvOffsetPx(
                     viewport,
                     loc,
@@ -282,6 +291,18 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                     starfield.getTextureWidth(),
                     starfield.getTextureHeight()
             );
+
+            //and the field's own wander, which is what is left when that is zero
+            Vector2f drift = ParallaxUtil.computeDriftUvOffsetPx(
+                    elapsed,
+                    PondConstants.POND_FILL_DRIFT,
+                    PondConstants.POND_FILL_DRIFT_PERIOD,
+                    fillSize,
+                    starfield.getTextureWidth(),
+                    starfield.getTextureHeight()
+            );
+
+            Vector2f.add(fillUvOffsetPx, drift, fillUvOffsetPx);
 
             maskedRenderer.render(
                     starfield,
@@ -329,6 +350,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (layer == CampaignEngineLayers.ABOVE) {
             Stencil.startDepthMask(mask, maskSize, maskSize, loc, true);
 
+            //under the motes, and inside the same mask - depth first, then the things swimming in it
+            getDepthField().render(loc, entity.getRadius() * activity, alpha);
+
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
                 ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);
             }
@@ -349,6 +373,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                 new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation()))
         );
         mote.setLocation(spawnLoc.x, spawnLoc.y);
+    }
+
+    protected PondDepthField getDepthField() {
+        if (depthField == null) depthField = new PondDepthField();
+
+        return depthField;
     }
 
     private void initRenderer() {
