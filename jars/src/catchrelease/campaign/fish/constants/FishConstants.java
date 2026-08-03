@@ -105,18 +105,14 @@ public class FishConstants {
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
     public static final float MINIGAME_DIFFICULTY_SCALE = 0.3f;
 
-    //minigame - dev controls
+    /** Bounds on the two values a running catch can have retuned under it. */
     public static final float MINIGAME_DIFFICULTY_MIN = 1f;
     public static final float MINIGAME_DIFFICULTY_MAX = 200f;
-    public static final float MINIGAME_DIFFICULTY_STEP = 10f;
     public static final float MINIGAME_SPEED_MIN = 0.1f;
     public static final float MINIGAME_SPEED_MAX = 4f;
-    public static final float MINIGAME_SPEED_STEP = 0.2f;
+
     /** Dev mode only: the meter stops here instead of running out, so nothing is ever lost. */
     public static final float MINIGAME_DEV_PROGRESS_FLOOR = 0.02f;
-    public static final float MINIGAME_DEV_ROW_HEIGHT = 74f;
-    public static final float MINIGAME_DEV_BUTTON_WIDTH = 62f;
-    public static final float MINIGAME_DEV_BUTTON_HEIGHT = 22f;
 
     /** Padding between the playfield and whatever frames it. */
     public static final float MINIGAME_FRAME_PAD = 12f;

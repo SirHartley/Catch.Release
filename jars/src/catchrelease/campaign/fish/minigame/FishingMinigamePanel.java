@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
-import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.CatchReleaseSettings;
 import catchrelease.helper.loading.SpriteLoader;
@@ -453,41 +452,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         GL11.glPopAttrib();
     }
 
-    /** Dev control presses arrive here, routed from the buttons the dialog plugin adds. */
+
+    /** Nothing to press: the catch has no buttons, in dev mode or out of it. */
     @Override
     public void buttonPressed(Object buttonId) {
-        if (!(buttonId instanceof DevControl)) return;
-
-        switch ((DevControl) buttonId) {
-            case DIFFICULTY_DOWN:
-                minigame.setDifficulty(minigame.getDifficulty() - FishConstants.MINIGAME_DIFFICULTY_STEP);
-                break;
-            case DIFFICULTY_UP:
-                minigame.setDifficulty(minigame.getDifficulty() + FishConstants.MINIGAME_DIFFICULTY_STEP);
-                break;
-            case SPEED_DOWN:
-                minigame.setMotionSpeed(minigame.getMotionSpeed() - FishConstants.MINIGAME_SPEED_STEP);
-                break;
-            case SPEED_UP:
-                minigame.setMotionSpeed(minigame.getMotionSpeed() + FishConstants.MINIGAME_SPEED_STEP);
-                break;
-            case MOTION:
-                minigame.setMotion(getNextMotion(minigame.getMotion()));
-                break;
-            case RESTART:
-                minigame.restart();
-                reported = false;
-                celebration = null;
-                result = null;
-                endLingerLeft = FishConstants.MINIGAME_END_LINGER;
-                break;
-        }
-    }
-
-    protected static FishMotion getNextMotion(FishMotion current) {
-        FishMotion[] values = FishMotion.values();
-
-        return values[(current.ordinal() + 1) % values.length];
     }
 
     public FishingMinigame getMinigame() {
