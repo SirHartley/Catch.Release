@@ -188,11 +188,15 @@ public class FishMapIntel extends BaseIntelPlugin {
                 spec.rarity.color));
     }
 
-    /** Known about but never landed: the location is a region, not a point. */
+    /**
+     * Known about but never landed: the location is a region, not a point. Dev mode shows every
+     * region the table declares, caught or not - a catch marker on top of one is not a reason to
+     * hide where the species actually spawns, and checking the table is what dev mode is for.
+     */
     protected boolean showsRegions(FishSpec spec, boolean caught) {
-        if (caught) return false;
+        if (Global.getSettings().isDevMode()) return !spec.regions.isEmpty();
 
-        return Global.getSettings().isDevMode() || FishLog.isLocationDataUnlocked(spec.id);
+        return !caught && FishLog.isLocationDataUnlocked(spec.id);
     }
 
     /**
@@ -285,7 +289,12 @@ public class FishMapIntel extends BaseIntelPlugin {
     }
 
     protected String getStatus(FishSpec spec) {
-        return FishLog.isCaught(spec.id) ? "landed" : "region data";
+        if (FishLog.isCaught(spec.id)) return "landed";
+
+        //a table row with nowhere to be is a data problem, and dev mode is where it gets caught
+        if (Global.getSettings().isDevMode() && spec.regions.isEmpty()) return "no location data";
+
+        return "region data";
     }
 
     /**
