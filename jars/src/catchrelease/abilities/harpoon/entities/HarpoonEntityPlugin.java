@@ -94,9 +94,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected Vector2f slack;
     protected Vector2f slackVelocity = new Vector2f();
 
-    /** How much line is in the air, and which side the extra hangs off. */
+    /** How much line is in the air. More than the gap it spans is what puts waves in it. */
     protected float paidOut = 0f;
-    protected float side = 1f;
 
     /** What the head has hold of, if anything. */
     protected SectorEntityToken hooked;
@@ -121,8 +120,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (p != null) heading = Vector2f.sub(p.target, p.from, null);
         if (heading.lengthSquared() > 0f) heading.normalise(heading);
 
-        //which way the spare rope hangs. No reason to prefer one, and two shots running should differ
-        side = MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f;
     }
 
     @Override
@@ -311,14 +308,15 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Where the middle of the rope would hang if it were left alone: halfway along, and off to one
-     * side by however much more rope is in the air than there is distance to cover.
+     * Where the middle of the rope is heading, and how much rope there is to get there with.
      * <p>
-     * That excess is the whole reason a line moves at all. Going out, a launcher throws more rope
-     * than it measures. Pulled taut, the slack is hauled in and the belly disappears. Coming home,
-     * the winch is slower than the head, so the harpoon runs ahead of its own rope and the belly
-     * grows behind it - which is the wobble, and it is the rope's own doing rather than an animation
-     * played over the top of it.
+     * The excess is the whole reason a line moves at all. Going out, a launcher throws more rope
+     * than it measures. Pulled taut, the slack is hauled in. Coming home, the winch is slower than
+     * the head, so the harpoon runs ahead of its own rope and there is spare line behind it.
+     * <p>
+     * None of it hangs to one side. The rest point is the plain middle of the straight line, and the
+     * spare rope shows up as waves instead - which are symmetric about the shot, so a line stays
+     * centred on where it was aimed however loose it is.
      */
     protected Vector2f getRestPoint(float amount, CampaignFleetAPI fleet) {
         Vector2f from = fleet.getLocation();
@@ -338,17 +336,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 paidOut = approach(paidOut, distance, HarpoonConstants.LINE_REEL_IN * amount);
         }
 
-        Vector2f middle = midpoint(from, to);
-        if (distance <= 0f) return middle;
+        return midpoint(from, to);
+    }
 
-        float excess = Math.max(0f, paidOut - distance);
-        float sag = Math.min((float) Math.sqrt(excess * distance) * HarpoonConstants.LINE_SAG_MULT,
-                distance * HarpoonConstants.LINE_SAG_MAX);
+    /** How loose the rope is: spare length as a share of the distance it has to cover. */
+    protected float getExcessShare(float distance) {
+        if (distance <= 0f) return 0f;
 
-        //across the line, since that is the only direction spare rope has to go
-        Vector2f across = new Vector2f(-(to.y - from.y) / distance, (to.x - from.x) / distance);
+        float excess = Math.max(0f, paidOut - distance) / distance;
 
-        return new Vector2f(middle.x + across.x * sag * side, middle.y + across.y * sag * side);
+        return MathUtils.clamp(excess / HarpoonConstants.WAVE_EXCESS_FULL, 0f, 1f);
     }
 
     protected static float approach(float value, float target, float step) {
@@ -510,7 +507,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         float controlX = middle.x * 2f - (from.x + to.x) * 0.5f;
         float controlY = middle.y * 2f - (from.y + to.y) * 0.5f;
 
-        float shiver = length * HarpoonConstants.WAVE_AMPLITUDE * getShiver();
+        float shiver = length * HarpoonConstants.WAVE_AMPLITUDE * getShiver(length);
 
         //perpendicular, so the shiver is across the line rather than along it
         Vector2f across = new Vector2f(-along.y, along.x);
@@ -522,8 +519,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             float x = inverse * inverse * from.x + 2f * inverse * t * controlX + t * t * to.x;
             float y = inverse * inverse * from.y + 2f * inverse * t * controlY + t * t * to.y;
 
-            //nothing at the ends, most of it towards the fleet
-            float envelope = (float) Math.sin(t * Math.PI) * inverse;
+            //nothing at the ends, most of it in the middle, and the same either side of centre
+            float envelope = (float) Math.sin(t * Math.PI);
 
             float offset = envelope * shiver * (float) Math.sin(
                     t * Math.PI * HarpoonConstants.WAVE_COUNT - age * HarpoonConstants.WAVE_SPEED);
@@ -535,14 +532,18 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * How much the rope is shivering: the throw itself, dying off, or being swung about hard enough
-     * to shake - whichever is greater at the time.
+     * How much the rope is shivering: the throw itself dying off, being swung about hard enough to
+     * shake, or simply having more rope in the air than it needs - whichever is greatest.
+     * <p>
+     * The last of those is what carries the loose line, going out and coming home alike. It used to
+     * be drawn as a belly hanging off one side; as waves it says the same thing without the rope
+     * leaving the line of the shot.
      */
-    protected float getShiver() {
+    protected float getShiver(float distance) {
         float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
         float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
 
-        return MathUtils.clamp(Math.max(thrown, swung), 0f, 1f);
+        return MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
     }
 
     protected void renderHead(float alpha) {

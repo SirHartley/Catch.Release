@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
+import catchrelease.campaign.fish.data.FishRecords;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.rendering.helper.Disc;
@@ -38,8 +39,12 @@ public class CatchResultPanel {
         final String value;
         final Color color;
 
+        /** Set on the row a record was set on, which gets a mark after its value. */
+        boolean record;
+
         transient LazyFont.DrawableString labelText;
         transient LazyFont.DrawableString valueText;
+        transient LazyFont.DrawableString markText;
 
         Line(String label, String value, Color color) {
             this.label = label;
@@ -53,6 +58,9 @@ public class CatchResultPanel {
 
     protected float elapsed = 0f;
     protected int shown = 0;
+
+    /** Set when the tally was skipped. Lines shown this way arrive at once, without fading in. */
+    protected boolean skipped = false;
 
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
@@ -77,16 +85,26 @@ public class CatchResultPanel {
         FishSpec spec = entry.getSpec();
         FishGrade grade = entry.getGrade();
 
+        //filed before anything is drawn, since the comparison is against what was there beforehand
+        boolean record = FishRecords.submit(entry);
+
         if (spec != null) {
             lines.add(new Line("Species", Misc.ucFirst(spec.rarity.name().toLowerCase()), spec.rarity.color));
         }
 
         lines.add(new Line("Specimen", grade.name, grade.getColor()));
-        lines.add(new Line("Length", String.format("%.2f m", entry.length), Misc.getHighlightColor()));
+        Line length = new Line("Length", String.format("%.2f m", entry.length), Misc.getHighlightColor());
+        length.record = record;
+        lines.add(length);
         lines.add(new Line("Weight", String.format("%.1f kg", entry.weight), Misc.getHighlightColor()));
         lines.add(new Line("Coherence", FishItemPlugin.getAberrationLabel(entry.aberration),
                 FishItemPlugin.getAberrationColor(entry.aberration)));
         lines.add(new Line("Value", Misc.getDGSCredits(entry.getValue()), Misc.getHighlightColor()));
+
+        //last, so it lands after the number it is about rather than interrupting the tally
+        if (record) {
+            lines.add(new Line("", FishConstants.MINIGAME_RESULT_RECORD, Misc.getPositiveHighlightColor()));
+        }
     }
 
     public void advance(float amount) {
@@ -103,6 +121,7 @@ public class CatchResultPanel {
     /** Everything at once, for a player who would rather not be read to. */
     public void revealAll() {
         shown = lines.size();
+        skipped = true;
     }
 
     /** True once there is nothing left to arrive, which is when a keypress means "close". */
@@ -113,6 +132,7 @@ public class CatchResultPanel {
     public void render(FishingMinigameLayout layout, SpriteAPI fishSprite, float alphaMult) {
         if (entry == null || alphaMult <= 0f) return;
 
+        renderPanel(layout, alphaMult);
         renderBox(layout, fishSprite, alphaMult);
 
         float y = layout.boxY - FishConstants.MINIGAME_RESULT_TITLE_GAP;
@@ -121,6 +141,41 @@ public class CatchResultPanel {
         y = renderLines(layout, y, alphaMult);
 
         renderPrompt(layout, y, alphaMult);
+    }
+
+    /**
+     * The readout's own frame: a dark field with the same bright-line-and-dimmer-line dressing the
+     * catch's panel carries, so the two read as two panels of one interface rather than as one panel
+     * with something bolted to the side of it.
+     */
+    protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
+        drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
+                Color.BLACK, 0.85f * alphaMult);
+
+        drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
+                Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+
+        dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
+    }
+
+    /** The bright outline just off a box and the dimmer one outside it, as the catch's panel has. */
+    protected static void dress(float x, float y, float width, float height, float alphaMult) {
+        float inset = FishConstants.MINIGAME_BORDER_INSET;
+        float spacing = FishConstants.MINIGAME_BORDER_SPACING;
+
+        outline(x, y, width, height, inset + spacing, Misc.getDarkPlayerColor(),
+                FishConstants.MINIGAME_BORDER_OUTER_ALPHA * alphaMult);
+
+        outline(x, y, width, height, inset, Misc.getBrightPlayerColor(),
+                FishConstants.MINIGAME_BORDER_ALPHA * alphaMult);
+    }
+
+    protected static void outline(float x, float y, float width, float height, float offset,
+                                  Color color, float alpha) {
+
+        RoundedBorder.draw(x - offset, y - offset, width + offset * 2f, height + offset * 2f,
+                FishConstants.MINIGAME_BORDER_RADIUS + offset, color, alpha,
+                FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
     /**
@@ -155,18 +210,7 @@ public class CatchResultPanel {
         catchrelease.campaign.fish.items.FishItemRenderer.render(x, y, size, size, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
 
-        //dressing: the panel's bright line just off the square, and a dimmer one outside it
-        RoundedBorder.draw(x - FishConstants.MINIGAME_BORDER_INSET - FishConstants.MINIGAME_BORDER_SPACING,
-                y - FishConstants.MINIGAME_BORDER_INSET - FishConstants.MINIGAME_BORDER_SPACING,
-                size + (FishConstants.MINIGAME_BORDER_INSET + FishConstants.MINIGAME_BORDER_SPACING) * 2f,
-                size + (FishConstants.MINIGAME_BORDER_INSET + FishConstants.MINIGAME_BORDER_SPACING) * 2f,
-                FishConstants.MINIGAME_BORDER_RADIUS, Misc.getDarkPlayerColor(),
-                FishConstants.MINIGAME_BORDER_OUTER_ALPHA * alphaMult, FishConstants.MINIGAME_BORDER_WIDTH);
-
-        RoundedBorder.draw(x - FishConstants.MINIGAME_BORDER_INSET, y - FishConstants.MINIGAME_BORDER_INSET,
-                size + FishConstants.MINIGAME_BORDER_INSET * 2f, size + FishConstants.MINIGAME_BORDER_INSET * 2f,
-                FishConstants.MINIGAME_BORDER_RADIUS, Misc.getBrightPlayerColor(),
-                FishConstants.MINIGAME_BORDER_ALPHA * alphaMult, FishConstants.MINIGAME_BORDER_WIDTH);
+        dress(x, y, size, size, alphaMult);
     }
 
     /** @return the y the next thing down should start at */
@@ -195,15 +239,25 @@ public class CatchResultPanel {
             Line line = lines.get(i);
             build(line);
 
-            //the newest line arrives rather than switching on
+            //the newest line arrives rather than switching on - unless it was skipped to, in which
+            //case it is already meant to be here and fading it in would be a second wait
             float age = elapsed - (i + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY;
-            float alpha = alphaMult * MathUtils.clamp(age / FishConstants.MINIGAME_RESULT_FADE, 0f, 1f);
+            float alpha = skipped
+                    ? alphaMult
+                    : alphaMult * MathUtils.clamp(age / FishConstants.MINIGAME_RESULT_FADE, 0f, 1f);
 
             line.labelText.setBaseColor(withAlpha(Misc.getGrayColor(), alpha));
             line.labelText.draw(layout.resultX, y);
 
             line.valueText.setBaseColor(withAlpha(line.color, alpha));
             line.valueText.draw(right, y);
+
+            //a record is marked on the row that set it as well as being said in words below, so the
+            //eye lands on the number rather than on the announcement
+            if (line.record && line.markText != null) {
+                line.markText.setBaseColor(withAlpha(Misc.getPositiveHighlightColor(), alpha));
+                line.markText.draw(layout.resultX + layout.resultWidth * 0.5f, y);
+            }
 
             y -= FishConstants.MINIGAME_RESULT_LINE_HEIGHT;
         }
@@ -229,6 +283,12 @@ public class CatchResultPanel {
 
         line.valueText = font.createText(line.value, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
         line.valueText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+
+        if (!line.record) return;
+
+        line.markText = font.createText(FishConstants.MINIGAME_RESULT_RECORD_MARK, Color.WHITE,
+                FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+        line.markText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
     }
 
     /** Loaded once and kept. A missing font costs the text and nothing else. */

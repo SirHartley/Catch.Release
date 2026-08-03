@@ -9,18 +9,20 @@ public class FishConstants {
     public static final float CORE_BAND_HALF_HEIGHT = 17000f;
 
     /**
-     * The readout beside the track: a cargo-square of the specimen, its name under that, and its
-     * numbers under that a line at a time.
+     * The readout: a panel of its own, off the right edge of the one the catch is played in, with a
+     * cargo-square of the specimen at the top of it and its numbers below a line at a time.
+     * <p>
+     * Its own panel rather than a column inside the catch's, because the catch's panel is sized to
+     * the playfield and nothing else - there is no room in there, and making room would leave the
+     * catch sitting in a half-empty box for the whole time it is being played.
      * <p>
      * BOX is a hundred to the side because that is what a cargo cell is, and the point of the box is
-     * to be recognisably one. The column sits to the right of the meter, which is why the panel is
-     * wider than the playfield needs - the track stays centred in it either way.
-     * <p>
-     * LINE_DELAY is the wait between one number and the next; each one plays SOUND_RESULT_LINE as it
-     * lands.
+     * to be recognisably one. LINE_DELAY is the wait between one number and the next; each one plays
+     * SOUND_RESULT_LINE as it lands.
      */
-    public static final float MINIGAME_RESULT_GAP = 24f;
-    public static final float MINIGAME_RESULT_WIDTH = 190f;
+    public static final float MINIGAME_RESULT_GAP = 16f;
+    public static final float MINIGAME_RESULT_WIDTH = 210f;
+    public static final float MINIGAME_RESULT_PAD = 16f;
     public static final float MINIGAME_RESULT_BOX = 100f;
     public static final float MINIGAME_RESULT_BOX_PAD = 12f;
     public static final float MINIGAME_RESULT_TITLE_GAP = 14f;
@@ -33,8 +35,17 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_TITLE_SIZE = 19f;
     public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
 
-    //minigame - panel
-    public static final float MINIGAME_PANEL_WIDTH = 560f;
+    /**
+     * What a personal best is said with. The mark goes on the row that set it, the line goes at the
+     * end of the tally - one so the eye lands on the number, the other so it is stated outright.
+     * <p>
+     * Records are per species and measured on length, since that is what a record is about.
+     */
+    public static final String MINIGAME_RESULT_RECORD_MARK = "* best";
+    public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
+
+    //minigame - panel. Wide enough for the playfield and its dressing, and no wider
+    public static final float MINIGAME_PANEL_WIDTH = 140f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
     public static final float MINIGAME_TRACK_WIDTH = 52f;
     public static final float MINIGAME_TRACK_HEIGHT = 360f;
@@ -105,18 +116,14 @@ public class FishConstants {
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
     public static final float MINIGAME_DIFFICULTY_SCALE = 0.3f;
 
-    //minigame - dev controls
+    /** Bounds on the two values a running catch can have retuned under it. */
     public static final float MINIGAME_DIFFICULTY_MIN = 1f;
     public static final float MINIGAME_DIFFICULTY_MAX = 200f;
-    public static final float MINIGAME_DIFFICULTY_STEP = 10f;
     public static final float MINIGAME_SPEED_MIN = 0.1f;
     public static final float MINIGAME_SPEED_MAX = 4f;
-    public static final float MINIGAME_SPEED_STEP = 0.2f;
+
     /** Dev mode only: the meter stops here instead of running out, so nothing is ever lost. */
     public static final float MINIGAME_DEV_PROGRESS_FLOOR = 0.02f;
-    public static final float MINIGAME_DEV_ROW_HEIGHT = 74f;
-    public static final float MINIGAME_DEV_BUTTON_WIDTH = 62f;
-    public static final float MINIGAME_DEV_BUTTON_HEIGHT = 22f;
 
     /** Padding between the playfield and whatever frames it. */
     public static final float MINIGAME_FRAME_PAD = 12f;
@@ -212,13 +219,13 @@ public class FishConstants {
     public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
 
     /**
-     * The marks drawn onto a catch's cargo icon, both on one row along the bottom: grade as pips,
-     * then the rarity as a single bar at the end of them.
+     * The marks drawn onto a catch's cargo icon, both on one row across the top left: the rarity as a
+     * single unbroken bar, then the grade as pips after it.
      * <p>
-     * The bar is three pips long and unbroken, so it cannot be counted as part of the grade - it is
-     * plainly a different kind of mark on the same scale. Reading left to right, the row is what the
-     * specimen is followed by what the species is. Kept small and inset; the icon has to read as the
-     * fish first.
+     * The bar is three pips long, so it cannot be counted as part of the grade - it is plainly a
+     * different kind of mark on the same scale. Reading left to right the row is what the species is
+     * followed by what this one is, which is the order the two are learned in. Kept small and inset;
+     * the icon has to read as the fish first.
      */
     public static final float ITEM_MARK_INSET = 3f;
     public static final float ITEM_GRADE_PIP_SIZE = 3f;
@@ -242,8 +249,22 @@ public class FishConstants {
      */
     public static final String ITEM_ICON_BLANK = "graphics/catchrelease/icon/blank.png";
     public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
-    public static final float ITEM_ICON_INSET = 4f;
+    public static final float ITEM_ICON_INSET = 5f;
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
+
+    /**
+     * Unsharp masking on the cargo icon, since the art is drawn at whatever size the cell is rather
+     * than at the size it was authored and the game does no sharpening of its own on the way.
+     * <p>
+     * Done the way an unsharp mask is done - the image, plus the difference between the image and a
+     * blurred copy of it - with the blur approximated by the same sprite drawn RADIUS pixels wider,
+     * which linear filtering softens. AMOUNT is how much of that difference is added back.
+     * <p>
+     * SHARPEN is the switch. Turn it off and the icon is drawn in one ordinary pass.
+     */
+    public static final boolean ITEM_ICON_SHARPEN = true;
+    public static final float ITEM_ICON_SHARPEN_AMOUNT = 0.2f;
+    public static final float ITEM_ICON_SHARPEN_RADIUS = 1f;
 
     /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
