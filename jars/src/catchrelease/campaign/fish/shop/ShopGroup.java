@@ -11,18 +11,22 @@ import catchrelease.memory.upgrades.UpgradeStat;
  */
 public enum ShopGroup {
 
-    SEARCHLIGHTS("Searchlights"),
-    DRONES("Drones"),
-    HARPOON("Harpoon"),
-    DEPTH_BOMBS("Depth bombs"),
-    THE_CATCH("The catch"),
-    DRONE_TACKLE("Drone tackle"),
-    HARPOON_TIPS("Harpoon tips");
+    SEARCHLIGHTS("Searchlights", "Lights"),
+    DRONES("Drones", "Drones"),
+    HARPOON("Harpoon", "Harpoon"),
+    DEPTH_BOMBS("Depth bombs", "Bombs"),
+    THE_CATCH("The catch", "Catch"),
+    DRONE_TACKLE("Drone tackle", "Drone rig"),
+    HARPOON_TIPS("Harpoon tips", "Harpoon");
 
     public final String title;
 
-    ShopGroup(String title) {
+    /** What fits on a tab, where the full title would not. */
+    public final String tabTitle;
+
+    ShopGroup(String title, String tabTitle) {
         this.title = title;
+        this.tabTitle = tabTitle;
     }
 
     /** The shelf a stat sits on. Anything the ids do not place ends up with the catch. */
