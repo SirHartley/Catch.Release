@@ -29,7 +29,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * The pond, as terrain rather than as a custom entity.
@@ -81,6 +83,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     /** Seconds the pond has been advancing. What the deep field's own drift runs off. */
     protected float elapsed = 0f;
+
+    /** The rings thrown when the rupture opens. One-shot, so a save mid-wave simply misses it. */
+    transient protected List<RippleData> openingWave;
 
     transient protected PondDepthField depthField;
     transient protected WarpGrid warpGrid;
@@ -194,6 +199,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         elapsed += amount;
         if (depthField != null) depthField.advance(amount);
+        advanceOpeningWave(amount);
 
         if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
@@ -223,9 +229,42 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
 
+        throwOpeningWave();
+
         //holds the camera while the player is here, and closes the pond once they have left. Sector
         //level rather than on the entity: entity scripts do not advance while the game is paused
         Global.getSector().addScript(new PondCameraFocusScript(entity));
+    }
+
+    /**
+     * The rupture opening, said with the same rings it makes when it is idle - several of them, one
+     * after another, wider and thinner and going out much faster.
+     * <p>
+     * The same rings on purpose. An opening should read as the pond doing hard what it does gently
+     * the rest of the time, not as a different effect borrowed for the occasion.
+     */
+    protected void throwOpeningWave() {
+        openingWave = new ArrayList<>();
+
+        openingWave.add(new RippleData(
+                new Vector2f(entity.getLocation()),
+                PondConstants.OPEN_WAVE_INTERVAL,
+                PondConstants.OPEN_WAVE_INTERVAL,
+                PondConstants.OPEN_WAVE_COLOR,
+                entity.getRadius() * PondConstants.OPEN_WAVE_SIZE_MULT,
+                PondConstants.OPEN_WAVE_WIDTH,
+                PondConstants.OPEN_WAVE_GROW_TIME,
+                PondConstants.OPEN_WAVE_START_MULT,
+                PondConstants.OPEN_WAVE_RINGS));
+    }
+
+    protected void advanceOpeningWave(float amount) {
+        if (openingWave == null) return;
+
+        for (RippleData wave : openingWave) wave.advance(amount);
+        openingWave.removeIf(RippleData::isExpired);
+
+        if (openingWave.isEmpty()) openingWave = null;
     }
 
     /**
