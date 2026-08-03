@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -45,8 +46,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     protected FishSpec fish;
     protected Callback callback;
 
-    /** Where this one was taken. Only its aberration is read off it, but that has to be read early. */
+    /** Where this one was taken. Its aberration is read off it early, and the log reads it on a win. */
     protected SectorEntityToken anchor;
+
+    /** How it is being taken. Recorded in the log, since the three ways are not interchangeable. */
+    protected FishLogEntry.Method method = FishLogEntry.Method.UNKNOWN;
 
     /**
      * Rolled when the catch opens rather than when it is won.
@@ -71,17 +75,20 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
      * @return false if a dialog is already up or the UI is mid-transition, in which case the caller
      *         should try again rather than treat the fish as lost
      */
-    public static boolean open(SectorEntityToken anchor, FishSpec fish, Callback callback) {
+    public static boolean open(SectorEntityToken anchor, FishSpec fish, FishLogEntry.Method method,
+                               Callback callback) {
         if (fish == null) return false;
 
-        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(fish, anchor, callback);
+        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(fish, anchor, method, callback);
 
         return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
     }
 
-    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor, Callback callback) {
+    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
+                                       FishLogEntry.Method method, Callback callback) {
         this.fish = fish;
         this.anchor = anchor;
+        this.method = method == null ? FishLogEntry.Method.UNKNOWN : method;
         this.callback = callback;
     }
 
@@ -119,7 +126,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     /** Wraps the panel for the dialog. The catch ends itself, so there is nothing to press. */
     protected class Delegate implements CustomVisualDialogDelegate, FishingMinigamePanel.Listener {
 
-        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, this);
+        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
 
         /** The frame's own handle, and the only way to close the panel from in here. */
         protected DialogCallbacks callbacks;

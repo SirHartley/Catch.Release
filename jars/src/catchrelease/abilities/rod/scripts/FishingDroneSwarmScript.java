@@ -5,6 +5,7 @@ import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
 import catchrelease.abilities.rod.rendering.FishingRingRenderer;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -247,7 +248,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(pond, fish, new FishingMinigameDialogPlugin.Callback() {
+        boolean opened = FishingMinigameDialogPlugin.open(pond, fish, FishLogEntry.Method.DRONE, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
                 if (landed != null) FishItems.addToPlayerCargo(landed);

@@ -3,12 +3,14 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
-import catchrelease.campaign.fish.data.FishRecords;
+import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.rendering.helper.RoundedBorder;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -54,6 +56,8 @@ public class CatchResultPanel {
     }
 
     protected final FishCatch entry;
+    protected final SectorEntityToken where;
+    protected final FishLogEntry.Method method;
     protected final List<Line> lines = new ArrayList<>();
 
     protected float elapsed = 0f;
@@ -68,8 +72,10 @@ public class CatchResultPanel {
     transient protected LazyFont.DrawableString prompt;
     transient protected boolean fontsChecked = false;
 
-    public CatchResultPanel(FishCatch entry) {
+    public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
         this.entry = entry;
+        this.where = where;
+        this.method = method;
 
         buildLines();
     }
@@ -85,8 +91,9 @@ public class CatchResultPanel {
         FishSpec spec = entry.getSpec();
         FishGrade grade = entry.getGrade();
 
-        //filed before anything is drawn, since the comparison is against what was there beforehand
-        boolean record = FishRecords.submit(entry);
+        //filed before anything is drawn, since the comparison is against what was there beforehand.
+        //This is also where a species stops being unknown to the codex
+        boolean record = FishLog.record(entry, where, method);
 
         if (spec != null) {
             lines.add(new Line("Species", Misc.ucFirst(spec.rarity.name().toLowerCase()), spec.rarity.color));

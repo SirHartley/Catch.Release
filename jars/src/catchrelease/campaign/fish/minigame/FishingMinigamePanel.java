@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.CatchReleaseSettings;
 import catchrelease.helper.loading.SpriteLoader;
@@ -10,6 +11,7 @@ import catchrelease.rendering.plugins.WarpGrid;
 import catchrelease.rendering.plugins.WarpedRectRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -40,6 +42,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Rolled before the catch begins, shown only if it is won. What the readout reads. */
     protected FishCatch specimen;
 
+    /** Where this one was taken and how, for the log. Only read once, on a win. */
+    protected SectorEntityToken where;
+    protected FishLogEntry.Method method;
+
     protected PositionAPI position;
 
     /** Rebuilt each frame from the panel's position; also what custom framing should line up against. */
@@ -67,9 +73,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
 
-    public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, Listener listener) {
+    public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
+                               FishLogEntry.Method method, Listener listener) {
         this.minigame = minigame;
         this.specimen = specimen;
+        this.where = where;
+        this.method = method;
         this.listener = listener;
     }
 
@@ -108,7 +117,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
      */
     protected void advanceCaught(float amount) {
         if (result == null) {
-            result = new CatchResultPanel(specimen);
+            result = new CatchResultPanel(specimen, where, method);
 
             //from the middle of the track, which is where the specimen is shown - not from wherever
             //in the track it happened to be when it was landed
