@@ -22,9 +22,11 @@ void main() {
 
     float a = texture2D(maskTex, uv).a;
 
-    // No early-out on low alpha. The outer glow is by definition the pixels just OUTSIDE the shape,
-    // where a is near zero - discarding those was discarding the entire outer half of the effect,
-    // which is why the glow only ever appeared on the inside of the edge.
+    // Force very low alpha to full transparency
+    if (a < 0.05) {
+        gl_FragColor = vec4(0.0);
+        return;
+    }
 
     // Sample pattern (8-tap) for min/max
     // Outer
@@ -61,11 +63,9 @@ void main() {
     outer = smoothstep(0.02, 0.35, outer);
     inner = smoothstep(0.02, 0.35, inner);
 
-    // Weighted apart, because they live on opposite sides of the edge: inner is strongest deep in
-    // the shape, outer is strongest well outside it. One weighting for both suppressed whichever of
-    // the two it was not written for.
-    float glow = inner * (0.25 + 0.75 * a) + outer * (0.25 + 0.75 * (1.0 - a));
+    float glow = outer + inner;
 
+    glow *= (0.25 + 0.75 * a);
     glow *= glowAlpha;
 
     float outA = glow;

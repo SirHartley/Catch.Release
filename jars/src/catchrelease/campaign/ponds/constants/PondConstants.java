@@ -38,8 +38,15 @@ public class PondConstants {
      * SPEED_FLOOR is how fast the deepest layer turns compared to the shallowest - the gap between
      * them is what the eye reads as distance, so this being well under 1 is the point of the whole
      * thing. REACH_FLOOR narrows the deep layers towards the middle, which turns a cylinder into a
-     * well. EDGE_FROM is where a particle starts fading so nothing sits hard against the mask, and
-     * FILL keeps the field inside the rim.
+     * well - gently, or the field bunches into a disc with a dead ring around it. FILL runs past 1
+     * on purpose: the mask stencil cuts whatever crosses the rim, and a mote cut in half by the edge
+     * reads as one that continues underneath it.
+     * <p>
+     * SIZE is the full width handed to the glow sprite, most of which is transparent falloff - the
+     * visible core is maybe a third of it, which is why these dwarf the half-extents of the quads
+     * they replaced. The colours are a brightness ramp as much as a hue ramp: additive blending can
+     * only add light, so a deep mote is dark by contributing nearly nothing - dim colour, low alpha
+     * - not by being painted dark.
      * <p>
      * COUNTER_SHARE is how many turn the other way. Not many: enough that the field is not a wheel.
      */
@@ -48,16 +55,15 @@ public class PondConstants {
     public static final float DEPTH_SPIN_MAX = 6f;
     public static final float DEPTH_COUNTER_SHARE = 0.25f;
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
-    public static final float DEPTH_REACH_FLOOR = 0.45f;
-    public static final float DEPTH_FILL = 0.92f;
-    public static final float DEPTH_EDGE_FROM = 0.75f;
-    public static final float DEPTH_SIZE_MIN = 1.2f;
-    public static final float DEPTH_SIZE_MAX = 4.5f;
-    public static final float DEPTH_ALPHA_MIN = 0.12f;
-    public static final float DEPTH_ALPHA_MAX = 0.55f;
+    public static final float DEPTH_REACH_FLOOR = 0.7f;
+    public static final float DEPTH_FILL = 1.15f;
+    public static final float DEPTH_SIZE_MIN = 7f;
+    public static final float DEPTH_SIZE_MAX = 28f;
+    public static final float DEPTH_ALPHA_MIN = 0.1f;
+    public static final float DEPTH_ALPHA_MAX = 0.35f;
     public static final float DEPTH_BOB = 0.25f;
 
-    public static final java.awt.Color DEPTH_COLOR_DEEP = new java.awt.Color(70, 90, 190);
+    public static final java.awt.Color DEPTH_COLOR_DEEP = new java.awt.Color(25, 35, 80);
     public static final java.awt.Color DEPTH_COLOR_NEAR = new java.awt.Color(215, 175, 255);
 
     /**
@@ -69,29 +75,6 @@ public class PondConstants {
      */
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
-
-    /**
-     * The pond's surface, done in the fragment shader rather than by pushing a mesh about.
-     * <p>
-     * WAVE_AMP is a share of the fill sprite, so it holds its look at any size. WAVE_SCALE is
-     * roughly how many waves fit across it and RING_SCALE how many rings run out from the middle -
-     * the rings are what say this is a hole with something coming up through it rather than a
-     * rectangle of moving texture. MASK_FEATHER softens the rim, which used to be a hard cut and
-     * aliased against whatever was behind it.
-     * <p>
-     * MESH_* is what is left of the old mesh warp: a slow, large flex under the shader's detail,
-     * rather than the whole of the motion. Its radius used to have the same minimum and maximum,
-     * which meant it never actually changed size - it only rotated.
-     */
-    public static final float POND_WAVE_AMP = 0.004f;
-    public static final float POND_WAVE_SCALE = 1.6f;
-    public static final float POND_WAVE_SPEED = 0.55f;
-    public static final float POND_RING_SCALE = 3.5f;
-    public static final float POND_RING_AMP = 0.006f;
-    public static final float POND_MASK_FEATHER = 0.06f;
-    public static final float POND_MESH_MIN = 0.05f;
-    public static final float POND_MESH_MAX = 0.16f;
-    public static final float POND_MESH_RATE = 0.6f;
 
     /**
      * The shove space takes when a rupture opens - a real screen-space distortion through
