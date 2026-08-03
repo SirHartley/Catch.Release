@@ -4,6 +4,7 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.ponds.constants.PondConstants;
+import catchrelease.campaign.ponds.renderer.PondDepthField;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
@@ -28,7 +29,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 /**
  * The pond, as terrain rather than as a custom entity.
@@ -78,6 +81,13 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
 
+    /** Seconds the pond has been advancing. What the deep field's own drift runs off. */
+    protected float elapsed = 0f;
+
+    /** The rings thrown when the rupture opens. One-shot, so a save mid-wave simply misses it. */
+    transient protected List<RippleData> openingWave;
+
+    transient protected PondDepthField depthField;
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
     transient protected MaskGlowRenderer maskGlowRenderer;
@@ -187,12 +197,18 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         initRippleRenderer();
 
+        elapsed += amount;
+        if (depthField != null) depthField.advance(amount);
+        advanceOpeningWave(amount);
+
         if (isActive && activity < 1) activity += amount / ACTIVATION_SPOOL_UP_TIME;
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
         activity = Math.max(0f, Math.min(1f, activity));
 
+        //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
+        //since they are stencilled to the mask - invisible, but real enough to be harpooned
         moteSpawnInterval.advance(amount);
-        if (moteSpawnInterval.intervalElapsed()) spawnRandomMote();
+        if (moteSpawnInterval.intervalElapsed() && isActive) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
     }
 
@@ -207,12 +223,48 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void activate(){
         if (isActive) return;
 
+        //the idle ripples may not exist yet: activate can arrive before this plugin has advanced once
+        initRippleRenderer();
+
         isActive = true;
         rippleRenderer.fadeAndExpire(1);
+
+        throwOpeningWave();
 
         //holds the camera while the player is here, and closes the pond once they have left. Sector
         //level rather than on the entity: entity scripts do not advance while the game is paused
         Global.getSector().addScript(new PondCameraFocusScript(entity));
+    }
+
+    /**
+     * The rupture opening, said with the same rings it makes when it is idle - several of them, one
+     * after another, wider and thinner and going out much faster.
+     * <p>
+     * The same rings on purpose. An opening should read as the pond doing hard what it does gently
+     * the rest of the time, not as a different effect borrowed for the occasion.
+     */
+    protected void throwOpeningWave() {
+        openingWave = new ArrayList<>();
+
+        openingWave.add(new RippleData(
+                new Vector2f(entity.getLocation()),
+                PondConstants.OPEN_WAVE_INTERVAL,
+                PondConstants.OPEN_WAVE_INTERVAL,
+                PondConstants.OPEN_WAVE_COLOR,
+                entity.getRadius() * PondConstants.OPEN_WAVE_SIZE_MULT,
+                PondConstants.OPEN_WAVE_WIDTH,
+                PondConstants.OPEN_WAVE_GROW_TIME,
+                PondConstants.OPEN_WAVE_START_MULT,
+                PondConstants.OPEN_WAVE_RINGS));
+    }
+
+    protected void advanceOpeningWave(float amount) {
+        if (openingWave == null) return;
+
+        for (RippleData wave : openingWave) wave.advance(amount);
+        openingWave.removeIf(RippleData::isExpired);
+
+        if (openingWave.isEmpty()) openingWave = null;
     }
 
     /**
@@ -223,6 +275,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!isActive) return;
 
         isActive = false;
+
+        //expired rather than simply dropped: the renderer is an entity script, and letting go of the
+        //reference without ending it leaves it running and spawning ripples for a pond that is shut
+        if (rippleRenderer != null) rippleRenderer.fadeAndExpire(1f);
         rippleRenderer = null;
     }
 
@@ -260,9 +316,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             starfield.setAlphaMult(1f);
             starfield.setNormalBlend();
 
+            //pushed and popped: this used to leave blending enabled for whatever drew next
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+            //the camera's contribution, which is nothing at all while the camera is snapped to us
             Vector2f fillUvOffsetPx = ParallaxUtil.computeFillUvOffsetPx(
                     viewport,
                     loc,
@@ -271,6 +330,18 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                     starfield.getTextureWidth(),
                     starfield.getTextureHeight()
             );
+
+            //and the field's own wander, which is what is left when that is zero
+            Vector2f drift = ParallaxUtil.computeDriftUvOffsetPx(
+                    elapsed,
+                    PondConstants.POND_FILL_DRIFT,
+                    PondConstants.POND_FILL_DRIFT_PERIOD,
+                    fillSize,
+                    starfield.getTextureWidth(),
+                    starfield.getTextureHeight()
+            );
+
+            Vector2f.add(fillUvOffsetPx, drift, fillUvOffsetPx);
 
             maskedRenderer.render(
                     starfield,
@@ -281,6 +352,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                     alpha,
                     fillUvOffsetPx
             );
+
+            GL11.glPopAttrib();
             return;
         }
 
@@ -316,6 +389,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (layer == CampaignEngineLayers.ABOVE) {
             Stencil.startDepthMask(mask, maskSize, maskSize, loc, true);
 
+            //under the motes, and inside the same mask - depth first, then the things swimming in it
+            getDepthField().render(loc, entity.getRadius() * activity, alpha);
+
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
                 ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);
             }
@@ -336,6 +412,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                 new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation()))
         );
         mote.setLocation(spawnLoc.x, spawnLoc.y);
+    }
+
+    protected PondDepthField getDepthField() {
+        if (depthField == null) depthField = new PondDepthField();
+
+        return depthField;
     }
 
     private void initRenderer() {

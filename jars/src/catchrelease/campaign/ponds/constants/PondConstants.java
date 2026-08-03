@@ -31,4 +31,59 @@ public class PondConstants {
     /** World units. Once the camera is this close to the fleet again, control goes back to the game. */
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
 
+    /**
+     * The motes of light hanging inside the rupture at different depths.
+     * <p>
+     * Depth runs 0 at the bottom to 1 just under the surface, and every one of these is read off it.
+     * SPEED_FLOOR is how fast the deepest layer turns compared to the shallowest - the gap between
+     * them is what the eye reads as distance, so this being well under 1 is the point of the whole
+     * thing. REACH_FLOOR narrows the deep layers towards the middle, which turns a cylinder into a
+     * well. EDGE_FROM is where a particle starts fading so nothing sits hard against the mask, and
+     * FILL keeps the field inside the rim.
+     * <p>
+     * COUNTER_SHARE is how many turn the other way. Not many: enough that the field is not a wheel.
+     */
+    public static final int DEPTH_PARTICLES = 90;
+    public static final float DEPTH_SPIN_MIN = 1.5f;
+    public static final float DEPTH_SPIN_MAX = 6f;
+    public static final float DEPTH_COUNTER_SHARE = 0.25f;
+    public static final float DEPTH_SPEED_FLOOR = 0.25f;
+    public static final float DEPTH_REACH_FLOOR = 0.45f;
+    public static final float DEPTH_FILL = 0.92f;
+    public static final float DEPTH_EDGE_FROM = 0.75f;
+    public static final float DEPTH_SIZE_MIN = 1.2f;
+    public static final float DEPTH_SIZE_MAX = 4.5f;
+    public static final float DEPTH_ALPHA_MIN = 0.12f;
+    public static final float DEPTH_ALPHA_MAX = 0.55f;
+    public static final float DEPTH_BOB = 0.25f;
+
+    public static final java.awt.Color DEPTH_COLOR_DEEP = new java.awt.Color(70, 90, 190);
+    public static final java.awt.Color DEPTH_COLOR_NEAR = new java.awt.Color(215, 175, 255);
+
+    /**
+     * The deep field's own drift, in world units, and how long one wander takes.
+     * <p>
+     * The starfield behind the mask used to slide because the camera moved relative to the pond.
+     * With the camera snapped to the pond it never does, so the field is given a slow wander of its
+     * own - the two are added, so this is what is left when the camera contributes nothing.
+     */
+    public static final float POND_FILL_DRIFT = 90f;
+    public static final float POND_FILL_DRIFT_PERIOD = 23f;
+
+    /**
+     * The wave a rupture throws when it opens: a handful of rings going out from the middle, one
+     * after another, each wider and thinner than the ring the idle pond makes.
+     * <p>
+     * They are the same ripple rings the pond uses the rest of the time - which is deliberate, since
+     * the opening should read as the pond doing hard what it normally does gently, rather than as a
+     * different effect borrowed for the occasion.
+     */
+    public static final int OPEN_WAVE_RINGS = 4;
+    public static final float OPEN_WAVE_INTERVAL = 0.22f;
+    public static final float OPEN_WAVE_SIZE_MULT = 1.35f;
+    public static final float OPEN_WAVE_WIDTH = 6f;
+    public static final float OPEN_WAVE_GROW_TIME = 1.8f;
+    public static final float OPEN_WAVE_START_MULT = 0.02f;
+    public static final java.awt.Color OPEN_WAVE_COLOR = new java.awt.Color(190, 130, 255);
+
 }
