@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.treasure.MinigameTreasure;
+import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.memory.upgrades.StatIds;
@@ -54,6 +56,12 @@ public class FishingMinigame {
     protected float fishVelocity = 0f;
 
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
+
+    /**
+     * What else is down there, if anything. Rolled once when the catch starts: treasure that could
+     * appear at any moment would be a thing to wait for rather than a thing to react to.
+     */
+    protected MinigameTreasure treasure;
     protected State state = State.RUNNING;
 
     /** Set from dev mode at the start - kept as a field so this stays testable without a game. */
@@ -87,6 +95,10 @@ public class FishingMinigame {
         fishThinkTimer = 0f;
         fishTarget = pickFishTarget();
         progress = FishConstants.MINIGAME_PROGRESS_START;
+
+        treasure = TreasureRoller.rollForTreasure()
+                ? new MinigameTreasure(TreasureRoller.rollRarity())
+                : null;
         state = State.RUNNING;
         timeHeld = 0f;
         timeTotal = 0f;
@@ -114,6 +126,7 @@ public class FishingMinigame {
 
         advanceBar(amount, reeling);
         advanceFish(amount);
+        advanceTreasure(amount);
         advanceProgress(amount);
     }
 
@@ -205,7 +218,27 @@ public class FishingMinigame {
     }
 
     public boolean isFishInBar() {
-        return fishPosition >= barPosition && fishPosition <= barPosition + barHeight;
+        return covers(fishPosition);
+    }
+
+    /** Whether the window is over a point in the track. The fish and the treasure both ask this. */
+    public boolean covers(float position) {
+        return position >= barPosition && position <= barPosition + barHeight;
+    }
+
+    /**
+     * The treasure's own clock. It neither moves nor affects the fish - taking it costs the ground
+     * the bar gives up going to get it, and that is the whole of the trade.
+     */
+    protected void advanceTreasure(float amount) {
+        if (treasure == null || !treasure.isActive()) return;
+
+        treasure.advance(amount, covers(treasure.position));
+    }
+
+    /** Null when there is nothing down there, which is most catches. */
+    public MinigameTreasure getTreasure() {
+        return treasure;
     }
 
     /** Where this fish would like to be next, according to its archetype. */

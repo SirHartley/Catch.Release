@@ -72,6 +72,39 @@ public class FishConstants {
      */
     public static final String MINIGAME_TRACK_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
 
+    /**
+     * Treasure in the track: a thing that does not move, does not last, and is not the fish.
+     * <p>
+     * CHANCE is whether anything is down there at all this catch, and is deliberately low - treasure
+     * that turns up every other catch is a second reward slot rather than treasure. POSITION_INSET
+     * keeps it away from the ends of the track, where the bar rests anyway, so taking one always
+     * costs ground on the fish.
+     * <p>
+     * HOLD_TIME is how long the bar has to be over it, and HOLD_DECAY how fast that is given back
+     * when the bar slips off - a hold rather than a touch, so taking one is a decision instead of
+     * something that happens on the way past.
+     */
+    public static final float TREASURE_CHANCE = 0.12f;
+    public static final float TREASURE_POSITION_INSET = 0.18f;
+    public static final float TREASURE_LIFETIME_MIN = 6f;
+    public static final float TREASURE_LIFETIME_MAX = 11f;
+    public static final float TREASURE_HOLD_TIME = 1.1f;
+    public static final float TREASURE_HOLD_DECAY = 1.5f;
+
+    /** Stand-in art, and the sizes it and its clock are drawn at. */
+    public static final String TREASURE_ICON = "graphics/catchrelease/icon/small_icon_catchrelease2.png";
+    public static final float TREASURE_ICON_SIZE = 26f;
+    public static final float TREASURE_BAR_WIDTH = 30f;
+    public static final float TREASURE_BAR_HEIGHT = 3f;
+    public static final float TREASURE_BAR_GAP = 6f;
+
+    /** The game's own drop groups, rolled rather than listed so they stay correct as they change. */
+    public static final String TREASURE_GROUP_BLUEPRINTS = "blueprints";
+    public static final String TREASURE_GROUP_RARE_TECH = "rare_tech";
+
+    /** Roughly what a pile of commodity treasure is worth, before the roll picks which commodity. */
+    public static final float TREASURE_COMMODITY_VALUE = 2500f;
+
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */
     public static final float MINIGAME_BAR_SIZE_FALLBACK = 120f;
