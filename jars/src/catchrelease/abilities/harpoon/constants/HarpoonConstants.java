@@ -75,32 +75,32 @@ public class HarpoonConstants {
      * PAYOUT is how much more line goes out than the distance being covered - a launcher throws rope
      * rather than measuring it. TAKEUP is how fast the slack is hauled in when the line is pulled
      * taut, and REEL_IN how fast it comes in on the way home: slower than the head closes, on
-     * purpose, so a returning harpoon runs ahead of its own rope and the belly grows behind it.
+     * purpose, so a returning harpoon runs ahead of its own rope and there is spare line behind it.
      * <p>
-     * SAG_MULT turns the excess into a hanging distance the way an arc does, roughly, and SAG_MAX
-     * caps it as a share of the line's length so a long cast cannot loop round on itself.
+     * The excess does not hang to one side. It goes into the waves instead, which are symmetric
+     * about the straight line, so the rope stays centred on the shot however much of it is loose.
      */
     public static final float LINE_PAYOUT = 1.06f;
     public static final float LINE_TAKEUP = 2500f;
     public static final float LINE_REEL_IN = 850f;
-    public static final float LINE_SAG_MULT = 0.4f;
-    public static final float LINE_SAG_MAX = 0.18f;
 
     /**
      * The shiver on top of the swing - the small stuff a heavy rope does that one smooth curve
      * cannot say on its own.
      * <p>
      * WAVE_COUNT is how many bends are in the rope at once, SPEED how fast they run down it, and
-     * AMPLITUDE a share of the line's own length. It is fed by two things: the throw itself, dying
-     * off over DAMPING seconds, and how hard the middle of the rope is being swung about at the time
-     * - so a line yanked into a turn shivers and a line hanging still does not. REFERENCE_SPEED is
-     * the swing speed that counts as being thrown about as hard as it gets.
+     * AMPLITUDE a share of the line's own length. Three things feed it, and the strongest wins: the
+     * throw itself dying off over DAMPING seconds, how hard the middle of the rope is being swung
+     * about at the time, and how much spare rope is in the air. REFERENCE_SPEED is the swing speed
+     * that counts as being thrown about as hard as it gets, and EXCESS_FULL the share of spare rope
+     * that counts as fully loose.
      */
     public static final float WAVE_COUNT = 2.5f;
     public static final float WAVE_SPEED = 9f;
-    public static final float WAVE_AMPLITUDE = 0.05f;
+    public static final float WAVE_AMPLITUDE = 0.06f;
     public static final float WAVE_DAMPING = 0.5f;
     public static final float WAVE_REFERENCE_SPEED = 500f;
+    public static final float WAVE_EXCESS_FULL = 0.12f;
 
     public static final float HEAD_SIZE = 14f;
     public static final float TRAIL_SIZE = 12f;
