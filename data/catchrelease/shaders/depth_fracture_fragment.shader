@@ -136,11 +136,12 @@ void main() {
     float nearHole = 1.0 - smoothstep(inner + spread, inner + spread * 1.8, r);
     float gapDark = (1.0 - inPane) * nearHole * smoothstep(coreR - 0.01, coreR + 0.01, r);
 
-    //light spilling out of the hole, and the lit line along its rim. The spill falls off faster
-    //inward: the rim is lit, the deep behind it is not
-    float rimFall = r < coreR ? 22.0 : 9.0;
+    //light spilling out of the hole, and the lit line along its rim. The line is a line - a
+    //hairline on the polygon edge, not a band - and the spill is tight, falling off faster inward:
+    //the rim is lit, the deep behind it is not
+    float rimFall = r < coreR ? 40.0 : 16.0;
     float rimGlow = exp(-abs(r - coreR) * rimFall);
-    float rimLine = 1.0 - smoothstep(edgeWidth, edgeWidth * 2.5, abs(r - coreR));
+    float rimLine = 1.0 - smoothstep(edgeWidth * 0.5, edgeWidth * 1.4, abs(r - coreR));
 
     // ------------------------------------------------------------------ composed
     // The deep field, drifting slowly - what is behind the break is not still
@@ -156,15 +157,17 @@ void main() {
     color = mix(color, paneColor * shade, paneA);
     alpha = max(alpha, paneA);
 
-    //and every broken edge is lit
+    //and every broken edge is lit - capped, because the terms overlap exactly at the rim and light
+    //that stacks past white is how a hairline becomes a blown-out ring
     float lit = crack * mix(1.0, 0.35, alongC)
-              + crackGlow * 0.3
-              + edgeIn * 0.9
-              + rimLine * 1.1
-              + rimGlow * 0.7;
+              + crackGlow * 0.2
+              + edgeIn * 0.4
+              + rimLine * 0.8
+              + rimGlow * 0.3;
+    lit = min(lit, 1.2);
 
-    color += rimColor * lit * rimAlpha * 0.6;
-    alpha = max(alpha, clamp(lit, 0.0, 1.0) * 0.9);
+    color += rimColor * lit * rimAlpha * 0.55;
+    alpha = max(alpha, clamp(lit, 0.0, 1.0) * 0.85);
 
     //nothing may touch the edge of the quad, or the quad is what shows
     alpha *= 1.0 - smoothstep(0.92, 1.0, r);

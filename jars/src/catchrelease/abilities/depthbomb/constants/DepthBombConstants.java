@@ -43,7 +43,7 @@ public class DepthBombConstants {
     public static final float EDGE_WIDTH = 0.025f;
 
     public static final Color RIM_COLOR = new Color(255, 195, 225);
-    public static final float RIM_ALPHA = 1.4f;
+    public static final float RIM_ALPHA = 1f;
 
     /** Dark, so the hole reads as depth against the lifted panes rather than as a lighter patch. */
     public static final Color DEEP_TINT = new Color(100, 100, 150);
