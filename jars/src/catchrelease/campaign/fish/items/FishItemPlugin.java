@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.items;
 
+import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
@@ -149,6 +150,10 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishSpec spec = entry.getSpec();
         FishGrade grade = entry.getGrade();
         float pad = 10f;
+
+        //F2 over the stack would otherwise open the codex on the generic "Fish" item, which is what
+        //vanilla resolves from the item spec; point it at the species being held instead
+        tooltip.setCodexEntryId(FishCodex.getEntryId(entry.speciesId));
 
         tooltip.addTitle(entry.getDisplayName());
 
