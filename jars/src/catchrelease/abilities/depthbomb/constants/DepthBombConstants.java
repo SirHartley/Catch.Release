@@ -6,9 +6,16 @@ public class DepthBombConstants {
 
     public static final String ENTITY_ID = "catchrelease_DepthBomb";
 
+    /** The charge pool, without a row in the upgrade sheet. */
+    public static final float CHARGES_FALLBACK = 1f;
+    public static final float RECHARGE_FALLBACK = 30f;
+
     /** How far it can be thrown, and how fast it gets there. */
     public static final float RANGE = 1400f;
     public static final float SPEED = 520f;
+
+    /** How long a slowed mote stays slowed. The strength of it is the upgrade; this is the window. */
+    public static final float SLOW_TIME = 6f;
 
     /** Seconds between landing and going off. Long enough to see where it went. */
     public static final float ARM_TIME = 0.8f;

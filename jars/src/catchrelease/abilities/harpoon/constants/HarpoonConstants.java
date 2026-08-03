@@ -6,6 +6,14 @@ public class HarpoonConstants {
 
     public static final String ENTITY_ID = "catchrelease_Harpoon";
 
+    /**
+     * The charge pool, without a row in the upgrade sheet. Charges rather than a cooldown, so a pass
+     * can be spent all at once or held back - which is a more interesting question than whether the
+     * timer is up.
+     */
+    public static final float CHARGES_FALLBACK = 2f;
+    public static final float RECHARGE_FALLBACK = 12f;
+
     /** Line and head colour, and the hotter core the energy in it reads as. */
     public static final Color LINE_COLOR = new Color(120, 220, 255);
     public static final Color CORE_COLOR = new Color(230, 250, 255);
