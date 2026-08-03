@@ -14,9 +14,12 @@ import java.io.IOException;
 /**
  * A break in the fabric, drawn as one quad of procedural shattered glass.
  * <p>
- * A dark polygon where it was struck with long tapering spikes running out of it, the deep field
- * showing through all of it, and a lit rim along every edge. Nothing here is authored art: the shape
- * comes out of the seed, so no two breaks are the same one rotated.
+ * The anatomy of a pane hit hard: a dark irregular hole where it was struck with the deep field
+ * showing through, the sheet around it in lifted panes that catch the light each at their own
+ * angle, black separation between the panes near the hole where they have been shoved apart,
+ * hairline cracks running out much further than any pane - a couple much further than the rest -
+ * and every broken edge lit by what is spilling out of the hole. Nothing here is authored art: the
+ * shape comes out of the seed, so no two breaks are the same one rotated.
  * <p>
  * It heals by retracting rather than by fading. A crack that dissolves in place reads as a decal
  * being switched off; one that pulls its shards back in reads as something closing.
@@ -40,14 +43,18 @@ public class FractureRenderer {
     protected transient int uRimColor = -1;
     protected transient int uRimAlpha = -1;
     protected transient int uDeepTint = -1;
+    protected transient int uPaneColor = -1;
+    protected transient int uPaneAlpha = -1;
 
-    protected float shards = 11f;
+    protected float shards = 9f;
     protected float coreSize = 0.22f;
     protected float edgeWidth = 0.03f;
     protected float rimAlpha = 1.4f;
+    protected float paneAlpha = 0.55f;
 
     protected Color rimColor = new Color(255, 190, 235);
     protected Color deepTint = new Color(150, 150, 190);
+    protected Color paneColor = new Color(255, 210, 220);
 
     public void setShape(float shards, float coreSize, float edgeWidth) {
         this.shards = shards;
@@ -59,6 +66,12 @@ public class FractureRenderer {
         this.rimColor = rimColor;
         this.rimAlpha = rimAlpha;
         this.deepTint = deepTint;
+    }
+
+    /** The lifted panes themselves - glass catching the light. */
+    public void setPanes(Color paneColor, float paneAlpha) {
+        this.paneColor = paneColor;
+        this.paneAlpha = paneAlpha;
     }
 
     /**
@@ -90,6 +103,11 @@ public class FractureRenderer {
             GL20.glUniform3f(uDeepTint, deepTint.getRed() / 255f, deepTint.getGreen() / 255f,
                     deepTint.getBlue() / 255f);
         }
+        if (uPaneColor >= 0) {
+            GL20.glUniform3f(uPaneColor, paneColor.getRed() / 255f, paneColor.getGreen() / 255f,
+                    paneColor.getBlue() / 255f);
+        }
+        if (uPaneAlpha >= 0) GL20.glUniform1f(uPaneAlpha, paneAlpha);
 
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         deep.bindTexture();
@@ -152,6 +170,8 @@ public class FractureRenderer {
         uRimColor = GL20.glGetUniformLocation(program, "rimColor");
         uRimAlpha = GL20.glGetUniformLocation(program, "rimAlpha");
         uDeepTint = GL20.glGetUniformLocation(program, "deepTint");
+        uPaneColor = GL20.glGetUniformLocation(program, "paneColor");
+        uPaneAlpha = GL20.glGetUniformLocation(program, "paneAlpha");
 
         if (uDeepTex >= 0) GL20.glUniform1i(uDeepTex, 0);
 
