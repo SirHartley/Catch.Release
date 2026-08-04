@@ -190,8 +190,13 @@ public class FishingMinigame {
 
         fishPosition += fishVelocity * amount;
 
-        if (fishPosition < 0f || fishPosition > 1f) fishVelocity = 0f;
-        fishPosition = MathUtils.clamp(fishPosition, 0f, 1f);
+        //clamped by extent the way the bar is: the icon is drawn centred on this, so at raw 0 or 1
+        //half of it hung outside the track. The margin is half an icon in track fractions, and the
+        //narrowest bar is deeper than it, so the fish is still catchable pressed against either end
+        float margin = FishConstants.MINIGAME_FISH_ICON_SIZE * 0.5f / FishConstants.MINIGAME_TRACK_HEIGHT;
+
+        if (fishPosition < margin || fishPosition > 1f - margin) fishVelocity = 0f;
+        fishPosition = MathUtils.clamp(fishPosition, margin, 1f - margin);
     }
 
     /** Fills while the fish is inside the bar, drains while it is not. */
