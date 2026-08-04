@@ -77,6 +77,14 @@ public class PondConstants {
     public static final float DEPTH_SINK_DEPTH = 0.03f;
     public static final float DEPTH_SWIRL_BOOST = 2.2f;
     public static final float DEPTH_DRAIN = 0.08f;
+
+    /**
+     * The water itself turning: radians of twist at the drain, and radians per second the whole
+     * vortex rotates. The twist is the shape and the rotation is the motion - either alone reads
+     * as a lens error rather than a whirlpool.
+     */
+    public static final float POND_SWIRL_TWIST = 2.4f;
+    public static final float POND_SWIRL_RATE = 0.3f;
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
     public static final float DEPTH_REACH_FLOOR = 0.7f;
     public static final float DEPTH_FILL = 1.15f;

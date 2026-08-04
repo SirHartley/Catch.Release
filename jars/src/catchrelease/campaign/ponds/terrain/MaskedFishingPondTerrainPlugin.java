@@ -330,6 +330,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
             Vector2f.add(fillUvOffsetPx, drift, fillUvOffsetPx);
 
+            //the whirlpool, spooling up with the pond - a rupture half open turns half as hard
+            maskedRenderer.setSwirl(PondConstants.POND_SWIRL_TWIST * activity,
+                    elapsed * PondConstants.POND_SWIRL_RATE);
+
             maskedRenderer.render(
                     starfield,
                     mask,
