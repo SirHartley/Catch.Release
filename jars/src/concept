@@ -19,9 +19,6 @@ scrapped
 
 ai_
 
-Minigame
-- Add "found treasure" card to left side of minigame, panel similar to the Catch card upon successful treasure catch, using static treasure chest icon (placeholder for now)
-- Treasure only gets transferred to cargo if fish is caught too (lost otherwise), double check this is the case
 
 Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
@@ -43,6 +40,8 @@ x Minigame UI
 
 x Minigame
 - Treasure never shows up. Should sometimes show up even without tackle.
+- Add "found treasure" card to left side of minigame when treasure is picked up, panel similar to the Catch card upon successful treasure catch, using static treasure chest icon (placeholder for now)
+- Treasure only gets transferred to cargo if fish is caught too (lost otherwise), double check this is the case
 
 x Fish shop
 - fish shop UI panels do not properly remove on switch, causing them to stack up over themselves.
