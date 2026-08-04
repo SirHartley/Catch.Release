@@ -37,7 +37,8 @@ public class StatIds {
             HARPOON_CHARGES = "harpoon_charges",
             HARPOON_RECHARGE_TIME = "harpoon_recharge_time",
             HARPOON_SPEED = "harpoon_speed",
-            HARPOON_AIM_ASSIST = "harpoon_aim_assist";
+            HARPOON_AIM_ASSIST = "harpoon_aim_assist",
+            HARPOON_DEEP = "harpoon_deep";
 
     //depth bombs
     public static final String

@@ -57,6 +57,19 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      */
     private final Map<SectorEntityToken, Float> marks = new HashMap<>();
 
+    /**
+     * How lit one is right now: 1 under a beam, fading to nothing over the bought tracking seconds
+     * once the beam has moved on, and 0 for anything the lights have not found.
+     * <p>
+     * Read by anything that needs to act on what the lights turned up rather than only draw it -
+     * this map is the whole of that knowledge, since a buried mote carries no mark of its own.
+     */
+    public float getMarkStrength(SectorEntityToken mote) {
+        Float held = marks.get(mote);
+
+        return held == null ? 0f : held;
+    }
+
     private boolean expired = false;
 
     //fadeAndExpire

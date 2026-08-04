@@ -1,7 +1,9 @@
 package catchrelease.abilities.harpoon.entities;
 
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -196,6 +198,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         distanceOut += getSpeed() * amount;
 
         SectorEntityToken hit = findMote();
+
+        //and, with the deep gear fitted, one still under the fabric that a light is holding. It
+        //comes through on the strike, so what is on the end of the line from here on is an ordinary
+        //surfaced mote and the catch plays out exactly as any other does
+        if (hit == null) hit = strikeBuried();
+
         if (hit != null) {
             hooked = hit;
             setHookedHeld(true);
@@ -715,6 +723,42 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
+    }
+
+    /**
+     * A mote the head reached while it was still under the fabric, brought through by the hit.
+     * <p>
+     * Two things have to be true, and the second is the whole point of it. The deep gear has to be
+     * fitted, and a searchlight has to be holding the mote - the dent is the only thing there is to
+     * aim at, so without a light on it there is nothing to aim at and this would be a shot into
+     * blank fabric that happened to pay out. It is the light that makes the shot possible; the
+     * upgrade only makes it legal.
+     * <p>
+     * The strike unearths rather than hooking the buried entity, so nothing downstream of here has
+     * to know a mote arrived any differently to the ones that surfaced on their own. That also
+     * means the bomb is not made redundant: it opens a whole blast radius at once and this takes
+     * exactly one, at the end of a line, one shot at a time.
+     */
+    protected SectorEntityToken strikeBuried() {
+        if (!UpgradeManager.isUnlocked(StatIds.HARPOON_DEEP)) return null;
+
+        for (SectorEntityToken buried : entity.getContainingLocation()
+                .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
+
+            if (buried.isExpired()) continue;
+            if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
+
+            if (Misc.getDistance(entity.getLocation(), buried.getLocation())
+                    > HarpoonConstants.CATCH_RADIUS) {
+                continue;
+            }
+
+            if (!SearchlightAbilityPlugin.isLit(buried)) continue;
+
+            return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
+        }
+
+        return null;
     }
 
     protected SectorEntityToken findMote() {
