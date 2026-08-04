@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -24,6 +25,21 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float GLOW_SIZE = 25f;
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
+
+    /**
+     * The movement archetypes, out in the open water. Pauses shrink and everything else grows with
+     * the rarity's wander ladder, so a legendary darter is a different animal to a common one.
+     */
+    private static final float DARTER_PAUSE = 2.4f;
+    private static final float DARTER_DASH_TIME = 0.5f;
+    private static final float DARTER_DASH_MULT = 2.2f;
+    private static final float DARTER_CREEP_MULT = 0.15f;
+    private static final float SINKER_SPEED_MULT = 0.75f;
+    private static final float SINKER_CURVE = 14f;
+    private static final float SINKER_FLIP_TIME = 6f;
+    private static final float FLOATER_SPEED_MULT = 1.15f;
+    private static final float FLOATER_JINK = 10f;
+    private static final float MIXED_REROLL = 6f;
 
     private float time = 0f;
     private float sineVariance;
@@ -56,6 +72,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private float stunLeft = 0f;
     private float slowLeft = 0f;
     private float slowStrength = 0f;
+
+    /**
+     * How this one swims, taken from the same column the minigame plays it by - a fish that sits
+     * and bolts on the line sits and bolts in open water too. All transient: the id is what is
+     * saved, and the archetype is looked back up from it.
+     */
+    private transient FishMotion activeMode;
+    private transient float phaseLeft = 0f;
+    private transient boolean dashing = false;
+    private transient float rerollLeft = 0f;
+    private transient float curveSign = 1f;
+    private transient float curveFlipLeft = 0f;
 
     /**
      * The rupture this one came out of, so it can tell when it has left it.
@@ -143,7 +171,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (slowLeft > 0f) slowLeft -= amount;
 
-        float step = MOVE_SPEED * getRarity().speedMult * getSlowMult() * amount;
+        float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
+                * advanceMode(amount) * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
@@ -193,7 +222,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
      * Two sines whose rates do not divide into each other, so a rare mote does not merely weave
      * harder - it weaves on a beat that cannot be read off a few seconds of watching it. The second
      * one only has any weight at all above common, which is what keeps the bottom of the ladder
-     * feeling like a fish drifting rather than a fish evading.
+     * feeling like a fish drifting rather than a fish evading. The archetype's own signature is
+     * laid over that.
      */
     protected float getWander() {
         FishRarity rarity = getRarity();
@@ -201,7 +231,106 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float wander = (float) Math.sin(time * 1.5f) * sineVariance;
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
 
-        return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult;
+        return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult + getModeWander();
+    }
+
+    /**
+     * The archetype's clock: what it is doing right now, and the speed that comes of it. This is
+     * where a darter sits, bolts, and sits again, where a sinker decides which way its long arc
+     * bends, and where a mixed one changes its mind about what it is.
+     */
+    protected float advanceMode(float amount) {
+        float difficulty = getRarity().wanderMult;
+
+        switch (getActiveMode(amount)) {
+            case DARTER:
+                phaseLeft -= amount;
+                if (phaseLeft <= 0f) {
+                    dashing = !dashing;
+
+                    //a rarer darter waits less and is gone faster - the pattern is the difficulty
+                    phaseLeft = dashing ? DARTER_DASH_TIME
+                            : DARTER_PAUSE / difficulty
+                                    * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
+                }
+
+                return dashing ? DARTER_DASH_MULT + 0.4f * (difficulty - 1f) : DARTER_CREEP_MULT;
+
+            case SINKER:
+                curveFlipLeft -= amount;
+                if (curveFlipLeft <= 0f) {
+                    if (MathUtils.getRandomNumberInRange(0f, 1f) < 0.6f) curveSign = -curveSign;
+                    curveFlipLeft = SINKER_FLIP_TIME * MathUtils.getRandomNumberInRange(0.6f, 1.4f);
+                }
+
+                return SINKER_SPEED_MULT;
+
+            case FLOATER:
+                return FLOATER_SPEED_MULT;
+
+            default:
+                return 1f;
+        }
+    }
+
+    /** The archetype's signature on the course, in degrees, over the shared weave. */
+    protected float getModeWander() {
+        float difficulty = getRarity().wanderMult;
+
+        FishMotion mode = activeMode == null ? getMotion() : activeMode;
+        if (mode == null) return 0f;
+
+        switch (mode) {
+            case DARTER:
+                //dead straight while it sits, a hard jink while it bolts
+                return dashing ? (float) Math.sin(time * 7.1f + sineVariance) * 5f * difficulty : 0f;
+
+            case SINKER:
+                //one long arc, held - heavy, low in the water, going somewhere in its own time
+                return curveSign * SINKER_CURVE * difficulty;
+
+            case FLOATER:
+                //quick shallow jinks over the drift, a thing skittering along just under the surface
+                return (float) Math.sin(time * 4.7f + sineVariance) * FLOATER_JINK * difficulty;
+
+            default:
+                return 0f;
+        }
+    }
+
+    /**
+     * What it is being this moment. For most that is the table's word for it; a MIXED one rerolls
+     * between the others as it goes, faster the rarer it is - which is exactly what makes one hard
+     * to read on the line, brought out into the water.
+     */
+    protected FishMotion getActiveMode(float amount) {
+        FishMotion motion = getMotion();
+
+        if (motion != FishMotion.MIXED) {
+            activeMode = motion;
+            return activeMode == null ? FishMotion.SMOOTH : activeMode;
+        }
+
+        rerollLeft -= amount;
+        if (activeMode == null || activeMode == FishMotion.MIXED || rerollLeft <= 0f) {
+            FishMotion[] pool = {FishMotion.SMOOTH, FishMotion.DARTER, FishMotion.SINKER,
+                    FishMotion.FLOATER};
+            activeMode = pool[(int) MathUtils.getRandomNumberInRange(0f, pool.length - 0.01f)];
+
+            rerollLeft = MIXED_REROLL / getRarity().wanderMult
+                    * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
+            phaseLeft = 0f;
+            dashing = false;
+        }
+
+        return activeMode;
+    }
+
+    /** The table's word for how this one moves, or SMOOTH where the row has gone. */
+    protected FishMotion getMotion() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null || spec.motion == null ? FishMotion.SMOOTH : spec.motion;
     }
 
     /**
