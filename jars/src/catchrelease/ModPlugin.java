@@ -4,11 +4,13 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.campaign.fish.spawner.BuriedMoteSpawner;
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
 import catchrelease.skillshot.SkillshotFramework;
 import com.fs.starfarer.api.BaseModPlugin;
+import com.fs.starfarer.api.Global;
 
 public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
@@ -41,6 +43,9 @@ public class ModPlugin extends BaseModPlugin {
         //data
         UpgradeManager.getInstance().updateBaseValues();
         SkillshotFramework.register();
+
+        //UI - transient, so a save never carries a screen-watcher in it
+        Global.getSector().addTransientScript(new FishMapFilterScript());
 
         //Testing
         //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
