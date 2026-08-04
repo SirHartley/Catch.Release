@@ -211,6 +211,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void initRippleRenderer(){
         if (rippleRenderer == null){
             RippleData data = new RippleData(entity.getLocation(), 3f, 6f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f); //magic bullshit go
+            data.home = entity.getContainingLocation();
             rippleRenderer = new UnstableFabricRippleTerrainRenderer(data, entity);
             entity.addScript(rippleRenderer);
         }

@@ -2,7 +2,9 @@ package catchrelease.rendering.renderers;
 
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.plugins.NoiseMappedCircularRingRenderer;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderingPlugin;
@@ -45,6 +47,19 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     public Vector2f location;
     public float size;
     public Color color;
+
+    /**
+     * The location this ring belongs to, and the only one it will be drawn in.
+     * <p>
+     * LunaLib keeps a single list of campaign renderers for the whole sector and draws all of it
+     * wherever the player happens to be, so a ring is otherwise painted at its raw world
+     * coordinates in whatever system is on screen - somewhere else entirely. Left null the ring
+     * draws anywhere, which is only safe for something made and finished in front of the player.
+     * <p>
+     * Saved rather than transient on purpose: a ring restored from a save with this cleared would
+     * go back to drawing itself into whatever system the game was loaded into.
+     */
+    public LocationAPI home;
 
     public RippleRingRenderer(Vector2f loc, float size, Color color) {
         this.location = loc;
@@ -109,6 +124,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (expired) return;
+        if (home != null && home != Global.getSector().getCurrentLocation()) return;
 
         loadSpritesIfNeeded();
         renderGrowingFadingRing(location);

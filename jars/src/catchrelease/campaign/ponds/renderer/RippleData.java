@@ -1,6 +1,7 @@
 package catchrelease.campaign.ponds.renderer;
 
 import catchrelease.rendering.renderers.RippleRingRenderer;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import org.lwjgl.util.vector.Vector2f;
@@ -15,6 +16,9 @@ public class RippleData {
     public Vector2f loc;
     public IntervalUtil interval;
     public int amount;
+
+    /** Handed to every ring this makes - see {@link RippleRingRenderer#home}. Saved, for the same reason. */
+    public LocationAPI home;
 
     public Color color;
     public float maxSize, ringWidth, growTime, startRadiusOffsetMult;
@@ -55,6 +59,7 @@ public class RippleData {
 
         if (interval.intervalElapsed()) {
             RippleRingRenderer renderer = new RippleRingRenderer(color, maxSize, loc, ringWidth, growTime, startRadiusOffsetMult);
+            renderer.home = home;
             LunaCampaignRenderer.addRenderer(renderer);
             renderers.add(renderer);
 
