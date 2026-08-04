@@ -108,11 +108,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
-        //banked whichever way the fish went: treasure that was taken was taken, and losing the
-        //fish afterwards does not put it back
-        resolveTreasure();
-
         if (minigame.isCaught()) {
+            //only now. Taking the treasure is a detour and losing the fish is what the detour costs
+            //- banking it either way made the detour free, and a free detour is not a decision
+            resolveTreasure();
+
             advanceCaught(amount);
             return;
         }
@@ -144,10 +144,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /**
-     * Puts anything that was taken into the hold, once.
+     * Puts anything that was taken into the hold, once, and only on a landed fish.
      * <p>
-     * Ship tackle is passed as false because there is no tackle system yet - when there is, this is
-     * the one line that has to know about it.
+     * Whatever was prised out of the track goes down with the specimen if the specimen gets away.
+     * That is what makes taking it a decision: the hold that takes it costs ground on the fish, and
+     * a prize that survived losing the fish would make paying that ground free.
      */
     protected void resolveTreasure() {
         if (treasureResolved) return;
