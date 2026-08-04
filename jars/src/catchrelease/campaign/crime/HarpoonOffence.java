@@ -48,6 +48,26 @@ public class HarpoonOffence {
     public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
 
     /**
+     * Harpoonings the player was asked about and did not answer for, and when they were asked.
+     * <p>
+     * The bill for walking away from a patrol, held back rather than charged on the spot. Somebody
+     * has to fly home, file it, and have it read - and a consequence that lands while the player is
+     * still looking at the fleet that caused it is not a consequence they got away from.
+     */
+    public static final String EVASIONS_KEY = "$catchrelease_harpoonEvasions";
+
+    /** Days between refusing a patrol and the reputation catching up with it. */
+    public static final float EVASION_DELAY_DAYS = 4f;
+
+    /**
+     * What refusing costs, once it lands.
+     * <p>
+     * Twice the harpooning itself. The rope was arguably an accident; declining to discuss it with
+     * the people who came to ask was not.
+     */
+    public static final float EVASION_REP_LOSS = 0.1f;
+
+    /**
      * Set on the fleet that was hit, so anything that talks to it afterwards knows why it is in a
      * mood. Carries a clock: a crew that was harpooned a season ago has other things on its mind.
      */
@@ -168,12 +188,46 @@ public class HarpoonOffence {
     }
 
     protected static void applyRepLoss(String factionId) {
+        applyRepLoss(factionId, REP_LOSS);
+    }
+
+    protected static void applyRepLoss(String factionId, float amount) {
         CustomRepImpact impact = new CustomRepImpact();
-        impact.delta = -REP_LOSS;
+        impact.delta = -amount;
         impact.limit = RepLevel.HOSTILE;
 
         Global.getSector().adjustPlayerReputation(
                 new RepActionEnvelope(RepActions.CUSTOM, impact, null, true), factionId);
+    }
+
+    /**
+     * Files a refusal, to be charged for in a few days.
+     * <p>
+     * Overwrites rather than stacks: one unanswered question is one report, and a player who gets
+     * asked twice before the first report lands has not done anything twice.
+     */
+    public static void noteEvasion(String factionId) {
+        getMap(EVASIONS_KEY).put(factionId, Global.getSector().getClock().getTimestamp());
+    }
+
+    /**
+     * Charges for any refusal that has had time to be read by somebody who matters.
+     * <p>
+     * Driven off the patrol script's own tick rather than a script of its own, so there is nothing
+     * extra in the save and nothing to register: the thing that files these is the thing that runs.
+     */
+    public static void applyDueEvasions() {
+        Map<String, Long> evasions = getMap(EVASIONS_KEY);
+
+        for (String factionId : new ArrayList<>(evasions.keySet())) {
+            Long when = evasions.get(factionId);
+            if (when == null) continue;
+
+            if (Global.getSector().getClock().getElapsedDaysSince(when) < EVASION_DELAY_DAYS) continue;
+
+            evasions.remove(factionId);
+            applyRepLoss(factionId, EVASION_REP_LOSS);
+        }
     }
 
     /** Writes down that it happened, and when, for anything that cares whether it happened before. */

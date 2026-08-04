@@ -122,11 +122,11 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         interval.advance(days);
         if (!interval.intervalElapsed()) return;
 
+        HarpoonOffence.applyDueEvasions();
+
         //a chase already under way, from before this script existed
         chasing = reacquire();
         if (chasing != null) return;
-
-        if (Global.getSector().getMemoryWithoutUpdate().getBoolean(RETRY_KEY)) return;
 
         beginChase();
     }
@@ -163,6 +163,10 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;
 
         for (String factionId : HarpoonOffence.getOwedFactions()) {
+            //per faction, so one faction's patrol going home does not buy the player five quiet
+            //days from everybody else they have put a rope into
+            if (Global.getSector().getMemoryWithoutUpdate().getBoolean(RETRY_KEY + factionId)) continue;
+
             final FactionAPI faction = Global.getSector().getFaction(factionId);
             if (faction == null) continue;
 
@@ -278,6 +282,13 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             return;
         }
 
+        //not only hyperspace: a gate leaves the patrol in a system the player is no longer in, with
+        //nothing to see and no way to give up, and the flag would sit on it for its whole clock
+        if (chasing.getContainingLocation() != player.getContainingLocation()) {
+            endChase();
+            return;
+        }
+
         //settled elsewhere, or lapsed while the chase was on. Either way this patrol is flying at
         //the player over a debt that no longer exists
         String factionId = mem.getString(PATROL_FACTION_KEY);
@@ -285,6 +296,9 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             endChase();
             return;
         }
+
+        //harpooned again while this one was still on its way, which changes what it has come to say
+        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
 
         //hostile now, so the encounter this was going to produce is not the one it would get
         if (chasing.isHostileTo(player)) {
@@ -307,12 +321,21 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     protected void collect() {
         MemoryAPI mem = chasing.getMemoryWithoutUpdate();
 
-        if (!mem.getBoolean(PAID_KEY)) return;
-
         String factionId = mem.getString(PATROL_FACTION_KEY);
-        if (factionId != null) HarpoonOffence.settle(factionId);
+        if (factionId == null) return;
 
-        mem.unset(PAID_KEY);
+        //either way the faction has had its answer and stops sending people about this one. What
+        //differs is what the answer was
+        HarpoonOffence.settle(factionId);
+
+        if (mem.getBoolean(PAID_KEY)) {
+            mem.unset(PAID_KEY);
+            return;
+        }
+
+        //refused, or closed the link and flew off, which the faction files as the same thing. The
+        //bill for it arrives days later, somewhere else
+        HarpoonOffence.noteEvasion(factionId);
     }
 
     /**
@@ -346,6 +369,12 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
                 REASON, false, 0f);
 
+        //read before the keys go, since the wait is kept per faction and this is where its name is
+        String factionId = mem.getString(PATROL_FACTION_KEY);
+        if (factionId != null) {
+            Global.getSector().getMemoryWithoutUpdate().set(RETRY_KEY + factionId, true, RETRY_DAYS);
+        }
+
         mem.unset(PATROL_FLAG);
         mem.unset(PATROL_FACTION_KEY);
         mem.unset(FINE_KEY);
@@ -353,8 +382,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         mem.unset(REPEAT_KEY);
 
         chasing = null;
-
-        Global.getSector().getMemoryWithoutUpdate().set(RETRY_KEY, true, RETRY_DAYS);
     }
 
     @Override
