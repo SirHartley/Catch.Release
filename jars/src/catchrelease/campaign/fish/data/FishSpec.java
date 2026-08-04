@@ -55,6 +55,19 @@ public class FishSpec {
     }
 
     /**
+     * What kind of thing this is, read off the table's tags - a crab is not a mollusc, and neither
+     * is a matter of rarity. The abyssal tag rides along as a qualifier rather than a type of its
+     * own, since an abyssal crab is still a crab.
+     */
+    public String getTypeName() {
+        String base = tags.contains("crab") ? "Crab"
+                : tags.contains("mollusc") ? "Mollusc"
+                : tags.contains("fish") ? "Fish" : "Other";
+
+        return tags.contains("abyssal") ? "Abyssal " + base.toLowerCase() : base;
+    }
+
+    /**
      * Whether this fish can turn up in the given system.
      *
      * @param starType   the star's planet type id, e.g. "star_red" - null for a system without one

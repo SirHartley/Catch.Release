@@ -5,12 +5,19 @@ import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.items.FishItemRenderer;
+import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.codex.CodexDialogAPI;
 import com.fs.starfarer.api.impl.codex.CodexEntryV2;
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.ui.Alignment;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -23,12 +30,12 @@ import java.util.List;
 /**
  * One species in the codex.
  * <p>
- * Custom throughout, because a fish is not a thing the game has loaded. There is no hull, no weapon,
- * no commodity behind it - only a row in fish.csv and whatever the player has managed to catch - so
- * every part of the entry that vanilla would derive from a spec is built here instead. Built in the
- * shape vanilla gives a special item's entry, though: the typed line, the labelled rows, the
- * description, the effect prose, and a base value line at the bottom - so a fish page and an item
- * page read as the same book.
+ * Custom throughout, because a fish is not a thing the game has loaded - only a row in fish.csv
+ * and whatever the player has managed to catch. The page is built the way the game builds an
+ * item's page crossed with the way the catch card is built: each informational area in a box of
+ * its own - what it is, what it takes, the record, where it was found - all of it said with the
+ * game's own text machinery, and the species' art in a dressed cargo-square at the top of the
+ * right column, at the size it was drawn.
  * <p>
  * Hidden until the species has been caught. {@link #isVisible()} is asked at draw time rather than
  * at build time, which matters: the codex is generated once when the game loads and would otherwise
@@ -36,11 +43,17 @@ import java.util.List;
  */
 public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin {
 
+    /** The right column is vanilla's related-entries width; the boxes take what is left. */
+    public static final float RIGHT_WIDTH = 290f;
+    public static final float BOX_GAP = 10f;
+
+    /** The art gets its own pixels, but not the whole page - past this it is scaled to fit. */
+    public static final float ART_MAX = 240f;
+    public static final float CARD_PAD = 16f;
+
     protected final String speciesId;
 
     protected transient CustomPanelAPI panel;
-    protected transient UIPanelAPI relatedEntries;
-    protected transient UIPanelAPI box;
     protected transient CodexDialogAPI codex;
 
     public FishCodexEntry(String id, FishSpec spec) {
@@ -62,9 +75,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     /**
      * A species nobody has caught is not in the codex at all - not greyed out, not a silhouette with
      * a name under it. The point of the thing is that the list gets longer as you fish.
-     * <p>
-     * Asked every time the list is drawn, so catching one puts it there without the codex being
-     * rebuilt.
      */
     @Override
     public boolean isVisible() {
@@ -94,142 +104,155 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     @Override
     public void destroyCustomDetail() {
         panel = null;
-        relatedEntries = null;
-        box = null;
         codex = null;
     }
 
     @Override
     public void createCustomDetail(CustomPanelAPI panel, UIPanelAPI relatedEntries, CodexDialogAPI codex) {
         this.panel = panel;
-        this.relatedEntries = relatedEntries;
         this.codex = codex;
 
         FishSpec spec = getSpec();
         FishLogEntry logged = getLogged();
 
-        float opad = 10f;
         float width = panel.getPosition().getWidth();
+        float leftWidth = width - RIGHT_WIDTH - 20f;
 
-        //the width vanilla's own custom entry uses so a tooltip sits beside the related-entries widget
-        float textWidth = width - 290f - opad - 30f + 10f;
-
-        TooltipMakerAPI text = panel.createUIElement(textWidth, 0, false);
-        text.setParaSmallInsignia();
-
-        addIdentity(text, spec, opad);
-        addRecord(text, logged, opad);
-        addLocationData(text, logged, opad);
-        addBaseValue(text, logged, opad);
-
-        panel.updateUIElementSizeAndMakeItProcessInput(text);
-
-        box = panel.wrapTooltipWithBox(text);
-        panel.addComponent(box).inTL(0f, 0f);
-
-        //the species' art in the right-hand column, above the related entries the way vanilla puts
-        //an item's image view above them. Scaled by width alone rather than fitted to a box: the
-        //art is square today, and a squarer or taller one from another mod's table should come out
-        //the shape it was drawn rather than stretched to whatever frame suited ours.
-        //A spec-less entry has no art to show and skips the column rather than framing the stand-in.
-        TooltipMakerAPI image = null;
+        //the art in its dressed square, flush right the way vanilla hangs an item's image view,
+        //with the related entries under it
         float rightHeight = 0f;
+        CustomPanelAPI card = buildIconCard(spec, logged);
 
-        if (spec != null) {
-            float imageWidth = 145f;
-
-            image = panel.createUIElement(imageWidth, 0, false);
-            image.addImage(FishCodex.getIcon(spec), imageWidth, 0f);
-
-            panel.updateUIElementSizeAndMakeItProcessInput(image);
-            panel.addUIElement(image).inTR(0f, 0f);
-
-            rightHeight = image.getPosition().getHeight();
+        if (card != null) {
+            panel.addComponent(card).inTR(0f, 0f);
+            rightHeight = card.getPosition().getHeight();
         }
 
         if (relatedEntries != null) {
-            if (image != null) {
-                panel.addComponent(relatedEntries).belowRight(image, opad);
-                rightHeight += opad + relatedEntries.getPosition().getHeight();
+            if (card != null) {
+                panel.addComponent(relatedEntries).belowRight(card, BOX_GAP);
+                rightHeight += BOX_GAP + relatedEntries.getPosition().getHeight();
             } else {
                 panel.addComponent(relatedEntries).inTR(0f, 0f);
                 rightHeight = relatedEntries.getPosition().getHeight();
             }
         }
 
-        float height = Math.max(box.getPosition().getHeight(), rightHeight);
+        //the boxes, one per informational area, stacked down the left
+        float y = 0f;
 
-        panel.getPosition().setSize(width, height);
+        y += addBox(leftWidth, y, "Description", box -> addDescription(box, spec));
+
+        if (spec != null) {
+            y += addBox(leftWidth, y, "Catch data", box -> addCatchData(box, spec, logged));
+        }
+
+        if (logged != null && !logged.hintOnly) {
+            y += addBox(leftWidth, y, "Record", box -> addRecord(box, logged));
+        }
+
+        y += addBox(leftWidth, y, "Catch location data", box -> addLocationData(box, logged));
+
+        panel.getPosition().setSize(width, Math.max(y, rightHeight));
     }
 
-    /**
-     * What it is, in the shape vanilla gives an item: the typed line first, labelled rows for the
-     * numbers under it, then the description in the text colour - the codex's own title bar has
-     * already said the name, so the box does not say it again.
-     */
-    protected void addIdentity(TooltipMakerAPI text, FishSpec spec, float opad) {
+    /** One boxed area: the game's own heading, the content, the game's own box around both. */
+    protected float addBox(float width, float y, String title,
+                           java.util.function.Consumer<TooltipMakerAPI> content) {
+
+        //the box pads its tooltip by fifteen a side on the way in
+        TooltipMakerAPI text = panel.createUIElement(width - 30f, 0, false);
+        text.setParaSmallInsignia();
+
+        text.addSectionHeading(title, Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
+                Alignment.MID, 0f);
+
+        content.accept(text);
+
+        panel.updateUIElementSizeAndMakeItProcessInput(text);
+
+        UIPanelAPI box = panel.wrapTooltipWithBox(text);
+        panel.addComponent(box).inTL(0f, y);
+
+        return box.getPosition().getHeight() + BOX_GAP;
+    }
+
+    /** What it is: its type off the table's tags, its rarity beside that, and the words. */
+    protected void addDescription(TooltipMakerAPI text, FishSpec spec) {
         if (spec == null) {
-            text.addPara("The table no longer has a row for this one.", Misc.getNegativeHighlightColor(), 0f);
+            text.addPara("The table no longer has a row for this one.",
+                    Misc.getNegativeHighlightColor(), BOX_GAP);
             return;
         }
 
-        text.addPara("Species type: %s", 0f, Misc.getGrayColor(), spec.rarity.color,
+        text.addPara("Type: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
+                spec.getTypeName());
+        text.addPara("Rarity: %s", 3f, Misc.getGrayColor(), spec.rarity.color,
                 Misc.ucFirst(spec.rarity.name().toLowerCase()));
 
-        text.addPara("Difficulty: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
+        if (spec.desc != null && !spec.desc.isEmpty()) {
+            text.addPara(spec.desc, Misc.getTextColor(), BOX_GAP);
+        }
+    }
+
+    /** What it takes to land one, and how often one has been landed. */
+    protected void addCatchData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
+        text.addPara("Difficulty: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 getDifficultyLabel(spec.difficulty));
+
         text.addPara("Behaviour: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 spec.motion.name().toLowerCase() + ", runs at "
                         + String.format("%.1fx", spec.motionSpeed)
                         + ", turns " + getRestlessnessLabel(spec.restlessness));
 
-        if (spec.desc != null && !spec.desc.isEmpty()) {
-            text.addPara(spec.desc, Misc.getTextColor(), opad);
+        if (logged != null && !logged.hintOnly) {
+            text.addPara("Landed: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                    logged.caught + (logged.caught == 1 ? " specimen" : " specimens"));
         }
     }
 
-    /** The tally and the best of it, as prose with the numbers lit - where an item says its effect. */
-    protected void addRecord(TooltipMakerAPI text, FishLogEntry logged, float opad) {
-        if (logged == null) return;
-
+    /** The best one, and the story of it: how big, from where, when, and by what. */
+    protected void addRecord(TooltipMakerAPI text, FishLogEntry logged) {
         //rebuilt from the recorded numbers rather than stored, so a retuned table regrades old
         //catches instead of leaving a grade behind that its own numbers no longer support
         FishGrade best = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
                 logged.recordAberration).getGrade();
 
-        text.addPara("Landed %s so far; the first %s in %s.", opad, Misc.getHighlightColor(),
-                logged.caught + (logged.caught == 1 ? " specimen" : " specimens"),
-                getDate(logged.firstTimestamp),
-                logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
-
         Color hl = Misc.getHighlightColor();
 
-        text.addPara("The record specimen ran %s at %s, graded %s, taken %s in %s by %s.", 3f,
-                new Color[]{hl, hl, best.getColor(), hl, hl, hl},
+        text.addPara("Length: %s   Weight: %s   Grade: %s", BOX_GAP,
+                new Color[]{hl, hl, best.getColor()},
                 String.format("%.2f m", logged.recordLength),
                 String.format("%.1f kg", logged.recordWeight),
-                best.name,
+                best.name);
+
+        text.addPara("Taken %s in %s, by %s.", 3f, hl,
                 getDate(logged.recordTimestamp),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName,
                 logged.recordMethod.name);
+
+        text.addPara("The first %s in %s.", 3f, hl,
+                getDate(logged.firstTimestamp),
+                logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
 
     /**
-     * Where to go looking, once it has been paid for.
-     * <p>
-     * Locked by default and stated as locked rather than hidden - a blank space says nothing was
-     * recorded, and a locked block says there is something here to buy.
+     * Where to go looking. Open once the species has actually been caught - a fisher who landed one
+     * knows where they were standing - or once the data has been bought for one that is only known
+     * about. Stated as sealed rather than hidden otherwise, so the block says there is something
+     * here to have.
      */
-    protected void addLocationData(TooltipMakerAPI text, FishLogEntry logged, float opad) {
-        if (logged == null || !logged.locationDataUnlocked) {
-            text.addPara("Catch location data: %s. Survey data for this species can be bought from"
-                    + " someone who has been where it lives.", opad, Misc.getGrayColor(),
-                    Misc.getNegativeHighlightColor(), "sealed");
+    protected void addLocationData(TooltipMakerAPI text, FishLogEntry logged) {
+        boolean open = logged != null
+                && (FishLog.isCaught(speciesId) || logged.locationDataUnlocked);
+
+        if (!open) {
+            text.addPara("Sealed. Survey data for this species can be bought from someone who has"
+                    + " been where it lives.", Misc.getGrayColor(), BOX_GAP);
             return;
         }
 
-        text.addPara("Catch location data: recorded in %s.", opad, Misc.getGrayColor(),
-                Misc.getHighlightColor(),
+        text.addPara("Recorded in %s.", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
 
         if (logged.recordLocationInHyper == null) {
@@ -237,23 +260,102 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             return;
         }
 
+        text.addPara("The circle is where it was taken, on the sector map.", Misc.getGrayColor(), 3f);
+
         //the map itself, drawn rather than described
-        text.addCustom(new FishLocationMap(logged).build(text, opad), opad);
+        text.addCustom(new FishLocationMap(logged).build(text, BOX_GAP), BOX_GAP);
     }
 
-    /** The line every item ends on, priced at the record specimen since a species has no one price. */
-    protected void addBaseValue(TooltipMakerAPI text, FishLogEntry logged, float opad) {
-        if (logged == null) return;
+    /**
+     * The species' art in the dressed cargo-square the catch card established: dark field, rarity
+     * backlight, the bright-line-and-dimmer-line border, the rarity and record-grade marks along
+     * the bottom. The art is drawn at the size it was drawn at - a bitmap scaled is a bitmap gone
+     * soft - and only capped when it would not fit the column.
+     */
+    protected CustomPanelAPI buildIconCard(FishSpec spec, FishLogEntry logged) {
+        if (spec == null || spec.icon == null || spec.icon.isEmpty()) return null;
 
-        FishCatch record = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
-                logged.recordAberration);
+        //loaded through the cache once so the texture exists, then asked for fresh - the cached
+        //instance is shared and other draws resize it, and this one needs the native size
+        if (SpriteLoader.loadSprite(spec.icon) == null) return null;
 
-        text.addPara("Base value: %s (the record specimen)", opad, Misc.getGrayColor(),
-                Misc.getHighlightColor(), Misc.getDGSCredits(record.getValue()));
+        SpriteAPI fresh = Global.getSettings().getSprite(spec.icon);
+
+        float artWidth = fresh.getWidth();
+        float artHeight = fresh.getHeight();
+
+        float cap = ART_MAX / Math.max(artWidth, artHeight);
+        if (cap < 1f) {
+            artWidth *= cap;
+            artHeight *= cap;
+        }
+
+        float cardSize = Math.max(100f, Math.max(artWidth, artHeight) + CARD_PAD * 2f);
+
+        FishGrade best = logged == null || logged.hintOnly ? null
+                : new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
+                        logged.recordAberration).getGrade();
+
+        return panel.createCustomPanel(cardSize, cardSize,
+                new IconCard(spec, artWidth, artHeight, best));
     }
 
+    /** The card itself: all dressing and one sprite, no text to go soft. */
+    protected static class IconCard extends BaseCustomUIPanelPlugin {
+
+        protected final FishSpec spec;
+        protected final float artWidth;
+        protected final float artHeight;
+        protected final FishGrade grade;
+
+        protected PositionAPI pos;
+
+        public IconCard(FishSpec spec, float artWidth, float artHeight, FishGrade grade) {
+            this.spec = spec;
+            this.artWidth = artWidth;
+            this.artHeight = artHeight;
+            this.grade = grade;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            float x = pos.getX();
+            float y = pos.getY();
+            float size = pos.getWidth();
+
+            ShopUi.drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
+
+            //a wash of the rarity colour behind the art, so the silhouette has something to sit against
+            Disc.draw(x + size * 0.5f, y + size * 0.5f, size * 0.5f, spec.rarity.color,
+                    0.3f * alphaMult, 0f, true);
+
+            SpriteAPI art = SpriteLoader.loadSprite(spec.icon);
+            if (art != null) {
+                art.setSize(artWidth, artHeight);
+                art.setColor(Color.WHITE);
+                art.setNormalBlend();
+                art.setAlphaMult(alphaMult);
+                art.renderAtCenter(Math.round(x + size * 0.5f), Math.round(y + size * 0.5f));
+            }
+
+            if (grade != null) {
+                FishItemRenderer.render(x, y, size, size, alphaMult, spec.rarity, grade);
+            }
+
+            ShopUi.dress(x, y, size, size, alphaMult);
+        }
+    }
+
+    /** The clock's epoch is cycle 206, which is long before 1970 - a real stamp is negative. Only an exact zero means unset. */
     protected static String getDate(long timestamp) {
-        if (Global.getSector() == null || timestamp <= 0L) return "an unrecorded date";
+        if (Global.getSector() == null || timestamp == 0L) return "an unrecorded date";
 
         //a clock built on the stored stamp, rather than a date string written when it was stored -
         //so a cycle rolling over cannot leave a stale one behind
