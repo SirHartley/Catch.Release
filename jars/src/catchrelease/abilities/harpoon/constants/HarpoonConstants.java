@@ -44,6 +44,28 @@ public class HarpoonConstants {
     public static final float ARRIVAL_DISTANCE = 30f;
 
     /**
+     * Winding in the last of the line, once the head is home.
+     * <p>
+     * DONE is how short the line has to get before there is nothing left worth drawing - both the
+     * gap to the fleet and the rope still paid out behind it have to be under it. MAX_TIME is the
+     * backstop for a fleet moving away faster than the winch can take up, so a harpoon can never be
+     * left trailing one forever. FADE is what is left afterwards, and it is short because by then it
+     * is a dot on the hull rather than a harpoon on a rope.
+     */
+    public static final float RETRACT_DONE = 4f;
+    public static final float RETRACT_MAX_TIME = 0.5f;
+    public static final float RETRACT_FADE = 0.07f;
+
+    /**
+     * How hard the winch hauls the rope's middle straight while stowing, per second.
+     * <p>
+     * The spring above is underdamped on purpose, which is right for a rope in flight and wrong for
+     * one being wound in - left to ring down it would keep a stowed harpoon on the hull for most of
+     * a second over a wobble nobody is watching. Under tension it comes straight instead.
+     */
+    public static final float RETRACT_SLACK_PULL = 14f;
+
+    /**
      * The line itself: a hairline core with a soft wider pass under it for the glow. Both are screen
      * pixels, so the cable stays the same weight however far the camera is pulled back.
      */
