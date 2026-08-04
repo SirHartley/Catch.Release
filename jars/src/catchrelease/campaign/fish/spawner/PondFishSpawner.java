@@ -25,12 +25,26 @@ public class PondFishSpawner {
 
     /** The id to hand to a mote, or null if nothing at all can live here. */
     public static String pickFishId(LocationAPI location) {
-        FishSpec spec = pickFish(location);
+        return pickFishId(location, 0f);
+    }
+
+    /**
+     * The same, for something that leans on what turns up over and above the drones.
+     *
+     * @param extraRarityBias added to the drone bias, so nothing that reads it has to know the
+     *                        drones exist - zero means "whatever the pond would have produced"
+     */
+    public static String pickFishId(LocationAPI location, float extraRarityBias) {
+        FishSpec spec = pickFish(location, extraRarityBias);
 
         return spec == null ? null : spec.id;
     }
 
     public static FishSpec pickFish(LocationAPI location) {
+        return pickFish(location, 0f);
+    }
+
+    public static FishSpec pickFish(LocationAPI location, float extraRarityBias) {
         String starType = getStarType(location);
         SectorRegion region = SectorRegion.of(location);
         Set<String> tags = location == null ? new HashSet<String>() : new HashSet<>(location.getTags());
@@ -41,7 +55,7 @@ public class PondFishSpawner {
             if (spec.spawnWeight <= 0f) continue;
             if (!spec.matches(starType, tags, region)) continue;
 
-            picker.add(spec, spec.spawnWeight * getRarityWeight(spec));
+            picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));
         }
 
         if (picker.isEmpty()) {
@@ -61,8 +75,8 @@ public class PondFishSpawner {
      * bias is raised to the rarity's own step, so a legendary feels it four times over and a common
      * not at all.
      */
-    protected static float getRarityWeight(FishSpec spec) {
-        float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias;
+    protected static float getRarityWeight(FishSpec spec, float extraBias) {
+        float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias + extraBias;
         if (bias == 1f || spec.rarity == null) return 1f;
 
         return (float) Math.pow(bias, spec.rarity.ordinal());
