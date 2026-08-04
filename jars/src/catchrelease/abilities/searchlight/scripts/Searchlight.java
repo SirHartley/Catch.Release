@@ -32,6 +32,28 @@ public class Searchlight implements EveryFrameScript {
     public static final float SINE_CADENCE = 90f; //distance the sine wave takes off the arc
     public static final float OSCILLATION_TIME_MULT = 0.7f; //this affects how nervous the searchlights feel
 
+    /** The beam's radius without a row in the upgrade sheet. */
+    public static final float AREA_FALLBACK = 350f;
+
+    /**
+     * The furthest from the fleet a light can light anything up, upgrades included.
+     * <p>
+     * The beam rides an arc drawn at twice its own size, wanders a sine off that, and finds anything
+     * within its size of wherever it ended up - so this is those three added together. Anything that
+     * wants to seed the world just outside what the lights can see needs the same number, and
+     * guessing at it is what left the buried motes sitting in a band the lights never reached.
+     */
+    public static float getMaxReach() {
+        float size = getArea();
+
+        return size * 2f + SINE_CADENCE + size;
+    }
+
+    /** The beam's own radius. One read, so the arc, the lens and the reach cannot disagree. */
+    public static float getArea() {
+        return UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, AREA_FALLBACK);
+    }
+
     private SearchlightGlowRenderer glow;
     private final List<RippleRingRenderer> rings = new ArrayList<>();
     private final Vector2f currentRenderLoc = new Vector2f();
@@ -64,10 +86,21 @@ public class Searchlight implements EveryFrameScript {
         return false;
     }
 
-    public void init(CircularArc circularArc) {
+    /**
+     * The fleet this light is mounted on, for the heading its arc is measured from.
+     * <p>
+     * The arc already followed the fleet around - it holds the fleet's own location vector - but its
+     * angles were degrees of the world, so a fleet turning about kept sweeping the same wedge of
+     * space it had been sweeping before it turned. A light bolted to a hull points where the hull
+     * points.
+     */
+    private SectorEntityToken fleet;
+
+    public void init(CircularArc circularArc, SectorEntityToken fleet) {
         this.arc = circularArc;
+        this.fleet = fleet;
         baseArcAngle = arc.startAngle;
-        float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
+        float size = getArea();
         glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
 
         LunaCampaignRenderer.addTransientRenderer(glow);
@@ -84,7 +117,7 @@ public class Searchlight implements EveryFrameScript {
         // splash
         ringInterval.advance(amt);
         if (ringInterval.intervalElapsed()) {
-            float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
+            float size = getArea();
             RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size, COLOR);
             rings.add(ring);
             LunaCampaignRenderer.addTransientRenderer(ring);
@@ -105,12 +138,16 @@ public class Searchlight implements EveryFrameScript {
         float degPerSec = arc.convertToDegreesPerSecond(speed);
         baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
 
-        Vector2f basePos = arc.getPointForAngle(baseArcAngle);
+        //the sweep is kept in the fleet's own frame and only turned into a place at the last moment,
+        //so the light travels its arc exactly as before while the whole arc rides the heading
+        float heading = getHeading();
+
+        Vector2f basePos = arc.getPointForAngle(baseArcAngle + heading);
 
         float sine = (float) Math.sin(oscillationTime * OSCILLATION_TIME_MULT);
         float offset = sine * SINE_CADENCE;
 
-        float tangentAngle = baseArcAngle + 90f;
+        float tangentAngle = baseArcAngle + heading + 90f;
         Vector2f renderPos = MathUtils.getPointOnCircumference(basePos, offset, tangentAngle);
 
         updateRenderLoc(renderPos);
@@ -124,7 +161,7 @@ public class Searchlight implements EveryFrameScript {
     protected void advanceLens() {
         if (!CampaignDistortionRenderer.isSupported()) return;
 
-        float size = UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, 350f);
+        float size = getArea();
 
         if (lens == null) {
             lens = new WaveDistortion(new Vector2f(currentRenderLoc), new Vector2f());
@@ -143,6 +180,18 @@ public class Searchlight implements EveryFrameScript {
 
         //the size is only here to pick up upgrades, and it has to keep off while the fade-in owns it
         if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
+    }
+
+    /**
+     * Which way is forward, in world degrees.
+     * <p>
+     * The fleet's facing rather than its velocity: a fleet already turns to face where it is going,
+     * and facing keeps its last value when it stops. Velocity goes to nothing the moment the fleet
+     * does, which would swing every light back to due east each time the player took their hand off
+     * the controls.
+     */
+    protected float getHeading() {
+        return fleet == null ? 0f : fleet.getFacing();
     }
 
     public void updateRenderLoc(Vector2f newLoc){
