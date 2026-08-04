@@ -1,74 +1,177 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeStat;
+import com.fs.starfarer.api.Global;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 
 /**
- * What things cost, in fish.
+ * What things cost: credits, and a catch that has to be brought in alongside them.
  * <p>
- * One rule rather than a price list: the rarity a thing is paid in comes from how far up its own
- * ladder it is, and the number of them comes from how many have already been bought. A price list
- * would have to be maintained alongside every new upgrade; this does not.
+ * The catch is the interesting half, and it is rolled once per campaign rather than written in a
+ * table: a seed drawn on first ask and kept in the save decides what every rung of every ladder
+ * wants, so this game the drone bay takes crabs of a good grade and the next it takes three of one
+ * species, barely holding together. The asks climb the same way whatever they are - more of them,
+ * better, rarer, more specific - ending in a named species for the last rung of a ladder.
  * <p>
- * Levels are paid in a rarity that steps up as the levels do, so the last level of anything costs
- * something you had to go looking for rather than a larger pile of the same thing you catch by
- * accident.
+ * Still one rule rather than a price list, for the same reason as before: a list would have to be
+ * maintained alongside every new upgrade, and this does not.
  */
 public class ShopPricing {
 
-    /** How many of the base rarity the first level costs. */
-    public static final int BASE_COST = 3;
+    public static final String SEED_KEY = "$catchrelease_shop_seed";
 
-    /** Added per level already bought, so the fourth costs more than the first. */
-    public static final int COST_PER_LEVEL = 2;
+    /** Credits for a ladder's first rung, and how steeply the rungs climb. */
+    public static final int CREDITS_BASE = 2500;
+    public static final float CREDITS_PER_LEVEL = 1.7f;
 
-    /** How many levels are paid in one rarity before the price moves up a tier. */
-    public static final int LEVELS_PER_TIER = 2;
+    /** Credits per tier of tackle - a module is one purchase, so it is priced as one. */
+    public static final int TACKLE_CREDITS_PER_TIER = 4000;
 
-    /** A tackle module is a one-off rather than a ladder, so it has a flat price. */
-    public static final int TACKLE_COST = 6;
+    /** Credits and the catch beside them. A null requirement is credits alone. */
+    public static class Price {
+        public final int credits;
+        public final FishRequirement fish;
 
-    /** What the next level of a stat is paid in. Null for a stat that is already at its ceiling. */
-    public static FishRarity getRarity(UpgradeStat stat) {
-        if (stat == null || isMaxed(stat)) return null;
-
-        int tier = stat.level / LEVELS_PER_TIER;
-
-        FishRarity[] ladder = FishRarity.values();
-
-        return ladder[Math.min(tier, ladder.length - 1)];
+        public Price(int credits, FishRequirement fish) {
+            this.credits = credits;
+            this.fish = fish;
+        }
     }
 
-    public static int getCost(UpgradeStat stat) {
-        if (stat == null || isMaxed(stat)) return 0;
+    /**
+     * This campaign's seed, drawn once and kept in the save - the whole point is that a new game
+     * wants different catches for the same gear.
+     */
+    public static long getSeed() {
+        Object stored = Global.getSector().getMemoryWithoutUpdate().get(SEED_KEY);
+        if (stored instanceof Long) return (Long) stored;
 
-        return BASE_COST + COST_PER_LEVEL * stat.level;
+        long seed = new Random().nextLong();
+        Global.getSector().getMemoryWithoutUpdate().set(SEED_KEY, seed);
+
+        return seed;
+    }
+
+    /** The next rung of a stat's ladder. Null once it is at its ceiling. */
+    public static Price getPrice(UpgradeStat stat) {
+        if (stat == null || isMaxed(stat)) return null;
+
+        int tier = Math.max(0, stat.level);
+        boolean last = stat.maxLevel > 0 && stat.level == stat.maxLevel - 1;
+
+        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
+
+        return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
+    }
+
+    /** A module's one price. Emptying the slot is free. */
+    public static Price getPrice(Tackle tackle) {
+        if (tackle == null || tackle == Tackle.NONE) return null;
+
+        int tier = getTackleTier(tackle);
+
+        return new Price(TACKLE_CREDITS_PER_TIER * (tier + 1),
+                generate(rngFor("tackle_" + tackle.name(), tier), tier + 1, false));
+    }
+
+    /** Tackle is tiered by what it does, and the ones that change what can come up cost the most. */
+    protected static int getTackleTier(Tackle tackle) {
+        if (tackle.shipTackle) return 3;
+        if (tackle.sonar || tackle.rarityBias > 1f) return 2;
+        if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return 1;
+
+        return 0;
     }
 
     public static boolean isMaxed(UpgradeStat stat) {
         return stat != null && stat.maxLevel > 0 && stat.level >= stat.maxLevel;
     }
 
+    protected static Random rngFor(String key, int tier) {
+        return new Random(getSeed() ^ (key.hashCode() * 1000003L + tier * 7919L));
+    }
+
+    protected static int round100(int credits) {
+        return Math.max(100, (credits / 100) * 100);
+    }
+
     /**
-     * Tackle is priced by what it does rather than by a ladder, and the ones that change what can
-     * come up out of a catch cost the most.
+     * The ask for one rung. Difficulty climbs by stacking axes rather than only by raising the
+     * count: a type first, then floors on grade and rarity, then the hard asks - one species,
+     * low coherence - and the last rung of a ladder names the species outright.
      */
-    public static FishRarity getRarity(Tackle tackle) {
-        if (tackle == null || tackle == Tackle.NONE) return null;
+    protected static FishRequirement generate(Random rng, int tier, boolean last) {
+        FishRequirement req = new FishRequirement();
 
-        if (tackle.shipTackle) return FishRarity.EPIC;
-        if (tackle.sonar || tackle.rarityBias > 1f) return FishRarity.RARE;
-        if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return FishRarity.UNCOMMON;
+        req.count = 2 + Math.min(tier, 5) / 2;
+        req.tag = pickTag(rng);
 
-        return FishRarity.COMMON;
+        if (last || tier >= 4) {
+            req.speciesId = pickSpecies(rng);
+            req.minGrade = FishGrade.FINE;
+            req.count = Math.min(req.count, 3);
+
+            //a named species is ask enough on its own
+            if (req.speciesId != null) return req;
+        }
+
+        if (tier >= 1) {
+            req.minGrade = rng.nextBoolean() ? FishGrade.FINE : FishGrade.AVERAGE;
+        } else if (rng.nextBoolean()) {
+            req.minGrade = FishGrade.AVERAGE;
+        }
+
+        if (tier >= 2) {
+            req.minRarity = tier >= 3 ? FishRarity.RARE : FishRarity.UNCOMMON;
+
+            //one of the hard asks, not both - both together is a lottery ticket, not a price
+            if (rng.nextBoolean()) {
+                req.sameSpecies = true;
+            } else {
+                req.lowCoherence = true;
+
+                //low coherence is the rarity here; stacking a rarity floor on it overshoots
+                if (tier < 3) req.minRarity = null;
+            }
+        }
+
+        return req;
     }
 
-    public static int getCost(Tackle tackle) {
-        return tackle == null || tackle == Tackle.NONE ? 0 : TACKLE_COST;
+    protected static String pickTag(Random rng) {
+        String[] tags = {"fish", "fish", "crab", "mollusc"};
+
+        return tags[rng.nextInt(tags.length)];
     }
 
-    public static boolean canAfford(FishRarity rarity, int cost) {
-        return rarity == null || FishCurrency.count(rarity) >= cost;
+    /**
+     * A species worth naming: rare or better, not the special ones. Sorted before the pick so the
+     * same roll lands on the same species whatever order the table loaded in.
+     */
+    protected static String pickSpecies(Random rng) {
+        List<FishSpec> pool = new ArrayList<>();
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (spec.rarity.ordinal() < FishRarity.RARE.ordinal()) continue;
+            if (spec.tags.contains("special")) continue;
+
+            pool.add(spec);
+        }
+
+        if (pool.isEmpty()) return null;
+
+        pool.sort(Comparator.comparing(spec -> spec.id));
+
+        return pool.get(rng.nextInt(pool.size())).id;
     }
 }

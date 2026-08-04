@@ -5,8 +5,13 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
+import catchrelease.campaign.fish.items.FishItems;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoPickerListener;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
@@ -19,6 +24,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Keyboard;
 
@@ -56,8 +62,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float DETAIL_GAP = 14f;
 
     public static final float MAIN_TAB_HEIGHT = 28f;
-    public static final float CATEGORY_TAB_HEIGHT = 24f;
+    public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
+    public static final float ACTION_HEIGHT = 28f;
 
     /** Opens the outfitter, if the UI will have it. */
     public static boolean open() {
@@ -99,11 +106,25 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         /** Counted once per change rather than once per frame - the purse walks the whole hold. */
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
+        protected int credits = 0;
+
+        /**
+         * Everything this build put on the panel, by the reference that can actually take it off
+         * again. A scrollable element is wrapped in a scroller on the way in and the wrapper is
+         * what the panel holds - removing the element itself removes nothing, which is where the
+         * stacked-up panels came from. So what goes in this list is the element's external
+         * scroller when it has one, and the element itself when it does not.
+         */
+        protected final List<UIComponentAPI> added = new ArrayList<>();
 
         /** The right-hand pane, torn down and rebuilt whenever what it shows stops being true. */
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
         protected Object buyId;
+
+        protected final Object storeId = new Object();
+        protected final Object retrieveId = new Object();
+        protected final Object sellId = new Object();
 
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
@@ -124,8 +145,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
 
-            //the sheet documents its own format with a row, which is not a thing for sale
+            //the sheet documents its own format with a row, which is not a thing for sale - and the
+            //catch's own tuning stats are not equipment, so the shop does not stock them at all
             stats.removeIf(stat -> stat.id == null || stat.id.equalsIgnoreCase("example"));
+            stats.removeIf(stat -> ShopGroup.forStat(stat) == ShopGroup.THE_CATCH);
             stats.sort(Comparator.comparing(stat -> stat.id));
 
             for (ShopGroup group : ShopGroup.values()) {
@@ -134,17 +157,26 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 }
             }
 
+            //the empty slot first: the way out of every module is the first thing on the shelf
             for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON}) {
+                entries.add(ShopEntry.of(Tackle.NONE, rig));
+
                 for (Tackle tackle : TackleManager.getOptions(rig)) {
                     if (tackle != Tackle.NONE) entries.add(ShopEntry.of(tackle, rig));
                 }
-
-                entries.add(ShopEntry.of(Tackle.NONE, rig));
             }
         }
 
         protected void refreshWallet() {
             wallet = FishCurrency.count();
+
+            credits = Global.getSector().getPlayerFleet() == null ? 0
+                    : (int) Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+        }
+
+        @Override
+        public int getCredits() {
+            return credits;
         }
 
         protected void build() {
@@ -152,12 +184,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildTabs();
             buildList();
             buildDetail();
+            buildActions();
         }
 
         /**
-         * Everything torn down and put back. Not element by element: removing a single element and
-         * re-adding it stacks the new one over the old, and one clean sweep is both simpler and
-         * harder to get wrong than reaching back into what is already there.
+         * Everything torn down by the reference it was tracked under and put back, since reaching
+         * back into a live panel is how stale copies get left behind it.
          *
          * @param keepScroll whether the list should come back at the scroll it was at - true for a
          *                   click inside the shelf, false when the shelf itself changed
@@ -168,7 +200,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float scroll = keepScroll && list != null && list.getExternalScroller() != null
                     ? list.getExternalScroller().getYOffset() : 0f;
 
-            panel.removeComponent(null);
+            for (UIComponentAPI component : added) panel.removeComponent(component);
+            added.clear();
+
             build();
 
             if (keepScroll && list != null && list.getExternalScroller() != null) {
@@ -176,18 +210,35 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
         }
 
+        /**
+         * Adds an element and remembers the thing the panel actually holds for it.
+         *
+         * @return the position of that thing - for a scrollable element the scroller's, which is
+         *         the window on screen rather than the content behind it
+         */
+        protected PositionAPI place(TooltipMakerAPI element, float x, float y) {
+            PositionAPI pos = panel.addUIElement(element);
+            pos.inTL(x, y);
+
+            added.add(element.getExternalScroller() != null
+                    ? (UIComponentAPI) element.getExternalScroller() : element);
+
+            return pos;
+        }
+
         protected void buildHeader() {
             CustomPanelAPI header = panel.createCustomPanel(WIDTH - PAD * 2f, HEADER_HEIGHT,
                     new ShopHeaderPlugin(this));
 
             panel.addComponent(header).inTL(PAD, PAD);
+            added.add(header);
         }
 
         /** The gear a main tab sells, in shelf order. */
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
             return tab == ShopEntry.Kind.UPGRADE
                     ? new ShopGroup[]{ShopGroup.SEARCHLIGHTS, ShopGroup.DRONES, ShopGroup.HARPOON,
-                            ShopGroup.DEPTH_BOMBS, ShopGroup.THE_CATCH}
+                            ShopGroup.DEPTH_BOMBS}
                     : new ShopGroup[]{ShopGroup.DRONE_TACKLE, ShopGroup.HARPOON_TIPS};
         }
 
@@ -221,7 +272,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             for (int i = 0; i < kinds.length; i++) {
                 addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
                         kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2", 15f,
-                        PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
+                        false, PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
             float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
@@ -229,19 +280,20 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
-                addTab(groups[i], groups[i].tabTitle, null, 13f,
-                        PAD + i * (categoryWidth + TAB_GAP), categoryTop,
+                addTab(groups[i], groups[i].tabTitle, "placeholder", 14f,
+                        true, PAD + i * (categoryWidth + TAB_GAP), categoryTop,
                         categoryWidth, CATEGORY_TAB_HEIGHT);
             }
         }
 
         protected void addTab(Object data, String label, String iconId, float textSize,
-                              float x, float y, float width, float height) {
+                              boolean vertical, float x, float y, float width, float height) {
 
             CustomPanelAPI tab = panel.createCustomPanel(width, height,
-                    new ShopTabPlugin(data, label, iconId, textSize, this));
+                    new ShopTabPlugin(data, label, iconId, textSize, vertical, this));
 
             panel.addComponent(tab).inTL(x, y);
+            added.add(tab);
         }
 
         @Override
@@ -276,13 +328,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         new ShopRowPlugin(entry, this)), 3f);
             }
 
-            listViewport = panel.addUIElement(list);
-            listViewport.inTL(PAD, top);
+            listViewport = place(list, PAD, top);
         }
 
         protected void buildDetail() {
             float top = PAD + HEADER_HEIGHT + 10f;
-            float height = HEIGHT - top - PAD;
+            float height = HEIGHT - top - PAD - ACTION_HEIGHT - 10f;
             float width = WIDTH - PAD * 2f - LIST_WIDTH - DETAIL_GAP;
 
             detail = panel.createUIElement(width, height, false);
@@ -290,7 +341,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             ShopEntry entry = getSelected();
             if (entry != null) buildDetailContent(detail, width, entry);
 
-            panel.addUIElement(detail).inTL(PAD + LIST_WIDTH + DETAIL_GAP, top);
+            place(detail, PAD + LIST_WIDTH + DETAIL_GAP, top);
         }
 
         protected void buildDetailContent(TooltipMakerAPI info, float width, ShopEntry entry) {
@@ -319,7 +370,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildBuyButton(info, entry);
         }
 
-        /** The tag: what the next one costs, and whether the hold can cover it. */
+        /** The tag: credits, the catch beside them, and whether the hold can cover it. */
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isMaxed()) {
                 info.addPara("Fully upgraded.", Misc.getPositiveHighlightColor(), 16f);
@@ -331,21 +382,31 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            FishRarity rarity = entry.getPriceRarity();
-            if (rarity == null) {
+            ShopPricing.Price price = entry.getPrice();
+            if (price == null) {
                 info.addPara("No charge for emptying a slot.", Misc.getGrayColor(), 16f);
                 return;
             }
 
-            int cost = entry.getPriceCost();
-            int held = wallet.get(rarity) == null ? 0 : wallet.get(rarity);
+            boolean creditsOk = credits >= price.credits;
 
-            info.addPara("Price: %s", 16f, rarity.color,
-                    cost + " x " + Misc.ucFirst(rarity.name().toLowerCase()) + " specimens");
+            info.addPara("Price: %s", 16f, Misc.getGrayColor(),
+                    creditsOk ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor(),
+                    Misc.getDGSCredits(price.credits));
 
-            info.addPara("In the hold: %s", 4f,
-                    held >= cost ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
-                    String.valueOf(held));
+            if (price.fish != null) {
+                FishRarity rarity = price.fish.getDisplayRarity();
+                int have = FishCurrency.count(price.fish);
+                boolean fishOk = have >= price.fish.count;
+
+                info.addPara("And the catch: %s", 4f, Misc.getGrayColor(),
+                        rarity == null ? Misc.getHighlightColor() : rarity.color,
+                        price.fish.describe());
+
+                info.addPara("Matching aboard: %s", 4f, Misc.getGrayColor(),
+                        fishOk ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
+                        String.valueOf(have));
+            }
         }
 
         protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
@@ -367,6 +428,93 @@ public class FishShopDialog implements InteractionDialogPlugin {
             info.setButtonFontDefault();
 
             button.setEnabled(afford);
+        }
+
+        /**
+         * The counter itself, under the detail pane: stow the catch with the shop, take it back,
+         * or sell it outright - each through the game's own cargo picker, over only the fish.
+         */
+        protected void buildActions() {
+            float width = WIDTH - PAD * 2f - LIST_WIDTH - DETAIL_GAP;
+            float buttonWidth = (width - TAB_GAP * 2f) / 3f;
+            float x = PAD + LIST_WIDTH + DETAIL_GAP;
+            float y = HEIGHT - PAD - ACTION_HEIGHT;
+
+            addAction("Store fish", storeId, x, y, buttonWidth);
+            addAction("Retrieve fish", retrieveId, x + buttonWidth + TAB_GAP, y, buttonWidth);
+            addAction("Sell fish", sellId, x + (buttonWidth + TAB_GAP) * 2f, y, buttonWidth);
+        }
+
+        protected void addAction(String label, Object id, float x, float y, float width) {
+            TooltipMakerAPI element = panel.createUIElement(width, ACTION_HEIGHT, false);
+
+            element.addButton(label, id, Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
+                    Alignment.MID, CutStyle.TL_BR, width, ACTION_HEIGHT - 2f, 0f);
+
+            place(element, x, y);
+        }
+
+        /** One picker for all three counters; what changes is where the picked stacks go. */
+        protected void openPicker(String title, String okText, CargoAPI shown,
+                                  java.util.function.Consumer<CargoAPI> onPicked) {
+
+            if (dialog == null || shown.getStacksCopy().isEmpty()) return;
+
+            dialog.showCargoPickerDialog(title, okText, "Cancel", false, 330f, shown,
+                    new CargoPickerListener() {
+                        @Override
+                        public void pickedCargo(CargoAPI cargo) {
+                            onPicked.accept(cargo);
+
+                            refreshWallet();
+                            rebuild(true);
+                        }
+
+                        @Override
+                        public void cancelledCargoSelection() {
+                        }
+
+                        @Override
+                        public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo,
+                                                      CargoStackAPI pickedUp, boolean pickedUpFromSource,
+                                                      CargoAPI combined) {
+                            int count = 0;
+                            float value = 0f;
+
+                            if (combined != null) {
+                                for (CargoStackAPI stack : combined.getStacksCopy()) {
+                                    count += FishItems.countSpecimens(stack);
+                                    value += FishItems.getStackValue(stack);
+                                }
+                            }
+
+                            panel.setParaFontOrbitron();
+                            panel.addPara(title, Misc.getBasePlayerColor(), 10f);
+                            panel.setParaFontDefault();
+
+                            panel.addPara("Selected: %s specimens", 10f, Misc.getHighlightColor(),
+                                    String.valueOf(count));
+                            panel.addPara("Base value: %s", 3f, Misc.getHighlightColor(),
+                                    Misc.getDGSCredits(value));
+                        }
+                    });
+        }
+
+        /** Every picked stack out of one hold and into the other. A null destination is a sale. */
+        protected float moveStacks(CargoAPI picked, CargoAPI from, CargoAPI to) {
+            float value = 0f;
+
+            for (CargoStackAPI stack : picked.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+
+                value += FishItems.getStackValue(stack);
+
+                from.removeItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
+                if (to != null) to.addItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
+            }
+
+            return value;
         }
 
         protected ShopEntry getSelected() {
@@ -404,6 +552,30 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void buttonPressed(Object buttonId) {
+            CargoAPI player = Global.getSector().getPlayerFleet().getCargo();
+
+            if (buttonId == storeId) {
+                openPicker("Store the catch with the shop", "Store", FishItems.copyFishStacks(player),
+                        picked -> moveStacks(picked, player, ShopStorage.get()));
+                return;
+            }
+
+            if (buttonId == retrieveId) {
+                openPicker("Take the catch back aboard", "Retrieve",
+                        FishItems.copyFishStacks(ShopStorage.get()),
+                        picked -> moveStacks(picked, ShopStorage.get(), player));
+                return;
+            }
+
+            if (buttonId == sellId) {
+                openPicker("Sell the catch", "Sell", FishItems.copyFishStacks(player),
+                        picked -> {
+                            float value = moveStacks(picked, player, null);
+                            player.getCredits().add(value);
+                        });
+                return;
+            }
+
             if (buttonId != buyId) return;
 
             ShopEntry entry = getSelected();

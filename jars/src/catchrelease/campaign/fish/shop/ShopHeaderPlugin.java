@@ -25,11 +25,14 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     /** Where the counts come from - the dialog owns the cache, this only draws it. */
     public interface Purse {
         Map<FishRarity, Integer> getWallet();
+
+        int getCredits();
     }
 
     public static final String TITLE = "THE OUTFITTER";
 
     public static final float CHIP_WIDTH = 64f;
+    public static final float CREDITS_CHIP_WIDTH = 110f;
     public static final float CHIP_HEIGHT = 30f;
     public static final float CHIP_GAP = 8f;
     public static final float ICON_SIZE = 20f;
@@ -41,6 +44,9 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     protected transient LazyFont.DrawableString title;
     protected final Map<FishRarity, LazyFont.DrawableString> counts = new EnumMap<>(FishRarity.class);
     protected final Map<FishRarity, Integer> drawnCounts = new EnumMap<>(FishRarity.class);
+
+    protected transient LazyFont.DrawableString creditsText;
+    protected int drawnCredits = -1;
 
     public ShopHeaderPlugin(Purse purse) {
         this.purse = purse;
@@ -85,8 +91,12 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         if (wallet == null) return;
 
         FishRarity[] ladder = FishRarity.values();
-        float chipX = x + width - ladder.length * CHIP_WIDTH - (ladder.length - 1) * CHIP_GAP;
+        float chipX = x + width - ladder.length * CHIP_WIDTH - ladder.length * CHIP_GAP
+                - CREDITS_CHIP_WIDTH;
         float chipY = y + (height - CHIP_HEIGHT) * 0.5f;
+
+        renderCredits(chipX, chipY, alphaMult);
+        chipX += CREDITS_CHIP_WIDTH + CHIP_GAP;
 
         for (FishRarity rarity : ladder) {
             renderChip(rarity, wallet.get(rarity) == null ? 0 : wallet.get(rarity),
@@ -94,6 +104,27 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
             chipX += CHIP_WIDTH + CHIP_GAP;
         }
+    }
+
+    /** The other half of every price, so the purse tells the whole of it. */
+    protected void renderCredits(float x, float y, float alphaMult) {
+        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Color.BLACK, 0.5f * alphaMult);
+        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Misc.getHighlightColor(),
+                0.08f * alphaMult);
+
+        LazyFont font = ShopUi.getBodyFont();
+        if (font == null) return;
+
+        int credits = purse.getCredits();
+        if (creditsText == null || credits != drawnCredits) {
+            creditsText = font.createText(Misc.getDGSCredits(credits), Color.WHITE, 15f);
+            creditsText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+            drawnCredits = credits;
+        }
+
+        creditsText.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+        creditsText.draw(Math.round(x + CREDITS_CHIP_WIDTH - 7f),
+                Math.round(y + CHIP_HEIGHT * 0.5f + creditsText.getHeight() * 0.5f));
     }
 
     protected void renderChip(FishRarity rarity, int count, float x, float y, float alphaMult) {
