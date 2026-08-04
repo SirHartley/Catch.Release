@@ -18,7 +18,7 @@ scrapped
 ---------------------
 
 ai_
-
+A fleet that's harpooned twice in a row should turn hostile and engage the player in combat (reduced_rep_impact). Add a fitting dialogue text when the player opnes comms.
 
 Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
