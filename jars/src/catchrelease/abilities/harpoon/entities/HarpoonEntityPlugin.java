@@ -662,7 +662,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case PUSHING:
                 paidOut = Math.max(paidOut, distance * HarpoonConstants.LINE_PAYOUT);
                 break;
+            //a hull gets the same fast take-up a fish does. There is no PUSHING or TAUT beat on the
+            //way into a fleet - the haul starts the moment the head lands - so without naming it
+            //here the line fell to the default and wound in at the returning rate, which is slow
+            //enough that a rope into something being dragged never stopped looking loose
             case TAUT:
+            case HAULING:
                 paidOut = approach(paidOut, distance, HarpoonConstants.LINE_TAKEUP * amount);
                 break;
             default:
@@ -876,7 +881,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
         float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
 
-        return MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
+        float shiver = MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
+
+        //a rope with a fleet on the end of it is a cable, not a thrown line. Held down rather than
+        //switched off: what is left is fed almost entirely by the swing term, so the line still
+        //stirs when the two ends change direction on each other and sits still when they do not
+        if (state == State.HAULING) shiver *= HarpoonConstants.HAUL_SHIVER;
+
+        return shiver;
     }
 
     protected void renderHead(float alpha) {

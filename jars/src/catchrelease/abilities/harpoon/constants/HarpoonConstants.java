@@ -62,6 +62,16 @@ public class HarpoonConstants {
     public static final float HAUL_DONE_DISTANCE = 60f;
 
     /**
+     * What is left of the rope's shiver once there is a hull on the end of it.
+     * <p>
+     * A line into a fleet is under load from the moment it lands, and a cable under load does not
+     * ripple the way a line thrown at a speck does. Scaled down rather than switched off: the swing
+     * term survives, so the rope still stirs when the two ends change direction on each other,
+     * which is the only motion there is any reason to see during a haul.
+     */
+    public static final float HAUL_SHIVER = 0.3f;
+
+    /**
      * How far the head has to be clear of the launcher before it can bury itself in a hull.
      * <p>
      * A mote is a speck and can be hit the instant the line leaves; a fleet is an object the size of
