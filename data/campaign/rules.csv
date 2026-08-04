@@ -177,6 +177,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything.
@@ -190,6 +191,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","""The second incident is not a fine. The second incident is a finding."" $PersonRank $personName sets the slate face down. ""Findings are executed.""",,
@@ -199,6 +201,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
@@ -208,6 +211,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","$PersonRank $personName does not offer peace this time. ""We called the first one curiosity. You have been kind enough to correct us.""",,
@@ -217,6 +221,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","There is no greeting. Somebody laughs, once, the way you would at a door closing.",,
@@ -226,6 +231,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
@@ -235,6 +241,7 @@ $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol tr
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation NO_CONTINUE","""You were told the penalty was the favourable outcome."" $PersonRank $personName sounds almost sorry. ""It was.""",,

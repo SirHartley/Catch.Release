@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken.VisibilityLevel;
 import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
@@ -60,8 +61,16 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     /** Set by the encounter once this patrol has had its say, however that went. */
     public static final String DEALT_WITH_KEY = "$catchrelease_harpoonPatrolDone";
 
-    /** Set by the encounter when the fine was paid, which is the one outcome that settles it. */
+    /** Set by the encounter when the fine was paid. */
     public static final String PAID_KEY = "$catchrelease_harpoonFinePaid";
+
+    /**
+     * Set by the encounter when there was never a fine to pay.
+     * <p>
+     * The second harpooning inside the window is not negotiated, so the player cannot be said to
+     * have declined anything - without this they were charged for evading a question nobody asked.
+     */
+    public static final String FORCED_KEY = "$catchrelease_harpoonForced";
 
     /** What the patrol will want, and the same figure written the way a person would say it. */
     public static final String FINE_KEY = "$catchrelease_harpoonFine";
@@ -142,13 +151,17 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
      * matter of looking around for it rather than of having remembered it.
      */
     protected CampaignFleetAPI reacquire() {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null || player.getContainingLocation() == null) return null;
+        //every location rather than the player's own. A patrol left behind in another system is
+        //precisely the one that has to be found: nothing else will call it off, and until something
+        //does it keeps its flag - and with it the right to open the fine conversation - for the
+        //whole twelve days, over a harpooning that may have been settled somewhere else since.
+        //Picking it up here hands it to the chase, which sees the mismatched location and lets go
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            for (CampaignFleetAPI fleet : location.getFleets()) {
+                if (!fleet.getMemoryWithoutUpdate().getBoolean(PATROL_FLAG)) continue;
 
-        for (CampaignFleetAPI fleet : player.getContainingLocation().getFleets()) {
-            if (!fleet.getMemoryWithoutUpdate().getBoolean(PATROL_FLAG)) continue;
-
-            return fleet;
+                return fleet;
+            }
         }
 
         return null;
@@ -259,18 +272,20 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
      */
     protected void maintainChase() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        MemoryAPI mem = chasing.getMemoryWithoutUpdate();
 
-        if (!chasing.isAlive() || player == null) {
+        //the encounter sets this when the patrol has said its piece. Read before anything else,
+        //including before asking whether the patrol is still alive: refusing turns them hostile and
+        //the fight that follows happens inside the same paused dialog, so the ordinary way to
+        //refuse a fine ends with the script's first look landing on a dead fleet. Checked in that
+        //order, the outcome of the conversation was thrown away exactly when the player had one
+        if (mem.getBoolean(DEALT_WITH_KEY)) {
+            collect();
             endChase();
             return;
         }
 
-        MemoryAPI mem = chasing.getMemoryWithoutUpdate();
-
-        //the encounter sets this when the patrol has said its piece. Read before anything else,
-        //because settling the debt has to happen while the fleet still says whose debt it was
-        if (mem.getBoolean(DEALT_WITH_KEY)) {
-            collect();
+        if (!chasing.isAlive() || player == null) {
             endChase();
             return;
         }
@@ -316,11 +331,13 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     }
 
     /**
-     * Takes the harpooning off the faction's slate, if the conversation ended with it paid for.
+     * Takes the harpooning off the faction's slate, now that somebody has been out to ask about it.
      * <p>
-     * Paying is the only thing that settles it. Refusing turns the patrol into a fight, and a fight
-     * the player wins or runs from is not an answer to the question - the debt stands, and the
-     * faction sends somebody else.
+     * The asking is what settles it, not the answer - a faction that sent a patrol, got a reply and
+     * kept sending more patrols about the same rope would be a faction the player can never be
+     * finished with. What the answer was decides the price rather than the outcome: paid costs the
+     * money, forced costs the fight, and anything else is filed as an evasion and charged for a few
+     * days later, somewhere the player cannot shoot their way out of it.
      */
     protected void collect() {
         MemoryAPI mem = chasing.getMemoryWithoutUpdate();
@@ -328,8 +345,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId == null) return;
 
-        //either way the faction has had its answer and stops sending people about this one. What
-        //differs is what the answer was
         HarpoonOffence.settle(factionId);
 
         if (mem.getBoolean(PAID_KEY)) {
@@ -337,8 +352,14 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             return;
         }
 
-        //refused, or closed the link and flew off, which the faction files as the same thing. The
-        //bill for it arrives days later, somewhere else
+        //the second one inside the window is never offered a price, so there was nothing to refuse
+        //and nothing to evade. They came to have the fight, and they had it
+        if (mem.getBoolean(FORCED_KEY)) {
+            mem.unset(FORCED_KEY);
+            return;
+        }
+
+        //refused, or closed the link and flew off, which the faction files as the same thing
         HarpoonOffence.noteEvasion(factionId);
     }
 
