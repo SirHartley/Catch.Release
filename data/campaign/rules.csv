@@ -3,8 +3,273 @@ catchrelease_harpoonedComms,OpenCommLink,"$entity.catchrelease_harpooned score:1
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""The link opens onto an argument already in progress. Someone reads your transponder code aloud, and someone else asks - twice, and not calmly - what exactly you thought you were fishing for."" $faction.baseColor
 $menuState = fleetConvMain 0
-FireAll PopulateOptions",,,"They will still talk, they are just going to lead with the harpoon. Scored over the vanilla greetings so this is what they open with, and it hands off to the ordinary conversation menu exactly as those greetings do - the line is the only thing that changes."
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""Be advised, the incident has been logged.\"" $PersonRank $personName holds up a slate as though you could read it. \""Hull breach, non-standard munition, recovered intact. It is going to Naval Intelligence, because everything unidentified goes to Naval Intelligence. You will be hearing about the barb.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""Damage assessment is complete and your involvement is not in dispute.\"" $PersonRank $personName reads without inflection. \""You will receive a schedule of costs. It will be itemised. One of the items will be the harpoon, which we have kept.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""$PersonRank $personName looks at the puncture, then at you, with the particular patience of someone cataloguing a sin. \""A machine for taking things out of the dark,\"" $heOrShe says. \""And you pointed it at people.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""Whoever answers is laughing. \""It shot a rope at us! A rope!\"" The laughing stops very suddenly. \""Do it again and we will come and see what else your ship does.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""That,\"" says $personName, with something close to admiration, \""is not a weapon. That is a fishing rig.\"" A pause. \""Which you fired. At us. What is wrong with you?\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""You have discharged an unregistered device at a vessel of the Diktat.\"" $PersonRank $personName does not blink. \""I am required to ask whether this was deliberate. I am not required to believe the answer.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""There is a form for this.\"" $PersonRank $personName sounds almost pleased about it. \""There is not a form for this, actually. I have checked. I am going to have to write to someone about the fact that there is no form for this.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_harpooned score:1110
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""\""You put a hook in us,\"" says $personName, in the flat voice of somebody who has had a long month and is not going to have a shorter one. \""Not a shot. A hook. We are going to be explaining that to the yard for a year.\"""" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second."" $faction.baseColor
-EndConversation NO_CONTINUE",,,"The greetingNoComms shape: say the one thing and put the encounter options back. Without EndConversation the comm session is left open with no way out of it."
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""\""Second incident. Same vessel. Same device.\"" $PersonRank $personName reaches off-screen. \""The logging phase of this is over.\"""" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostileTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""\""The account is closed and has been escalated,\"" says $personName, already turning away. \""Escalation is not a conversation.\"""" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostileLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""\""Twice.\"" $PersonRank $personName closes $hisOrHer eyes briefly. \""Ludd is patient. I have been assured, repeatedly, that I am not required to be.\"""" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostileLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""The link opens on someone already shouting orders to somebody else, and closes before any of them are addressed to you."" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostilePirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""\""Once was funny,\"" says $personName, and cuts the link on the word."" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_harpooned score:1210
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""\""Deliberate, then.\"" $PersonRank $personName sounds satisfied to have it settled. The link closes."" $faction.baseColor
+EndConversation NO_CONTINUE",,,
+catchrelease_patrolStop,BeginFleetEncounter,"$catchrelease_harpoonPatrol score:1100
+!$catchrelease_harpoonPatrolDone
+!$isHostile","$catchrelease_harpoonPatrolDone = true 30
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+unset $ignorePlayerCommRequests
+$catchrelease_fineConv = true 0
+AddText ""You're being hailed by the $faction $otherShipOrFleet."" $faction.baseColor
+OpenComms",,,"The patrol sent about a harpooning, arriving. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. Marked as had here rather than at each ending, as the cargo scan does: the patrol is still pursuing while the dialog is open, so a conversation that only counted once it was finished would be reopened the instant the player closed it."
+catchrelease_fineDemand,OpenCommLink,"$entity.catchrelease_fineConv score:1300
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""We have a report of a $faction hull holed by - "" $PersonRank $personName stops, checks the screen again, and continues in the voice of someone who has decided not to editorialise. "" - by a fishing implement.""
+
+""Damage to fleet property, discharge of a projectile weapon inside a patrolled lane, and whatever the tribunal decides to call the rest of it. Settle it here for $entity.catchrelease_harpoonFineDGS credits and it goes in the file as an accident.""",,
+catchrelease_fineDemandHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Hegemony Navy. Heave to.""
+
+$PersonRank $personName works through it without looking up. ""Discharge of an unregistered device, damage to a registered hull, and an entry under 'munition, description of' that I have had to write out by hand. The schedule for all three comes to $entity.catchrelease_harpoonFineDGS credits.""
+
+$HeOrShe finally looks up. ""Pay it and the file says accident. Don't, and it says something else, and then it stops being mine.""",,
+catchrelease_fineDemandTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Tri-Tachyon corporate security. This is a billing matter.""
+
+$PersonRank $personName has the figure ready. ""Hull damage, survey time, and the recovery of a foreign object from a company vessel. $entity.catchrelease_harpoonFineDGS credits, settled now, at the pre-litigation rate.""
+
+""The post-litigation rate is not a number I am authorised to say out loud.""",,
+catchrelease_fineDemandLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Peace be with you. Cut your engines.""
+
+$PersonRank $personName looks tired rather than angry. ""A crew of ours has a hole in their ship and a story nobody believes. The Church is not interested in punishing curiosity. It is interested in the repair, which comes to $entity.catchrelease_harpoonFineDGS credits.""
+
+""Pay it, and we will both call this a lesson.""",,
+catchrelease_fineDemandLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Stop. Stop there.""
+
+The voice is young and delighted. ""You are the one with the machine that grabs. Everyone has heard. We are not supposed to want to see it.""
+
+A cough off-screen, and the delight is packed away. ""Tribute for the ship you holed. $entity.catchrelease_harpoonFineDGS credits. Then we look at your gear, and then we decide what it is.""",,
+catchrelease_fineDemandPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Hold position, friend.""
+
+$PersonName is grinning. ""Word is you put a hook in a hull. Not shot it - hooked it. Half of us want to buy you a drink and the other half want the rig.""
+
+""Neither's happening. What is happening is $entity.catchrelease_harpoonFineDGS credits, and then nobody has to find out how the rest of it goes.""",,
+catchrelease_fineDemandDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Heave to for the Sindrian Diktat.""
+
+$PersonRank $personName reads the charge as though it were a sentence. ""Discharge of an unregistered device within Diktat space, against a Diktat hull. The administrative penalty is $entity.catchrelease_harpoonFineDGS credits.""
+
+""The administrative penalty is the favourable outcome. I would take it.""",,
+catchrelease_fineDemandLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Persean League patrol. Cut your drive.""
+
+$PersonRank $personName has clearly been reading up. ""There is no statute for this. There is a statute for discharging a weapon at a member-state hull, and a separate one for damage caused by recovery equipment, and I have decided to apply both.""
+
+""$entity.catchrelease_harpoonFineDGS credits. Argue it with a committee if you like, but not with me.""",,
+catchrelease_fineDemandIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_fineConv score:1310
+$entity.catchrelease_harpoonPatrol
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""Independent patrol. Ease off.""
+
+$PersonName sounds like somebody who took this contract for the fuel allowance. ""Somebody you hooked filed with us, and filing means I have to fly out here and say a number at you. The number is $entity.catchrelease_harpoonFineDGS credits.""
+
+""Say yes and we can both go back to what we were doing.""",,
+catchrelease_fineDemandRepeat,OpenCommLink,"$entity.catchrelease_fineConv score:1400
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything.
+
+""Second one this month. There was a number attached to the first, and you will notice nobody is quoting you one now.""
+
+The link closes. Weapons come up across the formation.",,
+catchrelease_fineDemandRepeatHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""The second incident is not a fine. The second incident is a finding."" $PersonRank $personName sets the slate face down. ""Findings are executed.""",,
+catchrelease_fineDemandRepeatTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
+catchrelease_fineDemandRepeatLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName does not offer peace this time. ""We called the first one curiosity. You have been kind enough to correct us.""",,
+catchrelease_fineDemandRepeatLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","There is no greeting. Somebody laughs, once, the way you would at a door closing.",,
+catchrelease_fineDemandRepeatPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
+catchrelease_fineDemandRepeatDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_fineConv score:1410
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""You were told the penalty was the favourable outcome."" $PersonRank $personName sounds almost sorry. ""It was.""",,
+catchrelease_patrolPaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1240
+$entity.catchrelease_harpoonFineSettled
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","$PersonRank $personName checks a reference before answering properly. ""Paid and filed. You are the fishing one.""
+
+It is not clear whether that is better or worse than the alternative.",,"Paid, and still on speaking terms - so this adds a line and hands the screen to the ordinary conversation menu rather than closing it. Keyed on a second flag from the paying rule rather than the one the script reads, because that one is consumed the moment it is read and this line has to keep working afterwards."
+catchrelease_patrolUnpaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1250
+!$entity.catchrelease_harpoonFineSettled
+$entity.isHostile","ShowDefaultVisual
+EndConversation NO_CONTINUE","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,"Refused, and still angry about it. Gated on their hostility rather than on the conversation having happened, so this cannot go on refusing to talk to the player for a month after everyone involved has calmed down."
+catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),"The affordability check greys the option out and explains why, which is vanilla's own handling and better than hiding it - a player who cannot pay should still see what they could not pay. Safe in the script column because options from every matching rule are added before any of their scripts run."
+catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,"10:catchrelease_refuseFine:""We were fishing.""",
+catchrelease_finePaySel,DialogOptionSelected,$option == catchrelease_payFine,"AddRemoveCommodity credits -$entity.catchrelease_harpoonFine true
+$entity.catchrelease_harpoonFinePaid = true 1
+$entity.catchrelease_harpoonFineSettled = true 30
+$entity.catchrelease_harpoonPatrolDone = true 30
+MakeOtherFleetPreventDisengage catchreleasePatrol false
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation","""Filed and closed."" $PersonRank $personName is already looking at something else. ""Fish somewhere else.""",,"The paid flag is given a day rather than the dialog, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. A day is what vanilla gives the same handoff in the cargo scan."
+catchrelease_fineRefuseSel,DialogOptionSelected,$option == catchrelease_refuseFine,"MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation","""So was I, once."" The link closes.
+
+Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
