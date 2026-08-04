@@ -334,6 +334,11 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
      * flat distance was tuned for, and the fleet it is chasing is usually burning away from it -
      * both of which had it swinging past and coming round again.
      * <p>
+     * The speed asked for here is only ever eased onto, never taken up at once, and the margin is
+     * what settles whether those two together arrive or oscillate - see
+     * {@link RodConstants#DRONE_BRAKE_MARGIN}. Reading this on its own and picking a margin that
+     * looks brisk is how it ended up overshooting.
+     * <p>
      * Everything else keeps the flat ease-off: those fly at {@link RodConstants#DRONE_SPEED}, which
      * is the speed that distance was tuned against.
      */
