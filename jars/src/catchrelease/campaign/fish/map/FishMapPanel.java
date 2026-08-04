@@ -63,6 +63,24 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
         }
     }
 
+    /**
+     * A shaded patch of the sector, in world units: the approximate water a species is said to
+     * haunt. A region that is not one rectangle - the rim quadrants are L-shaped - arrives as
+     * several of these in the same colour.
+     */
+    public static class AreaMark {
+        public final float x, y, width, height;
+        public final Color color;
+
+        public AreaMark(float x, float y, float width, float height, Color color) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = color;
+        }
+    }
+
     public static final float GRID_SPACING = 10000f;
     public static final float ZOOM_KICK = 1.5f;
     public static final float ZOOM_DECAY = 0.85f;
@@ -87,6 +105,7 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
 
     protected List<SystemMark> systems = new ArrayList<>();
     protected List<CatchMark> catches = new ArrayList<>();
+    protected List<AreaMark> areas = new ArrayList<>();
 
     protected float worldMinX, worldMinY, worldMaxX, worldMaxY;
     protected boolean fitted = false;
@@ -103,6 +122,11 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
         this.catches = catches == null ? new ArrayList<>() : catches;
 
         measureWorld();
+    }
+
+    /** The shaded waters - usually the selected species' regions. Empty clears the shading. */
+    public void setAreas(List<AreaMark> areas) {
+        this.areas = areas == null ? new ArrayList<>() : areas;
     }
 
     /** Puts a world point in the middle of the glass, zoomed close enough to mean it. */
@@ -293,6 +317,7 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(x, y, width, height, new Color(8, 12, 20), 0.92f * alphaMult);
 
         renderGrid(x, y, width, height, alphaMult);
+        renderAreas(alphaMult);
         renderSystems(alphaMult);
         renderCatches(alphaMult);
         renderPlayer(alphaMult);
@@ -321,6 +346,23 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
         for (float wy = (float) Math.ceil(bottomWorld / GRID_SPACING) * GRID_SPACING;
                 wy <= topWorld; wy += GRID_SPACING) {
             ShopUi.drawQuad(x, Math.round(toScreenY(wy)), width, 1f, color, alpha);
+        }
+    }
+
+    /**
+     * The selected species' waters, shaded under the marks. Fill only, no outlines: an L-shaped
+     * region is drawn as two rectangles, and at one flat alpha the pieces read as one patch where
+     * outlines would draw a seam down the join. The scissor clip handles however far off the
+     * glass a region reaches.
+     */
+    protected void renderAreas(float alphaMult) {
+        for (AreaMark mark : areas) {
+            float left = toScreenX(mark.x);
+            float bottom = toScreenY(mark.y);
+            float right = toScreenX(mark.x + mark.width);
+            float top = toScreenY(mark.y + mark.height);
+
+            ShopUi.drawQuad(left, bottom, right - left, top - bottom, mark.color, 0.1f * alphaMult);
         }
     }
 
