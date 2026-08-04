@@ -386,6 +386,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
+        //the beat before the yank. The line is already being pulled straight by now, so this is the
+        //moment it comes up hard against the weight on the end of it - the same pause a mote gets
+        //between the head landing and the catch starting. Nothing is written to the fleet during
+        //it, so whatever it was doing carries on until the rope decides otherwise
+        if (stateTime < HarpoonConstants.HAUL_DELAY) return;
+
         toAnchor.normalise(toAnchor);
         pulled.setVelocity(toAnchor.x * HarpoonConstants.HAUL_SPEED,
                 toAnchor.y * HarpoonConstants.HAUL_SPEED);
