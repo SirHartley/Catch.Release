@@ -1,10 +1,10 @@
 id,baseValue,type,increasePerLevel,increaseType,maxLevel,category,description
 Example,0.5,DOUBLE,1,FLAT,5,CAMPAIGN,
-searchlight_area,350,INT,100,FLAT,3,CAMPAIGN,The radius covered by each spotlight.
+searchlight_area,240,INT,100,FLAT,3,CAMPAIGN,The radius covered by each spotlight.
 searchlight_speed,30,INT,0.2,MULT,3,CAMPAIGN,The speed the spotlight moves at.
 fishing_drone_count,1,INT,1,FLAT,3,CAMPAIGN,The number of fishing drones sent out per cast. Each one can bring back a catch.
 fishing_bar_size,120,INT,20,FLAT,4,CAMPAIGN,The size of the catch bar in the fishing minigame.
-searchlight_count,1,INT,1,FLAT,3,CAMPAIGN,How many spotlights sweep at once.
+searchlight_count,2,INT,1,FLAT,3,CAMPAIGN,How many spotlights sweep at once.
 searchlight_rare_chance,0,DOUBLE,0.05,FLAT,4,CAMPAIGN,Added chance for a rarer species to surface under the light.
 searchlight_track_time,0,DOUBLE,2,FLAT,4,CAMPAIGN,Seconds a mote stays marked after the light has passed over it.
 searchlight_identify,0,INT,1,FLAT,2,CAMPAIGN,Whether the light gives away roughly how rare what it found is.

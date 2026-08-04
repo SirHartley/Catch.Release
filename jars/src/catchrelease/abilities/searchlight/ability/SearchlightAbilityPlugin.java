@@ -148,11 +148,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     /**
      * How many lights sweep at once.
      * <p>
-     * The upgrade rather than a fixed three. Eventually this is meant to depend on what the fleet
-     * has mounted; until then it is bought, and the fallback is what it always was.
+     * Two to start with, and bought upward from there. One was too little to read as a sweep at all
+     * - a single beam crawling round a whole circle spends most of its time somewhere the player is
+     * not looking - and two smaller ones working opposite halves cover the same ground while always
+     * having something in view. Eventually this is meant to depend on what the fleet has mounted;
+     * until then it is bought, and the fallback matches the sheet.
      */
     public int getSearchlightNum(){
-        return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 3f)));
+        return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 2f)));
     }
 
     @Override

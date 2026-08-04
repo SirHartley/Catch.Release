@@ -32,7 +32,7 @@ public class Searchlight implements EveryFrameScript {
     public static final float OSCILLATION_TIME_MULT = 0.7f; //this affects how nervous the searchlights feel
 
     /** The beam's radius without a row in the upgrade sheet. */
-    public static final float AREA_FALLBACK = 350f;
+    public static final float AREA_FALLBACK = 240f;
 
     /**
      * The furthest from the fleet a light can light anything up, upgrades included.
