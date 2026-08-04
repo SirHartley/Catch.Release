@@ -50,6 +50,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         /** Coming home empty. */
         RETURNING,
         /**
+         * Home, and winding the last of the line in before it goes.
+         * <p>
+         * Arriving is not the same as being stowed. The head stops a little short of the fleet and
+         * the rope is still being taken up when it gets there, so expiring on arrival faded out a
+         * harpoon that was visibly still on a line. This is the winch finishing its job.
+         */
+        RETRACTING,
+        /**
          * Home. Nothing further happens on this line.
          * <p>
          * Needed because expiring is a fade rather than a removal: the entity stays in the location
@@ -145,6 +153,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case HELD: break;
             case REELING:
             case RETURNING: advanceHomeward(amount, fleet); break;
+            case RETRACTING: advanceRetract(amount, fleet); break;
         }
 
         //after the head has moved, so the rope is chasing this frame's ends rather than last frame's
@@ -240,17 +249,55 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         hooked = null;
     }
 
-    /** The specimen goes in the hold, if there is one on the line. */
+    /**
+     * The specimen goes in the hold, if there is one on the line, and the winch takes up the rest.
+     * <p>
+     * The catch is settled here rather than when the line is finally stowed: arriving is what earns
+     * the specimen, and holding it back until the rope was in would leave a stretch where the catch
+     * had visibly been made and nothing had been given for it.
+     */
     protected void land() {
         boolean carrying = state == State.REELING && caught != null;
 
-        //before anything else, so a frame of the fade cannot land the same specimen twice
-        state = State.DONE;
+        //before anything else, so a frame of the retract cannot land the same specimen twice
+        enter(State.RETRACTING);
 
         if (carrying) FishItems.addToPlayerCargo(caught);
 
         if (isHookedValid()) Misc.fadeAndExpire(hooked, 0.3f);
+    }
 
+    /**
+     * The last of the line, wound in before the harpoon goes.
+     * <p>
+     * Arriving used to be the end of it, and it left the head sitting the arrival distance off the
+     * fleet with rope still paid out behind it - so the thing faded out mid-haul, on a line that was
+     * still visibly a line. The head comes the rest of the way in and the rope is taken up to
+     * nothing, and only then does it go.
+     * <p>
+     * Timed out as well as measured, because both ends can move: a fleet burning away from a slow
+     * winch would otherwise be chased by a harpoon that never quite gets stowed.
+     */
+    protected void advanceRetract(float amount, CampaignFleetAPI fleet) {
+        Vector2f toFleet = Vector2f.sub(fleet.getLocation(), entity.getLocation(), null);
+        float distance = toFleet.length();
+
+        if (distance > 0.01f) {
+            toFleet.normalise(toFleet);
+            move(toFleet, Math.min(HarpoonConstants.RETURN_SPEED * amount, distance));
+        }
+
+        //the rope's middle is a weight on a spring and lags both ends, so a line can be zero length
+        //and still be drawn as a loop. It has to have caught up too before there is nothing to see
+        float slackOff = slack == null ? 0f : Misc.getDistance(slack, fleet.getLocation());
+
+        boolean stowed = distance <= HarpoonConstants.RETRACT_DONE
+                && paidOut <= HarpoonConstants.RETRACT_DONE
+                && slackOff <= HarpoonConstants.RETRACT_DONE;
+
+        if (!stowed && stateTime < HarpoonConstants.RETRACT_MAX_TIME) return;
+
+        state = State.DONE;
         expire();
     }
 
@@ -297,6 +344,21 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         if (slack == null) {
             slack = rest;
+            return;
+        }
+
+        //the winch has it under tension at this point, and a rope being hauled in does not swing.
+        //Left to the spring it rings down from underdamped, which would hold a stowed harpoon on the
+        //hull for most of a second waiting for a wobble nobody is looking at
+        if (state == State.RETRACTING) {
+            float pull = Math.min(1f, HarpoonConstants.RETRACT_SLACK_PULL * amount);
+
+            slack.x += (rest.x - slack.x) * pull;
+            slack.y += (rest.y - slack.y) * pull;
+
+            slackVelocity.x *= 1f - pull;
+            slackVelocity.y *= 1f - pull;
+
             return;
         }
 
@@ -416,7 +478,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void expire() {
-        Misc.fadeAndExpire(entity, 0.2f);
+        Misc.fadeAndExpire(entity, HarpoonConstants.RETRACT_FADE);
     }
 
     public State getState() {
