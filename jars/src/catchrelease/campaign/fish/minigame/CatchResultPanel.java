@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemPlugin;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.rendering.helper.RoundedBorder;
 import com.fs.starfarer.api.Global;
@@ -59,6 +60,9 @@ public class CatchResultPanel {
     protected final SectorEntityToken where;
     protected final FishLogEntry.Method method;
 
+    /** What else came up, if anything. Read out after the fish, since the fish is what was played. */
+    protected final String treasure;
+    protected final TreasureRarity treasureRarity;
     protected final List<Line> lines = new ArrayList<>();
 
     protected float elapsed = 0f;
@@ -92,10 +96,13 @@ public class CatchResultPanel {
     transient protected LazyFont.DrawableString recordText;
     transient protected boolean fontsChecked = false;
 
-    public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
+    public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method,
+                            String treasure, TreasureRarity treasureRarity) {
         this.entry = entry;
         this.where = where;
         this.method = method;
+        this.treasure = treasure;
+        this.treasureRarity = treasureRarity;
 
         buildLines();
     }
@@ -128,9 +135,12 @@ public class CatchResultPanel {
                 FishItemPlugin.getAberrationColor(entry.aberration)));
         lines.add(new Line("Value", Misc.getDGSCredits(entry.getValue()), Misc.getHighlightColor()));
 
-        //what else came up is not a row here - it has a card of its own, in LootResultPanel; this
-        //tally is the specimen's alone. And a record is not a row either - it is the banner over
-        //the specimen, in renderRecord
+        //after the specimen, because the specimen is what was being played for
+        if (treasure != null && treasureRarity != null) {
+            lines.add(new Line(treasureRarity.name, treasure, treasureRarity.color));
+        }
+
+        //a record is not a row of the tally - it is the banner over the specimen, in renderRecord
     }
 
     public void advance(float amount) {
