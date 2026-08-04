@@ -21,13 +21,15 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uMaskThreshold = -1;
     private transient int uSwirl = -1;
     private transient int uSwirlSpin = -1;
+    private transient int uSwirlEdge = -1;
     private transient int uMaskToFill = -1;
 
     private float maskThreshold = 0f;
 
-    /** The whirlpool, off unless a caller turns it. Twist at the drain, and the vortex's rotation. */
+    /** The eddy, off unless a caller turns it. Twist in the band, its phase, and where it starts. */
     private float swirl = 0f;
     private float swirlSpin = 0f;
+    private float swirlEdge = 0.55f;
 
     public MaskedWarpedSpriteRenderer(WarpGrid warp) {
         this.warp = warp;
@@ -38,12 +40,14 @@ public class MaskedWarpedSpriteRenderer {
     }
 
     /**
-     * Turns the whirlpool. Twist is radians at the middle of the mask; spin is how far the whole
-     * vortex has rotated - the caller's clock times its rate, fed per frame.
+     * Turns the eddy at the rim. Twist is radians at the strongest point of the band; spin is the
+     * phase of the turn, the caller's clock times its rate, fed per frame; edge is the radius the
+     * band starts at, as a fraction of the mask's radius, with the middle left alone below it.
      */
-    public void setSwirl(float twist, float spin) {
+    public void setSwirl(float twist, float spin, float edge) {
         this.swirl = twist;
         this.swirlSpin = spin;
+        this.swirlEdge = edge;
     }
 
     public void render(SpriteAPI fillSprite,
@@ -73,6 +77,7 @@ public class MaskedWarpedSpriteRenderer {
         if (uMaskThreshold >= 0) GL20.glUniform1f(uMaskThreshold, maskThreshold);
         if (uSwirl >= 0) GL20.glUniform1f(uSwirl, swirl);
         if (uSwirlSpin >= 0) GL20.glUniform1f(uSwirlSpin, swirlSpin);
+        if (uSwirlEdge >= 0) GL20.glUniform1f(uSwirlEdge, swirlEdge);
 
         // unit0 = fill
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -233,6 +238,7 @@ public class MaskedWarpedSpriteRenderer {
         uMaskThreshold = GL20.glGetUniformLocation(program, "maskThreshold");
         uSwirl = GL20.glGetUniformLocation(program, "swirl");
         uSwirlSpin = GL20.glGetUniformLocation(program, "swirlSpin");
+        uSwirlEdge = GL20.glGetUniformLocation(program, "swirlEdge");
         uMaskToFill = GL20.glGetUniformLocation(program, "maskToFill");
 
         if (uTex >= 0) GL20.glUniform1i(uTex, 0);

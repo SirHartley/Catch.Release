@@ -101,12 +101,19 @@ public class PondConstants {
     public static final float DEPTH_DRAIN = 0.08f;
 
     /**
-     * The water itself turning: radians of twist at the drain, and radians per second the whole
-     * vortex rotates. The twist is the shape and the rotation is the motion - either alone reads
-     * as a lens error rather than a whirlpool.
+     * The eddy at the rim. TWIST is radians at the strongest point of the band, RATE is how fast
+     * that turn eases one way and back, and EDGE is the radius the band starts at, as a fraction
+     * of the mask's own radius.
+     * <p>
+     * Deliberately small, and deliberately kept off the middle. The pond's surface is a hand-made
+     * sprite drifting under a warp grid, and that is what the water is meant to read as; a twist
+     * strong enough to be noticed in the centre does not sit on top of that effect, it replaces
+     * it. Held out past EDGE it is something the eye catches at the rim and not a second, louder
+     * warper fighting the first.
      */
-    public static final float POND_SWIRL_TWIST = 2.4f;
-    public static final float POND_SWIRL_RATE = 0.3f;
+    public static final float POND_SWIRL_TWIST = 0.12f;
+    public static final float POND_SWIRL_RATE = 0.25f;
+    public static final float POND_SWIRL_EDGE = 0.55f;
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
     public static final float DEPTH_REACH_FLOOR = 0.7f;
     public static final float DEPTH_FILL = 1.15f;
