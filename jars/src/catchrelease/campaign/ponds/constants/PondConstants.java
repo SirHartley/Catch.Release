@@ -15,6 +15,16 @@ public class PondConstants {
     //both where the rod ability can be used and where the camera holds onto the pond
     public static final float POND_INTERACT_RANGE_MULT = 1.5f;
 
+    /**
+     * How far inside the rim a mote is put when it spawns, as a share of it.
+     * <p>
+     * Inside rather than on it for two reasons. A mote outside the mask is culled, and one born
+     * exactly on the line could be tipped over it by its own first wander and go straight back out.
+     * And the mask is a ragged shape inscribed in a square, so the circle's own edge is mostly not
+     * drawn - a mote spawned there would appear out of nothing some way in.
+     */
+    public static final float MOTE_SPAWN_INSET = 0.85f;
+
     //camera
     /** Seconds for the focus to close most of the distance - higher is softer and slower. */
     public static final float POND_FOCUS_TIME_CONSTANT = 1f;

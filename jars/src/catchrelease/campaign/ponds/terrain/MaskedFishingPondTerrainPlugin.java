@@ -394,13 +394,19 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void spawnRandomMote() {
         Vector2f loc = entity.getLocation();
 
+        //the rim as it stands rather than as it will be: the mask is only open this far, and a mote
+        //born at the full radius while the pond was still spooling up spawned outside its own
+        //stencil - invisible from the first frame, and catchable from it too
+        float rim = entity.getRadius() * activity * PondConstants.MOTE_SPAWN_INSET;
+
         float angle = MathUtils.getRandomNumberInRange(0, 360);
-        Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle);
-        Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle - 180);
+        Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, rim, angle);
+        Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, rim, angle - 180);
         //what lives here depends on the system, and the mote carries it from here on
         SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation()))
+                new FishEntityPlugin.Params(targetLoc,
+                        PondFishSpawner.pickFishId(entity.getContainingLocation()), entity)
         );
         mote.setLocation(spawnLoc.x, spawnLoc.y);
     }
