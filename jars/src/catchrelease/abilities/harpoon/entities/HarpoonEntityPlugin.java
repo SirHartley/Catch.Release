@@ -290,13 +290,21 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return !getHauling().isEmpty();
     }
 
+    /**
+     * Every line currently hauling, found by tag.
+     * <p>
+     * By tag rather than by walking the location: this is asked from {@code isUsable}, which the
+     * ability bar polls twice a frame whether or not a harpoon has ever been fired, and the full
+     * entity list includes every asteroid in the system - a couple of thousand of them in a belt.
+     * The tagged list is normally empty and always tiny.
+     */
     protected static List<HarpoonEntityPlugin> getHauling() {
         List<HarpoonEntityPlugin> hauling = new ArrayList<>();
 
         LocationAPI location = Global.getSector().getCurrentLocation();
         if (location == null) return hauling;
 
-        for (SectorEntityToken token : new ArrayList<>(location.getAllEntities())) {
+        for (SectorEntityToken token : location.getCustomEntitiesWithTag(HarpoonConstants.TAG)) {
             if (!(token.getCustomPlugin() instanceof HarpoonEntityPlugin)) continue;
 
             HarpoonEntityPlugin harpoon = (HarpoonEntityPlugin) token.getCustomPlugin();
@@ -346,6 +354,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         //coordinates from two unrelated spaces and steering somebody towards the result
         if (struck.getContainingLocation() != entity.getContainingLocation()
                 || player.getContainingLocation() != entity.getContainingLocation()) {
+            cutLine();
+            return;
+        }
+
+        //and it has to still be the kind of thing worth pulling on. Asked once at the hit, a fleet
+        //that joined a battle or went into a jump halfway through kept having its velocity written
+        //for the rest of the haul - which is the exact state the hit test refuses to start on.
+        //isHaulable rather than canHook: canHook also refuses a fleet that already has a line on it,
+        //which by now is this one, so asking it here would cut the haul on its own flag
+        if (!isHaulable(struck)) {
             cutLine();
             return;
         }
@@ -426,13 +444,21 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * or in a battle is halfway through something that owns its position, one that is hidden or
      * despawning is not really there, and one already on a line has a rope on it.
      */
-    protected boolean canHook(CampaignFleetAPI other) {
+    public static boolean canHook(CampaignFleetAPI other) {
+        //the second half is only about picking one. A line already on a hull rules it out as a
+        //target and says nothing about whether the hull is a sane thing to be pulling on, which is
+        //why the haul itself asks the first half alone
+        return isHaulable(other)
+                && !other.getMemoryWithoutUpdate().getBoolean(HarpoonConstants.HAULED_FLAG);
+    }
+
+    /** Whether a rope makes any sense on this fleet at all, line or no line. */
+    public static boolean isHaulable(CampaignFleetAPI other) {
         if (other.isExpired() || !other.isAlive()) return false;
         if (other.isStationMode() || other.isHidden() || other.isDespawning()) return false;
         if (other.isInHyperspaceTransition()) return false;
-        if (other.getBattle() != null) return false;
 
-        return !other.getMemoryWithoutUpdate().getBoolean(HarpoonConstants.HAULED_FLAG);
+        return other.getBattle() == null;
     }
 
     /** Line pulls straight, then the catch begins. */
