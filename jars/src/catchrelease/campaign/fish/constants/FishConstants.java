@@ -412,9 +412,24 @@ public class FishConstants {
      * SURFACE_RUN is how far the mote swims once it is through.
      */
     public static final String BURIED_ENTITY_ID = "catchrelease_BuriedMote";
-    public static final int BURIED_POPULATION = 6;
-    public static final float BURIED_RANGE = 3500f;
-    public static final float BURIED_SPAWN_MIN_RANGE = 1600f;
+
+    /**
+     * How many are kept within reach at once, and the band they are seeded into.
+     * <p>
+     * The band is not written down as two distances any more. It is measured off what the lights can
+     * actually see - CLEARANCE past that, and BAND deep - because the two were set independently
+     * and disagreed: the beams reached a little over a thousand units, nothing was seeded inside
+     * sixteen hundred, and everything out to thirty-five hundred counted towards the population. So
+     * the fleet was surrounded by motes that were nearly all too far out to ever drift into a beam,
+     * and the lights found almost nothing.
+     * <p>
+     * CLEARANCE is what keeps them out of sight when they appear - a mote surfacing inside the light
+     * was not found, it was handed over - and BAND is kept shallow so the population sits where a
+     * wandering mote can still cross into a beam.
+     */
+    public static final int BURIED_POPULATION = 14;
+    public static final float BURIED_SPAWN_CLEARANCE = 160f;
+    public static final float BURIED_SPAWN_BAND = 900f;
     public static final float BURIED_CULL_RANGE = 6000f;
     public static final float BURIED_CHECK_INTERVAL = 3f;
     public static final float BURIED_SPEED = 55f;
