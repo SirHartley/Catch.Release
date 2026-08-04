@@ -8,3 +8,42 @@ catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned 
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second."" $faction.baseColor
 EndConversation NO_CONTINUE",,,"The greetingNoComms shape: say the one thing and put the encounter options back. Without EndConversation the comm session is left open with no way out of it."
+catchrelease_patrolStop,BeginFleetEncounter,"$catchrelease_harpoonPatrol score:1100
+!$catchrelease_harpoonPatrolDone
+!$isHostile","$catchrelease_harpoonPatrolDone = true 30
+MakeOtherFleetPreventDisengage catchreleasePatrol true 3
+unset $ignorePlayerCommRequests
+$catchrelease_fineConv = true 0
+AddText ""You're being hailed by the $faction $otherShipOrFleet."" $faction.baseColor
+OpenComms",,,"The patrol sent about a harpooning, arriving. Unprefixed keys because there is no active person yet at this trigger, which puts the fleet's own memory in the local scope. Marked as dealt with here rather than at the end, as the cargo scan does, so backing out of the conversation still counts as having had it."
+catchrelease_fineDemand,OpenCommLink,"$entity.catchrelease_fineConv score:1300
+!$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
+FireAll CatchReleaseFineOptions","""We have a report of a $faction hull holed by - "" $PersonRank $personName stops, checks the screen again, and continues in the voice of someone who has decided not to editorialise. "" - by a fishing implement.
+
+""Damage to fleet property, discharge of a projectile weapon inside a patrolled lane, and whatever the tribunal decides to call the rest of it. Settle it here for $entity.catchrelease_harpoonFineDGS credits and it goes in the file as an accident.""",,"The first one is a fine, not a fight. The figure and the wording of it are both computed when the patrol is dispatched and left in its memory - rules cannot do arithmetic, but they can read a number somebody left for them."
+catchrelease_fineDemandRepeat,OpenCommLink,"$entity.catchrelease_fineConv score:1400
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything.
+
+""Second one this month. There was a number attached to the first, and you will notice nobody is quoting you one now.""
+
+The link closes. Weapons come up across the formation.",,"The second inside the window has no price on it. Hostile, aggressive and unable to be disengaged from, which together are what the fleet AI reads as a fight that is going to happen."
+catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),"The affordability check greys the option out and explains why, which is vanilla's own handling and better than hiding it - a player who cannot pay should be able to see what they could not pay. Safe in the script column because options from every matching rule are added before any of their scripts run."
+catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,10:catchrelease_refuseFine:"""We were fishing.""",
+catchrelease_finePaySel,DialogOptionSelected,$option == catchrelease_payFine,"AddRemoveCommodity credits -$entity.catchrelease_harpoonFine true
+$entity.catchrelease_harpoonFinePaid = true 0
+MakeOtherFleetPreventDisengage catchreleasePatrol false
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation","""Filed and closed."" $PersonRank $personName is already looking at something else. ""Fish somewhere else.""",,"The paid flag is read back by the script that sent the patrol, which is what actually takes the harpooning off the faction's slate. Paying is the only thing that does."
+catchrelease_fineRefuseSel,DialogOptionSelected,$option == catchrelease_refuseFine,"MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation","""So was I, once."" The link closes.
+
+Across the formation, gun ports open.",,"Refusing is not an exit. The debt stands afterwards however the fight goes, which is what makes running from one a thing the faction keeps sending people about."
