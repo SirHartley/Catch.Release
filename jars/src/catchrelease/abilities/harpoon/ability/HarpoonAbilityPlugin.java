@@ -81,7 +81,28 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        return hasMoteNearby() && super.isUsable();
+        return (hasMoteNearby() || hasFleetNearby()) && super.isUsable();
+    }
+
+    /**
+     * Whether there is a hull in range, which is also something the line can be put into.
+     * <p>
+     * Only a gate on firing. Aim assist is deliberately not extended to fleets: it exists to
+     * forgive a shot at a speck that is already almost under the cursor, and a fleet is neither
+     * small nor something to be helped into hitting.
+     */
+    protected boolean hasFleetNearby() {
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null) return false;
+
+        for (CampaignFleetAPI other : fleet.getContainingLocation().getFleets()) {
+            if (other == fleet || other.isExpired()) continue;
+
+            float reach = HarpoonConstants.RANGE + other.getRadius();
+            if (Misc.getDistance(fleet.getLocation(), other.getLocation()) <= reach) return true;
+        }
+
+        return false;
     }
 
     /**
@@ -150,6 +171,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         tooltip.addPara("Fires a line at a mote. A hit drives it back and holds it on the line"
                 + " while it is played, and a landed specimen comes home on the line.", pad);
+
+        tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
+                + " heavier one takes you with it.", Misc.getGrayColor(), pad);
 
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 
