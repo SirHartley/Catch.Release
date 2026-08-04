@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.constants;
 
+import java.awt.Color;
+
 public class FishConstants {
 
     //sector regions - the inner band, measured from the sector centre. Systems inside it are CORE_*,
@@ -38,29 +40,71 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_COLUMN_GAP = 14f;
     public static final float MINIGAME_RESULT_BOX = 100f;
     public static final float MINIGAME_RESULT_BOX_PAD = 12f;
+    /** Under the box, before the name. Wider than the gaps between lines - it separates picture
+     * from tally, not one row from the next. */
+    public static final float MINIGAME_RESULT_BOX_GAP = 24f;
     public static final float MINIGAME_RESULT_TITLE_GAP = 14f;
     public static final float MINIGAME_RESULT_LINE_HEIGHT = 19f;
     public static final float MINIGAME_RESULT_LINE_DELAY = 0.24f;
     public static final float MINIGAME_RESULT_FADE = 0.15f;
-    public static final String MINIGAME_RESULT_FONT = "graphics/fonts/insignia15LTaa.fnt";
-    public static final String MINIGAME_RESULT_TITLE_FONT = "graphics/fonts/insignia21LTaa.fnt";
-    public static final float MINIGAME_RESULT_TEXT_SIZE = 15f;
-    public static final float MINIGAME_RESULT_TITLE_SIZE = 19f;
-    public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
 
     /**
-     * What a personal best is said with. The mark goes on the row that set it, the line goes at the
-     * end of the tally - one so the eye lands on the number, the other so it is stated outright.
+     * These are bitmap fonts, and every size here is the size its font was cut at. Rendered at any
+     * other size the glyphs are resampled and go soft - the title spent a while at 19 on a 21px cut,
+     * which read as blur, not as style. Change a size only together with its font.
+     */
+    public static final String MINIGAME_RESULT_FONT = "graphics/fonts/insignia15LTaa.fnt";
+    public static final String MINIGAME_RESULT_TITLE_FONT = "graphics/fonts/orbitron20aabold.fnt";
+    public static final float MINIGAME_RESULT_TEXT_SIZE = 15f;
+    public static final float MINIGAME_RESULT_TITLE_SIZE = 20f;
+
+    /**
+     * The close prompt breathes between two greys, PERIOD seconds for the full round trip - a still
+     * grey line read as a caption, and the point of it is that the card is waiting on a key. Fixed
+     * colours rather than the player's UI grey, so the dim end matches vanilla's grey and the lit
+     * end stays a step above it whatever the UI is tinted.
+     */
+    public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
+    public static final Color MINIGAME_RESULT_PROMPT_DIM = new Color(125, 125, 125);
+    public static final Color MINIGAME_RESULT_PROMPT_LIT = new Color(200, 200, 200);
+    public static final float MINIGAME_RESULT_PROMPT_PERIOD = 1f;
+
+    /**
+     * What a personal best is said with. The mark goes on the row that set it, the banner floats
+     * above the specimen - one so the eye lands on the number, the other so it is stated outright.
      * <p>
      * The mark is a bare asterisk hung MARK_GAP past the value's right edge, in the value's own
-     * colour - a footnote on the number, with the line below as the footnote's text. Anything
-     * wordier in there fought the label for the middle of the row.
+     * colour - a footnote on the number. Anything wordier in there fought the label for the middle
+     * of the row.
+     * <p>
+     * The banner is its own element rather than a row of the tally: a record is an event, and a row
+     * with an empty label read as a leftover. It sits RECORD_GAP over the box and rides a sine,
+     * BOUNCE pixels either way at RATE radians a second - gentle enough to say "look here" without
+     * shaking the readout under it.
      * <p>
      * Records are per species and measured on length, since that is what a record is about.
      */
     public static final String MINIGAME_RESULT_RECORD_MARK = "*";
     public static final float MINIGAME_RESULT_MARK_GAP = 4f;
     public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
+    public static final float MINIGAME_RESULT_RECORD_GAP = 8f;
+    public static final float MINIGAME_RESULT_RECORD_BOUNCE = 3f;
+    public static final float MINIGAME_RESULT_RECORD_BOUNCE_RATE = 4f;
+
+    /**
+     * Bubbles up the card, behind the content. The card is a readout first, so they are few, faint,
+     * and outlines rather than fills - texture, not weather. Each rises at its own speed between
+     * the two SPEEDs and sways DRIFT pixels on a sine at DRIFT_RATE radians a second, because a
+     * bubble that goes straight up reads as a particle effect rather than a bubble.
+     */
+    public static final int MINIGAME_RESULT_BUBBLES = 9;
+    public static final float MINIGAME_RESULT_BUBBLE_ALPHA = 0.1f;
+    public static final float MINIGAME_RESULT_BUBBLE_SPEED_MIN = 14f;
+    public static final float MINIGAME_RESULT_BUBBLE_SPEED_MAX = 32f;
+    public static final float MINIGAME_RESULT_BUBBLE_DRIFT = 6f;
+    public static final float MINIGAME_RESULT_BUBBLE_DRIFT_RATE = 1.2f;
+    public static final float MINIGAME_RESULT_BUBBLE_SIZE_MIN = 2f;
+    public static final float MINIGAME_RESULT_BUBBLE_SIZE_MAX = 5f;
 
     //minigame - panel. Wide enough for the playfield and its dressing, and no wider
     public static final float MINIGAME_PANEL_WIDTH = 140f;
@@ -191,6 +235,13 @@ public class FishConstants {
     public static final float MINIGAME_FRAME_PAD = 12f;
 
     /**
+     * Extra frame on the left only. With the even pad the whole read weighed right - the meter and
+     * its dressing sit on that side - so the frame gives the left the difference back without
+     * moving anything inside it.
+     */
+    public static final float MINIGAME_FRAME_EXTRA_LEFT = 10f;
+
+    /**
      * What the smallest specimen of a species is worth as a share of its base value. The largest is
      * worth twice the base before its grade is applied, so the range either side of the middle is
      * even and the base value stays the number a typical specimen fetches.
@@ -247,8 +298,10 @@ public class FishConstants {
     public static final float CELEBRATION_RING_SPACING = 5f;
     public static final float CELEBRATION_RING_WIDTH = 1f;
     public static final String CELEBRATION_TEXT = "Caught!";
+    /** A bitmap font, so SIZE has to be the 24 it was cut at - upscaled it went soft. The pop still
+     * swells past it for a moment, which is motion rather than a resting size. */
     public static final String CELEBRATION_FONT = "graphics/fonts/orbitron24aabold.fnt";
-    public static final float CELEBRATION_TEXT_SIZE = 34f;
+    public static final float CELEBRATION_TEXT_SIZE = 24f;
     public static final float CELEBRATION_TEXT_ANGLE = 12f;
     public static final float CELEBRATION_TEXT_RISE = 110f;
     public static final float CELEBRATION_POP_TIME = 0.18f;

@@ -71,10 +71,29 @@ public class CatchResultPanel {
     /** Set when the tally was skipped. Lines shown this way arrive at once, without fading in. */
     protected boolean skipped = false;
 
+    /** Whether this specimen set a personal best, from the log. Drives the mark and the banner. */
+    protected boolean record = false;
+
+    /**
+     * The bubbles drifting up the card, in panel fractions so a card that grows keeps them. Their
+     * motion is a function of {@link #elapsed} rather than state of their own, so they need no
+     * advancing and cannot drift out of step with the rest of the card.
+     */
+    protected static class Bubble {
+        float fx;
+        float startY;
+        float speed;
+        float radius;
+        float phase;
+    }
+
+    protected final List<Bubble> bubbles = new ArrayList<>();
+
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
     transient protected LazyFont.DrawableString prompt;
+    transient protected LazyFont.DrawableString recordText;
     transient protected boolean fontsChecked = false;
 
     public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method,
@@ -101,7 +120,7 @@ public class CatchResultPanel {
 
         //filed before anything is drawn, since the comparison is against what was there beforehand.
         //This is also where a species stops being unknown to the codex
-        boolean record = FishLog.record(entry, where, method);
+        record = FishLog.record(entry, where, method);
 
         if (spec != null) {
             lines.add(new Line("Species", Misc.ucFirst(spec.rarity.name().toLowerCase()), spec.rarity.color));
@@ -121,10 +140,7 @@ public class CatchResultPanel {
             lines.add(new Line(treasureRarity.name, treasure, treasureRarity.color));
         }
 
-        //last, so it lands after the number it is about rather than interrupting the tally
-        if (record) {
-            lines.add(new Line("", FishConstants.MINIGAME_RESULT_RECORD, Misc.getPositiveHighlightColor()));
-        }
+        //a record is not a row of the tally - it is the banner over the specimen, in renderRecord
     }
 
     public void advance(float amount) {
@@ -155,17 +171,26 @@ public class CatchResultPanel {
         //before anything is placed, since the fonts are what the column is measured with
         loadFonts();
         layout.fitResultContent(getContentWidth());
-        layout.centerResultContent(getContentHeight());
+        layout.centerResultContent(getContentHeight(), getRecordHeadroom());
 
         renderPanel(layout, alphaMult);
         renderBox(layout, fishSprite, alphaMult);
+        renderRecord(layout, alphaMult);
 
-        float y = layout.boxY - FishConstants.MINIGAME_RESULT_TITLE_GAP;
+        float y = layout.boxY - FishConstants.MINIGAME_RESULT_BOX_GAP;
 
         y = renderTitle(layout, y, alphaMult);
         y = renderLines(layout, y, alphaMult);
 
         renderPrompt(layout, y, alphaMult);
+    }
+
+    /** What the banner needs kept clear over the box: its gap, its text, and the top of its bounce. */
+    protected float getRecordHeadroom() {
+        if (!record || recordText == null) return 0f;
+
+        return FishConstants.MINIGAME_RESULT_RECORD_GAP + recordText.getHeight()
+                + FishConstants.MINIGAME_RESULT_RECORD_BOUNCE;
     }
 
     /**
@@ -184,6 +209,7 @@ public class CatchResultPanel {
 
         if (title != null) widest = Math.max(widest, title.getWidth());
         if (prompt != null) widest = Math.max(widest, prompt.getWidth());
+        if (recordText != null) widest = Math.max(widest, recordText.getWidth());
 
         if (font == null) return widest;
 
@@ -206,7 +232,7 @@ public class CatchResultPanel {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
         if (title != null) {
-            height += FishConstants.MINIGAME_RESULT_TITLE_GAP + title.getHeight()
+            height += FishConstants.MINIGAME_RESULT_BOX_GAP + title.getHeight()
                     + FishConstants.MINIGAME_RESULT_TITLE_GAP;
         }
 
@@ -233,7 +259,47 @@ public class CatchResultPanel {
         drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
                 Misc.getDarkPlayerColor(), 0.07f * alphaMult);
 
+        //between the field and the content, so they are texture in the card rather than on it
+        renderBubbles(layout, alphaMult);
+
         dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
+    }
+
+    /**
+     * The card's own water: a few faint outlines rising bottom to top, swaying as they go, wrapping
+     * round when they leave. Drawn from {@link #elapsed} alone - see {@link Bubble}.
+     */
+    protected void renderBubbles(FishingMinigameLayout layout, float alphaMult) {
+        if (bubbles.isEmpty()) spawnBubbles();
+
+        for (Bubble b : bubbles) {
+            float risen = (b.startY + b.speed * elapsed) % layout.panelHeight;
+
+            float x = layout.panelX + b.fx * layout.panelWidth
+                    + (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_BUBBLE_DRIFT_RATE + b.phase)
+                            * FishConstants.MINIGAME_RESULT_BUBBLE_DRIFT;
+
+            Disc.drawOutline(x, layout.panelY + risen, b.radius, Misc.getBrightPlayerColor(),
+                    FishConstants.MINIGAME_RESULT_BUBBLE_ALPHA * alphaMult, 1f);
+        }
+    }
+
+    /** Scattered once, over the whole height - so the card starts already mid-bubble, not filling up. */
+    protected void spawnBubbles() {
+        for (int i = 0; i < FishConstants.MINIGAME_RESULT_BUBBLES; i++) {
+            Bubble b = new Bubble();
+
+            //held off the edges by a share that covers the sway, so none of them leave the card
+            b.fx = MathUtils.getRandomNumberInRange(0.1f, 0.9f);
+            b.startY = MathUtils.getRandomNumberInRange(0f, FishConstants.MINIGAME_PANEL_HEIGHT);
+            b.speed = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_RESULT_BUBBLE_SPEED_MIN,
+                    FishConstants.MINIGAME_RESULT_BUBBLE_SPEED_MAX);
+            b.radius = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_RESULT_BUBBLE_SIZE_MIN,
+                    FishConstants.MINIGAME_RESULT_BUBBLE_SIZE_MAX);
+            b.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+
+            bubbles.add(b);
+        }
     }
 
     /** The bright outline just off a box and the dimmer one outside it, as the catch's panel has. */
@@ -291,13 +357,30 @@ public class CatchResultPanel {
         dress(x, y, size, size, alphaMult);
     }
 
+    /**
+     * The banner over the specimen, when this one set a record. On its own sine so it moves and the
+     * readout under it does not; the layout has already kept its headroom clear, in
+     * {@link #getRecordHeadroom()}.
+     */
+    protected void renderRecord(FishingMinigameLayout layout, float alphaMult) {
+        if (!record || recordText == null || !isComplete()) return;
+
+        float bounce = (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_RECORD_BOUNCE_RATE)
+                * FishConstants.MINIGAME_RESULT_RECORD_BOUNCE;
+
+        recordText.setBaseColor(withAlpha(Misc.getPositiveHighlightColor(), alphaMult));
+        recordText.draw(layout.getBoxCenterX(),
+                layout.boxY + layout.boxSize + FishConstants.MINIGAME_RESULT_RECORD_GAP
+                        + recordText.getHeight() + bounce);
+    }
+
     /** @return the y the next thing down should start at */
     protected float renderTitle(FishingMinigameLayout layout, float y, float alphaMult) {
         loadFonts();
         if (title == null) return y;
 
         title.setBaseColor(withAlpha(Misc.getBrightPlayerColor(), alphaMult));
-        title.draw(layout.resultX, y);
+        title.draw(layout.resultX + layout.resultWidth * 0.5f, y);
 
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
@@ -345,13 +428,21 @@ public class CatchResultPanel {
         return y;
     }
 
-    /** Said once there is nothing left to wait for, since that is the only point at which it is true. */
+    /**
+     * Said once there is nothing left to wait for, since that is the only point at which it is true.
+     * Breathes between its two greys rather than sitting still, which is what makes it read as
+     * waiting for the key rather than as one more line of the tally.
+     */
     protected void renderPrompt(FishingMinigameLayout layout, float y, float alphaMult) {
         if (!isComplete() || prompt == null) return;
 
-        prompt.setBaseColor(withAlpha(Misc.getGrayColor(),
+        float lit = 0.5f - 0.5f * (float) Math.cos(
+                elapsed * (Math.PI * 2.0) / FishConstants.MINIGAME_RESULT_PROMPT_PERIOD);
+
+        prompt.setBaseColor(withAlpha(
+                blend(FishConstants.MINIGAME_RESULT_PROMPT_DIM, FishConstants.MINIGAME_RESULT_PROMPT_LIT, lit),
                 alphaMult * FishConstants.MINIGAME_RESULT_PROMPT_ALPHA));
-        prompt.draw(layout.resultX, y - FishConstants.MINIGAME_RESULT_TITLE_GAP);
+        prompt.draw(layout.resultX + layout.resultWidth * 0.5f, y - FishConstants.MINIGAME_RESULT_TITLE_GAP);
     }
 
     /** Built on first sight rather than up front, so a line that is never shown is never made. */
@@ -380,12 +471,22 @@ public class CatchResultPanel {
             font = LazyFont.loadFont(FishConstants.MINIGAME_RESULT_FONT);
             titleFont = LazyFont.loadFont(FishConstants.MINIGAME_RESULT_TITLE_FONT);
 
+            //wrapped at the widest the card can grow, not at its floor - the wrap is also the
+            //measurement, and a title wrapped at the floor never asked for more than the floor
             title = titleFont.createText(entry.getDisplayName(), Color.WHITE,
-                    FishConstants.MINIGAME_RESULT_TITLE_SIZE, FishConstants.MINIGAME_RESULT_WIDTH);
-            title.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+                    FishConstants.MINIGAME_RESULT_TITLE_SIZE,
+                    FishConstants.MINIGAME_RESULT_MAX_WIDTH - FishConstants.MINIGAME_RESULT_PAD * 2f);
+            title.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
+            title.setAlignment(LazyFont.TextAlignment.CENTER);
 
             prompt = font.createText("Press any key", Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
-            prompt.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            prompt.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
+
+            if (record) {
+                recordText = font.createText(FishConstants.MINIGAME_RESULT_RECORD, Color.WHITE,
+                        FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+                recordText.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
+            }
         } catch (Exception e) {
             Global.getLogger(CatchResultPanel.class).warn("No font for the catch readout", e);
         }
@@ -394,6 +495,15 @@ public class CatchResultPanel {
     protected static Color withAlpha(Color color, float alpha) {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(),
                 (int) MathUtils.clamp(alpha * 255f, 0f, 255f));
+    }
+
+    protected static Color blend(Color from, Color to, float share) {
+        share = MathUtils.clamp(share, 0f, 1f);
+
+        return new Color(
+                (int) (from.getRed() + (to.getRed() - from.getRed()) * share),
+                (int) (from.getGreen() + (to.getGreen() - from.getGreen()) * share),
+                (int) (from.getBlue() + (to.getBlue() - from.getBlue()) * share));
     }
 
     protected static void drawQuad(float x, float y, float width, float height, Color color, float alpha) {
