@@ -257,6 +257,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     3f, highlight, Misc.getRoundedValue(track) + " seconds");
         }
 
+        float lock = UpgradeManager.getValue(StatIds.SEARCHLIGHT_LOCK_TIME, 0f);
+        if (lock > 0f) {
+            tooltip.addPara("A light that finds something breaks off its sweep and follows it for %s.",
+                    3f, highlight, Misc.getRoundedValue(lock) + " seconds");
+        }
+
         int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
         if (identify == 1) {
             tooltip.addPara("A mark carries some hint of how rare the thing under it is.",

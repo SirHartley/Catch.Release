@@ -1,6 +1,10 @@
 package catchrelease.abilities.searchlight.scripts;
 
 import catchrelease.helper.math.CircularArc;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.LocationAPI;
+import catchrelease.helper.math.TrigHelper;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
@@ -67,6 +71,25 @@ public class Searchlight implements EveryFrameScript {
     private boolean expired = false;
 
     /**
+     * What the beam has stopped on, how long it has left on it, and how far over it is leaning.
+     * <p>
+     * The target is transient on purpose. A lock is a second and a half of a light looking at
+     * something, and carrying a reference to a wandering mote through a save to resume that is more
+     * bookkeeping than the moment is worth - on load the light simply goes back to sweeping.
+     */
+    private transient SectorEntityToken lockTarget;
+    private float lockLeft = 0f;
+    private float lockBlend = 0f;
+    private float lockCooldown = 0f;
+
+    /** Where the held thing is, kept separately so the lean-off has somewhere to lean from. */
+    private final Vector2f lockLoc = new Vector2f();
+
+    /** Seconds spent leaning onto what it found, and the wait before it may stop for anything else. */
+    public static final float LOCK_EASE_TIME = 0.35f;
+    public static final float LOCK_COOLDOWN = 4f;
+
+    /**
      * The beam's own bend, through GraphicsLib's distortion.
      * <p>
      * Kept alive and moved rather than respawned, so it is one lens travelling with the light rather
@@ -126,16 +149,23 @@ public class Searchlight implements EveryFrameScript {
     }
 
     public void advanceMovement(float amt) {
-        oscillationTime += amt;
+        advanceLock(amt);
 
-        float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
-        float progress = arc.getTraversalProgress(baseArcAngle);
-        float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
+        //the sweep stops while the light is holding on something, rather than running on underneath
+        //it. Held, the beam is not sweeping - and coming off a lock it should carry on from where it
+        //broke off rather than from wherever the clock got to while it was looking elsewhere
+        if (lockTarget == null) {
+            oscillationTime += amt;
 
-        if (normalizedProgress > 0.99f) travelDirection *= -1; //flip dir on last percent so it doesn't go 0
+            float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
+            float progress = arc.getTraversalProgress(baseArcAngle);
+            float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
 
-        float degPerSec = arc.convertToDegreesPerSecond(speed);
-        baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
+            if (normalizedProgress > 0.99f) travelDirection *= -1; //flip dir on last percent so it doesn't go 0
+
+            float degPerSec = arc.convertToDegreesPerSecond(speed);
+            baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
+        }
 
         Vector2f basePos = arc.getPointForAngle(baseArcAngle);
 
@@ -145,7 +175,78 @@ public class Searchlight implements EveryFrameScript {
         float tangentAngle = baseArcAngle + 90f;
         Vector2f renderPos = MathUtils.getPointOnCircumference(basePos, offset, tangentAngle);
 
+        //eased both ways, so the light leans over onto what it found and leans back off it. Snapping
+        //to the mote and snapping back reads as two lights rather than one changing its mind
+        if (lockBlend > 0f) {
+            float t = TrigHelper.smootherStep(lockBlend);
+
+            renderPos = new Vector2f(
+                    renderPos.x + (lockLoc.x - renderPos.x) * t,
+                    renderPos.y + (lockLoc.y - renderPos.y) * t);
+        }
+
         updateRenderLoc(renderPos);
+    }
+
+    /**
+     * Picking something up, holding it, and letting it go again.
+     * <p>
+     * Only ever one at a time and never the instant after the last one, because a light that grabs
+     * whatever is nearest the moment it is free stops sweeping altogether in a crowded patch - it
+     * just walks from mote to mote, and the sweep is the part the player is actually playing.
+     */
+    protected void advanceLock(float amt) {
+        if (lockCooldown > 0f) lockCooldown -= amt;
+
+        if (lockTarget != null) {
+            lockLeft -= amt;
+
+            if (lockTarget.isExpired() || lockLeft <= 0f) {
+                lockTarget = null;
+                lockCooldown = LOCK_COOLDOWN;
+            } else {
+                //followed rather than pinned where it was found - the thing is swimming, and a light
+                //that stayed on the spot would lose it immediately and look like it had jammed
+                lockLoc.set(lockTarget.getLocation());
+            }
+        }
+
+        //not while still leaning off the last one, or the two blends fight over the same beam
+        if (lockTarget == null && lockBlend <= 0f && lockCooldown <= 0f) acquire();
+
+        float step = LOCK_EASE_TIME <= 0f ? 1f : amt / LOCK_EASE_TIME;
+        lockBlend = MathUtils.clamp(lockBlend + (lockTarget != null ? step : -step), 0f, 1f);
+    }
+
+    /** The nearest thing under the beam worth stopping for, if the rig has been taught to stop. */
+    protected void acquire() {
+        float lockTime = UpgradeManager.getValue(StatIds.SEARCHLIGHT_LOCK_TIME, 0f);
+        if (lockTime <= 0f) return;
+
+        if (Global.getSector() == null) return;
+        LocationAPI location = Global.getSector().getCurrentLocation();
+        if (location == null) return;
+
+        float size = getArea();
+
+        SectorEntityToken best = null;
+        float bestDistance = Float.MAX_VALUE;
+
+        for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
+            if (buried.isExpired()) continue;
+
+            float distance = Misc.getDistance(currentRenderLoc, buried.getLocation());
+            if (distance > size || distance >= bestDistance) continue;
+
+            bestDistance = distance;
+            best = buried;
+        }
+
+        if (best == null) return;
+
+        lockTarget = best;
+        lockLeft = lockTime;
+        lockLoc.set(best.getLocation());
     }
 
     /**
