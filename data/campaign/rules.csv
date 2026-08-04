@@ -1,0 +1,10 @@
+id,trigger,conditions,script,text,options,notes
+catchrelease_harpoonedComms,OpenCommLink,"$entity.catchrelease_harpooned score:1100
+!$entity.catchrelease_harpoonHostile
+!$entity.isHostile","AddText ""The link opens onto an argument already in progress. Someone reads your transponder code aloud, and someone else asks - twice, and not calmly - what exactly you thought you were fishing for."" $faction.baseColor
+$menuState = fleetConvMain 0
+FireAll PopulateOptions",,,"They will still talk, they are just going to lead with the harpoon. Scored over the vanilla greetings so this is what they open with, and it hands off to the ordinary conversation menu exactly as those greetings do - the line is the only thing that changes."
+catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
+$entity.catchrelease_harpoonHostile","ShowDefaultVisual
+AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second."" $faction.baseColor
+EndConversation NO_CONTINUE",,,"The greetingNoComms shape: say the one thing and put the encounter options back. Without EndConversation the comm session is left open with no way out of it."

@@ -4,6 +4,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.CustomRepImpact;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActionEnvelope;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
@@ -34,6 +36,25 @@ public class HarpoonOffence {
     public static final String VICTIM_FLAG = "$catchrelease_harpooned";
 
     /**
+     * How many times this particular crew has been hit, and the flag set once they stop talking.
+     * <p>
+     * Counted on the fleet rather than against the faction: the faction files paperwork, the people
+     * who were actually shot at take it personally, and it is the second harpoon in the same hull
+     * that ends the conversation - not the second one anywhere in the sector.
+     */
+    public static final String HIT_COUNT_KEY = "$catchrelease_harpoonHits";
+    public static final String HOSTILE_FLAG = "$catchrelease_harpoonHostile";
+
+    /** The one that stops being an incident and starts being a fight. */
+    public static final int HITS_BEFORE_HOSTILE = 2;
+
+    /** What the hostility flags are held under, so they lift together and on their own. */
+    public static final String REASON = "catchreleaseHarpoon";
+
+    /** Days a crew stays willing to come after the player over it. */
+    public static final float HOSTILE_DAYS = 15f;
+
+    /**
      * Reputation lost with the faction whose hull it was.
      * <p>
      * Between refusing a cargo scan and outright piracy, which is about where firing a harpoon at
@@ -62,14 +83,53 @@ public class HarpoonOffence {
         FactionAPI faction = getOffendedFaction(victim);
         if (faction == null) return false;
 
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
         //flagged before the reputation moves, so anything that reacts to the rep hit already sees a
         //fleet that knows what happened to it
-        victim.getMemoryWithoutUpdate().set(VICTIM_FLAG, true, MEMORY_DAYS);
+        mem.set(VICTIM_FLAG, true, MEMORY_DAYS);
+
+        int hits = mem.getInt(HIT_COUNT_KEY) + 1;
+        mem.set(HIT_COUNT_KEY, hits, MEMORY_DAYS);
+
+        if (hits >= HITS_BEFORE_HOSTILE) turnHostile(victim);
 
         remember(faction.getId());
         applyRepLoss(faction.getId());
 
         return true;
+    }
+
+    /**
+     * The second one in a row, from the same crew's point of view.
+     * <p>
+     * Once is an accident somebody will complain about. Twice is being shot at, and there is nothing
+     * further to discuss - they come at you, and they mean it. Aggressive as well as hostile because
+     * hostility alone only decides how they feel about a fight they happen to be in; the pair
+     * together is what vanilla's own encounter check reads as "engage regardless".
+     * <p>
+     * Marked low rep impact, because the fight that follows is one they started. The player has
+     * already paid for the harpoons in reputation twice over, and paying full price again for
+     * defending themselves against the consequence would be charging for the same act three times.
+     */
+    protected static void turnHostile(CampaignFleetAPI victim) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_HOSTILE, REASON, true, HOSTILE_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, true, HOSTILE_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, HOSTILE_DAYS);
+
+        mem.set(MemFlags.MEMORY_KEY_LOW_REP_IMPACT, true, HOSTILE_DAYS);
+
+        //on the hostility's clock rather than the harpooning's, so the line about there being
+        //nothing left to say cannot outlive the fleet's willingness to act on it. Once it lapses
+        //the crew is back to being merely furious, and the other comm line takes over
+        mem.set(HOSTILE_FLAG, true, HOSTILE_DAYS);
+    }
+
+    /** Whether this crew has given up on talking about it. */
+    public static boolean hasTurnedHostile(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(HOSTILE_FLAG);
     }
 
     /**
