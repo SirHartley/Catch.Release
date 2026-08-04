@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -105,7 +106,10 @@ public class FishMapView implements FishMapRowPlugin.Host {
                 TooltipMakerAPI.TooltipLocation.BELOW);
 
         FishRarity[] rarities = FishRarity.values();
-        float chipWidth = (innerWidth - CHIP_GAP * (rarities.length - 1)) / rarities.length;
+
+        //floored to the pixel: a chip on a fractional edge is a chip with a soft edge
+        float chipWidth = (float) Math.floor(
+                (innerWidth - CHIP_GAP * (rarities.length - 1)) / rarities.length);
 
         CustomPanelAPI chipRow = host.createCustomPanel(innerWidth, CHIP_HEIGHT,
                 new BaseCustomUIPanelPlugin() {
@@ -136,6 +140,7 @@ public class FishMapView implements FishMapRowPlugin.Host {
         shownCount = shown.size();
 
         map.setData(buildSystemMarks(shown), buildCatchMarks(shown));
+        map.setAreas(buildAreaMarks(shown));
 
         float listHeight = height - CONTROLS_HEIGHT;
         listElement = host.createUIElement(SIDEBAR_WIDTH, listHeight, true);
@@ -182,6 +187,7 @@ public class FishMapView implements FishMapRowPlugin.Host {
     @Override
     public void onRowClicked(FishSpec spec) {
         selectedId = spec.id;
+        map.setAreas(buildAreaMarks(getShown()));
 
         FishLogEntry logged = FishLog.get(spec.id);
 
@@ -291,6 +297,88 @@ public class FishMapView implements FishMapRowPlugin.Host {
         return out;
     }
 
+    /**
+     * The selected species' approximate waters, as shaded patches in its rarity's colour - only
+     * for a species whose regions the map is allowed to show, under the same gate that lights the
+     * systems. The eight geometric regions become rectangles (the rim quadrants L-shapes, so two
+     * apiece); ABYSSAL is not a place on the map and stays with its lit systems.
+     */
+    protected List<FishMapPanel.AreaMark> buildAreaMarks(List<FishSpec> shown) {
+        List<FishMapPanel.AreaMark> out = new ArrayList<>();
+        if (selectedId == null) return out;
+
+        FishSpec spec = null;
+        for (FishSpec candidate : shown) {
+            if (selectedId.equals(candidate.id)) spec = candidate;
+        }
+
+        if (spec == null || !showsRegions(spec, FishLog.isCaught(spec.id))) return out;
+
+        //the sector's reach, measured the way the map measures it, with the same breathing room
+        float minX = -90000f, minY = -55000f, maxX = 90000f, maxY = 55000f;
+        boolean any = false;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.getLocation() == null) continue;
+
+            if (!any) {
+                any = true;
+                minX = maxX = system.getLocation().x;
+                minY = maxY = system.getLocation().y;
+            }
+
+            minX = Math.min(minX, system.getLocation().x);
+            minY = Math.min(minY, system.getLocation().y);
+            maxX = Math.max(maxX, system.getLocation().x);
+            maxY = Math.max(maxY, system.getLocation().y);
+        }
+
+        minX -= 6000f;
+        minY -= 6000f;
+        maxX += 6000f;
+        maxY += 6000f;
+
+        for (SectorRegion region : spec.regions) {
+            addRegionArea(region, spec.rarity.color, minX, minY, maxX, maxY, out);
+        }
+
+        return out;
+    }
+
+    protected void addRegionArea(SectorRegion region, Color color, float minX, float minY,
+                                 float maxX, float maxY, List<FishMapPanel.AreaMark> out) {
+        float coreW = FishConstants.CORE_BAND_HALF_WIDTH;
+        float coreH = FishConstants.CORE_BAND_HALF_HEIGHT;
+
+        switch (region) {
+            case CORE_NE -> out.add(new FishMapPanel.AreaMark(0f, 0f, coreW, coreH, color));
+            case CORE_NW -> out.add(new FishMapPanel.AreaMark(-coreW, 0f, coreW, coreH, color));
+            case CORE_SE -> out.add(new FishMapPanel.AreaMark(0f, -coreH, coreW, coreH, color));
+            case CORE_SW -> out.add(new FishMapPanel.AreaMark(-coreW, -coreH, coreW, coreH, color));
+
+            case RIM_NE -> {
+                out.add(new FishMapPanel.AreaMark(coreW, 0f, maxX - coreW, maxY, color));
+                out.add(new FishMapPanel.AreaMark(0f, coreH, coreW, maxY - coreH, color));
+            }
+            case RIM_NW -> {
+                out.add(new FishMapPanel.AreaMark(minX, 0f, -coreW - minX, maxY, color));
+                out.add(new FishMapPanel.AreaMark(-coreW, coreH, coreW, maxY - coreH, color));
+            }
+            case RIM_SE -> {
+                out.add(new FishMapPanel.AreaMark(coreW, minY, maxX - coreW, -minY, color));
+                out.add(new FishMapPanel.AreaMark(0f, minY, coreW, -coreH - minY, color));
+            }
+            case RIM_SW -> {
+                out.add(new FishMapPanel.AreaMark(minX, minY, -coreW - minX, -minY, color));
+                out.add(new FishMapPanel.AreaMark(-coreW, minY, coreW, -coreH - minY, color));
+            }
+
+            case ABYSSAL -> {
+                //a property of the system, not a place - its lit systems say it already
+            }
+        }
+    }
+
     /** The ordinal of the rarity a lit colour came from, so the rarest claimant keeps the light. */
     protected int getRarityOrdinal(Color color) {
         for (FishRarity rarity : FishRarity.values()) {
@@ -369,8 +457,8 @@ public class FishMapView implements FishMapRowPlugin.Host {
                         + " to live, in the rarest claimant's colour. A pin is the exact spot a"
                         + " record specimen came out of the water.", 8f);
 
-                tooltip.addPara("Click a species to centre the map on it. Drag the map to pan,"
-                        + " scroll to zoom.", 8f);
+                tooltip.addPara("Click a species to centre the map on it and shade the waters it"
+                        + " is said to haunt. Drag the map to pan, scroll to zoom.", 8f);
 
                 if (Global.getSettings().isDevMode()) {
                     tooltip.addPara("Dev mode: everything in the table is shown, caught or not.",
