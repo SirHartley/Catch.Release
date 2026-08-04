@@ -13,6 +13,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +29,14 @@ import java.util.Map;
  */
 public class HarpoonOffence {
 
-    /** Where the record of who has been harpooned, and when, is kept between sessions. */
-    public static final String OFFENCES_KEY = "$catchrelease_harpoonOffences";
+    /**
+     * When each faction has been harpooned, kept between sessions.
+     * <p>
+     * Every incident rather than only the last one, because the question asked of it is how many
+     * there have been lately, and a single timestamp cannot answer that - overwritten by the
+     * harpooning that prompts the question, it can only ever say "just now".
+     */
+    public static final String INCIDENTS_KEY = "$catchrelease_harpoonIncidents";
 
     /**
      * The ones nobody has answered for yet, and when they happened.
@@ -171,27 +178,53 @@ public class HarpoonOffence {
 
     /** Writes down that it happened, and when, for anything that cares whether it happened before. */
     protected static void remember(String factionId) {
-        getOffences().put(factionId, Global.getSector().getClock().getTimestamp());
+        getIncidents(factionId).add(Global.getSector().getClock().getTimestamp());
     }
 
     /**
-     * Whether this faction has been harpooned before, recently enough to count as a pattern.
+     * How many harpoonings this faction has had to put up with lately.
      * <p>
-     * Asked before the current one is written down, so "again" means the one before this one.
+     * Counted after the current one is written down, so the harpooning being asked about is one of
+     * them - the second in the window is the one that means the talking is over.
      */
-    public static boolean isRepeatOffence(String factionId) {
-        Long last = getOffences().get(factionId);
-        if (last == null) return false;
+    public static int getIncidentCount(String factionId) {
+        return getIncidents(factionId).size();
+    }
 
-        return Global.getSector().getClock().getElapsedDaysSince(last) <= MEMORY_DAYS;
+    /** Whether this is not the first one they have had to deal with inside the window. */
+    public static boolean isRepeatOffence(String factionId) {
+        return getIncidentCount(factionId) > 1;
     }
 
     /** How long ago the last one was, in days, or -1 if there has not been one. */
     public static float getDaysSinceLast(String factionId) {
-        Long last = getOffences().get(factionId);
-        if (last == null) return -1f;
+        List<Long> incidents = getIncidents(factionId);
+        if (incidents.isEmpty()) return -1f;
 
-        return Global.getSector().getClock().getElapsedDaysSince(last);
+        return Global.getSector().getClock().getElapsedDaysSince(incidents.get(incidents.size() - 1));
+    }
+
+    /**
+     * This faction's incidents, with anything older than the window dropped on the way out.
+     * <p>
+     * Pruned on read rather than swept on a timer: nobody asks about a faction that has not been
+     * harpooned, so the list that needs tidying is exactly the list somebody is looking at.
+     */
+    protected static List<Long> getIncidents(String factionId) {
+        Map<String, List<Long>> all = getMap(INCIDENTS_KEY);
+
+        List<Long> incidents = all.get(factionId);
+        if (incidents == null) {
+            incidents = new ArrayList<>();
+            all.put(factionId, incidents);
+        }
+
+        Iterator<Long> it = incidents.iterator();
+        while (it.hasNext()) {
+            if (Global.getSector().getClock().getElapsedDaysSince(it.next()) > MEMORY_DAYS) it.remove();
+        }
+
+        return incidents;
     }
 
     /** Puts a harpooning on the faction's slate, where it stays until somebody answers for it. */
@@ -244,23 +277,19 @@ public class HarpoonOffence {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(VICTIM_FLAG);
     }
 
-    protected static Map<String, Long> getOffences() {
-        return getMap(OFFENCES_KEY);
-    }
-
     protected static Map<String, Long> getOutstanding() {
         return getMap(OUTSTANDING_KEY);
     }
 
-    /** A faction-to-timestamp map in the save, created on first use. */
+    /** A map in the save, keyed by faction and created on first use. */
     @SuppressWarnings("unchecked")
-    protected static Map<String, Long> getMap(String key) {
+    protected static <T> Map<String, T> getMap(String key) {
         Map<String, Object> data = Global.getSector().getPersistentData();
 
         Object stored = data.get(key);
-        if (stored instanceof Map) return (Map<String, Long>) stored;
+        if (stored instanceof Map) return (Map<String, T>) stored;
 
-        Map<String, Long> map = new HashMap<>();
+        Map<String, T> map = new HashMap<>();
         data.put(key, map);
 
         return map;
