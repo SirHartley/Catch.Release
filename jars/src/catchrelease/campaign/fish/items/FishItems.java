@@ -24,6 +24,51 @@ public class FishItems {
     /** Between specimens inside a bundle. Fields inside one are separated by {@link FishCatch#SEPARATOR}. */
     public static final String BUNDLE_SEPARATOR = ";";
 
+    /** A cargo holding only the fish and crates out of another, for handing to a picker. */
+    public static CargoAPI copyFishStacks(CargoAPI source) {
+        CargoAPI out = Global.getFactory().createCargo(true);
+        if (source == null) return out;
+
+        for (CargoStackAPI stack : source.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null) continue;
+            if (!FISH.equals(data.getId()) && !BUNDLE.equals(data.getId())) continue;
+
+            out.addItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
+        }
+
+        return out;
+    }
+
+    /** What a stack of fish is worth at base value, crates included. */
+    public static float getStackValue(CargoStackAPI stack) {
+        SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
+        if (data == null) return 0f;
+
+        if (FISH.equals(data.getId())) {
+            FishCatch entry = FishCatch.decode(data.getData());
+            return entry == null ? 0f : entry.getValue() * stack.getSize();
+        }
+
+        if (!BUNDLE.equals(data.getId())) return 0f;
+
+        float total = 0f;
+        for (FishCatch entry : decodeBundle(data.getData())) total += entry.getValue();
+
+        return total * stack.getSize();
+    }
+
+    /** How many specimens a stack of fish holds, crates included. */
+    public static int countSpecimens(CargoStackAPI stack) {
+        SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
+        if (data == null) return 0;
+
+        if (FISH.equals(data.getId())) return (int) stack.getSize();
+        if (!BUNDLE.equals(data.getId())) return 0;
+
+        return decodeBundle(data.getData()).size() * (int) stack.getSize();
+    }
+
     public static SpecialItemData toItem(FishCatch catchData) {
         return new SpecialItemData(FISH, catchData.encode());
     }
