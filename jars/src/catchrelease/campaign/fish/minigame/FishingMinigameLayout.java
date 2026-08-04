@@ -89,6 +89,26 @@ public class FishingMinigameLayout {
      * The height has to come from the readout, since only it knows its fonts and how many lines it
      * ended up with. {@code boxY} stays at its top-anchored default until this is called.
      */
+    /**
+     * Widens the readout's panel to hold something too wide for it, and puts the column back in the
+     * middle of whatever width that leaves.
+     * <p>
+     * A floor rather than a size: the panel is a fixed width for the fish that fit, and only the
+     * ones that do not get to argue with it. Capped, because the name is read off a table and a
+     * long enough one would otherwise walk the panel off the side of the screen.
+     */
+    public void fitResultContent(float contentWidth) {
+        float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
+
+        panelWidth = Math.max(FishConstants.MINIGAME_RESULT_WIDTH,
+                Math.min(wanted, FishConstants.MINIGAME_RESULT_MAX_WIDTH));
+
+        resultX = panelX + FishConstants.MINIGAME_RESULT_PAD;
+        resultWidth = panelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+
+        boxX = resultX + (resultWidth - boxSize) * 0.5f;
+    }
+
     public void centerResultContent(float contentHeight) {
         float centeredTop = panelY + (panelHeight + contentHeight) * 0.5f;
         float highestTop = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD;
