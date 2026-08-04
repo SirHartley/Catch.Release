@@ -33,14 +33,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     public static float SPOOL_UP_TIME = 1.5f; //seconds
     public static float SEARCHLIGHT_ACTIVATION_PAUSE = 1f;
 
-    /**
-     * Degrees of the forward light's wedge, measured across the fleet's nose.
-     * <p>
-     * Narrow on purpose. It is there so the water the fleet is about to cross is always lit, and a
-     * wide one wanders off the bow for most of its sweep, which is the thing it exists not to do.
-     */
-    public static float FORWARD_ARC = 50f;
-
     private float timePassed = 0f;
     private int lightsToActivate = 0;
     private boolean spoolDone = false;
@@ -90,23 +82,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float size = Searchlight.getArea();
         float radius = size * 2f;
 
-        //every angle here is measured from the fleet's nose rather than from due east - see
-        //Searchlight.getHeading(), which is what turns these into places
+        //an even share of the circle each, in the world's own degrees. A wedge reserved for straight
+        //ahead went with the heading it was measured from: with the arcs no longer turning with the
+        //hull there is no ahead to keep clear, and the light that used to hold it just swept a
+        //narrow strip of due east forever
+        float areaPerLight = 360f / lightsToActivate;
 
-        //one light keeps the water ahead, on a narrow wedge, because ahead is where the fleet is
-        //about to be and an even carve-up left the front covered only when a sweep happened to
-        //swing past it
-        searchlightArcs.add(new CircularArc(getFleet().getLocation(), radius,
-                -FORWARD_ARC * 0.5f, FORWARD_ARC * 0.5f));
-
-        //the rest share what is left of the circle behind it
-        int remaining = lightsToActivate - 1;
-        if (remaining <= 0) return;
-
-        float areaPerLight = (360f - FORWARD_ARC) / remaining;
-
-        for (int i = 0; i < remaining; i++) {
-            float minAngle = FORWARD_ARC * 0.5f + areaPerLight * i;
+        for (int i = 0; i < lightsToActivate; i++) {
+            float minAngle = areaPerLight * i;
 
             searchlightArcs.add(new CircularArc(getFleet().getLocation(), radius,
                     minAngle, minAngle + areaPerLight));
@@ -148,10 +131,10 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private void addSearchlight(){
         Searchlight searchlight = new Searchlight();
 
-        //the arcs keep a direct reference to the fleets movement vector, and the fleet itself for
-        //the heading they are measured from. Taken from the front of the list so they light up in
-        //the order they were laid out - the forward one first, since it is the one worth having
-        searchlight.init(searchlightArcs.get(0), getFleet());
+        //the arcs keep a direct reference to the fleet's own location vector, which is how a light
+        //travels with the fleet without being told to. Taken from the front so they come on in the
+        //order they were laid out, going round rather than lighting up at random
+        searchlight.init(searchlightArcs.get(0));
         searchlightArcs.remove(0);
 
         getFleet().addScript(searchlight);

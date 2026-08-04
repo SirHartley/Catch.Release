@@ -8,7 +8,6 @@ import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -87,18 +86,18 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * The fleet this light is mounted on, for the heading its arc is measured from.
+     * The arc rides the fleet's position and not its facing.
      * <p>
-     * The arc already followed the fleet around - it holds the fleet's own location vector - but its
-     * angles were degrees of the world, so a fleet turning about kept sweeping the same wedge of
-     * space it had been sweeping before it turned. A light bolted to a hull points where the hull
-     * points.
+     * Bolting the sweep to the hull's heading is the more sensible-sounding of the two, and it plays
+     * badly: a fleet under manual control turns constantly, and every correction dragged all the
+     * lights round with it, so the sweep never settled and nothing stayed lit long enough to be
+     * worth looking at. Left in the world's own degrees the lights slide along with the fleet while
+     * the patch of sky they are working stays where it was, which is what makes a sweep readable.
+     * <p>
+     * The arc holds the fleet's own location vector, so following the fleet is already its job.
      */
-    private SectorEntityToken fleet;
-
-    public void init(CircularArc circularArc, SectorEntityToken fleet) {
+    public void init(CircularArc circularArc) {
         this.arc = circularArc;
-        this.fleet = fleet;
         baseArcAngle = arc.startAngle;
         float size = getArea();
         glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
@@ -138,16 +137,12 @@ public class Searchlight implements EveryFrameScript {
         float degPerSec = arc.convertToDegreesPerSecond(speed);
         baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
 
-        //the sweep is kept in the fleet's own frame and only turned into a place at the last moment,
-        //so the light travels its arc exactly as before while the whole arc rides the heading
-        float heading = getHeading();
-
-        Vector2f basePos = arc.getPointForAngle(baseArcAngle + heading);
+        Vector2f basePos = arc.getPointForAngle(baseArcAngle);
 
         float sine = (float) Math.sin(oscillationTime * OSCILLATION_TIME_MULT);
         float offset = sine * SINE_CADENCE;
 
-        float tangentAngle = baseArcAngle + heading + 90f;
+        float tangentAngle = baseArcAngle + 90f;
         Vector2f renderPos = MathUtils.getPointOnCircumference(basePos, offset, tangentAngle);
 
         updateRenderLoc(renderPos);
@@ -182,24 +177,6 @@ public class Searchlight implements EveryFrameScript {
         if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
     }
 
-    /**
-     * Which way is forward, in world degrees.
-     * <p>
-     * The fleet's facing rather than its velocity: a fleet already turns to face where it is going,
-     * and facing keeps its last value when it stops. Velocity goes to nothing the moment the fleet
-     * does, which would swing every light back to due east each time the player took their hand off
-     * the controls.
-     */
-    protected float getHeading() {
-        return fleet == null ? 0f : fleet.getFacing();
-    }
-
-    /**
-     * Where the beam is right now, and how wide.
-     * <p>
-     * Live rather than copied - the impressions are drawn from the same vector the light moves, so
-     * a mark can never be a frame behind the beam that made it.
-     */
     public Vector2f getRenderLoc() {
         return currentRenderLoc;
     }
