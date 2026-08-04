@@ -5,7 +5,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
-import catchrelease.campaign.fish.treasure.TreasureRarity;
+import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.CatchReleaseSettings;
@@ -25,6 +25,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,6 +124,15 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
+        //a lost fish with loot in hand still has a card to read, and a card is read at the
+        //player's pace - the card asks for the key, and the key closes it
+        if (!lootAwards.isEmpty()) {
+            if (lootResult == null) lootResult = new LootResultPanel(lootAwards, true);
+
+            lootResult.advance(amount);
+            return;
+        }
+
         //a lost fish has nothing to read, so it closes itself once the result has been seen
         endLingerLeft -= amount;
         if (endLingerLeft > 0f) return;
@@ -136,7 +146,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
      */
     protected void advanceCaught(float amount) {
         if (result == null) {
-            result = new CatchResultPanel(specimen, where, method, treasureTaken, treasureRarity);
+            result = new CatchResultPanel(specimen, where, method);
+
+            if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards, false);
 
             //no centre handed over: the celebration reads it off the layout at render time, once
             //the readout has settled where its specimen actually is
@@ -146,6 +158,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
 
         result.advance(amount);
+
+        //the loot reads out after the fish - the fish is what was played, and two tallies
+        //counting over each other would be one sound played twice
+        if (lootResult != null && result.isComplete()) lootResult.advance(amount);
+
         if (celebration != null) celebration.advance(amount);
     }
 
@@ -188,11 +205,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (treasureResolved) return;
         treasureResolved = true;
 
-        MinigameTreasure treasure = minigame.getTreasure();
-        if (treasure == null || !treasure.isTaken()) return;
-
-        treasureTaken = TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle);
-        treasureRarity = treasure.rarity;
+        for (MinigameTreasure treasure : minigame.getTakenTreasures()) {
+            lootAwards.add(TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle));
+        }
     }
 
     /** Reports the outcome once, whatever route got here. */
@@ -210,6 +225,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
             if (result != null) {
                 processResultInput(event);
+                continue;
+            }
+
+            //no catch readout but a loot card up: the fish was lost with loot in hand
+            if (lootResult != null) {
+                processLootInput(event);
                 continue;
             }
 
@@ -246,8 +267,33 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         event.consume();
 
-        if (result.isComplete()) end(true);
-        else result.revealAll();
+        if (isReadoutComplete()) {
+            end(true);
+        } else {
+            result.revealAll();
+            if (lootResult != null) lootResult.revealAll();
+        }
+    }
+
+    /** Both cards, when both are up - closing mid-tally would eat the half not yet read. */
+    protected boolean isReadoutComplete() {
+        return result.isComplete() && (lootResult == null || lootResult.isComplete());
+    }
+
+    /** The loot card alone on the glass: same manners as the readout, but the fish was lost. */
+    protected void processLootInput(InputEventAPI event) {
+        if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
+            event.consume();
+            end(false);
+            return;
+        }
+
+        if (!event.isKeyDownEvent() && !event.isLMBDownEvent() && !event.isRMBDownEvent()) return;
+
+        event.consume();
+
+        if (lootResult.isComplete()) end(false);
+        else lootResult.revealAll();
     }
 
     @Override
@@ -274,6 +320,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         //centres on the card's specimen - so it has to read a settled layout, and it has to draw
         //over the card or the flourish would be buried under the thing it is pointing at
         if (result != null) result.render(layout, getFishSprite(), alphaMult);
+        if (lootResult != null) lootResult.render(layout, alphaMult);
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
