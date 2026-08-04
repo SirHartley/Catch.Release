@@ -1,4 +1,4 @@
-package catchrelease.campaign.fish.map.tab;
+package catchrelease.campaign.fish.map;
 
 import catchrelease.reflection.ReflectionUtils;
 
