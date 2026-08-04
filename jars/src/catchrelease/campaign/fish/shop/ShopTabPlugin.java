@@ -34,7 +34,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
     protected final Object id;
     protected final String label;
     protected final String iconId;
-    protected final float textSize;
     protected final boolean vertical;
     protected final Host host;
 
@@ -42,12 +41,10 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
     protected transient LazyFont.DrawableString text;
 
-    public ShopTabPlugin(Object id, String label, String iconId, float textSize, boolean vertical,
-                         Host host) {
+    public ShopTabPlugin(Object id, String label, String iconId, boolean vertical, Host host) {
         this.id = id;
         this.label = label;
         this.iconId = iconId;
-        this.textSize = textSize;
         this.vertical = vertical;
         this.host = host;
     }
@@ -82,7 +79,7 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         if (font == null) return;
 
         if (text == null) {
-            text = font.createText(label, Color.WHITE, textSize);
+            text = ShopUi.createText(font, label);
             text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 

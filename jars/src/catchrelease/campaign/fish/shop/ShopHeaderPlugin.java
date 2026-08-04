@@ -78,7 +78,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         if (font == null) return;
 
         if (title == null) {
-            title = font.createText(TITLE, Color.WHITE, 22f);
+            title = ShopUi.createText(font, TITLE);
             title.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
@@ -117,7 +117,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         int credits = purse.getCredits();
         if (creditsText == null || credits != drawnCredits) {
-            creditsText = font.createText(Misc.getDGSCredits(credits), Color.WHITE, 15f);
+            creditsText = ShopUi.createText(font, Misc.getDGSCredits(credits));
             creditsText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
             drawnCredits = credits;
         }
@@ -157,7 +157,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         Integer drawn = drawnCounts.get(rarity);
         if (drawn == null || drawn != count) {
-            LazyFont.DrawableString text = font.createText(String.valueOf(count), Color.WHITE, 15f);
+            LazyFont.DrawableString text = ShopUi.createText(font, String.valueOf(count));
             text.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
 
             counts.put(rarity, text);

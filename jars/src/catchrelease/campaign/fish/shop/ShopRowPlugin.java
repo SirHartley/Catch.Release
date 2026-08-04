@@ -33,7 +33,6 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         PositionAPI getListViewport();
     }
 
-    public static final float TEXT_SIZE = 15f;
     public static final float PIP_SIZE = 8f;
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
@@ -99,7 +98,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         if (font == null) return;
 
         if (name == null) {
-            name = font.createText(entry.getListName(), Color.WHITE, TEXT_SIZE);
+            name = ShopUi.createText(font, entry.getListName());
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
@@ -148,7 +147,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
         if (mark == null || !text.equals(markText)) {
             markText = text;
-            mark = font.createText(text, Color.WHITE, 12f);
+            mark = ShopUi.createText(font, text);
             mark.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
         }
 

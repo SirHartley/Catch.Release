@@ -93,7 +93,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         LazyFont titleFont = ShopUi.getTitleFont();
         if (titleFont != null) {
             if (name == null) {
-                name = titleFont.createText(entry.getName(), Color.WHITE, 20f);
+                name = ShopUi.createText(titleFont, entry.getName());
                 name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
@@ -125,7 +125,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
                 : "LEVEL " + level + " / " + max;
 
         if (sub == null) {
-            sub = font.createText(text, Color.WHITE, 12f);
+            sub = ShopUi.createText(font, text);
             sub.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
@@ -144,7 +144,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
                 + (entry.isFitted() ? "  -  FITTED" : "");
 
         if (sub == null) {
-            sub = font.createText(text, Color.WHITE, 12f);
+            sub = ShopUi.createText(font, text);
             sub.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
