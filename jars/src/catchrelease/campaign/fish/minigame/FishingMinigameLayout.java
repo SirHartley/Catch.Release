@@ -46,6 +46,19 @@ public class FishingMinigameLayout {
     public float boxY;
     public float boxSize;
 
+    /**
+     * The loot card's panel, off the LEFT edge - the readout's mirror. Same width, same height,
+     * same box size and the same vertical manners, so the two cards flank the catch as a pair.
+     */
+    public float lootPanelX;
+    public float lootPanelY;
+    public float lootPanelWidth;
+    public float lootPanelHeight;
+    public float lootX;
+    public float lootWidth;
+    public float lootBoxX;
+    public float lootBoxY;
+
     public FishingMinigameLayout(PositionAPI position) {
         trackWidth = FishConstants.MINIGAME_TRACK_WIDTH;
         trackHeight = FishConstants.MINIGAME_TRACK_HEIGHT;
@@ -74,6 +87,19 @@ public class FishingMinigameLayout {
         boxSize = FishConstants.MINIGAME_RESULT_BOX;
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
         boxY = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
+
+        //the mirror of the readout's panel, hung off the other side. Its right edge is the fixed
+        //one: growing wider means growing leftward, away from the catch
+        lootPanelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
+        lootPanelX = position.getX() - FishConstants.MINIGAME_RESULT_GAP - lootPanelWidth;
+        lootPanelY = position.getY();
+        lootPanelHeight = position.getHeight();
+
+        lootX = lootPanelX + FishConstants.MINIGAME_RESULT_PAD;
+        lootWidth = lootPanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+
+        lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
+        lootBoxY = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
 
         //the extra is on the frame alone - the track and meter hold their ground, the frame
         //reaches further left around them
@@ -122,6 +148,32 @@ public class FishingMinigameLayout {
         float highestTop = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - headroom;
 
         boxY = Math.min(centeredTop, highestTop) - boxSize;
+    }
+
+    /**
+     * The loot card's version of {@link #fitResultContent}: same floor, same cap, but the growth
+     * goes leftward - the card's right edge holds its distance from the catch.
+     */
+    public void fitLootContent(float contentWidth) {
+        float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
+        float right = lootPanelX + lootPanelWidth;
+
+        lootPanelWidth = Math.max(FishConstants.MINIGAME_RESULT_WIDTH,
+                Math.min(wanted, FishConstants.MINIGAME_RESULT_MAX_WIDTH));
+
+        lootPanelX = right - lootPanelWidth;
+        lootX = lootPanelX + FishConstants.MINIGAME_RESULT_PAD;
+        lootWidth = lootPanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+
+        lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
+    }
+
+    /** The loot card's version of {@link #centerResultContent}, same reasoning, its own box. */
+    public void centerLootContent(float contentHeight) {
+        float centeredTop = lootPanelY + (lootPanelHeight + contentHeight) * 0.5f;
+        float highestTop = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD;
+
+        lootBoxY = Math.min(centeredTop, highestTop) - boxSize;
     }
 
     /** Screen y of a point in the track, given as a 0..1 position from the bottom. */

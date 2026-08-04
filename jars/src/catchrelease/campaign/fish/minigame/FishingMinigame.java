@@ -59,10 +59,16 @@ public class FishingMinigame {
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
 
     /**
-     * What else is down there, if anything. Rolled once when the catch starts: treasure that could
-     * appear at any moment would be a thing to wait for rather than a thing to react to.
+     * What else is down there. The count is rolled once when the catch starts - up to
+     * {@link FishConstants#TREASURE_MAX_PER_CATCH}, usually zero - and the pieces surface one at a
+     * time: the first straight away, each later one on a clock after the previous resolved. A
+     * short catch simply ends before the late ones were due, which is what keeps a three-piece
+     * catch a long story rather than a lucky moment.
      */
     protected MinigameTreasure treasure;
+    protected final java.util.List<MinigameTreasure> takenTreasures = new java.util.ArrayList<>();
+    protected int treasuresLeft = 0;
+    protected float treasureClock = 0f;
 
     /** What is fitted. Read once when the catch starts; changing gear mid-catch is not a thing. */
     protected Tackle tackle = Tackle.NONE;
@@ -102,15 +108,25 @@ public class FishingMinigame {
     }
 
     /**
-     * What else is down there this time, if anything.
-     * <p>
-     * Rolled once at the start of a catch. Treasure that could appear at any moment would be a thing
-     * to wait for rather than a thing to react to.
+     * How much is down there this time, if anything - rolled once at the start of a catch, so
+     * treasure is something to react to rather than something to wait for. The first piece, when
+     * there is one, is on the track from the first frame; the rest are only a possibility until
+     * the catch has lasted long enough to see them.
      */
     protected void rollTreasure() {
-        treasure = TreasureRoller.rollForTreasure(tackle.treasureChanceMult)
-                ? new MinigameTreasure(TreasureRoller.rollRarity())
-                : null;
+        takenTreasures.clear();
+        treasureClock = 0f;
+        treasuresLeft = TreasureRoller.rollCount(tackle.treasureChanceMult);
+
+        treasure = spawnTreasure();
+    }
+
+    /** The next piece, if any are owed. Decrements the debt; null once it is paid. */
+    protected MinigameTreasure spawnTreasure() {
+        if (treasuresLeft <= 0) return null;
+
+        treasuresLeft--;
+        return new MinigameTreasure(TreasureRoller.rollRarity());
     }
 
     /** Puts the fish back at the start with its current numbers - for the dev controls. */
@@ -262,20 +278,39 @@ public class FishingMinigame {
     /**
      * The treasure's own clock. It neither moves nor affects the fish - taking it costs the ground
      * the bar gives up going to get it, and that is the whole of the trade.
+     * <p>
+     * A piece that resolves - taken or timed out - makes room, and the next owed piece surfaces
+     * {@link FishConstants#TREASURE_SPAWN_INTERVAL} seconds later. Timed out pieces count against
+     * the debt the same as taken ones: letting one go is a decision, not a reroll.
      */
     protected void advanceTreasure(float amount) {
-        if (treasure == null || !treasure.isActive()) return;
+        if (treasure != null && treasure.isActive()) {
+            treasure.advance(amount, covers(treasure.position));
 
-        treasure.advance(amount, covers(treasure.position));
+            if (treasure.isTaken()) takenTreasures.add(treasure);
+            if (!treasure.isActive()) treasureClock = FishConstants.TREASURE_SPAWN_INTERVAL;
+
+            return;
+        }
+
+        if (treasuresLeft <= 0) return;
+
+        treasureClock -= amount;
+        if (treasureClock <= 0f) treasure = spawnTreasure();
     }
 
     public Tackle getTackle() {
         return tackle;
     }
 
-    /** Null when there is nothing down there, which is most catches. */
+    /** The piece on the track right now - null when there is nothing down there, which is most catches. */
     public MinigameTreasure getTreasure() {
         return treasure;
+    }
+
+    /** Every piece that was actually held onto this catch, in the order it was taken. */
+    public java.util.List<MinigameTreasure> getTakenTreasures() {
+        return takenTreasures;
     }
 
     /** Where this fish would like to be next, according to its archetype. */

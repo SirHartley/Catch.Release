@@ -147,6 +147,19 @@ public class FishConstants {
      * something that happens on the way past.
      */
     public static final float TREASURE_CHANCE = 0.12f;
+
+    /**
+     * How many pieces one catch can hold, and how the count is rolled once the CHANCE gate has
+     * passed: the weights pick 1, 2 or 3, with 3 kept a story. Later pieces only ever appear
+     * SPAWN_INTERVAL seconds after the previous one resolved, so a catch has to be long as well
+     * as lucky to see them - a short fight ends before the second piece was due.
+     */
+    public static final int TREASURE_MAX_PER_CATCH = 3;
+    public static final float TREASURE_COUNT_WEIGHT_1 = 80f;
+    public static final float TREASURE_COUNT_WEIGHT_2 = 17f;
+    public static final float TREASURE_COUNT_WEIGHT_3 = 3f;
+    public static final float TREASURE_SPAWN_INTERVAL = 9f;
+
     public static final float TREASURE_POSITION_INSET = 0.18f;
     public static final float TREASURE_LIFETIME_MIN = 6f;
     public static final float TREASURE_LIFETIME_MAX = 11f;
@@ -166,6 +179,13 @@ public class FishConstants {
 
     /** Roughly what a pile of commodity treasure is worth, before the roll picks which commodity. */
     public static final float TREASURE_COMMODITY_VALUE = 2500f;
+
+    //minigame - the loot card, beside the track on the side the catch card is not
+    public static final String MINIGAME_LOOT_TITLE = "RECOVERED";
+    public static final float MINIGAME_LOOT_LINE_HEIGHT = 30f;
+    public static final float MINIGAME_LOOT_ICON = 24f;
+    public static final float MINIGAME_LOOT_ICON_GAP = 8f;
+    public static final float MINIGAME_LOOT_COUNT_GAP = 12f;
 
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */
