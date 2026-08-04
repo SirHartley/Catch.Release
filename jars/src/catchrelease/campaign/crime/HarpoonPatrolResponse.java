@@ -114,15 +114,19 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     public void advance(float amount) {
         float days = Global.getSector().getClock().convertToDays(amount);
 
+        interval.advance(days);
+        boolean tick = interval.intervalElapsed();
+
+        //ahead of the chase and not inside it, because a refusal owed to one faction must not wait
+        //on some other faction's patrol to finish flying about before it is charged for
+        if (tick) HarpoonOffence.applyDueEvasions();
+
         if (chasing != null) {
             maintainChase();
             return;
         }
 
-        interval.advance(days);
-        if (!interval.intervalElapsed()) return;
-
-        HarpoonOffence.applyDueEvasions();
+        if (!tick) return;
 
         //a chase already under way, from before this script existed
         chasing = reacquire();
