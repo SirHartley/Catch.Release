@@ -191,13 +191,47 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
                 Global.getSettings().getString("defaultFont"),
                 player.getColor(), player.getDarkUIColor(), player.getBrightUIColor());
 
-        List<ReflectionUtils.ReflectedConstructor> buttonCtors = ReflectionUtils.getConstructorsMatching(
-                template.getClass(), 2, new Class<?>[]{checkboxClass, null});
+        //the game's buttons do not take the checkbox raw: vanilla's factory reads
+        //  new n(new m(checkbox), listener)
+        //where m is the adapter the template's getRenderer() returned - the checkbox speaks one
+        //renderer dialect and the button another, and m is the translation. So the adapter route
+        //goes first, through the template renderer's own one-argument constructor; the direct
+        //route stays as the fallback for the day the adapter stops existing.
+        fishButton = null;
 
-        if (buttonCtors.isEmpty()) throw new IllegalStateException("no button constructor fits the renderer");
+        if (!renderer.getClass().equals(checkboxClass)) {
+            List<ReflectionUtils.ReflectedConstructor> wrapCtors = ReflectionUtils.getConstructorsMatching(
+                    renderer.getClass(), 1, new Class<?>[]{checkboxClass});
 
-        fishButton = (ButtonAPI) buttonCtors.get(0).newInstance(checkbox, null);
+            if (!wrapCtors.isEmpty()) {
+                Object wrapper = wrapCtors.get(0).newInstance(checkbox);
+
+                List<ReflectionUtils.ReflectedConstructor> wrapped = ReflectionUtils.getConstructorsMatching(
+                        template.getClass(), 2, new Class<?>[]{wrapper.getClass(), null});
+
+                if (!wrapped.isEmpty()) {
+                    fishButton = (ButtonAPI) wrapped.get(0).newInstance(wrapper, null);
+                }
+            }
+        }
+
+        if (fishButton == null) {
+            List<ReflectionUtils.ReflectedConstructor> direct = ReflectionUtils.getConstructorsMatching(
+                    template.getClass(), 2, new Class<?>[]{checkboxClass, null});
+
+            if (!direct.isEmpty()) {
+                fishButton = (ButtonAPI) direct.get(0).newInstance(checkbox, null);
+            }
+        }
+
+        if (fishButton == null) throw new IllegalStateException("no button constructor fits the renderer");
+
         fishButton.setChecked(false);
+
+        //the same finishing touches vanilla's factory applies, both plain API
+        fishButton.setHighlightBrightness(0.8f);
+        fishButton.setQuickMode(true);
+
         fishButton.setShortcut(Keyboard.KEY_7, true);
 
         ((UIPanelAPI) filterRow).addComponent((UIComponentAPI) fishButton)
