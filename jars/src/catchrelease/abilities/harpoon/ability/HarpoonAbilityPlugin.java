@@ -134,33 +134,11 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         //the one thing an activation can do while hauling is let go
         if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
 
-        return (hasMoteNearby() || hasFleetNearby()) && super.isUsable();
-    }
-
-    /**
-     * Whether there is a hull in range, which is also something the line can be put into.
-     * <p>
-     * Only a gate on firing. Aim assist is deliberately not extended to fleets: it exists to
-     * forgive a shot at a speck that is already almost under the cursor, and a fleet is neither
-     * small nor something to be helped into hitting.
-     * <p>
-     * Asks the same question the head will ask when it gets there. Left to its own looser test the
-     * button lit up for stations, for fleets already on somebody's line, and - worse - for hidden
-     * ones, which quietly answered a question about what is out there that the player had not been
-     * given any other way to ask.
-     */
-    protected boolean hasFleetNearby() {
-        CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return false;
-
-        for (CampaignFleetAPI other : fleet.getContainingLocation().getFleets()) {
-            if (other == fleet || !HarpoonEntityPlugin.canHook(other)) continue;
-
-            float reach = HarpoonConstants.RANGE + other.getRadius();
-            if (Misc.getDistance(fleet.getLocation(), other.getLocation()) <= reach) return true;
-        }
-
-        return false;
+        //no check on there being anything out there to hit. Missing is allowed - it is most of what
+        //aiming this thing is - and a button that only lights when something is already in range
+        //answers a question about what is out there that the player was not given any other way to
+        //ask. Charges and the rearm still gate it; being pointed at nothing does not
+        return super.isUsable();
     }
 
     /**
@@ -207,18 +185,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
                 Misc.getAngleInDegrees(from, best.getLocation()));
     }
 
-    /** No point firing into empty space - there has to be something out there to hit. */
-    protected boolean hasMoteNearby() {
-        CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return false;
-
-        for (SectorEntityToken mote : fleet.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (Misc.getDistance(fleet.getLocation(), mote.getLocation()) <= HarpoonConstants.RANGE) return true;
-        }
-
-        return false;
-    }
-
     @Override
     public void addTooltip(TooltipMakerAPI tooltip) {
         Color highlight = Misc.getHighlightColor();
@@ -233,6 +199,11 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
                 + " heavier one takes you with it.", Misc.getGrayColor(), pad);
 
+        if (UpgradeManager.isUnlocked(StatIds.HARPOON_DEEP)) {
+            tooltip.addPara("The head will go through the fabric for one a searchlight is holding.",
+                    Misc.getGrayColor(), pad);
+        }
+
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 
         tooltip.addPara("Charges: %s of %s", 3f, highlight,
@@ -244,12 +215,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isAnyHauling()) {
             tooltip.addPara("A line is out. Activate again to cut it.", highlight, pad);
-        }
-
-        //asked of both, since either is something to fire at - keyed on motes alone this said the
-        //ability could not be used while the button beside it was lit and working
-        if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby() && !hasFleetNearby()) {
-            tooltip.addPara("Nothing within range to fire at.", Misc.getNegativeHighlightColor(), pad);
         }
 
         addIncompatibleToTooltip(tooltip, false);

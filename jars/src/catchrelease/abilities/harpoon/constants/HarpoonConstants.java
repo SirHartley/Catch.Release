@@ -52,14 +52,28 @@ public class HarpoonConstants {
     /**
      * Hauling on a fleet, once one has been stuck.
      * <p>
-     * SPEED is what the losing end is dragged at. Not faster than a fleet can travel - a hard burn
-     * beats it outright - but the haul writes velocity rather than racing it, so it wins regardless.
+     * SPEED is what the losing end is dragged at, and it is meant to read as a snatch rather than a
+     * tow - the haul writes velocity rather than racing the fleet, so it does not need to be fair.
+     * DELAY is the pause between the head landing and the rope coming up hard, matched to the beat
+     * a mote gets in PUSH_TIME so both ends of the ability keep the same rhythm; the line is drawn
+     * straight through it, so the wait reads as tension rather than as nothing happening.
      * TIME caps the whole thing, so a rope tied to something that will not move lets go rather than
      * towing forever, and DONE_DISTANCE is the clearance past both hulls that counts as arrived.
      */
-    public static final float HAUL_SPEED = 260f;
+    public static final float HAUL_SPEED = 850f;
+    public static final float HAUL_DELAY = PUSH_TIME;
     public static final float HAUL_TIME = 6f;
     public static final float HAUL_DONE_DISTANCE = 60f;
+
+    /**
+     * What is left of the rope's shiver once there is a hull on the end of it.
+     * <p>
+     * A line into a fleet is under load from the moment it lands, and a cable under load does not
+     * ripple the way a line thrown at a speck does. Scaled down rather than switched off: the swing
+     * term survives, so the rope still stirs when the two ends change direction on each other,
+     * which is the only motion there is any reason to see during a haul.
+     */
+    public static final float HAUL_SHIVER = 0.3f;
 
     /**
      * How far the head has to be clear of the launcher before it can bury itself in a hull.

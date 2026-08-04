@@ -9,6 +9,8 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.abilities.BaseToggleAbility;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -22,6 +24,9 @@ import java.util.List;
 //todo make sure to manually disable this if the player upgrades it
 
 public class SearchlightAbilityPlugin extends BaseToggleAbility {
+
+    /** As the ability is keyed in data/campaign/abilities.csv, for looking the rig up off a fleet. */
+    public static final String ABILITY_ID = "catchrelease_searchlights";
 
     public static float DETECTABILITY_PERCENT = 100f;
 
@@ -44,6 +49,26 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private List<CircularArc> searchlightArcs = new ArrayList<>();
 
     private SearchlightImpressionRenderer impressionRenderer;
+
+    /**
+     * Whether the player's lights have this one, and have not yet forgotten it.
+     * <p>
+     * The only way to ask. What the lights have found is held in the impression renderer's own map
+     * rather than on the motes, because being found is a property of having looked - so anything
+     * that wants to act on it has to come through the ability that owns the renderer. False with
+     * the rig off, not fitted, or simply never having swept over the thing being asked about.
+     */
+    public static boolean isLit(SectorEntityToken mote) {
+        CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
+        if (fleet == null || mote == null) return false;
+
+        AbilityPlugin ability = fleet.getAbility(ABILITY_ID);
+        if (!(ability instanceof SearchlightAbilityPlugin)) return false;
+
+        SearchlightImpressionRenderer renderer = ((SearchlightAbilityPlugin) ability).impressionRenderer;
+
+        return renderer != null && renderer.getMarkStrength(mote) > 0f;
+    }
 
     @Override
     protected void activateImpl() {

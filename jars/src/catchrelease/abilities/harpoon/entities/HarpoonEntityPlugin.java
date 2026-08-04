@@ -1,7 +1,9 @@
 package catchrelease.abilities.harpoon.entities;
 
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -196,6 +198,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         distanceOut += getSpeed() * amount;
 
         SectorEntityToken hit = findMote();
+
+        //and, with the deep gear fitted, one still under the fabric that a light is holding. It
+        //comes through on the strike, so what is on the end of the line from here on is an ordinary
+        //surfaced mote and the catch plays out exactly as any other does
+        if (hit == null) hit = strikeBuried();
+
         if (hit != null) {
             hooked = hit;
             setHookedHeld(true);
@@ -385,6 +393,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             cutLine();
             return;
         }
+
+        //the beat before the yank. The line is already being pulled straight by now, so this is the
+        //moment it comes up hard against the weight on the end of it - the same pause a mote gets
+        //between the head landing and the catch starting. Nothing is written to the fleet during
+        //it, so whatever it was doing carries on until the rope decides otherwise
+        if (stateTime < HarpoonConstants.HAUL_DELAY) return;
 
         toAnchor.normalise(toAnchor);
         pulled.setVelocity(toAnchor.x * HarpoonConstants.HAUL_SPEED,
@@ -662,7 +676,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case PUSHING:
                 paidOut = Math.max(paidOut, distance * HarpoonConstants.LINE_PAYOUT);
                 break;
+            //a hull gets the same fast take-up a fish does. There is no PUSHING or TAUT beat on the
+            //way into a fleet - the haul starts the moment the head lands - so without naming it
+            //here the line fell to the default and wound in at the returning rate, which is slow
+            //enough that a rope into something being dragged never stopped looking loose
             case TAUT:
+            case HAULING:
                 paidOut = approach(paidOut, distance, HarpoonConstants.LINE_TAKEUP * amount);
                 break;
             default:
@@ -704,6 +723,42 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
+    }
+
+    /**
+     * A mote the head reached while it was still under the fabric, brought through by the hit.
+     * <p>
+     * Two things have to be true, and the second is the whole point of it. The deep gear has to be
+     * fitted, and a searchlight has to be holding the mote - the dent is the only thing there is to
+     * aim at, so without a light on it there is nothing to aim at and this would be a shot into
+     * blank fabric that happened to pay out. It is the light that makes the shot possible; the
+     * upgrade only makes it legal.
+     * <p>
+     * The strike unearths rather than hooking the buried entity, so nothing downstream of here has
+     * to know a mote arrived any differently to the ones that surfaced on their own. That also
+     * means the bomb is not made redundant: it opens a whole blast radius at once and this takes
+     * exactly one, at the end of a line, one shot at a time.
+     */
+    protected SectorEntityToken strikeBuried() {
+        if (!UpgradeManager.isUnlocked(StatIds.HARPOON_DEEP)) return null;
+
+        for (SectorEntityToken buried : entity.getContainingLocation()
+                .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
+
+            if (buried.isExpired()) continue;
+            if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
+
+            if (Misc.getDistance(entity.getLocation(), buried.getLocation())
+                    > HarpoonConstants.CATCH_RADIUS) {
+                continue;
+            }
+
+            if (!SearchlightAbilityPlugin.isLit(buried)) continue;
+
+            return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
+        }
+
+        return null;
     }
 
     protected SectorEntityToken findMote() {
@@ -876,7 +931,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
         float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
 
-        return MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
+        float shiver = MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
+
+        //a rope with a fleet on the end of it is a cable, not a thrown line. Held down rather than
+        //switched off: what is left is fed almost entirely by the swing term, so the line still
+        //stirs when the two ends change direction on each other and sits still when they do not
+        if (state == State.HAULING) shiver *= HarpoonConstants.HAUL_SHIVER;
+
+        return shiver;
     }
 
     protected void renderHead(float alpha) {
