@@ -52,9 +52,6 @@ public class LootResultPanel {
     protected final List<TreasureAward> awards;
     protected final List<Row> rows = new ArrayList<>();
 
-    /** Whether this card is the only one up - a lost fish, loot in hand - and so owns the prompt. */
-    protected final boolean standalone;
-
     protected float elapsed = 0f;
     protected int shown = 0;
     protected boolean skipped = false;
@@ -64,15 +61,13 @@ public class LootResultPanel {
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
-    transient protected LazyFont.DrawableString prompt;
     transient protected boolean fontsChecked = false;
 
     transient protected SpriteAPI boxSprite;
     transient protected boolean boxSpriteChecked = false;
 
-    public LootResultPanel(List<TreasureAward> awards, boolean standalone) {
+    public LootResultPanel(List<TreasureAward> awards) {
         this.awards = awards == null ? new ArrayList<>() : awards;
-        this.standalone = standalone;
 
         for (TreasureAward award : this.awards) {
             for (TreasureAward.Item item : award.items) {
@@ -120,9 +115,7 @@ public class LootResultPanel {
         float y = layout.lootBoxY - FishConstants.MINIGAME_RESULT_BOX_GAP;
 
         y = renderTitle(layout, y, alphaMult);
-        y = renderRows(layout, y, alphaMult);
-
-        renderPrompt(layout, y, alphaMult);
+        renderRows(layout, y, alphaMult);
     }
 
     /** The widest row, measured up front so the card never grows while it is being read out. */
@@ -130,7 +123,6 @@ public class LootResultPanel {
         float widest = 0f;
 
         if (title != null) widest = Math.max(widest, title.getWidth());
-        if (prompt != null) widest = Math.max(widest, prompt.getWidth());
 
         if (font == null) return widest;
 
@@ -150,7 +142,7 @@ public class LootResultPanel {
         return widest;
     }
 
-    /** Box top to prompt bottom, counted off the full list - the mirror of the readout's measure. */
+    /** Box top to last row's bottom, counted off the full list - the mirror of the readout's measure. */
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -160,10 +152,6 @@ public class LootResultPanel {
         }
 
         height += rows.size() * FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
-
-        if (standalone && prompt != null) {
-            height += FishConstants.MINIGAME_RESULT_TITLE_GAP + prompt.getHeight();
-        }
 
         return height;
     }
@@ -312,20 +300,6 @@ public class LootResultPanel {
         return y;
     }
 
-    /** Only when this card is alone on the glass - beside the readout, the readout does the asking. */
-    protected void renderPrompt(FishingMinigameLayout layout, float y, float alphaMult) {
-        if (!standalone || !isComplete() || prompt == null) return;
-
-        float lit = 0.5f - 0.5f * (float) Math.cos(
-                elapsed * (Math.PI * 2.0) / FishConstants.MINIGAME_RESULT_PROMPT_PERIOD);
-
-        prompt.setBaseColor(CatchResultPanel.withAlpha(
-                CatchResultPanel.blend(FishConstants.MINIGAME_RESULT_PROMPT_DIM,
-                        FishConstants.MINIGAME_RESULT_PROMPT_LIT, lit),
-                alphaMult * FishConstants.MINIGAME_RESULT_PROMPT_ALPHA));
-        prompt.draw(layout.lootX + layout.lootWidth * 0.5f, y - FishConstants.MINIGAME_RESULT_TITLE_GAP);
-    }
-
     /** Built on first sight rather than up front, so a row that is never shown is never made. */
     protected void build(Row row) {
         if (row.nameText != null) return;
@@ -387,9 +361,6 @@ public class LootResultPanel {
             title = titleFont.createText(FishConstants.MINIGAME_LOOT_TITLE, Color.WHITE,
                     FishConstants.MINIGAME_RESULT_TITLE_SIZE);
             title.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
-
-            prompt = font.createText("Press any key", Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
-            prompt.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
         } catch (Exception e) {
             Global.getLogger(LootResultPanel.class).warn("No font for the loot card", e);
         }

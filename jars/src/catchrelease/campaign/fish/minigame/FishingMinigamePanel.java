@@ -6,7 +6,6 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
-import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.CatchReleaseSettings;
@@ -70,13 +69,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     /** What came up alongside the fish - every piece that was held onto, resolved once at the end. */
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
-
-    /** The found-treasure card, off the left edge. Up from the moment the chest is prised out. */
-    transient protected TreasureFoundPanel treasureCard;
-
-    /** What came up alongside the fish, if anything, and what tier it was. */
-    protected String treasureTaken;
-    protected TreasureRarity treasureRarity;
     protected boolean treasureResolved = false;
 
     /** Held after a fish is lost, so the result is readable before the dialog closes itself. */
@@ -114,9 +106,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         //ahead of anything that returns early: the backing swims whether or not the catch is still on
         getWarp().advance(amount);
 
-        //likewise ahead of them: the card goes up mid-catch and stays through every ending
-        advanceTreasureCard(amount);
-
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
             return;
@@ -131,16 +120,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
-        //a lost fish with loot in hand still has a card to read, and a card is read at the
-        //player's pace - the card asks for the key, and the key closes it
-        if (!lootAwards.isEmpty()) {
-            if (lootResult == null) lootResult = new LootResultPanel(lootAwards, true);
-
-            lootResult.advance(amount);
-            return;
-        }
-
-        //a lost fish has nothing to read, so it closes itself once the result has been seen
+        //a lost fish has nothing to read - whatever was prised out went down with it - so it
+        //closes itself once the result has been seen
         endLingerLeft -= amount;
         if (endLingerLeft > 0f) return;
 
@@ -155,7 +136,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (result == null) {
             result = new CatchResultPanel(specimen, where, method);
 
-            if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards, false);
+            if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 
             //no centre handed over: the celebration reads it off the layout at render time, once
             //the readout has settled where its specimen actually is
@@ -171,34 +152,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (lootResult != null && result.isComplete()) lootResult.advance(amount);
 
         if (celebration != null) celebration.advance(amount);
-    }
-
-    /**
-     * Keeps the found-treasure card in step with the catch: up the moment the chest is prised out,
-     * and told how things ended once they have.
-     * <p>
-     * A lost fish takes the chest down with it - {@link #resolveTreasure()} never runs - and this
-     * card is the one place the player learns that, so the lost-fish linger is stretched to give
-     * the line a chance to be read. Once, not held: escape during the linger still skips out.
-     */
-    protected void advanceTreasureCard(float amount) {
-        if (treasureCard == null) {
-            MinigameTreasure treasure = minigame.getTreasure();
-            if (treasure == null || !treasure.isTaken()) return;
-
-            treasureCard = new TreasureFoundPanel(treasure.rarity);
-        }
-
-        treasureCard.advance(amount);
-
-        if (minigame.isRunning()) return;
-
-        if (minigame.isCaught()) {
-            treasureCard.setSecured();
-        } else if (!treasureCard.isLost()) {
-            treasureCard.setLost();
-            endLingerLeft = Math.max(endLingerLeft, FishConstants.TREASURE_CARD_LOST_LINGER);
-        }
     }
 
     /**
@@ -232,12 +185,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
             if (result != null) {
                 processResultInput(event);
-                continue;
-            }
-
-            //no catch readout but a loot card up: the fish was lost with loot in hand
-            if (lootResult != null) {
-                processLootInput(event);
                 continue;
             }
 
@@ -287,22 +234,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return result.isComplete() && (lootResult == null || lootResult.isComplete());
     }
 
-    /** The loot card alone on the glass: same manners as the readout, but the fish was lost. */
-    protected void processLootInput(InputEventAPI event) {
-        if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
-            event.consume();
-            end(false);
-            return;
-        }
-
-        if (!event.isKeyDownEvent() && !event.isLMBDownEvent() && !event.isRMBDownEvent()) return;
-
-        event.consume();
-
-        if (lootResult.isComplete()) end(false);
-        else lootResult.revealAll();
-    }
-
     @Override
     public void renderBelow(float alphaMult) {
     }
@@ -319,9 +250,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderFish(layout, alphaMult);
         renderTreasure(layout, alphaMult);
         renderMeter(layout, alphaMult);
-
-        //off the left edge, so it never argues with the readout or the celebration on the right
-        if (treasureCard != null) treasureCard.render(layout, alphaMult);
 
         //the readout first: rendering it is what settles the card's geometry, and the celebration
         //centres on the card's specimen - so it has to read a settled layout, and it has to draw
