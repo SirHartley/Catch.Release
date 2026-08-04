@@ -3,7 +3,9 @@ package catchrelease.abilities.searchlight.ability;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
+import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -41,6 +43,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private List<Searchlight> activeSearchlights = new ArrayList<>();
     private List<CircularArc> searchlightArcs = new ArrayList<>();
 
+    private SearchlightImpressionRenderer impressionRenderer;
+
     @Override
     protected void activateImpl() {
         timePassed = 0f;
@@ -48,6 +52,15 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
         activeSearchlights.clear();
         searchlightArcs.clear();
+
+        //one renderer for all the dents, made alongside the lights rather than inside one of them:
+        //drawn per light, a mote under two crossing beams was dented twice, at double the depth.
+        //It holds the live list, so lights arriving on the activation stagger are its problem.
+        //An old one still fading from the last toggle goes now - it would draw these same dents
+        //under the new one until its second ran out
+        if (impressionRenderer != null) impressionRenderer.fadeAndExpire(0f);
+        impressionRenderer = new SearchlightImpressionRenderer(activeSearchlights);
+        LunaCampaignRenderer.addTransientRenderer(impressionRenderer);
 
         float size = Searchlight.getArea();
         float radius = size * 2f;
@@ -141,8 +154,17 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
 
         CampaignFleetAPI fleet = getFleet();
-        expireLights(fleet != null && !fleet.getContainingLocation().isHyperspace());
+        boolean withFade = fleet != null && !fleet.getContainingLocation().isHyperspace();
+
+        expireLights(withFade);
         activeSearchlights.clear();
+
+        //the dents go on the lights' own terms - and like them, immediately when the fleet is in
+        //hyperspace, so nothing of this is left drawing out there
+        if (impressionRenderer != null) {
+            impressionRenderer.fadeAndExpire(withFade ? 1f : 0f);
+            impressionRenderer = null;
+        }
 
         cleanupImpl();
     }

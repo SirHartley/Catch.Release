@@ -475,6 +475,14 @@ public class FishConstants {
     public static final float IMPRESSION_PULSE_RATE = 2.2f;
 
     /**
+     * How far the ring leans toward the rarity's colour at the identify upgrade's first level.
+     * Partway on purpose: at 1 the ring would already be the rarity's own colour and the second
+     * level would have nothing left to sell. Far enough off the beam's orange to say "look closer",
+     * not far enough to name the tier.
+     */
+    public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.4f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad

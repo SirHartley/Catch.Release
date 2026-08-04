@@ -194,6 +194,20 @@ public class Searchlight implements EveryFrameScript {
         return fleet == null ? 0f : fleet.getFacing();
     }
 
+    /**
+     * Where the beam is right now, and how wide.
+     * <p>
+     * Live rather than copied - the impressions are drawn from the same vector the light moves, so
+     * a mark can never be a frame behind the beam that made it.
+     */
+    public Vector2f getRenderLoc() {
+        return currentRenderLoc;
+    }
+
+    public float getSize() {
+        return getArea();
+    }
+
     public void updateRenderLoc(Vector2f newLoc){
         currentRenderLoc.x = newLoc.x;
         currentRenderLoc.y = newLoc.y;
