@@ -48,13 +48,27 @@ public class RodConstants {
     /**
      * How hard a returning drone brakes, as a multiple of {@link #DRONE_STEER_RESPONSE}: it asks for
      * the closing speed that would cover what is left of the gap in that long. Lower brakes later
-     * and flies straighter, higher eases off sooner and takes the long way round.
+     * and flies straighter, higher eases off sooner and comes in gently.
      * <p>
-     * Tuned by simulating returns from 200 to 1200 units against a fleet burning away at up to 300
-     * units a second, from every start angle on the ring. This is where the path is shortest without
-     * the approach to a stationary fleet changing at all.
+     * This is a damping ratio in disguise, and that is what picks the number. The drone asks for a
+     * closing speed of {@code gap / (response * margin)} but only eases onto it, over that same
+     * response - so the gap is a mass on a spring: {@code r'' + r'/response + r/(response^2 *
+     * margin) = 0}, damping at {@code sqrt(margin) / 2}. The response cancels out of that, so how
+     * far past the fleet a drone sails is fixed by this number alone and no amount of upgraded
+     * steering will help it. The old 0.5 damped at 0.35 and overshot by about a third of whatever
+     * the gap was when braking started - fifty to seventy units on an ordinary return.
+     * <p>
+     * 4 would be critical damping and cannot overshoot at all, but it dawdles: an approach that
+     * only ever decays takes a second and a half longer to get home than it needs to. 3 damps at
+     * 0.87, where what is left of the overshoot is a couple of units - smaller than
+     * {@link #DRONE_ARRIVAL_DISTANCE}, so the drone is home and gone before it could be seen.
+     * Simulated across the upgrade range, fleets burning off at up to 300, gaps from 200 to 2000
+     * and down to twenty frames a second: nothing crosses.
+     * <p>
+     * Tuning this for the shortest path is what got it wrong before: the shortest path to a point
+     * you are allowed to fly past is always the one that brakes latest.
      */
-    public static final float DRONE_BRAKE_MARGIN = 0.5f;
+    public static final float DRONE_BRAKE_MARGIN = 3f;
 
     /** Sideways drift in world units per second, and how quickly it wanders. */
     public static final float DRONE_NOISE_STRENGTH = 40f;
@@ -98,8 +112,10 @@ public class RodConstants {
     public static final float DRONE_SETTLE_RESPONSE = 1.2f;
 
     /**
-     * How much faster a returning drone gets per second on the way home, and the ceiling on it. The
-     * slowing distance still applies at the end, so it arrives rather than overshooting the fleet.
+     * How much faster a returning drone gets per second on the way home, and the ceiling on it.
+     * {@link #DRONE_SLOWING_DISTANCE} is not what stops it - a returning drone brakes off the gap
+     * instead, see {@link #DRONE_BRAKE_MARGIN} - and the faster it has wound up to, the further out
+     * that braking starts.
      */
     public static final float DRONE_RETURN_ACCELERATION = 0.2f;
     public static final float DRONE_RETURN_MAX_MULT = 3.5f;
