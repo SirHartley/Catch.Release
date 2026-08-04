@@ -18,10 +18,19 @@ scrapped
 ---------------------
 
 ai_
-A fleet that's harpooned twice in a row should turn hostile and engage the player in combat (reduced_rep_impact). Add a fitting dialogue text when the player opnes comms.
-
 Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
+
+---------------------
+
+qa round 2_
+
+Pond
+- "swirl" renderer / warp is way too pronounced and appears to have supplanted the original warper. Restore the original for now, we'll see if the new mote behaviour is sufficient.
+- top & bottom boundary of the viewport snapper are once gain broken, this is a clear regression?
+
+Mote behaviour
+- Movement modes for motes made uncommon ones super easy to catch with the harpoon, way easier than the common ones
 
 ---------------------
 

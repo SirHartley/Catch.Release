@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.CatchReleaseSettings;
@@ -63,6 +64,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     /** The readout of what was caught. Up until the player dismisses it. */
     transient protected CatchResultPanel result;
+
+    /** The receipt for what else came up, on the readout's other side. Null when nothing was. */
+    transient protected LootResultPanel lootResult;
+
+    /** What came up alongside the fish - every piece that was held onto, resolved once at the end. */
+    protected final List<TreasureAward> lootAwards = new ArrayList<>();
 
     /** The found-treasure card, off the left edge. Up from the moment the chest is prised out. */
     transient protected TreasureFoundPanel treasureCard;

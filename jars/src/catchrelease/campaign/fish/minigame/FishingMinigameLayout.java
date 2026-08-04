@@ -46,6 +46,15 @@ public class FishingMinigameLayout {
     public float boxY;
     public float boxSize;
 
+    public float lootPanelX;
+    public float lootPanelY;
+    public float lootPanelWidth;
+    public float lootPanelHeight;
+    public float lootX;
+    public float lootWidth;
+    public float lootBoxX;
+    public float lootBoxY;
+
     /**
      * The found-treasure card's panel, off the left edge - the readout's mirror, with its own
      * fields because the two can be up at once and each fits itself to its own content.
@@ -207,4 +216,31 @@ public class FishingMinigameLayout {
     public float getBoxCenterY() {
         return boxY + boxSize * 0.5f;
     }
+
+    /**
+     * The loot card's version of {@link #fitResultContent}: same floor, same cap, but the growth
+     * goes leftward - the card's right edge holds its distance from the catch.
+     */
+    public void fitLootContent(float contentWidth) {
+        float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
+        float right = lootPanelX + lootPanelWidth;
+
+        lootPanelWidth = Math.max(FishConstants.MINIGAME_RESULT_WIDTH,
+                Math.min(wanted, FishConstants.MINIGAME_RESULT_MAX_WIDTH));
+
+        lootPanelX = right - lootPanelWidth;
+        lootX = lootPanelX + FishConstants.MINIGAME_RESULT_PAD;
+        lootWidth = lootPanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+
+        lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
+    }
+
+    /** The loot card's version of {@link #centerResultContent}, same reasoning, its own box. */
+    public void centerLootContent(float contentHeight) {
+        float centeredTop = lootPanelY + (lootPanelHeight + contentHeight) * 0.5f;
+        float highestTop = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD;
+
+        lootBoxY = Math.min(centeredTop, highestTop) - boxSize;
+    }
+
 }
