@@ -9,6 +9,8 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.renderers.RippleRingRenderer;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.abilities.searchlight.rendering.SearchlightBurnRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -57,7 +59,21 @@ public class Searchlight implements EveryFrameScript {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, AREA_FALLBACK);
     }
 
-    private SearchlightGlowRenderer glow;
+    /**
+     * The two faces a light can wear, and both transient for the same reason.
+     * <p>
+     * Either is registered with LunaCampaignRenderer's transient list, which does not survive a
+     * load. Written into the save, a renderer comes back as an orphan: a live object nothing draws,
+     * with the field it lives in non-null, so the rebuild never fires and the beam is simply
+     * invisible for the rest of the session. Null on load instead, and {@link #advanceLook()} builds
+     * whichever one is wanted on the first frame that wants it.
+     */
+    private transient SearchlightGlowRenderer glow;
+    private transient SearchlightBurnRenderer burn;
+
+    /** Seconds one face takes to hand over to the other when the fleet crosses. */
+    public static final float LOOK_SWAP_FADE = 1f;
+
     private final List<RippleRingRenderer> rings = new ArrayList<>();
     private final Vector2f currentRenderLoc = new Vector2f();
 
@@ -122,10 +138,11 @@ public class Searchlight implements EveryFrameScript {
     public void init(CircularArc circularArc) {
         this.arc = circularArc;
         baseArcAngle = arc.startAngle;
-        float size = getArea();
-        glow = new SearchlightGlowRenderer(currentRenderLoc, size, COLOR);
 
-        LunaCampaignRenderer.addTransientRenderer(glow);
+        //picks the face for where the fleet already is, so a light switched on in hyperspace is
+        //born a burn rather than flashing orange for a frame and then correcting itself
+        advanceLook();
+
         Global.getSoundPlayer().playSound("catchrelease_ui_searchlight_toggle", 1.1f, 1.3f, arc.getPointForAngle(baseArcAngle), new Vector2f(0,0));
     }
 
@@ -134,13 +151,17 @@ public class Searchlight implements EveryFrameScript {
         if (expired || arc == null) return;
 
         advanceMovement(amt);
+        advanceLook();
         advanceLens();
 
         // splash
         ringInterval.advance(amt);
         if (ringInterval.intervalElapsed()) {
             float size = getArea();
-            RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size, COLOR);
+            //a splash takes the colour of the surface it lands on - orange light on the fabric,
+            //the rim's own colour on a burn
+            RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size,
+                    burn != null ? SearchlightBurnRenderer.RING_COLOR : COLOR);
             rings.add(ring);
             LunaCampaignRenderer.addTransientRenderer(ring);
         }
@@ -186,6 +207,54 @@ public class Searchlight implements EveryFrameScript {
         }
 
         updateRenderLoc(renderPos);
+    }
+
+    /**
+     * Which face the light wears where the fleet is standing: the beam, or the burn.
+     * <p>
+     * Checked every frame rather than once, because with the burn-through bought the ability stays
+     * on across a jump - the look has to follow the fleet through, not the toggle. The old face
+     * fades on its way out rather than vanishing, and a face that has faded is done for good, so
+     * coming back means building a fresh one - which also replays the glow's switch-on flash, and a
+     * light re-lighting as it comes out of hyperspace is the right thing for it to do.
+     * <p>
+     * This is also what heals a load mid-burn: the burn is transient, so it comes back null, and
+     * the first frame out here simply makes another.
+     */
+    protected void advanceLook() {
+        if (isBurning()) {
+            if (glow != null) {
+                glow.fadeAndExpire(LOOK_SWAP_FADE);
+                glow = null;
+            }
+            if (burn == null) {
+                burn = new SearchlightBurnRenderer(currentRenderLoc, getArea());
+                LunaCampaignRenderer.addTransientRenderer(burn);
+            }
+        } else {
+            if (burn != null) {
+                burn.fadeAndExpire(LOOK_SWAP_FADE);
+                burn = null;
+            }
+            if (glow == null) {
+                glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
+                LunaCampaignRenderer.addTransientRenderer(glow);
+            }
+        }
+    }
+
+    /**
+     * Whether this light should be a burn rather than a beam. Both halves are required: the
+     * upgrade alone changes nothing at home, and hyperspace without it never gets a running light
+     * to ask - the ability refuses to run there.
+     */
+    protected boolean isBurning() {
+        if (!SearchlightAbilityPlugin.burnsIntoHyperspace()) return false;
+
+        if (Global.getSector() == null) return false;
+        LocationAPI location = Global.getSector().getCurrentLocation();
+
+        return location != null && location.isHyperspace();
     }
 
     /**
@@ -295,6 +364,12 @@ public class Searchlight implements EveryFrameScript {
         float fadeSeconds = withFade ? 1f : 0f;
         for (RippleRingRenderer ring : rings) ring.fadeAndExpire(fadeSeconds);
         if (glow != null) glow.fadeAndExpire(fadeSeconds);
+
+        //the burn goes the way the glow goes - it is the same light in different clothes
+        if (burn != null) {
+            burn.fadeAndExpire(fadeSeconds);
+            burn = null;
+        }
 
         rings.clear();
 
