@@ -101,7 +101,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null) return;
 
-        if (level > 0 && fleet.getContainingLocation() != null && fleet.getContainingLocation().isHyperspace()) {
+        if (level > 0 && !canRunHere(fleet)) {
             deactivate();
             return;
         }
@@ -141,6 +141,25 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         activeSearchlights.add(searchlight);
     }
 
+    /**
+     * Whether the lights will run where the fleet is standing.
+     * <p>
+     * They will not go into hyperspace on their own - there is nothing out there for an ordinary
+     * beam to find, and lighting up the deep for no reason is only a way to be seen. Bought, the
+     * rig burns through instead of shining across, which is what makes the trip worth making.
+     */
+    public static boolean canRunHere(CampaignFleetAPI fleet) {
+        if (fleet == null || fleet.getContainingLocation() == null) return true;
+        if (!fleet.getContainingLocation().isHyperspace()) return true;
+
+        return burnsIntoHyperspace();
+    }
+
+    /** Whether the burn-through has been fitted. */
+    public static boolean burnsIntoHyperspace() {
+        return UpgradeManager.getValue(StatIds.SEARCHLIGHT_HYPERSPACE, 0f) > 0f;
+    }
+
     private void expireLights(boolean withFade){
         for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
     }
@@ -165,7 +184,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
 
         CampaignFleetAPI fleet = getFleet();
-        boolean withFade = fleet != null && !fleet.getContainingLocation().isHyperspace();
+        boolean withFade = fleet != null && canRunHere(fleet);
 
         expireLights(withFade);
         activeSearchlights.clear();
@@ -285,10 +304,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         CampaignFleetAPI fleet = getFleet();
 
-        if (!fleet.isAIMode() &&
-                fleet.getContainingLocation() != null && fleet.getContainingLocation().isHyperspace()) {
-            return false;
-        }
+        if (!fleet.isAIMode() && !canRunHere(fleet)) return false;
 
         return true;
     }

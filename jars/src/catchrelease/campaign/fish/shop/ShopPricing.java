@@ -68,9 +68,16 @@ public class ShopPricing {
         int tier = Math.max(0, stat.level);
         boolean last = stat.maxLevel > 0 && stat.level == stat.maxLevel - 1;
 
-        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
+        double mult = stat.costMult <= 0d ? 1d : stat.costMult;
 
-        return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
+        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier) * mult));
+
+        //a dear one is asked for in fish as well as in credits, since fish are what the shop really
+        //trades in - priced only in credits, the expensive upgrades are the ones a rich player skips
+        //the interesting half of
+        int askTier = tier + (mult >= 8d ? 2 : mult >= 2d ? 1 : 0);
+
+        return new Price(credits, generate(rngFor(stat.id, tier), askTier, last));
     }
 
     /** A module's one price. Emptying the slot is free. */

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.spawner;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
@@ -59,7 +60,12 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         if (!interval.intervalElapsed()) return;
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
-        if (fleet == null || fleet.isInHyperspace()) return;
+        if (fleet == null) return;
+
+        //nothing is buried out in the deep until the rig can burn through to it. Seeding it anyway
+        //would leave a population nobody has any way of finding, and then hand the whole standing
+        //stock over at once the moment somebody bought the upgrade
+        if (fleet.isInHyperspace() && !SearchlightAbilityPlugin.burnsIntoHyperspace()) return;
 
         LocationAPI location = fleet.getContainingLocation();
         if (location == null) return;

@@ -21,7 +21,8 @@ public class StatIds {
             SEARCHLIGHT_RARE_CHANCE = "searchlight_rare_chance",
             SEARCHLIGHT_TRACK_TIME = "searchlight_track_time",
             SEARCHLIGHT_LOCK_TIME = "searchlight_lock_time",
-            SEARCHLIGHT_IDENTIFY = "searchlight_identify";
+            SEARCHLIGHT_IDENTIFY = "searchlight_identify",
+            SEARCHLIGHT_HYPERSPACE = "searchlight_hyperspace";
 
     //drones
     public static final String

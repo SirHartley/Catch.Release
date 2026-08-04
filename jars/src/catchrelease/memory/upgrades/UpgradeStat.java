@@ -32,6 +32,15 @@ public class UpgradeStat {
     public String description;
     public Category category = Category.CAMPAIGN;
 
+    /**
+     * What this one costs over the ordinary ladder, for the few that are meant to be a decision.
+     * <p>
+     * One by default, so a row that says nothing is priced exactly as it was. It exists because the
+     * ladder prices a rung by how many rungs came before it, which has nothing to say about an
+     * upgrade that has a single rung and changes where the fleet can fish.
+     */
+    public double costMult = 1d;
+
     public int level = 0;
 
     private int getClampedLevel() {
