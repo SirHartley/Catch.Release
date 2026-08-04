@@ -23,6 +23,19 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_GAP = 26f;
     public static final float MINIGAME_RESULT_WIDTH = 210f;
     public static final float MINIGAME_RESULT_PAD = 16f;
+
+    /**
+     * WIDTH is the width the card would like to be; these are what happens when it cannot have it.
+     * <p>
+     * Species names come off a table any mod can add rows to, and the long ones ran off the card.
+     * So the width is a floor and the card grows to fit what is actually in it, up to MAX_WIDTH -
+     * without a ceiling a long enough name would walk the card off the side of the screen.
+     * <p>
+     * COLUMN_GAP is the least space left between a row's label and its value, which are drawn to
+     * opposite edges and would otherwise meet in the middle on a wide enough pair.
+     */
+    public static final float MINIGAME_RESULT_MAX_WIDTH = 400f;
+    public static final float MINIGAME_RESULT_COLUMN_GAP = 14f;
     public static final float MINIGAME_RESULT_BOX = 100f;
     public static final float MINIGAME_RESULT_BOX_PAD = 12f;
     public static final float MINIGAME_RESULT_TITLE_GAP = 14f;

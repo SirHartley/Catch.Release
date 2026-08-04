@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.entities;
 
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -56,13 +57,32 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private float slowLeft = 0f;
     private float slowStrength = 0f;
 
+    /**
+     * The rupture this one came out of, so it can tell when it has left it.
+     * <p>
+     * Carried rather than looked up: a system can hold more than one pond, and a mote that asked the
+     * location which pond it was near would be answered by whichever happened to be closest - so one
+     * pond would end up culling another's motes as it closed.
+     */
+    private SectorEntityToken pond;
+
     public static class Params {
         public final Vector2f target;
         public final String fishId;
+        public final SectorEntityToken pond;
 
+        /**
+         * For a mote that belongs to no rupture - one shaken loose by a bomb, or unearthed. Nothing
+         * bounds it, because there is no mask it could be said to have left.
+         */
         public Params(Vector2f target, String fishId) {
+            this(target, fishId, null);
+        }
+
+        public Params(Vector2f target, String fishId, SectorEntityToken pond) {
             this.target = target;
             this.fishId = fishId;
+            this.pond = pond;
         }
     }
 
@@ -98,6 +118,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         Params p = (Params) params;
         this.target = p.target;
         this.fishId = p.fishId;
+        this.pond = p.pond;
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
@@ -140,6 +161,30 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         );
 
         entity.setLocation(next.x, next.y);
+
+        if (hasLeftThePond()) Misc.fadeAndExpire(entity);
+    }
+
+    /**
+     * Whether it has drifted out of the rupture it came from.
+     * <p>
+     * The mask is what makes a mote visible and not what makes one real. Outside it a mote carries
+     * on drifting, unseen, and stays exactly as catchable as it ever was - which is how one gets
+     * landed from well past the border, by a harpoon aimed at nothing the player can see.
+     * <p>
+     * The mask is drawn at the pond's radius scaled by how far open it is, so that is the edge worth
+     * measuring against: a pond that is still opening has not reached its own rim yet, and a closing
+     * one takes its motes down with it. Held motes never get here - whatever has hold of one is
+     * carrying it out of the pond on purpose.
+     */
+    protected boolean hasLeftThePond() {
+        if (pond == null) return false;
+
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+        if (plugin == null) return false;
+
+        return Misc.getDistance(entity.getLocation(), pond.getLocation())
+                > pond.getRadius() * plugin.activity;
     }
 
     /**

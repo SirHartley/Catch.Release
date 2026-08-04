@@ -152,8 +152,9 @@ public class CatchResultPanel {
     public void render(FishingMinigameLayout layout, SpriteAPI fishSprite, float alphaMult) {
         if (entry == null || alphaMult <= 0f) return;
 
-        //before anything is placed, since the fonts are what the column's height is measured with
+        //before anything is placed, since the fonts are what the column is measured with
         loadFonts();
+        layout.fitResultContent(getContentWidth());
         layout.centerResultContent(getContentHeight());
 
         renderPanel(layout, alphaMult);
@@ -165,6 +166,35 @@ public class CatchResultPanel {
         y = renderLines(layout, y, alphaMult);
 
         renderPrompt(layout, y, alphaMult);
+    }
+
+    /**
+     * The widest thing that has to fit across the column.
+     * <p>
+     * The species name is the usual offender - it is read off a table, and the long ones ran off the
+     * card - but a row is a label drawn to the left edge and a value drawn to the right one, so a
+     * long enough pair collides in the middle the same way. A treasure is the other candidate.
+     * <p>
+     * Measured off every line up front rather than off the ones that have arrived, for the same
+     * reason the height is: the tally reads out one row at a time, and a card that grew as it filled
+     * in would be worse than one that was too narrow to begin with.
+     */
+    protected float getContentWidth() {
+        float widest = 0f;
+
+        if (title != null) widest = Math.max(widest, title.getWidth());
+        if (prompt != null) widest = Math.max(widest, prompt.getWidth());
+
+        if (font == null) return widest;
+
+        for (Line line : lines) {
+            build(line);
+
+            widest = Math.max(widest, line.labelText.getWidth()
+                    + FishConstants.MINIGAME_RESULT_COLUMN_GAP + line.valueText.getWidth());
+        }
+
+        return widest;
     }
 
     /**
