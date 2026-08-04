@@ -64,11 +64,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** The readout of what was caught. Up until the player dismisses it. */
     transient protected CatchResultPanel result;
 
-    /** The receipt for what else came up, on the readout's other side. Null when nothing was. */
-    transient protected LootResultPanel lootResult;
+    /** The found-treasure card, off the left edge. Up from the moment the chest is prised out. */
+    transient protected TreasureFoundPanel treasureCard;
 
-    /** What came up alongside the fish - every piece that was held onto, resolved once at the end. */
-    protected final List<TreasureAward> lootAwards = new ArrayList<>();
+    /** What came up alongside the fish, if anything, and what tier it was. */
+    protected String treasureTaken;
+    protected TreasureRarity treasureRarity;
     protected boolean treasureResolved = false;
 
     /** Held after a fish is lost, so the result is readable before the dialog closes itself. */
@@ -106,16 +107,19 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         //ahead of anything that returns early: the backing swims whether or not the catch is still on
         getWarp().advance(amount);
 
+        //likewise ahead of them: the card goes up mid-catch and stays through every ending
+        advanceTreasureCard(amount);
+
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
             return;
         }
 
-        //banked whichever way the fish went: treasure that was taken was taken, and losing the
-        //fish afterwards does not put it back
-        resolveTreasure();
-
         if (minigame.isCaught()) {
+            //only now. Taking the treasure is a detour and losing the fish is what the detour costs
+            //- banking it either way made the detour free, and a free detour is not a decision
+            resolveTreasure();
+
             advanceCaught(amount);
             return;
         }
@@ -163,10 +167,39 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /**
-     * Puts anything that was taken into the hold, once.
+     * Keeps the found-treasure card in step with the catch: up the moment the chest is prised out,
+     * and told how things ended once they have.
      * <p>
-     * Ship tackle is passed as false because there is no tackle system yet - when there is, this is
-     * the one line that has to know about it.
+     * A lost fish takes the chest down with it - {@link #resolveTreasure()} never runs - and this
+     * card is the one place the player learns that, so the lost-fish linger is stretched to give
+     * the line a chance to be read. Once, not held: escape during the linger still skips out.
+     */
+    protected void advanceTreasureCard(float amount) {
+        if (treasureCard == null) {
+            MinigameTreasure treasure = minigame.getTreasure();
+            if (treasure == null || !treasure.isTaken()) return;
+
+            treasureCard = new TreasureFoundPanel(treasure.rarity);
+        }
+
+        treasureCard.advance(amount);
+
+        if (minigame.isRunning()) return;
+
+        if (minigame.isCaught()) {
+            treasureCard.setSecured();
+        } else if (!treasureCard.isLost()) {
+            treasureCard.setLost();
+            endLingerLeft = Math.max(endLingerLeft, FishConstants.TREASURE_CARD_LOST_LINGER);
+        }
+    }
+
+    /**
+     * Puts anything that was taken into the hold, once, and only on a landed fish.
+     * <p>
+     * Whatever was prised out of the track goes down with the specimen if the specimen gets away.
+     * That is what makes taking it a decision: the hold that takes it costs ground on the fish, and
+     * a prize that survived losing the fish would make paying that ground free.
      */
     protected void resolveTreasure() {
         if (treasureResolved) return;
@@ -279,6 +312,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderFish(layout, alphaMult);
         renderTreasure(layout, alphaMult);
         renderMeter(layout, alphaMult);
+
+        //off the left edge, so it never argues with the readout or the celebration on the right
+        if (treasureCard != null) treasureCard.render(layout, alphaMult);
 
         //the readout first: rendering it is what settles the card's geometry, and the celebration
         //centres on the card's specimen - so it has to read a settled layout, and it has to draw

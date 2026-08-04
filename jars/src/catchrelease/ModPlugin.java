@@ -1,6 +1,8 @@
 package catchrelease;
 
 import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
+import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.map.tab.CatchMapTabScript;
 import catchrelease.memory.charges.ChargeManager;
@@ -33,6 +35,10 @@ public class ModPlugin extends BaseModPlugin {
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();
         ChargeManager.register();
+
+        //what happens when the fishing gear is pointed at somebody
+        CatchReleaseCampaignPlugin.register();
+        HarpoonPatrolResponse.register();
 
         //data
         UpgradeManager.getInstance().updateBaseValues();

@@ -75,13 +75,92 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
                 Misc.genUID(), null, HarpoonConstants.ENTITY_ID, null,
                 new HarpoonEntityPlugin.Params(from, new Vector2f(worldTarget)));
 
+        harpoon.addTag(HarpoonConstants.TAG);
         harpoon.setLocation(from.x, from.y);
         harpoon.setFacing(angleFromFleet);
     }
 
+    /**
+     * The press cuts the line while one is hauling, and only fires when none is.
+     * <p>
+     * Being towed is the one part of this the player has done to them rather than by them, and a
+     * rope with no way out of it is a cutscene. This is the way out. Ahead of the vanilla path for
+     * the same reason the rod's recall is: a shot leaves the ability on its rearm, and the stretch
+     * a cut is worth asking for is exactly the stretch that would swallow the press.
+     */
+    @Override
+    public void pressButton() {
+        if (cutIfHauling()) return;
+
+        super.pressButton();
+    }
+
+    /**
+     * No reticule while a line is out, because the press is not a shot then - it is the cut.
+     * <p>
+     * This is what makes the cut reachable from the keyboard at all. The hotkey never arrives at
+     * pressButton while a reticule is wanted: the framework's key listener consumes the key first
+     * and opens an aiming session, so a towed player pressing the ability's number fired a second
+     * harpoon instead of letting go of the first. Answering no here leaves the key unconsumed, the
+     * UI turns it into an ordinary button press, and both inputs end up in the same place.
+     * <p>
+     * It also makes firing while towed impossible rather than merely discouraged - with no reticule
+     * wanted, activation routes to {@link #onActivatedWithoutReticule()}, which cuts.
+     */
+    @Override
+    public boolean showReticuleOnActivation() {
+        return !HarpoonEntityPlugin.isAnyHauling();
+    }
+
+    /** The vanilla activation path, which is where a press lands once the reticule is off. */
+    @Override
+    protected void onActivatedWithoutReticule() {
+        cutIfHauling();
+    }
+
+    protected boolean cutIfHauling() {
+        if (entity == null || !entity.isPlayerFleet()) return false;
+        if (!HarpoonEntityPlugin.cutAllLines()) return false;
+
+        playActivationSound();
+
+        return true;
+    }
+
     @Override
     public boolean isUsable() {
-        return hasMoteNearby() && super.isUsable();
+        //a line already out can always be cut, whatever the charges or the rearm say about firing.
+        //Safe to open this far only because showReticuleOnActivation is false at the same time, so
+        //the one thing an activation can do while hauling is let go
+        if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
+
+        return (hasMoteNearby() || hasFleetNearby()) && super.isUsable();
+    }
+
+    /**
+     * Whether there is a hull in range, which is also something the line can be put into.
+     * <p>
+     * Only a gate on firing. Aim assist is deliberately not extended to fleets: it exists to
+     * forgive a shot at a speck that is already almost under the cursor, and a fleet is neither
+     * small nor something to be helped into hitting.
+     * <p>
+     * Asks the same question the head will ask when it gets there. Left to its own looser test the
+     * button lit up for stations, for fleets already on somebody's line, and - worse - for hidden
+     * ones, which quietly answered a question about what is out there that the player had not been
+     * given any other way to ask.
+     */
+    protected boolean hasFleetNearby() {
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null) return false;
+
+        for (CampaignFleetAPI other : fleet.getContainingLocation().getFleets()) {
+            if (other == fleet || !HarpoonEntityPlugin.canHook(other)) continue;
+
+            float reach = HarpoonConstants.RANGE + other.getRadius();
+            if (Misc.getDistance(fleet.getLocation(), other.getLocation()) <= reach) return true;
+        }
+
+        return false;
     }
 
     /**
@@ -151,6 +230,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         tooltip.addPara("Fires a line at a mote. A hit drives it back and holds it on the line"
                 + " while it is played, and a landed specimen comes home on the line.", pad);
 
+        tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
+                + " heavier one takes you with it.", Misc.getGrayColor(), pad);
+
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 
         tooltip.addPara("Charges: %s of %s", 3f, highlight,
@@ -160,7 +242,13 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
             tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);
         }
 
-        if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby()) {
+        if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isAnyHauling()) {
+            tooltip.addPara("A line is out. Activate again to cut it.", highlight, pad);
+        }
+
+        //asked of both, since either is something to fire at - keyed on motes alone this said the
+        //ability could not be used while the button beside it was lit and working
+        if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby() && !hasFleetNearby()) {
             tooltip.addPara("Nothing within range to fire at.", Misc.getNegativeHighlightColor(), pad);
         }
 

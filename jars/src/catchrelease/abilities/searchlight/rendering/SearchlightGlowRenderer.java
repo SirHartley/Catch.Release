@@ -1,15 +1,7 @@
 package catchrelease.abilities.searchlight.rendering;
 
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.helper.math.TrigHelper;
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.util.Misc;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -22,12 +14,11 @@ import java.awt.*;
 import java.util.EnumSet;
 
 /**
- * The beam, and what it finds.
+ * The beam: a sprite, flickering, with the switch-on flash over it.
  * <p>
- * The light itself is a sprite. Over it go the negative impressions: buried motes do not draw
- * anything of their own, and what shows here is the dent one makes in the beam rather than the thing
- * making it. Drawn subtractively, so it is a hole in the light rather than a mark on top of it -
- * which is the difference between "something is under there" and "something is drawn there".
+ * What the beam finds is not drawn here. The dents live in {@link SearchlightImpressionRenderer},
+ * one renderer across every light - drawn per light, as they used to be, a mote under two crossing
+ * beams was dented twice as deep as one that had actually been found twice as well.
  */
 public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     public transient SpriteAPI sprite;
@@ -119,71 +110,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
         sprite.setAlphaMult(alpha);
         sprite.setColor(color);
         sprite.renderAtCenter(loc.x, loc.y);
-
-        renderImpressions(alpha);
-    }
-
-    /**
-     * Every buried mote under the beam, as a dent in it.
-     * <p>
-     * Scaled by how near the middle of the light it is, so sweeping across one makes it swell and
-     * fade rather than blink - which is what makes a thing findable rather than merely visible.
-     */
-    protected void renderImpressions(float alphaMult) {
-        if (Global.getSector() == null) return;
-
-        LocationAPI location = Global.getSector().getCurrentLocation();
-        if (location == null) return;
-
-        for (SectorEntityToken buried
-                : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-
-            if (buried.isExpired()) continue;
-
-            float distance = Misc.getDistance(loc, buried.getLocation());
-            if (distance > size) continue;
-
-            //full in the middle of the beam, nothing at its edge
-            float inBeam = 1f - MathUtils.clamp(distance / Math.max(1f, size), 0f, 1f);
-            inBeam *= inBeam;
-
-            renderImpression(buried.getLocation(), inBeam * alphaMult);
-        }
-    }
-
-    /**
-     * One dent: a subtractive core with a fainter ring standing off it, breathing slowly so it reads
-     * as something moving under a surface rather than a decal pinned to the map.
-     */
-    protected void renderImpression(Vector2f at, float alphaMult) {
-        if (alphaMult <= 0f) return;
-
-        float pulse = 1f + FishConstants.IMPRESSION_PULSE
-                * (float) Math.sin(timePassed * FishConstants.IMPRESSION_PULSE_RATE);
-
-        float coreSize = FishConstants.IMPRESSION_SIZE * pulse;
-
-        //taken out of the light rather than added to it
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-        GL14.glBlendEquation(GL14.GL_FUNC_REVERSE_SUBTRACT);
-
-        sprite.setColor(Color.WHITE);
-        sprite.setSize(coreSize, coreSize);
-        sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_ALPHA);
-        sprite.renderAtCenter(at.x, at.y);
-
-        GL14.glBlendEquation(GL14.GL_FUNC_ADD);
-        GL11.glPopAttrib();
-
-        //and the standing wave around it, which is the part that says it is displacing something
-        sprite.setAdditiveBlend();
-        sprite.setColor(color);
-        sprite.setSize(coreSize * FishConstants.IMPRESSION_RING_SIZE,
-                coreSize * FishConstants.IMPRESSION_RING_SIZE);
-        sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_RING_ALPHA);
-        sprite.renderAtCenter(at.x, at.y);
     }
 
     public void loadSpritesIfNeeded() {

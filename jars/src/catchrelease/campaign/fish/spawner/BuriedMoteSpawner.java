@@ -3,6 +3,8 @@ package catchrelease.campaign.fish.spawner;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -123,11 +125,26 @@ public class BuriedMoteSpawner implements EveryFrameScript {
     }
 
     /**
+     * How much better the lights are at turning up something worth having.
+     * <p>
+     * Applied where the population is seeded rather than where a light passes over one, which is the
+     * only place it can honestly go: a buried mote is a specific species from the moment it exists,
+     * and a beam that changed what was already down there would be deciding rather than finding.
+     * What the upgrade actually buys is a better class of thing put out there to be found.
+     * <p>
+     * Added to the drones' own bias rather than replacing it, so a fleet that has invested in both
+     * gets both, and a fleet that has bought neither sees exactly what it saw before.
+     */
+    protected static float getRareChance() {
+        return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
+    }
+
+    /**
      * Out past the light's reach, in a ring rather than a disc - one appearing inside the searchlight
      * would read as the light making them rather than finding them.
      */
     protected void spawn(LocationAPI location, Vector2f around) {
-        String fishId = PondFishSpawner.pickFishId(location);
+        String fishId = PondFishSpawner.pickFishId(location, getRareChance());
         if (fishId == null) return;
 
         float angle = MathUtils.getRandomNumberInRange(0f, 360f);

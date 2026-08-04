@@ -47,17 +47,20 @@ public class FishingMinigameLayout {
     public float boxSize;
 
     /**
-     * The loot card's panel, off the LEFT edge - the readout's mirror. Same width, same height,
-     * same box size and the same vertical manners, so the two cards flank the catch as a pair.
+     * The found-treasure card's panel, off the left edge - the readout's mirror, with its own
+     * fields because the two can be up at once and each fits itself to its own content.
      */
-    public float lootPanelX;
-    public float lootPanelY;
-    public float lootPanelWidth;
-    public float lootPanelHeight;
-    public float lootX;
-    public float lootWidth;
-    public float lootBoxX;
-    public float lootBoxY;
+    public float treasurePanelX;
+    public float treasurePanelY;
+    public float treasurePanelWidth;
+    public float treasurePanelHeight;
+
+    /** Inside that panel: its content column, and the chest's cargo-square at the top of it. */
+    public float treasureContentX;
+    public float treasureContentWidth;
+    public float treasureBoxX;
+    public float treasureBoxY;
+    public float treasureBoxSize;
 
     public FishingMinigameLayout(PositionAPI position) {
         trackWidth = FishConstants.MINIGAME_TRACK_WIDTH;
@@ -88,18 +91,20 @@ public class FishingMinigameLayout {
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
         boxY = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
 
-        //the mirror of the readout's panel, hung off the other side. Its right edge is the fixed
-        //one: growing wider means growing leftward, away from the catch
-        lootPanelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
-        lootPanelX = position.getX() - FishConstants.MINIGAME_RESULT_GAP - lootPanelWidth;
-        lootPanelY = position.getY();
-        lootPanelHeight = position.getHeight();
+        //the readout's mirror, off the other edge and at the readout's own measurements, so a
+        //catch with both up reads as one interface with a pane on each side
+        treasurePanelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
+        treasurePanelX = position.getX() - FishConstants.MINIGAME_RESULT_GAP - treasurePanelWidth;
+        treasurePanelY = position.getY();
+        treasurePanelHeight = position.getHeight();
 
-        lootX = lootPanelX + FishConstants.MINIGAME_RESULT_PAD;
-        lootWidth = lootPanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+        treasureContentX = treasurePanelX + FishConstants.MINIGAME_RESULT_PAD;
+        treasureContentWidth = treasurePanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
 
-        lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
-        lootBoxY = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
+        treasureBoxSize = FishConstants.MINIGAME_RESULT_BOX;
+        treasureBoxX = treasureContentX + (treasureContentWidth - treasureBoxSize) * 0.5f;
+        treasureBoxY = treasurePanelY + treasurePanelHeight - FishConstants.MINIGAME_RESULT_PAD
+                - treasureBoxSize;
 
         //the extra is on the frame alone - the track and meter hold their ground, the frame
         //reaches further left around them
@@ -151,29 +156,33 @@ public class FishingMinigameLayout {
     }
 
     /**
-     * The loot card's version of {@link #fitResultContent}: same floor, same cap, but the growth
-     * goes leftward - the card's right edge holds its distance from the catch.
+     * {@link #fitResultContent} for the treasure card. The one difference is which edge is pinned:
+     * the readout grows away from the dialog, and on the left that means growing leftward, so it
+     * is the right edge that holds still here.
      */
-    public void fitLootContent(float contentWidth) {
+    public void fitTreasureContent(float contentWidth) {
+        float right = treasurePanelX + treasurePanelWidth;
         float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
-        float right = lootPanelX + lootPanelWidth;
 
-        lootPanelWidth = Math.max(FishConstants.MINIGAME_RESULT_WIDTH,
+        treasurePanelWidth = Math.max(FishConstants.MINIGAME_RESULT_WIDTH,
                 Math.min(wanted, FishConstants.MINIGAME_RESULT_MAX_WIDTH));
 
-        lootPanelX = right - lootPanelWidth;
-        lootX = lootPanelX + FishConstants.MINIGAME_RESULT_PAD;
-        lootWidth = lootPanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
+        treasurePanelX = right - treasurePanelWidth;
+        treasureContentX = treasurePanelX + FishConstants.MINIGAME_RESULT_PAD;
+        treasureContentWidth = treasurePanelWidth - FishConstants.MINIGAME_RESULT_PAD * 2f;
 
-        lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
+        treasureBoxX = treasureContentX + (treasureContentWidth - treasureBoxSize) * 0.5f;
     }
 
-    /** The loot card's version of {@link #centerResultContent}, same reasoning, its own box. */
-    public void centerLootContent(float contentHeight) {
-        float centeredTop = lootPanelY + (lootPanelHeight + contentHeight) * 0.5f;
-        float highestTop = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD;
+    /**
+     * {@link #centerResultContent} for the treasure card, without the headroom - nothing floats
+     * over its square.
+     */
+    public void centerTreasureContent(float contentHeight) {
+        float centeredTop = treasurePanelY + (treasurePanelHeight + contentHeight) * 0.5f;
+        float highestTop = treasurePanelY + treasurePanelHeight - FishConstants.MINIGAME_RESULT_PAD;
 
-        lootBoxY = Math.min(centeredTop, highestTop) - boxSize;
+        treasureBoxY = Math.min(centeredTop, highestTop) - treasureBoxSize;
     }
 
     /** Screen y of a point in the track, given as a 0..1 position from the bottom. */

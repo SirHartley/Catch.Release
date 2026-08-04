@@ -3,7 +3,9 @@ package catchrelease.abilities.searchlight.ability;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
+import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -41,6 +43,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private List<Searchlight> activeSearchlights = new ArrayList<>();
     private List<CircularArc> searchlightArcs = new ArrayList<>();
 
+    private SearchlightImpressionRenderer impressionRenderer;
+
     @Override
     protected void activateImpl() {
         timePassed = 0f;
@@ -48,6 +52,15 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
         activeSearchlights.clear();
         searchlightArcs.clear();
+
+        //one renderer for all the dents, made alongside the lights rather than inside one of them:
+        //drawn per light, a mote under two crossing beams was dented twice, at double the depth.
+        //It holds the live list, so lights arriving on the activation stagger are its problem.
+        //An old one still fading from the last toggle goes now - it would draw these same dents
+        //under the new one until its second ran out
+        if (impressionRenderer != null) impressionRenderer.fadeAndExpire(0f);
+        impressionRenderer = new SearchlightImpressionRenderer(activeSearchlights);
+        LunaCampaignRenderer.addTransientRenderer(impressionRenderer);
 
         float size = Searchlight.getArea();
         float radius = size * 2f;
@@ -141,8 +154,17 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
 
         CampaignFleetAPI fleet = getFleet();
-        expireLights(fleet != null && !fleet.getContainingLocation().isHyperspace());
+        boolean withFade = fleet != null && !fleet.getContainingLocation().isHyperspace();
+
+        expireLights(withFade);
         activeSearchlights.clear();
+
+        //the dents go on the lights' own terms - and like them, immediately when the fleet is in
+        //hyperspace, so nothing of this is left drawing out there
+        if (impressionRenderer != null) {
+            impressionRenderer.fadeAndExpire(withFade ? 1f : 0f);
+            impressionRenderer = null;
+        }
 
         cleanupImpl();
     }
@@ -198,10 +220,46 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
 
-        tooltip.addPara("TODO: Upgrade information", pad
-        );
+        addUpgradesToTooltip(tooltip, pad);
 
         addIncompatibleToTooltip(tooltip, expanded);
+    }
+
+    /**
+     * What has been fitted, and only what has been fitted.
+     * <p>
+     * A rig with nothing bought says nothing here rather than listing four zeroes - the shop is
+     * where you go to find out what is for sale, and a tooltip that reads like a price list every
+     * time you hover the button is a tooltip nobody finishes reading.
+     */
+    protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
+        Color highlight = Misc.getHighlightColor();
+
+        int lights = getSearchlightNum();
+        tooltip.addPara("Sweeping with %s, each reaching %s.", pad, highlight,
+                lights == 1 ? "one light" : lights + " lights",
+                (int) Searchlight.getArea() + " units");
+
+        float track = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
+        if (track > 0f) {
+            tooltip.addPara("Whatever the light passes over stays marked for %s afterwards.",
+                    3f, highlight, Misc.getRoundedValue(track) + " seconds");
+        }
+
+        int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
+        if (identify == 1) {
+            tooltip.addPara("A mark carries some hint of how rare the thing under it is.",
+                    Misc.getGrayColor(), 3f);
+        } else if (identify > 1) {
+            tooltip.addPara("A mark is coloured by exactly how rare the thing under it is.",
+                    Misc.getGrayColor(), 3f);
+        }
+
+        float rare = UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
+        if (rare > 0f) {
+            tooltip.addPara("Rarer species are more likely to be down there to begin with.",
+                    Misc.getGrayColor(), 3f);
+        }
     }
 
     public boolean isUsable() {

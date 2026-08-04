@@ -173,6 +173,26 @@ public class FishConstants {
     public static final float TREASURE_BAR_HEIGHT = 3f;
     public static final float TREASURE_BAR_GAP = 6f;
 
+    /**
+     * The found-treasure card: a panel off the left edge of the catch's, up from the moment the
+     * chest is prised out. It borrows the readout's width, pad, square, fonts and dressing - the
+     * two are meant to read as the two panes of one interface - so the only numbers of its own are
+     * the ones the readout has no equivalent for.
+     * <p>
+     * The strings are the card's last line. PENDING is the warning while the fish is still on,
+     * SECURED and LOST are how it ended - treasure only survives a landed fish, and LOST is the
+     * one place the player is told the chest went down with it. LOST_LINGER stretches the
+     * lost-fish linger so that line can actually be read; FADE is the card arriving, since it
+     * appears mid-catch while the eye is on the track.
+     */
+    public static final String TREASURE_CARD_TITLE = "Treasure Found";
+    public static final String TREASURE_CARD_TYPE_LABEL = "Type";
+    public static final String TREASURE_CARD_PENDING = "Kept if the fish is landed";
+    public static final String TREASURE_CARD_SECURED = "Secured";
+    public static final String TREASURE_CARD_LOST = "Lost with the fish";
+    public static final float TREASURE_CARD_FADE = 0.25f;
+    public static final float TREASURE_CARD_LOST_LINGER = 2.5f;
+
     /** The game's own drop groups, rolled rather than listed so they stay correct as they change. */
     public static final String TREASURE_GROUP_BLUEPRINTS = "blueprints";
     public static final String TREASURE_GROUP_RARE_TECH = "rare_tech";
@@ -473,6 +493,14 @@ public class FishConstants {
     public static final float IMPRESSION_RING_ALPHA = 0.3f;
     public static final float IMPRESSION_PULSE = 0.12f;
     public static final float IMPRESSION_PULSE_RATE = 2.2f;
+
+    /**
+     * How far the ring leans toward the rarity's colour at the identify upgrade's first level.
+     * Partway on purpose: at 1 the ring would already be the rarity's own colour and the second
+     * level would have nothing left to sell. Far enough off the beam's orange to say "look closer",
+     * not far enough to name the tier.
+     */
+    public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.4f;
 
     /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
