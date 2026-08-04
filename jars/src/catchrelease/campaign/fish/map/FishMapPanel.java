@@ -178,6 +178,32 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
         camY = (worldMinY + worldMaxY) * 0.5f;
     }
 
+    /**
+     * Keeps the visible rect inside the world, not just the camera point - clamping the centre
+     * to the world bounds lets the middle of the glass reach the world's corner, which is half a
+     * screen of nothing past the content. Each axis stands alone: where the view is wider than
+     * the world's span the content cannot fill the glass anyway, so the camera pins to the
+     * middle - that is what stops the drag when everything already fits.
+     */
+    protected void clampCamera() {
+        if (ppu <= 0f) return;
+
+        float halfX = pos.getWidth() * 0.5f / ppu;
+        float halfY = pos.getHeight() * 0.5f / ppu;
+
+        if (halfX * 2f >= worldMaxX - worldMinX) {
+            camX = (worldMinX + worldMaxX) * 0.5f;
+        } else {
+            camX = MathUtils.clamp(camX, worldMinX + halfX, worldMaxX - halfX);
+        }
+
+        if (halfY * 2f >= worldMaxY - worldMinY) {
+            camY = (worldMinY + worldMaxY) * 0.5f;
+        } else {
+            camY = MathUtils.clamp(camY, worldMinY + halfY, worldMaxY - halfY);
+        }
+    }
+
     @Override
     public void positionChanged(PositionAPI position) {
         pos = position;
@@ -264,8 +290,7 @@ public class FishMapPanel extends BaseCustomUIPanelPlugin {
             if (Math.abs(zoomVelocity) < 0.001f) zoomVelocity = 0f;
         }
 
-        camX = MathUtils.clamp(camX, worldMinX, worldMaxX);
-        camY = MathUtils.clamp(camY, worldMinY, worldMaxY);
+        clampCamera();
 
         updateHover();
     }
