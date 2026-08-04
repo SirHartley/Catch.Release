@@ -19,6 +19,7 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Keyboard;
 
@@ -100,6 +101,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
         /** Counted once per change rather than once per frame - the purse walks the whole hold. */
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
 
+        /**
+         * Everything this build put on the panel, by the reference that can actually take it off
+         * again. A scrollable element is wrapped in a scroller on the way in and the wrapper is
+         * what the panel holds - removing the element itself removes nothing, which is where the
+         * stacked-up panels came from. So what goes in this list is the element's external
+         * scroller when it has one, and the element itself when it does not.
+         */
+        protected final List<UIComponentAPI> added = new ArrayList<>();
+
         /** The right-hand pane, torn down and rebuilt whenever what it shows stops being true. */
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
@@ -155,9 +165,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         /**
-         * Everything torn down and put back. Not element by element: removing a single element and
-         * re-adding it stacks the new one over the old, and one clean sweep is both simpler and
-         * harder to get wrong than reaching back into what is already there.
+         * Everything torn down by the reference it was tracked under and put back, since reaching
+         * back into a live panel is how stale copies get left behind it.
          *
          * @param keepScroll whether the list should come back at the scroll it was at - true for a
          *                   click inside the shelf, false when the shelf itself changed
@@ -168,7 +177,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float scroll = keepScroll && list != null && list.getExternalScroller() != null
                     ? list.getExternalScroller().getYOffset() : 0f;
 
-            panel.removeComponent(null);
+            for (UIComponentAPI component : added) panel.removeComponent(component);
+            added.clear();
+
             build();
 
             if (keepScroll && list != null && list.getExternalScroller() != null) {
@@ -176,11 +187,28 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
         }
 
+        /**
+         * Adds an element and remembers the thing the panel actually holds for it.
+         *
+         * @return the position of that thing - for a scrollable element the scroller's, which is
+         *         the window on screen rather than the content behind it
+         */
+        protected PositionAPI place(TooltipMakerAPI element, float x, float y) {
+            PositionAPI pos = panel.addUIElement(element);
+            pos.inTL(x, y);
+
+            added.add(element.getExternalScroller() != null
+                    ? (UIComponentAPI) element.getExternalScroller() : element);
+
+            return pos;
+        }
+
         protected void buildHeader() {
             CustomPanelAPI header = panel.createCustomPanel(WIDTH - PAD * 2f, HEADER_HEIGHT,
                     new ShopHeaderPlugin(this));
 
             panel.addComponent(header).inTL(PAD, PAD);
+            added.add(header);
         }
 
         /** The gear a main tab sells, in shelf order. */
@@ -242,6 +270,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     new ShopTabPlugin(data, label, iconId, textSize, this));
 
             panel.addComponent(tab).inTL(x, y);
+            added.add(tab);
         }
 
         @Override
@@ -276,8 +305,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         new ShopRowPlugin(entry, this)), 3f);
             }
 
-            listViewport = panel.addUIElement(list);
-            listViewport.inTL(PAD, top);
+            listViewport = place(list, PAD, top);
         }
 
         protected void buildDetail() {
@@ -290,7 +318,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             ShopEntry entry = getSelected();
             if (entry != null) buildDetailContent(detail, width, entry);
 
-            panel.addUIElement(detail).inTL(PAD + LIST_WIDTH + DETAIL_GAP, top);
+            place(detail, PAD + LIST_WIDTH + DETAIL_GAP, top);
         }
 
         protected void buildDetailContent(TooltipMakerAPI info, float width, ShopEntry entry) {

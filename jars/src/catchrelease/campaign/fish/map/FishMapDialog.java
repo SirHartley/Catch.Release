@@ -24,6 +24,7 @@ import com.fs.starfarer.api.ui.MarkerData;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;
@@ -98,6 +99,12 @@ public class FishMapDialog implements InteractionDialogPlugin {
         /** The map and the species list, torn down together when the filter moves. */
         protected TooltipMakerAPI mapElement;
         protected TooltipMakerAPI sideElement;
+
+        /**
+         * What the panel actually holds for the sidebar: a scrollable element goes in wrapped in a
+         * scroller, and removing the element itself removes nothing.
+         */
+        protected UIComponentAPI sideRemovable;
 
         /** What the panels on screen were built from, which is how a change is recognised. */
         protected String builtSearch = "";
@@ -224,7 +231,7 @@ public class FishMapDialog implements InteractionDialogPlugin {
          * the markers do not name themselves, so the sidebar does it for them.
          */
         protected void buildSidebar(List<FishSpec> shown) {
-            if (sideElement != null) panel.removeComponent(sideElement);
+            if (sideRemovable != null) panel.removeComponent(sideRemovable);
 
             float height = HEIGHT - PAD * 2f;
             float pad = 10f;
@@ -278,6 +285,9 @@ public class FishMapDialog implements InteractionDialogPlugin {
             }
 
             panel.addUIElement(sideElement).inTL(WIDTH - PAD - SIDEBAR_WIDTH, PAD);
+
+            sideRemovable = sideElement.getExternalScroller() != null
+                    ? (UIComponentAPI) sideElement.getExternalScroller() : sideElement;
         }
 
         protected String getStatus(FishSpec spec) {
