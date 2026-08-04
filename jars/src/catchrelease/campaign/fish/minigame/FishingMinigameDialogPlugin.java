@@ -97,11 +97,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     @Override
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
-        this.minigame = new FishingMinigame(fish);
-
-        //whatever is fitted to the rig this was hooked on. Read once, before anything is rolled
+        //whatever is fitted to the rig this was hooked on. Read once, before anything is rolled -
+        //and handed to the catch on the way in, since it is what sizes the window and rolls the
+        //treasure rather than something the catch can be told about afterwards
         Tackle tackle = TackleManager.get(method);
-        this.minigame.setTackle(tackle);
+        this.minigame = new FishingMinigame(fish, tackle);
 
         //how loosely it holds to reality comes from where it was taken, not from the fish
         this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias);
