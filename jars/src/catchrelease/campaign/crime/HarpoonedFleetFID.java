@@ -1,6 +1,7 @@
 package catchrelease.campaign.crime;
 
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
 import com.fs.starfarer.api.util.Misc;
 
@@ -18,11 +19,21 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
     /** Said once per encounter rather than on every refresh of the options. */
     protected boolean spoken = false;
 
+    /**
+     * Spoken as the encounter opens, which is the only hook that sees every encounter.
+     * <p>
+     * The obvious-looking one is updatePreCombat, and it is wrong: vanilla only reaches it from the
+     * options that commit to a fight, so the line would have been read out on the deployment screen
+     * to a player who had already decided to shoot - and never at all to one who looked, talked and
+     * left. After super, so it lands under the encounter's own description rather than ahead of it.
+     * <p>
+     * Cutting a comm link comes back through reinit rather than init, so this stays said once.
+     */
     @Override
-    protected void updatePreCombat() {
-        speak();
+    public void init(InteractionDialogAPI dialog) {
+        super.init(dialog);
 
-        super.updatePreCombat();
+        speak();
     }
 
     protected void speak() {
@@ -58,7 +69,7 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
                 "Whatever " + name + " expected to be shot at with today, it was not a rope.",
         };
 
-        return lines[Math.abs(other.getId().hashCode()) % lines.length];
+        return lines[Math.floorMod(other.getId().hashCode(), lines.length)];
     }
 
     protected CampaignFleetAPI getOtherFleet() {
