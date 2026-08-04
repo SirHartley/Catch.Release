@@ -46,14 +46,30 @@ public class HarpoonConstants {
     /**
      * Hauling on a fleet, once one has been stuck.
      * <p>
-     * SPEED is what the losing end is dragged at, and it is meant to be faster than a fleet travels
-     * under its own power - the point of the line is that it is not a negotiation. TIME caps it, so
-     * a rope tied to something that cannot be moved lets go rather than towing it forever, and
-     * DONE_DISTANCE is the clearance past both hulls that counts as having arrived.
+     * SPEED is what the losing end is dragged at. Not faster than a fleet can travel - a hard burn
+     * beats it outright - but the haul writes velocity rather than racing it, so it wins regardless.
+     * TIME caps the whole thing, so a rope tied to something that will not move lets go rather than
+     * towing forever, and DONE_DISTANCE is the clearance past both hulls that counts as arrived.
      */
     public static final float HAUL_SPEED = 260f;
     public static final float HAUL_TIME = 6f;
     public static final float HAUL_DONE_DISTANCE = 60f;
+
+    /**
+     * How far the head has to be clear of the launcher before it can bury itself in a hull.
+     * <p>
+     * A mote is a speck and can be hit the instant the line leaves; a fleet is an object the size of
+     * the reticule, and the head starts inside the player's own. Without this every cast made
+     * anywhere near another hull stuck in it on the first frame, which near a market is every cast.
+     */
+    public static final float FLEET_ARM_DISTANCE = 220f;
+
+    /**
+     * Set on a fleet while a line is on it, so a second line cannot fight the first for it, with a
+     * day's clock on it so the flag cannot outlive the harpoon that set it.
+     */
+    public static final String HAULED_FLAG = "$catchrelease_hauled";
+    public static final float HAULED_FLAG_EXPIRY_DAYS = 1f;
 
     /**
      * Winding in the last of the line, once the head is home.

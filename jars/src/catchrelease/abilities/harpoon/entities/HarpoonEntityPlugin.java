@@ -14,6 +14,7 @@ import catchrelease.skillshot.util.SkillshotUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -158,6 +159,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) {
+            //through the cut rather than straight out, so a haul in progress lets go of its fleet
+            //instead of leaving the flag on it
+            if (state == State.HAULING) cutLine();
+
             expire();
             return;
         }
@@ -226,7 +231,74 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         haulingTarget = player != null
                 && struck.getEffectiveStrength() < player.getEffectiveStrength();
 
+        //so a second line cannot be put into the same hull: two of them writing its velocity in one
+        //frame is last-writer-wins, and what comes out is neither pull.
+        //
+        //Given an expiry rather than left to be unset, because the unset is the harpoon's job and
+        //the harpoon might not survive to do it - a save taken mid-haul, a location unloaded. A flag
+        //with no clock on it would leave that fleet quietly un-hookable for the rest of the game
+        struck.getMemoryWithoutUpdate().set(HarpoonConstants.HAULED_FLAG, true,
+                HarpoonConstants.HAULED_FLAG_EXPIRY_DAYS);
+
         enter(State.HAULING);
+    }
+
+    /**
+     * Lets go of a fleet and comes home, by whatever route ended the haul - arrival, the rope's own
+     * patience, one end leaving, or the player cutting it.
+     * <p>
+     * Everything the haul did to the fleet is undone here rather than at each of those places, so
+     * there is one door out and the flag cannot be left behind on a fleet nobody is pulling.
+     */
+    public void cutLine() {
+        CampaignFleetAPI struck = getHookedFleet();
+        if (struck != null) struck.getMemoryWithoutUpdate().unset(HarpoonConstants.HAULED_FLAG);
+
+        enter(State.RETURNING);
+    }
+
+    /** Whether this line is currently hauling on something, for anything wanting to cut it. */
+    public boolean isHauling() {
+        return state == State.HAULING;
+    }
+
+    /**
+     * Cuts every line currently hauling, and says whether there was one.
+     * <p>
+     * The ability's own press routes through this: being towed with no way to answer for it is the
+     * one part of this that is done <i>to</i> the player rather than by them, and a rope you cannot
+     * cut is a cutscene. Pressing the harpoon again lets go of it.
+     */
+    public static boolean cutAllLines() {
+        boolean cut = false;
+
+        for (HarpoonEntityPlugin harpoon : getHauling()) {
+            harpoon.cutLine();
+            cut = true;
+        }
+
+        return cut;
+    }
+
+    /** Whether anything is on a line right now, for the button that would cut it. */
+    public static boolean isAnyHauling() {
+        return !getHauling().isEmpty();
+    }
+
+    protected static List<HarpoonEntityPlugin> getHauling() {
+        List<HarpoonEntityPlugin> hauling = new ArrayList<>();
+
+        LocationAPI location = Global.getSector().getCurrentLocation();
+        if (location == null) return hauling;
+
+        for (SectorEntityToken token : new ArrayList<>(location.getAllEntities())) {
+            if (!(token.getCustomPlugin() instanceof HarpoonEntityPlugin)) continue;
+
+            HarpoonEntityPlugin harpoon = (HarpoonEntityPlugin) token.getCustomPlugin();
+            if (harpoon.isHauling()) hauling.add(harpoon);
+        }
+
+        return hauling;
     }
 
     /**
@@ -260,7 +332,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         CampaignFleetAPI struck = getHookedFleet();
 
         if (struck == null || player == null) {
-            enter(State.RETURNING);
+            cutLine();
+            return;
+        }
+
+        //both ends have to be in the same place for the distance between them to mean anything. A
+        //fleet that jumps out mid-haul, or a player who does, would otherwise have this subtracting
+        //coordinates from two unrelated spaces and steering somebody towards the result
+        if (struck.getContainingLocation() != entity.getContainingLocation()
+                || player.getContainingLocation() != entity.getContainingLocation()) {
+            cutLine();
             return;
         }
 
@@ -278,7 +359,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 + HarpoonConstants.HAUL_DONE_DISTANCE;
 
         if (met || stateTime >= HarpoonConstants.HAUL_TIME) {
-            enter(State.RETURNING);
+            cutLine();
             return;
         }
 
@@ -303,16 +384,50 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * had to touch the exact middle of a battle group would never connect with one.
      */
     protected CampaignFleetAPI findFleet() {
+        //the line has to be clear of the launcher before it can bury itself in anything that big.
+        //Without this the head tests for hulls on its first frame, from inside the player's own
+        //fleet, and any hull whose radius overlaps where you are standing eats every cast - which
+        //near a market is all of them, and means no fishing at all within sight of one
+        if (distanceOut < HarpoonConstants.FLEET_ARM_DISTANCE) return null;
+
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
-        for (CampaignFleetAPI other : entity.getContainingLocation().getFleets()) {
-            if (other == player || other.isExpired() || !other.isAlive()) continue;
+        CampaignFleetAPI closest = null;
+        float closestDistance = Float.MAX_VALUE;
 
-            float reach = HarpoonConstants.CATCH_RADIUS + other.getRadius();
-            if (Misc.getDistance(entity.getLocation(), other.getLocation()) <= reach) return other;
+        for (CampaignFleetAPI other : entity.getContainingLocation().getFleets()) {
+            if (other == player || !canHook(other)) continue;
+
+            float distance = Misc.getDistance(entity.getLocation(), other.getLocation());
+            if (distance > HarpoonConstants.CATCH_RADIUS + other.getRadius()) continue;
+
+            //nearest rather than whichever the location listed first, so a line through two
+            //overlapping hulls takes the one it actually reached
+            if (distance >= closestDistance) continue;
+
+            closest = other;
+            closestDistance = distance;
         }
 
-        return null;
+        return closest;
+    }
+
+    /**
+     * Whether a fleet is a thing a rope can meaningfully be tied to.
+     * <p>
+     * Most of this list is vanilla's own, from the checks its patrol code makes before picking a
+     * fleet to bother. A station is a fleet that cannot be moved - its position comes from its
+     * orbit, so hauling on one either does nothing or drags the player into it. One in transition
+     * or in a battle is halfway through something that owns its position, one that is hidden or
+     * despawning is not really there, and one already on a line has a rope on it.
+     */
+    protected boolean canHook(CampaignFleetAPI other) {
+        if (other.isExpired() || !other.isAlive()) return false;
+        if (other.isStationMode() || other.isHidden() || other.isDespawning()) return false;
+        if (other.isInHyperspaceTransition()) return false;
+        if (other.getBattle() != null) return false;
+
+        return !other.getMemoryWithoutUpdate().getBoolean(HarpoonConstants.HAULED_FLAG);
     }
 
     /** Line pulls straight, then the catch begins. */

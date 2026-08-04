@@ -79,8 +79,29 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         harpoon.setFacing(angleFromFleet);
     }
 
+    /**
+     * The press cuts the line while one is hauling, and only fires when none is.
+     * <p>
+     * Being towed is the one part of this the player has done to them rather than by them, and a
+     * rope with no way out of it is a cutscene. This is the way out. Ahead of the vanilla path for
+     * the same reason the rod's recall is: a shot leaves the ability on its rearm, and the stretch
+     * a cut is worth asking for is exactly the stretch that would swallow the press.
+     */
+    @Override
+    public void pressButton() {
+        if (entity != null && entity.isPlayerFleet() && HarpoonEntityPlugin.cutAllLines()) {
+            playActivationSound();
+            return;
+        }
+
+        super.pressButton();
+    }
+
     @Override
     public boolean isUsable() {
+        //a line already out can always be cut, whatever the charges or the rearm say about firing
+        if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
+
         return (hasMoteNearby() || hasFleetNearby()) && super.isUsable();
     }
 
@@ -184,7 +205,13 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
             tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);
         }
 
-        if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby()) {
+        if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isAnyHauling()) {
+            tooltip.addPara("A line is out. Activate again to cut it.", highlight, pad);
+        }
+
+        //asked of both, since either is something to fire at - keyed on motes alone this said the
+        //ability could not be used while the button beside it was lit and working
+        if (!Global.CODEX_TOOLTIP_MODE && !hasMoteNearby() && !hasFleetNearby()) {
             tooltip.addPara("Nothing within range to fire at.", Misc.getNegativeHighlightColor(), pad);
         }
 
