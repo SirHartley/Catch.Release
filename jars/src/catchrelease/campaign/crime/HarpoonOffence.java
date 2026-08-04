@@ -11,7 +11,9 @@ import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActionEnvelope
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
 import com.fs.starfarer.api.util.Misc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +30,15 @@ public class HarpoonOffence {
 
     /** Where the record of who has been harpooned, and when, is kept between sessions. */
     public static final String OFFENCES_KEY = "$catchrelease_harpoonOffences";
+
+    /**
+     * The ones nobody has answered for yet, and when they happened.
+     * <p>
+     * Separate from the record above because the two are asked different questions. That one is
+     * history and is never cleared - it is what makes a second harpooning a pattern rather than an
+     * accident. This one is a debt, and a debt is something that can be settled.
+     */
+    public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
 
     /**
      * Set on the fleet that was hit, so anything that talks to it afterwards knows why it is in a
@@ -95,6 +106,7 @@ public class HarpoonOffence {
         if (hits >= HITS_BEFORE_HOSTILE) turnHostile(victim);
 
         remember(faction.getId());
+        owe(faction.getId());
         applyRepLoss(faction.getId());
 
         return true;
@@ -182,21 +194,75 @@ public class HarpoonOffence {
         return Global.getSector().getClock().getElapsedDaysSince(last);
     }
 
+    /** Puts a harpooning on the faction's slate, where it stays until somebody answers for it. */
+    protected static void owe(String factionId) {
+        getOutstanding().put(factionId, Global.getSector().getClock().getTimestamp());
+    }
+
+    /**
+     * Whether this faction is still owed an answer for a harpooning.
+     * <p>
+     * Lapses on its own after the memory window, and clears the entry on the way past rather than
+     * leaving a debt nobody will ever collect sitting in the save.
+     */
+    public static boolean isOutstanding(String factionId) {
+        Long when = getOutstanding().get(factionId);
+        if (when == null) return false;
+
+        if (Global.getSector().getClock().getElapsedDaysSince(when) > MEMORY_DAYS) {
+            getOutstanding().remove(factionId);
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Every faction with a harpooning still to collect on, newest not distinguished from oldest. */
+    public static List<String> getOwedFactions() {
+        List<String> owed = new ArrayList<>();
+
+        //over a copy, because the lapse check writes back into the map it is reading
+        for (String factionId : new ArrayList<>(getOutstanding().keySet())) {
+            if (isOutstanding(factionId)) owed.add(factionId);
+        }
+
+        return owed;
+    }
+
+    /**
+     * Marks a harpooning as answered for - paid, fought over, or otherwise done with.
+     * <p>
+     * Only the debt. The history stays, because settling up is not the same as it never having
+     * happened, and the next one is still the second one.
+     */
+    public static void settle(String factionId) {
+        getOutstanding().remove(factionId);
+    }
+
     /** Whether this particular fleet is one that was harpooned and has not got over it. */
     public static boolean wasHarpooned(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(VICTIM_FLAG);
     }
 
-    @SuppressWarnings("unchecked")
     protected static Map<String, Long> getOffences() {
+        return getMap(OFFENCES_KEY);
+    }
+
+    protected static Map<String, Long> getOutstanding() {
+        return getMap(OUTSTANDING_KEY);
+    }
+
+    /** A faction-to-timestamp map in the save, created on first use. */
+    @SuppressWarnings("unchecked")
+    protected static Map<String, Long> getMap(String key) {
         Map<String, Object> data = Global.getSector().getPersistentData();
 
-        Object stored = data.get(OFFENCES_KEY);
+        Object stored = data.get(key);
         if (stored instanceof Map) return (Map<String, Long>) stored;
 
-        Map<String, Long> offences = new HashMap<>();
-        data.put(OFFENCES_KEY, offences);
+        Map<String, Long> map = new HashMap<>();
+        data.put(key, map);
 
-        return offences;
+        return map;
     }
 }
