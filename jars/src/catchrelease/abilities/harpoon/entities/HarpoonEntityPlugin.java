@@ -1,6 +1,7 @@
 package catchrelease.abilities.harpoon.entities;
 
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
+import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -239,6 +240,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         //with no clock on it would leave that fleet quietly un-hookable for the rest of the game
         struck.getMemoryWithoutUpdate().set(HarpoonConstants.HAULED_FLAG, true,
                 HarpoonConstants.HAULED_FLAG_EXPIRY_DAYS);
+
+        //booked at the hit rather than when the line lets go. Being harpooned is the thing they
+        //object to; whether the rope then dragged them anywhere is our problem, not theirs
+        HarpoonOffence.record(struck);
 
         enter(State.HAULING);
     }
