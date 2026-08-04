@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -99,17 +100,31 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.get(rig) == tackle;
     }
 
-    /** What the next purchase is paid in. Null when it is free or there is nothing left to buy. */
-    public FishRarity getPriceRarity() {
-        return isUpgrade() ? ShopPricing.getRarity(stat) : ShopPricing.getRarity(tackle);
+    /** The next purchase's price. Null when it is free or there is nothing left to buy. */
+    public ShopPricing.Price getPrice() {
+        return isUpgrade() ? ShopPricing.getPrice(stat) : ShopPricing.getPrice(tackle);
     }
 
-    public int getPriceCost() {
-        return isUpgrade() ? ShopPricing.getCost(stat) : ShopPricing.getCost(tackle);
+    /** The colour the ask wears in the UI. Null when the catch half has no rarity to speak of. */
+    public FishRarity getPriceRarity() {
+        ShopPricing.Price price = getPrice();
+
+        return price == null || price.fish == null ? null : price.fish.getDisplayRarity();
     }
 
     public boolean canAfford() {
-        return ShopPricing.canAfford(getPriceRarity(), getPriceCost());
+        ShopPricing.Price price = getPrice();
+        if (price == null) return true;
+
+        if (getPlayerCredits() < price.credits) return false;
+
+        return price.fish == null || FishCurrency.count(price.fish) >= price.fish.count;
+    }
+
+    protected static float getPlayerCredits() {
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return 0f;
+
+        return Global.getSector().getPlayerFleet().getCargo().getCredits().get();
     }
 
     /** Nothing left to sell here: an upgrade at its ceiling, or a tackle already in its slot. */
@@ -123,8 +138,15 @@ public class ShopEntry {
      * @return false if it could not be paid for, in which case nothing changed
      */
     public boolean buy() {
-        if (isDone()) return false;
-        if (!FishCurrency.spend(getPriceRarity(), getPriceCost())) return false;
+        if (isDone() || !canAfford()) return false;
+
+        ShopPricing.Price price = getPrice();
+        if (price != null) {
+            if (price.fish != null && !FishCurrency.spend(price.fish)) return false;
+            if (price.credits > 0) {
+                Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(price.credits);
+            }
+        }
 
         if (isUpgrade()) {
             UpgradeManager.getInstance().addLevels(stat.id, 1);

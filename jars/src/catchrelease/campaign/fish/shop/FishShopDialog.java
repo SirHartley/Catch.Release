@@ -100,6 +100,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         /** Counted once per change rather than once per frame - the purse walks the whole hold. */
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
+        protected int credits = 0;
 
         /**
          * Everything this build put on the panel, by the reference that can actually take it off
@@ -158,6 +159,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void refreshWallet() {
             wallet = FishCurrency.count();
+
+            credits = Global.getSector().getPlayerFleet() == null ? 0
+                    : (int) Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+        }
+
+        @Override
+        public int getCredits() {
+            return credits;
         }
 
         protected void build() {
@@ -350,7 +359,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildBuyButton(info, entry);
         }
 
-        /** The tag: what the next one costs, and whether the hold can cover it. */
+        /** The tag: credits, the catch beside them, and whether the hold can cover it. */
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isMaxed()) {
                 info.addPara("Fully upgraded.", Misc.getPositiveHighlightColor(), 16f);
@@ -362,21 +371,31 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            FishRarity rarity = entry.getPriceRarity();
-            if (rarity == null) {
+            ShopPricing.Price price = entry.getPrice();
+            if (price == null) {
                 info.addPara("No charge for emptying a slot.", Misc.getGrayColor(), 16f);
                 return;
             }
 
-            int cost = entry.getPriceCost();
-            int held = wallet.get(rarity) == null ? 0 : wallet.get(rarity);
+            boolean creditsOk = credits >= price.credits;
 
-            info.addPara("Price: %s", 16f, rarity.color,
-                    cost + " x " + Misc.ucFirst(rarity.name().toLowerCase()) + " specimens");
+            info.addPara("Price: %s", 16f, Misc.getGrayColor(),
+                    creditsOk ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor(),
+                    Misc.getDGSCredits(price.credits));
 
-            info.addPara("In the hold: %s", 4f,
-                    held >= cost ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
-                    String.valueOf(held));
+            if (price.fish != null) {
+                FishRarity rarity = price.fish.getDisplayRarity();
+                int have = FishCurrency.count(price.fish);
+                boolean fishOk = have >= price.fish.count;
+
+                info.addPara("And the catch: %s", 4f, Misc.getGrayColor(),
+                        rarity == null ? Misc.getHighlightColor() : rarity.color,
+                        price.fish.describe());
+
+                info.addPara("Matching aboard: %s", 4f, Misc.getGrayColor(),
+                        fishOk ? Misc.getPositiveHighlightColor() : Misc.getNegativeHighlightColor(),
+                        String.valueOf(have));
+            }
         }
 
         protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
