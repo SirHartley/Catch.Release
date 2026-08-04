@@ -75,8 +75,15 @@ public class FishingMinigame {
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
 
-    public FishingMinigame(FishSpec fish) {
+    /**
+     * The tackle is taken here rather than set afterwards, because everything the tackle changes is
+     * decided in this constructor. Handed over after the fact it arrived too late to be read: the
+     * window was already sized against an empty rig, and the treasure - had it ever been rolled -
+     * would have been rolled against one too.
+     */
+    public FishingMinigame(FishSpec fish, Tackle tackle) {
         this.fish = fish;
+        this.tackle = tackle == null ? Tackle.NONE : tackle;
 
         this.difficulty = fish.difficulty;
         this.motionSpeed = fish.motionSpeed;
@@ -90,6 +97,20 @@ public class FishingMinigame {
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
         this.fishTarget = pickFishTarget();
         this.cannotLose = Global.getSettings().isDevMode();
+
+        rollTreasure();
+    }
+
+    /**
+     * What else is down there this time, if anything.
+     * <p>
+     * Rolled once at the start of a catch. Treasure that could appear at any moment would be a thing
+     * to wait for rather than a thing to react to.
+     */
+    protected void rollTreasure() {
+        treasure = TreasureRoller.rollForTreasure(tackle.treasureChanceMult)
+                ? new MinigameTreasure(TreasureRoller.rollRarity())
+                : null;
     }
 
     /** Puts the fish back at the start with its current numbers - for the dev controls. */
@@ -102,9 +123,7 @@ public class FishingMinigame {
         fishTarget = pickFishTarget();
         progress = FishConstants.MINIGAME_PROGRESS_START;
 
-        treasure = TreasureRoller.rollForTreasure(tackle.treasureChanceMult)
-                ? new MinigameTreasure(TreasureRoller.rollRarity())
-                : null;
+        rollTreasure();
         state = State.RUNNING;
         timeHeld = 0f;
         timeTotal = 0f;
@@ -250,16 +269,11 @@ public class FishingMinigame {
         treasure.advance(amount, covers(treasure.position));
     }
 
-    /** Null when there is nothing down there, which is most catches. */
-    /** Set by whoever opened the catch, before it starts. */
-    public void setTackle(Tackle tackle) {
-        this.tackle = tackle == null ? Tackle.NONE : tackle;
-    }
-
     public Tackle getTackle() {
         return tackle;
     }
 
+    /** Null when there is nothing down there, which is most catches. */
     public MinigameTreasure getTreasure() {
         return treasure;
     }
