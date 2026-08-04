@@ -75,6 +75,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
                 Misc.genUID(), null, HarpoonConstants.ENTITY_ID, null,
                 new HarpoonEntityPlugin.Params(from, new Vector2f(worldTarget)));
 
+        harpoon.addTag(HarpoonConstants.TAG);
         harpoon.setLocation(from.x, from.y);
         harpoon.setFacing(angleFromFleet);
     }
@@ -89,17 +90,48 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
      */
     @Override
     public void pressButton() {
-        if (entity != null && entity.isPlayerFleet() && HarpoonEntityPlugin.cutAllLines()) {
-            playActivationSound();
-            return;
-        }
+        if (cutIfHauling()) return;
 
         super.pressButton();
     }
 
+    /**
+     * No reticule while a line is out, because the press is not a shot then - it is the cut.
+     * <p>
+     * This is what makes the cut reachable from the keyboard at all. The hotkey never arrives at
+     * pressButton while a reticule is wanted: the framework's key listener consumes the key first
+     * and opens an aiming session, so a towed player pressing the ability's number fired a second
+     * harpoon instead of letting go of the first. Answering no here leaves the key unconsumed, the
+     * UI turns it into an ordinary button press, and both inputs end up in the same place.
+     * <p>
+     * It also makes firing while towed impossible rather than merely discouraged - with no reticule
+     * wanted, activation routes to {@link #onActivatedWithoutReticule()}, which cuts.
+     */
+    @Override
+    public boolean showReticuleOnActivation() {
+        return !HarpoonEntityPlugin.isAnyHauling();
+    }
+
+    /** The vanilla activation path, which is where a press lands once the reticule is off. */
+    @Override
+    protected void onActivatedWithoutReticule() {
+        cutIfHauling();
+    }
+
+    protected boolean cutIfHauling() {
+        if (entity == null || !entity.isPlayerFleet()) return false;
+        if (!HarpoonEntityPlugin.cutAllLines()) return false;
+
+        playActivationSound();
+
+        return true;
+    }
+
     @Override
     public boolean isUsable() {
-        //a line already out can always be cut, whatever the charges or the rearm say about firing
+        //a line already out can always be cut, whatever the charges or the rearm say about firing.
+        //Safe to open this far only because showReticuleOnActivation is false at the same time, so
+        //the one thing an activation can do while hauling is let go
         if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
 
         return (hasMoteNearby() || hasFleetNearby()) && super.isUsable();
@@ -111,13 +143,18 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
      * Only a gate on firing. Aim assist is deliberately not extended to fleets: it exists to
      * forgive a shot at a speck that is already almost under the cursor, and a fleet is neither
      * small nor something to be helped into hitting.
+     * <p>
+     * Asks the same question the head will ask when it gets there. Left to its own looser test the
+     * button lit up for stations, for fleets already on somebody's line, and - worse - for hidden
+     * ones, which quietly answered a question about what is out there that the player had not been
+     * given any other way to ask.
      */
     protected boolean hasFleetNearby() {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null) return false;
 
         for (CampaignFleetAPI other : fleet.getContainingLocation().getFleets()) {
-            if (other == fleet || other.isExpired()) continue;
+            if (other == fleet || !HarpoonEntityPlugin.canHook(other)) continue;
 
             float reach = HarpoonConstants.RANGE + other.getRadius();
             if (Misc.getDistance(fleet.getLocation(), other.getLocation()) <= reach) return true;

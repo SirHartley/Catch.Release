@@ -7,6 +7,12 @@ public class HarpoonConstants {
     public static final String ENTITY_ID = "catchrelease_Harpoon";
 
     /**
+     * Carried by every harpoon in flight, so the ones currently out can be found without walking the
+     * location. Anything asked every frame has to be cheap when the answer is no.
+     */
+    public static final String TAG = "catchrelease_harpoon_line";
+
+    /**
      * The charge pool, without a row in the upgrade sheet. Charges rather than a cooldown, so a pass
      * can be spent all at once or held back - which is a more interesting question than whether the
      * timer is up.
