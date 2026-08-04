@@ -60,6 +60,14 @@ public class ShopUi {
         return small;
     }
 
+    /**
+     * Text at the one size a bitmap font is sharp at: its own. Anything else is the texture
+     * scaled, which is the blur.
+     */
+    public static LazyFont.DrawableString createText(LazyFont font, String text) {
+        return font.createText(text, java.awt.Color.WHITE, font.getBaseHeight());
+    }
+
     public static Color withAlpha(Color color, float alpha) {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(),
                 (int) MathUtils.clamp(alpha * 255f, 0f, 255f));

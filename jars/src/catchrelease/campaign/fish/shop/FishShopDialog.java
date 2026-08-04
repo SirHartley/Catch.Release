@@ -271,7 +271,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             ShopEntry.Kind[] kinds = ShopEntry.Kind.values();
             for (int i = 0; i < kinds.length; i++) {
                 addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
-                        kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2", 15f,
+                        kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2",
                         false, PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
@@ -280,17 +280,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
-                addTab(groups[i], groups[i].tabTitle, "placeholder", 14f,
+                addTab(groups[i], groups[i].tabTitle, "placeholder",
                         true, PAD + i * (categoryWidth + TAB_GAP), categoryTop,
                         categoryWidth, CATEGORY_TAB_HEIGHT);
             }
         }
 
-        protected void addTab(Object data, String label, String iconId, float textSize,
+        protected void addTab(Object data, String label, String iconId,
                               boolean vertical, float x, float y, float width, float height) {
 
             CustomPanelAPI tab = panel.createCustomPanel(width, height,
-                    new ShopTabPlugin(data, label, iconId, textSize, vertical, this));
+                    new ShopTabPlugin(data, label, iconId, vertical, this));
 
             panel.addComponent(tab).inTL(x, y);
             added.add(tab);
