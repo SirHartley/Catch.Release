@@ -8,6 +8,28 @@ public class PondConstants {
     public static final float MIN_EMPTY_RADIUS_AROUND_POND = 1000;
     public static final float MIN_DISTANCE = 10000f;
     public static final float DIST_PER_FITTING_ATTEMPT = 500f; //technical
+
+    /**
+     * How far one rupture has to be from the next.
+     * <p>
+     * Nothing measured this before - a spot was only ever checked against planets, so the second
+     * pond in a system was free to land on the first, and did. Generous, because two of them within
+     * sight of each other makes the cast a choice of which one rather than where in one.
+     */
+    public static final float MIN_POND_SEPARATION = 6000f;
+
+    /**
+     * How far clear of a nebula tile a rupture has to sit.
+     * <p>
+     * Handed to the nebula's own containsPoint, which walks its tiles - so this is clearance from
+     * the cloud where it actually is, not from the middle of the terrain that owns it. A rupture
+     * inside one is invisible under the cloud and unreachable through the slowdown around it.
+     */
+    public static final float MIN_NEBULA_CLEARANCE = 1200f;
+
+    /** Bearings tried per ring, and rings tried before the search gives up and takes what it has. */
+    public static final float FITTING_ANGLE_STEP = 5f;
+    public static final int MAX_FITTING_ATTEMPTS = 120;
     public static final int MIN_POND_AMT_PER_SYSTEM = 1;
     public static final int PLANETS_PER_ADDITIONAL_POND = 4;
 
