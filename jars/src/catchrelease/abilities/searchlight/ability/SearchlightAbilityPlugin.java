@@ -220,10 +220,46 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
 
-        tooltip.addPara("TODO: Upgrade information", pad
-        );
+        addUpgradesToTooltip(tooltip, pad);
 
         addIncompatibleToTooltip(tooltip, expanded);
+    }
+
+    /**
+     * What has been fitted, and only what has been fitted.
+     * <p>
+     * A rig with nothing bought says nothing here rather than listing four zeroes - the shop is
+     * where you go to find out what is for sale, and a tooltip that reads like a price list every
+     * time you hover the button is a tooltip nobody finishes reading.
+     */
+    protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
+        Color highlight = Misc.getHighlightColor();
+
+        int lights = getSearchlightNum();
+        tooltip.addPara("Sweeping with %s, each reaching %s.", pad, highlight,
+                lights == 1 ? "one light" : lights + " lights",
+                (int) Searchlight.getArea() + " units");
+
+        float track = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
+        if (track > 0f) {
+            tooltip.addPara("Whatever the light passes over stays marked for %s afterwards.",
+                    3f, highlight, Misc.getRoundedValue(track) + " seconds");
+        }
+
+        int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
+        if (identify == 1) {
+            tooltip.addPara("A mark carries some hint of how rare the thing under it is.",
+                    Misc.getGrayColor(), 3f);
+        } else if (identify > 1) {
+            tooltip.addPara("A mark is coloured by exactly how rare the thing under it is.",
+                    Misc.getGrayColor(), 3f);
+        }
+
+        float rare = UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
+        if (rare > 0f) {
+            tooltip.addPara("Rarer species are more likely to be down there to begin with.",
+                    Misc.getGrayColor(), 3f);
+        }
     }
 
     public boolean isUsable() {
