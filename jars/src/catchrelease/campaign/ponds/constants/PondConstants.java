@@ -66,7 +66,17 @@ public class PondConstants {
     public static final int DEPTH_PARTICLES = 90;
     public static final float DEPTH_SPIN_MIN = 1.5f;
     public static final float DEPTH_SPIN_MAX = 6f;
-    public static final float DEPTH_COUNTER_SHARE = 0.25f;
+    public static final float DEPTH_COUNTER_SHARE = 0.1f;
+
+    /**
+     * The drain. Radius lost per second (before the depth speed scaling), depth lost per second,
+     * how much extra turn a particle picks up by the middle, and the radius at which the drain
+     * takes it and it starts over at the rim.
+     */
+    public static final float DEPTH_SINK_RADIUS = 0.045f;
+    public static final float DEPTH_SINK_DEPTH = 0.03f;
+    public static final float DEPTH_SWIRL_BOOST = 2.2f;
+    public static final float DEPTH_DRAIN = 0.08f;
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
     public static final float DEPTH_REACH_FLOOR = 0.7f;
     public static final float DEPTH_FILL = 1.15f;

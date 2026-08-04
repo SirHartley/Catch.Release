@@ -21,6 +21,11 @@ import java.awt.Color;
  * larger, brighter, warmer and quicker. Because they all circle the same middle at speeds that
  * differ by depth, they slide across each other continuously - which is motion parallax, and it does
  * not care whether the camera is moving.
+ * <p>
+ * And they do not merely circle: they drain. Every particle spirals slowly inward, turning faster
+ * the closer to the middle it gets and sinking as it goes - dimmer, smaller, bluer - until the
+ * drain takes it and it starts again out at the rim, near the surface. The eye follows the spiral
+ * down, which is the pull the whole pond wants.
  */
 public class PondDepthField {
 
@@ -49,22 +54,35 @@ public class PondDepthField {
         particles = new Particle[PondConstants.DEPTH_PARTICLES];
 
         for (int i = 0; i < particles.length; i++) {
-            particles[i] = spawn();
+            particles[i] = spawn(true);
         }
     }
 
-    protected Particle spawn() {
+    /**
+     * @param anywhere true for the first fill, which scatters particles through the whole well so
+     *                 the spiral does not start as one ring marching in; a respawn starts at the
+     *                 rim near the surface, where the drain delivered it
+     */
+    protected Particle spawn(boolean anywhere) {
         Particle p = new Particle();
 
-        p.depth = MathUtils.getRandomNumberInRange(0f, 1f);
         p.angle = MathUtils.getRandomNumberInRange(0f, 360f);
 
-        //square-rooted, or every particle bunches into the middle where the area is smallest
-        p.radius = (float) Math.sqrt(MathUtils.getRandomNumberInRange(0f, 1f));
+        if (anywhere) {
+            p.depth = MathUtils.getRandomNumberInRange(0f, 1f);
+
+            //square-rooted, or every particle bunches into the middle where the area is smallest
+            p.radius = (float) Math.sqrt(MathUtils.getRandomNumberInRange(0f, 1f));
+        } else {
+            p.depth = MathUtils.getRandomNumberInRange(0.85f, 1f);
+            p.radius = MathUtils.getRandomNumberInRange(0.92f, 1.05f);
+        }
 
         p.size = MathUtils.getRandomNumberInRange(0.6f, 1.4f);
         p.phase = MathUtils.getRandomNumberInRange(0f, 6.283f);
 
+        //one direction, near enough: a whirlpool that cannot decide which way it turns is two
+        //effects fighting, and the few counter-spinners are texture rather than argument
         p.spin = MathUtils.getRandomNumberInRange(PondConstants.DEPTH_SPIN_MIN, PondConstants.DEPTH_SPIN_MAX)
                 * (MathUtils.getRandomNumberInRange(0f, 1f) < PondConstants.DEPTH_COUNTER_SHARE ? -1f : 1f);
 
@@ -75,16 +93,32 @@ public class PondDepthField {
     }
 
     /**
-     * A shallow particle moves faster than a deep one at the same distance out, which is the whole
-     * trick: the layers shear against each other and the eye reads the difference as distance.
+     * A shallow particle moves faster than a deep one at the same distance out - the layers shear
+     * and the eye reads distance - and every particle is on its way down the drain: inward a
+     * little each second, turning harder the nearer the middle it gets, sinking as it goes. One
+     * that reaches the drain starts over at the rim.
      */
     public void advance(float amount) {
         time += amount;
 
-        for (Particle p : particles) {
-            p.angle += p.spin * getSpeedMult(p) * amount;
+        for (int i = 0; i < particles.length; i++) {
+            Particle p = particles[i];
+            float mult = getSpeedMult(p);
+
+            //the vortex: angular speed climbs as the radius falls, the way water actually drains
+            float vortex = 1f + PondConstants.DEPTH_SWIRL_BOOST
+                    * (1f - MathUtils.clamp(p.radius, 0f, 1f));
+
+            p.angle += p.spin * mult * vortex * amount;
             if (p.angle > 360f) p.angle -= 360f;
             if (p.angle < 0f) p.angle += 360f;
+
+            p.radius -= PondConstants.DEPTH_SINK_RADIUS * mult * amount;
+            p.depth = MathUtils.clamp(p.depth - PondConstants.DEPTH_SINK_DEPTH * amount, 0f, 1f);
+
+            if (p.radius <= PondConstants.DEPTH_DRAIN || p.depth <= 0.02f) {
+                particles[i] = spawn(false);
+            }
         }
     }
 
