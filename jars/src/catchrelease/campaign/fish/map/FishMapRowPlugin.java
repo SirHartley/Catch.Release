@@ -13,9 +13,10 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * One species in the map's sidebar, in the shop list's language: a rarity swatch, the name, and
- * what the log has on it at the right-hand end. Clicking one asks the map to go there - a list
- * beside a map that cannot point at the map is a legend, not a control.
+ * One species in the map's list, in the shop rows' language: an accent bar down the left edge in
+ * the rarity's colour, the name, and one quiet word at the right end for what the log has on it.
+ * Clicking one points the map there and keeps the bar lit while the map is pointed at it - a
+ * list beside a map that cannot point at the map is a legend, not a control.
  */
 public class FishMapRowPlugin extends BaseCustomUIPanelPlugin {
 
@@ -23,11 +24,13 @@ public class FishMapRowPlugin extends BaseCustomUIPanelPlugin {
     public interface Host {
         void onRowClicked(FishSpec spec);
 
+        boolean isSelectedRow(FishSpec spec);
+
         PositionAPI getListViewport();
     }
 
     public static final float PAD_SIDE = 8f;
-    public static final float SWATCH = 8f;
+    public static final float ACCENT_WIDTH = 3f;
 
     protected final FishSpec spec;
     protected final String status;
@@ -65,13 +68,16 @@ public class FishMapRowPlugin extends BaseCustomUIPanelPlugin {
 
         ShopUi.startClip(view.getX(), view.getY(), view.getWidth(), view.getHeight());
 
-        boolean hovered = isMouseOver();
+        boolean selected = host.isSelectedRow(spec);
+        boolean hovered = !selected && isMouseOver();
 
-        ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
-                (hovered ? 0.3f : 0.12f) * alphaMult);
+        float field = selected ? 0.4f : hovered ? 0.3f : 0.12f;
+        ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), field * alphaMult);
 
-        ShopUi.drawQuad(Math.round(x + PAD_SIDE), Math.round(y + (height - SWATCH) * 0.5f),
-                SWATCH, SWATCH, spec.rarity.color, 0.9f * alphaMult);
+        //the rarity holds the left edge the way a shop row's bar does - brighter the more the
+        //row is meant, but never gone, since this colour is what the map's lights are keyed to
+        float accent = selected ? 0.9f : hovered ? 0.6f : 0.3f;
+        ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, spec.rarity.color, accent * alphaMult);
 
         LazyFont body = ShopUi.getBodyFont();
         if (body != null) {
@@ -80,9 +86,9 @@ public class FishMapRowPlugin extends BaseCustomUIPanelPlugin {
                 name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
-            name.setBaseColor(ShopUi.withAlpha(
-                    hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(), alphaMult));
-            name.draw(Math.round(x + PAD_SIDE * 2f + SWATCH),
+            Color color = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+            name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+            name.draw(Math.round(x + ACCENT_WIDTH + PAD_SIDE),
                     Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
         }
 
