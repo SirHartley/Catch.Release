@@ -1,7 +1,6 @@
 package catchrelease.abilities.rod.ability;
 
 import catchrelease.ModPlugin;
-import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -65,8 +64,10 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public SkillshotRenderer createReticule() {
-        //sized to the ring the drones will fly, so the reticule shows exactly what the cast covers
-        float radius = RodConstants.DRONE_ORBIT_RADIUS * 2f;
+        //sized to the ring the swarm fishes rather than the tight circle it patrols, so the reticule
+        //shows what the cast will actually cover. Doubled because the reticule takes a diameter, and
+        //read off the upgrade so a wider ring is visible while aiming rather than only afterwards
+        float radius = FishingDroneSwarmScript.getRingRadius() * 2f;
         return new ValidatedAreaReticuleRenderer(radius, new PondProximityValidator(radius));
     }
 

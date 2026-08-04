@@ -143,13 +143,19 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     /**
-     * How far past the ring a drone will follow something.
+     * How far past the ring a drone will notice something, and follow it.
      * <p>
-     * Zero by default, which is what makes the ring a boundary rather than a suggestion. Buying it
-     * up lets a drone finish a chase that leaves the ring instead of turning back on the line.
+     * Not zero by default any more. A ring that was a hard boundary meant a drone only moved once a
+     * mote was already inside it, and by then the mote is drifting across ground the drone still has
+     * to cover - the swarm read as slow because it was always starting late. A little reach past the
+     * line lets one set off to meet a mote on its way in.
+     * <p>
+     * Buying it up widens that reach, and lets a drone finish a chase that leaves the ring instead
+     * of turning back on the line.
      */
     public static float getChaseMargin() {
-        return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN, 0f);
+        return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN,
+                RodConstants.CHASE_MARGIN_FALLBACK);
     }
 
     @Override
@@ -289,8 +295,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             SectorEntityToken mote = plugin.getChaseTarget();
             if (mote == null) continue;
 
-            //drifted back out of the ring - let it go rather than chasing it across the system
-            if (Misc.getDistance(mote.getLocation(), target) > RodConstants.DRONE_ORBIT_RADIUS) {
+            //drifted back out of the ring - let it go rather than chasing it across the system.
+            //Measured against the ring the swarm fishes, which is what sent the drone out in the
+            //first place: tested against the orbit instead, every chase beyond that tight inner
+            //circle was called off the frame after it began, so a mote that wandered in was picked
+            //up and dropped rather than caught
+            if (Misc.getDistance(mote.getLocation(), target) > getRingRadius() + getChaseMargin()) {
                 plugin.returnToOrbit();
                 continue;
             }
