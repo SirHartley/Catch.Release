@@ -75,20 +75,15 @@ public class FishingMinigameLayout {
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
         boxY = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
 
-        frameX = trackX - FishConstants.MINIGAME_FRAME_PAD;
+        //the extra is on the frame alone - the track and meter hold their ground, the frame
+        //reaches further left around them
+        frameX = trackX - FishConstants.MINIGAME_FRAME_PAD - FishConstants.MINIGAME_FRAME_EXTRA_LEFT;
         frameY = trackY - FishConstants.MINIGAME_FRAME_PAD;
-        frameWidth = totalWidth + FishConstants.MINIGAME_FRAME_PAD * 2f;
+        frameWidth = totalWidth + FishConstants.MINIGAME_FRAME_PAD * 2f
+                + FishConstants.MINIGAME_FRAME_EXTRA_LEFT;
         frameHeight = trackHeight + FishConstants.MINIGAME_FRAME_PAD * 2f;
     }
 
-    /**
-     * Drops the readout's content column to the middle of its panel. The panel is taller than the
-     * column ever is, and a column pinned to the top left the difference as a void under the last
-     * line; centred, the spare height splits evenly, the way the playfield sits in its own panel.
-     * <p>
-     * The height has to come from the readout, since only it knows its fonts and how many lines it
-     * ended up with. {@code boxY} stays at its top-anchored default until this is called.
-     */
     /**
      * Widens the readout's panel to hold something too wide for it, and puts the column back in the
      * middle of whatever width that leaves.
@@ -109,9 +104,22 @@ public class FishingMinigameLayout {
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
     }
 
-    public void centerResultContent(float contentHeight) {
-        float centeredTop = panelY + (panelHeight + contentHeight) * 0.5f;
-        float highestTop = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD;
+    /**
+     * Drops the readout's content column to the middle of its panel. The panel is taller than the
+     * column ever is, and a column pinned to the top left the difference as a void under the last
+     * line; centred, the spare height splits evenly, the way the playfield sits in its own panel.
+     * <p>
+     * The height has to come from the readout, since only it knows its fonts and how many lines it
+     * ended up with. {@code boxY} stays at its top-anchored default until this is called.
+     *
+     * @param headroom space to keep clear above the box, for anything that floats over it - the
+     *                 record banner. Centred as part of the column and held inside the pad, so the
+     *                 floater neither unbalances the card nor gets pushed off the top of it.
+     */
+    public void centerResultContent(float contentHeight, float headroom) {
+        float total = contentHeight + headroom;
+        float centeredTop = panelY + (panelHeight + total) * 0.5f - headroom;
+        float highestTop = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - headroom;
 
         boxY = Math.min(centeredTop, highestTop) - boxSize;
     }
@@ -123,5 +131,19 @@ public class FishingMinigameLayout {
 
     public float getTrackCenterX() {
         return trackX + trackWidth * 0.5f;
+    }
+
+    /**
+     * The middle of the readout's cargo-square - where the specimen is shown, and so where anything
+     * about the specimen should centre itself. Only settled once the readout has laid itself out;
+     * before {@code fitResultContent} and {@code centerResultContent} run this is the top-anchored
+     * default.
+     */
+    public float getBoxCenterX() {
+        return boxX + boxSize * 0.5f;
+    }
+
+    public float getBoxCenterY() {
+        return boxY + boxSize * 0.5f;
     }
 }

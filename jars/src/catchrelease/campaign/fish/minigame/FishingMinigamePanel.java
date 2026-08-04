@@ -132,12 +132,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (result == null) {
             result = new CatchResultPanel(specimen, where, method, treasureTaken, treasureRarity);
 
-            //from the middle of the track, which is where the specimen is shown - not from wherever
-            //in the track it happened to be when it was landed
+            //no centre handed over: the celebration reads it off the layout at render time, once
+            //the readout has settled where its specimen actually is
             if (CatchReleaseSettings.isCelebrationEnabled()) {
-                celebration = new CatchCelebration(minigame.getFish(),
-                        layout == null ? 0f : layout.getTrackCenterX(),
-                        layout == null ? 0f : layout.getTrackY(0.5f));
+                celebration = new CatchCelebration(minigame.getFish());
             }
         }
 
@@ -234,9 +232,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderTreasure(layout, alphaMult);
         renderMeter(layout, alphaMult);
 
-        //over everything, since they are the thing being looked at once they are up
-        if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
+        //the readout first: rendering it is what settles the card's geometry, and the celebration
+        //centres on the card's specimen - so it has to read a settled layout, and it has to draw
+        //over the card or the flourish would be buried under the thing it is pointing at
         if (result != null) result.render(layout, getFishSprite(), alphaMult);
+        if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
     /**

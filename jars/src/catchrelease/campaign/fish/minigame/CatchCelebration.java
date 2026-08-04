@@ -15,8 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What happens when the fish is landed: a flash behind it, the specimen rising out of the track,
- * confetti, and the word for it at an angle.
+ * What happens when the fish is landed: a flash behind it, the specimen growing over the catch
+ * card's cargo-square, confetti, and the word for it at an angle.
+ * <p>
+ * Centred on the card's specimen rather than the track - the card is where the eye goes the moment
+ * the fish is landed, and the flourish should land where the eye is. The centre is read off the
+ * layout every frame, after the card has settled it, so there is exactly one source of it.
  * <p>
  * Driven by one clock. Everything reads its own timing off that rather than keeping its own, so the
  * whole thing can be retimed from {@link FishConstants#CELEBRATION_TIME} without any part of it
@@ -40,12 +44,12 @@ public class CatchCelebration {
     transient protected LazyFont.DrawableString text;
     transient protected boolean fontChecked = false;
 
-    public CatchCelebration(FishSpec fish, float centerX, float centerY) {
-        this.fish = fish;
+    /** Set once the confetti has been thrown - which is on first render, not construction, because
+     * only a layout the card has settled knows where the burst should come from. */
+    protected boolean confettiSpawned = false;
 
-        for (int i = 0; i < FishConstants.CELEBRATION_CONFETTI; i++) {
-            confetti.add(spawn(centerX, centerY, fish));
-        }
+    public CatchCelebration(FishSpec fish) {
+        this.fish = fish;
 
         playHook(FishConstants.SOUND_CATCH);
     }
@@ -124,8 +128,17 @@ public class CatchCelebration {
         float alpha = alphaMult * MathUtils.clamp(fade, 0f, 1f);
         if (alpha <= 0f) return;
 
-        float centerX = layout.getTrackCenterX();
-        float centerY = layout.trackY + layout.trackHeight * 0.5f;
+        //the card's specimen, not the track - and read here, each frame, so the burst follows
+        //wherever the card's own layout put the box this frame
+        float centerX = layout.getBoxCenterX();
+        float centerY = layout.getBoxCenterY();
+
+        if (!confettiSpawned) {
+            confettiSpawned = true;
+            for (int i = 0; i < FishConstants.CELEBRATION_CONFETTI; i++) {
+                confetti.add(spawn(centerX, centerY, fish));
+            }
+        }
 
         renderFlash(centerX, centerY, progress, alpha);
         renderBacklight(centerX, centerY, progress, alpha);
@@ -172,9 +185,9 @@ public class CatchCelebration {
     }
 
     /**
-     * The specimen itself, in the middle of the track and growing as it comes.
+     * The specimen itself, over the card's cargo-square and growing as it comes.
      * <p>
-     * In the middle rather than lifted out of it: the fish is the thing being looked at, and it was
+     * On the centre rather than lifted off it: the fish is the thing being looked at, and it was
      * being drawn away from the light that was meant to be behind it.
      */
     protected void renderFish(SpriteAPI sprite, float centerX, float centerY, float progress, float alpha) {
