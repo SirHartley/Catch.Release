@@ -15,8 +15,18 @@ public class RodConstants {
      * The ring the swarm fishes inside, when the upgrade sheet has no row for it. Every real read
      * goes through the upgrade, so this is the number a save with a missing sheet falls back to
      * rather than the number the game normally uses.
+     * <p>
+     * Kept well under {@code PondConstants.POND_RADIUS}. At four hundred against a pond of five
+     * this covered most of the water from wherever it was dropped, and a cast that catches
+     * everything is not a cast - the aim stops being a decision.
      */
-    public static final float RING_RADIUS_FALLBACK = 400f;
+    public static final float RING_RADIUS_FALLBACK = 150f;
+
+    /**
+     * How far past that ring a drone still reacts, without the upgrade. See
+     * {@code FishingDroneSwarmScript.getChaseMargin()} for why this is not zero.
+     */
+    public static final float CHASE_MARGIN_FALLBACK = 40f;
 
     /** World units per second on the way out and the way home. */
     public static final float DRONE_SPEED = 300f;
