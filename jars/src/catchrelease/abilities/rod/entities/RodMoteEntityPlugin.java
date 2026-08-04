@@ -108,6 +108,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         LunaCampaignRenderer.addRenderer(flash);
 
         RippleData data = new RippleData(entity.getLocation(), 0.1f, 0.3f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,600f,4f, 2.5f, 0.05f, 3); //magic bullshit go
+        data.home = entity.getContainingLocation();
         ripples = new SimpleRippleDataRunner(data);
         entity.addScript(ripples);
 
