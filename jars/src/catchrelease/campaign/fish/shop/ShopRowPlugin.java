@@ -99,7 +99,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         if (font == null) return;
 
         if (name == null) {
-            name = font.createText(entry.getName(), Color.WHITE, TEXT_SIZE);
+            name = font.createText(entry.getListName(), Color.WHITE, TEXT_SIZE);
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 

@@ -16,7 +16,7 @@ import java.util.List;
  * One tab over the shelf list, drawn in the rows' own language: a quiet field that lights under
  * the mouse and holds bright while it is the open one, with its mark - the underline along its
  * bottom edge - where a row carries its bar down the side. The main pair wear an icon beside the
- * label; the gear row is too narrow for one and says its word alone.
+ * label; the gear row wears its icon over the word, being taller than it is wide has any use for.
  */
 public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
@@ -35,17 +35,20 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
     protected final String label;
     protected final String iconId;
     protected final float textSize;
+    protected final boolean vertical;
     protected final Host host;
 
     protected PositionAPI pos;
 
     protected transient LazyFont.DrawableString text;
 
-    public ShopTabPlugin(Object id, String label, String iconId, float textSize, Host host) {
+    public ShopTabPlugin(Object id, String label, String iconId, float textSize, boolean vertical,
+                         Host host) {
         this.id = id;
         this.label = label;
         this.iconId = iconId;
         this.textSize = textSize;
+        this.vertical = vertical;
         this.host = host;
     }
 
@@ -84,22 +87,36 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         }
 
         SpriteAPI icon = iconId == null ? null : SpriteLoader.getSprite(iconId);
+        Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+        text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+
+        if (vertical && icon != null) {
+            //the icon over the word, for a tab that is taller than it is wide has any use for
+            icon.setSize(ICON_SIZE, ICON_SIZE);
+            icon.setColor(color);
+            icon.setNormalBlend();
+            icon.setAlphaMult(alphaMult);
+            icon.renderAtCenter(Math.round(x + width * 0.5f),
+                    Math.round(y + height - ACCENT_HEIGHT - 4f - ICON_SIZE * 0.5f));
+
+            //on the pixel, since a bitmap font off the pixel is what blur is
+            text.draw(Math.round(x + (width - text.getWidth()) * 0.5f),
+                    Math.round(y + 3f + text.getHeight()));
+            return;
+        }
+
         float contentWidth = text.getWidth() + (icon == null ? 0f : ICON_SIZE + ICON_GAP);
         float left = x + (width - contentWidth) * 0.5f;
 
         if (icon != null) {
             icon.setSize(ICON_SIZE, ICON_SIZE);
-            icon.setColor(active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor());
+            icon.setColor(color);
             icon.setNormalBlend();
             icon.setAlphaMult(alphaMult);
             icon.renderAtCenter(Math.round(left + ICON_SIZE * 0.5f), Math.round(y + height * 0.5f));
 
             left += ICON_SIZE + ICON_GAP;
         }
-
-        Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-
-        text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
         //on the pixel, since a bitmap font off the pixel is what blur is
         text.draw(Math.round(left), Math.round(y + height * 0.5f + text.getHeight() * 0.5f));

@@ -57,7 +57,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float DETAIL_GAP = 14f;
 
     public static final float MAIN_TAB_HEIGHT = 28f;
-    public static final float CATEGORY_TAB_HEIGHT = 24f;
+    public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
 
     /** Opens the outfitter, if the UI will have it. */
@@ -134,8 +134,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
 
-            //the sheet documents its own format with a row, which is not a thing for sale
+            //the sheet documents its own format with a row, which is not a thing for sale - and the
+            //catch's own tuning stats are not equipment, so the shop does not stock them at all
             stats.removeIf(stat -> stat.id == null || stat.id.equalsIgnoreCase("example"));
+            stats.removeIf(stat -> ShopGroup.forStat(stat) == ShopGroup.THE_CATCH);
             stats.sort(Comparator.comparing(stat -> stat.id));
 
             for (ShopGroup group : ShopGroup.values()) {
@@ -144,12 +146,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 }
             }
 
+            //the empty slot first: the way out of every module is the first thing on the shelf
             for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON}) {
+                entries.add(ShopEntry.of(Tackle.NONE, rig));
+
                 for (Tackle tackle : TackleManager.getOptions(rig)) {
                     if (tackle != Tackle.NONE) entries.add(ShopEntry.of(tackle, rig));
                 }
-
-                entries.add(ShopEntry.of(Tackle.NONE, rig));
             }
         }
 
@@ -215,7 +218,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
             return tab == ShopEntry.Kind.UPGRADE
                     ? new ShopGroup[]{ShopGroup.SEARCHLIGHTS, ShopGroup.DRONES, ShopGroup.HARPOON,
-                            ShopGroup.DEPTH_BOMBS, ShopGroup.THE_CATCH}
+                            ShopGroup.DEPTH_BOMBS}
                     : new ShopGroup[]{ShopGroup.DRONE_TACKLE, ShopGroup.HARPOON_TIPS};
         }
 
@@ -249,7 +252,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             for (int i = 0; i < kinds.length; i++) {
                 addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
                         kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2", 15f,
-                        PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
+                        false, PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
             float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
@@ -257,17 +260,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
-                addTab(groups[i], groups[i].tabTitle, null, 13f,
-                        PAD + i * (categoryWidth + TAB_GAP), categoryTop,
+                addTab(groups[i], groups[i].tabTitle, "placeholder", 14f,
+                        true, PAD + i * (categoryWidth + TAB_GAP), categoryTop,
                         categoryWidth, CATEGORY_TAB_HEIGHT);
             }
         }
 
         protected void addTab(Object data, String label, String iconId, float textSize,
-                              float x, float y, float width, float height) {
+                              boolean vertical, float x, float y, float width, float height) {
 
             CustomPanelAPI tab = panel.createCustomPanel(width, height,
-                    new ShopTabPlugin(data, label, iconId, textSize, this));
+                    new ShopTabPlugin(data, label, iconId, textSize, vertical, this));
 
             panel.addComponent(tab).inTL(x, y);
             added.add(tab);

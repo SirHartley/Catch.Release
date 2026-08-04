@@ -55,6 +55,26 @@ public class ShopEntry {
         return Misc.ucFirst(stat.id.replace('_', ' '));
     }
 
+    /**
+     * The name as the list says it, with the gear prefix cut off - the shelf already says which
+     * gear this is, and "Searchlight area" under a searchlight tab is the word searchlight three
+     * times. The detail pane keeps the full name, since it stands alone over there.
+     */
+    public String getListName() {
+        if (kind == Kind.TACKLE) return tackle.name;
+
+        String id = stat.id;
+        for (String prefix : new String[]{"searchlight_", "fishing_drone_", "drone_",
+                "harpoon_", "bomb_", "fishing_", "minigame_"}) {
+            if (id.startsWith(prefix) && id.length() > prefix.length()) {
+                id = id.substring(prefix.length());
+                break;
+            }
+        }
+
+        return Misc.ucFirst(id.replace('_', ' '));
+    }
+
     public String getDescription() {
         return kind == Kind.TACKLE ? tackle.description : stat.description;
     }
