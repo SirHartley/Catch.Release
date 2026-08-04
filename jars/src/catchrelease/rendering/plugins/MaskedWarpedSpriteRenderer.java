@@ -19,8 +19,15 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uMaskTex = -1;
     private transient int uAlphaMult = -1;
     private transient int uMaskThreshold = -1;
+    private transient int uSwirl = -1;
+    private transient int uSwirlSpin = -1;
+    private transient int uMaskToFill = -1;
 
     private float maskThreshold = 0f;
+
+    /** The whirlpool, off unless a caller turns it. Twist at the drain, and the vortex's rotation. */
+    private float swirl = 0f;
+    private float swirlSpin = 0f;
 
     public MaskedWarpedSpriteRenderer(WarpGrid warp) {
         this.warp = warp;
@@ -28,6 +35,15 @@ public class MaskedWarpedSpriteRenderer {
 
     public void setMaskThreshold(float threshold) {
         this.maskThreshold = threshold;
+    }
+
+    /**
+     * Turns the whirlpool. Twist is radians at the middle of the mask; spin is how far the whole
+     * vortex has rotated - the caller's clock times its rate, fed per frame.
+     */
+    public void setSwirl(float twist, float spin) {
+        this.swirl = twist;
+        this.swirlSpin = spin;
     }
 
     public void render(SpriteAPI fillSprite,
@@ -55,6 +71,8 @@ public class MaskedWarpedSpriteRenderer {
 
         if (uAlphaMult >= 0) GL20.glUniform1f(uAlphaMult, alphaMult);
         if (uMaskThreshold >= 0) GL20.glUniform1f(uMaskThreshold, maskThreshold);
+        if (uSwirl >= 0) GL20.glUniform1f(uSwirl, swirl);
+        if (uSwirlSpin >= 0) GL20.glUniform1f(uSwirlSpin, swirlSpin);
 
         // unit0 = fill
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -76,6 +94,12 @@ public class MaskedWarpedSpriteRenderer {
         // Used to convert world-space warp offsets into fill texcoord offsets
         float fillUvPerWorldX = fillTW / fillSize;
         float fillUvPerWorldY = fillTH / fillSize;
+
+        //a whole mask-width of offset, said in fill texcoords - the swirl is computed in the
+        //mask's own round space and lands on the fill through this
+        if (uMaskToFill >= 0) {
+            GL20.glUniform2f(uMaskToFill, maskSize * fillUvPerWorldX, maskSize * fillUvPerWorldY);
+        }
 
         GL11.glPushMatrix();
         GL11.glTranslatef(center.x - w * 0.5f, center.y - h * 0.5f, 0f);
@@ -207,6 +231,9 @@ public class MaskedWarpedSpriteRenderer {
         uMaskTex = GL20.glGetUniformLocation(program, "maskTex");
         uAlphaMult = GL20.glGetUniformLocation(program, "alphaMult");
         uMaskThreshold = GL20.glGetUniformLocation(program, "maskThreshold");
+        uSwirl = GL20.glGetUniformLocation(program, "swirl");
+        uSwirlSpin = GL20.glGetUniformLocation(program, "swirlSpin");
+        uMaskToFill = GL20.glGetUniformLocation(program, "maskToFill");
 
         if (uTex >= 0) GL20.glUniform1i(uTex, 0);
         if (uMaskTex >= 0) GL20.glUniform1i(uMaskTex, 1);
