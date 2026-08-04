@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.spawner;
 
+import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -70,13 +71,39 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
+    /**
+     * Just past what the lights can see, rather than a number picked to sound far away.
+     * <p>
+     * This was fixed at a distance chosen before the lights were, and the two never met: the beams
+     * reach a little over a thousand units and nothing was ever seeded inside sixteen hundred, so
+     * every mote the player ever found had wandered several hundred units inward on its own. That is
+     * why so few turned up. Measured off the lights now, so it stays just out of sight when the
+     * area upgrade widens them instead of falling inside the beam.
+     */
+    protected static float getSpawnMinRange() {
+        return Searchlight.getMaxReach() + FishConstants.BURIED_SPAWN_CLEARANCE;
+    }
+
+    /**
+     * And a band rather than the whole surrounding disc. Seeded out to the old range most of them
+     * sat too far out to ever drift in, so the population was real and unreachable at the same time.
+     */
+    protected static float getSpawnMaxRange() {
+        return getSpawnMinRange() + FishConstants.BURIED_SPAWN_BAND;
+    }
+
+    /** Everything inside the band counts towards the population, so the target is what is reachable. */
+    protected static float getPopulationRange() {
+        return getSpawnMaxRange();
+    }
+
     protected List<SectorEntityToken> getNearby(LocationAPI location, Vector2f around) {
         List<SectorEntityToken> nearby = new ArrayList<>();
 
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
 
-            if (Misc.getDistance(around, buried.getLocation()) <= FishConstants.BURIED_RANGE) {
+            if (Misc.getDistance(around, buried.getLocation()) <= getPopulationRange()) {
                 nearby.add(buried);
             }
         }
@@ -104,8 +131,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         if (fishId == null) return;
 
         float angle = MathUtils.getRandomNumberInRange(0f, 360f);
-        float distance = MathUtils.getRandomNumberInRange(
-                FishConstants.BURIED_SPAWN_MIN_RANGE, FishConstants.BURIED_RANGE);
+        float distance = MathUtils.getRandomNumberInRange(getSpawnMinRange(), getSpawnMaxRange());
 
         Vector2f loc = MathUtils.getPointOnCircumference(around, distance, angle);
 
