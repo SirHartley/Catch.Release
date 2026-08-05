@@ -122,6 +122,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected PositionAPI listViewport;
         protected Object buyId;
 
+        /** Dev mode's side door beside the buy button. Null outside dev mode, so it matches nothing. */
+        protected Object devBuyId;
+
         protected final Object storeId = new Object();
         protected final Object retrieveId = new Object();
         protected final Object sellId = new Object();
@@ -466,6 +469,18 @@ public class FishShopDialog implements InteractionDialogPlugin {
             info.setButtonFontDefault();
 
             button.setEnabled(afford);
+
+            //dev mode's side door: the same grant with the till skipped. A tooltip only stacks
+            //vertically, so the button is added below and then re-anchored against the real one -
+            //the phantom row the tooltip still counts for it is height the pane has spare
+            if (Global.getSettings().isDevMode()) {
+                devBuyId = new Object();
+
+                ButtonAPI dev = info.addButton("DEV", devBuyId, Misc.getHighlightColor(),
+                        Misc.getDarkPlayerColor(), Alignment.MID, CutStyle.TL_BR, 70f, 34f, 10f);
+
+                dev.getPosition().rightOfMid(button, 10f);
+            }
         }
 
         /**
@@ -611,6 +626,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
                             float value = moveStacks(picked, player, null);
                             player.getCredits().add(value);
                         });
+                return;
+            }
+
+            if (devBuyId != null && buttonId == devBuyId) {
+                ShopEntry entry = getSelected();
+                if (entry == null || !entry.devBuy()) return;
+
+                Global.getSoundPlayer().playUISound("ui_char_increase_aptitude", 1f, 1f);
+
+                refreshWallet();
+                rebuild(true);
                 return;
             }
 

@@ -156,6 +156,23 @@ public class ShopEntry {
     }
 
     /**
+     * Dev mode's buy: the grant without the till. Skips the price and the affordability check
+     * entirely, but not {@link #isDone()} - a maxed ladder or a fitted tackle has nothing left to
+     * hand over, dev mode or not.
+     */
+    public boolean devBuy() {
+        if (isDone()) return false;
+
+        if (isUpgrade()) {
+            UpgradeManager.getInstance().addLevels(stat.id, 1);
+        } else {
+            TackleManager.fit(rig, tackle);
+        }
+
+        return true;
+    }
+
+    /**
      * The stat's value as it would read at a given level, for the "now against next" line - the
      * same arithmetic {@link UpgradeStat#getCurrentValue()} runs, at a level it is not at.
      */

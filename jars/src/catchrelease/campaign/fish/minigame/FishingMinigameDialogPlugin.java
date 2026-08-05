@@ -7,6 +7,8 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
@@ -15,9 +17,13 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -118,6 +124,52 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                 delegate);
     }
 
+    /**
+     * Dev mode's fish swap. The fish cannot be changed under a running catch - it is fixed in three
+     * constructors with no setter - so the whole dialog is torn down and reopened on the picked
+     * spec, through the same entry point everything else opens it through.
+     * <p>
+     * Marked resolved before the teardown so the callback stays quiet about it: the caller is owed
+     * exactly one resolution, and the reopened catch - carrying the same callback - is what pays
+     * it. The reopen retries every frame because the UI refuses a new dialog while the old one is
+     * still on its way out; if it still refuses after a few seconds, the fish and its resolution
+     * are let go rather than retried forever.
+     */
+    protected void reopenWith(FishSpec pick) {
+        if (pick == null || resolved) return;
+        resolved = true;
+
+        if (delegate != null) delegate.dismissPanel();
+        if (dialog != null) dialog.dismiss();
+
+        SectorEntityToken anchor = this.anchor;
+        FishLogEntry.Method method = this.method;
+        Callback callback = this.callback;
+
+        Global.getSector().addTransientScript(new EveryFrameScript() {
+            protected float patience = 5f;
+            protected boolean done = false;
+
+            @Override
+            public boolean isDone() {
+                return done;
+            }
+
+            @Override
+            public boolean runWhilePaused() {
+                return true;
+            }
+
+            @Override
+            public void advance(float amount) {
+                if (done) return;
+
+                patience -= amount;
+                done = open(anchor, pick, method, callback) || patience <= 0f;
+            }
+        });
+    }
+
     /** Ends the dialog and tells the caller how it went. Safe to reach twice; it only reports once. */
     protected void resolve(boolean caught) {
         if (resolved) return;
@@ -129,17 +181,42 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (callback != null) callback.onCatchResolved(caught ? specimen : null);
     }
 
-    /** Wraps the panel for the dialog. The catch ends itself, so there is nothing to press. */
-    protected class Delegate implements CustomVisualDialogDelegate, FishingMinigamePanel.Listener {
+    /**
+     * Wraps the panel for the dialog. The catch ends itself, so there is nothing to press - except
+     * in dev mode, where a strip of cheat buttons hangs off the panel's edge. Those buttons live on
+     * child panels that name this delegate as their {@link CustomUIPanelPlugin}, which is the only
+     * reason this implements it: presses land in {@link #buttonPressed}, and the rest of the
+     * interface stays empty.
+     */
+    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
+            FishingMinigamePanel.Listener {
+
+        /** Dev strip sizing. Sized to its labels, not to the layout - it is scaffolding. */
+        protected static final float DEV_BUTTON_WIDTH = 150f;
+        protected static final float DEV_BUTTON_HEIGHT = 24f;
+        protected static final float DEV_LIST_WIDTH = 220f;
+        protected static final float DEV_GAP = 30f;
 
         protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
 
         /** The frame's own handle, and the only way to close the panel from in here. */
         protected DialogCallbacks callbacks;
 
+        /** The dialog's own panel, kept so the dev fish list can be put up and taken down again. */
+        protected CustomPanelAPI framePanel;
+
+        /** The dev species list while it is up, by the reference that can take it off again. */
+        protected CustomPanelAPI fishList;
+
+        protected final Object devWinId = new Object();
+        protected final Object devWinTreasureId = new Object();
+        protected final Object devTreasureId = new Object();
+        protected final Object devFishId = new Object();
+
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
             this.callbacks = callbacks;
+            this.framePanel = panel;
 
             addFramingElements(panel);
         }
@@ -148,11 +225,84 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
          * Where the custom framing goes: titles, borders, portraits, anything that wants to be a real
          * UI element rather than something drawn.
          * <p>
-         * Deliberately empty and deliberately separate. Elements added here take part in layout and
-         * mouse-over as normal; anything that has to line up with the track itself is better drawn in
-         * {@link FishingMinigamePanel#renderFrame}, which has the same layout the track uses.
+         * Deliberately empty - dev mode's cheat strip excepted - and deliberately separate. Elements
+         * added here take part in layout and mouse-over as normal; anything that has to line up with
+         * the track itself is better drawn in {@link FishingMinigamePanel#renderFrame}, which has the
+         * same layout the track uses.
          */
         protected void addFramingElements(CustomPanelAPI panel) {
+            if (Global.getSettings().isDevMode()) addDevControls(panel);
+        }
+
+        /**
+         * Dev mode's cheat strip, hung off the panel's left edge - the panel itself is cut to the
+         * playfield, so there is no room inside it, and children take input fine from outside their
+         * parent's rectangle since event dispatch never culls by bounds. The landed-fish cards can
+         * end up drawn over it, which is fine: by then the strip has done its job.
+         */
+        protected void addDevControls(CustomPanelAPI panel) {
+            float height = (DEV_BUTTON_HEIGHT + 4f) * 4f + 4f;
+
+            CustomPanelAPI strip = panel.createCustomPanel(DEV_BUTTON_WIDTH, height, this);
+            TooltipMakerAPI element = strip.createUIElement(DEV_BUTTON_WIDTH, height, false);
+
+            element.addButton("Win", devWinId, DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Win with treasure", devWinTreasureId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Spawn treasure", devTreasureId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Spawn fish...", devFishId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+
+            strip.addUIElement(element).inTL(0f, 0f);
+            panel.addComponent(strip).inTL(-DEV_BUTTON_WIDTH - DEV_GAP, 0f);
+        }
+
+        /**
+         * The species list, beside the strip: one button per row of the fish table, straight off
+         * the loader. The strip's button toggles it - pressed again, the list goes away unpicked.
+         */
+        protected void toggleFishList() {
+            if (fishList != null) {
+                framePanel.removeComponent(fishList);
+                fishList = null;
+                return;
+            }
+
+            List<FishSpec> specs = FishSpecLoader.getAllFishSpecs();
+            if (specs.isEmpty() || framePanel == null) return;
+
+            float height = FishConstants.MINIGAME_PANEL_HEIGHT;
+
+            fishList = framePanel.createCustomPanel(DEV_LIST_WIDTH, height, this);
+            TooltipMakerAPI element = fishList.createUIElement(DEV_LIST_WIDTH, height, true);
+
+            for (FishSpec spec : specs) {
+                //the spec itself is the button's id, so a press says which fish with no second map
+                element.addButton(spec.name == null || spec.name.isEmpty() ? spec.id : spec.name,
+                        spec, DEV_LIST_WIDTH - 25f, 22f, 3f);
+            }
+
+            fishList.addUIElement(element).inTL(0f, 0f);
+            framePanel.addComponent(fishList)
+                    .inTL(-DEV_BUTTON_WIDTH - DEV_GAP - DEV_LIST_WIDTH - 10f, 0f);
+        }
+
+        /** The dev strip's presses. Nothing else in the dialog has a button to press. */
+        @Override
+        public void buttonPressed(Object buttonId) {
+            if (buttonId == devWinId) {
+                minigame.setCaught();
+            } else if (buttonId == devWinTreasureId) {
+                minigame.devTakeTreasure();
+                minigame.setCaught();
+            } else if (buttonId == devTreasureId) {
+                minigame.devSpawnTreasure();
+            } else if (buttonId == devFishId) {
+                toggleFishList();
+            } else if (buttonId instanceof FishSpec) {
+                reopenWith((FishSpec) buttonId);
+            }
         }
 
         @Override
@@ -168,6 +318,23 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         @Override
         public void advance(float amount) {
+        }
+
+        /** The rest of {@link CustomUIPanelPlugin} - the dev strip draws and moves nothing itself. */
+        @Override
+        public void positionChanged(PositionAPI position) {
+        }
+
+        @Override
+        public void renderBelow(float alphaMult) {
+        }
+
+        @Override
+        public void render(float alphaMult) {
+        }
+
+        @Override
+        public void processInput(List<InputEventAPI> events) {
         }
 
         /** Closes the panel, which brings us back through {@link #reportDismissed(int)}. */
