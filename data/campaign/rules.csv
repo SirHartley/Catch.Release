@@ -273,14 +273,91 @@ ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
 Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
-catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,"One of the drinkers has a slate out and a list on it, and keeps looking at the door as though expecting somebody who knows what they are doing with a net.",,"Fired by the bar wrapper while it builds the prompt. The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
-catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_orderAsk:Ask about the list.,The option that appears in the bar. Selecting it goes to the row below.
-catchrelease_orderAsk,DialogOptionSelected,$option == catchrelease_orderAsk,FireBest catchrelease_standingOrder_offer,,,
-catchrelease_standingOrder_offer,catchrelease_standingOrder_offer,,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Standing order,"" $heOrShe says, and turns the slate round. ""$catchreleaseAsk. I am not fussy about who brings them, only that they arrive.""
-
-""$catchreleaseReward, on delivery.""","catchrelease_orderAccept:Take the order.
-catchrelease_orderDecline:""Not my sort of water.""",
-catchrelease_orderAccept,DialogOptionSelected,$option == catchrelease_orderAccept,"BarCMD accept catchrelease_standingOrder
-BarCMD close","$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
-catchrelease_orderDecline,DialogOptionSelected,$option == catchrelease_orderDecline,BarCMD close,The slate goes back to the bar top.,,
-catchrelease_standingOrder_turnIn,DialogOptionSelected,$option == catchrelease_orderTurnIn,CallEvent catchrelease_standingOrder turnIn,"$HeOrShe checks the crates without hurrying, and pays without arguing about it.",,"CallEvent routes to the job's own callAction, which spends the fish and pays out. Refusing to fire is how a short delivery says no, so the text only ever follows a real hand-over."
+catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"Call $catchrelease_jobRef accepted
+BarCMD accept $missionId
+BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
+catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"Call $catchrelease_jobRef declined
+BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh $catchreleaseHasFish before it is read. It is not a test - an action that answered false would throw rather than fail.
+catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"Call $catchrelease_jobRef turnIn
+FireAll PopulateOptions",,,"The job spends the fish, pays, and says its own piece. Repopulating is what takes the hand-over option away once the job is settled."
+catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
+catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,Call $catchrelease_jobRef blurb,,,"The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
+catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the list.,"The option id must start with the mission id. BarCMD aborts every bar mission whose prefix the selected option does not carry - including this one, if it were named anything else."
+catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask the cook what the problem is.,
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:""Find another supplier.""",
+catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Let the young man finish his sentence.,
+catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to the first run.
+catchrelease_jobDecline:""No.""",
+catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask the man in the coat who he is waiting for.,
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Accept the commission.
+catchrelease_jobDecline:Leave him to it.",
+catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask what she is drawing.,
+catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to stock the tank.
+catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Find out what the children want.,
+catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the battle.
+catchrelease_jobDecline:Explain, gently, that fish do not fight.",
+catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
+catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets which fish. The choice cannot be got wrong - the extra is paid for the specimen, not for the guess."
+catchrelease_duelShort,PopulateOptions,"$catchrelease_duelChoice
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_duelWait:Tell them you are still looking.,
+catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,"Call $catchrelease_jobRef turnInLoud
+FireAll PopulateOptions",,,
+catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,"Call $catchrelease_jobRef turnInQuiet
+FireAll PopulateOptions",,,
+catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
+catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the tank.,
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the ring.
+catchrelease_jobDecline:Decide you were never here.",
+catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
+catchrelease_ringLeft:Put the fee on Ferro's fish.
+catchrelease_ringRight:Put the fee on Vasque's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
+catchrelease_ringShort,PopulateOptions,"$catchrelease_ringBet
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
+catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,"Call $catchrelease_jobRef turnInFlat
+FireAll PopulateOptions",,,
+catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,"Call $catchrelease_jobRef turnInLeft
+FireAll PopulateOptions",,,
+catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,"Call $catchrelease_jobRef turnInRight
+FireAll PopulateOptions",,,
+catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Find out what she wants.,
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the arrangement.
+catchrelease_jobDecline:""I don't think so.""",
+catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is marking.,
+catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to bring her a bad one.
+catchrelease_jobDecline:Leave her to it.",
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what the lamps are for.,
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to be in the video.
+catchrelease_jobDecline:Step out of the shot.",
+catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask the three in the coats what they are waiting for.,
+catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to find it.
+catchrelease_jobDecline:Decline, politely.",
