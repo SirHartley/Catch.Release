@@ -300,3 +300,7 @@ catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,Call $catchrelease_
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Let the young man finish his sentence.,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to the first run.
 catchrelease_jobDecline:""No.""",
+catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask the man in the coat who he is waiting for.,
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Accept the commission.
+catchrelease_jobDecline:Leave him to it.",
