@@ -458,6 +458,13 @@ waiting for the row to be reached. Set a companion boolean — `MafiaJob` carrie
 whenever the write happens rather than where the key was written down - which can be a stage change
 minutes later.
 
+**`BaseHubMission` assumes there is a person, in about a dozen places that do not check.** The
+intel's icon and faction colour, the reputation lines, the reward text and the distance readouts all
+reach through `getPerson()` bare. A mission with no bar contact must call `setPersonOverride(...)`
+with somebody - a fleet's `getCommander()` will do - or it will throw, once per method, on whichever
+one the game happens to reach first. `FleetQuest` cost three crashes learning this a method at a
+time; give it a person instead.
+
 **The two `makeImportant` overloads do not take the same kind of string,** and the compiler cannot
 tell them apart. `Misc.makeImportant(entity, reason)` takes a *reason*, held alongside the flag, and
 must **not** start with `$`. `BaseHubMission.makeImportant(entity, flag, stages...)` takes a memory

@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -101,6 +102,16 @@ public class FleetQuest extends FishJob {
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
         //a bar can never produce one of these, and being asked is how it finds that out
         if (barEvent || giver == null || type == null) return false;
+
+        //the framework assumes a person all the way through. The intel's icon and faction colour,
+        //the reputation lines, the reward text - a dozen places reach through getPerson() without
+        //checking, and a job given by a hull has nobody standing anywhere. It has a captain though,
+        //and that is who is actually asking, so the framework is handed them. One answer to all of
+        //it, and a truer one than overriding the dozen methods that would each have thrown in turn.
+        PersonAPI captain = giver.getCommander();
+        if (captain == null) return false;
+
+        setPersonOverride(captain);
 
         FishRequirement ask = type.rollAsk(random());
         addAsk(ask);
