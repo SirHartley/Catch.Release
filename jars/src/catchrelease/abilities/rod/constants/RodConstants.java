@@ -61,8 +61,8 @@ public class RodConstants {
      * that is under way at all - it settles into a chase it cannot win. Overshooting a fleet you
      * have caught is a better failure than never catching one.
      * <p>
-     * What the overshoot cost is handled at the other end instead, by counting the whole fleet as
-     * home rather than a point inside it - see {@link #DRONE_ARRIVAL_DISTANCE}.
+     * The overshoot is left as the cost of that, and it is the cheaper of the two: a drone that
+     * swings past and comes round again is a drone that got there.
      */
     public static final float DRONE_BRAKE_MARGIN = 0.5f;
 
@@ -137,17 +137,7 @@ public class RodConstants {
     public static final float RING_FADE_TIME = 0.5f;
     public static final float RING_PULSE_SPEED = 4f;
 
-    /**
-     * How close counts as arrived, in world units - the floor under it rather than the whole of it.
-     * <p>
-     * A drone is home when it reaches the fleet, and the fleet is the hulls, not the point they are
-     * measured from. Crossing the fleet's own radius is where it starts fading, and by the time
-     * anything it did after that would have been worth looking at it is already transparent. That
-     * is the entire answer to the overshoot: the swing past happens outside a circle the drone has
-     * long since left, so there is nothing left to watch it happen to.
-     * <p>
-     * This value only covers a fleet too small to have a radius worth using.
-     */
+    /** How close counts as arrived, in world units. */
     public static final float DRONE_ARRIVAL_DISTANCE = 10f;
 
     public static final float DRONE_SPRITE_SIZE = 8f;
