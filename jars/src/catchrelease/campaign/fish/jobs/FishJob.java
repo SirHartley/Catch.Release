@@ -10,8 +10,11 @@ import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -445,4 +448,103 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         return Global.getSector() != null && Global.getSector().getPlayerFleet() != null;
     }
 
+    //---- intel ----------------------------------------------------------------------------------
+
+    /**
+     * A job is a job rather than a mission, which is the word vanilla puts in the abandon prompt and
+     * the end-stage lines it writes for us.
+     */
+    @Override
+    protected String getMissionTypeNoun() {
+        return "job";
+    }
+
+    /**
+     * The entry while the fish are owed.
+     * <p>
+     * Only this stage is written here: the base class already says the right thing about a job that
+     * was finished, failed or abandoned, and repeating it would be two entries disagreeing about a
+     * job that is over.
+     */
+    @Override
+    public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
+        float opad = 10f;
+        Color highlight = Misc.getHighlightColor();
+        Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
+
+        PersonAPI person = getPerson();
+        MarketAPI market = getGiverMarket();
+
+        if (person != null && market != null) {
+            info.addPara("%s is waiting on %s for the catch.", opad, highlight,
+                    person.getNameString(), market.getName());
+        }
+
+        info.addPara("What is wanted:", opad);
+
+        bullet(info);
+        for (FishRequirement ask : asks) {
+            //highlighted after the fact rather than through a format string, since the ask writes
+            //its own sentence and there is no %s in it to hang the count on
+            LabelAPI line = info.addPara(Misc.ucFirst(ask.describe()), text, 0f);
+            line.setHighlightColor(highlight);
+            line.setHighlight(String.valueOf(ask.count));
+        }
+
+        //the clock belongs with the ask rather than with the payment - it is a fact about how long
+        //there is to catch them, not about what is being handed over
+        if (days > 0f) {
+            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text);
+        }
+        unindent(info);
+
+        info.addPara("On delivery:", opad);
+
+        bullet(info);
+        for (FishReward reward : rewards) {
+            info.addPara(Misc.ucFirst(reward.describe()), text, 0f);
+        }
+        unindent(info);
+    }
+
+    /** The compact form, for the list down the side of the intel screen. */
+    @Override
+    protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+        Color highlight = Misc.getHighlightColor();
+        Color text = getBulletColorForMode(mode);
+
+        float pad = mode == ListInfoMode.IN_DESC ? 10f : 0f;
+
+        LabelAPI line = info.addPara(Misc.ucFirst(describeAsks()), text, pad);
+        line.setHighlightColor(highlight);
+
+        //an empty highlight would ask the label to find nothing, which is not the same as finding
+        //nothing to highlight
+        if (!asks.isEmpty()) line.setHighlight(String.valueOf(asks.get(0).count));
+
+        if (days > 0f && !isEnding()) {
+            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text, 0f);
+        }
+    }
+
+    /**
+     * The one line under the entry's title, which is the only part most players read.
+     * <p>
+     * Deliberately not conditional on whether the hold already covers the ask. Answering that means
+     * decoding every specimen in every stack, and this is asked while a list is being drawn rather
+     * than while somebody is waiting for an answer - so it says both halves of the errand and stays
+     * cheap.
+     */
+    @Override
+    public String getNextStepText() {
+        if (isEnding()) return null;
+
+        PersonAPI person = getPerson();
+        MarketAPI market = getGiverMarket();
+
+        if (person == null || market == null) return "Catch " + describeAsks() + ".";
+
+        return "Catch " + describeAsks() + ", then find " + person.getNameString()
+                + " on " + market.getName() + ".";
+    }
 }
