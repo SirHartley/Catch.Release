@@ -175,7 +175,22 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
         //while the fish are owed and no longer once they are not, which is the whole lifetime of the
         //hand-over option - the flag going away is what takes the option away
-        makeImportant(getPerson(), getDeliverFlag(), Stage.WANTED);
+        markDeliverable();
+    }
+
+    /**
+     * Puts the flag that raises the hand-over options wherever the player will be standing when
+     * they bring the fish.
+     * <p>
+     * A person, for a job given across a counter. Not every job has one: a giver that is a hull in
+     * space has no person to flag and no market to flag them at, and asking vanilla to mark a null
+     * important throws rather than doing nothing. Those override this and flag what they do have.
+     */
+    protected void markDeliverable() {
+        PersonAPI person = getPerson();
+        if (person == null) return;
+
+        makeImportant(person, getDeliverFlag(), Stage.WANTED);
     }
 
     /**
