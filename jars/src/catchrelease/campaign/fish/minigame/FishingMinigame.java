@@ -417,6 +417,29 @@ public class FishingMinigame {
         state = State.ESCAPED;
     }
 
+    /** {@link #setEscaped()}'s mirror, for the dev controls: the meter filled, the fish is landed. */
+    public void setCaught() {
+        progress = 1f;
+        state = State.CAUGHT;
+    }
+
+    /**
+     * Dev controls: a piece straight into the taken pile, as if it had been held for. Only the
+     * rarity is ever read off a taken piece, so a fresh roll is all "with treasure" needs.
+     */
+    public void devTakeTreasure() {
+        takenTreasures.add(new MinigameTreasure(TreasureRoller.rollRarity()));
+    }
+
+    /**
+     * Dev controls: a fresh piece on the track right now, owed or not. Replaces whatever piece is
+     * up - it is for practising the take, not for auditing the debt.
+     */
+    public void devSpawnTreasure() {
+        treasuresLeft++;
+        treasure = spawnTreasure();
+    }
+
     public float getProgress() {
         return progress;
     }
