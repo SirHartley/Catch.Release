@@ -17,7 +17,8 @@ public enum ShopGroup {
     DEPTH_BOMBS("Depth bombs", "Bombs"),
     THE_CATCH("The catch", "Catch"),
     DRONE_TACKLE("Drone tackle", "Drone rig"),
-    HARPOON_TIPS("Harpoon tips", "Harpoon");
+    HARPOON_TIPS("Harpoon tips", "Harpoon"),
+    SEARCHLIGHT_RIG("Searchlight rig", "Light rig");
 
     public final String title;
 

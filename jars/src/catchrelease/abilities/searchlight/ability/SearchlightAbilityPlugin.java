@@ -5,6 +5,8 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
@@ -157,7 +159,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     /** Whether the burn-through has been fitted. */
     public static boolean burnsIntoHyperspace() {
-        return UpgradeManager.getValue(StatIds.SEARCHLIGHT_HYPERSPACE, 0f) > 0f;
+        return TackleManager.get(Tackle.Fit.SEARCHLIGHT).burnsHyperspace;
     }
 
     private void expireLights(boolean withFade){
@@ -276,7 +278,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     3f, highlight, Misc.getRoundedValue(track) + " seconds");
         }
 
-        float lock = UpgradeManager.getValue(StatIds.SEARCHLIGHT_LOCK_TIME, 0f);
+        float lock = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
         if (lock > 0f) {
             tooltip.addPara("A light that finds something breaks off its sweep and follows it for %s.",
                     3f, highlight, Misc.getRoundedValue(lock) + " seconds");

@@ -5,6 +5,8 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import catchrelease.helper.math.TrigHelper;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
@@ -289,7 +291,7 @@ public class Searchlight implements EveryFrameScript {
 
     /** The nearest thing under the beam worth stopping for, if the rig has been taught to stop. */
     protected void acquire() {
-        float lockTime = UpgradeManager.getValue(StatIds.SEARCHLIGHT_LOCK_TIME, 0f);
+        float lockTime = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
         if (lockTime <= 0f) return;
 
         if (Global.getSector() == null) return;
