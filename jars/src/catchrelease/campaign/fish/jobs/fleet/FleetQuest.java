@@ -145,7 +145,13 @@ public class FleetQuest extends FishJob {
      * All of it keyed to the job's live stage, so finishing or failing lifts the pin by itself.
      */
     protected void pin() {
-        makeImportant(giver, IMPORTANT_REASON, Stage.WANTED);
+        //Misc's overload and not the hub mission's. They take different kinds of string and the
+        //compiler cannot tell them apart: the mission's second argument is a memory key it will
+        //write on a stage change, so it has to start with a $, while Misc's is a reason held
+        //alongside the flag and must not. Handing the reason to the mission's version is what threw
+        //on the first stranded fleet - and this is the half that pairs with the makeUnimportant in
+        //release, which is reason-based too
+        Misc.makeImportant(giver, IMPORTANT_REASON);
 
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
