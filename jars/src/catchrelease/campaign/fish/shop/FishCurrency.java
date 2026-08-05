@@ -241,6 +241,30 @@ public class FishCurrency {
         return amount;
     }
 
+    /**
+     * The best specimen aboard that would go towards a requirement, or null for none.
+     * <p>
+     * For the buyers who pay on quality rather than on count. Judged by where a specimen sits in its
+     * own species' range rather than by what it weighs, so a magnificent prawn beats a poor tuna -
+     * somebody impressed by a fish is impressed by a good one of its kind, not by a heavy one.
+     */
+    public static FishCatch findBest(FishRequirement req) {
+        CargoAPI cargo = getCargo();
+        if (req == null || cargo == null) return null;
+
+        FishCatch best = null;
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            for (FishCatch entry : read(stack)) {
+                if (!req.matches(entry)) continue;
+
+                if (best == null || entry.getSizeFraction() > best.getSizeFraction()) best = entry;
+            }
+        }
+
+        return best;
+    }
+
     /** Everything a stack holds, whether it is one specimen or a crate of them. */
     protected static List<FishCatch> read(CargoStackAPI stack) {
         List<FishCatch> out = new ArrayList<>();

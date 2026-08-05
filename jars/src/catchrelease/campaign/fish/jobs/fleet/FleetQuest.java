@@ -14,7 +14,6 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import java.util.Random;
 
 /**
  * A job given by a fleet rather than by a bar, and by a fleet that then has to still be there.
@@ -34,9 +33,6 @@ import java.util.Random;
  * market hook that every other job is found through is answered no.
  */
 public class FleetQuest extends FishJob {
-
-    /** What the rules rows reach this through, on the giver's own memory. */
-    public static final String REF_KEY = "$catchrelease_fleetQuestRef";
 
     /** Set on the giver so the dialogue rows know there is a job on this hull at all. */
     public static final String QUEST_FLAG = "$catchrelease_fleetQuest";
@@ -62,15 +58,6 @@ public class FleetQuest extends FishJob {
 
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
-
-    /**
-     * Its own, because a fleet quest is not created through the framework that seeds genRandom.
-     * <p>
-     * Not transient, and not restored through readResolve: the hub mission underneath has its own
-     * readResolve doing work this class knows nothing about, and overriding it to rebuild one field
-     * is a good way to quietly stop that work happening.
-     */
-    protected Random random = new Random();
 
     /**
      * Puts a job onto a fleet and starts it, or leaves the fleet alone and answers no.
@@ -106,7 +93,7 @@ public class FleetQuest extends FishJob {
         //a bar can never produce one of these, and being asked is how it finds that out
         if (barEvent || giver == null || type == null) return false;
 
-        FishRequirement ask = type.rollAsk(random);
+        FishRequirement ask = type.rollAsk(random());
         addAsk(ask);
 
         int worth = type.getBaseCredits() * Math.max(1, ask.count);
@@ -127,6 +114,10 @@ public class FleetQuest extends FishJob {
 
         setUpSpine();
 
+        //the same key the bar jobs are reached through, put on the hull instead of on a person.
+        //A fleet interaction has no active person, which puts the fleet's own memory in the local
+        //scope - so the framework's own rows, "Call $catchrelease_jobRef turnIn" and the rest,
+        //resolve here exactly as they do across a counter, and none of them had to learn about this
         if (!setEntityMissionRef(giver, REF_KEY)) return false;
 
         pin();

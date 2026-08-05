@@ -11,6 +11,9 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
+import com.fs.starfarer.api.loading.FighterWingSpecAPI;
+import com.fs.starfarer.api.loading.WeaponSpecAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -192,11 +195,35 @@ public abstract class FishReward {
 
         @Override
         public String describe() {
-            if (Items.SHIP_BP.equals(itemId)) return "a ship blueprint";
-            if (Items.WEAPON_BP.equals(itemId)) return "a weapon blueprint";
-            if (Items.FIGHTER_BP.equals(itemId)) return "a fighter blueprint";
+            //named where the game can name it, since "a weapon blueprint" is a worse offer than the
+            //same offer with the weapon in it - the player decides whether to take a job on this
+            if (Items.SHIP_BP.equals(itemId)) return named("blueprint", hullName());
+            if (Items.WEAPON_BP.equals(itemId)) return named("weapon blueprint", weaponName());
+            if (Items.FIGHTER_BP.equals(itemId)) return named("fighter blueprint", wingName());
 
             return "something out of a crate";
+        }
+
+        protected String named(String kind, String what) {
+            return what == null ? "a " + kind : "a " + what + " " + kind;
+        }
+
+        protected String hullName() {
+            ShipHullSpecAPI spec = data == null ? null : Global.getSettings().getHullSpec(data);
+
+            return spec == null ? null : spec.getHullName();
+        }
+
+        protected String weaponName() {
+            WeaponSpecAPI spec = data == null ? null : Global.getSettings().getWeaponSpec(data);
+
+            return spec == null ? null : spec.getWeaponName();
+        }
+
+        protected String wingName() {
+            FighterWingSpecAPI spec = data == null ? null : Global.getSettings().getFighterWingSpec(data);
+
+            return spec == null ? null : spec.getWingName();
         }
 
         @Override
