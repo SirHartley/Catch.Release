@@ -99,9 +99,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     @Override
     public String getIcon() {
         FishSpec spec = getSpec();
-        if (spec == null) return FishConstants.ITEM_ICON_FALLBACK;
+        if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
 
-        return FishLog.isCaught(speciesId) ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+        //the category's own mark for anything not yet caught, so a surveyed species files under
+        //the same sign as the shelf it sits on rather than borrowing art it has not earned
+        return FishLog.isCaught(speciesId) ? FishCodex.getIcon(spec)
+                : FishConstants.CODEX_CATEGORY_ICON;
     }
 
     @Override
@@ -164,7 +167,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 box -> addDescription(box, spec, unseen));
         y += description.getPosition().getHeight() + BOX_GAP;
 
-        if (spec != null && !unseen) {
+        //the catch data comes with the survey - difficulty and behaviour are exactly the things a
+        //buyer wants to know before going after something they have never seen. What stays earned
+        //is the creature itself: the art and the landed count are still the catch's to give
+        if (spec != null) {
             UIPanelAPI box = addBox(leftWidth, y, "Catch data", b -> addCatchData(b, spec, logged));
             y += box.getPosition().getHeight() + BOX_GAP;
         }
@@ -227,8 +233,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         //which is the whole of what a survey is - the rest of this page is earned by landing one
         if (unseen) {
             text.addPara("Known only from survey data. Nothing of this species has been seen"
-                    + " aboard, and there is nothing here but where to look.",
-                    Misc.getGrayColor(), BOX_GAP);
+                    + " aboard - only where to look, and what the instruments made of the way"
+                    + " it moves.", Misc.getGrayColor(), BOX_GAP);
             return;
         }
 
@@ -321,15 +327,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
 
-        if (logged.recordLocationInHyper == null) {
-            text.addPara("No position was recorded with it.", Misc.getGrayColor(), 3f);
-        } else {
-            text.addPara("The circle is where it was taken, on the sector map.", Misc.getGrayColor(), 3f);
-
-            //the map itself, drawn rather than described
-            text.addCustom(new FishLocationMap(logged).build(text, BOX_GAP), BOX_GAP);
-        }
-
+        //no little map in here any more - the real one is a button away, wearing the fish filter,
+        //and a sketch beside a door to the actual thing only ever got read as the actual thing
         addMapButton(text, spec);
     }
 
@@ -353,9 +352,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      * at does not exist yet - the script picks the request up when it attaches, and lets it
      * quietly expire if the player never arrives. The codex is closed the way its own close
      * button closes it - detail destroyed, then {@code dismiss(1)}, a stable name on an
-     * obfuscated class - because the API offers a way in but none back out, and the tab switch
-     * is refused while any dialog is still showing. One failure anywhere abandons the whole
-     * jump: the worst outcome is the button doing nothing, logged once.
+     * obfuscated class - because the API offers a way in but none back out.
+     * <p>
+     * The tab switch is refused while any dialog is still showing. One failure anywhere abandons
+     * the whole jump: the worst outcome is the button doing nothing, logged once.
      */
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
