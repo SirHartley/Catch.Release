@@ -20,6 +20,13 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
     protected boolean spoken = false;
 
     /**
+     * Vanilla's own key for "this fleet is worth talking to", read and cleared by
+     * {@code updateMainState} as it builds the comm link option. Not in MemFlags - vanilla only
+     * ever writes it from the HighlightComms rule command, and reads it as a literal.
+     */
+    public static final String HIGHLIGHT_COMMS = "$highlightComms";
+
+    /**
      * Spoken as the encounter opens, which is the only hook that sees every encounter.
      * <p>
      * The obvious-looking one is updatePreCombat, and it is wrong: vanilla only reaches it from the
@@ -31,9 +38,37 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
      */
     @Override
     public void init(InteractionDialogAPI dialog) {
+        //before super, because super is what builds the options: vanilla reads this key while it is
+        //adding the comm link and clears it on the way past. Set afterwards it would colour nothing
+        //and sit on the fleet waiting to colour the next encounter instead
+        highlightComms(dialog);
+
         super.init(dialog);
 
         speak();
+    }
+
+    /**
+     * Lights the comm link up when there is something on the other end of it.
+     * <p>
+     * Which there is, for as long as this dialogue is the one being used at all: the comm rules are
+     * keyed on the same harpooning flag that chooses this plugin, and they come in a pair - one set
+     * for a crew still willing to talk about it and another for one that is not - so a harpooned
+     * fleet always has a line waiting. Highlighting it says the encounter has changed rather than
+     * leaving the player to open a link on the off-chance.
+     * <p>
+     * Through vanilla's key rather than by colouring the option directly, so it clears itself the
+     * moment the link is opened. The highlight is a notice that something is waiting, and once it
+     * has been heard there is nothing left to give notice of.
+     */
+    protected void highlightComms(InteractionDialogAPI dialog) {
+        if (dialog == null) return;
+        if (!(dialog.getInteractionTarget() instanceof CampaignFleetAPI)) return;
+
+        CampaignFleetAPI other = (CampaignFleetAPI) dialog.getInteractionTarget();
+        if (!HarpoonOffence.wasHarpooned(other)) return;
+
+        other.getMemoryWithoutUpdate().set(HIGHLIGHT_COMMS, true, 0f);
     }
 
     protected void speak() {
