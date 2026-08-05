@@ -284,3 +284,23 @@ catchrelease_orderAccept,DialogOptionSelected,$option == catchrelease_orderAccep
 BarCMD close","$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
 catchrelease_orderDecline,DialogOptionSelected,$option == catchrelease_orderDecline,BarCMD close,The slate goes back to the bar top.,,
 catchrelease_standingOrder_turnIn,DialogOptionSelected,$option == catchrelease_orderTurnIn,CallEvent catchrelease_standingOrder turnIn,"$HeOrShe checks the crates without hurrying, and pays without arguing about it.",,"CallEvent routes to the job's own callAction, which spends the fish and pays out. Refusing to fire is how a short delivery says no, so the text only ever follows a real hand-over."
+catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:1200
+!$catchrelease_fleetQuestTaken
+!$catchrelease_fleetQuestHailed","$catchrelease_fleetQuestHailed = true
+FleetDesc
+HailPlayer",,,"They open the link themselves the first time. After that the flag stays set and the player has to choose to call - being asked once is a distress call and being asked every pass is a nuisance."
+catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
+!$entity.catchrelease_fleetQuestTaken
+!$entity.isHostile",,"""$entity.catchrelease_fleetQuestPitch""","0:catchrelease_fqAccept:""We can find you one.""
+10:catchrelease_fqDecline:Decline",The pitch is read off the fleet's own memory so one row serves every kind of trouble.
+catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
+EndConversation","They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.",,
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,"They take it the way anyone takes it. The link closes without anything further being said - and they are still going to be here.",,"Declining does not end the job. The fleet is pinned either way and the offer stands the next time the player calls."
+catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
+$entity.catchrelease_fleetQuestTaken
+!$entity.isHostile",FireAll CatchReleaseFleetQuestTurnIn,"They are exactly where you left them and they have not stopped watching the water.",,
+catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,,Call $entity.catchrelease_fleetQuestRef hasFish,,0:catchrelease_fqTurnIn:Hand over the catch,"The option exists only when the hold can pay for it - hasFish refuses to fire and takes the row with it."
+catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
+catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_fleetQuestRef turnIn
+EndConversation","The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.",,"turnIn spends the fish and pays out. It refuses to fire on a short hold rather than taking a partial payment."
+catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,EndConversation,"The link closes. They go back to waiting.",,
