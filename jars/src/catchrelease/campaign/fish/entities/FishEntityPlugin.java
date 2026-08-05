@@ -150,6 +150,16 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /**
+     * Whether this one rose out of a rupture, as against being loose in the dark.
+     * <p>
+     * Settled when the mote is made and never revised, which is what makes it worth recording on a
+     * specimen - where a fish was reachable from is a fact about the catch, not about the fish.
+     */
+    public boolean isFromPond() {
+        return pond != null;
+    }
+
     /** Asks the mote to look at itself again, for anything that changes what it is after it exists. */
     public void refreshColor() {
         this.color = resolveColor();

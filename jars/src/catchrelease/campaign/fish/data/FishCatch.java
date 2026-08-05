@@ -39,6 +39,17 @@ public class FishCatch {
      */
     public SectorRegion origin;
 
+    /**
+     * How it was hooked, and what made it reachable.
+     * <p>
+     * Both are facts about the catch rather than about the fish, and both are things a buyer can
+     * reasonably care about - somebody who wants one taken on a harpoon out in the dark is asking a
+     * question the species could never answer. Null on a specimen landed before either was written
+     * down, which is not the same as a specimen that was taken some other way.
+     */
+    public FishLogEntry.Method method;
+    public CatchImplement implement;
+
     public FishCatch() {
     }
 
@@ -166,10 +177,28 @@ public class FishCatch {
      * an old specimen and a new one respectively hand it.
      */
     public String encode() {
-        String encoded = speciesId + SEPARATOR + round(length) + SEPARATOR + round(weight)
-                + SEPARATOR + round(aberration);
+        StringBuilder encoded = new StringBuilder(speciesId)
+                .append(SEPARATOR).append(round(length))
+                .append(SEPARATOR).append(round(weight))
+                .append(SEPARATOR).append(round(aberration));
 
-        return origin == null ? encoded : encoded + SEPARATOR + origin.name();
+        //the optional tail, written only as far as it has anything to say. A blank field holds the
+        //place of one that does not - the fields are read by position, so a specimen with no origin
+        //but a known method cannot simply leave the origin out
+        String[] tail = {
+                origin == null ? "" : origin.name(),
+                method == null ? "" : method.name(),
+                implement == null ? "" : implement.name(),
+        };
+
+        int last = -1;
+        for (int i = 0; i < tail.length; i++) {
+            if (!tail[i].isEmpty()) last = i;
+        }
+
+        for (int i = 0; i <= last; i++) encoded.append(SEPARATOR).append(tail[i]);
+
+        return encoded.toString();
     }
 
     /** Null for anything that does not parse - a fish from a build that wrote a different format. */
@@ -180,12 +209,34 @@ public class FishCatch {
         if (parts.length < 4) return null;
 
         try {
-            //a fish caught before anyone recorded where simply has no answer, rather than a wrong one
-            SectorRegion origin = parts.length > 4 ? SectorRegion.parse(parts[4]) : null;
+            //a fish caught before anyone recorded any of this simply has no answer, rather than a
+            //wrong one. Every field past the fourth is read if it is there and ignored if it is not
+            FishCatch entry = new FishCatch(parts[0], Float.parseFloat(parts[1]),
+                    Float.parseFloat(parts[2]), Float.parseFloat(parts[3]),
+                    SectorRegion.parse(field(parts, 4)));
 
-            return new FishCatch(parts[0], Float.parseFloat(parts[1]),
-                    Float.parseFloat(parts[2]), Float.parseFloat(parts[3]), origin);
+            entry.method = parseMethod(field(parts, 5));
+            entry.implement = CatchImplement.parse(field(parts, 6));
+
+            return entry;
         } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** One of the optional tail fields, or null where the encoded form stopped short of it. */
+    protected static String field(String[] parts, int index) {
+        if (index >= parts.length) return null;
+
+        return parts[index].isEmpty() ? null : parts[index];
+    }
+
+    protected static FishLogEntry.Method parseMethod(String name) {
+        if (name == null) return null;
+
+        try {
+            return FishLogEntry.Method.valueOf(name.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
             return null;
         }
     }
