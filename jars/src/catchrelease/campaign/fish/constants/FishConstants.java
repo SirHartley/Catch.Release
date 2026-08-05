@@ -163,8 +163,18 @@ public class FishConstants {
     public static final float TREASURE_POSITION_INSET = 0.18f;
     public static final float TREASURE_LIFETIME_MIN = 6f;
     public static final float TREASURE_LIFETIME_MAX = 11f;
-    public static final float TREASURE_HOLD_TIME = 1.1f;
+    public static final float TREASURE_HOLD_TIME = 1.45f;
     public static final float TREASURE_HOLD_DECAY = 1.5f;
+
+    /**
+     * Where the closing ring stops, as a multiple of the icon's own radius.
+     * <p>
+     * Just outside it. The ring is the only thing saying how far along the hold is, so it has to
+     * arrive somewhere the eye reads as arrival - and a ring that halts with a visible gap still
+     * between it and the icon reads as an animation that was cut off rather than one that finished.
+     * Not touching, either: a ring drawn exactly on the edge fights the icon's own outline.
+     */
+    public static final float TREASURE_RING_END = 1.15f;
 
     /** Stand-in art, and the sizes it and its clock are drawn at. */
     public static final String TREASURE_ICON = "graphics/catchrelease/icon/small_icon_catchrelease2.png";
