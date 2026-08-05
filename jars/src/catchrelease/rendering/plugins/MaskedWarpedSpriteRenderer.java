@@ -20,16 +20,22 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uAlphaMult = -1;
     private transient int uMaskThreshold = -1;
     private transient int uSwirl = -1;
-    private transient int uSwirlSpin = -1;
     private transient int uSwirlEdge = -1;
+    private transient int uWell = -1;
+    private transient int uWellGamma = -1;
+    private transient int uWellDim = -1;
     private transient int uMaskToFill = -1;
 
     private float maskThreshold = 0f;
 
-    /** The eddy, off unless a caller turns it. Twist in the band, its phase, and where it starts. */
+    /** The eddy, off unless a caller turns it. Twist in the band and where the band starts. */
     private float swirl = 0f;
-    private float swirlSpin = 0f;
     private float swirlEdge = 0.55f;
+
+    /** The funnel, off unless a caller opens it. Depth, the remap's exponent, the throat's dark. */
+    private float well = 0f;
+    private float wellGamma = 1f;
+    private float wellDim = 0f;
 
     public MaskedWarpedSpriteRenderer(WarpGrid warp) {
         this.warp = warp;
@@ -40,14 +46,26 @@ public class MaskedWarpedSpriteRenderer {
     }
 
     /**
-     * Turns the eddy at the rim. Twist is radians at the strongest point of the band; spin is the
-     * phase of the turn, the caller's clock times its rate, fed per frame; edge is the radius the
-     * band starts at, as a fraction of the mask's radius, with the middle left alone below it.
+     * Turns the eddy at the rim. Twist is radians at the strongest point of the band, fed per
+     * frame with any time modulation already folded in - the shader never accumulates it; edge
+     * is the radius the band starts at, as a fraction of the mask's radius, with the middle left
+     * alone below it.
      */
-    public void setSwirl(float twist, float spin, float edge) {
+    public void setSwirl(float twist, float edge) {
         this.swirl = twist;
-        this.swirlSpin = spin;
         this.swirlEdge = edge;
+    }
+
+    /**
+     * Opens the funnel: a radial remap of the fill that reads as depth rather than as a lens.
+     * Depth blends the remap in, 0 flat to 1 full; gamma is the remap's exponent, under 1 so the
+     * fill compresses ever harder towards the centre the way a funnel wall does; dim is how dark
+     * the throat goes at full depth, 0 to leave the colour alone.
+     */
+    public void setWell(float depth, float gamma, float dim) {
+        this.well = depth;
+        this.wellGamma = gamma;
+        this.wellDim = dim;
     }
 
     public void render(SpriteAPI fillSprite,
@@ -76,8 +94,10 @@ public class MaskedWarpedSpriteRenderer {
         if (uAlphaMult >= 0) GL20.glUniform1f(uAlphaMult, alphaMult);
         if (uMaskThreshold >= 0) GL20.glUniform1f(uMaskThreshold, maskThreshold);
         if (uSwirl >= 0) GL20.glUniform1f(uSwirl, swirl);
-        if (uSwirlSpin >= 0) GL20.glUniform1f(uSwirlSpin, swirlSpin);
         if (uSwirlEdge >= 0) GL20.glUniform1f(uSwirlEdge, swirlEdge);
+        if (uWell >= 0) GL20.glUniform1f(uWell, well);
+        if (uWellGamma >= 0) GL20.glUniform1f(uWellGamma, wellGamma);
+        if (uWellDim >= 0) GL20.glUniform1f(uWellDim, wellDim);
 
         // unit0 = fill
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -237,8 +257,10 @@ public class MaskedWarpedSpriteRenderer {
         uAlphaMult = GL20.glGetUniformLocation(program, "alphaMult");
         uMaskThreshold = GL20.glGetUniformLocation(program, "maskThreshold");
         uSwirl = GL20.glGetUniformLocation(program, "swirl");
-        uSwirlSpin = GL20.glGetUniformLocation(program, "swirlSpin");
         uSwirlEdge = GL20.glGetUniformLocation(program, "swirlEdge");
+        uWell = GL20.glGetUniformLocation(program, "well");
+        uWellGamma = GL20.glGetUniformLocation(program, "wellGamma");
+        uWellDim = GL20.glGetUniformLocation(program, "wellDim");
         uMaskToFill = GL20.glGetUniformLocation(program, "maskToFill");
 
         if (uTex >= 0) GL20.glUniform1i(uTex, 0);
