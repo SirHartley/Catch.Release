@@ -30,16 +30,47 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
      * The movement archetypes, out in the open water. Pauses shrink and everything else grows with
      * the rarity's wander ladder, so a legendary darter is a different animal to a common one.
      */
-    private static final float DARTER_PAUSE = 2.4f;
-    private static final float DARTER_DASH_TIME = 0.5f;
+    private static final float DARTER_PAUSE = 1.1f;
+    private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
-    private static final float DARTER_CREEP_MULT = 0.15f;
+
+    /**
+     * What a darter is doing between bolts, and the number that made the whole ladder wrong.
+     * <p>
+     * At a seventh of its speed a resting darter is not resting, it is parked - and eleven of the
+     * twelve uncommon species are darters, against commons that are mostly smooth swimmers moving
+     * the whole time. So the uncommon ones spent four fifths of their lives as a stationary target
+     * and were the easiest thing in the sky to put a harpoon through, which is exactly backwards.
+     * <p>
+     * Slow enough to read as gathering itself, fast enough that a shot still has to lead it. With
+     * the shorter pause above, a darter now spends about as long moving as it does resting, and its
+     * average speed comes out ahead of the common swimmers it is supposed to be harder than.
+     */
+    private static final float DARTER_CREEP_MULT = 0.55f;
     private static final float SINKER_SPEED_MULT = 0.75f;
     private static final float SINKER_CURVE = 14f;
     private static final float SINKER_FLIP_TIME = 6f;
     private static final float FLOATER_SPEED_MULT = 1.15f;
     private static final float FLOATER_JINK = 10f;
     private static final float MIXED_REROLL = 6f;
+
+    /**
+     * The deep ones do not stay where you can see them.
+     * <p>
+     * From epic upward a mote goes under at a steady beat and comes back somewhere else, and while
+     * it is under it can neither be seen nor speared. Steady on purpose: a dive that came at random
+     * would only ever read as the harpoon having missed, where a rhythm is something a player can
+     * learn to shoot around, which is the difference between hard and unfair.
+     * <p>
+     * The interval is scaled off the rarity ladder, so the one legendary goes under oftener than
+     * the epics do.
+     */
+    private static final FishRarity DIVE_FROM = FishRarity.EPIC;
+    private static final float DIVE_INTERVAL = 4.5f;
+    private static final float DIVE_TIME = 1.6f;
+
+    /** How long it spends on the way down and on the way back, which is the whole of the warning. */
+    private static final float DIVE_FADE = 0.35f;
 
     private float time = 0f;
     private float sineVariance;
@@ -84,6 +115,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float rerollLeft = 0f;
     private transient float curveSign = 1f;
     private transient float curveFlipLeft = 0f;
+
+    /** Where in the dive cycle this one is. Transient like the rest of the swimming state. */
+    private transient boolean diving = false;
+    private transient float diveClock = 0f;
 
     /**
      * The rupture this one came out of, so it can tell when it has left it.
@@ -160,6 +195,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void advance(float amount) {
         time += amount;
         flicker.advance(amount);
+
+        advanceDive(amount);
 
         //still lit, still flickering, but going nowhere of its own accord
         if (held) return;
@@ -273,6 +310,78 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /**
+     * The dive clock: under, up, and under again on a beat.
+     * <p>
+     * A held mote surfaces and stays surfaced. Whatever has hold of it has already caught it, and
+     * letting it wink out on the end of a line would read as the catch being lost.
+     */
+    protected void advanceDive(float amount) {
+        if (!dives()) {
+            diving = false;
+            diveClock = 0f;
+            return;
+        }
+
+        if (held) {
+            diving = false;
+            diveClock = getDiveInterval();
+            return;
+        }
+
+        diveClock -= amount;
+        if (diveClock > 0f) return;
+
+        diving = !diving;
+        diveClock = diving ? DIVE_TIME : getDiveInterval();
+    }
+
+    protected boolean dives() {
+        FishRarity rarity = getRarity();
+
+        return rarity != null && rarity.ordinal() >= DIVE_FROM.ordinal();
+    }
+
+    protected float getDiveInterval() {
+        //off the same ladder everything else here is scaled by, so the rarest goes under oftener
+        return DIVE_INTERVAL * DIVE_FROM.wanderMult / Math.max(0.01f, getRarity().wanderMult);
+    }
+
+    /**
+     * How much of it is showing, from all of it to none.
+     * <p>
+     * Nothing at the middle of a dive, easing out on the way down and back in on the way up - and
+     * the easing is the tell. A mote that vanished between one frame and the next would be a mote
+     * that was never there as far as anyone watching is concerned.
+     */
+    public float getVisibility() {
+        if (!diving) return 1f;
+
+        float elapsed = DIVE_TIME - diveClock;
+        float nearestEdge = Math.min(elapsed, diveClock);
+
+        return 1f - MathUtils.clamp(nearestEdge / DIVE_FADE, 0f, 1f);
+    }
+
+    /** Whether it is far enough under that a line would pass straight through it. */
+    public boolean isDiving() {
+        return diving && getVisibility() <= 0f;
+    }
+
+    /**
+     * Whether anything is allowed to take this one right now.
+     * <p>
+     * Asked of the token rather than the plugin so every rig can ask the same question without
+     * first working out what it is holding - and so a mote that is held, gone, or under the fabric
+     * is one answer rather than three separate checks that can drift apart.
+     */
+    public static boolean isAvailable(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired()) return false;
+        if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) return true;
+
+        return !fish.isHeld() && !fish.isDiving();
+    }
+
     /** The archetype's signature on the course, in degrees, over the shared weave. */
     protected float getModeWander() {
         float difficulty = getRarity().wanderMult;
@@ -369,6 +478,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 entity.getSensorFaderBrightness() *
                 entity.getSensorContactFaderBrightness();
 
+        alpha *= getVisibility();
         if (alpha <= 0f) return;
 
         float spriteAlpha = alpha * (1f - 0.5f * flicker.getBrightness());

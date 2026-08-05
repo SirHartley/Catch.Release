@@ -763,13 +763,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected SectorEntityToken findMote() {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (mote.isExpired()) continue;
-
-            //something else already has this one
-            if (mote.getCustomPlugin() instanceof FishEntityPlugin
-                    && ((FishEntityPlugin) mote.getCustomPlugin()).isHeld()) {
-                continue;
-            }
+            //already speared by something else, or under the fabric where a line cannot reach it
+            if (!FishEntityPlugin.isAvailable(mote)) continue;
 
             if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
