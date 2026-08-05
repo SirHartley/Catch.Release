@@ -1,90 +1,90 @@
 id,trigger,conditions,script,text,options,notes
 catchrelease_harpoonedComms,OpenCommLink,"$entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""The link opens onto an argument already in progress. Someone reads your transponder code aloud, and someone else asks - twice, and not calmly - what exactly you thought you were fishing for."" $faction.baseColor
+!$entity.isHostile","AddText ""The link opens onto an argument already in progress. Someone reads your transponder code aloud, and someone else asks - twice, and not calmly - what exactly you thought you were fishing for.""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""Be advised, the incident has been logged.\"" $PersonRank $personName holds up a slate as though you could read it. \""Hull breach, non-standard munition, recovered intact. It is going to Naval Intelligence, because everything unidentified goes to Naval Intelligence. You will be hearing about the barb.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""Be advised, the incident has been logged.\"" $PersonRank $personName holds up a slate as though you could read it. \""Hull breach, non-standard munition, recovered intact. It is going to Naval Intelligence, because everything unidentified goes to Naval Intelligence. You will be hearing about the barb.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""Damage assessment is complete and your involvement is not in dispute.\"" $PersonRank $personName reads without inflection. \""You will receive a schedule of costs. It will be itemised. One of the items will be the harpoon, which we have kept.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""Damage assessment is complete and your involvement is not in dispute.\"" $PersonRank $personName reads without inflection. \""You will receive a schedule of costs. It will be itemised. One of the items will be the harpoon, which we have kept.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""$PersonRank $personName looks at the puncture, then at you, with the particular patience of someone cataloguing a sin. \""A machine for taking things out of the dark,\"" $heOrShe says. \""And you pointed it at people.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""$PersonRank $personName looks at the puncture, then at you, with the particular patience of someone cataloguing a sin. \""A machine for taking things out of the dark,\"" $heOrShe says. \""And you pointed it at people.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""Whoever answers is laughing. \""It shot a rope at us! A rope!\"" The laughing stops very suddenly. \""Do it again and we will come and see what else your ship does.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""Whoever answers is laughing. \""It shot a rope at us! A rope!\"" The laughing stops very suddenly. \""Do it again and we will come and see what else your ship does.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""That,\"" says $personName, with something close to admiration, \""is not a weapon. That is a fishing rig.\"" A pause. \""Which you fired. At us. What is wrong with you?\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""That,\"" says $personName, with something close to admiration, \""is not a weapon. That is a fishing rig.\"" A pause. \""Which you fired. At us. What is wrong with you?\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""You have discharged an unregistered device at a vessel of the Diktat.\"" $PersonRank $personName does not blink. \""I am required to ask whether this was deliberate. I am not required to believe the answer.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""You have discharged an unregistered device at a vessel of the Diktat.\"" $PersonRank $personName does not blink. \""I am required to ask whether this was deliberate. I am not required to believe the answer.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsLeague,OpenCommLink,"$faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""There is a form for this.\"" $PersonRank $personName sounds almost pleased about it. \""There is not a form for this, actually. I have checked. I am going to have to write to someone about the fact that there is no form for this.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""There is a form for this.\"" $PersonRank $personName sounds almost pleased about it. \""There is not a form for this, actually. I have checked. I am going to have to write to someone about the fact that there is no form for this.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsIndie,OpenCommLink,"$faction.id == independent
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""You put a hook in us,\"" says $personName, in the flat voice of somebody who has had a long month and is not going to have a shorter one. \""Not a shot. A hook. We are going to be explaining that to the yard for a year.\"""" $faction.baseColor
+!$entity.isHostile","AddText ""\""You put a hook in us,\"" says $personName, in the flat voice of somebody who has had a long month and is not going to have a shorter one. \""Not a shot. A hook. We are going to be explaining that to the yard for a year.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second."" $faction.baseColor
+AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second.""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Second incident. Same vessel. Same device.\"" $PersonRank $personName reaches off-screen. \""The logging phase of this is over.\"""" $faction.baseColor
+AddText ""\""Second incident. Same vessel. Same device.\"" $PersonRank $personName reaches off-screen. \""The logging phase of this is over.\""""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""The account is closed and has been escalated,\"" says $personName, already turning away. \""Escalation is not a conversation.\"""" $faction.baseColor
+AddText ""\""The account is closed and has been escalated,\"" says $personName, already turning away. \""Escalation is not a conversation.\""""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Twice.\"" $PersonRank $personName closes $hisOrHer eyes briefly. \""Ludd is patient. I have been assured, repeatedly, that I am not required to be.\"""" $faction.baseColor
+AddText ""\""Twice.\"" $PersonRank $personName closes $hisOrHer eyes briefly. \""Ludd is patient. I have been assured, repeatedly, that I am not required to be.\""""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""The link opens on someone already shouting orders to somebody else, and closes before any of them are addressed to you."" $faction.baseColor
+AddText ""The link opens on someone already shouting orders to somebody else, and closes before any of them are addressed to you.""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostilePirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Once was funny,\"" says $personName, and cuts the link on the word."" $faction.baseColor
+AddText ""\""Once was funny,\"" says $personName, and cuts the link on the word.""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Deliberate, then.\"" $PersonRank $personName sounds satisfied to have it settled. The link closes."" $faction.baseColor
+AddText ""\""Deliberate, then.\"" $PersonRank $personName sounds satisfied to have it settled. The link closes.""
 EndConversation NO_CONTINUE",,,
 catchrelease_patrolStop,BeginFleetEncounter,"$catchrelease_harpoonPatrol score:1100
 !$catchrelease_harpoonPatrolDone

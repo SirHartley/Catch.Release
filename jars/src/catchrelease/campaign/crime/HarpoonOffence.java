@@ -147,9 +147,14 @@ public class HarpoonOffence {
      * hostility alone only decides how they feel about a fight they happen to be in; the pair
      * together is what vanilla's own encounter check reads as "engage regardless".
      * <p>
-     * Marked low rep impact, because the fight that follows is one they started. The player has
-     * already paid for the harpoons in reputation twice over, and paying full price again for
-     * defending themselves against the consequence would be charging for the same act three times.
+     * Not marked low rep impact, which it used to be. That flag is what vanilla hangs on a fleet
+     * whose behaviour is deniable - a pirate in all but paperwork - and it quietly downgrades a
+     * fight with them to the transponder-off reputation actions, which skip the {@code ensureAtBest}
+     * that otherwise floors the whole faction relationship at hostile. It also puts a line in the
+     * encounter tooltip promising the fight will not cause hostilities, which is a promise this
+     * has no business making. A crew harpooned twice by a fleet that was identified both times is
+     * not deniable, and their faction is not going to pretend otherwise. Cargo inspection is the
+     * shape to copy: it charges for what was found, plainly, once, and never touches the flag.
      */
     protected static void turnHostile(CampaignFleetAPI victim) {
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
@@ -157,8 +162,6 @@ public class HarpoonOffence {
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_HOSTILE, REASON, true, HOSTILE_DAYS);
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, true, HOSTILE_DAYS);
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, HOSTILE_DAYS);
-
-        mem.set(MemFlags.MEMORY_KEY_LOW_REP_IMPACT, true, HOSTILE_DAYS);
 
         //on the hostility's clock rather than the harpooning's, so the line about there being
         //nothing left to say cannot outlive the fleet's willingness to act on it. Once it lapses
