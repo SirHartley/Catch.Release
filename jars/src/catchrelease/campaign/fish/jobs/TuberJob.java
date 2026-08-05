@@ -3,11 +3,9 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * A man who makes TriPad content and needs a fish to hold up.
@@ -53,20 +51,15 @@ public class TuberJob extends FishJob {
         return true;
     }
 
+    /**
+     * The second round, which is the point of him.
+     * <p>
+     * The first is what he thinks he wants. This is what the numbers told him he wants after the
+     * first one did fine, and fine is the worst thing that can happen to a video.
+     */
     @Override
-    protected boolean onDelivered(TextPanelAPI text) {
-        if (getRound() > 1) {
-            text.addPara("\"That,\" he says, watching the playback, \"is the thumbnail. That is the "
-                    + "whole video and I have not shot the video.\"");
-
-            return false;
-        }
-
-        text.addPara("He films it for a long time and then goes quiet in a way you recognise from "
-                + "people looking at a number that has not moved.");
-
-        text.addPara("\"It did fine,\" he says. \"Fine is the worst thing. Nobody stops for a "
-                + "healthy fish.\" He looks up. \"Can you get me a bad one? On purpose?\"");
+    protected boolean onDelivered() {
+        if (getRound() > 1) return false;
 
         asks.clear();
         rewards.clear();
@@ -78,41 +71,7 @@ public class TuberJob extends FishJob {
         addAsk(grim);
         addRewards(FishRewardRoller.roll(random(), (int) (VALUE * 1.6f), true));
 
-        text.addPara("\"%s. Something that looks like it is arguing with being alive. %s, and I "
-                        + "will credit you, which I appreciate is not payment.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeAsks()), Misc.ucFirst(describeRewards()));
-
         return true;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("Somebody has set up two lamps and a very expensive lens pointed at an empty "
-                + "chair, and is explaining to the bar staff that it will only take a minute.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"Do not look at the lens,\" he says, meaning that you should. \"I do fishing "
-                + "content. It is a growing vertical.\"");
-
-        text.addPara("\"I need %s. To hold up. That is the shot - I hold it up, I say the name, "
-                        + "people find out fish are real.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeAsks());
-
-        text.addPara("\"I cannot pay what a buyer pays. What I can do is %s, all of which was sent "
-                        + "to me by people who want to be in a video.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeRewards());
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Amazing. Amazing. Can you say that again with the lamps on?\"");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("\"No, that is fair. That is completely fair.\" He is still filming.");
     }
 
     @Override

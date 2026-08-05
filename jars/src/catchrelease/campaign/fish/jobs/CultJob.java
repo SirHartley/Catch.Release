@@ -4,11 +4,10 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * People who want one particular species and will not say what for.
@@ -68,43 +67,8 @@ public class CultJob extends FishJob {
     }
 
     @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("Three people in matching, unremarkable coats are sharing one drink between "
-                + "them and have not touched it. They are waiting, and they are not impatient.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("One of them says a name. Not yours - the fish's.");
-
-        text.addPara("\"%s,\" they repeat, when you do not answer immediately. \"One. Whole.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(), getSpeciesName());
-
-        text.addPara("You ask what for. There is a pause of exactly the length of somebody deciding "
-                + "not to be offended, and then the same sentence again, with the same emphasis, as "
-                + "though the problem had been the volume.");
-
-        text.addPara("\"%s,\" the second one adds, and produces it, and puts it on the table, and "
-                        + "leaves it there while you think about it.", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("None of them thanks you. All three of them nod at the same time, which is "
-                + "worse.");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("They do not seem to mind. You get the strong impression they will be here "
-                + "when you come back.");
-    }
-
-    @Override
-    protected void printReminder(TextPanelAPI text) {
-        text.addPara("\"%s,\" one of them says. That is the whole of the conversation.",
-                Misc.getTextColor(), Misc.getHighlightColor(), getSpeciesName());
+    protected void setJobTokens(MemoryAPI mem) {
+        token(mem, "$catchreleaseSpecies", getSpeciesName());
     }
 
     @Override

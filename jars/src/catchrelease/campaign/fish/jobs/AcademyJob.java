@@ -1,12 +1,10 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * A Galatian researcher who wants one that is coming apart.
@@ -64,40 +62,6 @@ public class AcademyJob extends FishJob {
         setUpSpine();
 
         return true;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("A researcher with an Academy lanyard she has stopped bothering to hide is "
-                + "working through a stack of sample logs and marking almost all of them as "
-                + "useless.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"Everyone brings me good ones,\" she says. \"Whole ones. Beautiful ones. "
-                + "They are worthless to me and I have stopped being polite about it.\"");
-
-        text.addPara("\"%s. Barely holding together. If it looks like it is about to stop being a "
-                        + "fish, that is the specimen.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
-
-        text.addPara("She notices your expression. \"A stable one tells me what a fish is. I know "
-                + "what a fish is. I want to know what is happening to them, and the ones it is "
-                + "happening to are the ones that come up wrong.\"");
-
-        text.addPara("\"%s. The Academy will not ask where either.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Do not stabilise it in transit,\" she says. \"Please. It has happened.\"");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("She goes back to marking things useless.");
     }
 
     @Override

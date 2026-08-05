@@ -5,13 +5,16 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
+import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +33,14 @@ import java.util.Random;
  * the Abyss" is expressed once and understood everywhere. And it holds a list of
  * {@link FishReward}s, which hand themselves over without the job knowing what they are.
  * <p>
- * Everything a job says is written in Java rather than in the rules sheet. The sheet gets three
- * short rows per job and no prose at all: what a person in a bar says runs to paragraphs with
- * quotes and commas in them, which is exactly the shape that takes the game down at load when one
- * of them lands wrong in a CSV. The rows that remain are the ones vanilla insists on owning - the
- * bar prompt and the bar option - and even those only route back into here.
+ * Nothing here says anything. Every word a job speaks lives in data/campaign/rules.csv, which is
+ * where dialogue belongs: it can be read, edited and translated without a compiler, and a row is
+ * the unit the engine already scores and picks between, so a job that wants to say something
+ * different when a wager comes off writes a second row rather than a second branch.
+ * <p>
+ * What Java owns is the part a sheet cannot do - counting the hold, spending it, rolling the
+ * payment, settling a bet. The two meet at a handful of memory tokens: this side writes what
+ * happened, and the rows read it and do the talking.
  */
 public abstract class FishJob extends HubMissionWithBarEvent {
 
@@ -53,6 +59,22 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
     /** Whether the hold covers the whole ask, refreshed every time the dialogue asks. */
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
+
+    /**
+     * What the rows say the job wants and pays, in words.
+     * <p>
+     * Written out rather than described in the sheet, because the ask is assembled from a
+     * requirement that can say six different things at once and no row wants to spell that out.
+     */
+    public static final String ASK_KEY = "$catchreleaseAsk";
+    public static final String ASK_CAP_KEY = "$catchreleaseAskCap";
+    public static final String REWARD_KEY = "$catchreleaseReward";
+    public static final String REWARD_CAP_KEY = "$catchreleaseRewardCap";
+
+    /** How the hand-over went, for the rows that describe it. */
+    public static final String PAID_KEY = "$catchreleasePaid";
+    public static final String BONUS_KEY = "$catchreleaseBonus";
+    public static final String MORE_KEY = "$catchreleaseMore";
 
     public enum Stage {
         /** Accepted, and the fish are not caught yet. Where a job spends nearly all of its life. */
@@ -269,77 +291,71 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * Everything the job says, reached from the sheet by name.
+     * The mechanics the sheet asks for by name. None of them says anything.
+     * <p>
+     * What a job says lives in rules.csv, which is where dialogue belongs - it can be read, edited
+     * and translated without a compiler, and a row is the unit the engine already scores and picks
+     * between. What Java owns is the part a sheet cannot do: counting the hold, spending it, rolling
+     * the payment, settling a wager. The two meet at a handful of memory tokens the rows read.
      * <p>
      * Note that returning false here is not a way to say no: vanilla throws on an unhandled action
-     * rather than treating it as a failed condition, so every verb this job knows answers true and
-     * says its piece, and a hand-over that cannot happen says so in prose instead.
+     * rather than treating it as a failed condition, so every verb answers true and reports what
+     * happened in a flag instead.
      */
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
-        TextPanelAPI text = dialog == null ? null : dialog.getTextPanel();
+        if ("turnIn".equals(action)) {
+            handOver(dialog, memoryMap);
 
-        switch (action) {
-            case "blurb":
-                printBlurb(text);
-                return true;
-
-            case "offer":
-                printOffer(text);
-                return true;
-
-            case "accepted":
-                printAccepted(text);
-                return true;
-
-            case "declined":
-                printDeclined(text);
-                return true;
-
-            case "remind":
-                printReminder(text);
-                return true;
-
-            case "turnIn":
-                handOver(text, dialog, memoryMap);
-                return true;
-
-            default:
-                return super.callAction(action, ruleId, dialog, params, memoryMap);
+            return true;
         }
+
+        return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
     /**
      * The exchange itself, kept in one place because every job that adds a decision to it still ends
      * here - the decision changes what is said and what is paid, not what is taken.
+     * <p>
+     * Every branch the prose needs to know about comes back out as a flag, so a row can ask whether
+     * the payment happened, whether an extra was earned, and whether the job is asking again.
      */
-    protected void handOver(TextPanelAPI text, InteractionDialogAPI dialog,
-                            Map<String, MemoryAPI> memoryMap) {
+    protected void handOver(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
 
         //asked before anything is spent or paid, since a job that settles a wager afterwards has
         //already handed over the stake it was wagering
         if (!isSatisfied()) {
-            printShort(text);
+            token(mem, PAID_KEY, false);
             return;
         }
 
         FishCatch offered = getBestOffered();
 
-        beforePayment(offered, text);
+        beforePayment(offered, mem);
 
         if (!turnIn()) {
-            printShort(text);
+            token(mem, PAID_KEY, false);
             return;
         }
 
-        printPaid(text, offered);
+        token(mem, PAID_KEY, true);
+        token(mem, BONUS_KEY, payBonus(offered));
 
         //a job that wants another round says so by setting itself a new ask, and stays where it is.
         //Nothing else has to change: the flag is still set, the option is still there, and the
         //intel entry reads as the same person wanting more, which is what a supply chain looks like
-        if (!onDelivered(text)) setCurrentStage(Stage.DONE, dialog, memoryMap);
+        boolean more = onDelivered();
+
+        token(mem, MORE_KEY, more);
+
+        //re-read after a new round has been set, so the row describing what is wanted next describes
+        //what is wanted next rather than what was just handed over
+        updateTokens(mem);
+
+        if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
 
     /**
@@ -350,7 +366,16 @@ public abstract class FishJob extends HubMissionWithBarEvent {
      *
      * @param offered the best specimen going towards the first ask, or null
      */
-    protected void beforePayment(FishCatch offered, TextPanelAPI text) {
+    protected void beforePayment(FishCatch offered, MemoryAPI mem) {
+    }
+
+    /**
+     * An extra for a specimen worth remarking on, granted on top of what was agreed.
+     *
+     * @return whether anything extra was paid, which is what the prose branches on
+     */
+    protected boolean payBonus(FishCatch offered) {
+        return false;
     }
 
     /**
@@ -358,59 +383,46 @@ public abstract class FishJob extends HubMissionWithBarEvent {
      *
      * @return true if the job goes on, having set itself fresh asks and rewards
      */
-    protected boolean onDelivered(TextPanelAPI text) {
+    protected boolean onDelivered() {
         return false;
     }
 
-    /** What the bar shows before anybody has spoken to them. One paragraph, no options. */
-    protected abstract void printBlurb(TextPanelAPI text);
-
-    /** What they say when asked, ending on what they want and what they are paying. */
-    protected abstract void printOffer(TextPanelAPI text);
-
-    protected void printAccepted(TextPanelAPI text) {
-        if (text != null) text.addPara("The arrangement is made.");
-    }
-
-    protected void printDeclined(TextPanelAPI text) {
-        if (text != null) text.addPara("You leave them to it.");
-    }
-
-    /** What they say when you turn up without the whole catch. */
-    protected void printReminder(TextPanelAPI text) {
-        if (text == null) return;
-
-        text.addPara("You are still owed for %s.", Misc.getTextColor(), Misc.getHighlightColor(), describeAsks());
-    }
-
-    /** The rare case: the option was up and the hold emptied between one frame and the next. */
-    protected void printShort(TextPanelAPI text) {
-        if (text != null) text.addPara("The count comes up short, and the matter is left there.");
-    }
-
     /**
-     * @param offered the best specimen that went towards the first ask, for a job that pays on
-     *                quality. Null if there was nothing to measure
-     */
-    protected void printPaid(TextPanelAPI text, FishCatch offered) {
-        if (text == null) return;
-
-        text.addPara("The crates change hands, and you are paid %s.", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeRewards());
-    }
-
-    /**
-     * The tokens the shared rows use, on top of the person and stage ones vanilla sets.
+     * The tokens the rows read, on top of the person and stage ones vanilla sets.
      * <p>
-     * All three expire the moment the game unpauses, which is what {@code set} does and what is
-     * wanted here - they describe a conversation, not a save.
+     * All of them expire the moment the game unpauses, which is what a conversation is. Capitalised
+     * twins are set alongside the plain ones because the engine does not capitalise a token for you
+     * and a sentence has to be able to start with one.
      */
+    protected void updateTokens(MemoryAPI mem) {
+        if (mem == null) return;
+
+        token(mem, "$missionId", getMissionId());
+
+        String ask = describeAsks();
+        String reward = describeRewards();
+
+        token(mem, ASK_KEY, ask);
+        token(mem, ASK_CAP_KEY, Misc.ucFirst(ask));
+        token(mem, REWARD_KEY, reward);
+        token(mem, REWARD_CAP_KEY, Misc.ucFirst(reward));
+        token(mem, HAS_FISH_KEY, isSatisfied());
+
+        setJobTokens(mem);
+    }
+
+    /** Anything a particular job's rows need naming: a dish, a species, two men in a bar. */
+    protected void setJobTokens(MemoryAPI mem) {
+    }
+
+    /** Written straight to the conversation's memory, which is the only place a row will look. */
+    protected static void token(MemoryAPI mem, String key, Object value) {
+        if (mem != null) mem.set(key, value, 0f);
+    }
+
     @Override
     protected void updateInteractionDataImpl() {
-        set("$missionId", getMissionId());
-        set("$catchreleaseAsk", describeAsks());
-        set("$catchreleaseReward", describeRewards());
-        set(HAS_FISH_KEY, isSatisfied());
+        updateTokens(interactionMemory);
     }
 
     /**
@@ -434,5 +446,105 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
     protected static boolean hasPlayerFleet() {
         return Global.getSector() != null && Global.getSector().getPlayerFleet() != null;
+    }
+
+    //---- intel ----------------------------------------------------------------------------------
+
+    /**
+     * A job is a job rather than a mission, which is the word vanilla puts in the abandon prompt and
+     * the end-stage lines it writes for us.
+     */
+    @Override
+    protected String getMissionTypeNoun() {
+        return "job";
+    }
+
+    /**
+     * The entry while the fish are owed.
+     * <p>
+     * Only this stage is written here: the base class already says the right thing about a job that
+     * was finished, failed or abandoned, and repeating it would be two entries disagreeing about a
+     * job that is over.
+     */
+    @Override
+    public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
+        float opad = 10f;
+        Color highlight = Misc.getHighlightColor();
+        Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
+
+        PersonAPI person = getPerson();
+        MarketAPI market = getGiverMarket();
+
+        if (person != null && market != null) {
+            info.addPara("%s is waiting on %s for the catch.", opad, highlight,
+                    person.getNameString(), market.getName());
+        }
+
+        info.addPara("What is wanted:", opad);
+
+        bullet(info);
+        for (FishRequirement ask : asks) {
+            //highlighted after the fact rather than through a format string, since the ask writes
+            //its own sentence and there is no %s in it to hang the count on
+            LabelAPI line = info.addPara(Misc.ucFirst(ask.describe()), text, 0f);
+            line.setHighlightColor(highlight);
+            line.setHighlight(String.valueOf(ask.count));
+        }
+
+        //the clock belongs with the ask rather than with the payment - it is a fact about how long
+        //there is to catch them, not about what is being handed over
+        if (days > 0f) {
+            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text);
+        }
+        unindent(info);
+
+        info.addPara("On delivery:", opad);
+
+        bullet(info);
+        for (FishReward reward : rewards) {
+            info.addPara(Misc.ucFirst(reward.describe()), text, 0f);
+        }
+        unindent(info);
+    }
+
+    /** The compact form, for the list down the side of the intel screen. */
+    @Override
+    protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+        Color highlight = Misc.getHighlightColor();
+        Color text = getBulletColorForMode(mode);
+
+        float pad = mode == ListInfoMode.IN_DESC ? 10f : 0f;
+
+        LabelAPI line = info.addPara(Misc.ucFirst(describeAsks()), text, pad);
+        line.setHighlightColor(highlight);
+
+        //an empty highlight would ask the label to find nothing, which is not the same as finding
+        //nothing to highlight
+        if (!asks.isEmpty()) line.setHighlight(String.valueOf(asks.get(0).count));
+
+        if (days > 0f && !isEnding()) {
+            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text, 0f);
+        }
+    }
+
+    /**
+     * The one line under the entry's title, which is the only part most players read.
+     * <p>
+     * Deliberately not conditional on whether the hold already covers the ask. Answering that means
+     * decoding every specimen in every stack, and this is asked while a list is being drawn rather
+     * than while somebody is waiting for an answer - so it says both halves of the errand and stays
+     * cheap.
+     */
+    @Override
+    public String getNextStepText() {
+        if (isEnding()) return null;
+
+        PersonAPI person = getPerson();
+        MarketAPI market = getGiverMarket();
+
+        if (person == null || market == null) return "Catch " + describeAsks() + ".";
+
+        return "Catch " + describeAsks() + ", then find " + person.getNameString()
+                + " on " + market.getName() + ".";
     }
 }

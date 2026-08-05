@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
@@ -78,7 +77,7 @@ public class KidsJob extends FishJob {
         if ("turnInLoud".equals(action) || "turnInQuiet".equals(action)) {
             toLoud = "turnInLoud".equals(action);
 
-            handOver(dialog == null ? null : dialog.getTextPanel(), dialog, memoryMap);
+            handOver(dialog, memoryMap);
 
             return true;
         }
@@ -86,74 +85,27 @@ public class KidsJob extends FishJob {
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
+    /**
+     * Paid for the specimen rather than for the choice, since the choice cannot be got wrong and
+     * rewarding it would only teach the player to guess.
+     */
     @Override
-    protected void printPaid(TextPanelAPI text, FishCatch offered) {
-        String winner = toLoud ? "the loud one" : "the quiet one";
-        String other = toLoud ? "the quiet one" : "the loud one";
+    protected boolean payBonus(FishCatch offered) {
+        if (offered == null || offered.getGrade().ordinal() < BONUS_GRADE.ordinal()) return false;
 
-        text.addPara("You hand the better of the two to %s. There is a silence of the kind that "
-                        + "precedes either delight or a formal complaint.", Misc.getTextColor(),
-                Misc.getHighlightColor(), winner);
-
-        boolean impressive = offered != null && offered.getGrade().ordinal() >= BONUS_GRADE.ordinal();
-
-        if (impressive) {
-            //paid for the specimen rather than for the choice, since the choice cannot be got wrong
-            //and rewarding it would only teach the player to guess
-            text.addPara("It is a serious fish. Both of them go very quiet, and then %s empties "
-                            + "a pocket onto the table without being asked.", Misc.getTextColor(),
-                    Misc.getHighlightColor(), other);
-
-            for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {
-                extra.grant();
-                rewards.add(extra);
-            }
-        } else {
-            text.addPara("%s declares this unfair. The declaration is noted and ignored.",
-                    Misc.getTextColor(), Misc.getHighlightColor(), Misc.ucFirst(other));
+        for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {
+            extra.grant();
+            rewards.add(extra);
         }
 
-        text.addPara("Between them they produce %s, which they clearly consider a fortune, and "
-                        + "which they are not wrong about.", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeRewards());
+        return true;
     }
 
     @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("Two children who should not be in here are conducting negotiations at a "
-                + "corner table. One of them is doing all the talking. The other one has a bucket.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"We need two,\" the loud one says. \"For the battle.\"");
-
-        text.addPara("The quiet one turns the bucket so you can see into it. There is nothing in "
-                + "the bucket. This does not appear to have discouraged anyone.");
-
-        text.addPara("\"%s. One each. Then they fight.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
-
-        text.addPara("You point out that they will not fight. This is dismissed as an adult "
-                + "opinion. The payment, when it is produced, is %s - and it is produced from four "
-                + "pockets, so you understand that it is all of it.", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeRewards());
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("The loud one shakes your hand. The quiet one does not, but does nod, which "
-                + "you gather is the binding part.");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("They take this well, which is somehow worse.");
-    }
-
-    @Override
-    protected void printReminder(TextPanelAPI text) {
-        text.addPara("\"Have you got them yet.\" It is the fourth time today for somebody.");
+    protected void setJobTokens(MemoryAPI mem) {
+        token(mem, "$catchreleaseKid", toLoud ? "the loud one" : "the quiet one");
+        token(mem, "$catchreleaseOther", toLoud ? "the quiet one" : "the loud one");
+        token(mem, "$catchreleaseOtherCap", toLoud ? "The quiet one" : "The loud one");
     }
 
     @Override

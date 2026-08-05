@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
@@ -84,18 +83,16 @@ public class MafiaJob extends FishJob {
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
-        TextPanelAPI text = dialog == null ? null : dialog.getTextPanel();
-
         if ("turnInFlat".equals(action)) {
             wager = null;
-            handOver(text, dialog, memoryMap);
+            handOver(dialog, memoryMap);
 
             return true;
         }
 
         if ("turnInLeft".equals(action) || "turnInRight".equals(action)) {
             wager = "turnInLeft".equals(action) ? left : right;
-            handOver(text, dialog, memoryMap);
+            handOver(dialog, memoryMap);
 
             return true;
         }
@@ -121,7 +118,7 @@ public class MafiaJob extends FishJob {
      * would be a wager on the reward table rather than on a fish.
      */
     @Override
-    protected void beforePayment(FishCatch offered, TextPanelAPI text) {
+    protected void beforePayment(FishCatch offered, MemoryAPI mem) {
         if (wager == null) return;
 
         //a better specimen fights better, so what the player brought is the thing they are actually
@@ -137,72 +134,21 @@ public class MafiaJob extends FishJob {
     }
 
     @Override
-    protected void printPaid(TextPanelAPI text, FishCatch offered) {
-        if (wager == null) {
-            text.addPara("You take the fee. One of them looks briefly disappointed in you, which "
-                    + "from a man in this line of work is close to a compliment.");
+    protected void setJobTokens(MemoryAPI mem) {
+        if (mem == null) return;
 
-            text.addPara("%s, counted out on the tank lid.", Misc.getTextColor(),
-                    Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
+        token(mem, "$catchreleaseLeft", left);
+        token(mem, "$catchreleaseRight", right);
+        token(mem, "$catchreleaseWon", won);
 
-            return;
-        }
+        //a separate boolean rather than testing the name, because a condition that is only a
+        //variable hands the engine back whatever the key holds, and what it wants back is a
+        //true or a false - a name would be neither
+        token(mem, "$catchreleaseHasWager", wager != null);
 
-        text.addPara("The tank goes in. Something is added to the water from an unlabelled "
-                + "ampoule. Nobody explains what, and the room leans in.");
-
-        if (won) {
-            text.addPara("%s's fish is still moving. Yours was on it. You are paid %s, and paid "
-                            + "promptly, which is the part that tells you they are serious people.",
-                    Misc.getTextColor(), Misc.getHighlightColor(), wager, describeRewards());
-        } else {
-            text.addPara("It is over quickly and it is not your side that it is over for. %s "
-                            + "shrugs. \"You picked. That is the whole of it.\"", Misc.getTextColor(),
-                    Misc.getHighlightColor(), wager.equals(left) ? right : left);
-
-            text.addPara("You walk out with nothing, which you agreed to on the way in.");
-        }
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("Two men are sitting with a tank between them that is far too good for this "
-                + "bar. Neither of them is drinking. Both of them are watching everyone who is.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"You bring the stock,\" says the one who introduces himself as %s. \"We "
-                        + "supply the rest.\" He does not say what the rest is. The other one, %s, "
-                        + "taps the ampoule case on the table, which is an answer of sorts.",
-                Misc.getTextColor(), Misc.getHighlightColor(), left, right);
-
-        text.addPara("\"%s. Two, because it is not much of an event with one.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
-
-        text.addPara("\"Flat fee is %s. Or you put the fee on one of ours and take double if it "
-                        + "walks out. Your call, at the door, not before.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), describeRewards());
-
-        text.addPara("\"Bring a good one,\" the second one adds. \"They last longer. That is your "
-                + "business, not ours, but it is your money.\"");
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("Neither of them writes anything down. You get the impression that they will "
-                + "remember.");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("They go back to watching the room. You are no longer part of what they are "
-                + "watching, which is a relief.");
-    }
-
-    @Override
-    protected void printReminder(TextPanelAPI text) {
-        text.addPara("\"Still two,\" one of them says, without turning round.");
+        token(mem, "$catchreleaseWager", wager == null ? "nobody" : wager);
+        token(mem, "$catchreleaseFoe", wager == null ? "nobody"
+                : wager.equals(left) ? right : left);
     }
 
     @Override
