@@ -95,6 +95,15 @@ public enum Tackle {
         }
     },
 
+    FANNED_ARRAY("Fanned Array", Fit.SEARCHLIGHT,
+            "Throws the lights as fans off the hull rather than as spots out on the deep. Far more"
+                    + " sky is under them at once, and thinly - what they find, they find at a"
+                    + " glance rather than by dwelling on it.") {
+        {
+            fanBeam = true;
+        }
+    },
+
     BREACH_LAMP("Breach Lamp", Fit.SEARCHLIGHT,
             "Burns through the fabric rather than shining across it. The lights work out in"
                     + " hyperspace, and there is something out there to find.") {
@@ -132,6 +141,9 @@ public enum Tackle {
 
     /** Whether the lights burn through into hyperspace rather than refusing to run out there. */
     public boolean burnsHyperspace = false;
+
+    /** Whether the lights are thrown as fans off the hull rather than as spots out in the dark. */
+    public boolean fanBeam = false;
 
     Tackle(String name, Fit fit, String description) {
         this.name = name;

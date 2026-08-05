@@ -91,6 +91,7 @@ public class ShopPricing {
 
         if (tackle.shipTackle) return 3;
         if (tackle.sonar || tackle.rarityBias > 1f || tackle.lockTime > 0f) return 2;
+        if (tackle.fanBeam) return 2;
         if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return 1;
 
         return 0;

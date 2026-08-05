@@ -180,12 +180,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         for (Searchlight light : lights) {
             if (light.isDone()) continue;
 
-            float size = light.getSize();
-            float distance = Misc.getDistance(light.getRenderLoc(), at);
-            if (distance > size) continue;
-
-            float inBeam = 1f - MathUtils.clamp(distance / Math.max(1f, size), 0f, 1f);
-            inBeam *= inBeam;
+            //the light's own answer, so a fan dents what a fan is actually over
+            float inBeam = light.getLitStrength(at);
 
             if (inBeam > strongest) strongest = inBeam;
         }

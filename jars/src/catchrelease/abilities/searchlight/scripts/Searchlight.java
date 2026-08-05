@@ -13,6 +13,7 @@ import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightBurnRenderer;
+import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -62,9 +63,9 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * The two faces a light can wear, and both transient for the same reason.
+     * The faces a light can wear, and all of them transient for the same reason.
      * <p>
-     * Either is registered with LunaCampaignRenderer's transient list, which does not survive a
+     * Each is registered with LunaCampaignRenderer's transient list, which does not survive a
      * load. Written into the save, a renderer comes back as an orphan: a live object nothing draws,
      * with the field it lives in non-null, so the rebuild never fires and the beam is simply
      * invisible for the rest of the session. Null on load instead, and {@link #advanceLook()} builds
@@ -72,6 +73,7 @@ public class Searchlight implements EveryFrameScript {
      */
     private transient SearchlightGlowRenderer glow;
     private transient SearchlightBurnRenderer burn;
+    private transient SearchlightFanRenderer fan;
 
     /** Seconds one face takes to hand over to the other when the fleet crosses. */
     public static final float LOOK_SWAP_FADE = 1f;
@@ -102,6 +104,16 @@ public class Searchlight implements EveryFrameScript {
 
     /** Where the held thing is, kept separately so the lean-off has somewhere to lean from. */
     private final Vector2f lockLoc = new Vector2f();
+
+    /**
+     * How wide the fan opens either side of where it is aimed, and how much of its strength is left
+     * out at the tip.
+     * <p>
+     * The tip never reaches nothing on purpose: a fan is sold as covering more sky at once, and one
+     * that faded away before its own reach would cover less than the spot it replaced.
+     */
+    public static final float FAN_HALF_ANGLE = 11f;
+    public static final float FAN_TIP_STRENGTH = 0.35f;
 
     /** Seconds spent leaning onto what it found, and the wait before it may stop for anything else. */
     public static final float LOCK_EASE_TIME = 0.35f;
@@ -212,36 +224,53 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * Which face the light wears where the fleet is standing: the beam, or the burn.
+     * Which face the light wears where the fleet is standing: the burn in hyperspace, the fan when
+     * that module is fitted, and the spot otherwise.
+     * <p>
+     * The burn outranks the fan on purpose - in hyperspace the light is a hole in the fabric, not
+     * a lamp, and a fan of orange thrown across the deep would be the very
+     * shining-at-nothing the burn-through exists to replace.
      * <p>
      * Checked every frame rather than once, because with the burn-through bought the ability stays
-     * on across a jump - the look has to follow the fleet through, not the toggle. The old face
-     * fades on its way out rather than vanishing, and a face that has faded is done for good, so
-     * coming back means building a fresh one - which also replays the glow's switch-on flash, and a
-     * light re-lighting as it comes out of hyperspace is the right thing for it to do.
+     * on across a jump, and the fan module can be refitted under a running light - the look has to
+     * follow the fleet and the fit, not the toggle. The old face fades on its way out rather than
+     * vanishing, and a face that has faded is done for good, so coming back means building a fresh
+     * one - which also replays the glow's switch-on flash, and a light re-lighting as it comes out
+     * of hyperspace is the right thing for it to do.
      * <p>
      * This is also what heals a load mid-burn: the burn is transient, so it comes back null, and
      * the first frame out here simply makes another.
      */
     protected void advanceLook() {
-        if (isBurning()) {
-            if (glow != null) {
-                glow.fadeAndExpire(LOOK_SWAP_FADE);
-                glow = null;
-            }
-            if (burn == null) {
-                burn = new SearchlightBurnRenderer(currentRenderLoc, getArea());
-                LunaCampaignRenderer.addTransientRenderer(burn);
-            }
-        } else {
-            if (burn != null) {
-                burn.fadeAndExpire(LOOK_SWAP_FADE);
-                burn = null;
-            }
-            if (glow == null) {
-                glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
-                LunaCampaignRenderer.addTransientRenderer(glow);
-            }
+        boolean burning = isBurning();
+        boolean fanned = !burning && isFanned();
+
+        if (burn != null && !burning) {
+            burn.fadeAndExpire(LOOK_SWAP_FADE);
+            burn = null;
+        }
+        if (fan != null && !fanned) {
+            fan.fadeAndExpire(LOOK_SWAP_FADE);
+            fan = null;
+        }
+        if (glow != null && (burning || fanned)) {
+            glow.fadeAndExpire(LOOK_SWAP_FADE);
+            glow = null;
+        }
+
+        if (burning && burn == null) {
+            burn = new SearchlightBurnRenderer(currentRenderLoc, getArea());
+            LunaCampaignRenderer.addTransientRenderer(burn);
+        }
+        if (fanned && fan == null) {
+            //the fan pivots on the fleet and follows the sweep, so it takes both live vectors:
+            //where the light is thrown from and where it is looking
+            fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
+            LunaCampaignRenderer.addTransientRenderer(fan);
+        }
+        if (!burning && !fanned && glow == null) {
+            glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
+            LunaCampaignRenderer.addTransientRenderer(glow);
         }
     }
 
@@ -298,18 +327,18 @@ public class Searchlight implements EveryFrameScript {
         LocationAPI location = Global.getSector().getCurrentLocation();
         if (location == null) return;
 
-        float size = getArea();
-
         SectorEntityToken best = null;
-        float bestDistance = Float.MAX_VALUE;
+        float bestLit = 0f;
 
+        //the best lit rather than the nearest, because under a fan those are not the same thing -
+        //something out at the tip on the centre line is more found than something off to one side
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
 
-            float distance = Misc.getDistance(currentRenderLoc, buried.getLocation());
-            if (distance > size || distance >= bestDistance) continue;
+            float lit = getLitStrength(buried.getLocation());
+            if (lit <= bestLit) continue;
 
-            bestDistance = distance;
+            bestLit = lit;
             best = buried;
         }
 
@@ -353,6 +382,64 @@ public class Searchlight implements EveryFrameScript {
         return currentRenderLoc;
     }
 
+    /**
+     * Where the light is thrown from, which is the fleet - the arc is drawn around it and holds its
+     * own location vector, so this follows the fleet without anything having to be told.
+     */
+    public Vector2f getOrigin() {
+        return arc == null ? currentRenderLoc : arc.center;
+    }
+
+    /** Whether the fan is fitted, which changes the shape of everything the light is doing. */
+    public static boolean isFanned() {
+        return TackleManager.get(Tackle.Fit.SEARCHLIGHT).fanBeam;
+    }
+
+    /**
+     * How lit a spot is by this light, from nothing to full.
+     * <p>
+     * The one place that answers what a light is touching. It used to be asked and answered
+     * separately by the thing that draws the dents and the thing that decides what to stop on, both
+     * assuming a circle - which is fine while a light is a circle, and wrong the moment one is a
+     * fan. Asked here, a light that changes shape changes shape for everything at once.
+     */
+    public float getLitStrength(Vector2f at) {
+        float size = getArea();
+
+        if (!isFanned()) {
+            float distance = Misc.getDistance(currentRenderLoc, at);
+            if (distance > size) return 0f;
+
+            float inBeam = 1f - MathUtils.clamp(distance / Math.max(1f, size), 0f, 1f);
+
+            return inBeam * inBeam;
+        }
+
+        Vector2f origin = getOrigin();
+
+        //the fan is aimed wherever the sweep is aimed, and reaches past the aim point by the beam's
+        //own radius, so the two shapes cover the same ground and the reach the world is seeded
+        //against still holds
+        float length = Misc.getDistance(origin, currentRenderLoc) + size;
+        if (length <= 1f) return 0f;
+
+        float distance = Misc.getDistance(origin, at);
+        if (distance > length) return 0f;
+
+        float off = Math.abs(Misc.getAngleDiff(
+                Misc.getAngleInDegrees(origin, currentRenderLoc),
+                Misc.getAngleInDegrees(origin, at)));
+
+        if (off > FAN_HALF_ANGLE) return 0f;
+
+        float across = 1f - off / FAN_HALF_ANGLE;
+        float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
+
+        //squared across the fan so the edges are soft, and only leaned on down its length - a fan
+        //that faded to nothing at the tip would be a fan that cannot find anything at its own reach
+        return across * across * (FAN_TIP_STRENGTH + (1f - FAN_TIP_STRENGTH) * along);
+    }
+
     public float getSize() {
         return getArea();
     }
@@ -367,10 +454,14 @@ public class Searchlight implements EveryFrameScript {
         for (RippleRingRenderer ring : rings) ring.fadeAndExpire(fadeSeconds);
         if (glow != null) glow.fadeAndExpire(fadeSeconds);
 
-        //the burn goes the way the glow goes - it is the same light in different clothes
+        //the other faces go the way the glow goes - the same light in different clothes
         if (burn != null) {
             burn.fadeAndExpire(fadeSeconds);
             burn = null;
+        }
+        if (fan != null) {
+            fan.fadeAndExpire(fadeSeconds);
+            fan = null;
         }
 
         rings.clear();
