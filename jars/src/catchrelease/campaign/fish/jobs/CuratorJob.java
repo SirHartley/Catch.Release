@@ -1,0 +1,98 @@
+package catchrelease.campaign.fish.jobs;
+
+import catchrelease.campaign.fish.data.FishGrade;
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.shop.FishRequirement;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Ranks;
+import com.fs.starfarer.api.impl.campaign.ids.Voices;
+import com.fs.starfarer.api.util.Misc;
+
+/**
+ * A conservationist stocking a private aquarium, who will take either kind of remarkable.
+ * <p>
+ * The job the {@code anyOf} composition was written for. Everything else in a requirement stacks:
+ * rarity and grade and coherence are all true at once, which can only ever narrow. This one wants
+ * something uncommon that is either a magnificent specimen or one that is barely holding its shape,
+ * and does not care which - both are worth putting behind glass, and they are opposite catches.
+ */
+public class CuratorJob extends FishJob {
+
+    public static final int VALUE_PER_FISH = 2600;
+
+    public static final float DAYS = 70f;
+
+    @Override
+    protected boolean create(MarketAPI createdAt, boolean barEvent) {
+        if (!setGlobalReference("$catchrelease_curatorRef", "$catchrelease_curatorInProgress")) {
+            return false;
+        }
+
+        setGiverRank(Ranks.CITIZEN);
+        setGiverVoice(Voices.SCIENTIST);
+
+        if (!setUpGiver(createdAt)) return false;
+
+        days = DAYS;
+
+        FishRequirement ask = new FishRequirement();
+        ask.count = 1 + genRandom.nextInt(3);
+
+        FishRequirement fine = new FishRequirement();
+        fine.minRarity = FishRarity.UNCOMMON;
+        fine.minGrade = FishGrade.FINE;
+        ask.addAlternative(fine);
+
+        FishRequirement strange = new FishRequirement();
+        strange.minRarity = FishRarity.UNCOMMON;
+        strange.lowCoherence = true;
+        ask.addAlternative(strange);
+
+        addAsk(ask);
+
+        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, true));
+
+        setUpSpine();
+
+        return true;
+    }
+
+    @Override
+    protected void printBlurb(TextPanelAPI text) {
+        text.addPara("A woman with salt-cracked hands and an academic's posture is sketching "
+                + "something on a slate and covering it whenever anyone walks past.");
+    }
+
+    @Override
+    protected void printOffer(TextPanelAPI text) {
+        text.addPara("\"I keep a tank,\" she says. \"Larger than is sensible. I am told it is a "
+                + "conservation programme, which is what people call a collection when it has a "
+                + "grant attached.\"");
+
+        text.addPara("\"What I want is %s.\"", Misc.getTextColor(), Misc.getHighlightColor(),
+                describeAsks());
+
+        text.addPara("She taps the slate. \"Either will do. A perfect one teaches you what the "
+                + "species is meant to be. A ruined one teaches you what is happening to it. I have "
+                + "space for both and no preference between them.\"");
+
+        text.addPara("\"%s. And I will not ask where.\"", Misc.getTextColor(),
+                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
+    }
+
+    @Override
+    protected void printAccepted(TextPanelAPI text) {
+        text.addPara("\"Keep it wet,\" she says. \"Whichever one you find.\"");
+    }
+
+    @Override
+    protected void printDeclined(TextPanelAPI text) {
+        text.addPara("She covers the slate again.");
+    }
+
+    @Override
+    public String getBaseName() {
+        return "Something Worth Glass";
+    }
+}

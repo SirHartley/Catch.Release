@@ -3,3 +3,4 @@ catchrelease_standingOrder,,10,1,30,40,20,30,60,90,catchrelease.campaign.fish.jo
 catchrelease_chef,,10,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.ChefJob
 catchrelease_startup,,9,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.StartupJob
 catchrelease_butler,,8,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.ButlerJob
+catchrelease_curator,,7,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.CuratorJob
