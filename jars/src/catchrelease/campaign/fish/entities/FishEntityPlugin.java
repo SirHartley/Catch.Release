@@ -30,10 +30,23 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
      * The movement archetypes, out in the open water. Pauses shrink and everything else grows with
      * the rarity's wander ladder, so a legendary darter is a different animal to a common one.
      */
-    private static final float DARTER_PAUSE = 2.4f;
-    private static final float DARTER_DASH_TIME = 0.5f;
+    private static final float DARTER_PAUSE = 1.1f;
+    private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
-    private static final float DARTER_CREEP_MULT = 0.15f;
+
+    /**
+     * What a darter is doing between bolts, and the number that made the whole ladder wrong.
+     * <p>
+     * At a seventh of its speed a resting darter is not resting, it is parked - and eleven of the
+     * twelve uncommon species are darters, against commons that are mostly smooth swimmers moving
+     * the whole time. So the uncommon ones spent four fifths of their lives as a stationary target
+     * and were the easiest thing in the sky to put a harpoon through, which is exactly backwards.
+     * <p>
+     * Slow enough to read as gathering itself, fast enough that a shot still has to lead it. With
+     * the shorter pause above, a darter now spends about as long moving as it does resting, and its
+     * average speed comes out ahead of the common swimmers it is supposed to be harder than.
+     */
+    private static final float DARTER_CREEP_MULT = 0.55f;
     private static final float SINKER_SPEED_MULT = 0.75f;
     private static final float SINKER_CURVE = 14f;
     private static final float SINKER_FLIP_TIME = 6f;
