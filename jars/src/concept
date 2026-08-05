@@ -22,20 +22,39 @@ scrapped
 
 ai_
 
-Dive bomb
+Bar encounters
+The mod will add bar encounters spawning individuals that request fish in certain make, quantity and quality. They sometimes request fish from a specific location.
+They provide payment in fishing upgrades, tackles, location data, blueprints, special items or money. These bar encounters should support:
+- Factional spawning
+- Multistage quests
+- spawning static or pre-made "cyan" quest motes in specific ponds
+- marking ponds as quest important
+- Quests that may spawn (we'll implement those later, this is just for reference on what the framework needs to support):
+chef that wants certain feesh (3 types at once?) for dish
+startup guy that wants feesh because its needed for his project (he's gonna figure out the supply chain later)
+butler for super rich guy that wants specific fish above size x
+conservartionist that needs it for his aquarium
+two kids that want specific kinds for a pokemon battle
+two mafia guys that want specific kinds for a drug-fuelled battle ring (you can bet on one of them and double or lose your reward)
+totally not a prostitute that wants it for a client (won't disclose why, only spawns on hegemony worlds)
+galatian researcher requesting for a type of fish for a project
+TriTuber that wants one for a video
+Cultists request one, do not say why
+
+x Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
 
 x Drones
 - Now despawn way too early...
 
-Pond
+x Pond
 - Swirl renderer still gone. Trial a new design that makes it look like a hole, include the warping hyperspace bg
 - unstable terrain should not spawn below ring bands
 
-Minigame
+x Minigame
  - Treasure panel image height/pos does not match catch panel
 
-Shop
+x Shop
 - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate
 - Modifier category lacks support for mod entries for searchlights and bombs - auto add them when there's stuff in the csv
 
@@ -56,7 +75,7 @@ x Fish Map UI
 - move species location data source text to on hover tooltip (regional data ect)
 - add fish icon into on hover tooltip
 
-Codex
+x Codex
 - image is right top aligned. Should be placed to the right of the uppermost info panel with 10px distance. Should use the same kind of border as info boxes, not the fancy fish border.
 - Catch location data should be a summary of _where_ the fish _can_ be caught. Keep it human-readable, like "In the far reaches of the north-west, under a blue star when slipstreams run towards the core" or "In the core, under a red star, at any time of the cycle." or "In the Abyss."
 - Add a button that takes you to the pre-filtered fish map UI with the fish already selected
