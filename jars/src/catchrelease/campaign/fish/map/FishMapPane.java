@@ -1,11 +1,13 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -330,6 +332,10 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         + " once for planning a route - and overlapping waters take turns at the"
                         + " pixels rather than piling on them.", 8f);
 
+                tooltip.addPara("A filled circle by a name is a species somebody aboard has"
+                        + " landed. A hollow one is known only from survey data: its waters"
+                        + " shade, but nobody has seen the creature itself.", 8f);
+
                 tooltip.addPara("F2 over a row opens that species' codex page.", Misc.getGrayColor(), 8f);
 
                 if (Global.getSettings().isDevMode()) {
@@ -352,9 +358,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 boolean caught = FishLog.isCaught(spec.id);
                 FishLogEntry logged = FishLog.get(spec.id);
 
-                //no portrait for something nobody aboard has ever seen. A survey says where a thing
-                //lives; what it looks like is learned by pulling one out of the water
-                String icon = caught ? FishCodex.getIcon(spec) : null;
+                //the generic mark rather than the creature for something nobody aboard has seen. A
+                //survey says where a thing lives; what it looks like is learned by landing one
+                String icon = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
                 if (icon != null && !icon.isEmpty()) {
                     try {
                         Global.getSettings().loadTexture(icon);
@@ -366,8 +372,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
                 tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);
 
-                //the kind of creature it is is also a thing you know from having handled one
-                if (caught) tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
+                //the type stays whether or not one has been landed. It is what the list is sorted
+                //and filtered by, so a row whose type is a blank is a row that cannot be found
+                tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
 
                 if (caught && logged != null) {
                     tooltip.addPara("Caught " + logged.caught + (logged.caught == 1
@@ -620,14 +627,17 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * One species in the list: an accent bar in the rarity's colour and the name - everything
-     * else the row used to say moved into its tooltip. The bar stays lit while its waters are
-     * on the map. F2 while hovering opens the codex on it.
+     * One species in the list: an accent bar in the rarity's colour, a circle carrying what the
+     * log knows of the species - filled once one has been landed, hollow while it is survey data
+     * only - and the name. Everything else the row used to say moved into its tooltip. The bar
+     * stays lit while its waters are on the map. F2 while hovering opens the codex on it.
      */
     protected class RowPlugin extends BaseCustomUIPanelPlugin {
 
         public static final float PAD_SIDE = 8f;
         public static final float ACCENT_WIDTH = 3f;
+        public static final float MARK_RADIUS = 3.5f;
+        public static final float MARK_GAP = 7f;
 
         protected final FishSpec spec;
         protected PositionAPI rowPos;
@@ -667,6 +677,24 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             float accent = selected ? 0.9f : hovered ? 0.6f : 0.3f;
             ShopUi.drawQuad(x, y, ACCENT_WIDTH, h, spec.rarity.color, accent * alphaMult);
 
+            Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+            //the shop's pip vocabulary again: filled is a thing you have, hollow is the slot
+            //waiting for it. Knowledge is a shape rather than a shade because every shade the row
+            //owns already means selection or rarity, and a dimmed row reads as one that cannot be
+            //clicked. Asked of the log each frame so the ring fills the moment a first catch lands
+            boolean caught = FishLog.isCaught(spec.id);
+            float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
+            float markY = y + h * 0.5f;
+
+            if (caught) {
+                Disc.draw(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 0.9f * alphaMult, false);
+            }
+
+            //over the fill as well as instead of it: the smoothed line is what keeps a circle
+            //this small round
+            Disc.drawOutline(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 1.5f);
+
             LazyFont body = ShopUi.getBodyFont();
             if (body != null) {
                 if (name == null) {
@@ -674,9 +702,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                     name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
                 }
 
-                Color color = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-                name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-                name.draw(Math.round(x + ACCENT_WIDTH + PAD_SIDE),
+                name.setBaseColor(ShopUi.withAlpha(chrome, alphaMult));
+                name.draw(Math.round(x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS * 2f + MARK_GAP),
                         Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
             }
 
