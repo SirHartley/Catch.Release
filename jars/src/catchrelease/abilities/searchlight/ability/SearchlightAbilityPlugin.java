@@ -144,20 +144,19 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether the lights will run where the fleet is standing.
+     * Whether the lights will run where the fleet is standing, which is anywhere but hyperspace.
      * <p>
-     * They will not go into hyperspace on their own - there is nothing out there for an ordinary
-     * beam to find, and lighting up the deep for no reason is only a way to be seen. Bought, the
-     * rig burns through instead of shining across, which is what makes the trip worth making.
+     * All fishing is done from realspace into hyperspace - the fabric is the thing the gear works
+     * through, and standing on the far side of it leaves nothing to work through. The breach lamp
+     * does not change this: it burns its window from the near side, like everything else.
      */
     public static boolean canRunHere(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return true;
-        if (!fleet.getContainingLocation().isHyperspace()) return true;
 
-        return burnsIntoHyperspace();
+        return !fleet.getContainingLocation().isHyperspace();
     }
 
-    /** Whether the burn-through has been fitted. */
+    /** Whether the breach lamp has been fitted, turning the beams into windows. */
     public static boolean burnsIntoHyperspace() {
         return TackleManager.get(Tackle.Fit.SEARCHLIGHT).burnsHyperspace;
     }

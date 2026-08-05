@@ -3,6 +3,7 @@ package catchrelease.abilities.charges;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 
 /**
  * A skillshot that fires out of a charge pool rather than off a rearm timer.
@@ -111,6 +112,19 @@ public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        return hasCharge() && super.isUsable();
+        return hasCharge() && !isInHyperspace() && super.isUsable();
+    }
+
+    /**
+     * No fishing gear works in hyperspace. All fishing is done from realspace into hyperspace -
+     * the fabric is what the gear works through, and out there is the wrong side of it. The gate
+     * sits here so every charged skillshot answers the same way, rather than each rig
+     * rediscovering the rule.
+     */
+    protected boolean isInHyperspace() {
+        CampaignFleetAPI fleet = getFleet();
+
+        return fleet != null && fleet.getContainingLocation() != null
+                && fleet.getContainingLocation().isHyperspace();
     }
 }

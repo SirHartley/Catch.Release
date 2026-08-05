@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.rendering;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
@@ -224,14 +225,22 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         float glowLevel = identify <= 0 ? 0f
                 : identify == 1 ? FishConstants.IMPRESSION_GLOW_HINT_MULT : 1f;
 
+        //with the breach lamp fitted the beams are windows, and a mote a window is over right now
+        //is seen rather than silhouetted - the dent turns inside out by however much of a beam is
+        //on it. Live rather than off the mark on purpose: the lingering mark is memory, and the
+        //window only shows what is under it while it is under it
+        boolean breaching = SearchlightAbilityPlugin.burnsIntoHyperspace();
+
         for (Map.Entry<SectorEntityToken, Float> entry : marks.entrySet()) {
             SectorEntityToken buried = entry.getKey();
             if (buried.isExpired()) continue;
 
             float mark = entry.getValue();
+            float reveal = breaching ? strongestBeam(buried.getLocation()) : 0f;
 
             renderImpression(buried.getLocation(), mark * alpha,
-                    mark * fadeMult * glowLevel, ringColor(buried, identify));
+                    mark * fadeMult * glowLevel, ringColor(buried, identify),
+                    reveal, reveal * fadeMult, revealColor(buried));
         }
     }
 
@@ -264,18 +273,43 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
     }
 
     /**
+     * What a mote seen through a breach window is drawn in: its own rarity's colour, plainly.
+     * <p>
+     * Deliberately not put through the identify ladder. The ladder sells reading the silhouette -
+     * a hint at one level, a name at the next - and the breach lamp is not reading anything: the
+     * window is open and the thing is simply visible, briefly, while a beam is directly on it.
+     */
+    protected Color revealColor(SectorEntityToken buried) {
+        if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
+            return Searchlight.BREACH_COLOR;
+        }
+
+        return mote.getRarity().color;
+    }
+
+    /**
      * One dent: a subtractive core with a fainter ring standing off it, breathing slowly so it reads
      * as something moving under a surface rather than a decal pinned to the map. With identify
      * bought there is a third pass, a wide additive wash of the ring's colour around the whole
      * thing - the dent stays the hole it always was; the glow is what says what colour of thing is
      * making it.
+     * <p>
+     * Under a breach window the dent turns inside out: the subtractive core gives way by the
+     * reveal, and the mote is drawn in its place - a body and a halo, additive, in its own colour.
+     * The ring stays through the change, since the wave a thing makes in the fabric does not stop
+     * because the light learned to see through it.
      *
-     * @param glowMult how much of the identify glow to draw, 0 for none - the mark and the fade but
-     *                 deliberately not the beams' resting alpha, because anything cut down to that
-     *                 light is too faint to read as a colour, which is how the recoloured ring went
-     *                 unseen in the first place
+     * @param glowMult   how much of the identify glow to draw, 0 for none - the mark and the fade
+     *                   but deliberately not the beams' resting alpha, because anything cut down to
+     *                   that light is too faint to read as a colour, which is how the recoloured
+     *                   ring went unseen in the first place
+     * @param reveal     how much of a live beam is on the mote through a breach window, 0 outside
+     *                   one - this is what trades the core away
+     * @param revealMult the reveal with the fade on it, for the drawn body - and like the identify
+     *                   glow, deliberately not the resting alpha
      */
-    protected void renderImpression(Vector2f at, float alphaMult, float glowMult, Color ringColor) {
+    protected void renderImpression(Vector2f at, float alphaMult, float glowMult, Color ringColor,
+                                    float reveal, float revealMult, Color revealColor) {
         if (alphaMult <= 0f) return;
 
         float pulse = 1f + FishConstants.IMPRESSION_PULSE
@@ -283,19 +317,39 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
         float coreSize = FishConstants.IMPRESSION_SIZE * pulse;
 
-        //taken out of the light rather than added to it
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-        GL14.glBlendEquation(GL14.GL_FUNC_REVERSE_SUBTRACT);
+        //taken out of the light rather than added to it - unless a window is open over it, in
+        //which case there is that much less lit fabric to take anything out of
+        float dent = alphaMult * (1f - MathUtils.clamp(reveal, 0f, 1f));
+        if (dent > 0f) {
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL14.glBlendEquation(GL14.GL_FUNC_REVERSE_SUBTRACT);
 
-        sprite.setColor(Color.WHITE);
-        sprite.setSize(coreSize, coreSize);
-        sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_ALPHA);
-        sprite.renderAtCenter(at.x, at.y);
+            sprite.setColor(Color.WHITE);
+            sprite.setSize(coreSize, coreSize);
+            sprite.setAlphaMult(dent * FishConstants.IMPRESSION_ALPHA);
+            sprite.renderAtCenter(at.x, at.y);
 
-        GL14.glBlendEquation(GL14.GL_FUNC_ADD);
-        GL11.glPopAttrib();
+            GL14.glBlendEquation(GL14.GL_FUNC_ADD);
+            GL11.glPopAttrib();
+        }
+
+        //the mote itself, where the reveal has traded the dent away
+        if (revealMult > 0f) {
+            sprite.setAdditiveBlend();
+            sprite.setColor(revealColor);
+
+            sprite.setSize(coreSize * FishConstants.IMPRESSION_REVEAL_SIZE,
+                    coreSize * FishConstants.IMPRESSION_REVEAL_SIZE);
+            sprite.setAlphaMult(revealMult * FishConstants.IMPRESSION_REVEAL_ALPHA);
+            sprite.renderAtCenter(at.x, at.y);
+
+            sprite.setSize(coreSize * FishConstants.IMPRESSION_REVEAL_HALO_SIZE,
+                    coreSize * FishConstants.IMPRESSION_REVEAL_HALO_SIZE);
+            sprite.setAlphaMult(revealMult * FishConstants.IMPRESSION_REVEAL_HALO_ALPHA);
+            sprite.renderAtCenter(at.x, at.y);
+        }
 
         //and the standing wave around it, which is the part that says it is displacing something
         sprite.setAdditiveBlend();

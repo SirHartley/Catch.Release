@@ -498,6 +498,20 @@ public class FishConstants {
     public static final float IMPRESSION_GLOW_HINT_MULT = 0.45f;
 
     /**
+     * The breach lamp's reveal - the dent turning inside out under a light that has burned a
+     * window through. With hyperspace showing where the beam lands there is no lit fabric left to
+     * be a hole in, so the mote is drawn instead: a body at the dent's own size and a wider halo
+     * around it, both additive, both in the thing's true colour, both scaled by how hard the beam
+     * is on it right now. The reveal follows the live beam and not the lingering mark on purpose -
+     * the window is where the beam is, and a mote lit through it goes back to being a dent the
+     * moment the light moves on.
+     */
+    public static final float IMPRESSION_REVEAL_SIZE = 1f;
+    public static final float IMPRESSION_REVEAL_ALPHA = 0.45f;
+    public static final float IMPRESSION_REVEAL_HALO_SIZE = 2.4f;
+    public static final float IMPRESSION_REVEAL_HALO_ALPHA = 0.15f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad
