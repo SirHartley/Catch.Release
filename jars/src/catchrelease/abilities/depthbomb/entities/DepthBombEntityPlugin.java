@@ -161,9 +161,10 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         shakeNearbyMotes();
         unearthBuried();
 
-        //the glass rupture, or the pond: the pond for now, the glass kept whole for its day.
-        //The pond brings its own mote spawning, opening visuals and camera hold, so the bomb's
-        //own loose motes and shards stay home in that mode
+        //the glass rupture, or the pond look: the pond for now, the glass kept whole for its day.
+        //Either way the break behaves like the bomb's own break - in pond dress the shards stay
+        //home because there is no pane to come off, and the loose motes stay home because a bomb
+        //only frees what was already under it
         if (DepthBombConstants.SPAWN_POND) {
             spawnTemporaryPond();
         } else {
@@ -178,21 +179,26 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * The break as a rupture that behaves like a pond, because it is one: the same terrain, the
-     * same opening spool, ripple and camera hold, the same motes swimming inside the same mask -
-     * sized by the blast, timed by the rupture upgrade, and gone without a trace once it closes.
-     * The bomb entity itself has nothing left to be once the pond stands, so it leaves at once.
+     * The break wearing the pond's look, and only its look: the same terrain visuals - opening
+     * spool, ripple, mask, deep - sized by the blast, timed by the rupture upgrade, and gone
+     * without a trace once it closes. Visual-only on purpose, so the break still behaves like the
+     * bomb's own break: no camera hold, no rod target, no map icon, and no motes bred inside it -
+     * what comes out of a bomb is what {@link #unearthBuried()} already let out.
+     * The bomb entity itself has nothing left to be once the dressing stands, so it leaves at once.
      */
     protected void spawnTemporaryPond() {
         float radius = getBlastRadius() * DepthBombConstants.TEMP_POND_RADIUS_MULT;
         float lifetime = getHealTime() * DepthBombConstants.TEMP_POND_LIFETIME_MULT;
 
-        SectorEntityToken pond = entity.getContainingLocation().addTerrain(
-                MaskedFishingPondTerrainPlugin.TERRAIN_ID,
+        MaskedFishingPondTerrainPlugin.PondParams params =
                 new MaskedFishingPondTerrainPlugin.PondParams(
                         MathUtils.getRandomNumberInRange(0f, 1f) > 0.5f
                                 ? (long) (seed * 1000f) : (long) (seed * -1000f),
-                        radius, lifetime));
+                        radius, lifetime);
+        params.visualOnly = true;
+
+        SectorEntityToken pond = entity.getContainingLocation().addTerrain(
+                MaskedFishingPondTerrainPlugin.TERRAIN_ID, params);
 
         pond.setLocation(entity.getLocation().x, entity.getLocation().y);
 

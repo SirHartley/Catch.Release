@@ -63,6 +63,14 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         public boolean temporary = false;
         public float lifetime = 0f;
 
+        /**
+         * A pond that is only the look of one: no pond tag, so the rod cannot target it, the
+         * spawner does not count it and quests do not pick it; no camera hold; no motes of its
+         * own; no map icon. What the depth bomb dresses its break in - the break keeps the bomb's
+         * own behaviour, and this is just the water it appears to be made of.
+         */
+        public boolean visualOnly = false;
+
         public PondParams(long seed, float radius) {
             this.seed = seed;
             this.radius = radius;
@@ -95,6 +103,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     protected float lifeLeft = 0f;
     protected boolean wasOpened = false;
     protected boolean expiring = false;
+
+    /** Only the look of a pond - see {@link PondParams#visualOnly}. */
+    protected boolean visualOnly = false;
 
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
@@ -133,12 +144,16 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             temporary = true;
             lifeLeft = params.lifetime;
         }
+        if (params != null) visualOnly = params.visualOnly;
 
         name = NAME;
 
-        //the terrain entity is built with no name, no tags of ours and a radius of 0
+        //the terrain entity is built with no name, no tags of ours and a radius of 0.
+        //A visual-only pond does not carry the pond tag: the tag is how the rod finds a target,
+        //how the spawner counts and spaces the real ones, and how the quests pick theirs -
+        //dressing on a bomb's break is none of those things
         entity.setName(NAME);
-        entity.addTag(TERRAIN_ID);
+        if (!visualOnly) entity.addTag(TERRAIN_ID);
         if (entity instanceof CampaignTerrainAPI) {
             ((CampaignTerrainAPI) entity).setRadius(params == null ? PondConstants.POND_RADIUS : params.radius);
         }
@@ -189,7 +204,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     @Override
     public boolean hasMapIcon() {
-        return true;
+        //dressing on a bomb's break is not a place - it is gone in half a minute, and a map icon
+        //would promise somewhere worth flying to
+        return !visualOnly;
     }
 
     @Override
@@ -226,9 +243,11 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         activity = Math.max(0f, Math.min(1f, activity));
 
         //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
-        //since they are stencilled to the mask - invisible, but real enough to be harpooned
+        //since they are stencilled to the mask - invisible, but real enough to be harpooned.
+        //And never into dressing: a bomb's break frees what was already under it, it does not
+        //breed anything of its own
         moteSpawnInterval.advance(amount);
-        if (moteSpawnInterval.intervalElapsed() && isActive) spawnRandomMote();
+        if (moteSpawnInterval.intervalElapsed() && isActive && !visualOnly) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
 
         advanceTemporary(amount);
@@ -278,8 +297,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         throwOpeningDistortion();
 
         //holds the camera while the player is here, and closes the pond once they have left. Sector
-        //level rather than on the entity: entity scripts do not advance while the game is paused
-        Global.getSector().addScript(new PondCameraFocusScript(entity));
+        //level rather than on the entity: entity scripts do not advance while the game is paused.
+        //Not over dressing: a bomb's break takes the camera nowhere, exactly like the fracture it
+        //stands in for, and it closes on its own clock rather than on the player leaving
+        if (!visualOnly) Global.getSector().addScript(new PondCameraFocusScript(entity));
     }
 
     /**
