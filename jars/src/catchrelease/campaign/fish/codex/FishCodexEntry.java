@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.codex;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
@@ -85,6 +86,24 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      * A species nobody has caught is not in the codex at all - not greyed out, not a silhouette with
      * a name under it. The point of the thing is that the list gets longer as you fish.
      */
+    /**
+     * The picture in the tree, which is not the fish until there is a fish to picture.
+     * <p>
+     * Asked at draw time rather than fixed in the constructor, like visibility above and for the
+     * same reason: entries are built before a game exists, so anything that depends on what has been
+     * caught cannot be settled when they are made. A species known only from a survey shows the
+     * generic mark - somebody has told you it is out there and where to look, which is not the same
+     * as having seen one, and a list that draws the creature is answering a question nobody has
+     * earned the answer to yet.
+     */
+    @Override
+    public String getIcon() {
+        FishSpec spec = getSpec();
+        if (spec == null) return FishConstants.ITEM_ICON_FALLBACK;
+
+        return FishLog.isCaught(speciesId) ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+    }
+
     @Override
     public boolean isVisible() {
         if (Global.getSector() == null) return false;

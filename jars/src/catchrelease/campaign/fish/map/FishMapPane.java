@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
@@ -352,9 +353,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 boolean caught = FishLog.isCaught(spec.id);
                 FishLogEntry logged = FishLog.get(spec.id);
 
-                //no portrait for something nobody aboard has ever seen. A survey says where a thing
-                //lives; what it looks like is learned by pulling one out of the water
-                String icon = caught ? FishCodex.getIcon(spec) : null;
+                //the generic mark rather than the creature for something nobody aboard has seen. A
+                //survey says where a thing lives; what it looks like is learned by landing one
+                String icon = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
                 if (icon != null && !icon.isEmpty()) {
                     try {
                         Global.getSettings().loadTexture(icon);
@@ -366,8 +367,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
                 tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);
 
-                //the kind of creature it is is also a thing you know from having handled one
-                if (caught) tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
+                //the type stays whether or not one has been landed. It is what the list is sorted
+                //and filtered by, so a row whose type is a blank is a row that cannot be found
+                tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
 
                 if (caught && logged != null) {
                     tooltip.addPara("Caught " + logged.caught + (logged.caught == 1
