@@ -3,9 +3,11 @@ package catchrelease.campaign.fish.shop;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -164,14 +166,7 @@ public class ShopEntry {
             }
         }
 
-        if (isUpgrade()) {
-            UpgradeManager.getInstance().addLevels(stat.id, 1);
-        } else {
-            //owned before fitted, since owning it is what was paid for - the slot is only where it
-            //is being kept, and it can be moved out and back again for nothing from here on
-            TackleManager.own(tackle);
-            TackleManager.fit(rig, tackle);
-        }
+        grant();
 
         return true;
     }
@@ -184,14 +179,58 @@ public class ShopEntry {
     public boolean devBuy() {
         if (isDone()) return false;
 
-        if (isUpgrade()) {
-            UpgradeManager.getInstance().addLevels(stat.id, 1);
-        } else {
-            TackleManager.own(tackle);
-            TackleManager.fit(rig, tackle);
-        }
+        grant();
 
         return true;
+    }
+
+    /**
+     * Hands the thing over, and stops whatever it changes.
+     * <p>
+     * An ability reads its numbers when it starts and keeps them - a running rig rebuilt from the
+     * sheet mid-sweep would be lamps changing size in the middle of a pass. So the ability is turned
+     * off rather than reconfigured, which is both cheaper and more honest: the player sees it stop,
+     * and what comes back on is built from what they just bought.
+     */
+    protected void grant() {
+        if (isUpgrade()) {
+            UpgradeManager.getInstance().addLevels(stat.id, 1);
+            stopAbility(StatIds.getAbilityId(stat.id));
+
+            return;
+        }
+
+        //owned before fitted, since owning it is what was paid for - the slot is only where it is
+        //being kept, and it can be moved out and back again for nothing from here on
+        TackleManager.own(tackle);
+        TackleManager.fit(rig, tackle);
+
+        //a module is read at the same moment for the same reason, so a rig wearing a new one has to
+        //come back up as well
+        stopAbility(getRigAbilityId());
+    }
+
+    /** Which ability this entry's rig is, or null for a rig with no ability of its own. */
+    protected String getRigAbilityId() {
+        if (rig == null) return null;
+
+        switch (rig) {
+            case SEARCHLIGHT: return StatIds.LAMPS_ABILITY;
+            case DRONE: return StatIds.ROD_ABILITY;
+            case HARPOON: return StatIds.HARPOON_ABILITY;
+            default: return null;
+        }
+    }
+
+    /** Turns an ability off if it is running, and says nothing if it is not. */
+    protected static void stopAbility(String abilityId) {
+        if (abilityId == null) return;
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return;
+
+        AbilityPlugin ability = Global.getSector().getPlayerFleet().getAbility(abilityId);
+        if (ability == null || !ability.isActiveOrInProgress()) return;
+
+        ability.deactivate();
     }
 
     /**
