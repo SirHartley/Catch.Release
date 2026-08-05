@@ -59,9 +59,20 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         public long seed;
         public float radius;
 
+        /** A temporary pond removes itself once it has closed; lifetime caps how long it stays open. */
+        public boolean temporary = false;
+        public float lifetime = 0f;
+
         public PondParams(long seed, float radius) {
             this.seed = seed;
             this.radius = radius;
+        }
+
+        public PondParams(long seed, float radius, float lifetime) {
+            this(seed, radius);
+
+            this.temporary = true;
+            this.lifetime = lifetime;
         }
     }
 
@@ -78,6 +89,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public float activity = 0; //0 - 1
 
     protected PondParams params;
+
+    /** Temporary ponds: how long the rupture holds before it pulls itself shut on its own. */
+    protected boolean temporary = false;
+    protected float lifeLeft = 0f;
+    protected boolean wasOpened = false;
+    protected boolean expiring = false;
 
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
@@ -111,6 +128,11 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         super.init(terrainId, entity, param);
 
         if (param instanceof PondParams) params = (PondParams) param;
+
+        if (params != null && params.temporary) {
+            temporary = true;
+            lifeLeft = params.lifetime;
+        }
 
         name = NAME;
 
@@ -208,6 +230,31 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed() && isActive) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
+
+        advanceTemporary(amount);
+    }
+
+    /**
+     * A temporary pond - a bomb's, not the sector's - runs down its clock while open and
+     * removes itself once it has spooled shut, whichever of the clock or the player leaving
+     * closed it. The campaign pauses for the catch itself, so time spent actually fishing the
+     * rupture costs none of its life.
+     */
+    protected void advanceTemporary(float amount) {
+        if (!temporary || expiring) return;
+
+        if (isActive) {
+            wasOpened = true;
+
+            lifeLeft -= amount;
+            if (lifeLeft <= 0f) deactivate();
+            return;
+        }
+
+        if (wasOpened && activity <= 0f) {
+            expiring = true;
+            Misc.fadeAndExpire(entity, 1f);
+        }
     }
 
     public void initRippleRenderer(){
