@@ -273,14 +273,22 @@ ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
 Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
-catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,"One of the drinkers has a slate out and a list on it, and keeps looking at the door as though expecting somebody who knows what they are doing with a net.",,"Fired by the bar wrapper while it builds the prompt. The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
-catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_orderAsk:Ask about the list.,The option that appears in the bar. Selecting it goes to the row below.
-catchrelease_orderAsk,DialogOptionSelected,$option == catchrelease_orderAsk,FireBest catchrelease_standingOrder_offer,,,
-catchrelease_standingOrder_offer,catchrelease_standingOrder_offer,,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Standing order,"" $heOrShe says, and turns the slate round. ""$catchreleaseAsk. I am not fussy about who brings them, only that they arrive.""
-
-""$catchreleaseReward, on delivery.""","catchrelease_orderAccept:Take the order.
-catchrelease_orderDecline:""Not my sort of water.""",
-catchrelease_orderAccept,DialogOptionSelected,$option == catchrelease_orderAccept,"BarCMD accept catchrelease_standingOrder
-BarCMD close","$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
-catchrelease_orderDecline,DialogOptionSelected,$option == catchrelease_orderDecline,BarCMD close,The slate goes back to the bar top.,,
-catchrelease_standingOrder_turnIn,DialogOptionSelected,$option == catchrelease_orderTurnIn,CallEvent catchrelease_standingOrder turnIn,"$HeOrShe checks the crates without hurrying, and pays without arguing about it.",,"CallEvent routes to the job's own callAction, which spends the fish and pays out. Refusing to fire is how a short delivery says no, so the text only ever follows a real hand-over."
+catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"Call $catchrelease_jobRef accepted
+BarCMD accept $missionId
+BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
+catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"Call $catchrelease_jobRef declined
+BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh $catchreleaseHasFish before it is read. It is not a test - an action that answered false would throw rather than fail.
+catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"Call $catchrelease_jobRef turnIn
+FireAll PopulateOptions",,,"The job spends the fish, pays, and says its own piece. Repopulating is what takes the hand-over option away once the job is settled."
+catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
+catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,Call $catchrelease_jobRef blurb,,,"The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
+catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the list.,"The option id must start with the mission id. BarCMD aborts every bar mission whose prefix the selected option does not carry - including this one, if it were named anything else."
+catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:""Not my sort of water.""",
