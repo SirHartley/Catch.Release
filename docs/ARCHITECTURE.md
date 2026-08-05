@@ -261,7 +261,7 @@ Modules bolted to a rig.
 | File | What it does |
 |---|---|
 | `Tackle.java` | The modules, which rig each fits, and the multipliers each applies |
-| `TackleManager.java` | The fitted slot per rig; always returns non-null, possibly `NONE` |
+| `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE` |
 
 ### `campaign/fish/map`
 The sector-map fish filter.
@@ -466,6 +466,17 @@ cleanly and throws in the campaign. Whichever is used, pair it with the matching
 
 **`Tackle.Fit.BOTH` is not a rig.** It is a declaration of what a module fits. Code walking rigs must
 use `Fit.isRig()` or it will offer a shelf for a slot nobody owns.
+
+**Owning a module and wearing one are different questions.** `TackleManager.isOwned()` asks the
+first, `get(rig)` the second. A module is bought once and can be moved between slots for nothing
+after that, so anything that charges for tackle must ask `isOwned()` first — `ShopEntry.getPrice()`
+returns null for one already owned, which is what makes fitting it free. Anything that *grants* a
+module must `own()` it as well as `fit()` it, or the player pays for their own gift the first time
+they take it off. Saves predating ownership seed the owned set from whatever is in a slot.
+
+**A null price means free, and there are two kinds of free.** `Tackle.NONE` never had a price;
+an owned module has already been paid for. The shop tells them apart explicitly, because one line
+covering both said that fitting a module you own was "emptying a slot".
 
 **Fish encode format is save-critical.** `FishCatch.encode()` appends origin as an optional fifth
 field so four-field saves still parse. Changing the format breaks fish already in saves.
