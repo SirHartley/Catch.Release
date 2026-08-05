@@ -285,7 +285,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 
 | File | What it does |
 |---|---|
-| `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities |
+| `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
 | `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing |
@@ -302,10 +302,11 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `depthbomb/constants/DepthBombConstants.java` | Range, blast, glass look, shockwave, and the `SPAWN_POND` toggle |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Spools lights up; exposes `isLit(mote)`; detectability penalty |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
-| `searchlight/rendering/SearchlightGlowRenderer.java` | The default circular beam |
+| `searchlight/rendering/SearchlightGlowRenderer.java` | The default circular beam — orange, or purple under the breach lamp |
 | `searchlight/rendering/SearchlightFanRenderer.java` | The wedge beam, for the fan-beam tackle |
-| `searchlight/rendering/SearchlightBurnRenderer.java` | The hyperspace burn-through look |
-| `searchlight/rendering/SearchlightImpressionRenderer.java` | Every buried mote's dent, drawn once for all beams together |
+| `searchlight/rendering/SearchlightBreachRenderer.java` | The breach lamp's window: world-anchored hyperspace under the beam's falloff, with parallax |
+| `searchlight/rendering/SearchlightBurnRenderer.java` | The old pond-style burn look — sidelined, nothing uses it |
+| `searchlight/rendering/SearchlightImpressionRenderer.java` | Every buried mote's dent, drawn once for all beams together; a live breach beam turns a dent into the mote |
 
 ### `skillshot`
 Reusable aim-and-fire framework. **Has its own README — read that first.**
