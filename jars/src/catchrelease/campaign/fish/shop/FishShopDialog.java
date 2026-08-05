@@ -158,7 +158,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
 
             //the empty slot first: the way out of every module is the first thing on the shelf
-            for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON}) {
+            for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON, Tackle.Fit.SEARCHLIGHT}) {
                 entries.add(ShopEntry.of(Tackle.NONE, rig));
 
                 for (Tackle tackle : TackleManager.getOptions(rig)) {

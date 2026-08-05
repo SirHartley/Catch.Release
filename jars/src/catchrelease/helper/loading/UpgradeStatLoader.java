@@ -73,7 +73,6 @@ public class UpgradeStatLoader {
                 UpgradeStat.UpgradeType.class, UpgradeStat.UpgradeType.FLAT);
 
         s.maxLevel = optInt(row, "maxLevel", 0);
-        s.costMult = optDouble(row, "costMult", 1d);
         s.description = optString(row, "description", "");
 
         return s;

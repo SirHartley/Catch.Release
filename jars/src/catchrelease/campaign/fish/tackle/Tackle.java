@@ -84,12 +84,30 @@ public enum Tackle {
         {
             sonar = true;
         }
+    },
+
+    //--- searchlights
+    TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
+            "A light that finds something breaks off its sweep and follows it for a few seconds"
+                    + " before carrying on.") {
+        {
+            lockTime = 4f;
+        }
+    },
+
+    BREACH_LAMP("Breach Lamp", Fit.SEARCHLIGHT,
+            "Burns through the fabric rather than shining across it. The lights work out in"
+                    + " hyperspace, and there is something out there to find.") {
+        {
+            burnsHyperspace = true;
+        }
     };
 
     /** Which rig a piece of tackle will fit. */
     public enum Fit {
         DRONE,
         HARPOON,
+        SEARCHLIGHT,
         BOTH
     }
 
@@ -109,13 +127,27 @@ public enum Tackle {
     public boolean shipTackle = false;
     public boolean sonar = false;
 
+    /** Seconds a light holds on what it found before going back to its sweep. Zero never stops. */
+    public float lockTime = 0f;
+
+    /** Whether the lights burn through into hyperspace rather than refusing to run out there. */
+    public boolean burnsHyperspace = false;
+
     Tackle(String name, Fit fit, String description) {
         this.name = name;
         this.fit = fit;
         this.description = description;
     }
 
+    /**
+     * BOTH means both of the rigs a catch is played on, which is the drones and the harpoon. The
+     * lights are not one of those - nothing is landed on a searchlight - so a barbed head does not
+     * become a lamp fitting just because it said both.
+     */
     public boolean fits(Fit rig) {
-        return this == NONE || this.fit == Fit.BOTH || this.fit == rig;
+        if (this == NONE) return true;
+        if (rig == Fit.SEARCHLIGHT) return this.fit == Fit.SEARCHLIGHT;
+
+        return this.fit == Fit.BOTH || this.fit == rig;
     }
 }

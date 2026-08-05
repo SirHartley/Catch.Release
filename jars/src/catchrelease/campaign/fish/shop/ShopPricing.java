@@ -68,16 +68,9 @@ public class ShopPricing {
         int tier = Math.max(0, stat.level);
         boolean last = stat.maxLevel > 0 && stat.level == stat.maxLevel - 1;
 
-        double mult = stat.costMult <= 0d ? 1d : stat.costMult;
+        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
 
-        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier) * mult));
-
-        //a dear one is asked for in fish as well as in credits, since fish are what the shop really
-        //trades in - priced only in credits, the expensive upgrades are the ones a rich player skips
-        //the interesting half of
-        int askTier = tier + (mult >= 8d ? 2 : mult >= 2d ? 1 : 0);
-
-        return new Price(credits, generate(rngFor(stat.id, tier), askTier, last));
+        return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
     }
 
     /** A module's one price. Emptying the slot is free. */
@@ -92,8 +85,12 @@ public class ShopPricing {
 
     /** Tackle is tiered by what it does, and the ones that change what can come up cost the most. */
     protected static int getTackleTier(Tackle tackle) {
+        //the top of the ladder with the lifting rig, and for the same reason: it does not change
+        //how a catch plays, it changes where the fleet can fish at all
+        if (tackle.burnsHyperspace) return 3;
+
         if (tackle.shipTackle) return 3;
-        if (tackle.sonar || tackle.rarityBias > 1f) return 2;
+        if (tackle.sonar || tackle.rarityBias > 1f || tackle.lockTime > 0f) return 2;
         if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return 1;
 
         return 0;
