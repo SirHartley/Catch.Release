@@ -389,6 +389,16 @@ whole sector, drawn wherever the player is.
 **`callAction` must return true for anything it handles.** Vanilla throws on an unhandled action
 rather than reading it as a failed condition. Outcomes travel back through memory flags.
 
+**Every memory key starts with `$`.** `Memory.set` throws on one that does not, and it throws
+whenever the write happens rather than where the key was written down - which can be a stage change
+minutes later.
+
+**The two `makeImportant` overloads do not take the same kind of string,** and the compiler cannot
+tell them apart. `Misc.makeImportant(entity, reason)` takes a *reason*, held alongside the flag, and
+must **not** start with `$`. `BaseHubMission.makeImportant(entity, flag, stages...)` takes a memory
+*key* it writes on a stage change, and must. Handing a reason to the mission's version compiles
+cleanly and throws in the campaign. Whichever is used, pair it with the matching `makeUnimportant`.
+
 **`Tackle.Fit.BOTH` is not a rig.** It is a declaration of what a module fits. Code walking rigs must
 use `Fit.isRig()` or it will offer a shelf for a slot nobody owns.
 
