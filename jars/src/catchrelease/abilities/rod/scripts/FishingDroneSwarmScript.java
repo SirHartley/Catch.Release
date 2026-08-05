@@ -272,6 +272,10 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (mote.isExpired() || !mote.isAlive()) return false;
         if (handled.contains(mote.getId())) return false;
 
+        //under the fabric, where a drone has nothing to close on. It comes back up in a moment and
+        //is picked up again then, which is the whole of what a dive costs the drones
+        if (!FishEntityPlugin.isAvailable(mote)) return false;
+
         //the ring, plus however far past it this rig will follow something
         return Misc.getDistance(mote.getLocation(), target) <= getRingRadius() + getChaseMargin();
     }

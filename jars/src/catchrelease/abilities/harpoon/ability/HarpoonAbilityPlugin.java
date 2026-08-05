@@ -165,7 +165,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         for (SectorEntityToken mote : fleet.getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
 
-            if (mote.isExpired()) continue;
+            //assist will not bend a shot onto something the shot could not take anyway
+            if (!FishEntityPlugin.isAvailable(mote)) continue;
             if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
 
             float off = Math.abs(Misc.getAngleDiff(aimAngle,
