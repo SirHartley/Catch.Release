@@ -3,10 +3,12 @@ package catchrelease.campaign.fish.map;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * The organic shape around a species' systems: one filled, outlined blob rather than a pile of
+ * The organic shape around a set of systems: one filled, outlined blob rather than a pile of
  * circles.
  * <p>
  * Drawing a circle per system and letting them overlap gives lens-shaped seams where they cross -
@@ -16,11 +18,12 @@ import java.util.List;
  * fixed threshold is a single shape whose bridges and junctions are rounded by the addition
  * itself. No seam exists because no circle exists - only the field does.
  * <p>
- * The contour is cut by marching triangles rather than marching squares: each grid cell is split
- * into four triangles around its centre, and a triangle's three corners admit no ambiguous case,
- * so the saddle configurations that make marching squares fiddly never arise. Out the other end
- * come world-space triangles for the fill and world-space segments for the outline; the renderer
- * transforms them by whatever the map's camera is doing that frame.
+ * The contour is cut by marching triangles - a grid cell split into four triangles around its
+ * centre admits no ambiguous case - and what comes out is not triangles but <i>loops</i>: the
+ * contour segments chained end to end into closed rings, then rounded twice over with Chaikin's
+ * corner cutting, so the per-cell facets melt into a curve. The renderer fills the rings by
+ * stencil parity and strokes them directly, which keeps the fill and the outline the same shape
+ * by construction.
  * <p>
  * Built once per filter change and cached by the caller - the field is a function of which
  * systems host the fish, not of where the camera looks.
@@ -37,19 +40,34 @@ public class FishPresenceField {
 
     public static final float THRESHOLD = 0.35f;
 
-    /** Grid cells per visual radius. More is smoother and costs quadratically. */
+    /** Grid cells per visual radius. Chaikin does the smoothing; the grid only has to be honest. */
     public static final float CELLS_PER_RADIUS = 3f;
 
-    /** One blob's geometry, in world coordinates. */
-    public static class Mesh {
-        /** Flat triangles: x1,y1,x2,y2,x3,y3 per entry. */
-        public final List<float[]> fill = new ArrayList<>();
+    /** Rounds of corner cutting. Each round doubles the points and halves the corners. */
+    public static final int SMOOTHING_ROUNDS = 2;
 
-        /** Flat segments: x1,y1,x2,y2 per entry. */
-        public final List<float[]> outline = new ArrayList<>();
+    /** One blob's geometry: closed rings in world coordinates, and the box around all of them. */
+    public static class Mesh {
+        /** Each ring is a flat x,y polyline; the last point connects back to the first. */
+        public final List<float[]> loops = new ArrayList<>();
+
+        public float minX, minY, maxX, maxY;
 
         public boolean isEmpty() {
-            return fill.isEmpty();
+            return loops.isEmpty();
+        }
+    }
+
+    /** A contour crossing, kept with the exact bits of its endpoints so chaining can match them. */
+    protected static class Segment {
+        final float x1, y1, x2, y2;
+        boolean used = false;
+
+        Segment(float x1, float y1, float x2, float y2) {
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
         }
     }
 
@@ -62,6 +80,26 @@ public class FishPresenceField {
     public static Mesh build(List<Vector2f> centers, float visualRadius) {
         Mesh mesh = new Mesh();
         if (centers == null || centers.isEmpty() || visualRadius <= 0f) return mesh;
+
+        List<Segment> segments = cutSegments(centers, visualRadius);
+        List<float[]> loops = chainLoops(segments);
+
+        for (float[] loop : loops) {
+            float[] smoothed = loop;
+            for (int round = 0; round < SMOOTHING_ROUNDS; round++) {
+                smoothed = chaikin(smoothed);
+            }
+
+            mesh.loops.add(smoothed);
+        }
+
+        measure(mesh);
+        return mesh;
+    }
+
+    /** Marching triangles over the field, keeping only the contour crossings. */
+    protected static List<Segment> cutSegments(List<Vector2f> centers, float visualRadius) {
+        List<Segment> segments = new ArrayList<>();
 
         float reach = visualRadius * REACH;
         float cell = visualRadius / CELLS_PER_RADIUS;
@@ -97,34 +135,26 @@ public class FishPresenceField {
                 float v2 = above[col + 1];
                 float v3 = above[col];
 
-                //a cell nowhere near the threshold cuts nothing and fills either everything
-                //or nothing; both are answered without touching its triangles
                 boolean in0 = v0 >= THRESHOLD, in1 = v1 >= THRESHOLD;
                 boolean in2 = v2 >= THRESHOLD, in3 = v3 >= THRESHOLD;
 
-                if (!in0 && !in1 && !in2 && !in3) continue;
+                //a cell wholly in or wholly out crosses nothing
+                if (in0 == in1 && in1 == in2 && in2 == in3) continue;
 
-                if (in0 && in1 && in2 && in3) {
-                    mesh.fill.add(new float[]{xLeft, yBottom, xRight, yBottom, xRight, yTop});
-                    mesh.fill.add(new float[]{xLeft, yBottom, xRight, yTop, xLeft, yTop});
-                    continue;
-                }
-
-                //a boundary cell: four triangles around the centre, each unambiguous
                 float xMid = xLeft + cell * 0.5f;
                 float yMid = yBottom + cell * 0.5f;
                 float vMid = sample(centers, reach, xMid, yMid);
 
-                cut(mesh, xLeft, yBottom, v0, xRight, yBottom, v1, xMid, yMid, vMid);
-                cut(mesh, xRight, yBottom, v1, xRight, yTop, v2, xMid, yMid, vMid);
-                cut(mesh, xRight, yTop, v2, xLeft, yTop, v3, xMid, yMid, vMid);
-                cut(mesh, xLeft, yTop, v3, xLeft, yBottom, v0, xMid, yMid, vMid);
+                cut(segments, xLeft, yBottom, v0, xRight, yBottom, v1, xMid, yMid, vMid);
+                cut(segments, xRight, yBottom, v1, xRight, yTop, v2, xMid, yMid, vMid);
+                cut(segments, xRight, yTop, v2, xLeft, yTop, v3, xMid, yMid, vMid);
+                cut(segments, xLeft, yTop, v3, xLeft, yBottom, v0, xMid, yMid, vMid);
             }
 
             below = above;
         }
 
-        return mesh;
+        return segments;
     }
 
     protected static float[] sampleRow(List<Vector2f> centers, float reach, float minX, float y,
@@ -158,66 +188,38 @@ public class FishPresenceField {
     }
 
     /**
-     * One triangle against the threshold. Three corners give eight cases and none of them is
-     * ambiguous: all in fills the triangle whole, one in fills the corner cut off by the contour,
-     * two in fill the quad the contour leaves behind - and the contour piece itself is always the
-     * one segment between the two crossed edges.
+     * One triangle against the threshold: any triangle the contour passes through contributes
+     * exactly one segment, between its two crossed edges. Adjacent triangles compute the crossing
+     * on their shared edge from the same two samples, so the endpoints match to the bit - which
+     * is what lets the chaining below match them exactly instead of within a tolerance.
      */
-    protected static void cut(Mesh mesh, float x0, float y0, float v0, float x1, float y1, float v1,
-                              float x2, float y2, float v2) {
+    protected static void cut(List<Segment> segments, float x0, float y0, float v0, float x1,
+                              float y1, float v1, float x2, float y2, float v2) {
 
         boolean in0 = v0 >= THRESHOLD, in1 = v1 >= THRESHOLD, in2 = v2 >= THRESHOLD;
         int count = (in0 ? 1 : 0) + (in1 ? 1 : 0) + (in2 ? 1 : 0);
 
-        if (count == 0) return;
+        if (count == 0 || count == 3) return;
 
-        if (count == 3) {
-            mesh.fill.add(new float[]{x0, y0, x1, y1, x2, y2});
-            return;
-        }
-
-        //rotate so the odd corner out is corner 0 - the lone inside one, or the lone outside one
+        //rotate so the odd corner out is corner 0, then the crossed edges are 0-1 and 0-2
         if (count == 1) {
-            if (in1) {
-                cutOne(mesh, x1, y1, v1, x2, y2, v2, x0, y0, v0);
-            } else if (in2) {
-                cutOne(mesh, x2, y2, v2, x0, y0, v0, x1, y1, v1);
-            } else {
-                cutOne(mesh, x0, y0, v0, x1, y1, v1, x2, y2, v2);
-            }
-            return;
-        }
-
-        if (!in1) {
-            cutTwo(mesh, x1, y1, v1, x2, y2, v2, x0, y0, v0);
-        } else if (!in2) {
-            cutTwo(mesh, x2, y2, v2, x0, y0, v0, x1, y1, v1);
+            if (in1) addSegment(segments, x1, y1, v1, x2, y2, v2, x0, y0, v0);
+            else if (in2) addSegment(segments, x2, y2, v2, x0, y0, v0, x1, y1, v1);
+            else addSegment(segments, x0, y0, v0, x1, y1, v1, x2, y2, v2);
         } else {
-            cutTwo(mesh, x0, y0, v0, x1, y1, v1, x2, y2, v2);
+            if (!in0) addSegment(segments, x0, y0, v0, x1, y1, v1, x2, y2, v2);
+            else if (!in1) addSegment(segments, x1, y1, v1, x2, y2, v2, x0, y0, v0);
+            else addSegment(segments, x2, y2, v2, x0, y0, v0, x1, y1, v1);
         }
     }
 
-    /** Corner 0 inside, the other two out: the fill is the clipped corner. */
-    protected static void cutOne(Mesh mesh, float x0, float y0, float v0, float x1, float y1,
-                                 float v1, float x2, float y2, float v2) {
+    protected static void addSegment(List<Segment> segments, float x0, float y0, float v0,
+                                     float x1, float y1, float v1, float x2, float y2, float v2) {
 
         float[] a = lerp(x0, y0, v0, x1, y1, v1);
         float[] b = lerp(x0, y0, v0, x2, y2, v2);
 
-        mesh.fill.add(new float[]{x0, y0, a[0], a[1], b[0], b[1]});
-        mesh.outline.add(new float[]{a[0], a[1], b[0], b[1]});
-    }
-
-    /** Corner 0 outside, the other two in: the fill is the quad past the contour. */
-    protected static void cutTwo(Mesh mesh, float x0, float y0, float v0, float x1, float y1,
-                                 float v1, float x2, float y2, float v2) {
-
-        float[] a = lerp(x1, y1, v1, x0, y0, v0);
-        float[] b = lerp(x2, y2, v2, x0, y0, v0);
-
-        mesh.fill.add(new float[]{x1, y1, x2, y2, b[0], b[1]});
-        mesh.fill.add(new float[]{x1, y1, b[0], b[1], a[0], a[1]});
-        mesh.outline.add(new float[]{a[0], a[1], b[0], b[1]});
+        segments.add(new Segment(a[0], a[1], b[0], b[1]));
     }
 
     /** Where the threshold crosses the edge between two samples. */
@@ -226,5 +228,113 @@ public class FishPresenceField {
         float t = Math.abs(span) < 0.0001f ? 0.5f : (THRESHOLD - vA) / span;
 
         return new float[]{xA + (xB - xA) * t, yA + (yB - yA) * t};
+    }
+
+    /**
+     * Chains the segments into closed rings. A marching contour is manifold - every endpoint is
+     * shared by exactly two segments - so each walk is unambiguous: leave a point by the one
+     * segment that did not bring you there, until the start comes round again.
+     */
+    protected static List<float[]> chainLoops(List<Segment> segments) {
+        Map<Long, List<Segment>> byPoint = new HashMap<>(segments.size() * 2);
+
+        for (Segment segment : segments) {
+            byPoint.computeIfAbsent(key(segment.x1, segment.y1), k -> new ArrayList<>(2)).add(segment);
+            byPoint.computeIfAbsent(key(segment.x2, segment.y2), k -> new ArrayList<>(2)).add(segment);
+        }
+
+        List<float[]> loops = new ArrayList<>();
+
+        for (Segment start : segments) {
+            if (start.used) continue;
+
+            List<Float> points = new ArrayList<>();
+            Segment current = start;
+            float atX = start.x1, atY = start.y1;
+
+            while (current != null && !current.used) {
+                current.used = true;
+                points.add(atX);
+                points.add(atY);
+
+                //cross the segment to its far end, then leave by the other segment there
+                if (atX == current.x1 && atY == current.y1) {
+                    atX = current.x2;
+                    atY = current.y2;
+                } else {
+                    atX = current.x1;
+                    atY = current.y1;
+                }
+
+                Segment next = null;
+                List<Segment> here = byPoint.get(key(atX, atY));
+
+                if (here != null) {
+                    for (Segment candidate : here) {
+                        if (!candidate.used) {
+                            next = candidate;
+                            break;
+                        }
+                    }
+                }
+
+                current = next;
+            }
+
+            //a ring needs room to be one; anything shorter is grid noise
+            if (points.size() >= 6) {
+                float[] loop = new float[points.size()];
+                for (int i = 0; i < loop.length; i++) loop[i] = points.get(i);
+
+                loops.add(loop);
+            }
+        }
+
+        return loops;
+    }
+
+    /** The endpoint's exact bits as a key - matching floats, not nearby ones. */
+    protected static long key(float x, float y) {
+        return ((long) Float.floatToIntBits(x) << 32) | (Float.floatToIntBits(y) & 0xFFFFFFFFL);
+    }
+
+    /**
+     * One round of Chaikin's corner cutting on a closed ring: every edge donates the points a
+     * quarter in from each end, and the corners between them fall away. Twice over, the marching
+     * grid's facets read as a drawn curve.
+     */
+    protected static float[] chaikin(float[] loop) {
+        int count = loop.length / 2;
+        float[] out = new float[count * 4];
+
+        for (int i = 0; i < count; i++) {
+            int j = (i + 1) % count;
+
+            float x1 = loop[i * 2], y1 = loop[i * 2 + 1];
+            float x2 = loop[j * 2], y2 = loop[j * 2 + 1];
+
+            out[i * 4] = x1 * 0.75f + x2 * 0.25f;
+            out[i * 4 + 1] = y1 * 0.75f + y2 * 0.25f;
+            out[i * 4 + 2] = x1 * 0.25f + x2 * 0.75f;
+            out[i * 4 + 3] = y1 * 0.25f + y2 * 0.75f;
+        }
+
+        return out;
+    }
+
+    protected static void measure(Mesh mesh) {
+        mesh.minX = Float.MAX_VALUE;
+        mesh.minY = Float.MAX_VALUE;
+        mesh.maxX = -Float.MAX_VALUE;
+        mesh.maxY = -Float.MAX_VALUE;
+
+        for (float[] loop : mesh.loops) {
+            for (int i = 0; i < loop.length; i += 2) {
+                mesh.minX = Math.min(mesh.minX, loop[i]);
+                mesh.maxX = Math.max(mesh.maxX, loop[i]);
+                mesh.minY = Math.min(mesh.minY, loop[i + 1]);
+                mesh.maxY = Math.max(mesh.maxY, loop[i + 1]);
+            }
+        }
     }
 }

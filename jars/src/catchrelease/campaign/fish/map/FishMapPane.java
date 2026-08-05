@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
-import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
 import com.fs.starfarer.api.Global;
@@ -19,13 +18,21 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The filter pane that appears beside the sector map when the Fish filter is on: a search field
- * the list chases a keystroke at a time, one chip per rarity, and the known species as rows.
- * Everything that would have been a paragraph of instructions is a tooltip; clicking a row points
- * the map at that species' waters and lights its shape.
+ * the list chases a keystroke at a time, one chip per type - fish, crab, mollusc, other - and
+ * the known species as rows. Everything that would have been a paragraph of instructions is a
+ * tooltip.
+ * <p>
+ * The waters have two modes, on a pair of tabs. CATEGORY shades each enabled type's whole
+ * territory as one merged shape - the survey view. SPECIES shades only the species the player
+ * has picked off the list, and lets them pick several at once - the route-planning view, where
+ * clicking rows toggles their waters in and out. In both, overlapping waters interleave rather
+ * than stack.
  * <p>
  * This class is the pane's own panel plugin as well as its builder - the host makes a custom
  * panel with this as the plugin, then calls {@link #mount}. The controls are built once and never
@@ -34,9 +41,21 @@ import java.util.List;
  */
 public class FishMapPane extends BaseCustomUIPanelPlugin {
 
+    /** Which waters the map is shading: whole categories, or hand-picked species. */
+    public enum Mode {
+        CATEGORY("CATEGORY"),
+        SPECIES("SPECIES");
+
+        public final String label;
+
+        Mode(String label) {
+            this.label = label;
+        }
+    }
+
     /** What the pane needs from whoever put it on the screen. */
     public interface Host {
-        /** The filter or the selection moved - the waters on the map need re-cutting. */
+        /** The filter, the mode or the selection moved - the waters on the map need re-cutting. */
         void onPresenceChanged();
 
         /** A row was clicked - point the map at this species. */
@@ -49,8 +68,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float SEARCH_HEIGHT = 22f;
     public static final float CHIP_HEIGHT = 20f;
     public static final float CHIP_GAP = 4f;
+    public static final float MODE_HEIGHT = 20f;
     public static final float HEADER_HEIGHT = 20f;
-    public static final float CONTROLS_HEIGHT = 96f;
+    public static final float CONTROLS_HEIGHT = 124f;
     public static final float ROW_HEIGHT = 24f;
 
     protected final Host host;
@@ -65,7 +85,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
 
-    protected String selectedId = null;
+    protected Mode mode = Mode.CATEGORY;
+    protected final Set<String> selectedIds = new LinkedHashSet<>();
     protected int shownCount = 0;
 
     public FishMapPane(Host host) {
@@ -76,8 +97,13 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return filter;
     }
 
-    public String getSelectedId() {
-        return selectedId;
+    public Mode getMode() {
+        return mode;
+    }
+
+    /** The species whose waters the SPECIES mode is showing, in the order they were picked. */
+    public Set<String> getSelectedIds() {
+        return selectedIds;
     }
 
     /** Builds the controls and the first list into the pane's own panel. Call once. */
@@ -95,17 +121,28 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-    /** The pane's own field and dressing, under the widgets - so it reads as a panel, not a pile. */
+    /**
+     * The pane's own field and border, under the widgets. The border is the game's own manner -
+     * one pixel of the player colour, corners square - because this pane sits among vanilla
+     * panels, and a guest dresses like the house.
+     */
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
 
-        ShopUi.drawQuad(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                Color.BLACK, 0.8f * alphaMult);
-        ShopUi.drawQuad(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+        float x = pos.getX();
+        float y = pos.getY();
+        float w = pos.getWidth();
+        float h = pos.getHeight();
 
-        ShopUi.dress(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), alphaMult);
+        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.8f * alphaMult);
+        ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+
+        Color border = Misc.getDarkPlayerColor();
+        ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
+        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, alphaMult);
+        ShopUi.drawQuad(x, y, 1f, h, border, alphaMult);
+        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, alphaMult);
     }
 
     /**
@@ -137,25 +174,42 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 "Type to filter the species by name. The list and the waters follow as you type."),
                 TooltipMakerAPI.TooltipLocation.BELOW);
 
-        FishRarity[] rarities = FishRarity.values();
+        FishType[] types = FishType.values();
 
         //floored to the pixel: a chip on a fractional edge is a chip with a soft edge
         float chipWidth = (float) Math.floor(
-                (innerWidth - CHIP_GAP * (rarities.length - 1)) / rarities.length);
+                (innerWidth - CHIP_GAP * (types.length - 1)) / types.length);
 
         CustomPanelAPI chipRow = panel.createCustomPanel(innerWidth, CHIP_HEIGHT,
                 new BaseCustomUIPanelPlugin() {
                 });
 
-        for (int i = 0; i < rarities.length; i++) {
-            FishRarity rarity = rarities[i];
-            CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT, new ChipPlugin(rarity));
+        for (int i = 0; i < types.length; i++) {
+            FishType type = types[i];
+            CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT, new ChipPlugin(type));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
-            controls.addTooltipTo(createChipTooltip(rarity), chip, TooltipMakerAPI.TooltipLocation.BELOW);
+            controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
         }
 
         controls.addCustom(chipRow, 8f);
+
+        //the two ways of shading the map, as a pair of tabs
+        float tabWidth = (float) Math.floor((innerWidth - CHIP_GAP) / 2f);
+
+        CustomPanelAPI modeRow = panel.createCustomPanel(innerWidth, MODE_HEIGHT,
+                new BaseCustomUIPanelPlugin() {
+                });
+
+        Mode[] modes = Mode.values();
+        for (int i = 0; i < modes.length; i++) {
+            CustomPanelAPI tab = panel.createCustomPanel(tabWidth, MODE_HEIGHT, new ModeTabPlugin(modes[i]));
+
+            modeRow.addComponent(tab).inTL(i * (tabWidth + CHIP_GAP), 0f);
+            controls.addTooltipTo(createModeTooltip(modes[i]), tab, TooltipMakerAPI.TooltipLocation.BELOW);
+        }
+
+        controls.addCustom(modeRow, 8f);
 
         CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT, new ListHeaderPlugin());
         controls.addCustom(header, 8f);
@@ -190,18 +244,36 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
     }
 
-    protected void onChipToggled(FishRarity rarity) {
-        if (!filter.rarities.remove(rarity)) filter.rarities.add(rarity);
+    protected void onChipToggled(FishType type) {
+        if (!filter.types.remove(type)) filter.types.add(type);
 
         rebuildList();
         host.onPresenceChanged();
     }
 
+    protected void onModeClicked(Mode picked) {
+        if (mode == picked) return;
+
+        mode = picked;
+        host.onPresenceChanged();
+    }
+
+    /**
+     * In SPECIES mode a click toggles the row's waters in and out of the picture - several at
+     * once is the point, that is how a route gets planned. In CATEGORY mode the shapes belong to
+     * the types, so a click only points the map.
+     */
     protected void onRowClicked(FishSpec spec) {
-        selectedId = spec.id;
+        if (mode == Mode.SPECIES) {
+            boolean added = selectedIds.add(spec.id);
+            if (!added) selectedIds.remove(spec.id);
+
+            if (added) host.onSpeciesFocused(spec);
+            host.onPresenceChanged();
+            return;
+        }
 
         host.onSpeciesFocused(spec);
-        host.onPresenceChanged();
     }
 
     // --- Tooltips, which is where all the explaining lives. ---
@@ -220,9 +292,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         };
     }
 
-    protected TooltipMakerAPI.TooltipCreator createChipTooltip(FishRarity rarity) {
-        String name = Misc.ucFirst(rarity.name().toLowerCase());
-
+    protected TooltipMakerAPI.TooltipCreator createChipTooltip(FishType type) {
         return new BaseTooltipCreator() {
             @Override
             public float getTooltipWidth(Object tooltipParam) {
@@ -231,10 +301,31 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara(name, rarity.color, 0f);
-                tooltip.addPara(filter.rarities.contains(rarity)
-                        ? "Click to hide this rarity."
-                        : "Click to show this rarity.", Misc.getGrayColor(), 6f);
+                tooltip.addPara(type.label, type.color, 0f);
+                tooltip.addPara(filter.types.contains(type)
+                        ? "Click to hide this type."
+                        : "Click to show this type.", Misc.getGrayColor(), 6f);
+            }
+        };
+    }
+
+    protected TooltipMakerAPI.TooltipCreator createModeTooltip(Mode tabMode) {
+        return new BaseTooltipCreator() {
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                return 280f;
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                if (tabMode == Mode.CATEGORY) {
+                    tooltip.addPara("Category", Misc.getBasePlayerColor(), 0f);
+                    tooltip.addPara("Shade each enabled type's whole territory as one shape.", 6f);
+                } else {
+                    tooltip.addPara("Species", Misc.getBasePlayerColor(), 0f);
+                    tooltip.addPara("Shade only the species you pick off the list - several at"
+                            + " once, for planning a route.", 6f);
+                }
             }
         };
     }
@@ -250,9 +341,10 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.addPara("Reading the waters", Misc.getBasePlayerColor(), 0f);
 
-                tooltip.addPara("A shaded shape is the water a species with location data is said"
-                        + " to haunt, in its rarity's colour. Click a species to centre the map on"
-                        + " it and light its shape.", 8f);
+                tooltip.addPara("A shaded shape is water something with location data is said to"
+                        + " haunt. In CATEGORY it is a type's whole territory; in SPECIES it is"
+                        + " the species you have picked, and overlapping waters take turns at the"
+                        + " pixels rather than piling on them.", 8f);
 
                 if (Global.getSettings().isDevMode()) {
                     tooltip.addPara("Dev mode: everything in the table is shown, caught or not.",
@@ -290,21 +382,23 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                     tooltip.addPara("No region data in the table.", Misc.getHighlightColor(), 8f);
                 }
 
-                tooltip.addPara("Click to centre the map.", Misc.getGrayColor(), 8f);
+                tooltip.addPara(mode == Mode.SPECIES
+                        ? "Click to toggle its waters on the map."
+                        : "Click to centre the map.", Misc.getGrayColor(), 8f);
             }
         };
     }
 
     // --- The drawn controls. ---
 
-    /** One rarity as a chip: its colour when it is being shown, a quiet outline when it is not. */
+    /** One type as a chip: its colour when it is being shown, a quiet outline when it is not. */
     protected class ChipPlugin extends BaseCustomUIPanelPlugin {
 
-        protected final FishRarity rarity;
+        protected final FishType type;
         protected PositionAPI chipPos;
 
-        public ChipPlugin(FishRarity rarity) {
-            this.rarity = rarity;
+        public ChipPlugin(FishType type) {
+            this.type = type;
         }
 
         @Override
@@ -321,19 +415,19 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             float w = chipPos.getWidth();
             float h = chipPos.getHeight();
 
-            boolean on = filter.rarities.contains(rarity);
+            boolean on = filter.types.contains(type);
             boolean hovered = ShopUi.contains(x, y, w, h,
                     Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
 
             if (on) {
-                ShopUi.drawQuad(x, y, w, h, rarity.color, (hovered ? 0.65f : 0.5f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, rarity.color, 0.95f * alphaMult);
+                ShopUi.drawQuad(x, y, w, h, type.color, (hovered ? 0.65f : 0.5f) * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.95f * alphaMult);
             } else {
                 //off is absence, not another colour: the dark field with only the underline
                 //remembering what would come back
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered ? 0.35f : 0.18f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, rarity.color, 0.35f * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.35f * alphaMult);
             }
         }
 
@@ -350,7 +444,82 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
                 event.consume();
                 Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-                onChipToggled(rarity);
+                onChipToggled(type);
+
+                return;
+            }
+        }
+    }
+
+    /** One of the two shading modes as a tab: bright and underlined while it is the open one. */
+    protected class ModeTabPlugin extends BaseCustomUIPanelPlugin {
+
+        protected final Mode tabMode;
+        protected PositionAPI tabPos;
+
+        protected transient LazyFont.DrawableString text;
+
+        public ModeTabPlugin(Mode tabMode) {
+            this.tabMode = tabMode;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            tabPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (tabPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = tabPos.getX();
+            float y = tabPos.getY();
+            float w = tabPos.getWidth();
+            float h = tabPos.getHeight();
+
+            boolean active = mode == tabMode;
+            boolean hovered = !active && ShopUi.contains(x, y, w, h,
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            float field = active ? 0.5f : hovered ? 0.3f : 0.12f;
+            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), field * alphaMult);
+
+            if (active) {
+                ShopUi.drawQuad(x, y, w, 2f, Misc.getBrightPlayerColor(), 0.9f * alphaMult);
+            }
+
+            if (text == null) {
+                text = ShopUi.createText(small, tabMode.label);
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+            text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+            text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
+                    Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+        }
+
+        @Override
+        public void processInput(List<InputEventAPI> events) {
+            if (tabPos == null) return;
+
+            for (InputEventAPI event : events) {
+                if (event.isConsumed() || !event.isLMBDownEvent()) continue;
+                if (!ShopUi.contains(tabPos.getX(), tabPos.getY(), tabPos.getWidth(),
+                        tabPos.getHeight(), event.getX(), event.getY())) {
+                    continue;
+                }
+
+                event.consume();
+
+                //an already-open tab takes the click and does nothing with it
+                if (mode != tabMode) {
+                    Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
+                    onModeClicked(tabMode);
+                }
 
                 return;
             }
@@ -450,7 +619,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             ShopUi.startClip(listViewport.getX(), listViewport.getY(),
                     listViewport.getWidth(), listViewport.getHeight());
 
-            boolean selected = spec.id != null && spec.id.equals(selectedId);
+            boolean selected = mode == Mode.SPECIES && selectedIds.contains(spec.id);
             boolean hovered = !selected && contains(Global.getSettings().getMouseX(),
                     Global.getSettings().getMouseY());
 
