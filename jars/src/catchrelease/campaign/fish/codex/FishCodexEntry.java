@@ -87,7 +87,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      */
     @Override
     public boolean isVisible() {
-        return Global.getSector() != null && FishLog.isCaught(speciesId);
+        if (Global.getSector() == null) return false;
+
+        //bought survey data is worth an entry of its own. It is a species somebody has told you
+        //about and where to look for it, which is exactly the thing a codex is for - and an entry
+        //that appears only once you no longer need it is an entry nobody ever uses
+        return FishLog.isCaught(speciesId) || FishLog.isLocationDataUnlocked(speciesId);
     }
 
     /**
@@ -125,16 +130,22 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishSpec spec = getSpec();
         FishLogEntry logged = getLogged();
 
+        //bought the survey, never seen one. Everything on this page except where it lives is a thing
+        //you learn by landing one - what it looks like, what it does on the line, how big they run -
+        //so a page that showed them would be handing over the catch as well as the tip
+        boolean unseen = logged != null && logged.hintOnly;
+
         float width = panel.getPosition().getWidth();
         float leftWidth = width - RIGHT_WIDTH - 20f;
 
         //the boxes, one per informational area, stacked down the left
         float y = 0f;
 
-        UIPanelAPI description = addBox(leftWidth, y, "Description", box -> addDescription(box, spec));
+        UIPanelAPI description = addBox(leftWidth, y, "Description",
+                box -> addDescription(box, spec, unseen));
         y += description.getPosition().getHeight() + BOX_GAP;
 
-        if (spec != null) {
+        if (spec != null && !unseen) {
             UIPanelAPI box = addBox(leftWidth, y, "Catch data", b -> addCatchData(b, spec, logged));
             y += box.getPosition().getHeight() + BOX_GAP;
         }
@@ -150,7 +161,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         //the art off the topmost box's shoulder, with the related entries hanging under it
         float rightHeight = 0f;
-        UIPanelAPI card = buildIconCard(spec, logged, width - leftWidth - BOX_GAP);
+        UIPanelAPI card = buildIconCard(unseen ? null : spec, logged, width - leftWidth - BOX_GAP);
 
         if (card != null) {
             panel.addComponent(card).rightOfTop(description, BOX_GAP);
@@ -192,7 +203,16 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /** What it is: its type off the table's tags, its rarity beside that, and the words. */
-    protected void addDescription(TooltipMakerAPI text, FishSpec spec) {
+    protected void addDescription(TooltipMakerAPI text, FishSpec spec, boolean unseen) {
+        //what somebody else told you about a thing you have never seen. They said where it lives,
+        //which is the whole of what a survey is - the rest of this page is earned by landing one
+        if (unseen) {
+            text.addPara("Known only from survey data. Nothing of this species has been seen"
+                    + " aboard, and there is nothing here but where to look.",
+                    Misc.getGrayColor(), BOX_GAP);
+            return;
+        }
+
         if (spec == null) {
             text.addPara("The table no longer has a row for this one.",
                     Misc.getNegativeHighlightColor(), BOX_GAP);
@@ -270,6 +290,14 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         //the species before the specimen: where any of them can be caught, then where this one was
         text.addPara("Survey: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 FishLocationSummary.describe(spec));
+
+        //a survey bought for something never landed has no specimen to talk about, and the rest of
+        //this box is all about one particular fish on one particular day
+        if (logged.hintOnly) {
+            text.addPara("Nothing of this one has been landed. The waters are on the map.",
+                    Misc.getGrayColor(), 3f);
+            return;
+        }
 
         text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);

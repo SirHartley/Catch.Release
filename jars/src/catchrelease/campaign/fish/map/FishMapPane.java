@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -348,7 +349,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                String icon = FishCodex.getIcon(spec);
+                boolean caught = FishLog.isCaught(spec.id);
+                FishLogEntry logged = FishLog.get(spec.id);
+
+                //no portrait for something nobody aboard has ever seen. A survey says where a thing
+                //lives; what it looks like is learned by pulling one out of the water
+                String icon = caught ? FishCodex.getIcon(spec) : null;
                 if (icon != null && !icon.isEmpty()) {
                     try {
                         Global.getSettings().loadTexture(icon);
@@ -359,23 +365,21 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 }
 
                 tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);
-                tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
 
-                boolean caught = FishLog.isCaught(spec.id);
-                FishLogEntry logged = FishLog.get(spec.id);
+                //the kind of creature it is is also a thing you know from having handled one
+                if (caught) tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
 
                 if (caught && logged != null) {
                     tooltip.addPara("Caught " + logged.caught + (logged.caught == 1
                             ? " time." : " times."), 8f);
+                } else {
+                    tooltip.addPara("Known only from survey data.", Misc.getGrayColor(), 8f);
                 }
 
-                //where the knowledge comes from, and what it buys on the map
-                if (FishPresence.showsRegions(spec)) {
-                    tooltip.addPara("Known from purchased location data - its waters can be"
-                            + " shaded on the map.", 8f);
-                } else if (caught) {
-                    tooltip.addPara("Already landed - its waters are no longer shaded.", 8f);
-                } else if (Global.getSettings().isDevMode() && spec.regions.isEmpty()) {
+                tooltip.addPara("%s", 8f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                        FishLocationSummary.describe(spec));
+
+                if (Global.getSettings().isDevMode() && spec.regions.isEmpty()) {
                     tooltip.addPara("No region data in the table.", Misc.getHighlightColor(), 8f);
                 }
 

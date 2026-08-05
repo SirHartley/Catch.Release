@@ -67,30 +67,16 @@ public class FishPresence {
     }
 
     /** Whether this species' waters get drawn at all. */
-    /**
-     * Whether a species the player has picked out by name should have its waters shaded.
-     * <p>
-     * A looser question than the one below, and deliberately. That one is about browsing: the point
-     * of shading a species you have not caught is helping you find one, so it stops once you have.
-     * Asking for a particular fish by name is not browsing - it is asking where this thing lives,
-     * and answering "you have caught one, so you may not be told" is a strange thing to say to
-     * somebody holding it. A catch is knowing where it came from, so it opens the answer rather
-     * than closing it.
-     * <p>
-     * This is what the codex's own jump-to-map depends on: those pages exist only for species that
-     * have been caught, so under the browse rule the map it sent you to would shade nothing at all.
-     */
-    public static boolean showsRegionsWhenPicked(FishSpec spec) {
+    public static boolean showsRegions(FishSpec spec) {
         if (spec == null || spec.regions.isEmpty()) return false;
         if (Global.getSettings().isDevMode()) return true;
 
-        return FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id);
-    }
-
-    public static boolean showsRegions(FishSpec spec) {
-        if (Global.getSettings().isDevMode()) return !spec.regions.isEmpty();
-
-        return !FishLog.isCaught(spec.id) && FishLog.isLocationDataUnlocked(spec.id);
+        //knowing where it lives is the whole of it. This used to stop the moment a species was
+        //caught, on the reasoning that shading is for finding one you have not got - which reads
+        //backwards the moment you want it again: the shading is the answer to where the species can
+        //be caught, and landing one is not a reason to be told less. Catching now teaches the
+        //location outright, so the two halves of knowing are the same fact
+        return isKnown(spec);
     }
 
     /**

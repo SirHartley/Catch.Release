@@ -45,6 +45,11 @@ public class FishLog {
         logged.caught++;
         logged.hintOnly = false;
 
+        //landing one is knowing where it came from. Buying the survey and catching one were separate
+        //facts before, so a species could be in the log, in the codex, and on the map list while the
+        //map itself refused to shade the waters it had just been pulled out of
+        logged.locationDataUnlocked = true;
+
         boolean record = first || logged.isRecord(entry);
 
         if (first) {
