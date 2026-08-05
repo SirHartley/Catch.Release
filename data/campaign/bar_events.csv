@@ -1,3 +1,4 @@
 bar event id,tags,freq,prob,min dur,max dur,min timeout,max timeout,min accepted timeout,max accepted timeout,plugin
 catchrelease_standingOrder,,10,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.StandingOrderJob
 catchrelease_chef,,10,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.ChefJob
+catchrelease_startup,,9,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.StartupJob

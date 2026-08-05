@@ -296,3 +296,7 @@ catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,Call $catchrelease_jobRef
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask the cook what the problem is.,
 catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:""Find another supplier.""",
+catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Let the young man finish his sentence.,
+catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to the first run.
+catchrelease_jobDecline:""No.""",
