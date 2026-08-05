@@ -13,6 +13,7 @@ import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightBreachRenderer;
+import catchrelease.abilities.searchlight.rendering.SearchlightFanBreachRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -30,16 +31,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Searchlight implements EveryFrameScript {
-    public static final Color COLOR = new Color(255, 180, 50, 255);
 
     /**
-     * The lamp with the breach lamp fitted: the same light in purple, with hyperspace showing
-     * through wherever it lands. The ring colour is the pond rim's hot purple, for the pond's
-     * reason - a splash on a surface takes the surface's colour, and under this lamp the surface
-     * is the same fabric the ponds are torn out of.
+     * The lamp's purple, and the hot purple its splashes wear. Every lamp is a breach lamp now -
+     * the light burns a window through the fabric wherever it lands, so the beam is purple and
+     * the rings take the pond rim's colour, since the surface they splash on is the same fabric
+     * the ponds are torn out of. The old orange spot is gone with the module that used to sell
+     * the difference.
      */
-    public static final Color BREACH_COLOR = new Color(185, 80, 255, 255);
-    public static final Color BREACH_RING_COLOR = new Color(255, 120, 255);
+    public static final Color COLOR = new Color(185, 80, 255, 255);
+    public static final Color RING_COLOR = new Color(255, 120, 255);
 
     /** The beam's lens: how much wider than the light it bends, and how hard. */
     public static final float LENS_SIZE_MULT = 0.8f;
@@ -83,10 +84,7 @@ public class Searchlight implements EveryFrameScript {
     private transient SearchlightGlowRenderer glow;
     private transient SearchlightBreachRenderer breach;
     private transient SearchlightFanRenderer fan;
-
-    /** What the glow was built in, so a lamp refitted under a running light can be caught
-     * changing colour - the glow takes its colour at construction and holds it. */
-    private transient Color glowColor;
+    private transient SearchlightFanBreachRenderer fanBreach;
 
     /** Seconds one face takes to hand over to the other when the fleet crosses. */
     public static final float LOOK_SWAP_FADE = 1f;
@@ -187,6 +185,12 @@ public class Searchlight implements EveryFrameScript {
         this.arc = circularArc;
         baseArcAngle = arc.startAngle;
 
+        //born where the sweep starts rather than at the vector's default (0,0). The faces hold the
+        //live location and read it the moment they are made, so without this the light spent its
+        //first frame at the world origin - a spot flashing in the wrong place, and a fan drawn as
+        //a spear across half the map before jumping to where it was meant to be
+        updateRenderLoc(arc.getPointForAngle(baseArcAngle));
+
         //picks the face for the fit as it already is, so a light switched on under a breach lamp
         //is born purple rather than flashing orange for a frame and then correcting itself
         advanceLook();
@@ -208,10 +212,9 @@ public class Searchlight implements EveryFrameScript {
         ringInterval.advance(amt);
         if (ringInterval.intervalElapsed() && fan == null) {
             float size = getArea();
-            //a splash takes the colour of the surface it lands on - orange light on the fabric,
-            //the rim's hot purple where the lamp has burned a window through it
-            RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size,
-                    breach != null ? BREACH_RING_COLOR : COLOR);
+            //a splash takes the colour of the surface it lands on, and the surface under a lamp
+            //is always the rim of its own window
+            RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size, RING_COLOR);
             rings.add(ring);
             LunaCampaignRenderer.addTransientRenderer(ring);
         }
@@ -261,73 +264,66 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * Which face the light wears for the fit as it stands: with the breach lamp, the ordinary lamp
-     * in purple over a window of hyperspace; the fan when that module is fitted; the spot
-     * otherwise.
+     * Which face the light wears for the fit as it stands: the lamp over its window, or the fan
+     * over a wedge of the same window. Every lamp burns through now - the window under the light
+     * is what the rig is, not a module - so the only question left is the shape of the opening.
      * <p>
-     * The burn outranks the fan on purpose - a lamp that burns through the fabric is doing
-     * something a wedge of thin light cannot, and a fan of it would spread the burn over more sky
-     * than it can open.
+     * Each face is a pair registered window-first, because within a layer draw order is
+     * registration order and the light has to sit over the deep it opened.
      * <p>
-     * Checked every frame rather than once, because the modules can be refitted under a running
-     * light - the look has to follow the fit, not the toggle. The old face fades on its way out
-     * rather than vanishing, and a face that has faded is done for good, so coming back means
-     * building a fresh one - which also replays the glow's switch-on flash, and a light re-lighting
-     * as its optics are swapped is the right thing for it to do.
+     * Checked every frame rather than once, because the fan module can be refitted under a
+     * running light - the look has to follow the fit, not the toggle. The old face fades on its
+     * way out rather than vanishing, and a face that has faded is done for good, so coming back
+     * means building a fresh one - which also replays the glow's switch-on flash, and a light
+     * re-lighting as its optics are swapped is the right thing for it to do.
      * <p>
      * This is also what heals a load: the faces are transient, so they come back null, and the
      * first frame out here simply makes new ones.
      */
     protected void advanceLook() {
-        boolean burning = isBurning();
-        boolean fanned = !burning && isFanned();
-        Color wanted = burning ? BREACH_COLOR : COLOR;
+        boolean fanned = isFanned();
 
-        if (breach != null && !burning) {
-            breach.fadeAndExpire(LOOK_SWAP_FADE);
-            breach = null;
-        }
-        if (fan != null && !fanned) {
-            fan.fadeAndExpire(LOOK_SWAP_FADE);
-            fan = null;
-        }
-        //the glow goes under a fan, and goes when it is the wrong colour - rebuilt rather than
-        //recoloured, which both replays the switch-on flash and lands the new one after the
-        //window below, since within a layer draw order is registration order
-        if (glow != null && (fanned || !wanted.equals(glowColor))) {
-            glow.fadeAndExpire(LOOK_SWAP_FADE);
-            glow = null;
+        if (fanned) {
+            if (breach != null) {
+                breach.fadeAndExpire(LOOK_SWAP_FADE);
+                breach = null;
+            }
+            if (glow != null) {
+                glow.fadeAndExpire(LOOK_SWAP_FADE);
+                glow = null;
+            }
+        } else {
+            if (fanBreach != null) {
+                fanBreach.fadeAndExpire(LOOK_SWAP_FADE);
+                fanBreach = null;
+            }
+            if (fan != null) {
+                fan.fadeAndExpire(LOOK_SWAP_FADE);
+                fan = null;
+            }
         }
 
-        if (burning && breach == null) {
-            breach = new SearchlightBreachRenderer(currentRenderLoc, getArea());
-            LunaCampaignRenderer.addTransientRenderer(breach);
+        if (fanned) {
+            if (fanBreach == null) {
+                fanBreach = new SearchlightFanBreachRenderer(getOrigin(), currentRenderLoc);
+                LunaCampaignRenderer.addTransientRenderer(fanBreach);
+            }
+            if (fan == null) {
+                //the fan pivots on the fleet and follows the sweep, so it takes both live vectors:
+                //where the light is thrown from and where it is looking
+                fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
+                LunaCampaignRenderer.addTransientRenderer(fan);
+            }
+        } else {
+            if (breach == null) {
+                breach = new SearchlightBreachRenderer(currentRenderLoc, getArea());
+                LunaCampaignRenderer.addTransientRenderer(breach);
+            }
+            if (glow == null) {
+                glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
+                LunaCampaignRenderer.addTransientRenderer(glow);
+            }
         }
-        if (fanned && fan == null) {
-            //the fan pivots on the fleet and follows the sweep, so it takes both live vectors:
-            //where the light is thrown from and where it is looking
-            fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
-            LunaCampaignRenderer.addTransientRenderer(fan);
-        }
-        if (!fanned && glow == null) {
-            glowColor = wanted;
-            glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), wanted);
-            LunaCampaignRenderer.addTransientRenderer(glow);
-        }
-    }
-
-    /**
-     * Whether this light burns a window through rather than only shining, which is the whole of
-     * what the breach lamp is fitted for.
-     * <p>
-     * Fitted is the only condition. It used to also require the fleet to be standing in
-     * hyperspace, and the result was a module that changed nothing whatsoever anywhere the player
-     * normally is, which is not a subtle upgrade, it is a broken one. The lamp works where all the
-     * fishing gear works - from realspace, through the fabric - and what it opens onto is
-     * hyperspace, which is the point of fitting it.
-     */
-    protected boolean isBurning() {
-        return SearchlightAbilityPlugin.burnsIntoHyperspace();
     }
 
     /**
@@ -534,6 +530,10 @@ public class Searchlight implements EveryFrameScript {
         if (fan != null) {
             fan.fadeAndExpire(fadeSeconds);
             fan = null;
+        }
+        if (fanBreach != null) {
+            fanBreach.fadeAndExpire(fadeSeconds);
+            fanBreach = null;
         }
 
         rings.clear();

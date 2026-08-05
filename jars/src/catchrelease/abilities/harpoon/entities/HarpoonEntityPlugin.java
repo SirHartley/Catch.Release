@@ -728,11 +728,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     /**
      * A mote the head reached while it was still under the fabric, brought through by the hit.
      * <p>
-     * Two things have to be true, and the second is the whole point of it. The deep gear has to be
-     * fitted, and a searchlight has to be holding the mote - the dent is the only thing there is to
-     * aim at, so without a light on it there is nothing to aim at and this would be a shot into
-     * blank fabric that happened to pay out. It is the light that makes the shot possible; the
-     * upgrade only makes it legal.
+     * One thing has to be true: a breach lamp has to have exposed the mote. The dent is the only
+     * thing there is to aim at, so without a lamp having been over it there is nothing to aim at
+     * and this would be a shot into blank fabric that happened to pay out. This is the whole
+     * gameplay loop of the lamps - sweep, expose, harpoon - so it is not gated behind any
+     * upgrade; the exposure itself is the unlock, renewed every time a beam passes over.
      * <p>
      * The strike unearths rather than hooking the buried entity, so nothing downstream of here has
      * to know a mote arrived any differently to the ones that surfaced on their own. That also
@@ -740,8 +740,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * exactly one, at the end of a line, one shot at a time.
      */
     protected SectorEntityToken strikeBuried() {
-        if (!UpgradeManager.isUnlocked(StatIds.HARPOON_DEEP)) return null;
-
         for (SectorEntityToken buried : entity.getContainingLocation()
                 .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
 
