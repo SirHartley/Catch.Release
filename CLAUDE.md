@@ -30,13 +30,21 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 
 ## Layout
 
+**[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the full map** - every package, every file, one
+line each, plus the boot order and the index of what is registered by data rather than by code. Read
+it before going looking for something. Update it when a package gains or loses a file.
+
+The short version:
+
 | Path | What lives there |
 |---|---|
 | `jars/src/catchrelease/campaign/ponds/` | The pond. **Terrain**, not a custom entity - registered in `data/campaign/terrain.json`, plugin under `terrain/`. |
-| `jars/src/catchrelease/campaign/fish/` | Fish specs, mote entities, spawning, and the catch minigame. |
-| `jars/src/catchrelease/abilities/` | The searchlight and the R.O.D. - drones, motes, the ring. |
+| `jars/src/catchrelease/campaign/fish/` | Most of the mod: specs, motes, spawning, the catch minigame, jobs, the shop, the map filter, the codex. |
+| `jars/src/catchrelease/campaign/crime/` | What harpooning a fleet costs you. |
+| `jars/src/catchrelease/abilities/` | The four rigs - searchlight, R.O.D., harpoon, depth bomb. |
 | `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire ability framework; see its README. |
 | `jars/src/catchrelease/rendering/` | Shader and sprite renderers, stencils, warp grids. |
+| `jars/src/catchrelease/memory/` | Anything that has to survive a save - upgrades, charges, caches. |
 | `data/config/custom_entities.json` | Motes and drones. The pond is **not** here any more. |
 
 ## Gotchas
