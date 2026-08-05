@@ -94,8 +94,46 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 **`data/config/custom_entities.json`** — the motes, harpoon, drone and depth bomb. The pond is
 **not** here any more.
 
-**`data/campaign/rules.csv`** — all dialogue. Jobs reach their Java through
-`Call $catchrelease_jobRef <action>`.
+**`data/campaign/rules.csv`** — all dialogue. See the contract below.
+
+---
+
+## The rules.csv contract
+
+Every word a job speaks is in the sheet. Java owns only what a sheet cannot do — counting the hold,
+spending it, rolling the payment, settling a bet — and writes the outcome into memory for the rows
+to read. A job that says something different when a wager comes off is **a second row**, not a
+second branch in Java.
+
+**Rows per job.** Three are wiring, four are voice, and a job with a decision at the hand-over
+brings its own options under its own flag.
+
+| Trigger | Carries |
+|---|---|
+| `<missionId>_blurbBar` | The bar prompt. Id composed by vanilla — a row named anything else is never found |
+| `<missionId>_optionBar` | The bar option. **Id must start with the mission id** (see below) |
+| `DialogOptionSelected` on `<missionId>_ask` | The offer, and the accept/decline options |
+| `catchreleaseJobAccepted` / `…Declined` / `…Remind` / `…Paid` | Gated on `$missionId ==` |
+
+**Tokens Java sets, rows read.** The first two live as long as the job does, written on the giver.
+The rest are written through `token()` with a zero expiry, which unsets them the moment the game
+unpauses — the life of a conversation. Capitalised twins exist because the engine does not
+capitalise for you and a sentence has to be able to start with one.
+
+| Token | Set by | Means |
+|---|---|---|
+| `$catchrelease_jobRef` | `setPersonMissionRef` / `setEntityMissionRef` | The job itself, for `Call $catchrelease_jobRef <action>` |
+| `$catchrelease_jobDeliver` | `markDeliverable()` | The fish are owed; puts the hand-over option up |
+| `$catchreleaseHasFish` | `updateTokens` | Whether the hold covers the whole ask |
+| `$catchreleaseAsk` · `…AskCap` | `updateTokens` | What is wanted, as a sentence |
+| `$catchreleaseReward` · `…RewardCap` | `updateTokens` | What is paid |
+| `$catchreleasePaid` | `handOver` | Whether the exchange happened |
+| `$catchreleaseBonus` | `handOver` | Whether an extra was earned |
+| `$catchreleaseMore` | `handOver` | Whether the job is asking again |
+| Anything else | a job's `setJobTokens` | Per-job names: the dish, the species, the two men in a bar |
+
+A job with its own hand-over decision overrides `getDeliverFlag()` so the shared "hand over the
+catch" row does not appear beside its own — `KidsJob` and `MafiaJob` both do this.
 
 ---
 
@@ -388,6 +426,32 @@ whole sector, drawn wherever the player is.
 
 **`callAction` must return true for anything it handles.** Vanilla throws on an unhandled action
 rather than reading it as a failed condition. Outcomes travel back through memory flags.
+
+**A bar option id must start with its mission id.** `BarCMD` finds the wrapper by testing whether
+the selected option *begins with* the mission's trigger prefix, and `abortMissions` kills every
+mission that fails that test — including the one the option was meant to open. An option named for
+the job rather than for the mission silently aborts it. No mission id may be a prefix of another,
+either.
+
+**`BarCMD` has no `close` verb.** It is `returnFromEvent`, which is also what puts the player back
+in the bar. An unrecognised command falls through the switch and leaves the dialogue with no options
+at all.
+
+**A bare `score:` line takes the game down at load.** The score token is stripped before the
+condition is parsed, so a line with nothing else on it leaves an empty token list and throws. Append
+`score:` to a real condition, never put it on a line of its own.
+
+**Rule scores are summed across the matching condition lines, with no bonus for being more
+specific.** Two rows that both match at 0 are picked between *at random* — so a general row and its
+special case need an explicit `score:` between them, not just an extra condition.
+
+**A condition that is only a variable hands the engine back whatever the key holds,** and it has to
+be a true or a false. Testing a key that holds a name is not a truthiness check; it is a type error
+waiting for the row to be reached. Set a companion boolean — `MafiaJob` carries
+`$catchreleaseHasWager` beside `$catchreleaseWager` for exactly this.
+
+**Token replacement is longest-key-first,** so `$catchreleaseAskCap` resolves before
+`$catchreleaseAsk` rather than leaving a stray `Cap`. Relied on, not merely observed.
 
 **Every memory key starts with `$`.** `Memory.set` throws on one that does not, and it throws
 whenever the write happens rather than where the key was written down - which can be a stage change
