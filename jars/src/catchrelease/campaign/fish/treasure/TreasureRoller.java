@@ -178,8 +178,23 @@ public class TreasureRoller {
         FighterWingSpecAPI spec = picker.pick();
         cargo.addFighters(spec.getId(), 1);
 
-        award.items.add(new TreasureAward.Item(spec.getWingName() + " wing",
-                getWingSprite(spec), 1));
+        award.items.add(new TreasureAward.Item(wingName(spec), getWingSprite(spec), 1));
+    }
+
+    /**
+     * What to call a wing on the card.
+     * <p>
+     * Most of them are already called one. getWingName comes back as "Spark Wing" far more often
+     * than it comes back as "Spark", so appending the word unconditionally - which is what this used
+     * to do - produced "Spark Wing wing" on every fighter in the game that names itself properly.
+     * Only added where it is missing, and matched case-insensitively because the spec's own
+     * capitalisation is not something this gets a say in.
+     */
+    protected static String wingName(FighterWingSpecAPI spec) {
+        String name = spec.getWingName();
+        if (name == null || name.isEmpty()) return "fighter wing";
+
+        return name.toLowerCase().endsWith("wing") ? name : name + " wing";
     }
 
     /** A wing's cargo chip shows the fighter itself, so the card does too. Null if anything is off. */
