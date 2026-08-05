@@ -163,7 +163,7 @@ public class PondConstants {
      * (WELL_ALPHA at the centre, gone by WELL_REACH of the radius); and the wall shadow rising
      * again from RIM_START of the radius to the rim.
      */
-    public static final boolean POND_HOLE_LOOK = true;
+    public static final boolean POND_HOLE_LOOK = false;
     public static final float HOLE_FILL_MULT = 1.5f;
     public static final float HOLE_BG_ALPHA = 0.85f;
     public static final float HOLE_BG_ZOOM = 1.6f;
