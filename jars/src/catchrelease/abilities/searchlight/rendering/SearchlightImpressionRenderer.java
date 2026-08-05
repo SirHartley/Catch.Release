@@ -225,18 +225,16 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         float glowLevel = identify <= 0 ? 0f
                 : identify == 1 ? FishConstants.IMPRESSION_GLOW_HINT_MULT : 1f;
 
-        //with the breach lamp fitted the beams are windows, and a mote a window is over right now
-        //is seen rather than silhouetted - the dent turns inside out by however much of a beam is
-        //on it. Live rather than off the mark on purpose: the lingering mark is memory, and the
-        //window only shows what is under it while it is under it
-        boolean breaching = SearchlightAbilityPlugin.burnsIntoHyperspace();
-
+        //every beam is a window, and a mote a window is over right now is seen rather than
+        //silhouetted - the dent turns inside out by however much of a beam is on it. Live rather
+        //than off the mark on purpose: the lingering mark is memory, and the window only shows
+        //what is under it while it is under it
         for (Map.Entry<SectorEntityToken, Float> entry : marks.entrySet()) {
             SectorEntityToken buried = entry.getKey();
             if (buried.isExpired()) continue;
 
             float mark = entry.getValue();
-            float reveal = breaching ? strongestBeam(buried.getLocation()) : 0f;
+            float reveal = strongestBeam(buried.getLocation());
 
             renderImpression(buried.getLocation(), mark * alpha,
                     mark * fadeMult * glowLevel, ringColor(buried, identify),
@@ -281,7 +279,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      */
     protected Color revealColor(SectorEntityToken buried) {
         if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
-            return Searchlight.BREACH_COLOR;
+            return Searchlight.COLOR;
         }
 
         return mote.getRarity().color;

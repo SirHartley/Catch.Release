@@ -62,10 +62,9 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) return;
 
-        //nothing is buried out in the deep until the rig can burn through to it. Seeding it anyway
-        //would leave a population nobody has any way of finding, and then hand the whole standing
-        //stock over at once the moment somebody bought the upgrade
-        if (fleet.isInHyperspace() && !SearchlightAbilityPlugin.burnsIntoHyperspace()) return;
+        //nothing is seeded around a fleet standing in hyperspace - no fishing gear works out
+        //there, so a population on that side of the fabric is one nobody can ever touch
+        if (fleet.isInHyperspace()) return;
 
         LocationAPI location = fleet.getContainingLocation();
         if (location == null) return;

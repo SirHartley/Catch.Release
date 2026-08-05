@@ -85,10 +85,6 @@ public class ShopPricing {
 
     /** Tackle is tiered by what it does, and the ones that change what can come up cost the most. */
     protected static int getTackleTier(Tackle tackle) {
-        //the top of the ladder with the lifting rig, and for the same reason: it does not change
-        //how a catch plays, it changes where the fleet can fish at all
-        if (tackle.burnsHyperspace) return 3;
-
         if (tackle.shipTackle) return 3;
         if (tackle.sonar || tackle.rarityBias > 1f || tackle.lockTime > 0f) return 2;
         if (tackle.fanBeam) return 2;

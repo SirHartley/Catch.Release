@@ -102,15 +102,6 @@ public enum Tackle {
         {
             fanBeam = true;
         }
-    },
-
-    BREACH_LAMP("Breach Lamp", Fit.SEARCHLIGHT,
-            "Burns through the fabric rather than shining across it. Each beam opens a window"
-                    + " into hyperspace, and whatever it passes over is seen plainly rather than"
-                    + " guessed at from the dent it makes.") {
-        {
-            burnsHyperspace = true;
-        }
     };
 
     /** Which rig a piece of tackle will fit. */
@@ -151,9 +142,6 @@ public enum Tackle {
 
     /** Seconds a light holds on what it found before going back to its sweep. Zero never stops. */
     public float lockTime = 0f;
-
-    /** Whether the lights burn through into hyperspace rather than refusing to run out there. */
-    public boolean burnsHyperspace = false;
 
     /** Whether the lights are thrown as fans off the hull rather than as spots out in the dark. */
     public boolean fanBeam = false;

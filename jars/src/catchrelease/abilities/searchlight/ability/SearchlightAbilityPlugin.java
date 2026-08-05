@@ -156,11 +156,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return !fleet.getContainingLocation().isHyperspace();
     }
 
-    /** Whether the breach lamp has been fitted, turning the beams into windows. */
-    public static boolean burnsIntoHyperspace() {
-        return TackleManager.get(Tackle.Fit.SEARCHLIGHT).burnsHyperspace;
-    }
-
     private void expireLights(boolean withFade){
         for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
     }
