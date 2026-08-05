@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.tackle.Tackle;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
@@ -128,6 +129,14 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         if (entry.isDone()) {
             drawMark(entry.isUpgrade() ? "MAX" : "FITTED", Misc.getPositiveHighlightColor(),
                     right, y, height, alphaMult);
+            return;
+        }
+
+        //an owned module wears no price, so without a mark the row's end would just be blank.
+        //The empty slot counts as owned too, but stays bare - OWNED on an absence would claim
+        //there is a thing there
+        if (entry.isOwned() && entry.tackle != Tackle.NONE) {
+            drawMark("OWNED", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 
