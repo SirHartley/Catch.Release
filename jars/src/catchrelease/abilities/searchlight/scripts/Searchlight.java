@@ -13,6 +13,7 @@ import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.renderers.RippleRingRenderer;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightBurnRenderer;
+import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.rendering.SearchlightGlowRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -62,9 +63,9 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * The two faces a light can wear, and both transient for the same reason.
+     * The faces a light can wear, and all of them transient for the same reason.
      * <p>
-     * Either is registered with LunaCampaignRenderer's transient list, which does not survive a
+     * Each is registered with LunaCampaignRenderer's transient list, which does not survive a
      * load. Written into the save, a renderer comes back as an orphan: a live object nothing draws,
      * with the field it lives in non-null, so the rebuild never fires and the beam is simply
      * invisible for the rest of the session. Null on load instead, and {@link #advanceLook()} builds
@@ -72,6 +73,7 @@ public class Searchlight implements EveryFrameScript {
      */
     private transient SearchlightGlowRenderer glow;
     private transient SearchlightBurnRenderer burn;
+    private transient SearchlightFanRenderer fan;
 
     /** Seconds one face takes to hand over to the other when the fleet crosses. */
     public static final float LOOK_SWAP_FADE = 1f;
@@ -222,36 +224,53 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * Which face the light wears where the fleet is standing: the beam, or the burn.
+     * Which face the light wears where the fleet is standing: the burn in hyperspace, the fan when
+     * that module is fitted, and the spot otherwise.
+     * <p>
+     * The burn outranks the fan on purpose - in hyperspace the light is a hole in the fabric, not
+     * a lamp, and a fan of orange thrown across the deep would be the very
+     * shining-at-nothing the burn-through exists to replace.
      * <p>
      * Checked every frame rather than once, because with the burn-through bought the ability stays
-     * on across a jump - the look has to follow the fleet through, not the toggle. The old face
-     * fades on its way out rather than vanishing, and a face that has faded is done for good, so
-     * coming back means building a fresh one - which also replays the glow's switch-on flash, and a
-     * light re-lighting as it comes out of hyperspace is the right thing for it to do.
+     * on across a jump, and the fan module can be refitted under a running light - the look has to
+     * follow the fleet and the fit, not the toggle. The old face fades on its way out rather than
+     * vanishing, and a face that has faded is done for good, so coming back means building a fresh
+     * one - which also replays the glow's switch-on flash, and a light re-lighting as it comes out
+     * of hyperspace is the right thing for it to do.
      * <p>
      * This is also what heals a load mid-burn: the burn is transient, so it comes back null, and
      * the first frame out here simply makes another.
      */
     protected void advanceLook() {
-        if (isBurning()) {
-            if (glow != null) {
-                glow.fadeAndExpire(LOOK_SWAP_FADE);
-                glow = null;
-            }
-            if (burn == null) {
-                burn = new SearchlightBurnRenderer(currentRenderLoc, getArea());
-                LunaCampaignRenderer.addTransientRenderer(burn);
-            }
-        } else {
-            if (burn != null) {
-                burn.fadeAndExpire(LOOK_SWAP_FADE);
-                burn = null;
-            }
-            if (glow == null) {
-                glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
-                LunaCampaignRenderer.addTransientRenderer(glow);
-            }
+        boolean burning = isBurning();
+        boolean fanned = !burning && isFanned();
+
+        if (burn != null && !burning) {
+            burn.fadeAndExpire(LOOK_SWAP_FADE);
+            burn = null;
+        }
+        if (fan != null && !fanned) {
+            fan.fadeAndExpire(LOOK_SWAP_FADE);
+            fan = null;
+        }
+        if (glow != null && (burning || fanned)) {
+            glow.fadeAndExpire(LOOK_SWAP_FADE);
+            glow = null;
+        }
+
+        if (burning && burn == null) {
+            burn = new SearchlightBurnRenderer(currentRenderLoc, getArea());
+            LunaCampaignRenderer.addTransientRenderer(burn);
+        }
+        if (fanned && fan == null) {
+            //the fan pivots on the fleet and follows the sweep, so it takes both live vectors:
+            //where the light is thrown from and where it is looking
+            fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
+            LunaCampaignRenderer.addTransientRenderer(fan);
+        }
+        if (!burning && !fanned && glow == null) {
+            glow = new SearchlightGlowRenderer(currentRenderLoc, getArea(), COLOR);
+            LunaCampaignRenderer.addTransientRenderer(glow);
         }
     }
 
@@ -435,10 +454,14 @@ public class Searchlight implements EveryFrameScript {
         for (RippleRingRenderer ring : rings) ring.fadeAndExpire(fadeSeconds);
         if (glow != null) glow.fadeAndExpire(fadeSeconds);
 
-        //the burn goes the way the glow goes - it is the same light in different clothes
+        //the other faces go the way the glow goes - the same light in different clothes
         if (burn != null) {
             burn.fadeAndExpire(fadeSeconds);
             burn = null;
+        }
+        if (fan != null) {
+            fan.fadeAndExpire(fadeSeconds);
+            fan = null;
         }
 
         rings.clear();
