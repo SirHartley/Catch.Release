@@ -1,7 +1,6 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.helper.loading.FishSpecLoader;
 
 import java.awt.Color;
 
@@ -23,26 +22,6 @@ public enum FishType {
     FishType(String label, Color color) {
         this.label = label;
         this.color = color;
-    }
-
-    protected String iconPath;
-    protected boolean iconChecked = false;
-
-    /** The first of this type's species that owns art - a face for the chip, found once. */
-    public String getIconPath() {
-        if (iconChecked) return iconPath;
-        iconChecked = true;
-
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || of(spec) != this) continue;
-
-            if (spec.icon != null && !spec.icon.isEmpty()) {
-                iconPath = spec.icon;
-                break;
-            }
-        }
-
-        return iconPath;
     }
 
     public static FishType of(FishSpec spec) {

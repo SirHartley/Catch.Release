@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
@@ -68,6 +69,29 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     public static final String SEARCH_GHOST = "Search...";
 
+    /** How many species can be up at once. Three weaves exist, and a fourth would have to pile. */
+    public static final int MAX_SELECTED = 3;
+
+    /** The chips' own face: category art does not exist yet, and a stand-in says so honestly. */
+    public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
+
+    protected static transient LazyFont tinyFont;
+    protected static transient boolean tinyChecked = false;
+
+    /** The smallest hand the game writes in, for labels that were shouting at chip size. */
+    protected static LazyFont getTinyFont() {
+        if (tinyChecked) return tinyFont;
+        tinyChecked = true;
+
+        try {
+            tinyFont = LazyFont.loadFont(CHIP_ICON_FONT);
+        } catch (Exception e) {
+            tinyFont = null;
+        }
+
+        return tinyFont;
+    }
+
     protected final Host host;
     protected final FishPresence.Filter filter = new FishPresence.Filter();
 
@@ -109,7 +133,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
      * Selecting is the whole of it, since a selection is what the species view is.
      */
     public void showSpecies(String speciesId) {
-        if (speciesId == null) return;
+        if (speciesId == null || selectedIds.contains(speciesId)) return;
+
+        //the codex asked, so room is made: the oldest pick retires rather than the request failing
+        if (selectedIds.size() >= MAX_SELECTED) {
+            selectedIds.remove(selectedIds.iterator().next());
+        }
 
         selectedIds.add(speciesId);
     }
@@ -269,10 +298,18 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
      * hand or by DESELECT ALL returns to it.
      */
     protected void onRowClicked(FishSpec spec) {
-        boolean added = selectedIds.add(spec.id);
-        if (!added) selectedIds.remove(spec.id);
+        if (selectedIds.contains(spec.id)) {
+            selectedIds.remove(spec.id);
+            host.onPresenceChanged();
+            return;
+        }
 
-        if (added) host.onSpeciesFocused(spec);
+        //three weaves, three picks: a fourth is refused rather than repainted over the others.
+        //The row's tooltip says so while the hand is full
+        if (selectedIds.size() >= MAX_SELECTED) return;
+
+        selectedIds.add(spec.id);
+        host.onSpeciesFocused(spec);
         host.onPresenceChanged();
     }
 
@@ -327,10 +364,10 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.addPara("Reading the waters", Misc.getBasePlayerColor(), 0f);
 
-                tooltip.addPara("With nothing picked, the map shades each enabled type's whole"
-                        + " territory. Pick species off the list to shade only those - several at"
-                        + " once for planning a route - and overlapping waters take turns at the"
-                        + " pixels rather than piling on them.", 8f);
+                tooltip.addPara("Enable type chips to shade whole territories. Pick species off"
+                        + " the list to shade only those - up to three at once for planning a"
+                        + " route, the first filled, the second striped one way, the third the"
+                        + " other, so overlaps cross instead of piling.", 8f);
 
                 tooltip.addPara("A filled circle by a name is a species somebody aboard has"
                         + " landed. A hollow one is known only from survey data: its waters"
@@ -390,8 +427,13 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                     tooltip.addPara("No region data in the table.", Misc.getHighlightColor(), 8f);
                 }
 
-                tooltip.addPara("Click to toggle its waters on the map. F2 opens the codex.",
-                        Misc.getGrayColor(), 8f);
+                if (!selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED) {
+                    tooltip.addPara("Three waters are already up - deselect one first.",
+                            Misc.getHighlightColor(), 8f);
+                } else {
+                    tooltip.addPara("Click to toggle its waters on the map. F2 opens the codex.",
+                            Misc.getGrayColor(), 8f);
+                }
             }
         };
     }
@@ -399,9 +441,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     // --- The drawn controls. ---
 
     /**
-     * One type as a chip: its face over its name, lit in its colour while it is being shown.
-     * The face is borrowed from the first of its species that owns art - the chip introduces
-     * the category with the category's own creature.
+     * One type as a chip: a stand-in mark over its name, lit in its colour while it is being
+     * shown. The mark is the mod's placeholder on purpose - category art does not exist yet, and
+     * borrowing some species' face made one fish stand for a whole type it does not speak for.
      */
     protected class ChipPlugin extends BaseCustomUIPanelPlugin {
 
@@ -458,11 +500,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         Math.round(y + h - 3f - ICON_SIZE * 0.5f));
             }
 
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
+            //the smallest native size there is: a chip is a label, not a heading
+            LazyFont tiny = getTinyFont();
+            if (tiny == null) return;
 
             if (text == null) {
-                text = ShopUi.createText(small, type.label.toUpperCase());
+                text = ShopUi.createText(tiny, type.label);
                 text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
@@ -476,12 +519,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             if (iconChecked) return icon;
             iconChecked = true;
 
-            String path = type.getIconPath();
-            if (path == null) return null;
-
             try {
-                Global.getSettings().loadTexture(path);
-                icon = Global.getSettings().getSprite(path);
+                icon = Global.getSettings().getSprite(ModPlugin.MOD_ID, "placeholder");
             } catch (Exception e) {
                 icon = null;
             }

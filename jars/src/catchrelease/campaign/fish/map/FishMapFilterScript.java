@@ -393,9 +393,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
     }
 
     /**
-     * The waters the current mode calls for, cut once and cached. CATEGORY shades each enabled
-     * type's whole territory as one shape; SPECIES shades exactly what the player has picked.
-     * Either way the count on screen stays small, which is what keeps the map light.
+     * The waters the current mode calls for, cut once and cached. The survey shades each enabled
+     * type's whole territory; the species view shades exactly what the player has picked, up to
+     * three, each fill in its own weave - solid, striped right, striped left - so overlaps cross
+     * instead of piling. Picks that share a colour also share one merged border, cut from the
+     * union of their systems: the same colour twice over would only stack lines.
      */
     protected void rebuildBlobs() {
         if (pane == null || overlay == null) return;
@@ -403,6 +405,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         List<FishPresenceOverlay.Blob> blobs = new ArrayList<>();
 
         if (pane.isCategoryView()) {
+            int index = 0;
+
             for (FishType type : FishType.values()) {
                 if (!pane.getFilter().types.contains(type)) continue;
 
@@ -416,30 +420,96 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
                     meshCache.put("type:" + type.name(), mesh);
                 }
 
-                if (!mesh.isEmpty()) blobs.add(new FishPresenceOverlay.Blob(mesh, type.color));
+                if (mesh.isEmpty()) continue;
+
+                blobs.add(new FishPresenceOverlay.Blob(mesh, type.color,
+                        getStyle(index++), true, true));
             }
         } else {
+            //colour groups first, because a border is per colour rather than per pick
+            Map<Integer, List<FishSpec>> byColor = new java.util.LinkedHashMap<>();
+            List<FishSpec> picked = new ArrayList<>();
+
             for (String id : pane.getSelectedIds()) {
                 FishSpec spec = FishPresence.getSpec(id);
                 if (spec == null || !FishPresence.isKnown(spec) || !FishPresence.showsRegions(spec)) {
                     continue;
                 }
 
-                FishPresenceField.Mesh mesh = meshCache.get("spec:" + id);
+                picked.add(spec);
+                byColor.computeIfAbsent(spec.rarity.color.getRGB(), k -> new ArrayList<>()).add(spec);
+            }
 
-                if (mesh == null) {
-                    List<Vector2f> hosts = FishPresence.getHostLocations(spec);
-                    if (hosts.isEmpty()) continue;
+            //each pick's fill, in its own weave, with its own border only when its colour is its own
+            for (int i = 0; i < picked.size(); i++) {
+                FishSpec spec = picked.get(i);
+                FishPresenceField.Mesh mesh = getSpeciesMesh(spec);
+                if (mesh == null) continue;
 
-                    mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
-                    meshCache.put("spec:" + id, mesh);
-                }
+                boolean colorShared = byColor.get(spec.rarity.color.getRGB()).size() > 1;
 
-                if (!mesh.isEmpty()) blobs.add(new FishPresenceOverlay.Blob(mesh, spec.rarity.color));
+                blobs.add(new FishPresenceOverlay.Blob(mesh, spec.rarity.color,
+                        getStyle(i), true, !colorShared));
+            }
+
+            //and one merged border per shared colour, around everything that colour covers
+            for (List<FishSpec> group : byColor.values()) {
+                if (group.size() < 2) continue;
+
+                FishPresenceField.Mesh union = getUnionMesh(group);
+                if (union == null) continue;
+
+                blobs.add(new FishPresenceOverlay.Blob(union, group.get(0).rarity.color,
+                        FishPresenceOverlay.STYLE_SOLID, false, true));
             }
         }
 
         overlay.setBlobs(blobs);
+    }
+
+    /** The three weaves, dealt in pick order; a fourth of anything starts the deal over. */
+    protected int getStyle(int index) {
+        switch (index % 3) {
+            case 1: return FishPresenceOverlay.STYLE_STRIPE_RIGHT;
+            case 2: return FishPresenceOverlay.STYLE_STRIPE_LEFT;
+            default: return FishPresenceOverlay.STYLE_SOLID;
+        }
+    }
+
+    protected FishPresenceField.Mesh getSpeciesMesh(FishSpec spec) {
+        FishPresenceField.Mesh mesh = meshCache.get("spec:" + spec.id);
+
+        if (mesh == null) {
+            List<Vector2f> hosts = FishPresence.getHostLocations(spec);
+            if (hosts.isEmpty()) return null;
+
+            mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
+            meshCache.put("spec:" + spec.id, mesh);
+        }
+
+        return mesh.isEmpty() ? null : mesh;
+    }
+
+    /** The merged shape around everything a colour group covers, cached by its membership. */
+    protected FishPresenceField.Mesh getUnionMesh(List<FishSpec> group) {
+        List<String> ids = new ArrayList<>();
+        for (FishSpec spec : group) ids.add(spec.id);
+        java.util.Collections.sort(ids);
+
+        String key = "union:" + String.join(",", ids);
+        FishPresenceField.Mesh mesh = meshCache.get(key);
+
+        if (mesh == null) {
+            java.util.Set<Vector2f> hosts = new java.util.LinkedHashSet<>();
+            for (FishSpec spec : group) hosts.addAll(FishPresence.getHostLocations(spec));
+
+            if (hosts.isEmpty()) return null;
+
+            mesh = FishPresenceField.build(new ArrayList<>(hosts), BLOB_RADIUS);
+            meshCache.put(key, mesh);
+        }
+
+        return mesh.isEmpty() ? null : mesh;
     }
 
     @Override
