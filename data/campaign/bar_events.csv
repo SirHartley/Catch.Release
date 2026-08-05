@@ -7,3 +7,4 @@ catchrelease_curator,,7,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.Cura
 catchrelease_duel,,8,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.KidsJob
 catchrelease_ring,,6,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.MafiaJob
 catchrelease_client,,8,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.CompanionJob
+catchrelease_academy,,7,1,30,40,20,30,60,90,catchrelease.campaign.fish.jobs.AcademyJob
