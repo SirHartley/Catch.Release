@@ -308,3 +308,20 @@ catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,Call $catchrelease_
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask what she is drawing.,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to stock the tank.
 catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Find out what the children want.,
+catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the battle.
+catchrelease_jobDecline:Explain, gently, that fish do not fight.",
+catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
+catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets which fish. The choice cannot be got wrong - the extra is paid for the specimen, not for the guess."
+catchrelease_duelShort,PopulateOptions,"$catchrelease_duelChoice
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_duelWait:Tell them you are still looking.,
+catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,"Call $catchrelease_jobRef turnInLoud
+FireAll PopulateOptions",,,
+catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,"Call $catchrelease_jobRef turnInQuiet
+FireAll PopulateOptions",,,
+catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
