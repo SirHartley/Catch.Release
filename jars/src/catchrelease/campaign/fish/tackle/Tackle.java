@@ -117,7 +117,19 @@ public enum Tackle {
         DRONE,
         HARPOON,
         SEARCHLIGHT,
-        BOTH
+        BOMB,
+        BOTH;
+
+        /**
+         * Whether this is a rig something bolts onto, rather than a way of saying more than one.
+         * <p>
+         * BOTH is the odd one out - it is a fit a piece of tackle can declare, never a slot the
+         * player has. Anything walking the rigs wants this, or it offers a shelf of tackle for a
+         * piece of equipment nobody owns.
+         */
+        public boolean isRig() {
+            return this != BOTH;
+        }
     }
 
     public final String name;
@@ -152,14 +164,18 @@ public enum Tackle {
     }
 
     /**
-     * BOTH means both of the rigs a catch is played on, which is the drones and the harpoon. The
-     * lights are not one of those - nothing is landed on a searchlight - so a barbed head does not
-     * become a lamp fitting just because it said both.
+     * BOTH means both of the rigs a catch is played on, which is the drones and the harpoon. Nothing
+     * is landed on a searchlight or a bomb, so a barbed head does not become a lamp fitting just
+     * because it said both.
+     * <p>
+     * Said as what BOTH covers rather than as which rigs are exempt from it. The old spelling named
+     * the searchlight as the exception, which meant every rig added afterwards silently inherited
+     * every piece of tackle that had ever said both.
      */
     public boolean fits(Fit rig) {
         if (this == NONE) return true;
-        if (rig == Fit.SEARCHLIGHT) return this.fit == Fit.SEARCHLIGHT;
+        if (this.fit == Fit.BOTH) return rig == Fit.DRONE || rig == Fit.HARPOON;
 
-        return this.fit == Fit.BOTH || this.fit == rig;
+        return this.fit == rig;
     }
 }

@@ -37,11 +37,7 @@ public class ShopEntry {
     }
 
     public static ShopEntry of(Tackle tackle, Tackle.Fit rig) {
-        ShopGroup group = ShopGroup.HARPOON_TIPS;
-        if (rig == Tackle.Fit.DRONE) group = ShopGroup.DRONE_TACKLE;
-        if (rig == Tackle.Fit.SEARCHLIGHT) group = ShopGroup.SEARCHLIGHT_RIG;
-
-        return new ShopEntry(Kind.TACKLE, group, null, tackle, rig);
+        return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig);
     }
 
     protected ShopEntry(Kind kind, ShopGroup group, UpgradeStat stat, Tackle tackle, Tackle.Fit rig) {
