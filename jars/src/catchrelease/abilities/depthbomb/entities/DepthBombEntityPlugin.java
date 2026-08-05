@@ -2,6 +2,7 @@ package catchrelease.abilities.depthbomb.entities;
 
 import catchrelease.abilities.depthbomb.constants.DepthBombConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.loading.SpriteLoader;
@@ -157,15 +158,48 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.BROKEN);
 
         throwShock(1f);
-        throwShards();
         shakeNearbyMotes();
         unearthBuried();
-        shakeLoose();
+
+        //the glass rupture, or the pond: the pond for now, the glass kept whole for its day.
+        //The pond brings its own mote spawning, opening visuals and camera hold, so the bomb's
+        //own loose motes and shards stay home in that mode
+        if (DepthBombConstants.SPAWN_POND) {
+            spawnTemporaryPond();
+        } else {
+            throwShards();
+            shakeLoose();
+        }
 
         if (!DepthBombConstants.SOUND_DETONATE.isEmpty()) {
             Global.getSoundPlayer().playSound(DepthBombConstants.SOUND_DETONATE, 1f, 1f,
                     entity.getLocation(), new Vector2f());
         }
+    }
+
+    /**
+     * The break as a rupture that behaves like a pond, because it is one: the same terrain, the
+     * same opening spool, ripple and camera hold, the same motes swimming inside the same mask -
+     * sized by the blast, timed by the rupture upgrade, and gone without a trace once it closes.
+     * The bomb entity itself has nothing left to be once the pond stands, so it leaves at once.
+     */
+    protected void spawnTemporaryPond() {
+        float radius = getBlastRadius() * DepthBombConstants.TEMP_POND_RADIUS_MULT;
+        float lifetime = getHealTime() * DepthBombConstants.TEMP_POND_LIFETIME_MULT;
+
+        SectorEntityToken pond = entity.getContainingLocation().addTerrain(
+                MaskedFishingPondTerrainPlugin.TERRAIN_ID,
+                new MaskedFishingPondTerrainPlugin.PondParams(
+                        MathUtils.getRandomNumberInRange(0f, 1f) > 0.5f
+                                ? (long) (seed * 1000f) : (long) (seed * -1000f),
+                        radius, lifetime));
+
+        pond.setLocation(entity.getLocation().x, entity.getLocation().y);
+
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+        if (plugin != null) plugin.activate();
+
+        Misc.fadeAndExpire(entity, 0.4f);
     }
 
     /** The pieces of the pane that do not stay: spinning slivers off the broken edge. */
@@ -318,8 +352,12 @@ public class DepthBombEntityPlugin extends BaseCustomEntityPlugin {
         float alpha = viewport.getAlphaMult();
         if (alpha <= 0f) return;
 
-        if (state == State.BROKEN) renderFracture(alpha);
-        else renderBomb(alpha);
+        //in pond mode a broken bomb has nothing to draw - the pond it opened is the visual
+        if (state == State.BROKEN) {
+            if (!DepthBombConstants.SPAWN_POND) renderFracture(alpha);
+        } else {
+            renderBomb(alpha);
+        }
     }
 
     protected void renderFracture(float alphaMult) {

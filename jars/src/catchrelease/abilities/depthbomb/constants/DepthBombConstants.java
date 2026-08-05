@@ -18,6 +18,17 @@ public class DepthBombConstants {
     public static final float SLOW_TIME = 6f;
 
     /** Seconds between landing and going off. Long enough to see where it went. */
+    /**
+     * Whether a detonation opens a temporary pond instead of the glass rupture. The rupture -
+     * FractureRenderer, the shards, the shaders - stays in the code whole while this is true,
+     * so the glass look can be returned to when its day comes. The pond it opens takes the
+     * bomb's own numbers: blast radius times RADIUS_MULT for its size, rupture time times
+     * LIFETIME_MULT for how long it stays open under a player who does not leave.
+     */
+    public static final boolean SPAWN_POND = true;
+    public static final float TEMP_POND_RADIUS_MULT = 1f;
+    public static final float TEMP_POND_LIFETIME_MULT = 3f;
+
     public static final float ARM_TIME = 0.8f;
 
     /** World units the break reaches, and how many specimens it shakes loose. */
