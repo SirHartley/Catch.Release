@@ -273,91 +273,281 @@ ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
 Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
-catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"Call $catchrelease_jobRef accepted
+catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"FireBest catchreleaseJobAccepted
 BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
-catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"Call $catchrelease_jobRef declined
+catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"FireBest catchreleaseJobDeclined
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh $catchreleaseHasFish before it is read. It is not a test - an action that answered false would throw rather than fail.
+$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
 catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"Call $catchrelease_jobRef turnIn
-FireAll PopulateOptions",,,"The job spends the fish, pays, and says its own piece. Repopulating is what takes the hand-over option away once the job is settled."
-catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef remind
+FireBest catchreleaseJobPaid
+FireAll PopulateOptions",,,"The job spends the fish, pays, and reports what happened in flags. The rows below read those flags and do the talking."
+catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
-catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,Call $catchrelease_jobRef blurb,,,"The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
-catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the list.,"The option id must start with the mission id. BarCMD aborts every bar mission whose prefix the selected option does not carry - including this one, if it were named anything else."
-catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
+catchrelease_jobRemindGeneric,catchreleaseJobRemind,,SetTextHighlights $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
+catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,"One of the drinkers has a slate out and a list on it, and keeps looking at the door as though expecting somebody who knows what they are doing with a net.",,
+catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the list.,
+catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Standing order,"" $heOrShe says, and turns the slate round. ""$catchreleaseAskCap. I am not fussy about who brings them, only that they arrive.""
+
+""$catchreleaseRewardCap, on delivery.""","catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:""Not my sort of water.""",
-catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
+catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The slate goes back to the bar top.,,
+catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,SetTextHighlights $catchreleaseAsk,"$HeOrShe taps the slate. ""$catchreleaseAskCap. The order has not changed.""",,
+catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_standingOrder
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"$HeOrShe checks the crates without hurrying, and pays without arguing about it.
+
+$catchreleaseRewardCap, counted out on the bar top.",,
+catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,"A cook in a stained whites jacket is arguing with a supplier over a comm slate, losing, and not enjoying it.",,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask the cook what the problem is.,
-catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Three things,"" the cook says, before you have said anything at all. ""On one plate. It is $catchreleaseDish and it does not work with two.""
+
+""I need $catchreleaseAsk. Not similar. Different. That is the entire idea.""
+
+""$catchreleaseRewardCap when they are in my kitchen and not before.""","catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:""Find another supplier.""",
-catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Do not freeze them.""",,
+catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,"The cook goes back to the comm slate, and back to losing.",,
+catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,SetTextHighlights $catchreleaseAsk,"""Three,"" the cook says, without looking up. ""$catchreleaseAskCap. It is still three.""",,
+catchrelease_chef_paid,catchreleaseJobPaid,"$missionId == catchrelease_chef
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The cook unpacks all of it on the bar top, in front of everyone, and spends a long time not saying anything.
+
+""Yes. That is the plate."" You are paid $catchreleaseReward, and told to come back in a month, when there will be a different plate.",,
+catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,"A young man with a very good jacket and a very cheap drink is explaining something to two people who are not listening, and to a third who left.",,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Let the young man finish his sentence.,
-catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to the first run.
+catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""You fish,"" he says. It is not a question and he does not wait. ""Everyone in this sector eats reconstituted protein because nobody has solved logistics. I have solved logistics. What I do not have is a demonstrated inbound.""
+
+""$catchreleaseAskCap. That is all. I need to be able to say, truthfully, that it arrived.""
+
+""$catchreleaseRewardCap for the first run. There will be more runs.""","catchrelease_jobAccept:Agree to the first run.
 catchrelease_jobDecline:""No.""",
-catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent. I will need an invoice. Do you do invoices?""",,
+catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""That is fine. That is fine. I have other conversations."" He does not.",,
+catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,SetTextHighlights $catchreleaseAsk,"""Still waiting on the inbound,"" he says, with the brightness of a man who has told somebody a date. ""$catchreleaseAskCap.""",,
+catchrelease_startup_paid,catchreleaseJobPaid,"$missionId == catchrelease_startup
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He counts it twice, photographs it, and pays you $catchreleaseReward without haggling, which from him is alarming.",,
+catchrelease_startup_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_startup
+$catchreleasePaid
+$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He is already scrolling. ""Right. Right. Now the same again, at volume, because the figure I showed them was not the figure you just delivered.""
+
+""$catchreleaseAskCap. Same terms, better terms, whatever you want - I have investors now.""",,
+catchrelease_startup_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_startup
+$catchreleasePaid
+!$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""That is a supply chain,"" he says, to himself more than to you. ""That is a supply chain and I have one.""",,
+catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,"A man in a plain, expensive coat is not drinking, and has been not drinking for some time. He watches the door the way somebody does when they are being paid to be somewhere.",,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask the man in the coat who he is waiting for.,
-catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Accept the commission.
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I am buying for a household,"" he says. ""I will not be naming it.""
+
+""The requirement is $catchreleaseAsk. I am told that is a difficult number. I am not empowered to lower it.""
+
+His expression does not change. ""It is to be looked at, you understand. Not eaten. Whether it is a good specimen of its kind is not a question that has been put to me.""
+
+""$catchreleaseRewardCap, on presentation.""","catchrelease_jobAccept:Accept the commission.
 catchrelease_jobDecline:Leave him to it.",
-catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good."" He writes nothing down, which suggests he does not need to.",,
+catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Understood."" He resumes not drinking.",,
+catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,SetTextHighlights $catchreleaseAsk,"""The requirement has not changed,"" he says. ""$catchreleaseAskCap.""",,
+catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He does not look at it for long. He looks at the scale.
+
+""That will do."" $catchreleaseRewardCap, handed over in a way that suggests he has done this for things far stranger than a fish.",,
+catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A woman with salt-cracked hands and an academic's posture is sketching something on a slate and covering it whenever anyone walks past.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask what she is drawing.,
-catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to stock the tank.
+catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I keep a tank,"" she says. ""Larger than is sensible. I am told it is a conservation programme, which is what people call a collection when it has a grant attached.""
+
+""What I want is $catchreleaseAsk.""
+
+She taps the slate. ""Either will do. A perfect one teaches you what the species is meant to be. A ruined one teaches you what is happening to it. I have space for both and no preference between them.""
+
+""$catchreleaseRewardCap. And I will not ask where.""","catchrelease_jobAccept:Agree to stock the tank.
 catchrelease_jobDecline:""Not my sort of water.""",
-catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Keep it wet,"" she says. ""Whichever one you find.""",,
+catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,She covers the slate again.,,
+catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,SetTextHighlights $catchreleaseAsk,"""Still $catchreleaseAsk,"" she says. ""Either sort. I have not become fussier.""",,
+catchrelease_curator_paid,catchreleaseJobPaid,"$missionId == catchrelease_curator
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She has the tank lid off before the crate is properly open, and does not thank you until everything is in the water.
+
+Then she does, at some length, and pays you $catchreleaseReward.",,
+catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children who should not be in here are conducting negotiations at a corner table. One of them is doing all the talking. The other one has a bucket.,,
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Find out what the children want.,
-catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the battle.
+catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""We need two,"" the loud one says. ""For the battle.""
+
+The quiet one turns the bucket so you can see into it. There is nothing in the bucket. This does not appear to have discouraged anyone.
+
+""$catchreleaseAskCap. One each. Then they fight.""
+
+You point out that they will not fight. This is dismissed as an adult opinion. The payment, when it is produced, is $catchreleaseReward - and it is produced from four pockets, so you understand that it is all of it.","catchrelease_jobAccept:Agree to supply the battle.
 catchrelease_jobDecline:Explain, gently, that fish do not fight.",
+catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The loud one shakes your hand. The quiet one does not, but does nod, which you gather is the binding part.",,
+catchrelease_duel_declined,catchreleaseJobDeclined,$missionId == catchrelease_duel,,"They take this well, which is somehow worse.",,
+catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel score:100,SetTextHighlights $catchreleaseAsk,"""Have you got them yet."" It is the fourth time today for somebody.",,
+catchrelease_duel_paid,catchreleaseJobPaid,"$missionId == catchrelease_duel
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"You hand the better of the two to $catchreleaseKid. There is a silence of the kind that precedes either delight or a formal complaint.
+
+$catchreleaseOtherCap declares this unfair. The declaration is noted and ignored.
+
+Between them they produce $catchreleaseReward, which they clearly consider a fortune, and which they are not wrong about.",,
+catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
+$catchreleasePaid
+$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"You hand the better of the two to $catchreleaseKid. There is a silence of the kind that precedes either delight or a formal complaint.
+
+It is a serious fish. Both of them go very quiet, and then $catchreleaseOther empties a pocket onto the table without being asked.
+
+Between them they produce $catchreleaseReward, which they clearly consider a fortune, and which they are not wrong about.",,
 catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
 catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets which fish. The choice cannot be got wrong - the extra is paid for the specimen, not for the guess."
-catchrelease_duelShort,PopulateOptions,"$catchrelease_duelChoice
+catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Tell them you are still looking.,
 catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,"Call $catchrelease_jobRef turnInLoud
+FireBest catchreleaseJobPaid
 FireAll PopulateOptions",,,
 catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,"Call $catchrelease_jobRef turnInQuiet
+FireBest catchreleaseJobPaid
 FireAll PopulateOptions",,,
-catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef remind
+catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
-catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men are sitting with a tank between them that is far too good for this bar. Neither of them is drinking. Both of them are watching everyone who is.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the tank.,
-catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the ring.
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""You bring the stock,"" says the one who introduces himself as $catchreleaseLeft. ""We supply the rest."" He does not say what the rest is. The other one, $catchreleaseRight, taps the ampoule case on the table, which is an answer of sorts.
+
+""$catchreleaseAskCap. Two, because it is not much of an event with one.""
+
+""Flat fee is $catchreleaseReward. Or you put the fee on one of ours and take double if it walks out. Your call, at the door, not before.""
+
+""Bring a good one,"" the second one adds. ""They last longer. That is your business, not ours, but it is your money.""","catchrelease_jobAccept:Agree to supply the ring.
 catchrelease_jobDecline:Decide you were never here.",
+catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,Neither of them writes anything down. You get the impression that they will remember.,,
+catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"They go back to watching the room. You are no longer part of what they are watching, which is a relief.",,
+catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,SetTextHighlights $catchreleaseAsk,"""Still two,"" one of them says, without turning round.",,
+catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"You take the fee. One of them looks briefly disappointed in you, which from a man in this line of work is close to a compliment.
+
+$catchreleaseRewardCap, counted out on the tank lid.",,
+catchrelease_ring_paidWon,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid
+$catchreleaseHasWager score:100
+$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The tank goes in. Something is added to the water from an unlabelled ampoule. Nobody explains what, and the room leans in.
+
+$catchreleaseWager's fish is still moving. Yours was on it. You are paid $catchreleaseReward, and paid promptly, which is the part that tells you they are serious people.",,
+catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid
+$catchreleaseHasWager score:100
+!$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The tank goes in. Something is added to the water from an unlabelled ampoule. Nobody explains what, and the room leans in.
+
+It is over quickly and it is not your side that it is over for. $catchreleaseFoe shrugs. ""You picked. That is the whole of it.""
+
+You walk out with nothing, which you agreed to on the way in.",,
 catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
-catchrelease_ringLeft:Put the fee on Ferro's fish.
-catchrelease_ringRight:Put the fee on Vasque's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
-catchrelease_ringShort,PopulateOptions,"$catchrelease_ringBet
+catchrelease_ringLeft:Put the fee on $catchreleaseLeft's fish.
+catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
+catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
 catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,"Call $catchrelease_jobRef turnInFlat
+FireBest catchreleaseJobPaid
 FireAll PopulateOptions",,,
 catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,"Call $catchrelease_jobRef turnInLeft
+FireBest catchreleaseJobPaid
 FireAll PopulateOptions",,,
 catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,"Call $catchrelease_jobRef turnInRight
+FireBest catchreleaseJobPaid
 FireAll PopulateOptions",,,
-catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef remind
+catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
-catchrelease_client_blurbBar,catchrelease_client_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,"A woman at the end of the bar is dressed for somewhere else entirely and is not troubled by this. She has been looking at you for a while, and it is not the look you would assume.",,
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Find out what she wants.,
-catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the arrangement.
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I have a client,"" she says. ""That is the word I am going to use and we are both going to leave it there.""
+
+""He wants a fish. A real one, out of the water, not off a menu. $catchreleaseAskCap - that is the floor, and I want you to understand that it is a floor.""
+
+You ask what it is for. She looks at you with enormous patience.
+
+""$catchreleaseRewardCap,"" she says. ""More if it is bigger. That is the entire arrangement and it is a very good one.""","catchrelease_jobAccept:Take the arrangement.
 catchrelease_jobDecline:""I don't think so.""",
-catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discreetly,"" she says. ""Not secretly. There is a difference and the difference is paperwork.""",,
+catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course."" She is already looking past you at the door.",,
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,SetTextHighlights $catchreleaseAsk,"""Still $catchreleaseAsk,"" she says. ""He has not become less specific.""",,
+catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She does not open the container in the bar. She weighs it, in her hands, the way somebody does when they have done it before.
+
+$catchreleaseRewardCap changes hands, and she is gone before you have counted it.",,
+catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
+$catchreleasePaid
+$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"She does not open the container in the bar. She weighs it, in her hands, the way somebody does when they have done it before.
+
+""Oh, that is over,"" she says. ""That is comfortably over.""
+
+$catchreleaseRewardCap changes hands, and she is gone before you have counted it.",,
+catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,A researcher with an Academy lanyard she has stopped bothering to hide is working through a stack of sample logs and marking almost all of them as useless.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is marking.,
-catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to bring her a bad one.
+catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Everyone brings me good ones,"" she says. ""Whole ones. Beautiful ones. They are worthless to me and I have stopped being polite about it.""
+
+""$catchreleaseAskCap. Barely holding together. If it looks like it is about to stop being a fish, that is the specimen.""
+
+She notices your expression. ""A stable one tells me what a fish is. I know what a fish is. I want to know what is happening to them, and the ones it is happening to are the ones that come up wrong.""
+
+""$catchreleaseRewardCap. The Academy will not ask where either.""","catchrelease_jobAccept:Agree to bring her a bad one.
 catchrelease_jobDecline:Leave her to it.",
-catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Do not stabilise it in transit,"" she says. ""Please. It has happened.""",,
+catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,She goes back to marking things useless.,,
+catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap,"" she says. ""Worse is better. I am aware of how that sounds.""",,
+catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She holds it up to the light, and whatever she sees through it makes her sit down.
+
+""Thank you. Genuinely."" $catchreleaseRewardCap, and a promise you will be in a footnote.",,
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"Somebody has set up two lamps and a very expensive lens pointed at an empty chair, and is explaining to the bar staff that it will only take a minute.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what the lamps are for.,
-catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to be in the video.
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Do not look at the lens,"" he says, meaning that you should. ""I do fishing content. It is a growing vertical.""
+
+""I need $catchreleaseAsk. To hold up. That is the shot - I hold it up, I say the name, people find out fish are real.""
+
+""I cannot pay what a buyer pays. What I can do is $catchreleaseReward, all of which was sent to me by people who want to be in a video.""","catchrelease_jobAccept:Agree to be in the video.
 catchrelease_jobDecline:Step out of the shot.",
-catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Amazing. Amazing. Can you say that again with the lamps on?""",,
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""No, that is fair. That is completely fair."" He is still filming.",,
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,SetTextHighlights $catchreleaseAsk,"""No rush,"" he says, in the voice of a man with a posting schedule. ""$catchreleaseAskCap.""",,
+catchrelease_tuber_paid,catchreleaseJobPaid,"$missionId == catchrelease_tuber
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,He films it from four angles and pays you $catchreleaseReward out of a box of things people have sent him.,,
+catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
+$catchreleasePaid
+$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He films it for a long time and then goes quiet in a way you recognise from people looking at a number that has not moved.
+
+""It did fine,"" he says. ""Fine is the worst thing. Nobody stops for a healthy fish."" He looks up. ""Can you get me a bad one? On purpose?""
+
+""$catchreleaseAskCap. Something that looks like it is arguing with being alive. $catchreleaseRewardCap, and I will credit you, which I appreciate is not payment.""",,
+catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
+$catchreleasePaid
+!$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""That,"" he says, watching the playback, ""is the thumbnail. That is the whole video and I have not shot the video.""
+
+$catchreleaseRewardCap, out of a box of things people have sent him.",,
+catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,"Three people in matching, unremarkable coats are sharing one drink between them and have not touched it. They are waiting, and they are not impatient.",,
 catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask the three in the coats what they are waiting for.,
-catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to find it.
+catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"One of them says a name. Not yours - the fish's.
+
+""$catchreleaseSpecies,"" they repeat, when you do not answer immediately. ""One. Whole.""
+
+You ask what for. There is a pause of exactly the length of somebody deciding not to be offended, and then the same sentence again, with the same emphasis, as though the problem had been the volume.
+
+""$catchreleaseRewardCap,"" the second one adds, and produces it, and puts it on the table, and leaves it there while you think about it.","catchrelease_jobAccept:Agree to find it.
 catchrelease_jobDecline:Decline, politely.",
+catchrelease_cult_accepted,catchreleaseJobAccepted,$missionId == catchrelease_cult,,"None of them thanks you. All three of them nod at the same time, which is worse.",,
+catchrelease_cult_declined,catchreleaseJobDeclined,$missionId == catchrelease_cult,,They do not seem to mind. You get the strong impression they will be here when you come back.,,
+catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseSpecies,"" one of them says. That is the whole of the conversation.",,
+catchrelease_cult_paid,catchreleaseJobPaid,"$missionId == catchrelease_cult
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"They do not open it. One of them puts a hand flat on the lid and leaves it there for rather too long.
+
+$catchreleaseRewardCap, pushed across the table. Nobody says what it is for, and by now you have stopped expecting them to.",,

@@ -1,11 +1,9 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * A servant buying on somebody else's behalf, and above a stated size.
@@ -48,45 +46,6 @@ public class ButlerJob extends FishJob {
         setUpSpine();
 
         return true;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("A man in a plain, expensive coat is not drinking, and has been not drinking "
-                + "for some time. He watches the door the way somebody does when they are being "
-                + "paid to be somewhere.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"I am buying for a household,\" he says. \"I will not be naming it.\"");
-
-        text.addPara("\"The requirement is %s. I am told that is a difficult number. I am not "
-                        + "empowered to lower it.\"", Misc.getTextColor(), Misc.getHighlightColor(),
-                describeAsks());
-
-        text.addPara("His expression does not change. \"It is to be looked at, you understand. Not "
-                + "eaten. Whether it is a good specimen of its kind is not a question that has been "
-                + "put to me.\"");
-
-        text.addPara("\"%s, on presentation.\"", Misc.getTextColor(), Misc.getHighlightColor(),
-                Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Very good.\" He writes nothing down, which suggests he does not need to.");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("\"Understood.\" He resumes not drinking.");
-    }
-
-    @Override
-    protected void printReminder(TextPanelAPI text) {
-        text.addPara("\"The requirement has not changed,\" he says. \"%s.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
     }
 
     @Override

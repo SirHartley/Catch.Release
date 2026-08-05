@@ -2,11 +2,10 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 
@@ -69,32 +68,8 @@ public class ChefJob extends FishJob {
     };
 
     @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("A cook in a stained whites jacket is arguing with a supplier over a comm "
-                + "slate, losing, and not enjoying it.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"Three things,\" the cook says, before you have said anything at all. "
-                + "\"On one plate. It is %s and it does not work with two.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), dish);
-
-        text.addPara("\"I need %s. Not similar. Different. That is the entire idea.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(), describeAsks());
-
-        text.addPara("\"%s when they are in my kitchen and not before.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Good. Do not freeze them.\"");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("The cook goes back to the comm slate, and back to losing.");
+    protected void setJobTokens(MemoryAPI mem) {
+        token(mem, "$catchreleaseDish", dish);
     }
 
     @Override

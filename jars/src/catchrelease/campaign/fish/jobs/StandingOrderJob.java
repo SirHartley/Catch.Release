@@ -3,11 +3,9 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * Somebody who wants a quantity of fish and is not interesting about it.
@@ -82,35 +80,6 @@ public class StandingOrderJob extends FishJob {
         if (genRandom.nextFloat() > 0.7f) ask.sameSpecies = true;
 
         return ask;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("One of the drinkers has a slate out and a list on it, and keeps looking at "
-                + "the door as though expecting somebody who knows what they are doing with a net.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"Standing order,\" %s says, and turns the slate round. \"%s. I am not fussy "
-                        + "about who brings them, only that they arrive.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(),
-                getPerson().getHeOrShe(), Misc.ucFirst(describeAsks()));
-
-        text.addPara("\"%s, on delivery.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("%s writes something next to the list without looking up. \"It will keep.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(),
-                Misc.ucFirst(getPerson().getHeOrShe()));
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("The slate goes back to the bar top.");
     }
 
     @Override

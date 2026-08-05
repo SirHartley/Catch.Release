@@ -1,11 +1,9 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * A man with a project and no supply chain.
@@ -65,53 +63,12 @@ public class StartupJob extends FishJob {
     }
 
     @Override
-    protected boolean onDelivered(TextPanelAPI text) {
-        if (getRound() >= ROUNDS) {
-            text.addPara("\"That is a supply chain,\" he says, to himself more than to you. "
-                    + "\"That is a supply chain and I have one.\"");
+    protected boolean onDelivered() {
+        if (getRound() >= ROUNDS) return false;
 
-            return false;
-        }
-
-        int grown = (int) (asks.get(0).count * GROWTH) + genRandom.nextInt(3);
-        setAsk(grown);
-
-        text.addPara("He is already scrolling. \"Right. Right. Now the same again, at volume, "
-                + "because the figure I showed them was not the figure you just delivered.\"");
-
-        text.addPara("\"%s. Same terms, better terms, whatever you want - I have investors now.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
+        setAsk((int) (asks.get(0).count * GROWTH) + genRandom.nextInt(3));
 
         return true;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("A young man with a very good jacket and a very cheap drink is explaining "
-                + "something to two people who are not listening, and to a third who left.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"You fish,\" he says. It is not a question and he does not wait. \"Everyone "
-                + "in this sector eats reconstituted protein because nobody has solved logistics. "
-                + "I have solved logistics. What I do not have is a demonstrated inbound.\"");
-
-        text.addPara("\"%s. That is all. I need to be able to say, truthfully, that it arrived.\"",
-                Misc.getTextColor(), Misc.getHighlightColor(), Misc.ucFirst(describeAsks()));
-
-        text.addPara("\"%s for the first run. There will be more runs.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Excellent. I will need an invoice. Do you do invoices?\"");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("\"That is fine. That is fine. I have other conversations.\" He does not.");
     }
 
     @Override

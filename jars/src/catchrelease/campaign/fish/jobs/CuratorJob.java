@@ -3,11 +3,9 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
-import com.fs.starfarer.api.util.Misc;
 
 /**
  * A conservationist stocking a private aquarium, who will take either kind of remarkable.
@@ -56,39 +54,6 @@ public class CuratorJob extends FishJob {
         setUpSpine();
 
         return true;
-    }
-
-    @Override
-    protected void printBlurb(TextPanelAPI text) {
-        text.addPara("A woman with salt-cracked hands and an academic's posture is sketching "
-                + "something on a slate and covering it whenever anyone walks past.");
-    }
-
-    @Override
-    protected void printOffer(TextPanelAPI text) {
-        text.addPara("\"I keep a tank,\" she says. \"Larger than is sensible. I am told it is a "
-                + "conservation programme, which is what people call a collection when it has a "
-                + "grant attached.\"");
-
-        text.addPara("\"What I want is %s.\"", Misc.getTextColor(), Misc.getHighlightColor(),
-                describeAsks());
-
-        text.addPara("She taps the slate. \"Either will do. A perfect one teaches you what the "
-                + "species is meant to be. A ruined one teaches you what is happening to it. I have "
-                + "space for both and no preference between them.\"");
-
-        text.addPara("\"%s. And I will not ask where.\"", Misc.getTextColor(),
-                Misc.getHighlightColor(), Misc.ucFirst(describeRewards()));
-    }
-
-    @Override
-    protected void printAccepted(TextPanelAPI text) {
-        text.addPara("\"Keep it wet,\" she says. \"Whichever one you find.\"");
-    }
-
-    @Override
-    protected void printDeclined(TextPanelAPI text) {
-        text.addPara("She covers the slate again.");
     }
 
     @Override
