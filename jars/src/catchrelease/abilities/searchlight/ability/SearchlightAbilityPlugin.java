@@ -1,6 +1,7 @@
 package catchrelease.abilities.searchlight.ability;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -124,10 +125,48 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             timePassed = 0f;
         }
 
+        applyBeamSlow(fleet);
+
         fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Breach lamps");
 
         if (level <= 0) {
             cleanupImpl();
+        }
+    }
+
+    /** Seconds the drag lingers once a mote has left the light, easing off rather than snapping. */
+    public static final float SLOW_LINGER = 0.5f;
+
+    /**
+     * The slow upgrade: the light itself drags on whatever swims through it.
+     * <p>
+     * Applied through the same knock a depth bomb deals, so the two cannot disagree about what a
+     * slowed mote is - and refreshed every frame a mote stays in a beam, with a short linger so
+     * leaving the light lets it go rather than snapping it back to speed. Nothing without the
+     * upgrade: the strength is zero until bought.
+     */
+    protected void applyBeamSlow(CampaignFleetAPI fleet) {
+        float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
+        if (slow <= 0f || activeSearchlights.isEmpty()) return;
+        if (fleet.getContainingLocation() == null) return;
+
+        for (SectorEntityToken mote : fleet.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+
+            if (mote.isExpired()) continue;
+            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+
+            boolean lit = false;
+            for (Searchlight light : activeSearchlights) {
+                if (light.isDone()) continue;
+
+                if (light.getLitStrength(mote.getLocation()) > 0f) {
+                    lit = true;
+                    break;
+                }
+            }
+
+            if (lit) fish.applyBlast(0f, slow, SLOW_LINGER);
         }
     }
 
@@ -301,6 +340,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         if (rare > 0f) {
             tooltip.addPara("Rarer species are more likely to be down there to begin with.",
                     Misc.getGrayColor(), 3f);
+        }
+
+        float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
+        if (slow > 0f) {
+            tooltip.addPara("The light itself drags: anything swimming through a beam is slowed"
+                    + " by %s.", 3f, highlight, Math.round(slow * 100f) + "%");
         }
     }
 

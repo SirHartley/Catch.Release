@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * What things cost: credits, and a catch that has to be brought in alongside them.
@@ -35,6 +37,14 @@ public class ShopPricing {
 
     /** Credits per tier of tackle - a module is one purchase, so it is priced as one. */
     public static final int TACKLE_CREDITS_PER_TIER = 4000;
+
+    /**
+     * Stats priced rungs above where their ladder stands. The one rule stays the rule - these are
+     * not a price list, they are the few upgrades that change what a rig does rather than how well
+     * it does it, and they enter the ladder already this many rungs up.
+     */
+    public static final int PREMIUM_TIER_BUMP = 2;
+    protected static final Set<String> PREMIUM_STATS = Set.of(StatIds.SEARCHLIGHT_SLOW);
 
     /** Credits and the catch beside them. A null requirement is credits alone. */
     public static class Price {
@@ -65,7 +75,8 @@ public class ShopPricing {
     public static Price getPrice(UpgradeStat stat) {
         if (stat == null || isMaxed(stat)) return null;
 
-        int tier = Math.max(0, stat.level);
+        int tier = Math.max(0, stat.level)
+                + (PREMIUM_STATS.contains(stat.id) ? PREMIUM_TIER_BUMP : 0);
         boolean last = stat.maxLevel > 0 && stat.level == stat.maxLevel - 1;
 
         int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
