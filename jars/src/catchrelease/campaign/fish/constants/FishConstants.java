@@ -483,6 +483,21 @@ public class FishConstants {
     public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.4f;
 
     /**
+     * The identify upgrade's glow - a wide wash of the ring's colour standing around the dent, and
+     * the part of the upgrade a player actually sees. Recolouring the ring alone was tried first and
+     * read as nothing: the dent and its ring are carved out of light so faint that one tint of it
+     * against another is invisible at campaign zoom. So the glow deliberately does not inherit the
+     * beams' resting alpha the way those two passes do - it answers only to the mark and the fade,
+     * bright enough to name a colour at a glance. SIZE is a multiplier on the dent so the glow
+     * breathes with it, and wider than the ring's 1.9 so it reads as an aura rather than a second
+     * rim. HINT_MULT is the first level's share of the full glow, held down on purpose so the second
+     * level still has something to sell.
+     */
+    public static final float IMPRESSION_GLOW_SIZE = 3.2f;
+    public static final float IMPRESSION_GLOW_ALPHA = 0.25f;
+    public static final float IMPRESSION_GLOW_HINT_MULT = 0.45f;
+
+    /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.
      * <p>
      * The three sources are taken at their strongest rather than summed, so the weights say how bad

@@ -207,25 +207,37 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         //deeper and it reads as a hole in the world rather than in the light
         float alpha = 0.12f - 0.03f * flicker.getBrightness();
 
+        //kept apart from the beam alpha because the identify glow takes the fade but not the
+        //resting alpha - see renderImpression for why
+        float fadeMult = 1f;
         if (fading) {
             float fadeT = fadeDuration > 0f ? 1f - (fadeElapsed / fadeDuration) : 0f;
-            alpha *= MathUtils.clamp(fadeT, 0f, 1f);
+            fadeMult = MathUtils.clamp(fadeT, 0f, 1f);
+            alpha *= fadeMult;
         }
         if (alpha <= 0f) return;
 
         int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
 
+        //the whole of the ladder in one number: no glow unbought, a held-down fraction at the
+        //first level, the full thing at the second
+        float glowLevel = identify <= 0 ? 0f
+                : identify == 1 ? FishConstants.IMPRESSION_GLOW_HINT_MULT : 1f;
+
         for (Map.Entry<SectorEntityToken, Float> entry : marks.entrySet()) {
             SectorEntityToken buried = entry.getKey();
             if (buried.isExpired()) continue;
 
-            renderImpression(buried.getLocation(), entry.getValue() * alpha,
-                    ringColor(buried, identify));
+            float mark = entry.getValue();
+
+            renderImpression(buried.getLocation(), mark * alpha,
+                    mark * fadeMult * glowLevel, ringColor(buried, identify));
         }
     }
 
     /**
-     * What the standing ring gives away, by identify level.
+     * What the standing ring - and the identify glow, which wears the same colour - gives away, by
+     * identify level.
      * <p>
      * At nothing bought it is the beam's own orange, and a legendary dent is any dent. The first
      * level leans the ring partway toward the rarity's colour - far enough off the orange to say
@@ -253,9 +265,17 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     /**
      * One dent: a subtractive core with a fainter ring standing off it, breathing slowly so it reads
-     * as something moving under a surface rather than a decal pinned to the map.
+     * as something moving under a surface rather than a decal pinned to the map. With identify
+     * bought there is a third pass, a wide additive wash of the ring's colour around the whole
+     * thing - the dent stays the hole it always was; the glow is what says what colour of thing is
+     * making it.
+     *
+     * @param glowMult how much of the identify glow to draw, 0 for none - the mark and the fade but
+     *                 deliberately not the beams' resting alpha, because anything cut down to that
+     *                 light is too faint to read as a colour, which is how the recoloured ring went
+     *                 unseen in the first place
      */
-    protected void renderImpression(Vector2f at, float alphaMult, Color ringColor) {
+    protected void renderImpression(Vector2f at, float alphaMult, float glowMult, Color ringColor) {
         if (alphaMult <= 0f) return;
 
         float pulse = 1f + FishConstants.IMPRESSION_PULSE
@@ -284,6 +304,16 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
                 coreSize * FishConstants.IMPRESSION_RING_SIZE);
         sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_RING_ALPHA);
         sprite.renderAtCenter(at.x, at.y);
+
+        //and, identify bought, the glow that names the colour - sized off the dent so all three
+        //passes breathe together
+        if (glowMult > 0f) {
+            sprite.setColor(ringColor);
+            sprite.setSize(coreSize * FishConstants.IMPRESSION_GLOW_SIZE,
+                    coreSize * FishConstants.IMPRESSION_GLOW_SIZE);
+            sprite.setAlphaMult(glowMult * FishConstants.IMPRESSION_GLOW_ALPHA);
+            sprite.renderAtCenter(at.x, at.y);
+        }
     }
 
     public void loadSpritesIfNeeded() {

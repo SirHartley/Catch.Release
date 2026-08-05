@@ -105,9 +105,12 @@ public class Searchlight implements EveryFrameScript {
     /** Where the held thing is, kept separately so the lean-off has somewhere to lean from. */
     private final Vector2f lockLoc = new Vector2f();
 
+    /** Which side of the held thing the light stopped on, fixed at the moment it stopped. */
+    private float lockBearing = 0f;
+
     /**
-     * How wide the fan opens either side of where it is aimed, and how much of its strength is left
-     * out at the tip.
+     * How wide the fan opens either side of where it is aimed at the base beam radius, and how much
+     * of its strength is left out at the tip.
      * <p>
      * The tip never reaches nothing on purpose: a fan is sold as covering more sky at once, and one
      * that faded away before its own reach would cover less than the spot it replaced.
@@ -115,8 +118,26 @@ public class Searchlight implements EveryFrameScript {
     public static final float FAN_HALF_ANGLE = 11f;
     public static final float FAN_TIP_STRENGTH = 0.35f;
 
+    /**
+     * How much of its sweep rate a fan keeps.
+     * <p>
+     * A fan pivots on the hull, so the same degrees per second throws the far end of it across far
+     * more sky than a spot travelling the same arc - it reads as hurried at a rate that reads as
+     * steady on a spot. Slower, so the two feel like the same rig wearing different optics.
+     */
+    public static final float FAN_SWEEP_MULT = 0.7f;
+
+    /**
+     * Where the light settles when it is holding something, as a share of its own radius.
+     * <p>
+     * Not on top of it. A mote directly under the middle of a beam is the worst place to look at
+     * one - it is the brightest part of the light and the thing is a dent in it. Held off to one
+     * side it sits where the light has fallen off enough to see the shape in it.
+     */
+    public static final float LOCK_HOLD_RADIUS_SHARE = 0.5f;
+
     /** Seconds spent leaning onto what it found, and the wait before it may stop for anything else. */
-    public static final float LOCK_EASE_TIME = 0.35f;
+    public static final float LOCK_EASE_TIME = 1.6f;
     public static final float LOCK_COOLDOWN = 4f;
 
     /**
@@ -168,9 +189,11 @@ public class Searchlight implements EveryFrameScript {
         advanceLook();
         advanceLens();
 
-        // splash
+        // splash - but not off a fan. A ripple is a round thing landing on the fabric at a point,
+        // which is what a spot is; a fan is a wedge thrown off the hull and has no point to land at,
+        // so the rings only ever read as a second, rounder light following the first one about
         ringInterval.advance(amt);
-        if (ringInterval.intervalElapsed()) {
+        if (ringInterval.intervalElapsed() && fan == null) {
             float size = getArea();
             //a splash takes the colour of the surface it lands on - orange light on the fabric,
             //the rim's own colour on a burn
@@ -193,6 +216,7 @@ public class Searchlight implements EveryFrameScript {
             oscillationTime += amt;
 
             float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
+            if (isFanned()) speed *= FAN_SWEEP_MULT;
             float progress = arc.getTraversalProgress(baseArcAngle);
             float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
 
@@ -275,17 +299,18 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
-     * Whether this light should be a burn rather than a beam. Both halves are required: the
-     * upgrade alone changes nothing at home, and hyperspace without it never gets a running light
-     * to ask - the ability refuses to run there.
+     * Whether this light should be a burn rather than a beam, which is the whole of what the lamp
+     * is fitted for.
+     * <p>
+     * Fitted is the only condition. It used to also require the fleet to be standing in hyperspace,
+     * on the reasoning that the burn is what the deep needs - and the result was a module that
+     * changed nothing whatsoever anywhere the player normally is, which is not a subtle upgrade, it
+     * is a broken one. A lamp that burns through the fabric burns through it wherever the fabric
+     * is; hyperspace is where that stops being a look and starts being the only way to see
+     * anything, and {@link SearchlightAbilityPlugin#canRunHere} still owns that half.
      */
     protected boolean isBurning() {
-        if (!SearchlightAbilityPlugin.burnsIntoHyperspace()) return false;
-
-        if (Global.getSector() == null) return false;
-        LocationAPI location = Global.getSector().getCurrentLocation();
-
-        return location != null && location.isHyperspace();
+        return SearchlightAbilityPlugin.burnsIntoHyperspace();
     }
 
     /**
@@ -307,7 +332,7 @@ public class Searchlight implements EveryFrameScript {
             } else {
                 //followed rather than pinned where it was found - the thing is swimming, and a light
                 //that stayed on the spot would lose it immediately and look like it had jammed
-                lockLoc.set(lockTarget.getLocation());
+                lockLoc.set(holdPointFor(lockTarget.getLocation()));
             }
         }
 
@@ -346,7 +371,25 @@ public class Searchlight implements EveryFrameScript {
 
         lockTarget = best;
         lockLeft = lockTime;
-        lockLoc.set(best.getLocation());
+
+        //which side it is held from is settled here and then left alone. Worked out per frame from
+        //wherever the beam currently is, the bearing would chase the beam that is chasing it, and
+        //the light would crawl round the mote for the whole hold instead of stopping beside it
+        lockBearing = Misc.getAngleInDegrees(best.getLocation(), currentRenderLoc);
+        lockLoc.set(holdPointFor(best.getLocation()));
+    }
+
+    /**
+     * Where the beam sits to hold something: beside it, by half the light's own radius.
+     * <p>
+     * Centred on the mote is where this used to put it, and that is the one place the dent cannot be
+     * read - the middle of a beam is its brightest part, and the thing being looked at is a hole in
+     * the light. Off to the side by half a radius it sits where the beam has fallen off enough to
+     * show a shape, and still comfortably inside what the light counts as lit.
+     */
+    protected Vector2f holdPointFor(Vector2f target) {
+        return MathUtils.getPointOnCircumference(target,
+                getArea() * LOCK_HOLD_RADIUS_SHARE, lockBearing);
     }
 
     /**
@@ -396,6 +439,18 @@ public class Searchlight implements EveryFrameScript {
     }
 
     /**
+     * How wide the fan opens either side of its aim, at the radius the light is currently bought to.
+     * <p>
+     * A bigger lamp throws a bigger fan. The reach already grew with the radius and the width did
+     * not, so buying area made the wedge longer and thinner - the upgrade that is sold as covering
+     * more sky was narrowing it. Scaled off the base radius so an un-upgraded rig is exactly the
+     * fan it always was.
+     */
+    public static float getFanHalfAngle() {
+        return FAN_HALF_ANGLE * (getArea() / AREA_FALLBACK);
+    }
+
+    /**
      * How lit a spot is by this light, from nothing to full.
      * <p>
      * The one place that answers what a light is touching. It used to be asked and answered
@@ -430,9 +485,9 @@ public class Searchlight implements EveryFrameScript {
                 Misc.getAngleInDegrees(origin, currentRenderLoc),
                 Misc.getAngleInDegrees(origin, at)));
 
-        if (off > FAN_HALF_ANGLE) return 0f;
+        if (off > getFanHalfAngle()) return 0f;
 
-        float across = 1f - off / FAN_HALF_ANGLE;
+        float across = 1f - off / getFanHalfAngle();
         float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
 
         //squared across the fan so the edges are soft, and only leaned on down its length - a fan

@@ -138,7 +138,10 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
-        drawWedge(Misc.getAngleInDegrees(origin, aim), distance + size, distance, alpha);
+        //the radius live rather than the one this was built with. The wedge is drawn every frame and
+        //the hit test is computed every frame off the current upgrade, so a cached size means a fan
+        //that finds things past where it is drawn until something happens to rebuild the renderer
+        drawWedge(Misc.getAngleInDegrees(origin, aim), distance + Searchlight.getArea(), distance, alpha);
     }
 
     /**
@@ -172,7 +175,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
             for (int i = 0; i <= STEPS_ACROSS; i++) {
                 float t = i / (float) STEPS_ACROSS * 2f - 1f; //-1 at one edge, 1 at the other
 
-                double angle = Math.toRadians(direction + Searchlight.FAN_HALF_ANGLE * t);
+                double angle = Math.toRadians(direction + Searchlight.getFanHalfAngle() * t);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
 
