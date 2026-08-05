@@ -273,3 +273,14 @@ ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
 Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
+catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,"One of the drinkers has a slate out and a list on it, and keeps looking at the door as though expecting somebody who knows what they are doing with a net.",,"Fired by the bar wrapper while it builds the prompt. The id is not ours to choose - vanilla composes it from the mission id, and a row named anything else is simply never found."
+catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_orderAsk:Ask about the list.,The option that appears in the bar. Selecting it goes to the row below.
+catchrelease_orderAsk,DialogOptionSelected,$option == catchrelease_orderAsk,FireBest catchrelease_standingOrder_offer,,,
+catchrelease_standingOrder_offer,catchrelease_standingOrder_offer,,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Standing order,"" $heOrShe says, and turns the slate round. ""$catchreleaseAsk. I am not fussy about who brings them, only that they arrive.""
+
+""$catchreleaseReward, on delivery.""","catchrelease_orderAccept:Take the order.
+catchrelease_orderDecline:""Not my sort of water.""",
+catchrelease_orderAccept,DialogOptionSelected,$option == catchrelease_orderAccept,"BarCMD accept catchrelease_standingOrder
+BarCMD close","$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
+catchrelease_orderDecline,DialogOptionSelected,$option == catchrelease_orderDecline,BarCMD close,The slate goes back to the bar top.,,
+catchrelease_standingOrder_turnIn,DialogOptionSelected,$option == catchrelease_orderTurnIn,CallEvent catchrelease_standingOrder turnIn,"$HeOrShe checks the crates without hurrying, and pays without arguing about it.",,"CallEvent routes to the job's own callAction, which spends the fish and pays out. Refusing to fire is how a short delivery says no, so the text only ever follows a real hand-over."
