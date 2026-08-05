@@ -283,8 +283,7 @@ Codex pages for species.
 | File | What it does |
 |---|---|
 | `FishCodex.java` | Installs the category and per-species entries; opens the codex on a species |
-| `FishCodexEntry.java` | One page: description, catch data, record, location, art |
-| `FishLocationMap.java` | A small drawn sector map marking where a record was taken |
+| `FishCodexEntry.java` | One page: description, catch data, record, location, art, and the jump to the sector map |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
 
