@@ -50,25 +50,21 @@ public class RodConstants {
      * the closing speed that would cover what is left of the gap in that long. Lower brakes later
      * and flies straighter, higher eases off sooner and comes in gently.
      * <p>
-     * This is a damping ratio in disguise, and that is what picks the number. The drone asks for a
-     * closing speed of {@code gap / (response * margin)} but only eases onto it, over that same
-     * response - so the gap is a mass on a spring: {@code r'' + r'/response + r/(response^2 *
-     * margin) = 0}, damping at {@code sqrt(margin) / 2}. The response cancels out of that, so how
-     * far past the fleet a drone sails is fixed by this number alone and no amount of upgraded
-     * steering will help it. The old 0.5 damped at 0.35 and overshot by about a third of whatever
-     * the gap was when braking started - fifty to seventy units on an ordinary return.
+     * This is a damping ratio in disguise: the drone asks for a closing speed of {@code gap /
+     * (response * margin)} but only eases onto it, over that same response, so the gap is a mass on
+     * a spring damping at {@code sqrt(margin) / 2}. At 0.5 that is 0.35, underdamped, and the drone
+     * crosses the fleet by about a third of whatever the gap was when braking started.
      * <p>
-     * 4 would be critical damping and cannot overshoot at all, but it dawdles: an approach that
-     * only ever decays takes a second and a half longer to get home than it needs to. 3 damps at
-     * 0.87, where what is left of the overshoot is a couple of units - smaller than
-     * {@link #DRONE_ARRIVAL_DISTANCE}, so the drone is home and gone before it could be seen.
-     * Simulated across the upgrade range, fleets burning off at up to 300, gaps from 200 to 2000
-     * and down to twenty frames a second: nothing crosses.
+     * Left underdamped on purpose. Damping it properly costs the approach: braking starts at
+     * {@code speed * response * margin}, so a margin high enough not to overshoot begins easing off
+     * most of two thousand units out, and a drone easing off that early never closes on a fleet
+     * that is under way at all - it settles into a chase it cannot win. Overshooting a fleet you
+     * have caught is a better failure than never catching one.
      * <p>
-     * Tuning this for the shortest path is what got it wrong before: the shortest path to a point
-     * you are allowed to fly past is always the one that brakes latest.
+     * What the overshoot cost is handled at the other end instead, by counting the whole fleet as
+     * home rather than a point inside it - see {@link #DRONE_ARRIVAL_DISTANCE}.
      */
-    public static final float DRONE_BRAKE_MARGIN = 3f;
+    public static final float DRONE_BRAKE_MARGIN = 0.5f;
 
     /** Sideways drift in world units per second, and how quickly it wanders. */
     public static final float DRONE_NOISE_STRENGTH = 40f;
@@ -141,7 +137,17 @@ public class RodConstants {
     public static final float RING_FADE_TIME = 0.5f;
     public static final float RING_PULSE_SPEED = 4f;
 
-    /** How close counts as arrived, in world units. */
+    /**
+     * How close counts as arrived, in world units - the floor under it rather than the whole of it.
+     * <p>
+     * A drone is home when it reaches the fleet, and the fleet is the hulls, not the point they are
+     * measured from. Crossing the fleet's own radius is where it starts fading, and by the time
+     * anything it did after that would have been worth looking at it is already transparent. That
+     * is the entire answer to the overshoot: the swing past happens outside a circle the drone has
+     * long since left, so there is nothing left to watch it happen to.
+     * <p>
+     * This value only covers a fleet too small to have a radius worth using.
+     */
     public static final float DRONE_ARRIVAL_DISTANCE = 10f;
 
     public static final float DRONE_SPRITE_SIZE = 8f;
