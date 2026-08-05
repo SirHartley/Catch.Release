@@ -61,6 +61,21 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
     /** How far a lone system's water reaches, in hyperspace units. */
     public static final float BLOB_RADIUS = 3200f;
 
+    /**
+     * How long a parked species request stays good. Generous next to the frame or two the tab
+     * switch actually takes, and short next to a play session - a request the player never
+     * followed through on must not lie in wait and reshape a map they open much later.
+     */
+    public static final long PENDING_SPECIES_MILLIS = 10_000L;
+
+    /**
+     * A species somebody outside asked the map to open on - the codex's "show on the sector map".
+     * Parked statically because the asker lives in a dialog that is gone before the map exists,
+     * and nothing outside can reach the live pane anyway.
+     */
+    protected static String pendingSpeciesId;
+    protected static long pendingSpeciesSetAt;
+
     /** The map screen instance the button currently lives on. A new open means a new one. */
     protected Object mapScreen;
 
@@ -116,15 +131,63 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         if (failed || fishButton == null) return;
 
         try {
+            //a parked request turns the filter on itself: the memory flag only speaks when the
+            //screen is freshly attached, and the codex may have been opened over a map that was
+            //already up with the filter off
+            if (hasFreshPendingSpecies() && !fishButton.isChecked()) fishButton.setChecked(true);
+
             boolean wanted = fishButton.isChecked();
 
             if (wanted != applied) {
                 if (wanted) activate();
                 else deactivate();
             }
+
+            if (applied && pendingSpeciesId != null) applyPendingSpecies();
         } catch (Throwable t) {
             fail(t);
         }
+    }
+
+    /**
+     * Parks a species for the next time the filter is up, and turns the remembered flag on so the
+     * filter comes up by itself - which, when the map is already open with the filter on, is this
+     * same frame. The rest happens in {@link #applyPendingSpecies()} once there is a pane to
+     * apply it to.
+     */
+    public static void requestSpeciesFocus(String speciesId) {
+        pendingSpeciesId = speciesId;
+        pendingSpeciesSetAt = System.currentTimeMillis();
+
+        if (Global.getSector() != null) {
+            Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
+        }
+    }
+
+    protected static boolean hasFreshPendingSpecies() {
+        return pendingSpeciesId != null
+                && System.currentTimeMillis() - pendingSpeciesSetAt <= PENDING_SPECIES_MILLIS;
+    }
+
+    /**
+     * The parked request, honoured now that the pane exists: the pane flips to SPECIES with the
+     * species picked, the waters are re-cut, and the map points where a row click would have
+     * pointed it. Consumed before anything else is done, so a request that goes wrong is a
+     * request that is over rather than one that fires again on the next open.
+     */
+    protected void applyPendingSpecies() {
+        boolean fresh = hasFreshPendingSpecies();
+        String id = pendingSpeciesId;
+        pendingSpeciesId = null;
+
+        if (!fresh) return;
+
+        FishSpec spec = FishPresence.getSpec(id);
+        if (spec == null || pane == null) return;
+
+        pane.showSpecies(id);
+        rebuildBlobs();
+        onSpeciesFocused(spec);
     }
 
     /** The sector map screen if it is on the glass right now, else null. */
@@ -358,7 +421,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         } else {
             for (String id : pane.getSelectedIds()) {
                 FishSpec spec = FishPresence.getSpec(id);
-                if (spec == null || !FishPresence.isKnown(spec) || !FishPresence.showsRegions(spec)) {
+                //the picked-by-name rule rather than the browsing one - see the difference in
+                //FishPresence. Under the browsing rule a species goes unshaded once it is caught,
+                //which would leave anyone arriving from a codex page looking at an empty map
+                if (spec == null || !FishPresence.isKnown(spec)
+                        || !FishPresence.showsRegionsWhenPicked(spec)) {
                     continue;
                 }
 
