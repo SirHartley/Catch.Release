@@ -2,6 +2,8 @@ package catchrelease.abilities.searchlight.ability;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.ponds.constants.PondConstants;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -184,16 +186,40 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether the lights will run where the fleet is standing, which is anywhere but hyperspace.
+     * Whether the lamps will run where the fleet is standing: not in hyperspace, and not beside
+     * an open pond.
      * <p>
-     * All fishing is done from realspace into hyperspace - the fabric is the thing the gear works
-     * through, and standing on the far side of it leaves nothing to work through. The breach lamp
-     * does not change this: it burns its window from the near side, like everything else.
+     * Hyperspace because all fishing is done from realspace into hyperspace - the fabric is the
+     * thing the gear works through, and standing on the far side of it leaves nothing to work
+     * through. The pond because the two rigs are the two ways of working the same fabric and they
+     * do not share it: an open rupture is the rod's water, and lamps burning windows at the edge
+     * of a hole that is already open would be two kinds of opening fighting over one patch.
      */
     public static boolean canRunHere(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return true;
+        if (fleet.getContainingLocation().isHyperspace()) return false;
 
-        return !fleet.getContainingLocation().isHyperspace();
+        return !isNearActivePond(fleet);
+    }
+
+    /** Whether an open rupture is within its own interaction range - the range the rod works at,
+     * so the lamps yield exactly where the rod takes over. */
+    public static boolean isNearActivePond(CampaignFleetAPI fleet) {
+        if (fleet == null || fleet.getContainingLocation() == null) return false;
+
+        for (SectorEntityToken pond : fleet.getContainingLocation()
+                .getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
+
+            MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+            if (plugin == null || !plugin.isActive()) continue;
+
+            if (Misc.getDistance(pond, fleet)
+                    < pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void expireLights(boolean withFade){
@@ -219,8 +245,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         lightsToActivate = 0;
         spoolDone = false;
 
+        //the fade is only refused in hyperspace, where nothing of the rig should linger drawing.
+        //Going out because a pond opened nearby deserves the ordinary spool-down - the lamps are
+        //yielding to the rod, not being torn off
         CampaignFleetAPI fleet = getFleet();
-        boolean withFade = fleet != null && canRunHere(fleet);
+        boolean withFade = fleet != null && fleet.getContainingLocation() != null
+                && !fleet.getContainingLocation().isHyperspace();
 
         expireLights(withFade);
         activeSearchlights.clear();
@@ -287,6 +317,9 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                 "exposed",
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
+
+        tooltip.addPara("The lamps will not run beside an open pond rupture - that water is the"
+                + " R.O.D.'s.", Misc.getGrayColor(), pad);
 
         addUpgradesToTooltip(tooltip, pad);
 

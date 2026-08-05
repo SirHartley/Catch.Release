@@ -2,6 +2,8 @@ package catchrelease.abilities.rod.ability;
 
 import catchrelease.ModPlugin;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -36,7 +38,24 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     @Override
     protected void onActivatedWithoutReticule() {
         if (!entity.isPlayerFleet()) return;
+        if (lampsAreOn()) return;
+
         unlockClosestPond();
+    }
+
+    /**
+     * Whether the breach lamps are running, which is the one thing that keeps the rod from
+     * opening a pond. The two rigs are the two ways of working the same fabric and they do not
+     * share it: with the lamps burning, the rod's drones are serving the lamps rather than the
+     * pond, so forcing a rupture open under them is off the table until the lights go out.
+     */
+    protected boolean lampsAreOn() {
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null) return false;
+
+        AbilityPlugin lamps = fleet.getAbility(SearchlightAbilityPlugin.ABILITY_ID);
+
+        return lamps != null && lamps.isActive();
     }
 
     public void unlockClosestPond() {
@@ -105,6 +124,10 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         SectorEntityToken pond = getPond();
         if (pond == null) return false;
 
+        //a locked pond cannot be opened while the lamps are burning - the rigs take turns on the
+        //fabric. An already-open pond stays workable; the lamps are the ones that yield there
+        if (!closestPondActive() && lampsAreOn()) return false;
+
         FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
 
         //out fishing: the button is the recall, so it stays live regardless of the cast's rearm.
@@ -159,6 +182,11 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
             SectorEntityToken pond = getPond();
             if (pond == null) {
                 tooltip.addPara("Your fleet is not currently near a pond rupture.", Misc.getNegativeHighlightColor(), pad);
+            }
+
+            if (!closestPondActive() && lampsAreOn()) {
+                tooltip.addPara("The breach lamps are burning. Switch them off to open a rupture.",
+                        Misc.getNegativeHighlightColor(), pad);
             }
 
             FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
