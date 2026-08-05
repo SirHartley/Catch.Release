@@ -357,3 +357,7 @@ catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,Call $catchrelease_jobR
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what the lamps are for.,
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to be in the video.
 catchrelease_jobDecline:Step out of the shot.",
+catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask the three in the coats what they are waiting for.,
+catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to find it.
+catchrelease_jobDecline:Decline, politely.",
