@@ -9,6 +9,9 @@ todo
     - Fleet quests
     - Fleet interactions
     - Colony Aquarium
+    - Confetti effects should be purchaseable upgrade from Crablobab the crab salesman
+    - explosive harpoon should be purchaseable upgrade from Crablobab the crab salesman (- Add an explosive harpoon modifier. This modifier should explode any fish it hits, then fade out the line while having it thrown away by the force. Use vanilla explosion vfx,there's a class for that). Doesn't do anything else for now. If it hits a fleet it turns hostile immediately and takes damage.
+    - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
 
@@ -18,82 +21,50 @@ scrapped
 ---------------------
 
 ai_
+
 Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
 
----------------------
-
-qa round 2_
+Drones
+- Now despawn way too early...
 
 Pond
-- "swirl" renderer / warp is way too pronounced and appears to have supplanted the original warper. Restore the original for now, we'll see if the new mote behaviour is sufficient.
-- top & bottom boundary of the viewport snapper are once gain broken, this is a clear regression?
+- Swirl renderer still gone. Trial a new design that makes it look like a hole, include the warping hyperspace bg
+- unstable terrain should not spawn below ring bands
+
+Minigame
+ - Treasure panel image height/pos does not match catch panel
+
+Shop
+- Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate
+- Modifier category lacks support for mod entries for searchlights and bombs - auto add them when there's stuff in the csv
 
 Mote behaviour
 - Movement modes for motes made uncommon ones super easy to catch with the harpoon, way easier than the common ones
+- uncommon motes behaviour needs to have less pauses too it's super easy to catch em
+- Epic motes should turn invisible / dive in regular intervals so they are harder to get
 
----------------------
+Fish Map UI
+- areas are no longer filled in and outlines no longer connected, just broken fragments with no area fill
+- remove category / species toggle fields
+- category filters should have icons & text
+- search should have default text "Search..."
+- when you select a category filter, filter the fish for that species and show the "all species of this category" overlay on the map
+  -> when specific species are selected, show only those specific species on the map (multiselect)
+  -> add a button "deselect all" which reverts to the category view
+- Add codex hotlink via f2 while hovering species list entry
+- move species location data source text to on hover tooltip (regional data ect)
+- add fish icon into on hover tooltip
 
-qa_
+Codex
+- image is right top aligned. Should be placed to the right of the uppermost info panel with 10px distance. Should use the same kind of border as info boxes, not the fancy fish border.
+- Catch location data should be a summary of _where_ the fish _can_ be caught. Keep it human-readable, like "In the far reaches of the north-west, under a blue star when slipstreams run towards the core" or "In the core, under a red star, at any time of the cycle." or "In the Abyss."
+- Add a button that takes you to the pre-filtered fish map UI with the fish already selected
 
-x Minigame UI
-- Minigame fish checks center for bounds, should use center + icon width / 2. Currently travels out of bounds of the container.
-- Minigame panel looks visually unbalanced, add about 10px to the left side of the panel without moving the minigame UI itself.
-- Catch Card text looks blurry or staunched. Should probably use default orbitron font if you are not. If you are, it's fine and I'm hallucinating.
-- Catch Card Increase space between fish name and image
-- Catch Card center fish name
-- Catch Card "new record" should be above fish icon, on top - centered, with an animation bouncing it up and down
-- Catch Card press any key should be centered and gradually change colour from current grey to muted light grey within 0.5ds and back another 0.5s to indicate that it's waiting for action
-- "celebration" animation should center on the image of the fish in the catch card
-- optional setting: make bubbles rise from the bottom of the catch card to the top with natural movement (sine??)
-
-x Minigame
-- Treasure never shows up. Should sometimes show up even without tackle.
-- Add "found treasure" card to left side of minigame when treasure is picked up, panel similar to the Catch card upon successful treasure catch, using static treasure chest icon (placeholder for now)
-- Treasure only gets transferred to cargo if fish is caught too (lost otherwise), double check this is the case
-
-x Fish shop
-- fish shop UI panels do not properly remove on switch, causing them to stack up over themselves.
-- remove "catch" category, that's only technical stats. Shop is for equipment upgrades only.
-- subcategories lights/drones/harpoon... should probably also have icons, with text below, because the text is currently so small it's almost unreadable if removing the catch cat fixes it -> larger font size, that's fine too.
-- "none" option should be at top of equip selection list
-- remove prefix from selection list eg: Searchlight area -> Area. Title to the right must retain prefix and continue reading "Searchlight area"
-- upgrades should cost credits in addition to costing fish. Cost should change every game and be, for instance, "3 same / different fish of type "crab / fish / ect" of good / bad / excellent [or better] quality", increasing in difficulty for each upgrade, including requiring specific fish. This may also use coherence, where low coherence = rarer (except for abyss fish).
-- you should be able to store fish in the shop via cargo picker
-- you should be able to sell fish in the shop via cargo picker
-
-x Harpoon
-- when returning with or without catch, the harpoon lingers for a fraction of a second before despawning and does not completely retract the line, making it look as if it was fading out with the line still extended a bit. line should be fully retracted, then despawn.
-
-x Catcher Drone
-- The "pathing" circle now circles the entire pond
-- Drones don't seem to react to things entering the circle anymore. Double check if the patch for the stat upgrades didn't break drone behaviour.
-- Once investigated: Reaction of drones to motes is slightly too slow upon entering the circle. Give them a bit of a reaction radius beyond their orbit by default, to make them react to motes faster.
-
-x Search lights
-- Way too few motes encountered
-- Position should be relative to fleet heading, not fixed relative to screen
-- one always in front of the fleet (with current movement, ofc)
-
-x Unstable Terrain
-- Unstable terrain can spawn way too close together.
-- Unstable terrain  should never spawn under or close to a nebula tile
-
-x Pond
-- depth motes should be more swirly to pull the visuals downwards.
-- Add some kind of whirlpool effect, preferrably via shader. If that's not possible, I will provide a sprite / map, tell me if you need it.
-- Make mote movement more varied, movement mode depending on minigame movement mode, difficulty of pattern on rarity
-
-x Fish Map UI
-- General UI still terrible and due a full overhaul
-- Map still doesn't show up, use reflection instead. I know Ashes of the Domain has a working implementation of this for, I think the Orion Sector module, appended to the main map UI as tab on top.
-
-x Codex
-- style the codex entry like the minigame / catch card - aim for a fusion between the way the codex is formatted for industry items and the catch card. Aim for good segmentation between informational areas, possibly even in distinct containers (desc, stats, loc data, record)
-- icon should display at native res in a dressed container with the same beautiful styling the catch card uses
-- catch location data should be available if the player caught the fish
-- catch time isn't correctly stored or displayed
-- species type != rarity. Type is specced in the csv, rarity is just rarity.
+Harpooning fleets
+- low rep impact flag should not be set I think, mirroring cargo inspection
+- commlink option to be highlighted when fleet has something to say
+- dialogue text in commlink option should be default text colour
 
 ---------------------
 
@@ -101,7 +72,7 @@ self_
 - Adjust skillshot fleet dir indicator for size, arrow too large
 - fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
 - Icons
-- Harpoon needs better tip
+- Harpoon needs better tip sprite
 
 ---------------------
 
