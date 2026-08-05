@@ -340,13 +340,14 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `depthbomb/ability/DepthBombAbilityPlugin.java` | Throws a bomb at a clamped-range point |
 | `depthbomb/entities/DepthBombEntityPlugin.java` | Falls, arms, detonates; dresses the break as a visual-only pond, stuns motes, unearths buried ones |
 | `depthbomb/constants/DepthBombConstants.java` | Range, blast, glass look, shockwave, and the `SPAWN_POND` toggle |
-| `searchlight/ability/SearchlightAbilityPlugin.java` | Spools lights up; exposes `isLit(mote)` and `isBreaching()` (lamp fitted **and** lit, which is not the same as `burnsIntoHyperspace()`); detectability penalty |
+| `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, exposes `isLit(mote)` and `isBreaching()` (fitted **and** lit, which is not what `burnsIntoHyperspace()` answers), beam slow, detectability penalty, yields to open ponds |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
-| `searchlight/rendering/SearchlightGlowRenderer.java` | The default circular beam — orange, or purple under the breach lamp |
+| `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |
 | `searchlight/rendering/SearchlightFanRenderer.java` | The wedge beam, for the fan-beam tackle |
-| `searchlight/rendering/SearchlightBreachRenderer.java` | The breach lamp's window: world-anchored hyperspace under the beam's falloff, with parallax |
+| `searchlight/rendering/SearchlightBreachRenderer.java` | The window under a spot: world-anchored hyperspace under the beam's falloff, with parallax |
+| `searchlight/rendering/SearchlightFanBreachRenderer.java` | The same window cut as the fan's wedge, falloff for falloff |
 | `searchlight/rendering/SearchlightBurnRenderer.java` | The old pond-style burn look — sidelined, nothing uses it |
-| `searchlight/rendering/SearchlightImpressionRenderer.java` | Every buried mote's dent, drawn once for all beams together; a live breach beam turns a dent into the mote |
+| `searchlight/rendering/SearchlightImpressionRenderer.java` | Dents for all beams together: passive bruises near a light, and a beam over a mote reveals its pond self |
 
 ### `skillshot`
 Reusable aim-and-fire framework. **Has its own README — read that first.**

@@ -1,5 +1,9 @@
 package catchrelease.abilities.searchlight.ability;
 
+import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.ponds.constants.PondConstants;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -123,10 +127,48 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             timePassed = 0f;
         }
 
-        fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Searchlights");
+        applyBeamSlow(fleet);
+
+        fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Breach lamps");
 
         if (level <= 0) {
             cleanupImpl();
+        }
+    }
+
+    /** Seconds the drag lingers once a mote has left the light, easing off rather than snapping. */
+    public static final float SLOW_LINGER = 0.5f;
+
+    /**
+     * The slow upgrade: the light itself drags on whatever swims through it.
+     * <p>
+     * Applied through the same knock a depth bomb deals, so the two cannot disagree about what a
+     * slowed mote is - and refreshed every frame a mote stays in a beam, with a short linger so
+     * leaving the light lets it go rather than snapping it back to speed. Nothing without the
+     * upgrade: the strength is zero until bought.
+     */
+    protected void applyBeamSlow(CampaignFleetAPI fleet) {
+        float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
+        if (slow <= 0f || activeSearchlights.isEmpty()) return;
+        if (fleet.getContainingLocation() == null) return;
+
+        for (SectorEntityToken mote : fleet.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+
+            if (mote.isExpired()) continue;
+            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+
+            boolean lit = false;
+            for (Searchlight light : activeSearchlights) {
+                if (light.isDone()) continue;
+
+                if (light.getLitStrength(mote.getLocation()) > 0f) {
+                    lit = true;
+                    break;
+                }
+            }
+
+            if (lit) fish.applyBlast(0f, slow, SLOW_LINGER);
         }
     }
 
@@ -144,35 +186,54 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether the lights will run where the fleet is standing, which is anywhere but hyperspace.
+     * Whether the lamps will run where the fleet is standing: not in hyperspace, and not beside
+     * an open pond.
      * <p>
-     * All fishing is done from realspace into hyperspace - the fabric is the thing the gear works
-     * through, and standing on the far side of it leaves nothing to work through. The breach lamp
-     * does not change this: it burns its window from the near side, like everything else.
+     * Hyperspace because all fishing is done from realspace into hyperspace - the fabric is the
+     * thing the gear works through, and standing on the far side of it leaves nothing to work
+     * through. The pond because the two rigs are the two ways of working the same fabric and they
+     * do not share it: an open rupture is the rod's water, and lamps burning windows at the edge
+     * of a hole that is already open would be two kinds of opening fighting over one patch.
      */
     public static boolean canRunHere(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return true;
+        if (fleet.getContainingLocation().isHyperspace()) return false;
 
-        return !fleet.getContainingLocation().isHyperspace();
+        return !isNearActivePond(fleet);
     }
 
-    /** Whether the breach lamp has been fitted, turning the beams into windows. */
-    public static boolean burnsIntoHyperspace() {
-        return TackleManager.get(Tackle.Fit.SEARCHLIGHT).burnsHyperspace;
+    /** Whether an open rupture is within its own interaction range - the range the rod works at,
+     * so the lamps yield exactly where the rod takes over. */
+    public static boolean isNearActivePond(CampaignFleetAPI fleet) {
+        if (fleet == null || fleet.getContainingLocation() == null) return false;
+
+        for (SectorEntityToken pond : fleet.getContainingLocation()
+                .getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
+
+            MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+            if (plugin == null || !plugin.isActive()) continue;
+
+            if (Misc.getDistance(pond, fleet)
+                    < pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Whether there are windows open right now: the lamp fitted, and the lights actually on.
+     * Whether there are windows open right now.
      * <p>
-     * Fitted is not the same as burning. {@link #burnsIntoHyperspace()} answers what the rig is
-     * capable of, which is what the spawner wants to know - whether there is anything down there to
-     * find at all - and this answers whether it is doing it, which is what anything reaching through
-     * a window has to ask first. The rod's roaming cast is the only caller so far, and it is exactly
-     * the difference between owning the lamp and having it lit.
+     * Every lamp burns one - that stopped being a fitting and became what the rig is - so this is
+     * only asking whether the lights are on. It is still worth a name of its own: what a caller
+     * reaching through a window wants to know is that there is a window, and asking the ability
+     * whether it happens to be toggled is the same fact said in terms of a button.
+     * <p>
+     * Note that {@link #canRunHere(CampaignFleetAPI)} already keeps the lamps off beside an open
+     * rupture, so this and an open pond are mutually exclusive without anybody arbitrating.
      */
     public static boolean isBreaching() {
-        if (!burnsIntoHyperspace()) return false;
-
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
         if (fleet == null) return false;
 
@@ -204,8 +265,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         lightsToActivate = 0;
         spoolDone = false;
 
+        //the fade is only refused in hyperspace, where nothing of the rig should linger drawing.
+        //Going out because a pond opened nearby deserves the ordinary spool-down - the lamps are
+        //yielding to the rod, not being torn off
         CampaignFleetAPI fleet = getFleet();
-        boolean withFade = fleet != null && canRunHere(fleet);
+        boolean withFade = fleet != null && fleet.getContainingLocation() != null
+                && !fleet.getContainingLocation().isHyperspace();
 
         expireLights(withFade);
         activeSearchlights.clear();
@@ -251,7 +316,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            LabelAPI title = tooltip.addTitle("Search Lights" + status);
+            LabelAPI title = tooltip.addTitle("Breach Lamps" + status);
             title.highlightLast(status);
             title.setHighlightColor(gray);
         } else {
@@ -261,15 +326,20 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float pad = 10f;
 
 
-        tooltip.addPara("Toggle the search lights installed on fishing trawlers.", pad);
+        tooltip.addPara("Toggle the breach lamps installed on fishing trawlers.", pad);
 
 
-        tooltip.addPara("Hyperspace motes will be drawn to, and made visible by these lights across dimensions. Use %s and harpoon them for a quick catch." +
-                        "The severe radiation increases the range at which the fleet can be detected by %s.", pad,
+        tooltip.addPara("Each lamp burns a window through the fabric as it sweeps. Whatever swims"
+                        + " under one is %s and can be harpooned before the mark fades."
+                        + " The severe radiation increases the range at which the fleet can be"
+                        + " detected by %s.", pad,
                 highlight,
-                "dive bombs",
+                "exposed",
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
+
+        tooltip.addPara("The lamps will not run beside an open pond rupture - that water is the"
+                + " R.O.D.'s.", Misc.getGrayColor(), pad);
 
         addUpgradesToTooltip(tooltip, pad);
 
@@ -288,8 +358,15 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         int lights = getSearchlightNum();
         tooltip.addPara("Sweeping with %s, each reaching %s.", pad, highlight,
-                lights == 1 ? "one light" : lights + " lights",
+                lights == 1 ? "one lamp" : lights + " lamps",
                 (int) Searchlight.getArea() + " units");
+
+        float detect = UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
+                FishConstants.IMPRESSION_DETECT_FALLBACK);
+        if (detect > 0f) {
+            tooltip.addPara("The fabric bruises within %s of a beam, betraying anything under it"
+                    + " as a dent.", 3f, highlight, (int) detect + " units");
+        }
 
         float track = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
         if (track > 0f) {
@@ -316,6 +393,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         if (rare > 0f) {
             tooltip.addPara("Rarer species are more likely to be down there to begin with.",
                     Misc.getGrayColor(), 3f);
+        }
+
+        float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
+        if (slow > 0f) {
+            tooltip.addPara("The light itself drags: anything swimming through a beam is slowed"
+                    + " by %s.", 3f, highlight, Math.round(slow * 100f) + "%");
         }
     }
 

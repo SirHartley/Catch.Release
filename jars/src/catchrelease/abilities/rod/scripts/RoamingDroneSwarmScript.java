@@ -17,10 +17,10 @@ import java.util.List;
  * A swarm with no pond under it: drones flying a screen around the fleet, going after whatever the
  * breach lamps have found down there.
  * <p>
- * The lamps are what makes this possible and what limits it. A beam with a breach lamp on it does not
- * merely sweep - it burns a window - and a window is something a drone can go through, which is the
- * only reason anything buried is reachable at all. So the whole mode lives and dies with the lights:
- * cast while they are on, recalled the moment they go off.
+ * The lamps are what makes this possible and what limits it. A breach lamp does not merely sweep - it
+ * burns a window - and a window is something a drone can go through, which is the only reason
+ * anything buried is reachable at all. So the whole mode lives and dies with the lights: cast while
+ * they are on, recalled the moment they go off.
  * <p>
  * What it is fishing is the other half of the difference. A cast waits on motes drifting into a ring
  * dropped on the water; this one hunts things that are still on the far side of the fabric and have

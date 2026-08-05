@@ -32,34 +32,38 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     protected String getActivationText() {
-        return getPond() == null ? "Dispatching Drones" : "Unlocking Pond";
+        return isRoamingAvailable() ? "Dispatching Drones" : "Unlocking Pond";
     }
 
     /**
-     * The two presses that involve no aiming: forcing a shut pond open, and sending a screen out.
+     * The two presses that involve no aiming: sending a screen out, and forcing a shut pond open.
      * <p>
-     * The pond comes first wherever there is one. Standing at a rupture and pressing the rod means
-     * open it - that is what the button has always done there, and roaming is what the rod does when
-     * there is no water in reach to cast into rather than an alternative to casting.
+     * The lamps come first, and it is the same rule read from either side. The rod cannot force a
+     * rupture open under them - the two rigs take turns on the fabric - and it has something better
+     * to do than try, because the beams have already cut the windows the drones would be going
+     * through. With the lights out the press is exactly what it always was.
      */
     @Override
     protected void onActivatedWithoutReticule() {
         if (!entity.isPlayerFleet()) return;
 
-        if (getPond() != null) {
-            unlockClosestPond();
+        if (isRoamingAvailable()) {
+            RoamingDroneSwarmScript.dispatch();
             return;
         }
 
-        if (isRoamingAvailable()) RoamingDroneSwarmScript.dispatch();
+        unlockClosestPond();
     }
 
     /**
      * Whether the rod can fish without a pond, which is entirely a question about the lights.
      * <p>
-     * Fitted is not enough - the lamps have to actually be lit. There is nothing to send drones
-     * through otherwise, and a screen with no windows to reach into would fly a circle around the
-     * fleet catching nothing at all.
+     * A screen with no windows to reach through would fly a circle around the fleet catching nothing
+     * at all, so the lamps burning is the whole of the condition - and it is also the condition
+     * under which the rod could not have opened a rupture anyway, the two rigs taking turns on the
+     * fabric. Those being one question rather than two is why the press does not have to choose:
+     * beside an open pond the lamps have already yielded, and everywhere else they are what the rod
+     * has to work with.
      */
     public boolean isRoamingAvailable() {
         return SearchlightAbilityPlugin.isBreaching();
@@ -136,8 +140,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         //has to stay reachable wherever the drones happen to be working
         if (swarm != null) return !swarm.isRecalling() && disableFrames <= 0;
 
-        //water to cast into, or windows to reach through. With neither there is nothing to press
-        if (getPond() == null && !isRoamingAvailable()) return false;
+        //a screen can go out anywhere there are windows to send it through. Without them the rod is
+        //back to needing water in reach, which is the only other thing this button has ever done
+        if (!isRoamingAvailable() && getPond() == null) return false;
 
         return super.isUsable();
     }
@@ -188,11 +193,12 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
                 + " whatever they have found down there.", pad, highlight, "breach lamps");
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            SectorEntityToken pond = getPond();
-            if (pond == null && !isRoamingAvailable()) {
+            //one line, in the order the press itself decides in. The lamps burning is not a
+            //complaint any more - it is what the button is going to do
+            if (isRoamingAvailable()) {
+                tooltip.addPara("The breach lamps are lit. The drones will roam.", highlight, pad);
+            } else if (getPond() == null) {
                 tooltip.addPara("Your fleet is not currently near a pond rupture.", Misc.getNegativeHighlightColor(), pad);
-            } else if (pond == null) {
-                tooltip.addPara("No rupture in reach - the drones will roam instead.", gray, pad);
             }
 
             FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
@@ -209,7 +215,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     /** The working icon whenever the press will send drones, whichever of the two ways it would. */
     @Override
     public String getSpriteName() {
-        if (closestPondActive() || (getPond() == null && isRoamingAvailable())) {
+        if (closestPondActive() || isRoamingAvailable()) {
             return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder2");
         }
 

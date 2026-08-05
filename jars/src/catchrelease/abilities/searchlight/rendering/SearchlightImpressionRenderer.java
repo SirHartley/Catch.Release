@@ -44,6 +44,7 @@ import java.util.Map;
  */
 public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugin {
     public transient SpriteAPI sprite;
+    public transient SpriteAPI moteSprite;
 
     /** The ability's own list, held live rather than copied - lights keep arriving after this
      * exists, staggered on the activation pause, and a copy would only ever see the first. */
@@ -201,7 +202,9 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
-        if (expired || marks.isEmpty()) return;
+        //not gated on the marks: the passive shadow dents exist wherever a mote stands near a
+        //live beam, marked or not
+        if (expired) return;
         loadSpritesIfNeeded();
 
         //the beams' own resting alpha, so a dent takes out about as much light as a beam put in -
@@ -225,23 +228,76 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         float glowLevel = identify <= 0 ? 0f
                 : identify == 1 ? FishConstants.IMPRESSION_GLOW_HINT_MULT : 1f;
 
-        //with the breach lamp fitted the beams are windows, and a mote a window is over right now
-        //is seen rather than silhouetted - the dent turns inside out by however much of a beam is
-        //on it. Live rather than off the mark on purpose: the lingering mark is memory, and the
-        //window only shows what is under it while it is under it
-        boolean breaching = SearchlightAbilityPlugin.burnsIntoHyperspace();
+        if (Global.getSector() == null) return;
+        LocationAPI location = Global.getSector().getCurrentLocation();
+        if (location == null) return;
 
-        for (Map.Entry<SectorEntityToken, Float> entry : marks.entrySet()) {
-            SectorEntityToken buried = entry.getKey();
+        //every mote in the system rather than only the marked ones, because the lamps have a
+        //passive reach now: the fabric bruises around a burn, so anything under it near a beam
+        //shows as a dent before any light has actually touched it - see nearestBeamShadow
+        for (SectorEntityToken buried
+                : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
+
             if (buried.isExpired()) continue;
 
-            float mark = entry.getValue();
-            float reveal = breaching ? strongestBeam(buried.getLocation()) : 0f;
+            float mark = getMarkStrength(buried);
+            float shadow = nearestBeamShadow(buried.getLocation());
+            float dent = Math.max(mark, shadow);
 
-            renderImpression(buried.getLocation(), mark * alpha,
+            //every beam is a window, and a mote a window is over right now is seen rather than
+            //silhouetted - the dent turns inside out as the beam comes over it. Live rather than
+            //off the mark on purpose: the lingering mark is memory, and the window only shows
+            //what is under it while it is under it
+            float reveal = revealStrength(buried.getLocation());
+
+            if (dent <= 0f && reveal <= 0f) continue;
+
+            renderImpression(buried.getLocation(), dent * alpha,
                     mark * fadeMult * glowLevel, ringColor(buried, identify),
                     reveal, reveal * fadeMult, revealColor(buried));
         }
+    }
+
+    /**
+     * How switched-over a mote is, from dent to its pond self: nothing at the rim of a beam,
+     * complete {@link FishConstants#IMPRESSION_REVEAL_FULL_PENETRATION} of the way in. Worked in
+     * penetration - how far into the beam it stands - rather than in lit strength, because the
+     * lit strength is already squared for the eye and squaring the ramp again would hold the
+     * switch back almost to the centre.
+     */
+    protected float revealStrength(Vector2f at) {
+        float lit = strongestBeam(at);
+        if (lit <= 0f) return 0f;
+
+        float penetration = (float) Math.sqrt(lit);
+
+        return MathUtils.clamp(
+                penetration / FishConstants.IMPRESSION_REVEAL_FULL_PENETRATION, 0f, 1f);
+    }
+
+    /**
+     * The passive dent: how hard a mote nowhere under a beam still bruises the fabric, by how
+     * close it stands to the nearest live light. Full against the beam, nothing at the detect
+     * radius, and capped under a real find - suspicion should read fainter than discovery.
+     */
+    protected float nearestBeamShadow(Vector2f at) {
+        float detect = UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
+                FishConstants.IMPRESSION_DETECT_FALLBACK);
+        if (detect <= 0f) return 0f;
+
+        float strongest = 0f;
+
+        for (Searchlight light : lights) {
+            if (light.isDone()) continue;
+
+            float distance = Misc.getDistance(light.getRenderLoc(), at);
+            if (distance >= detect) continue;
+
+            float near = 1f - distance / detect;
+            if (near * near > strongest) strongest = near * near;
+        }
+
+        return strongest * FishConstants.IMPRESSION_NEAR_DENT_MAX;
     }
 
     /**
@@ -281,7 +337,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      */
     protected Color revealColor(SectorEntityToken buried) {
         if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
-            return Searchlight.BREACH_COLOR;
+            return Searchlight.COLOR;
         }
 
         return mote.getRarity().color;
@@ -294,10 +350,10 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      * thing - the dent stays the hole it always was; the glow is what says what colour of thing is
      * making it.
      * <p>
-     * Under a breach window the dent turns inside out: the subtractive core gives way by the
-     * reveal, and the mote is drawn in its place - a body and a halo, additive, in its own colour.
-     * The ring stays through the change, since the wave a thing makes in the fabric does not stop
-     * because the light learned to see through it.
+     * Under the window the dent turns inside out: the subtractive core gives way by the reveal,
+     * and the mote is drawn in its place wearing its pond look - the stacked glow, in its own
+     * rarity's colour. The ring stays through the change, since the wave a thing makes in the
+     * fabric does not stop because the light learned to see through it.
      *
      * @param glowMult   how much of the identify glow to draw, 0 for none - the mark and the fade
      *                   but deliberately not the beams' resting alpha, because anything cut down to
@@ -335,20 +391,22 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
             GL11.glPopAttrib();
         }
 
-        //the mote itself, where the reveal has traded the dent away
+        //the mote itself, where the reveal has traded the dent away - drawn exactly the way a
+        //pond mote draws itself, stack for stack, so what the window shows is what a bomb or a
+        //harpoon will actually let out. See FishEntityPlugin.externalRender
         if (revealMult > 0f) {
-            sprite.setAdditiveBlend();
-            sprite.setColor(revealColor);
+            moteSprite.setColor(revealColor);
+            moteSprite.setAdditiveBlend();
 
-            sprite.setSize(coreSize * FishConstants.IMPRESSION_REVEAL_SIZE,
-                    coreSize * FishConstants.IMPRESSION_REVEAL_SIZE);
-            sprite.setAlphaMult(revealMult * FishConstants.IMPRESSION_REVEAL_ALPHA);
-            sprite.renderAtCenter(at.x, at.y);
+            float glowAlpha = revealMult * (1f - 0.5f * flicker.getBrightness());
+            float size = FishConstants.IMPRESSION_EXPOSED_GLOW_SIZE;
 
-            sprite.setSize(coreSize * FishConstants.IMPRESSION_REVEAL_HALO_SIZE,
-                    coreSize * FishConstants.IMPRESSION_REVEAL_HALO_SIZE);
-            sprite.setAlphaMult(revealMult * FishConstants.IMPRESSION_REVEAL_HALO_ALPHA);
-            sprite.renderAtCenter(at.x, at.y);
+            for (int i = 0; i < 6; i++) {
+                moteSprite.setSize(size, size);
+                moteSprite.setAlphaMult(glowAlpha * (i == 0 ? 1f : 0.67f));
+                moteSprite.renderAtCenter(at.x, at.y);
+                size *= 0.3f;
+            }
         }
 
         //and the standing wave around it, which is the part that says it is displacing something
@@ -372,5 +430,10 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     public void loadSpritesIfNeeded() {
         if (sprite == null) sprite = SpriteLoader.getSprite("spotlight_circle");
+
+        //the pond mote's own sprite, so the exposed look and the swimming look cannot drift apart
+        if (moteSprite == null) {
+            moteSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+        }
     }
 }
