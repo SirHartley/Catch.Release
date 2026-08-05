@@ -155,6 +155,29 @@ public class PondConstants {
      * With the camera snapped to the pond it never does, so the field is given a slow wander of its
      * own - the two are added, so this is what is left when the camera contributes nothing.
      */
+    /**
+     * The hole look, trialled against the shader swirl. HOLE_LOOK picks which of the two draws
+     * the fill: true is the new stencil-and-gradient hole, false is the old masked-warp shader,
+     * kept whole in case the verdict goes the other way. The rest shape the hole itself: the
+     * background's alpha, zoom and slow wander; the funnel pooling dark in the middle
+     * (WELL_ALPHA at the centre, gone by WELL_REACH of the radius); and the wall shadow rising
+     * again from RIM_START of the radius to the rim.
+     */
+    public static final boolean POND_HOLE_LOOK = true;
+    public static final float HOLE_FILL_MULT = 1.5f;
+    public static final float HOLE_BG_ALPHA = 0.85f;
+    public static final float HOLE_BG_ZOOM = 1.6f;
+    public static final java.awt.Color HOLE_BG_TINT = new java.awt.Color(200, 190, 255);
+    public static final float HOLE_DRIFT = 60f;
+    public static final float HOLE_DRIFT_PERIOD = 31f;
+    public static final float HOLE_WELL_ALPHA = 0.75f;
+    public static final float HOLE_WELL_REACH = 0.8f;
+    public static final float HOLE_RIM_START = 0.72f;
+    public static final float HOLE_RIM_SHADOW = 0.55f;
+
+    /** How much room a pond keeps from a ring band - terrain or purely visual - when spawning. */
+    public static final float MIN_RING_CLEARANCE = 200f;
+
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
 

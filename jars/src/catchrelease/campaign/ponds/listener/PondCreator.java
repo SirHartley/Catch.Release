@@ -7,6 +7,8 @@ import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.RingBandAPI;
+import com.fs.starfarer.api.impl.campaign.terrain.BaseRingTerrain;
 import com.fs.starfarer.api.impl.campaign.terrain.NebulaTerrainPlugin;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -112,7 +114,43 @@ public class PondCreator {
             }
         }
 
-        return !isInNebula(point);
+        return !isInNebula(point) && !isOnRingBand(point);
+    }
+
+    /**
+     * Whether a ring band runs through this spot. Two kinds have to be asked: rings that are
+     * terrain answer through their plugin, which knows the band's real geometry - and rings that
+     * are only art have no plugin to ask, so their band is measured by hand off the focus,
+     * middle radius and width they carry. A pond sitting on either reads as parked on the
+     * scenery, so both say no.
+     */
+    private boolean isOnRingBand(Vector2f point) {
+        for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
+            if (!(terrain.getPlugin() instanceof BaseRingTerrain)) continue;
+
+            //the pond's own radius rides along: the question is whether the rupture's edge
+            //reaches the band, not whether its centre does
+            if (terrain.getPlugin().containsPoint(point,
+                    PondConstants.POND_RADIUS + PondConstants.MIN_RING_CLEARANCE)) {
+                return true;
+            }
+        }
+
+        for (SectorEntityToken token : system.getAllEntities()) {
+            if (!(token instanceof RingBandAPI)) continue;
+
+            RingBandAPI ring = (RingBandAPI) token;
+            SectorEntityToken focus = ring.getFocus();
+            if (focus == null) continue;
+
+            float distance = Misc.getDistance(focus.getLocation(), point);
+            float halfBand = ring.getBandWidthInEngine() * 0.5f
+                    + PondConstants.POND_RADIUS + PondConstants.MIN_RING_CLEARANCE;
+
+            if (Math.abs(distance - ring.getMiddleRadius()) < halfBand) return true;
+        }
+
+        return false;
     }
 
     /**

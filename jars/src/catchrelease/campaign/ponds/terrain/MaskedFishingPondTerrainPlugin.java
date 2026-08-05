@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.renderer.PondDepthField;
+import catchrelease.campaign.ponds.renderer.PondHoleRenderer;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.campaign.ponds.scripts.PondCameraFocusScript;
@@ -88,6 +89,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
     transient protected MaskGlowRenderer maskGlowRenderer;
+    transient protected PondHoleRenderer holeRenderer;
 
     transient protected EnumSet<CampaignEngineLayers> layers = createLayers();
 
@@ -309,6 +311,15 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+            //the trial design: the hole, cut with the stencil and shaded with gradients, no
+            //shader anywhere in it. The swirl path below stays whole for switching back
+            if (PondConstants.POND_HOLE_LOOK) {
+                holeRenderer.render(starfield, mask, warpGrid, loc, maskSize, alpha, elapsed);
+
+                GL11.glPopAttrib();
+                return;
+            }
+
             //the camera's contribution, which is nothing at all while the camera is snapped to us
             Vector2f fillUvOffsetPx = ParallaxUtil.computeFillUvOffsetPx(
                     viewport,
@@ -442,6 +453,10 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         if (maskGlowRenderer == null) {
             maskGlowRenderer = new MaskGlowRenderer();
+        }
+
+        if (holeRenderer == null) {
+            holeRenderer = new PondHoleRenderer();
         }
     }
 
