@@ -128,7 +128,7 @@ public class FishLocationSummary {
         return "in " + band + " of the " + joinNatural(directions, "and");
     }
 
-    protected static String getDirectionName(String quadrant) {
+    public static String getDirectionName(String quadrant) {
         switch (quadrant) {
             case "NE": return "north-east";
             case "NW": return "north-west";

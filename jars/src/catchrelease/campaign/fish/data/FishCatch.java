@@ -28,14 +28,30 @@ public class FishCatch {
     /** 0 to 1 - how loosely the thing is holding its shape. Set from where it was taken. */
     public float aberration;
 
+    /**
+     * Which part of the sector this one came out of, or null for a specimen from before anyone was
+     * writing it down.
+     * <p>
+     * The species already says where its kind <i>can</i> be found, which is a different question and
+     * cannot answer this one: somebody asking for a crab from the Abyss is asking about the crab in
+     * front of them, not about crabs. Nothing could answer that before, because a landed fish
+     * carried its size and its coherence and no idea where it had been.
+     */
+    public SectorRegion origin;
+
     public FishCatch() {
     }
 
     public FishCatch(String speciesId, float length, float weight, float aberration) {
+        this(speciesId, length, weight, aberration, null);
+    }
+
+    public FishCatch(String speciesId, float length, float weight, float aberration, SectorRegion origin) {
         this.speciesId = speciesId;
         this.length = length;
         this.weight = weight;
         this.aberration = aberration;
+        this.origin = origin;
     }
 
     /**
@@ -50,7 +66,11 @@ public class FishCatch {
      * would read as a mistake. It keeps a little of its own, so two of the same length still differ.
      */
     public static FishCatch roll(FishSpec spec, float aberration) {
-        return roll(spec, aberration, 0f);
+        return roll(spec, aberration, 0f, null);
+    }
+
+    public static FishCatch roll(FishSpec spec, float aberration, float qualityBias) {
+        return roll(spec, aberration, qualityBias, null);
     }
 
     /**
@@ -58,7 +78,7 @@ public class FishCatch {
      *                    what it takes moves this rather than rerolling, so a good rig raises the
      *                    floor without guaranteeing the ceiling
      */
-    public static FishCatch roll(FishSpec spec, float aberration, float qualityBias) {
+    public static FishCatch roll(FishSpec spec, float aberration, float qualityBias, SectorRegion origin) {
         if (spec == null) return null;
 
         float lengthFraction = centred();
@@ -138,8 +158,18 @@ public class FishCatch {
      * The specimen as a string, for a special item to carry. Species first so a bundle can sort on
      * it without decoding the rest.
      */
+    /**
+     * Where it came from rides on the end, after the three numbers that were always there.
+     * <p>
+     * Appended rather than woven in, so a fish already sitting in somebody's hold still reads: the
+     * decoder wants at least four fields and takes a fifth if it is offered, which is exactly what
+     * an old specimen and a new one respectively hand it.
+     */
     public String encode() {
-        return speciesId + SEPARATOR + round(length) + SEPARATOR + round(weight) + SEPARATOR + round(aberration);
+        String encoded = speciesId + SEPARATOR + round(length) + SEPARATOR + round(weight)
+                + SEPARATOR + round(aberration);
+
+        return origin == null ? encoded : encoded + SEPARATOR + origin.name();
     }
 
     /** Null for anything that does not parse - a fish from a build that wrote a different format. */
@@ -150,8 +180,11 @@ public class FishCatch {
         if (parts.length < 4) return null;
 
         try {
+            //a fish caught before anyone recorded where simply has no answer, rather than a wrong one
+            SectorRegion origin = parts.length > 4 ? SectorRegion.parse(parts[4]) : null;
+
             return new FishCatch(parts[0], Float.parseFloat(parts[1]),
-                    Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
+                    Float.parseFloat(parts[2]), Float.parseFloat(parts[3]), origin);
         } catch (NumberFormatException e) {
             return null;
         }
