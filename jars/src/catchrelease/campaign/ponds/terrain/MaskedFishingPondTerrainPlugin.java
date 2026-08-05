@@ -331,10 +331,18 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
             Vector2f.add(fillUvOffsetPx, drift, fillUvOffsetPx);
 
-            //the eddy at the rim, spooling up with the pond - a rupture half open turns half as hard
-            maskedRenderer.setSwirl(PondConstants.POND_SWIRL_TWIST * activity,
-                    elapsed * PondConstants.POND_SWIRL_RATE,
+            //the eddy at the rim, spooling up with the pond - a rupture half open turns half as
+            //hard. The breathing is folded in here, so the angle the shader gets is always
+            //bounded: a standing turn that swells and eases, never one that winds up forever
+            float breathe = 1f + PondConstants.POND_SWIRL_BREATHE
+                    * (float) Math.sin(elapsed * PondConstants.POND_SWIRL_RATE);
+            maskedRenderer.setSwirl(PondConstants.POND_SWIRL_TWIST * activity * breathe,
                     PondConstants.POND_SWIRL_EDGE);
+
+            //and the funnel under it, opening out with the pond the same way
+            maskedRenderer.setWell(PondConstants.POND_WELL_DEPTH * activity,
+                    PondConstants.POND_WELL_GAMMA,
+                    PondConstants.POND_WELL_DIM);
 
             maskedRenderer.render(
                     starfield,

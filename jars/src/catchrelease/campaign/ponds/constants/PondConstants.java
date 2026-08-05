@@ -101,17 +101,39 @@ public class PondConstants {
     public static final float DEPTH_DRAIN = 0.08f;
 
     /**
-     * The eddy at the rim. TWIST is radians at the strongest point of the band, RATE is how fast
-     * that turn eases one way and back, and EDGE is the radius the band starts at, as a fraction
-     * of the mask's own radius.
+     * The well: what makes the rupture read as a hole rather than a disc of space. Not a rotation
+     * - a rotation only ever reads as a lens error - but a radial remap of the fill, r to
+     * r^GAMMA, which compresses the fill ever harder towards the centre the way a funnel wall
+     * does when looked at from above, and lands back where it started at the rim so the remapped
+     * fill meets the space outside the mask without a seam.
      * <p>
-     * Deliberately small, and deliberately kept off the middle. The pond's surface is a hand-made
-     * sprite drifting under a warp grid, and that is what the water is meant to read as; a twist
-     * strong enough to be noticed in the centre does not sit on top of that effect, it replaces
-     * it. Held out past EDGE it is something the eye catches at the rim and not a second, louder
-     * warper fighting the first.
+     * DEPTH is how far that remap is blended in, 0 flat to 1 the full funnel, and is what to turn
+     * first if the hole is too shallow or too deep. GAMMA is the funnel's profile: under 1, and
+     * lower is a steeper, narrower throat - at 1 the remap does nothing at any DEPTH. DIM is how
+     * dark the fill goes at the dead centre, gone by two thirds of the way out; the throat is dark
+     * because it is far away, and the depth motes read better lighting a dark floor than floating
+     * on a bright one. The remap is static, so nothing here can smear over a long session - the
+     * only motion through it is the fill's own drift, which the funnel bends as it passes.
      */
-    public static final float POND_SWIRL_TWIST = 0.12f;
+    public static final float POND_WELL_DEPTH = 0.7f;
+    public static final float POND_WELL_GAMMA = 0.6f;
+    public static final float POND_WELL_DIM = 0.4f;
+
+    /**
+     * The eddy at the rim, riding on the well rather than carrying the effect alone. TWIST is
+     * radians at the strongest point of the band and EDGE the radius the band starts at, as a
+     * fraction of the mask's own radius - kept off the middle, where the funnel and the warp grid
+     * own the water, so the twist is something the eye catches at the rim and not a second,
+     * louder warper fighting the first. TWIST is a standing turn, not a spin: the drifting fill
+     * flows through a fixed curl, which is what keeps the band from shearing itself into mush
+     * over hours the way an accumulating angle did.
+     * <p>
+     * BREATHE and RATE are the life on top: the twist swells by BREATHE of itself and eases back
+     * once per 2*pi/RATE seconds. BREATHE stays under 1 so the turn never reverses - a rim that
+     * changes direction reads as a glitch, not water.
+     */
+    public static final float POND_SWIRL_TWIST = 0.45f;
+    public static final float POND_SWIRL_BREATHE = 0.35f;
     public static final float POND_SWIRL_RATE = 0.25f;
     public static final float POND_SWIRL_EDGE = 0.55f;
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
