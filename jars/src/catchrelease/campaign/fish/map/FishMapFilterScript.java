@@ -9,9 +9,11 @@ import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -191,6 +193,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
                 Global.getSettings().getString("defaultFont"),
                 player.getColor(), player.getDarkUIColor(), player.getBrightUIColor());
 
+        //the key digit in the highlight colour, the way vanilla's own row wears its numbers
+        Object title = ReflectionUtils.invokeIfExists(checkbox, "getTitle");
+        if (title instanceof LabelAPI) {
+            ((LabelAPI) title).setHighlightColor(Misc.getHighlightColor());
+            ((LabelAPI) title).setHighlight("7");
+        }
+
         //the game's buttons do not take the checkbox raw: vanilla's factory reads
         //  new n(new m(checkbox), listener)
         //where m is the adapter the template's getRenderer() returned - the checkbox speaks one
@@ -320,29 +329,51 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         }
     }
 
-    /** Every shown species' waters, cut once and cached, lit where the selection is. */
+    /**
+     * The waters the current mode calls for, cut once and cached. CATEGORY shades each enabled
+     * type's whole territory as one shape; SPECIES shades exactly what the player has picked.
+     * Either way the count on screen stays small, which is what keeps the map light.
+     */
     protected void rebuildBlobs() {
         if (pane == null || overlay == null) return;
 
         List<FishPresenceOverlay.Blob> blobs = new ArrayList<>();
 
-        for (FishSpec spec : FishPresence.getShown(pane.getFilter())) {
-            if (!FishPresence.showsRegions(spec)) continue;
+        if (pane.getMode() == FishMapPane.Mode.CATEGORY) {
+            for (FishType type : FishType.values()) {
+                if (!pane.getFilter().types.contains(type)) continue;
 
-            FishPresenceField.Mesh mesh = meshCache.get(spec.id);
+                FishPresenceField.Mesh mesh = meshCache.get("type:" + type.name());
 
-            if (mesh == null) {
-                List<Vector2f> hosts = FishPresence.getHostLocations(spec);
-                if (hosts.isEmpty()) continue;
+                if (mesh == null) {
+                    List<Vector2f> hosts = FishPresence.getTypeHostLocations(type);
+                    if (hosts.isEmpty()) continue;
 
-                mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
-                meshCache.put(spec.id, mesh);
+                    mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
+                    meshCache.put("type:" + type.name(), mesh);
+                }
+
+                if (!mesh.isEmpty()) blobs.add(new FishPresenceOverlay.Blob(mesh, type.color));
             }
+        } else {
+            for (String id : pane.getSelectedIds()) {
+                FishSpec spec = FishPresence.getSpec(id);
+                if (spec == null || !FishPresence.isKnown(spec) || !FishPresence.showsRegions(spec)) {
+                    continue;
+                }
 
-            if (mesh.isEmpty()) continue;
+                FishPresenceField.Mesh mesh = meshCache.get("spec:" + id);
 
-            blobs.add(new FishPresenceOverlay.Blob(mesh, spec.rarity.color,
-                    spec.id.equals(pane.getSelectedId())));
+                if (mesh == null) {
+                    List<Vector2f> hosts = FishPresence.getHostLocations(spec);
+                    if (hosts.isEmpty()) continue;
+
+                    mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
+                    meshCache.put("spec:" + id, mesh);
+                }
+
+                if (!mesh.isEmpty()) blobs.add(new FishPresenceOverlay.Blob(mesh, spec.rarity.color));
+            }
         }
 
         overlay.setBlobs(blobs);
@@ -378,6 +409,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         clearComponents();
         mapScreen = null;
         failed = false;
+
+        //cut fresh next open: a catch or a bought chart between opens changes what is drawn
+        meshCache.clear();
     }
 
     protected void clearComponents() {

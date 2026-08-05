@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
-import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -28,14 +27,14 @@ public class FishPresence {
     public static class Filter {
 
         public String search = "";
-        public final Set<FishRarity> rarities = new LinkedHashSet<>();
+        public final Set<FishType> types = new LinkedHashSet<>();
 
         public Filter() {
-            for (FishRarity rarity : FishRarity.values()) rarities.add(rarity);
+            for (FishType type : FishType.values()) types.add(type);
         }
 
         public boolean accepts(FishSpec spec) {
-            if (!rarities.contains(spec.rarity)) return false;
+            if (!types.contains(FishType.of(spec))) return false;
             if (search == null || search.trim().isEmpty()) return true;
 
             String needle = search.trim().toLowerCase();
@@ -89,6 +88,34 @@ public class FishPresence {
         }
 
         return hosts;
+    }
+
+    /**
+     * Every system any species of the type haunts, deduplicated - the union that CATEGORY mode
+     * cuts as one shape. A system's location object is the system's own, so identity is enough.
+     */
+    public static List<Vector2f> getTypeHostLocations(FishType type) {
+        Set<Vector2f> hosts = new LinkedHashSet<>();
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (FishType.of(spec) != type) continue;
+            if (!isKnown(spec) || !showsRegions(spec)) continue;
+
+            hosts.addAll(getHostLocations(spec));
+        }
+
+        return new ArrayList<>(hosts);
+    }
+
+    public static FishSpec getSpec(String id) {
+        if (id == null) return null;
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec != null && id.equals(spec.id)) return spec;
+        }
+
+        return null;
     }
 
     /** Where pointing the map at this species should land: the record catch, else its first water. */
