@@ -22,8 +22,11 @@ import java.util.List;
  * the track while the catch ran; this is the receipt afterwards, and mixing the two - a tally
  * arriving while there was still a fish to fly - would put reading where playing goes.
  * <p>
- * Same anatomy as the readout on purpose: the square at the top at the same height, the title
- * under it, the list under that, arriving a line at a time to the same sound. Each line is a
+ * Same anatomy as the readout on purpose - the square at the top, the title under it, the list
+ * under that, arriving a line at a time to the same sound - but not the same frame: the card
+ * hugs its content instead of standing floor to ceiling around three rows, and its square is
+ * pinned level with the readout's specimen, so the two read as a pair of exhibits rather than
+ * a pair of pillars. Each line is a
  * thing that went into the hold, wearing the cargo icon the hold will show it under, in its
  * tier's colour - so the card reads as cargo, not as prose.
  */
@@ -107,7 +110,7 @@ public class LootResultPanel {
 
         loadFonts();
         layout.fitLootContent(getContentWidth());
-        layout.centerLootContent(getContentHeight());
+        layout.alignLootContent(getContentHeight());
 
         renderPanel(layout, alphaMult);
         renderBox(layout, alphaMult);

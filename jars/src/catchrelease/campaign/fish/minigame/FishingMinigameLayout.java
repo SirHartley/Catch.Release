@@ -47,8 +47,9 @@ public class FishingMinigameLayout {
     public float boxSize;
 
     /**
-     * The loot card's panel, off the LEFT edge - the readout's mirror. Same width, same height,
-     * same box size and the same vertical manners, so the two cards flank the catch as a pair.
+     * The loot card's panel, off the LEFT edge - the readout's mirror in width and box size, but
+     * not in height: it hugs its content, and its square is pinned level with the readout's, so
+     * the two flank the catch as a pair of exhibits rather than a pair of pillars.
      */
     public float lootPanelX;
     public float lootPanelY;
@@ -192,12 +193,21 @@ public class FishingMinigameLayout {
         lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
     }
 
-    /** The loot card's version of {@link #centerResultContent}, same reasoning, its own box. */
-    public void centerLootContent(float contentHeight) {
-        float centeredTop = lootPanelY + (lootPanelHeight + contentHeight) * 0.5f;
-        float highestTop = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD;
+    /**
+     * Sets the loot card's height and place from its content, rather than centring it in a
+     * full-height panel the way the readout is centred. The two cards carry different amounts -
+     * the readout a whole tally, the loot a handful of rows - and centring each in the same tall
+     * frame left their squares at different heights and the loot card mostly void. So the loot
+     * card hugs what it holds, and its square is pinned level with the readout's: {@code boxY}
+     * is already settled by the time this runs, because the readout renders first.
+     */
+    public void alignLootContent(float contentHeight) {
+        lootBoxY = boxY;
 
-        lootBoxY = Math.min(centeredTop, highestTop) - boxSize;
+        float top = lootBoxY + boxSize + FishConstants.MINIGAME_RESULT_PAD;
+
+        lootPanelHeight = contentHeight + FishConstants.MINIGAME_RESULT_PAD * 2f;
+        lootPanelY = top - lootPanelHeight;
     }
 
 }
