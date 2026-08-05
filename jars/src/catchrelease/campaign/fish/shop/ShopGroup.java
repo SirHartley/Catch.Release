@@ -12,14 +12,14 @@ import catchrelease.memory.upgrades.UpgradeStat;
  */
 public enum ShopGroup {
 
-    SEARCHLIGHTS("Searchlights", "Lights"),
+    SEARCHLIGHTS("Breach lamps", "Lamps"),
     DRONES("Drones", "Drones"),
     HARPOON("Harpoon", "Harpoon"),
     DEPTH_BOMBS("Depth bombs", "Bombs"),
     THE_CATCH("The catch", "Catch"),
     DRONE_TACKLE("Drone tackle", "Drone rig"),
     HARPOON_TIPS("Harpoon tips", "Harpoon"),
-    SEARCHLIGHT_RIG("Searchlight rig", "Light rig"),
+    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig"),
     BOMB_RIG("Bomb rig", "Bomb rig");
 
     public final String title;

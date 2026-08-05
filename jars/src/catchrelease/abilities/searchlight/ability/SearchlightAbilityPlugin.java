@@ -123,7 +123,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             timePassed = 0f;
         }
 
-        fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Searchlights");
+        fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Breach lamps");
 
         if (level <= 0) {
             cleanupImpl();
@@ -226,7 +226,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            LabelAPI title = tooltip.addTitle("Search Lights" + status);
+            LabelAPI title = tooltip.addTitle("Breach Lamps" + status);
             title.highlightLast(status);
             title.setHighlightColor(gray);
         } else {
@@ -236,13 +236,15 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float pad = 10f;
 
 
-        tooltip.addPara("Toggle the search lights installed on fishing trawlers.", pad);
+        tooltip.addPara("Toggle the breach lamps installed on fishing trawlers.", pad);
 
 
-        tooltip.addPara("Hyperspace motes will be drawn to, and made visible by these lights across dimensions. Use %s and harpoon them for a quick catch." +
-                        "The severe radiation increases the range at which the fleet can be detected by %s.", pad,
+        tooltip.addPara("Each lamp burns a window through the fabric as it sweeps. Whatever swims"
+                        + " under one is %s and can be harpooned before the mark fades."
+                        + " The severe radiation increases the range at which the fleet can be"
+                        + " detected by %s.", pad,
                 highlight,
-                "dive bombs",
+                "exposed",
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
 

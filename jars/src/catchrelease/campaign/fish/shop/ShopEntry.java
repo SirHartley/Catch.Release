@@ -51,7 +51,12 @@ public class ShopEntry {
     public String getName() {
         if (kind == Kind.TACKLE) return tackle.name;
 
-        return Misc.ucFirst(stat.id.replace('_', ' '));
+        //the ids still say searchlight, because ids live in saves and renaming those is a
+        //migration; the rig was renamed to breach lamps, and the display follows without them
+        String id = stat.id.startsWith("searchlight")
+                ? stat.id.replaceFirst("^searchlight", "lamp") : stat.id;
+
+        return Misc.ucFirst(id.replace('_', ' '));
     }
 
     /**
