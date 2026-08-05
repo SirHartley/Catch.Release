@@ -10,6 +10,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lazywizard.lazylib.ui.LazyFont;
+import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -59,7 +60,20 @@ public class LootResultPanel {
     protected int shown = 0;
     protected boolean skipped = false;
 
-    protected final List<CatchResultPanel.Bubble> bubbles = new ArrayList<>();
+    /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
+    protected static class Coin {
+        float fx;       //where across the card it falls, as a fraction of the panel's width
+        float startY;   //how far into the fall it began, in pixels, so they never start in a row
+        float speed;    //pixels per second, downward
+        float size;     //radius when face-on, in pixels
+        float flipRate; //radians per second of tumble
+        float phase;    //where in the tumble it began
+    }
+
+    /** Straight cuts around a coin. Half of what {@link Disc} uses - smooth at radii this small. */
+    protected static final int COIN_SEGMENTS = 16;
+
+    protected final List<Coin> coins = new ArrayList<>();
 
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
@@ -159,7 +173,8 @@ public class LootResultPanel {
         return height;
     }
 
-    /** The same field, bubbles and dressing the readout's panel wears, on its own rectangle. */
+    /** The readout's field and dressing on the loot card's own rectangle - but coin rain where the
+     *  readout has bubbles. The frames match on purpose; the weather is what tells the cards apart. */
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Color.BLACK, 0.85f * alphaMult);
@@ -167,40 +182,77 @@ public class LootResultPanel {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
 
-        renderBubbles(layout, alphaMult);
+        renderCoins(layout, alphaMult);
 
         CatchResultPanel.dress(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, alphaMult);
     }
 
-    protected void renderBubbles(FishingMinigameLayout layout, float alphaMult) {
-        if (bubbles.isEmpty()) spawnBubbles();
+    /**
+     * Gold coins raining down the card, each tumbling face over edge as it falls and wrapping back
+     * to the top, so the rain holds for however long the card is read.
+     * <p>
+     * The tumble is the coin's width running on |cos| while its height holds - narrowing to a bright
+     * sliver at edge-on and opening back out - rather than any rotation, because a rotated disc
+     * reads as a plate spinning on the glass, not a coin turning in the fall.
+     */
+    protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
+        if (coins.isEmpty()) spawnCoins();
 
-        for (CatchResultPanel.Bubble b : bubbles) {
-            float risen = (b.startY + b.speed * elapsed) % layout.lootPanelHeight;
+        Color gold = FishConstants.MINIGAME_LOOT_COIN_COLOR;
+        float r = gold.getRed() / 255f;
+        float g = gold.getGreen() / 255f;
+        float b = gold.getBlue() / 255f;
 
-            float x = layout.lootPanelX + b.fx * layout.lootPanelWidth
-                    + (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_BUBBLE_DRIFT_RATE + b.phase)
-                            * FishConstants.MINIGAME_RESULT_BUBBLE_DRIFT;
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            Disc.drawOutline(x, layout.lootPanelY + risen, b.radius, Misc.getBrightPlayerColor(),
-                    FishConstants.MINIGAME_RESULT_BUBBLE_ALPHA * alphaMult, 1f);
+        for (Coin c : coins) {
+            float fallen = (c.startY + c.speed * elapsed) % layout.lootPanelHeight;
+
+            float x = layout.lootPanelX + c.fx * layout.lootPanelWidth;
+            float y = layout.lootPanelY + layout.lootPanelHeight - fallen;
+
+            //1 face-on, 0 edge-on; the floor keeps a sliver of rim rather than a blink
+            float face = Math.abs((float) Math.cos(elapsed * c.flipRate + c.phase));
+            float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
+
+            //the rim catches the light as the face turns away, which is what sells the turn
+            float alpha = FishConstants.MINIGAME_LOOT_COIN_ALPHA * alphaMult
+                    * (1f + FishConstants.MINIGAME_LOOT_COIN_EDGE_SHINE * (1f - face) * (1f - face));
+
+            GL11.glColor4f(r, g, b, alpha);
+
+            GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+            GL11.glVertex2f(x, y);
+            for (int i = 0; i <= COIN_SEGMENTS; i++) {
+                double angle = Math.toRadians(i * 360.0 / COIN_SEGMENTS);
+                GL11.glVertex2f(x + (float) Math.cos(angle) * width,
+                        y + (float) Math.sin(angle) * c.size);
+            }
+            GL11.glEnd();
         }
+
+        GL11.glPopAttrib();
     }
 
-    protected void spawnBubbles() {
-        for (int i = 0; i < FishConstants.MINIGAME_RESULT_BUBBLES; i++) {
-            CatchResultPanel.Bubble b = new CatchResultPanel.Bubble();
+    protected void spawnCoins() {
+        for (int i = 0; i < FishConstants.MINIGAME_LOOT_COINS; i++) {
+            Coin c = new Coin();
 
-            b.fx = MathUtils.getRandomNumberInRange(0.1f, 0.9f);
-            b.startY = MathUtils.getRandomNumberInRange(0f, FishConstants.MINIGAME_PANEL_HEIGHT);
-            b.speed = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_RESULT_BUBBLE_SPEED_MIN,
-                    FishConstants.MINIGAME_RESULT_BUBBLE_SPEED_MAX);
-            b.radius = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_RESULT_BUBBLE_SIZE_MIN,
-                    FishConstants.MINIGAME_RESULT_BUBBLE_SIZE_MAX);
-            b.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+            c.fx = MathUtils.getRandomNumberInRange(0.1f, 0.9f);
+            c.startY = MathUtils.getRandomNumberInRange(0f, FishConstants.MINIGAME_PANEL_HEIGHT);
+            c.speed = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_LOOT_COIN_SPEED_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_SPEED_MAX);
+            c.size = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_LOOT_COIN_SIZE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_SIZE_MAX);
+            c.flipRate = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_LOOT_COIN_FLIP_RATE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_FLIP_RATE_MAX);
+            c.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
 
-            bubbles.add(b);
+            coins.add(c);
         }
     }
 

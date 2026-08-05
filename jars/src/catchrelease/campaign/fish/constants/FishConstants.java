@@ -163,8 +163,18 @@ public class FishConstants {
     public static final float TREASURE_POSITION_INSET = 0.18f;
     public static final float TREASURE_LIFETIME_MIN = 6f;
     public static final float TREASURE_LIFETIME_MAX = 11f;
-    public static final float TREASURE_HOLD_TIME = 1.1f;
+    public static final float TREASURE_HOLD_TIME = 1.45f;
     public static final float TREASURE_HOLD_DECAY = 1.5f;
+
+    /**
+     * Where the closing ring stops, as a multiple of the icon's own radius.
+     * <p>
+     * Just outside it. The ring is the only thing saying how far along the hold is, so it has to
+     * arrive somewhere the eye reads as arrival - and a ring that halts with a visible gap still
+     * between it and the icon reads as an animation that was cut off rather than one that finished.
+     * Not touching, either: a ring drawn exactly on the edge fights the icon's own outline.
+     */
+    public static final float TREASURE_RING_END = 1.15f;
 
     /** Stand-in art, and the sizes it and its clock are drawn at. */
     public static final String TREASURE_ICON = "graphics/catchrelease/icon/small_icon_catchrelease2.png";
@@ -186,6 +196,37 @@ public class FishConstants {
     public static final float MINIGAME_LOOT_ICON = 24f;
     public static final float MINIGAME_LOOT_ICON_GAP = 8f;
     public static final float MINIGAME_LOOT_COUNT_GAP = 12f;
+
+    /**
+     * Gold coins down the loot card, behind the content. The readout's bubbles say water, and water
+     * is the catch's motif, not the till's - what came out of the wreck should rain. Held to the
+     * bubbles' restraint all the same - few, faint, texture rather than weather - because this card
+     * is a receipt before it is a spectacle. Each coin falls at its own speed between the two SPEEDs
+     * and tumbles at its own rate between the two FLIP_RATEs, in radians a second, from its own
+     * point in the turn, so the rain never moves in step with itself.
+     */
+    public static final int MINIGAME_LOOT_COINS = 10;
+    public static final float MINIGAME_LOOT_COIN_ALPHA = 0.14f;
+    public static final float MINIGAME_LOOT_COIN_SPEED_MIN = 24f;
+    public static final float MINIGAME_LOOT_COIN_SPEED_MAX = 52f;
+    public static final float MINIGAME_LOOT_COIN_SIZE_MIN = 3f;
+    public static final float MINIGAME_LOOT_COIN_SIZE_MAX = 6f;
+    public static final float MINIGAME_LOOT_COIN_FLIP_RATE_MIN = 2.5f;
+    public static final float MINIGAME_LOOT_COIN_FLIP_RATE_MAX = 5f;
+
+    /**
+     * The flip is the coin's width running on |cos| while its height holds: a disc narrowing to an
+     * edge and opening back out is a coin going face over edge, where a rotated disc is only a plate
+     * spinning on the glass. EDGE is the width kept at edge-on, as a fraction of the coin's size, so
+     * the turn bottoms out in a sliver rather than a blink; SHINE is how much brighter that sliver
+     * gets than the face - the rim catching the light, which is what sells the turn as metal.
+     */
+    public static final float MINIGAME_LOOT_COIN_EDGE = 0.15f;
+    public static final float MINIGAME_LOOT_COIN_EDGE_SHINE = 1.5f;
+
+    /** Old gold rather than yellow. Yellow is a light source against the black field, and the coins
+     *  are texture behind a readout, not lamps in it. */
+    public static final Color MINIGAME_LOOT_COIN_COLOR = new Color(212, 172, 64);
 
     //minigame - the bar the player flies
     /** Used when the upgrade stat is missing, so a fresh save can still fish. */

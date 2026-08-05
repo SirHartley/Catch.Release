@@ -194,20 +194,25 @@ public class FishingMinigameLayout {
     }
 
     /**
-     * Sets the loot card's height and place from its content, rather than centring it in a
-     * full-height panel the way the readout is centred. The two cards carry different amounts -
-     * the readout a whole tally, the loot a handful of rows - and centring each in the same tall
-     * frame left their squares at different heights and the loot card mostly void. So the loot
-     * card hugs what it holds, and its square is pinned level with the readout's: {@code boxY}
-     * is already settled by the time this runs, because the readout renders first.
+     * Puts the loot card's square level with the readout's, and leaves its frame alone.
+     * <p>
+     * The frame is the readout's frame: the same width, the same full height, standing on the same
+     * line. Shrinking it to hug its rows was tried, on the reasoning that a card holding three
+     * things should not be as tall as one holding a whole tally - and what it actually produced was
+     * two cards of different heights either side of the track, which reads as one of them having
+     * gone wrong rather than as either of them fitting its contents.
+     * <p>
+     * The square is pinned rather than centred, which is the one thing worth keeping from that: the
+     * two icons sit on the same line, so the eye crosses from one card to the other without
+     * travelling. {@code boxY} is already settled by the time this runs, because the readout
+     * renders first.
+     *
+     * @param contentHeight what the card holds, unused now the frame no longer bends to it - kept
+     *                      so the caller still measures before it draws, which is what stops the
+     *                      column resizing while its rows are still arriving
      */
     public void alignLootContent(float contentHeight) {
         lootBoxY = boxY;
-
-        float top = lootBoxY + boxSize + FishConstants.MINIGAME_RESULT_PAD;
-
-        lootPanelHeight = contentHeight + FishConstants.MINIGAME_RESULT_PAD * 2f;
-        lootPanelY = top - lootPanelHeight;
     }
 
 }

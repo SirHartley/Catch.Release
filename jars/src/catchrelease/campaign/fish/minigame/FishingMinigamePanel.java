@@ -434,11 +434,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             sprite.renderAtCenter(centerX, centerY);
         }
 
-        //the ring closing as it is held, so the player can see the hold landing rather than guess
+        //the ring closing as it is held, so the player can see the hold landing rather than guess.
+        //It closes onto the icon's own edge and stops a little outside it: the radius used to be
+        //worked out off the icon's full width rather than its half, so the ring gave up while it was
+        //still most of its own width clear of the thing it was closing on - which is what read as
+        //the animation being cut off rather than finishing
         float held = treasure.getHeldFraction();
         if (held > 0f) {
-            Disc.drawOutline(centerX, centerY,
-                    FishConstants.TREASURE_ICON_SIZE * (1f - 0.35f * held),
+            float from = FishConstants.TREASURE_ICON_SIZE;
+            float to = FishConstants.TREASURE_ICON_SIZE * 0.5f * FishConstants.TREASURE_RING_END;
+
+            Disc.drawOutline(centerX, centerY, from + (to - from) * held,
                     treasure.rarity.color, alphaMult, 2f);
         }
 
