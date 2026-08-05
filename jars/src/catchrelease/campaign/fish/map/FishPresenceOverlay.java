@@ -38,14 +38,30 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     public static final float STRIPE_SPACING = 16f;
 
-    /** One set of waters: its cached world-space rings and its colour. */
+    /** How a blob's fill is painted. The three picks each get their own, so overlaps read. */
+    public static final int STYLE_SOLID = 0;
+    public static final int STYLE_STRIPE_RIGHT = 1;
+    public static final int STYLE_STRIPE_LEFT = 2;
+
+    /**
+     * One set of waters: its cached world-space rings, its colour, how its fill is painted, and
+     * which of fill and outline it actually draws - a same-coloured group shares one merged
+     * outline blob while each member keeps its own fill, so the border never stacks on itself.
+     */
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
         public final Color color;
+        public final int style;
+        public final boolean drawFill;
+        public final boolean drawOutline;
 
-        public Blob(FishPresenceField.Mesh mesh, Color color) {
+        public Blob(FishPresenceField.Mesh mesh, Color color, int style,
+                    boolean drawFill, boolean drawOutline) {
             this.mesh = mesh;
             this.color = color;
+            this.style = style;
+            this.drawFill = drawFill;
+            this.drawOutline = drawOutline;
         }
     }
 
@@ -89,16 +105,19 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        boolean striped = blobs.size() > 1;
-
-        for (int i = 0; i < blobs.size(); i++) {
-            renderBlob(blobs.get(i), i, striped, factor, centerX, centerY, alphaMult);
+        //fills first, outlines over all of them - a merged border belongs on top of every
+        //member's fill, not underneath the next one's
+        for (Blob blob : blobs) {
+            if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
+        }
+        for (Blob blob : blobs) {
+            if (blob.drawOutline) renderOutline(blob, factor, centerX, centerY, alphaMult);
         }
 
         GL11.glPopAttrib();
     }
 
-    protected void renderBlob(Blob blob, int index, boolean striped, float factor,
+    protected void renderFill(Blob blob, float factor,
                               float centerX, float centerY, float alphaMult) {
         if (blob.mesh == null || blob.mesh.isEmpty()) return;
 
@@ -144,21 +163,27 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         GL11.glColor4f(r, g, b, FILL_ALPHA * alphaMult);
 
-        if (striped) {
-            renderStripes(boxMinX, boxMinY, boxMaxX, boxMaxY, index);
-        } else {
+        if (blob.style == STYLE_SOLID) {
             GL11.glBegin(GL11.GL_QUADS);
             GL11.glVertex2f(boxMinX, boxMinY);
             GL11.glVertex2f(boxMaxX, boxMinY);
             GL11.glVertex2f(boxMaxX, boxMaxY);
             GL11.glVertex2f(boxMinX, boxMaxY);
             GL11.glEnd();
+        } else {
+            renderStripes(boxMinX, boxMinY, boxMaxX, boxMaxY, blob.style);
         }
 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
+    }
 
-        //the outline, stroked straight from the same rings the fill came from
-        GL11.glColor4f(r, g, b, OUTLINE_ALPHA * alphaMult);
+    /** The border, stroked straight from the rings - the fill's own, or a group's merged ones. */
+    protected void renderOutline(Blob blob, float factor,
+                                 float centerX, float centerY, float alphaMult) {
+        if (blob.mesh == null || blob.mesh.isEmpty()) return;
+
+        GL11.glColor4f(blob.color.getRed() / 255f, blob.color.getGreen() / 255f,
+                blob.color.getBlue() / 255f, OUTLINE_ALPHA * alphaMult);
         GL11.glBegin(GL11.GL_QUADS);
 
         for (float[] loop : blob.mesh.loops) {
@@ -176,12 +201,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * Diagonal bands clipped by the blob's stencil, offset by the blob's place in the list - so
-     * two overlapping waters take turns at the pixels instead of piling on them.
+     * Diagonal bands clipped by the blob's stencil - rising to the right for the second pick,
+     * to the left for the third, so where waters overlap the weaves cross instead of piling.
      */
-    protected void renderStripes(float minX, float minY, float maxX, float maxY, int index) {
+    protected void renderStripes(float minX, float minY, float maxX, float maxY, int style) {
         //the diagonal's unit vectors: along the stripe, and across it
-        float dirX = 0.70710678f, dirY = 0.70710678f;
+        float dirX = 0.70710678f;
+        float dirY = style == STYLE_STRIPE_LEFT ? -0.70710678f : 0.70710678f;
         float normX = -dirY, normY = dirX;
 
         //the box's reach along each axis, from its corners
@@ -202,9 +228,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
 
         float width = STRIPE_SPACING * 0.5f;
-        float phase = (index % 2) * width;
 
-        float start = (float) Math.floor(acrossMin / STRIPE_SPACING) * STRIPE_SPACING + phase;
+        float start = (float) Math.floor(acrossMin / STRIPE_SPACING) * STRIPE_SPACING;
 
         GL11.glBegin(GL11.GL_QUADS);
 

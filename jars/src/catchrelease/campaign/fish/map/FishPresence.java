@@ -23,18 +23,18 @@ import java.util.Set;
  */
 public class FishPresence {
 
-    /** What the pane is currently letting through. */
+    /**
+     * What the pane is currently letting through. Starts with no types enabled, so a freshly
+     * opened map shades nothing until the player - or the codex - asks it to; an empty type set
+     * leaves the list itself unfiltered, since chips narrow the list only once any are on.
+     */
     public static class Filter {
 
         public String search = "";
         public final Set<FishType> types = new LinkedHashSet<>();
 
-        public Filter() {
-            for (FishType type : FishType.values()) types.add(type);
-        }
-
         public boolean accepts(FishSpec spec) {
-            if (!types.contains(FishType.of(spec))) return false;
+            if (!types.isEmpty() && !types.contains(FishType.of(spec))) return false;
             if (search == null || search.trim().isEmpty()) return true;
 
             String needle = search.trim().toLowerCase();
