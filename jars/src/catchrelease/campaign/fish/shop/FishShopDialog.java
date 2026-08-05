@@ -140,7 +140,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         /**
          * Everything on sale, shelf by shelf: every stat the sheet knows grouped by its gear, then
-         * each rig's modules with the empty slot listed last as a way out of all of them.
+         * each rig's modules with the empty slot listed first as a way out of all of them.
          */
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
@@ -157,13 +157,23 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 }
             }
 
-            //the empty slot first: the way out of every module is the first thing on the shelf
-            for (Tackle.Fit rig : new Tackle.Fit[]{Tackle.Fit.DRONE, Tackle.Fit.HARPOON, Tackle.Fit.SEARCHLIGHT}) {
+            //every rig there is, rather than a list of the ones that had been thought of. A rig
+            //named here and nowhere else is a shelf that never appears, which is how the lights
+            //came to have tackle nobody could reach
+            for (Tackle.Fit rig : Tackle.Fit.values()) {
+                if (!rig.isRig()) continue;
+
+                List<Tackle> options = TackleManager.getOptions(rig);
+                options.remove(Tackle.NONE);
+
+                //a rig with nothing to bolt on gets no shelf at all - an empty slot on its own is
+                //a shelf holding the absence of the thing it is a shelf for
+                if (options.isEmpty()) continue;
+
+                //the empty slot first: the way out of every module is the first thing on the shelf
                 entries.add(ShopEntry.of(Tackle.NONE, rig));
 
-                for (Tackle tackle : TackleManager.getOptions(rig)) {
-                    if (tackle != Tackle.NONE) entries.add(ShopEntry.of(tackle, rig));
-                }
+                for (Tackle tackle : options) entries.add(ShopEntry.of(tackle, rig));
             }
         }
 
@@ -234,12 +244,32 @@ public class FishShopDialog implements InteractionDialogPlugin {
             added.add(header);
         }
 
-        /** The gear a main tab sells, in shelf order. */
+        /**
+         * The gear a main tab sells, in shelf order - read off the stock rather than written down.
+         * <p>
+         * Both halves of the shop are stocked from somewhere that can grow: the upgrades off the
+         * rows in the sheet, the modifiers off whatever tackle exists for a rig. A list of shelves
+         * kept by hand beside either of those is a list that goes stale the first time something is
+         * added, and it did: the searchlight rig had tackle, had a shelf to put it on, and had its
+         * stock built every time the shop opened, and none of it could be reached because the tab
+         * it needed was not in the array.
+         * <p>
+         * Asked of the entries, so a shelf exists exactly when there is something on it. Order is
+         * the order the shelves are declared in, which is what the array said by hand.
+         */
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
-            return tab == ShopEntry.Kind.UPGRADE
-                    ? new ShopGroup[]{ShopGroup.SEARCHLIGHTS, ShopGroup.DRONES, ShopGroup.HARPOON,
-                            ShopGroup.DEPTH_BOMBS}
-                    : new ShopGroup[]{ShopGroup.DRONE_TACKLE, ShopGroup.HARPOON_TIPS};
+            List<ShopGroup> out = new ArrayList<>();
+
+            for (ShopGroup group : ShopGroup.values()) {
+                for (ShopEntry entry : entries) {
+                    if (entry.kind != tab || entry.group != group) continue;
+
+                    out.add(group);
+                    break;
+                }
+            }
+
+            return out.toArray(new ShopGroup[0]);
         }
 
         /** What the current shelf holds - the list and the default selection are both cut from this. */
@@ -277,6 +307,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
             ShopGroup[] groups = getCategories(mainTab);
+
+            //a tab with nothing stocked under it draws no shelves rather than dividing the row
+            //between none of them. Could not happen while the shelves were a written-down array
+            if (groups.length == 0) return;
+
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
@@ -305,7 +340,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
         public void onTabClicked(Object id) {
             if (id instanceof ShopEntry.Kind) {
                 mainTab = (ShopEntry.Kind) id;
-                category = getCategories(mainTab)[0];
+
+                //the first shelf that has anything on it, if any does
+                ShopGroup[] groups = getCategories(mainTab);
+                if (groups.length > 0) category = groups[0];
             } else if (id instanceof ShopGroup) {
                 category = (ShopGroup) id;
             } else {

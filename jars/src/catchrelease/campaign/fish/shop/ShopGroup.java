@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeStat;
 
 /**
@@ -18,7 +19,8 @@ public enum ShopGroup {
     THE_CATCH("The catch", "Catch"),
     DRONE_TACKLE("Drone tackle", "Drone rig"),
     HARPOON_TIPS("Harpoon tips", "Harpoon"),
-    SEARCHLIGHT_RIG("Searchlight rig", "Light rig");
+    SEARCHLIGHT_RIG("Searchlight rig", "Light rig"),
+    BOMB_RIG("Bomb rig", "Bomb rig");
 
     public final String title;
 
@@ -42,5 +44,26 @@ public enum ShopGroup {
         if (id.startsWith("drone") || id.startsWith("fishing_drone")) return DRONES;
 
         return THE_CATCH;
+    }
+
+    /**
+     * The shelf a piece of tackle sits on, by the rig it bolts onto.
+     * <p>
+     * Here rather than at the point the entry is made, for the same reason {@link #forStat} is: a
+     * new rig should be one line in one place, and the thing that has to learn about it is the
+     * shelving, not everything that puts something on a shelf.
+     *
+     * @return null for anything that is not a rig, which has no shelf because nobody owns one
+     */
+    public static ShopGroup forRig(Tackle.Fit rig) {
+        if (rig == null) return null;
+
+        switch (rig) {
+            case DRONE: return DRONE_TACKLE;
+            case HARPOON: return HARPOON_TIPS;
+            case SEARCHLIGHT: return SEARCHLIGHT_RIG;
+            case BOMB: return BOMB_RIG;
+            default: return null;
+        }
     }
 }
