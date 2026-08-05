@@ -353,3 +353,7 @@ catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,Call $catchrelease_
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is marking.,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to bring her a bad one.
 catchrelease_jobDecline:Leave her to it.",
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what the lamps are for.,
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to be in the video.
+catchrelease_jobDecline:Step out of the shot.",
