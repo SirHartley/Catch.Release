@@ -1,9 +1,11 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishLocationSummary;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -56,6 +58,25 @@ public class FishRequirement {
     public SectorRegion origin = null;
 
     /**
+     * How the specimen had to have been taken, or null for either.
+     * <p>
+     * A question about the fisherman rather than about the fish. Somebody who wants one brought in
+     * on a harpoon is asking for a thing that was chased down and speared, not a thing that swam
+     * into a drone line, and the specimen is the same either way - which is exactly why it has to be
+     * recorded at the catch rather than worked out afterwards.
+     */
+    public FishLogEntry.Method method = null;
+
+    /**
+     * What had to have made it reachable, or null for either.
+     * <p>
+     * Stacks with the method, and the two together are the whole of how a catch happened: a harpoon
+     * through a breach lamp is a different afternoon from a harpoon into an open rupture, even for
+     * the same species at the same grade.
+     */
+    public CatchImplement implement = null;
+
+    /**
      * Alternative ways to satisfy the same ask, any one of which will do.
      * <p>
      * Every other axis here stacks - a type and a rarity floor and a grade floor are all true at
@@ -98,6 +119,11 @@ public class FishRequirement {
         if (minWeight > 0f && entry.weight < minWeight) return false;
 
         if (origin != null && entry.origin != origin) return false;
+
+        //a specimen from before either was written down satisfies neither - nothing about it says
+        //it was taken any particular way, which is not the same as having been taken this one
+        if (method != null && entry.method != method) return false;
+        if (implement != null && entry.implement != implement) return false;
 
         if (lowCoherence) {
             if (entry.aberration < LOW_COHERENCE) return false;
@@ -150,7 +176,48 @@ public class FishRequirement {
 
         if (lowCoherence) text.append(", coherence unstable or worse");
 
+        append(text, describeCatch());
+
         return text.toString();
+    }
+
+    /**
+     * How it had to have been taken: "caught with a harpoon through a breach lamp". Without a
+     * leading separator, since whether one is wanted is the caller's question - an alternative that
+     * says nothing else is the first thing in its own clause, and a comma there reads as a stutter.
+     * <p>
+     * Empty when the ask does not care, which is most of the time.
+     */
+    public String describeCatch() {
+        StringBuilder text = new StringBuilder();
+
+        if (method != null) text.append("caught with ").append(getMethodName());
+        if (implement != null) {
+            //"caught with a harpoon through a breach lamp" reads as one thought; "through a breach
+            //lamp" on its own has to say what it is qualifying
+            text.append(method == null ? "taken through " : " through ").append(implement.name);
+        }
+
+        return text.toString();
+    }
+
+    /** Adds a clause to a sentence already under way, with the comma only where one is needed. */
+    protected static void append(StringBuilder text, String clause) {
+        if (clause.isEmpty()) return;
+
+        if (text.length() > 0) text.append(", ");
+
+        text.append(clause);
+    }
+
+    /** The method said the way somebody would say it, rather than the way the log labels it. */
+    protected String getMethodName() {
+        switch (method) {
+            case HARPOON: return "a harpoon";
+            case DRONE: return "LINE drones";
+            case BOMB: return "a depth bomb";
+            default: return "no recorded gear";
+        }
     }
 
     /** The origin said the way the survey lines say it, so one vocabulary covers both. */
@@ -191,6 +258,8 @@ public class FishRequirement {
             text.append("barely holding together");
         }
         if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
+
+        append(text, describeCatch());
 
         String out = text.toString();
 
