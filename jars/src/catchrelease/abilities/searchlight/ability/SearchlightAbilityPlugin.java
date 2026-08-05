@@ -222,6 +222,26 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return false;
     }
 
+    /**
+     * Whether there are windows open right now.
+     * <p>
+     * Every lamp burns one - that stopped being a fitting and became what the rig is - so this is
+     * only asking whether the lights are on. It is still worth a name of its own: what a caller
+     * reaching through a window wants to know is that there is a window, and asking the ability
+     * whether it happens to be toggled is the same fact said in terms of a button.
+     * <p>
+     * Note that {@link #canRunHere(CampaignFleetAPI)} already keeps the lamps off beside an open
+     * rupture, so this and an open pond are mutually exclusive without anybody arbitrating.
+     */
+    public static boolean isBreaching() {
+        CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
+        if (fleet == null) return false;
+
+        AbilityPlugin ability = fleet.getAbility(ABILITY_ID);
+
+        return ability instanceof SearchlightAbilityPlugin && ((SearchlightAbilityPlugin) ability).isActive();
+    }
+
     private void expireLights(boolean withFade){
         for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
     }

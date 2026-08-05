@@ -64,7 +64,9 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (swarm == null || fade <= 0.01f) return;
 
-        Vector2f center = swarm.getTarget();
+        //asked for every frame rather than kept, so a roaming swarm's ring travels with the fleet it
+        //is drawn around instead of being left behind at the spot the drones launched from
+        Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 
         float period = getCircumference() / RodConstants.RING_DASH_COUNT;
@@ -75,7 +77,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     }
 
     protected float getCircumference() {
-        return (float) (2f * Math.PI * FishingDroneSwarmScript.getRingRadius());
+        return (float) (2f * Math.PI * swarm.getRingDrawRadius());
     }
 
     /** Dim while empty; brighter and breathing while there is something in the ring to go after. */
@@ -91,11 +93,13 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
     protected List<Vector2f> getRingVertices(Vector2f center) {
         List<Vector2f> vertices = new ArrayList<>();
+
+        float radius = swarm.getRingDrawRadius();
         float step = 360f / RodConstants.RING_SEGMENTS;
 
         for (int i = 0; i < RodConstants.RING_SEGMENTS; i++) {
-            vertices.add(MathUtils.getPointOnCircumference(center, FishingDroneSwarmScript.getRingRadius(), step * i));
-            vertices.add(MathUtils.getPointOnCircumference(center, FishingDroneSwarmScript.getRingRadius(), step * (i + 1)));
+            vertices.add(MathUtils.getPointOnCircumference(center, radius, step * i));
+            vertices.add(MathUtils.getPointOnCircumference(center, radius, step * (i + 1)));
         }
 
         return vertices;

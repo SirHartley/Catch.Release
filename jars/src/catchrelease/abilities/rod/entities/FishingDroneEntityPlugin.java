@@ -35,6 +35,11 @@ import java.util.logging.Logger;
  * The angle keeps advancing whatever the drone is doing, so one that launches or breaks off to chase
  * something rejoins where its share of the circle has got to, not where it left.
  * <p>
+ * The circle's middle is asked for rather than remembered - see {@link #getOrbitCenter()} - so a
+ * roaming drone flies the same circle around the player's own fleet, and it travels with them. That
+ * is the whole of the difference between a cast and a screen: every mode here is written in terms of
+ * where the middle currently is, and none of them care whether it moved.
+ * <p>
  * The drone owns its movement; {@link catchrelease.abilities.rod.scripts.FishingDroneSwarmScript}
  * owns the decisions and just says which of the four things it should be doing.
  */
@@ -57,15 +62,25 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         public final Vector2f orbitCenter;
         public final float orbitAngle;
         public final Color color;
+        public final boolean roaming;
 
         /**
          * @param orbitAngle this drone's share of the ring, in degrees - the swarm spreads its drones
          *                   evenly so they do not fly on top of each other
          */
         public Params(Vector2f orbitCenter, float orbitAngle, Color color) {
+            this(orbitCenter, orbitAngle, color, false);
+        }
+
+        /**
+         * @param roaming fly the circle around the fleet instead of around {@code orbitCenter} - the
+         *                centre is then read live every frame rather than being the spot handed in
+         */
+        public Params(Vector2f orbitCenter, float orbitAngle, Color color, boolean roaming) {
             this.orbitCenter = orbitCenter;
             this.orbitAngle = orbitAngle;
             this.color = color;
+            this.roaming = roaming;
         }
     }
 
@@ -73,13 +88,16 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected Vector2f orbitCenter;
     protected Color color;
 
+    /** Whether the circle is flown around the fleet rather than around a fixed point. */
+    protected boolean roaming;
+
     /** The circle's own rotation, and this drone's share of it. Its slot is the two added together. */
     protected float ringPhase;
     protected float slotOffset;
 
     /** Where the drone actually is in polar terms, eased towards its slot rather than snapped to it. */
     protected float currentAngle;
-    protected float currentRadius = RodConstants.DRONE_ORBIT_RADIUS;
+    protected float currentRadius;
 
     /** Heading error carried over from joining the circle, bled off rather than snapped out. */
     protected float facingOffset;
@@ -111,11 +129,38 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.orbitCenter = p.orbitCenter;
         this.slotOffset = p.orbitAngle;
         this.color = p.color;
+        this.roaming = p.roaming;
+
+        this.currentRadius = getOrbitRadius();
 
         //so the drones do not all wander in step
         this.wanderPhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2f));
 
         this.trailId = MagicCampaignTrailPlugin.getUniqueID();
+    }
+
+    /**
+     * The middle of the circle this drone flies.
+     * <p>
+     * Read rather than stored, because a roaming drone's circle is the fleet - it is a screen flying
+     * with the player, not a ring dropped on the water. Everything downstream of this is the same
+     * polar flight either way: the circle simply travels, and the drones travel with it without
+     * being told to.
+     */
+    protected Vector2f getOrbitCenter() {
+        if (!roaming) return orbitCenter;
+
+        SectorEntityToken fleet = Global.getSector().getPlayerFleet();
+        if (fleet != null) return fleet.getLocation();
+
+        //nothing left to fly around. A roaming drone was handed no fixed centre to fall back on, so
+        //it holds where it is rather than folding onto a circle around the origin
+        return orbitCenter == null ? entity.getLocation() : orbitCenter;
+    }
+
+    /** How wide that circle is. A roaming screen flies a wider one - see {@link RodConstants#DRONE_ROAM_RADIUS}. */
+    protected float getOrbitRadius() {
+        return roaming ? RodConstants.DRONE_ROAM_RADIUS : RodConstants.DRONE_ORBIT_RADIUS;
     }
 
     /** The drone's own speed, upgraded. Read per frame so a purchase applies to drones already out. */
@@ -174,7 +219,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
                 //aim ahead of the slot, not at it, so the drone arrives already going the way the
                 //circle goes - come in at the slot itself and it would meet the ring head-on and have
                 //to turn ninety degrees on the spot, which is what tears a trail
-                return MathUtils.getPointOnCircumference(orbitCenter, RodConstants.DRONE_ORBIT_RADIUS,
+                return MathUtils.getPointOnCircumference(getOrbitCenter(), getOrbitRadius(),
                         getSlotAngle() + RodConstants.DRONE_JOIN_LEAD_ANGLE);
         }
     }
@@ -186,7 +231,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Where this drone's share of the circle currently is. */
     public Vector2f getOrbitSlot() {
-        return MathUtils.getPointOnCircumference(orbitCenter, RodConstants.DRONE_ORBIT_RADIUS, getSlotAngle());
+        return MathUtils.getPointOnCircumference(getOrbitCenter(), getOrbitRadius(), getSlotAngle());
     }
 
     /**
@@ -194,10 +239,12 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
      * somewhere else does not count - taking up circle flight there would spin the drone on the spot.
      */
     protected boolean isOnTheRing() {
-        float radius = Misc.getDistance(orbitCenter, entity.getLocation());
-        if (Math.abs(radius - RodConstants.DRONE_ORBIT_RADIUS) > RodConstants.DRONE_JOIN_DISTANCE) return false;
+        Vector2f center = getOrbitCenter();
 
-        float tangent = Misc.getAngleInDegrees(orbitCenter, entity.getLocation()) + 90f;
+        float radius = Misc.getDistance(center, entity.getLocation());
+        if (Math.abs(radius - getOrbitRadius()) > RodConstants.DRONE_JOIN_DISTANCE) return false;
+
+        float tangent = Misc.getAngleInDegrees(center, entity.getLocation()) + 90f;
 
         return Math.abs(getAngleDifference(getHeading(), tangent)) <= RodConstants.DRONE_JOIN_ALIGNMENT;
     }
@@ -208,8 +255,10 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
      * error is left over is eased away rather than corrected in one frame.
      */
     protected void joinCircle() {
-        currentAngle = Misc.getAngleInDegrees(orbitCenter, entity.getLocation());
-        currentRadius = Misc.getDistance(orbitCenter, entity.getLocation());
+        Vector2f center = getOrbitCenter();
+
+        currentAngle = Misc.getAngleInDegrees(center, entity.getLocation());
+        currentRadius = Misc.getDistance(center, entity.getLocation());
         facingOffset = getAngleDifference(getHeading(), currentAngle + 90f);
 
         mode = Mode.ORBITING;
@@ -243,9 +292,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         //than a sprint round the ring. Uncapped this doubles or triples how fast the drone is turning
         float cap = RodConstants.DRONE_TRIM_RATE * amount;
         currentAngle += Math.max(-cap, Math.min(cap, trim));
-        currentRadius += (RodConstants.DRONE_ORBIT_RADIUS - currentRadius) * settle;
+        currentRadius += (getOrbitRadius() - currentRadius) * settle;
 
-        Vector2f position = MathUtils.getPointOnCircumference(orbitCenter, currentRadius, currentAngle);
+        Vector2f position = MathUtils.getPointOnCircumference(getOrbitCenter(), currentRadius, currentAngle);
         entity.setLocation(position.x, position.y);
 
         //hand the tangent over as the working velocity, so a dive peels off the ring already moving
@@ -253,6 +302,13 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         float tangential = (float) Math.toRadians(RodConstants.DRONE_ORBIT_SPEED) * currentRadius;
 
         velocity.set((float) -Math.sin(radians) * tangential, (float) Math.cos(radians) * tangential);
+
+        //and, on a circle that is itself travelling, what the circle is doing on top of it. Flying
+        //the ring places the drone rather than moving it, so its velocity only ever describes the
+        //turn - which on a moving screen is most of a fleet's speed short of the truth, and a drone
+        //that peels off with the wrong velocity spends the first half of its dive correcting it
+        Vector2f carry = getCenterVelocity();
+        if (carry != null) Vector2f.add(velocity, carry, velocity);
 
         //whatever heading the drone joined with, bled off over a fraction of a second instead of
         //being corrected in one frame - a frame-long turn is exactly what folds the trail
@@ -363,7 +419,21 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
      * ring is somewhere to be rather than something to keep pace with.
      */
     protected Vector2f getGoalVelocity() {
+        //the slot a launching drone is flying at is on a circle that may itself be under way, and a
+        //drone easing onto a standstill relative to a moving screen never reaches it - same failure
+        //as easing onto a standstill relative to a moving fleet, and the same answer
+        if (mode == Mode.LAUNCHING) return getCenterVelocity();
+
         if (mode != Mode.RETURNING) return null;
+
+        SectorEntityToken fleet = Global.getSector().getPlayerFleet();
+
+        return fleet == null ? null : fleet.getVelocity();
+    }
+
+    /** What the middle of the circle is doing, or null when it is a spot on the water and does nothing. */
+    protected Vector2f getCenterVelocity() {
+        if (!roaming) return null;
 
         SectorEntityToken fleet = Global.getSector().getPlayerFleet();
 
@@ -389,7 +459,11 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected void checkArrivedHome(float amount) {
         SectorEntityToken fleet = Global.getSector().getPlayerFleet();
 
-        if (fleet == null) {
+        //nowhere to come home to, or somewhere this drone cannot follow. A fleet that has jumped is
+        //still a fleet with a location, and it is a location in somebody else's coordinates - flown
+        //at from here it is a point in empty space the drone would never arrive at, and a drone that
+        //never arrives never expires and never lets go of the rod
+        if (fleet == null || fleet.getContainingLocation() != entity.getContainingLocation()) {
             expire();
             return;
         }
