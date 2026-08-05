@@ -345,3 +345,7 @@ catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight
 FireAll PopulateOptions",,,
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef remind
 FireAll PopulateOptions",,,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Find out what she wants.,
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the arrangement.
+catchrelease_jobDecline:""I don't think so.""",
