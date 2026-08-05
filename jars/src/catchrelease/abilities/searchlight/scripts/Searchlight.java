@@ -187,6 +187,12 @@ public class Searchlight implements EveryFrameScript {
         this.arc = circularArc;
         baseArcAngle = arc.startAngle;
 
+        //born where the sweep starts rather than at the vector's default (0,0). The faces hold the
+        //live location and read it the moment they are made, so without this the light spent its
+        //first frame at the world origin - a spot flashing in the wrong place, and a fan drawn as
+        //a spear across half the map before jumping to where it was meant to be
+        updateRenderLoc(arc.getPointForAngle(baseArcAngle));
+
         //picks the face for the fit as it already is, so a light switched on under a breach lamp
         //is born purple rather than flashing orange for a frame and then correcting itself
         advanceLook();
