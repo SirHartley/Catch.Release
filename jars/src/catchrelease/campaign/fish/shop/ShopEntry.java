@@ -98,8 +98,21 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.get(rig) == tackle;
     }
 
-    /** The next purchase's price. Null when it is free or there is nothing left to buy. */
+    /** Whether this module is already the player's, so moving it into a slot costs nothing. */
+    public boolean isOwned() {
+        return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
+    }
+
+    /**
+     * The next purchase's price. Null when it is free or there is nothing left to buy.
+     * <p>
+     * A module already owned is free, and that is the whole of the difference between buying one and
+     * putting one back on. The shop used to price the slot rather than the module, so a player who
+     * swapped to something else and changed their mind paid for the first one twice.
+     */
     public ShopPricing.Price getPrice() {
+        if (isOwned()) return null;
+
         return isUpgrade() ? ShopPricing.getPrice(stat) : ShopPricing.getPrice(tackle);
     }
 
@@ -149,6 +162,9 @@ public class ShopEntry {
         if (isUpgrade()) {
             UpgradeManager.getInstance().addLevels(stat.id, 1);
         } else {
+            //owned before fitted, since owning it is what was paid for - the slot is only where it
+            //is being kept, and it can be moved out and back again for nothing from here on
+            TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
         }
 
@@ -166,6 +182,7 @@ public class ShopEntry {
         if (isUpgrade()) {
             UpgradeManager.getInstance().addLevels(stat.id, 1);
         } else {
+            TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
         }
 

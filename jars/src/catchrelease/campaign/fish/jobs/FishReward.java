@@ -129,9 +129,9 @@ public abstract class FishReward {
     /**
      * A module for one of the rigs.
      * <p>
-     * Fitting it is the whole of granting it, because there is no owning a module in this mod - a
-     * slot holds one and the shop sells the right to put it there. Worth knowing that this displaces
-     * whatever was in that slot, which is the same thing buying one does.
+     * Granting it is owning it and then wearing it. Worth knowing that fitting displaces whatever was
+     * in that slot - which is what buying one does too, and which now costs nothing to undo, since
+     * the thing that was displaced is still the player's.
      */
     public static class TackleReward extends FishReward {
         public final Tackle tackle;
@@ -151,6 +151,9 @@ public abstract class FishReward {
             //everything fits and the one a module is most likely to be wanted on
             Tackle.Fit rig = tackle.fit == Tackle.Fit.BOTH ? Tackle.Fit.DRONE : tackle.fit;
 
+            //given, so owned. Somebody who hands you a module has not lent you a slot - taking it
+            //out later and putting it back must not send you to the shop to buy your own gift
+            TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
         }
     }
