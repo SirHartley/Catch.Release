@@ -122,13 +122,15 @@ public class FishPresenceField {
         float[] below = sampleRow(centers, reach, minX, minY, cols, cell);
 
         for (int row = 0; row < rows; row++) {
+            //always minX + n * cell, never the neighbour plus cell: the two round differently in
+            //float, and a vertex that exists twice with different bits is a chain that breaks
             float yBottom = minY + row * cell;
-            float yTop = yBottom + cell;
+            float yTop = minY + (row + 1) * cell;
             float[] above = sampleRow(centers, reach, minX, yTop, cols, cell);
 
             for (int col = 0; col < cols; col++) {
                 float xLeft = minX + col * cell;
-                float xRight = xLeft + cell;
+                float xRight = minX + (col + 1) * cell;
 
                 float v0 = below[col];
                 float v1 = below[col + 1];
@@ -222,8 +224,23 @@ public class FishPresenceField {
         segments.add(new Segment(a[0], a[1], b[0], b[1]));
     }
 
-    /** Where the threshold crosses the edge between two samples. */
+    /**
+     * Where the threshold crosses the edge between two samples - computed in a canonical order,
+     * because the two triangles sharing an edge arrive with the endpoints swapped, and the same
+     * crossing computed from opposite ends rounds to different bits. Sorted first, both sides run
+     * the identical arithmetic, and the chaining can match endpoints exactly.
+     */
     protected static float[] lerp(float xA, float yA, float vA, float xB, float yB, float vB) {
+        if (xB < xA || (xB == xA && yB < yA)) {
+            float tx = xA, ty = yA, tv = vA;
+            xA = xB;
+            yA = yB;
+            vA = vB;
+            xB = tx;
+            yB = ty;
+            vB = tv;
+        }
+
         float span = vB - vA;
         float t = Math.abs(span) < 0.0001f ? 0.5f : (THRESHOLD - vA) / span;
 

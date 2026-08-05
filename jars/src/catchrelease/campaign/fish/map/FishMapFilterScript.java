@@ -339,7 +339,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
 
         List<FishPresenceOverlay.Blob> blobs = new ArrayList<>();
 
-        if (pane.getMode() == FishMapPane.Mode.CATEGORY) {
+        if (pane.isCategoryView()) {
             for (FishType type : FishType.values()) {
                 if (!pane.getFilter().types.contains(type)) continue;
 
