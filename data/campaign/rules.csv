@@ -325,3 +325,23 @@ catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet
 FireAll PopulateOptions",,,
 catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef remind
 FireAll PopulateOptions",,,
+catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the tank.,
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Agree to supply the ring.
+catchrelease_jobDecline:Decide you were never here.",
+catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
+Call $catchrelease_jobRef updateData
+$catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
+catchrelease_ringLeft:Put the fee on Ferro's fish.
+catchrelease_ringRight:Put the fee on Vasque's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
+catchrelease_ringShort,PopulateOptions,"$catchrelease_ringBet
+Call $catchrelease_jobRef updateData
+!$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
+catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,"Call $catchrelease_jobRef turnInFlat
+FireAll PopulateOptions",,,
+catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,"Call $catchrelease_jobRef turnInLeft
+FireAll PopulateOptions",,,
+catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,"Call $catchrelease_jobRef turnInRight
+FireAll PopulateOptions",,,
+catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef remind
+FireAll PopulateOptions",,,
