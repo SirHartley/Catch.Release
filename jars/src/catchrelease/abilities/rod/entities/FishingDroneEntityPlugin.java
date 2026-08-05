@@ -394,16 +394,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //the fleet's own radius, not a point inside it. A drone that has reached the hulls has come
-        //home as far as anyone watching is concerned, and letting go there is what buys the return
-        //its speed: the approach can stay hard enough to catch a fleet under way, and the swing past
-        //that costs happens outside a circle the drone left long before, already fading.
-        //
-        //Still floored at this frame's worth of travel, or a drone moving faster than the circle is
-        //wide would step straight over it without ever being inside it.
-        float arrival = Math.max(
-                Math.max(RodConstants.DRONE_ARRIVAL_DISTANCE, fleet.getRadius()),
-                velocity.length() * amount);
+        //at least this frame's worth of travel: a drone moving faster than the arrival radius per
+        //frame would otherwise step straight over it without ever being inside it
+        float arrival = Math.max(RodConstants.DRONE_ARRIVAL_DISTANCE, velocity.length() * amount);
 
         if (Misc.getDistance(entity.getLocation(), fleet.getLocation()) <= arrival) expire();
     }
