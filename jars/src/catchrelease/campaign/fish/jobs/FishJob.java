@@ -15,6 +15,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Somebody in a bar who wants fish, and what they are offering for it.
@@ -167,6 +168,17 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
+     * Whose people ask for this, or null for anybody's.
+     * <p>
+     * A method rather than the field, because the question is put before {@link #create} has run -
+     * a job that assigned its own faction on the way to being built would be answering with whatever
+     * the last one happened to leave behind. Overriding this is the only way a faction gate works.
+     */
+    protected String getRequiredFactionId() {
+        return factionId;
+    }
+
+    /**
      * Only where the right people drink.
      * <p>
      * Asked before the job exists, so a Hegemony-only job on a pirate station costs nothing but the
@@ -176,9 +188,10 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
         if (market == null) return false;
-        if (factionId == null) return true;
 
-        return factionId.equals(market.getFactionId());
+        String required = getRequiredFactionId();
+
+        return required == null || required.equals(market.getFactionId());
     }
 
     /** Whether the player is carrying everything this job asked for, right now. */
@@ -305,7 +318,16 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     protected void handOver(TextPanelAPI text, InteractionDialogAPI dialog,
                             Map<String, MemoryAPI> memoryMap) {
 
+        //asked before anything is spent or paid, since a job that settles a wager afterwards has
+        //already handed over the stake it was wagering
+        if (!isSatisfied()) {
+            printShort(text);
+            return;
+        }
+
         FishCatch offered = getBestOffered();
+
+        beforePayment(offered, text);
 
         if (!turnIn()) {
             printShort(text);
@@ -318,6 +340,17 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         //Nothing else has to change: the flag is still set, the option is still there, and the
         //intel entry reads as the same person wanting more, which is what a supply chain looks like
         if (!onDelivered(text)) setCurrentStage(Stage.DONE, dialog, memoryMap);
+    }
+
+    /**
+     * A last chance to change what is about to be paid.
+     * <p>
+     * The hand-over is settled and cannot now fail, and nothing has been granted yet - which is the
+     * only moment a job can decide that the payment is double, or nothing at all.
+     *
+     * @param offered the best specimen going towards the first ask, or null
+     */
+    protected void beforePayment(FishCatch offered, TextPanelAPI text) {
     }
 
     /**
@@ -378,6 +411,18 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         set("$catchreleaseAsk", describeAsks());
         set("$catchreleaseReward", describeRewards());
         set(HAS_FISH_KEY, isSatisfied());
+    }
+
+    /**
+     * A source of chance that still works after the job has been accepted.
+     * <p>
+     * The mission's own seeded random is the right one while the job is being built, since that is
+     * what makes a bar say the same thing twice. It is the wrong one for a coin flipped at the
+     * hand-over, which should be flipped then and not decided when the job was written - and it is
+     * not guaranteed to have survived the trip through a save, so this never returns null.
+     */
+    protected Random random() {
+        return genRandom == null ? new Random() : genRandom;
     }
 
     /** Where the job is being run from, for anything that wants to talk about home. */
