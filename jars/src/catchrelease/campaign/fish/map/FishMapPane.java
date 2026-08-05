@@ -98,6 +98,19 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return selectedIds.isEmpty();
     }
 
+    /**
+     * Picks a species without a click on anything - how a request from outside the map, the codex's
+     * jump, arrives. Anything already picked stays picked: a selection is a route being planned, and
+     * being sent here to look at one more fish is no reason to lose the route.
+     * <p>
+     * Selecting is the whole of it, since a selection is what the species view is.
+     */
+    public void showSpecies(String speciesId) {
+        if (speciesId == null) return;
+
+        selectedIds.add(speciesId);
+    }
+
     /** Builds the controls and the first list into the pane's own panel. Call once. */
     public void mount(CustomPanelAPI panel, float width, float height) {
         this.panel = panel;
