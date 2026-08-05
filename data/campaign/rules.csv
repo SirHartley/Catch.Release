@@ -566,7 +566,8 @@ catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile",FireAll CatchReleaseFleetQuestTurnIn,They are exactly where you left them and they have not stopped watching the water.,,
-catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"Call $entity.catchrelease_jobRef updateData
+catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
+Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,"The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about."
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn

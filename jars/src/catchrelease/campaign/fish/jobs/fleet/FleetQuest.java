@@ -47,6 +47,15 @@ public class FleetQuest extends FishJob {
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
 
     /**
+     * This job's own hand-over flag, rather than the one the bar jobs share.
+     * <p>
+     * The shared rows put their option up on {@link FishJob#DELIVER_FLAG} wherever they find it, and
+     * this one brings rows of its own - so sharing the flag would offer the catch to a fleet twice,
+     * once through each set. A flag nothing else looks for is how a job keeps its own hand-over.
+     */
+    public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
+
+    /**
      * Days the hold assignment is given for.
      * <p>
      * Not a duration anybody is meant to reach. An assignment that runs out leaves the fleet with
@@ -149,6 +158,25 @@ public class FleetQuest extends FishJob {
 
         giver.setNoFactionInName(true);
         giver.setName(type.title);
+    }
+
+    /**
+     * The hull is where the hand-over happens, there being nobody to hand it to.
+     * <p>
+     * The base class flags a person and a fleet quest has none - which is what crashed this on the
+     * first one that ever spawned, since marking a null important throws rather than passing.
+     */
+    @Override
+    protected void markDeliverable() {
+        if (giver == null) return;
+
+        makeImportant(giver, getDeliverFlag(), Stage.WANTED);
+    }
+
+    /** Its own, so the shared hand-over rows never put a second offer beside this one's. */
+    @Override
+    protected String getDeliverFlag() {
+        return DELIVER_FLAG;
     }
 
     /** Lets the fleet go back to whatever it would have been doing. */
