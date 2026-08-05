@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 163 Java files across eight top-level packages, plus
+What is where, and which file to open first. 165 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -145,7 +145,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | File | What it does |
 |---|---|
 | `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
-| `FishCatch.java` | One rolled specimen — length, weight, aberration, origin; grades, values, encodes to a string |
+| `FishCatch.java` | One rolled specimen — length, weight, aberration, origin, and how it was taken; grades, values, encodes to a string |
 | `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour |
 | `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers |
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
@@ -153,6 +153,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
 | `Aberration.java` | 0–1 "reality coherence" for a location, from abyss depth, hypershunt and slipstream |
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
+| `CatchImplement.java` | What made a fish reachable — a pond or a breach lamp — read off the mote's own provenance |
 | `FishLocationSummary.java` | Builds the "where this swims" sentence from a spec's regions and tags |
 
 ### `campaign/fish/jobs`
@@ -485,8 +486,18 @@ they take it off. Saves predating ownership seed the owned set from whatever is 
 an owned module has already been paid for. The shop tells them apart explicitly, because one line
 covering both said that fitting a module you own was "emptying a slot".
 
-**Fish encode format is save-critical.** `FishCatch.encode()` appends origin as an optional fifth
-field so four-field saves still parse. Changing the format breaks fish already in saves.
+**Fish encode format is save-critical.** Four fields are always written; origin, method and
+implement follow as an optional tail, written only as far as there is anything to say. Fields are
+read **by position**, so a blank holds the place of one that has no value — a specimen with no
+origin but a known method encodes as `bass|1.2|4.5|0.6||HARPOON`. Four- and five-field specimens
+already in saves still parse. Changing the format breaks fish already in saves.
+
+**How a fish was caught is two questions, and they are not independent.** The method is the tackle
+at the end of the line; the implement is what made the fish reachable. The drones are played against
+the rupture itself, so anything they bring up came out of a pond by definition — `DRONE` +
+`BREACH_LAMP` is a requirement that reads fine and can never be filled. Only the harpoon, which is
+played against the mote rather than the hole, can be asked about either way. `FishJobAsks
+.rollCatchTerms()` is where that rule lives; anything else composing the two axes must respect it.
 
 **Bundles are identity-by-contents.** Spending part of one removes it and adds a new one with the
 remainder. Never mutate in place.
