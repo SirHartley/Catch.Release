@@ -354,8 +354,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      * button closes it - detail destroyed, then {@code dismiss(1)}, a stable name on an
      * obfuscated class - because the API offers a way in but none back out.
      * <p>
-     * The tab switch is refused while any dialog is still showing. One failure anywhere abandons
-     * the whole jump: the worst outcome is the button doing nothing, logged once.
+     * The tab switch is NOT made here. The UI refuses {@code showCoreUITab} while any dialog is
+     * still showing, and on the frame this runs the codex is still mid-dismissal - so the switch
+     * was silently swallowed and the button read as "close everything". A transient script makes
+     * the switch on the first frame the dialog is actually gone, and gives up quietly if the
+     * dismissal somehow never finishes. One failure anywhere abandons the whole jump: the worst
+     * outcome is the button doing nothing, logged once.
      */
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
@@ -368,10 +372,58 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 ReflectionUtils.invoke(shown, "dismiss", 1);
             }
 
-            Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.MAP);
+            Global.getSector().addTransientScript(new MapTabOpener());
         } catch (Throwable t) {
             Global.getLogger(FishCodexEntry.class)
                     .warn("Could not jump from the codex to the sector map", t);
+        }
+    }
+
+    /**
+     * Opens the map tab on the first frame no dialog is in the way, then removes itself.
+     * <p>
+     * Runs while paused, necessarily - the campaign is paused under the codex, and a script that
+     * waits for the clock would wait for the player to unpause and wonder why the button did
+     * nothing. The timeout is frames rather than seconds for the same reason.
+     */
+    protected static class MapTabOpener implements com.fs.starfarer.api.EveryFrameScript {
+
+        /** Frames to keep trying before deciding the dismissal is never finishing. */
+        public static final int GIVE_UP_FRAMES = 30;
+
+        private boolean done = false;
+        private int frames = 0;
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return true;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (done) return;
+
+            if (++frames > GIVE_UP_FRAMES) {
+                done = true;
+                return;
+            }
+
+            if (Global.getSector() == null || Global.getSector().getCampaignUI() == null) return;
+            if (Global.getSector().getCampaignUI().isShowingDialog()) return;
+
+            try {
+                Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.MAP);
+            } catch (Throwable t) {
+                Global.getLogger(FishCodexEntry.class)
+                        .warn("Could not open the sector map after the codex closed", t);
+            }
+
+            done = true;
         }
     }
 
