@@ -292,3 +292,7 @@ catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,Call $c
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the list.,"The option id must start with the mission id. BarCMD aborts every bar mission whose prefix the selected option does not carry - including this one, if it were named anything else."
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,Call $catchrelease_jobRef blurb,,,
+catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask the cook what the problem is.,
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef offer,,"catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:""Find another supplier.""",
