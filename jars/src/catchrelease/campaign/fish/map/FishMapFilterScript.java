@@ -421,11 +421,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         } else {
             for (String id : pane.getSelectedIds()) {
                 FishSpec spec = FishPresence.getSpec(id);
-                //the picked-by-name rule rather than the browsing one - see the difference in
-                //FishPresence. Under the browsing rule a species goes unshaded once it is caught,
-                //which would leave anyone arriving from a codex page looking at an empty map
-                if (spec == null || !FishPresence.isKnown(spec)
-                        || !FishPresence.showsRegionsWhenPicked(spec)) {
+                if (spec == null || !FishPresence.isKnown(spec) || !FishPresence.showsRegions(spec)) {
                     continue;
                 }
 
