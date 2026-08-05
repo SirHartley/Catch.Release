@@ -9,6 +9,9 @@ import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.util.Misc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * What a purchase asks for in fish: so many specimens, and the qualities every one of them has to
  * have. The axes stack - a type, a floor on rarity, a floor on grade, all of one species, a named
@@ -52,8 +55,36 @@ public class FishRequirement {
      */
     public SectorRegion origin = null;
 
+    /**
+     * Alternative ways to satisfy the same ask, any one of which will do.
+     * <p>
+     * Every other axis here stacks - a type and a rarity floor and a grade floor are all true at
+     * once - which cannot say "a good one or a strange one", and that is a real thing for somebody
+     * to want. A collector after something worth looking at will take the best of its kind or the
+     * one that is barely holding together, and does not care which.
+     * <p>
+     * When this is set the parent's own axes are ignored except for the count: the parent is the
+     * question and these are the acceptable answers.
+     */
+    public List<FishRequirement> anyOf = new ArrayList<>();
+
+    /** Adds an alternative and hands it back, so a caller can go on configuring it. */
+    public FishRequirement addAlternative(FishRequirement alternative) {
+        if (alternative != null) anyOf.add(alternative);
+
+        return alternative;
+    }
+
     public boolean matches(FishCatch entry) {
         if (entry == null) return false;
+
+        if (!anyOf.isEmpty()) {
+            for (FishRequirement alternative : anyOf) {
+                if (alternative.matches(entry)) return true;
+            }
+
+            return false;
+        }
 
         FishSpec spec = entry.getSpec();
         if (spec == null) return false;
@@ -90,6 +121,18 @@ public class FishRequirement {
     public String describe() {
         StringBuilder text = new StringBuilder();
 
+        if (!anyOf.isEmpty()) {
+            //described from the count outward, since the alternatives disagree about everything else
+            text.append(count).append(" ").append(count == 1 ? "specimen" : "specimens").append(", ");
+
+            for (int i = 0; i < anyOf.size(); i++) {
+                if (i > 0) text.append(i == anyOf.size() - 1 ? ", or " : ", ");
+                text.append(anyOf.get(i).describeQualities());
+            }
+
+            return text.toString();
+        }
+
         text.append(count).append(" ").append(getNoun());
 
         if (sameSpecies && speciesId == null) text.append(", all of one species");
@@ -124,6 +167,34 @@ public class FishRequirement {
     protected static String trim(float value) {
         return value == Math.round(value) ? String.valueOf(Math.round(value))
                 : String.valueOf(Math.round(value * 10f) / 10f);
+    }
+
+    /**
+     * The qualities without the count, for an alternative inside another ask.
+     * <p>
+     * An alternative saying its own count would be saying it three times over in a sentence with one
+     * number in it - the parent already asked for two, and both ways of satisfying it are still two.
+     */
+    public String describeQualities() {
+        StringBuilder text = new StringBuilder();
+
+        if (speciesId != null || tag != null) text.append(getNoun()).append(", ");
+        if (minRarity != null) {
+            text.append(Misc.ucFirst(minRarity.name().toLowerCase())).append(" or better");
+        }
+        if (minGrade != null) {
+            if (minRarity != null) text.append(", ");
+            text.append("graded ").append(minGrade.name).append(" or better");
+        }
+        if (lowCoherence) {
+            if (minRarity != null || minGrade != null) text.append(", ");
+            text.append("barely holding together");
+        }
+        if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
+
+        String out = text.toString();
+
+        return out.isEmpty() ? "anything" : out;
     }
 
     protected String getNoun() {
