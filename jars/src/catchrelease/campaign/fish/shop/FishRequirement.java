@@ -3,7 +3,9 @@ package catchrelease.campaign.fish.shop;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.util.Misc;
 
@@ -30,6 +32,26 @@ public class FishRequirement {
     public FishGrade minGrade = null;
     public boolean lowCoherence = false;
 
+    /**
+     * Floors on the specimen itself rather than on its grade, in metres and kilograms.
+     * <p>
+     * Grade is relative - a fine specimen of a small species is a small fish - so somebody who wants
+     * something big is not asking for a good one, they are asking for a heavy one. Zero for an ask
+     * that does not care.
+     */
+    public float minLength = 0f;
+    public float minWeight = 0f;
+
+    /**
+     * Where the specimen has to have been taken, or null for anywhere.
+     * <p>
+     * A question about this fish rather than about its kind: the species already says where its sort
+     * can be found, which cannot tell you whether the one on the table came from there. A fish
+     * landed before the origin was being recorded satisfies no origin, since nothing about it says
+     * it came from anywhere in particular.
+     */
+    public SectorRegion origin = null;
+
     public boolean matches(FishCatch entry) {
         if (entry == null) return false;
 
@@ -40,6 +62,11 @@ public class FishRequirement {
         if (speciesId == null && tag != null && !spec.tags.contains(tag)) return false;
         if (minRarity != null && spec.rarity.ordinal() < minRarity.ordinal()) return false;
         if (minGrade != null && entry.getGrade().ordinal() < minGrade.ordinal()) return false;
+
+        if (minLength > 0f && entry.length < minLength) return false;
+        if (minWeight > 0f && entry.weight < minWeight) return false;
+
+        if (origin != null && entry.origin != origin) return false;
 
         if (lowCoherence) {
             if (entry.aberration < LOW_COHERENCE) return false;
@@ -70,9 +97,33 @@ public class FishRequirement {
             text.append(", ").append(Misc.ucFirst(minRarity.name().toLowerCase())).append(" or better");
         }
         if (minGrade != null) text.append(", graded ").append(minGrade.name).append(" or better");
+
+        //said in the units the thing is measured in, since that is the ask - a heavy fish and a
+        //well-graded one are different requests and reading them the same way loses the difference
+        if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
+        if (minLength > 0f) text.append(", over ").append(trim(minLength)).append(" m");
+
+        if (origin != null) text.append(", taken ").append(getOriginName());
+
         if (lowCoherence) text.append(", coherence unstable or worse");
 
         return text.toString();
+    }
+
+    /** The origin said the way the survey lines say it, so one vocabulary covers both. */
+    protected String getOriginName() {
+        if (origin == SectorRegion.ABYSSAL) return "in the Abyss";
+
+        String band = origin.isCore() ? "the core" : "the far reaches";
+        String quadrant = origin.name().substring(origin.name().length() - 2);
+
+        return "in " + band + " of the " + FishLocationSummary.getDirectionName(quadrant);
+    }
+
+    /** Whole numbers without a trailing zero, because "over 2 kg" is what somebody would say. */
+    protected static String trim(float value) {
+        return value == Math.round(value) ? String.valueOf(Math.round(value))
+                : String.valueOf(Math.round(value * 10f) / 10f);
     }
 
     protected String getNoun() {

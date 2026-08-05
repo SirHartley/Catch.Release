@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -110,7 +111,8 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.minigame = new FishingMinigame(fish, tackle);
 
         //how loosely it holds to reality comes from where it was taken, not from the fish
-        this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias);
+        this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias,
+                anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
