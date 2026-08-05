@@ -105,8 +105,9 @@ public enum Tackle {
     },
 
     BREACH_LAMP("Breach Lamp", Fit.SEARCHLIGHT,
-            "Burns through the fabric rather than shining across it. The lights work out in"
-                    + " hyperspace, and there is something out there to find.") {
+            "Burns through the fabric rather than shining across it. Each beam opens a window"
+                    + " into hyperspace, and whatever it passes over is seen plainly rather than"
+                    + " guessed at from the dent it makes.") {
         {
             burnsHyperspace = true;
         }
