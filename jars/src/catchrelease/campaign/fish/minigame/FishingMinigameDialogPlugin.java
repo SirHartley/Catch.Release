@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -113,6 +114,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         //how loosely it holds to reality comes from where it was taken, not from the fish
         this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
+
+        //how it was hooked and what made it reachable, both read off the thing being fished at
+        //before the catch resolves - afterwards the mote is gone and there is nothing left to ask
+        this.specimen.method = method;
+        this.specimen.implement = CatchImplement.of(anchor);
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();

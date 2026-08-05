@@ -1,7 +1,10 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.campaign.fish.data.CatchImplement;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 
 import java.util.ArrayList;
@@ -76,6 +79,35 @@ public class FishJobAsks {
         if (pool.isEmpty()) return null;
 
         return pool.get(random.nextInt(pool.size())).id;
+    }
+
+    /**
+     * Sometimes asks for a fish taken a particular way, and never asks for an impossible one.
+     * <p>
+     * The two axes are not independent. The drones are played against the rupture itself, so
+     * anything they bring up came out of a pond by definition - "LINE drones through a breach lamp"
+     * is a sentence that reads fine and can never be filled. Only the harpoon can be asked about
+     * either way, because only the harpoon is played against the mote rather than against the hole.
+     *
+     * @param chance how often the ask says anything about this at all, 0 to 1
+     * @return whether anything was added, so the caller can price the extra difficulty
+     */
+    public static boolean rollCatchTerms(Random random, FishRequirement ask, float chance) {
+        if (ask == null || random.nextFloat() > clamp(chance)) return false;
+
+        //the harpoon more often than the drones: it is the axis that can then also be narrowed by
+        //where the fish was, and an ask that can say two things is worth reaching for more often
+        boolean harpoon = random.nextFloat() > 0.35f;
+
+        ask.method = harpoon ? FishLogEntry.Method.HARPOON : FishLogEntry.Method.DRONE;
+
+        if (!harpoon) return true;
+
+        if (random.nextFloat() > 0.45f) {
+            ask.implement = random.nextBoolean() ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
+        }
+
+        return true;
     }
 
     /**

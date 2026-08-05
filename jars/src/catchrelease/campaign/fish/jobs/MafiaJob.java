@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -64,6 +65,10 @@ public class MafiaJob extends FishJob {
 
         //something with a bit of fight in it. A pair of commons in a tank is not an evening out
         if (genRandom.nextFloat() > 0.4f) ask.minRarity = FishRarity.UNCOMMON;
+
+        //sometimes they want them speared rather than netted, on the theory - theirs, not anybody
+        //else's - that a fish which has already been chased once knows how to put on a show
+        if (genRandom.nextFloat() > 0.5f) ask.method = FishLogEntry.Method.HARPOON;
 
         addAsk(ask);
 

@@ -23,6 +23,9 @@ public class StandingOrderJob extends FishJob {
     /** Days to fill it. Long enough that it is a standing order rather than an errand. */
     public static final float DAYS = 60f;
 
+    /** Whether this one named a way of catching, which is worth paying for. */
+    protected boolean catchTermsAsked = false;
+
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
         //one at a time, sector-wide. Two of these running at once is two people asking for the same
@@ -44,6 +47,7 @@ public class StandingOrderJob extends FishJob {
         int worth = VALUE_PER_FISH * ask.count;
         if (ask.minRarity != null) worth *= 1 + ask.minRarity.ordinal();
         if (ask.minGrade != null) worth *= 2;
+        if (catchTermsAsked) worth *= 2;
 
         addRewards(FishRewardRoller.roll(genRandom, worth, true));
 
@@ -78,6 +82,9 @@ public class StandingOrderJob extends FishJob {
         if (genRandom.nextFloat() > 0.6f) ask.minGrade = FishGrade.FINE;
 
         if (genRandom.nextFloat() > 0.7f) ask.sameSpecies = true;
+
+        //a buyer who cares how it was landed is a fussier buyer, and the order is worth more for it
+        if (FishJobAsks.rollCatchTerms(genRandom, ask, 0.3f)) catchTermsAsked = true;
 
         return ask;
     }
