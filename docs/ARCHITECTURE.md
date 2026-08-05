@@ -238,7 +238,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
-| `ShopStorage.java` | A hold the shop keeps separate from the player's cargo |
+| `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `FishShopAbilityPlugin.java` | The ability-bar button that opens it. Temporary until it lives on a market |
 | `ShopRowPlugin.java` | One clickable row |
 | `ShopTabPlugin.java` | One tab button |
@@ -487,6 +487,13 @@ they take it off. Saves predating ownership seed the owned set from whatever is 
 an owned module has already been paid for. The shop tells them apart explicitly, because one line
 covering both said that fitting a module you own was "emptying a slot".
 
+**An ability reads its numbers once, when it starts.** Buying a rung or fitting a module while the
+rig is running leaves it on the old figures until it is switched off and on — so the shop switches
+it off for you. Both grants go through `ShopEntry.grant()`, which is the only place that knows to;
+anything else that changes a running ability's inputs has to do the same or the purchase looks like
+it did nothing. `StatIds.getAbilityId()` is the stat-to-ability link, **listed rather than matched
+on the id prefix** — `fishing_bar_size` belongs to the minigame despite reading like a drone stat.
+
 **Fish encode format is save-critical.** Four fields are always written; origin, method and
 implement follow as an optional tail, written only as far as there is anything to say. Fields are
 read **by position**, so a blank holds the place of one that has no value — a specimen with no
@@ -529,6 +536,7 @@ do nothing.
 |---|---|
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. The pond is terrain now |
 | `campaign/fish/intel/FishMapIntel` | Dead husk, kept so old saves can delete it. Removable once no save predates the map filter |
+| `campaign/fish/shop/ShopStorage` | The store/retrieve/sell counter is gone. Kept only to hand back fish a save is still holding in it, once, on the next shop open |
 | `campaign/fish/spawner/StarSystemFishSpawner` | Empty stub |
 | `testing/TestStencilRenderer` | Commented out of `ModPlugin` |
 | Depth bomb's glass fracture and shards | Fully implemented but dormant — `DepthBombConstants.SPAWN_POND` routes detonation to a temporary pond instead |
