@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
@@ -106,11 +107,16 @@ public class FishRewardRoller {
         return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
     }
 
-    /** A module. Fitting it displaces whatever is in that slot, same as buying one. */
+    /**
+     * A module the player does not already have.
+     * <p>
+     * Filtered like the other kinds here, and for the same reason: a module is owned once and fitted
+     * as often as you like, so handing over a second copy of one is handing over nothing at all.
+     */
     protected static FishReward rollTackle(Random random) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
-            if (tackle != Tackle.NONE) options.add(tackle);
+            if (tackle != Tackle.NONE && !TackleManager.isOwned(tackle)) options.add(tackle);
         }
 
         if (options.isEmpty()) return null;

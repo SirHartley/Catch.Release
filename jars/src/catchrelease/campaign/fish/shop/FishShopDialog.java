@@ -423,11 +423,22 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            ShopPricing.Price price = entry.getPrice();
-            if (price == null) {
+            //two kinds of free, told apart: the empty slot never had a price, while an owned
+            //module was paid for once and is only being moved back into the slot
+            if (entry.tackle == Tackle.NONE) {
                 info.addPara("No charge for emptying a slot.", Misc.getGrayColor(), 16f);
                 return;
             }
+
+            if (entry.isOwned()) {
+                info.addPara("Already yours - fitting it costs nothing.", Misc.getGrayColor(), 16f);
+                return;
+            }
+
+            //unreachable as things stand - the two branches above are the only free cases there are.
+            //It stays because the alternative to a wrong-looking pane is a dialog that throws
+            ShopPricing.Price price = entry.getPrice();
+            if (price == null) return;
 
             boolean creditsOk = credits >= price.credits;
 
