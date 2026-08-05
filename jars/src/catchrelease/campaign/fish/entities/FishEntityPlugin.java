@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.entities;
 
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -149,6 +150,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /** Asks the mote to look at itself again, for anything that changes what it is after it exists. */
+    public void refreshColor() {
+        this.color = resolveColor();
+    }
+
     /** The fish this mote carries, or null if it was spawned without one or its row has since gone. */
     public FishSpec getFishSpec() {
         return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
@@ -167,8 +173,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.held = held;
     }
 
+    /**
+     * What somebody put there rather than what swam up, drawn in a colour the ladder does not use.
+     * <p>
+     * Rarity owns grey through orange, so a quest fish coloured by its rarity is a quest fish nobody
+     * can pick out of a pond full of its neighbours. Cyan is off that ladder entirely, which is the
+     * point - it does not read as "rarer than orange", it reads as "not one of these".
+     */
+    public static final Color QUEST_COLOR = new Color(90, 240, 255);
+
     /** Rarity decides the colour, so a mote reads as what it is before it is ever caught. */
     protected Color resolveColor() {
+        if (entity != null && QuestPond.isQuestMote(entity)) return QUEST_COLOR;
+
         FishSpec spec = getFishSpec();
 
         return spec == null ? FishRarity.COMMON.color : spec.rarity.color;
