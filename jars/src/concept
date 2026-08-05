@@ -25,7 +25,7 @@ ai_
 Dive bomb
 - Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
 
-Drones
+x Drones
 - Now despawn way too early...
 
 Pond
@@ -39,12 +39,12 @@ Shop
 - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate
 - Modifier category lacks support for mod entries for searchlights and bombs - auto add them when there's stuff in the csv
 
-Mote behaviour
+x Mote behaviour
 - Movement modes for motes made uncommon ones super easy to catch with the harpoon, way easier than the common ones
 - uncommon motes behaviour needs to have less pauses too it's super easy to catch em
 - Epic motes should turn invisible / dive in regular intervals so they are harder to get
 
-Fish Map UI
+x Fish Map UI
 - areas are no longer filled in and outlines no longer connected, just broken fragments with no area fill
 - remove category / species toggle fields
 - category filters should have icons & text
@@ -61,7 +61,7 @@ Codex
 - Catch location data should be a summary of _where_ the fish _can_ be caught. Keep it human-readable, like "In the far reaches of the north-west, under a blue star when slipstreams run towards the core" or "In the core, under a red star, at any time of the cycle." or "In the Abyss."
 - Add a button that takes you to the pre-filtered fish map UI with the fish already selected
 
-Harpooning fleets
+x Harpooning fleets
 - low rep impact flag should not be set I think, mirroring cargo inspection
 - commlink option to be highlighted when fleet has something to say
 - dialogue text in commlink option should be default text colour
