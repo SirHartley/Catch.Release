@@ -13,14 +13,17 @@ package catchrelease.memory.upgrades;
  */
 public class StatIds {
 
-    //searchlights
+    //breach lamps. The ids still say searchlight because ids live in saves; the display name is
+    //translated in the shop
     public static final String
             SEARCHLIGHT_AREA = "searchlight_area",
             SEARCHLIGHT_SPEED = "searchlight_speed",
             SEARCHLIGHT_COUNT = "searchlight_count",
             SEARCHLIGHT_RARE_CHANCE = "searchlight_rare_chance",
             SEARCHLIGHT_TRACK_TIME = "searchlight_track_time",
-            SEARCHLIGHT_IDENTIFY = "searchlight_identify";
+            SEARCHLIGHT_IDENTIFY = "searchlight_identify",
+            SEARCHLIGHT_DETECT_RADIUS = "searchlight_detect_radius",
+            SEARCHLIGHT_SLOW = "searchlight_slow";
 
     //drones
     public static final String
@@ -37,8 +40,7 @@ public class StatIds {
             HARPOON_CHARGES = "harpoon_charges",
             HARPOON_RECHARGE_TIME = "harpoon_recharge_time",
             HARPOON_SPEED = "harpoon_speed",
-            HARPOON_AIM_ASSIST = "harpoon_aim_assist",
-            HARPOON_DEEP = "harpoon_deep";
+            HARPOON_AIM_ASSIST = "harpoon_aim_assist";
 
     //depth bombs
     public static final String

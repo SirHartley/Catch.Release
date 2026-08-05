@@ -200,10 +200,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
                 + " heavier one takes you with it.", Misc.getGrayColor(), pad);
 
-        if (UpgradeManager.isUnlocked(StatIds.HARPOON_DEEP)) {
-            tooltip.addPara("The head will go through the fabric for one a searchlight is holding.",
-                    Misc.getGrayColor(), pad);
-        }
+        tooltip.addPara("The head will go through the fabric for anything a breach lamp has"
+                + " exposed.", Misc.getGrayColor(), pad);
 
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 

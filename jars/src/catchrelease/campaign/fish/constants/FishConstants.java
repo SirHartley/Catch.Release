@@ -511,17 +511,17 @@ public class FishConstants {
     public static final float IMPRESSION_SIZE = 34f;
     public static final float IMPRESSION_ALPHA = 0.85f;
     public static final float IMPRESSION_RING_SIZE = 1.9f;
-    public static final float IMPRESSION_RING_ALPHA = 0.3f;
+    public static final float IMPRESSION_RING_ALPHA = 0.45f;
     public static final float IMPRESSION_PULSE = 0.12f;
     public static final float IMPRESSION_PULSE_RATE = 2.2f;
 
     /**
      * How far the ring leans toward the rarity's colour at the identify upgrade's first level.
      * Partway on purpose: at 1 the ring would already be the rarity's own colour and the second
-     * level would have nothing left to sell. Far enough off the beam's orange to say "look closer",
-     * not far enough to name the tier.
+     * level would have nothing left to sell. Far enough off the beam's purple to say "look
+     * closer", not far enough to name the tier.
      */
-    public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.4f;
+    public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.5f;
 
     /**
      * The identify upgrade's glow - a wide wash of the ring's colour standing around the dent, and
@@ -535,22 +535,32 @@ public class FishConstants {
      * level still has something to sell.
      */
     public static final float IMPRESSION_GLOW_SIZE = 3.2f;
-    public static final float IMPRESSION_GLOW_ALPHA = 0.25f;
+    public static final float IMPRESSION_GLOW_ALPHA = 0.4f;
     public static final float IMPRESSION_GLOW_HINT_MULT = 0.45f;
 
     /**
-     * The breach lamp's reveal - the dent turning inside out under a light that has burned a
-     * window through. With hyperspace showing where the beam lands there is no lit fabric left to
-     * be a hole in, so the mote is drawn instead: a body at the dent's own size and a wider halo
-     * around it, both additive, both in the thing's true colour, both scaled by how hard the beam
-     * is on it right now. The reveal follows the live beam and not the lingering mark on purpose -
-     * the window is where the beam is, and a mote lit through it goes back to being a dent the
-     * moment the light moves on.
+     * The reveal - the dent turning inside out under a beam that is a window. With hyperspace
+     * showing where the light lands there is no lit fabric left to be a hole in, so the mote is
+     * drawn instead, wearing exactly the look it has swimming in a pond: the same stacked glow
+     * sprite in its rarity's own colour. FULL_PENETRATION is how far into the beam the switch
+     * completes - at 0.4, a mote two fifths of the way from the rim to the centre is fully its
+     * pond self, and the blend runs over the outer stretch. The reveal follows the live beam and
+     * not the lingering mark on purpose - the window is where the beam is, and a mote seen
+     * through it goes back to being a dent the moment the light moves on.
      */
-    public static final float IMPRESSION_REVEAL_SIZE = 1f;
-    public static final float IMPRESSION_REVEAL_ALPHA = 0.45f;
-    public static final float IMPRESSION_REVEAL_HALO_SIZE = 2.4f;
-    public static final float IMPRESSION_REVEAL_HALO_ALPHA = 0.15f;
+    public static final float IMPRESSION_REVEAL_FULL_PENETRATION = 0.4f;
+
+    /** The pond mote's own glow size, so an exposed mote is the size it will be once unearthed. */
+    public static final float IMPRESSION_EXPOSED_GLOW_SIZE = 25f;
+
+    /**
+     * The lamps' passive awareness: anything under the fabric this close to a live beam shows as
+     * a dent even though no light is on it - the fabric bruises around a burn. FALLBACK is the
+     * radius with no upgrade row, measured from the beam's centre; NEAR_DENT_MAX caps how deep a
+     * proximity-only dent gets, so a mote actually swept over still reads as the stronger find.
+     */
+    public static final float IMPRESSION_DETECT_FALLBACK = 400f;
+    public static final float IMPRESSION_NEAR_DENT_MAX = 0.75f;
 
     /**
      * Aberration - how loosely a specimen holds to reality, from where it was taken.

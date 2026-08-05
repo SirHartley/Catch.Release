@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.ability;
 
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.helper.math.CircularArc;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -265,8 +266,15 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         int lights = getSearchlightNum();
         tooltip.addPara("Sweeping with %s, each reaching %s.", pad, highlight,
-                lights == 1 ? "one light" : lights + " lights",
+                lights == 1 ? "one lamp" : lights + " lamps",
                 (int) Searchlight.getArea() + " units");
+
+        float detect = UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
+                FishConstants.IMPRESSION_DETECT_FALLBACK);
+        if (detect > 0f) {
+            tooltip.addPara("The fabric bruises within %s of a beam, betraying anything under it"
+                    + " as a dent.", 3f, highlight, (int) detect + " units");
+        }
 
         float track = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
         if (track > 0f) {
