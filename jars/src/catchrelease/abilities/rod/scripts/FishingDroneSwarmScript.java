@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -34,6 +35,13 @@ import java.util.Set;
  * <p>
  * Only one swarm is out at a time - a new cast recalls the old one. Deliberately does not run while
  * paused, so the drones hold still while the minigame is up.
+ * <p>
+ * A trip is four questions, and each of them is a hook rather than a line of this class:
+ * {@link #getSearchCenter()} is what the ring is measured from, {@link #getSearchArea()} is what it
+ * is allowed to consider, {@link #isReachable(SectorEntityToken)} is what counts as fish, and
+ * {@link #shouldRecall()} is when it is over. Answered as written they describe a cast onto water.
+ * Answered differently they describe {@link RoamingDroneSwarmScript}, which is the same swarm doing
+ * the same flying and the same catching somewhere there is no pond at all.
  */
 public class FishingDroneSwarmScript implements EveryFrameScript {
 
@@ -60,9 +68,20 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
      * {@link StatIds#FISHING_DRONE_COUNT} upgrade.
      */
     public static FishingDroneSwarmScript dispatch(SectorEntityToken pond, Vector2f target) {
+        return launch(new FishingDroneSwarmScript(pond, target));
+    }
+
+    /**
+     * Puts a swarm out, whichever kind of swarm it is: clears the sky first, spawns it, registers it,
+     * and hangs its renderers on it.
+     * <p>
+     * The recall comes before anything is spawned, so a cast never has to share the sky with the one
+     * before it - and it is here rather than in each caller because forgetting it is how strays are
+     * left behind, which is not a thing a subclass should be able to get wrong.
+     */
+    protected static <T extends FishingDroneSwarmScript> T launch(T script) {
         recallExisting();
 
-        FishingDroneSwarmScript script = new FishingDroneSwarmScript(pond, target);
         script.spawnDrones();
 
         Global.getSector().addScript(script);
@@ -122,11 +141,16 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
             SectorEntityToken drone = fleet.getContainingLocation().addCustomEntity(
                     Misc.genUID(), null, FishingDroneEntityPlugin.ENTITY_ID, null,
-                    new FishingDroneEntityPlugin.Params(target, slotAngle, RodConstants.DRONE_COLOR));
+                    createDroneParams(slotAngle));
 
             drone.setLocation(fleet.getLocation().x, fleet.getLocation().y);
             drones.add(drone);
         }
+    }
+
+    /** What kind of circle these drones are being sent to fly. */
+    protected FishingDroneEntityPlugin.Params createDroneParams(float slotAngle) {
+        return new FishingDroneEntityPlugin.Params(target, slotAngle, RodConstants.DRONE_COLOR);
     }
 
     public static int getDroneCount() {
@@ -214,13 +238,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
      * send anyone after and the swarm just keeps circling until one wanders in.
      */
     protected void lookForCatch() {
-        if (pond == null || target == null) return;
+        if (getSearchCenter() == null) return;
 
         moteInRing = false;
 
         List<SectorEntityToken> candidates = new ArrayList<>();
 
-        for (SectorEntityToken mote : pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+        for (SectorEntityToken mote : getSearchArea()) {
             if (!isCatchable(mote)) continue;
 
             moteInRing = true;
@@ -259,12 +283,72 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         });
     }
 
+    /** Reads the species off either kind of mote, so the sort works on whatever is being fished. */
     protected static int getRarityOrdinal(SectorEntityToken mote) {
-        if (!(mote.getCustomPlugin() instanceof FishEntityPlugin)) return 0;
+        FishSpec spec = null;
 
-        FishSpec spec = ((FishEntityPlugin) mote.getCustomPlugin()).getFishSpec();
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin) {
+            spec = ((FishEntityPlugin) mote.getCustomPlugin()).getFishSpec();
+        } else if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin) {
+            spec = ((BuriedMoteEntityPlugin) mote.getCustomPlugin()).getFishSpec();
+        }
 
         return spec == null ? 0 : spec.rarity.ordinal();
+    }
+
+    /**
+     * The middle of the water being fished - the spot the rod was aimed at.
+     * <p>
+     * Everything that measures the ring measures it from here rather than from the cast point
+     * directly, because a swarm's middle is not always a place: a roaming one's is the fleet, and it
+     * moves. Null means there is nothing to fish around at all, and the swarm does nothing this tick.
+     */
+    public Vector2f getSearchCenter() {
+        return pond == null ? null : target;
+    }
+
+    /**
+     * How far from the middle this swarm will go after something - the ring plus whatever this rig
+     * will follow past it.
+     * <p>
+     * The one number both the search and the break-off are measured against, so a mote cannot be
+     * inside the reach when a drone is sent and outside it the same frame it arrives.
+     */
+    protected float getReach() {
+        return getRingRadius() + getChaseMargin();
+    }
+
+    /**
+     * The circle drawn for the player, which is the ring itself rather than the reach.
+     * <p>
+     * The margin is deliberately not in it: it is the give in the rig, not a promise, and drawing
+     * the line where a drone will sometimes still bother would be drawing a bigger ring than the one
+     * that was aimed.
+     */
+    public float getRingDrawRadius() {
+        return getRingRadius();
+    }
+
+    /** The circle the drones themselves fly, as opposed to the water they are fishing. */
+    public float getPatrolRadius() {
+        return RodConstants.DRONE_ORBIT_RADIUS;
+    }
+
+    /** Everything the swarm will consider, before any of it is filtered. */
+    protected List<SectorEntityToken> getSearchArea() {
+        if (pond == null) return new ArrayList<>();
+
+        return pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG);
+    }
+
+    /**
+     * Whether there is anything for a drone to close on, leaving aside where it is.
+     * <p>
+     * Under the fabric there is not: the mote comes back up in a moment and is picked up again then,
+     * which is the whole of what a dive costs the drones.
+     */
+    protected boolean isReachable(SectorEntityToken mote) {
+        return FishEntityPlugin.isAvailable(mote);
     }
 
     /** A mote is worth going after while it is alive, inside the ring, and not already dealt with. */
@@ -272,12 +356,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (mote.isExpired() || !mote.isAlive()) return false;
         if (handled.contains(mote.getId())) return false;
 
-        //under the fabric, where a drone has nothing to close on. It comes back up in a moment and
-        //is picked up again then, which is the whole of what a dive costs the drones
-        if (!FishEntityPlugin.isAvailable(mote)) return false;
+        if (!isReachable(mote)) return false;
+
+        Vector2f center = getSearchCenter();
+        if (center == null) return false;
 
         //the ring, plus however far past it this rig will follow something
-        return Misc.getDistance(mote.getLocation(), target) <= getRingRadius() + getChaseMargin();
+        return Misc.getDistance(mote.getLocation(), center) <= getReach();
     }
 
     /** Whether some drone is already on this one. */
@@ -292,6 +377,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     /** Watches the drones that are running something down, and calls it once one catches up. */
     protected void checkChasers() {
+        Vector2f center = getSearchCenter();
+
         for (SectorEntityToken drone : new ArrayList<>(drones)) {
             FishingDroneEntityPlugin plugin = getPlugin(drone);
             if (plugin == null || !plugin.isChasing()) continue;
@@ -304,7 +391,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             //first place: tested against the orbit instead, every chase beyond that tight inner
             //circle was called off the frame after it began, so a mote that wandered in was picked
             //up and dropped rather than caught
-            if (Misc.getDistance(mote.getLocation(), target) > getRingRadius() + getChaseMargin()) {
+            if (center == null || Misc.getDistance(mote.getLocation(), center) > getReach()) {
                 plugin.returnToOrbit();
                 continue;
             }
@@ -333,7 +420,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(pond, fish, FishLogEntry.Method.DRONE, new FishingMinigameDialogPlugin.Callback() {
+        boolean opened = FishingMinigameDialogPlugin.open(getCatchAnchor(mote), fish, FishLogEntry.Method.DRONE, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
                 if (landed != null) FishItems.addToPlayerCargo(landed);
@@ -346,6 +433,18 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (!opened) return;
 
         handled.add(mote.getId());
+    }
+
+    /**
+     * Where the catch counts as having happened, which is what the minigame is coloured by - the
+     * water's own aberration and the region it stands in are both read off this.
+     * <p>
+     * The pond, for a cast: a fish taken out of one belongs to it wherever in it the drone caught up.
+     * A swarm with no pond under it has to name something else, and the mote itself is the only
+     * honest answer - what was fished is where it was found.
+     */
+    protected SectorEntityToken getCatchAnchor(SectorEntityToken mote) {
+        return pond == null ? mote : pond;
     }
 
     /**

@@ -12,6 +12,17 @@ public class RodConstants {
     public static final float DRONE_ORBIT_RADIUS = 60f;
 
     /**
+     * Radius of the ring a roaming drone flies, which it flies around the fleet rather than around a
+     * spot on the water.
+     * <p>
+     * Wider than the cast ring, and for a reason that has nothing to do with fishing: a circle of
+     * sixty units centred on the player's own hull is drawn straight through the fleet's sprites,
+     * where the drones are neither visible nor legible as an escort. Far enough out to read as a
+     * screen flying with the fleet, close enough that they are still obviously yours.
+     */
+    public static final float DRONE_ROAM_RADIUS = 140f;
+
+    /**
      * The ring the swarm fishes inside, when the upgrade sheet has no row for it. Every real read
      * goes through the upgrade, so this is the number a save with a missing sheet falls back to
      * rather than the number the game normally uses.

@@ -1,6 +1,5 @@
 package catchrelease.abilities.rod.rendering;
 
-import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.skillshot.GuideLineStyle;
@@ -57,7 +56,10 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (isExpired()) return;
 
-        Vector2f center = swarm.getTarget();
+        //the middle as the swarm currently understands it, rather than the spot it was cast at - a
+        //roaming swarm was never cast at one, and drawing its circle where it isn't is worse than
+        //not drawing it
+        Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 
         SkillshotUtils.drawLines(getRingVertices(center), RING_COLOR, ALPHA, WIDTH, GuideLineStyle.DASHED);
@@ -67,11 +69,13 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
     /** The ring itself, as a closed loop of straight segments. */
     protected List<Vector2f> getRingVertices(Vector2f center) {
         List<Vector2f> vertices = new ArrayList<>();
+
+        float radius = swarm.getPatrolRadius();
         float step = 360f / CIRCLE_SEGMENTS;
 
         for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
-            vertices.add(MathUtils.getPointOnCircumference(center, RodConstants.DRONE_ORBIT_RADIUS, step * i));
-            vertices.add(MathUtils.getPointOnCircumference(center, RodConstants.DRONE_ORBIT_RADIUS, step * (i + 1)));
+            vertices.add(MathUtils.getPointOnCircumference(center, radius, step * i));
+            vertices.add(MathUtils.getPointOnCircumference(center, radius, step * (i + 1)));
         }
 
         return vertices;

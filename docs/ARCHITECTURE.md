@@ -325,10 +325,11 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | File | What it does |
 |---|---|
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
-| `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing |
-| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall |
+| `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet |
+| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces |
+| `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: a screen flying with the fleet, going after buried motes the breach lamps have lit and unearthing them on contact |
 | `rod/rendering/FishingRingRenderer.java` | The dashed ring showing the fishing radius |
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |
@@ -339,7 +340,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `depthbomb/ability/DepthBombAbilityPlugin.java` | Throws a bomb at a clamped-range point |
 | `depthbomb/entities/DepthBombEntityPlugin.java` | Falls, arms, detonates; dresses the break as a visual-only pond, stuns motes, unearths buried ones |
 | `depthbomb/constants/DepthBombConstants.java` | Range, blast, glass look, shockwave, and the `SPAWN_POND` toggle |
-| `searchlight/ability/SearchlightAbilityPlugin.java` | Spools lights up; exposes `isLit(mote)`; detectability penalty |
+| `searchlight/ability/SearchlightAbilityPlugin.java` | Spools lights up; exposes `isLit(mote)` and `isBreaching()` (lamp fitted **and** lit, which is not the same as `burnsIntoHyperspace()`); detectability penalty |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The default circular beam — orange, or purple under the breach lamp |
 | `searchlight/rendering/SearchlightFanRenderer.java` | The wedge beam, for the fan-beam tackle |

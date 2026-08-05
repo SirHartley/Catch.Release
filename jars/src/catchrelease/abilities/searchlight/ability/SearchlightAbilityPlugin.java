@@ -161,6 +161,26 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return TackleManager.get(Tackle.Fit.SEARCHLIGHT).burnsHyperspace;
     }
 
+    /**
+     * Whether there are windows open right now: the lamp fitted, and the lights actually on.
+     * <p>
+     * Fitted is not the same as burning. {@link #burnsIntoHyperspace()} answers what the rig is
+     * capable of, which is what the spawner wants to know - whether there is anything down there to
+     * find at all - and this answers whether it is doing it, which is what anything reaching through
+     * a window has to ask first. The rod's roaming cast is the only caller so far, and it is exactly
+     * the difference between owning the lamp and having it lit.
+     */
+    public static boolean isBreaching() {
+        if (!burnsIntoHyperspace()) return false;
+
+        CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
+        if (fleet == null) return false;
+
+        AbilityPlugin ability = fleet.getAbility(ABILITY_ID);
+
+        return ability instanceof SearchlightAbilityPlugin && ((SearchlightAbilityPlugin) ability).isActive();
+    }
+
     private void expireLights(boolean withFade){
         for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
     }
