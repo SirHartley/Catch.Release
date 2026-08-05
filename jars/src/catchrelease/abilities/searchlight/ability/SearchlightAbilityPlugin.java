@@ -33,14 +33,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     public static float SPOOL_UP_TIME = 1.5f; //seconds
     public static float SEARCHLIGHT_ACTIVATION_PAUSE = 1f;
 
-    /**
-     * Degrees of the forward light's wedge, measured across the fleet's nose.
-     * <p>
-     * Narrow on purpose. It is there so the water the fleet is about to cross is always lit, and a
-     * wide one wanders off the bow for most of its sweep, which is the thing it exists not to do.
-     */
-    public static float FORWARD_ARC = 50f;
-
     private float timePassed = 0f;
     private int lightsToActivate = 0;
     private boolean spoolDone = false;
@@ -90,23 +82,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float size = Searchlight.getArea();
         float radius = size * 2f;
 
-        //every angle here is measured from the fleet's nose rather than from due east - see
-        //Searchlight.getHeading(), which is what turns these into places
+        //an even share of the circle each, in the world's own degrees. A wedge reserved for straight
+        //ahead went with the heading it was measured from: with the arcs no longer turning with the
+        //hull there is no ahead to keep clear, and the light that used to hold it just swept a
+        //narrow strip of due east forever
+        float areaPerLight = 360f / lightsToActivate;
 
-        //one light keeps the water ahead, on a narrow wedge, because ahead is where the fleet is
-        //about to be and an even carve-up left the front covered only when a sweep happened to
-        //swing past it
-        searchlightArcs.add(new CircularArc(getFleet().getLocation(), radius,
-                -FORWARD_ARC * 0.5f, FORWARD_ARC * 0.5f));
-
-        //the rest share what is left of the circle behind it
-        int remaining = lightsToActivate - 1;
-        if (remaining <= 0) return;
-
-        float areaPerLight = (360f - FORWARD_ARC) / remaining;
-
-        for (int i = 0; i < remaining; i++) {
-            float minAngle = FORWARD_ARC * 0.5f + areaPerLight * i;
+        for (int i = 0; i < lightsToActivate; i++) {
+            float minAngle = areaPerLight * i;
 
             searchlightArcs.add(new CircularArc(getFleet().getLocation(), radius,
                     minAngle, minAngle + areaPerLight));
@@ -118,7 +101,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         CampaignFleetAPI fleet = getFleet();
         if (fleet == null) return;
 
-        if (level > 0 && fleet.getContainingLocation() != null && fleet.getContainingLocation().isHyperspace()) {
+        if (level > 0 && !canRunHere(fleet)) {
             deactivate();
             return;
         }
@@ -148,14 +131,33 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private void addSearchlight(){
         Searchlight searchlight = new Searchlight();
 
-        //the arcs keep a direct reference to the fleets movement vector, and the fleet itself for
-        //the heading they are measured from. Taken from the front of the list so they light up in
-        //the order they were laid out - the forward one first, since it is the one worth having
-        searchlight.init(searchlightArcs.get(0), getFleet());
+        //the arcs keep a direct reference to the fleet's own location vector, which is how a light
+        //travels with the fleet without being told to. Taken from the front so they come on in the
+        //order they were laid out, going round rather than lighting up at random
+        searchlight.init(searchlightArcs.get(0));
         searchlightArcs.remove(0);
 
         getFleet().addScript(searchlight);
         activeSearchlights.add(searchlight);
+    }
+
+    /**
+     * Whether the lights will run where the fleet is standing.
+     * <p>
+     * They will not go into hyperspace on their own - there is nothing out there for an ordinary
+     * beam to find, and lighting up the deep for no reason is only a way to be seen. Bought, the
+     * rig burns through instead of shining across, which is what makes the trip worth making.
+     */
+    public static boolean canRunHere(CampaignFleetAPI fleet) {
+        if (fleet == null || fleet.getContainingLocation() == null) return true;
+        if (!fleet.getContainingLocation().isHyperspace()) return true;
+
+        return burnsIntoHyperspace();
+    }
+
+    /** Whether the burn-through has been fitted. */
+    public static boolean burnsIntoHyperspace() {
+        return UpgradeManager.getValue(StatIds.SEARCHLIGHT_HYPERSPACE, 0f) > 0f;
     }
 
     private void expireLights(boolean withFade){
@@ -165,11 +167,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     /**
      * How many lights sweep at once.
      * <p>
-     * The upgrade rather than a fixed three. Eventually this is meant to depend on what the fleet
-     * has mounted; until then it is bought, and the fallback is what it always was.
+     * Two to start with, and bought upward from there. One was too little to read as a sweep at all
+     * - a single beam crawling round a whole circle spends most of its time somewhere the player is
+     * not looking - and two smaller ones working opposite halves cover the same ground while always
+     * having something in view. Eventually this is meant to depend on what the fleet has mounted;
+     * until then it is bought, and the fallback matches the sheet.
      */
     public int getSearchlightNum(){
-        return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 3f)));
+        return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 2f)));
     }
 
     @Override
@@ -179,7 +184,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         spoolDone = false;
 
         CampaignFleetAPI fleet = getFleet();
-        boolean withFade = fleet != null && !fleet.getContainingLocation().isHyperspace();
+        boolean withFade = fleet != null && canRunHere(fleet);
 
         expireLights(withFade);
         activeSearchlights.clear();
@@ -271,6 +276,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     3f, highlight, Misc.getRoundedValue(track) + " seconds");
         }
 
+        float lock = UpgradeManager.getValue(StatIds.SEARCHLIGHT_LOCK_TIME, 0f);
+        if (lock > 0f) {
+            tooltip.addPara("A light that finds something breaks off its sweep and follows it for %s.",
+                    3f, highlight, Misc.getRoundedValue(lock) + " seconds");
+        }
+
         int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
         if (identify == 1) {
             tooltip.addPara("A mark carries some hint of how rare the thing under it is.",
@@ -293,10 +304,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         CampaignFleetAPI fleet = getFleet();
 
-        if (!fleet.isAIMode() &&
-                fleet.getContainingLocation() != null && fleet.getContainingLocation().isHyperspace()) {
-            return false;
-        }
+        if (!fleet.isAIMode() && !canRunHere(fleet)) return false;
 
         return true;
     }
