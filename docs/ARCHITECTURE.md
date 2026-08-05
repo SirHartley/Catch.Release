@@ -297,7 +297,7 @@ The pond, as terrain.
 
 | File | What it does |
 |---|---|
-| `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary ponds |
+| `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
 | `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind |
@@ -336,7 +336,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
 | `depthbomb/ability/DepthBombAbilityPlugin.java` | Throws a bomb at a clamped-range point |
-| `depthbomb/entities/DepthBombEntityPlugin.java` | Falls, arms, detonates; opens a pond, stuns motes, unearths buried ones |
+| `depthbomb/entities/DepthBombEntityPlugin.java` | Falls, arms, detonates; dresses the break as a visual-only pond, stuns motes, unearths buried ones |
 | `depthbomb/constants/DepthBombConstants.java` | Range, blast, glass look, shockwave, and the `SPAWN_POND` toggle |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Spools lights up; exposes `isLit(mote)`; detectability penalty |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
