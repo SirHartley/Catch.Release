@@ -24,6 +24,10 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
+import com.fs.starfarer.api.impl.campaign.ExplosionEntityPlugin.ExplosionFleetDamage;
+import com.fs.starfarer.api.impl.campaign.ExplosionEntityPlugin.ExplosionParams;
+import com.fs.starfarer.api.impl.campaign.ids.Entities;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
@@ -55,6 +59,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         REELING,
         /** Coming home empty. */
         RETURNING,
+        /** Blown off its own line by an explosive head, tumbling away with the rope going with
+         *  it. Terminal, and not an arrival - nothing is reeled in and nothing comes home. */
+        BLASTED,
         /** Home, winding in the last of the line before it goes - arrival isn't the same as
          *  being stowed, the head stops short with rope still to take up. */
         RETRACTING,
@@ -111,6 +118,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     /** Set once the catch has been put up, so a busy UI is retried rather than skipped. */
     protected boolean minigameOpened = false;
 
+    /** Where the blast threw the head, and how fast. Null until a charge has gone off. */
+    protected Vector2f blastThrow;
+
     /** What was won, rolled by the catch itself so the hold gets the specimen the player was shown. */
     protected FishCatch caught;
 
@@ -166,6 +176,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case REELING:
             case RETURNING: advanceHomeward(amount, fleet); break;
             case RETRACTING: advanceRetract(amount, fleet); break;
+            case BLASTED: advanceBlasted(amount); break;
         }
 
         //after the head has moved, so the rope is chasing this frame's ends rather than last frame's
@@ -191,6 +202,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (hit == null) hit = strikeBuried();
 
         if (hit != null) {
+            //an explosive head never gets as far as the push: there is nothing to shove, nothing to
+            //play, and nothing to bring home. isExplosive reads the player's tackle, so an owned
+            //line never asks - what is screwed onto the player's line is not on anyone else's
+            if (owner == null && isExplosive()) {
+                blastMote(hit);
+                return;
+            }
+
             hooked = hit;
             setHookedHeld(true);
             enter(State.PUSHING);
@@ -200,6 +219,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         //checked after motes, so a line through a shoal takes the fish rather than the hull behind it
         CampaignFleetAPI struck = findFleet();
         if (struck != null) {
+            if (isExplosive()) {
+                blastFleet(struck);
+                return;
+            }
+
             hooked = struck;
             beginHaul(struck);
             return;
@@ -230,6 +254,109 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         HarpoonOffence.record(struck);
 
         enter(State.HAULING);
+    }
+
+    /**
+     * Whether the head fitted is a charge rather than a barb. Read at the hit rather than kept from
+     * launch, same as the fathom head - a shot is over in a fraction of a second.
+     */
+    public static boolean isExplosive() {
+        return TackleManager.get(Tackle.Fit.HARPOON).explosive;
+    }
+
+    /**
+     * A specimen, and then no specimen. No catch to play and nothing to bring home - this head does
+     * not take fish, it removes them. Set to harm nobody: a fish going up is not an incident, and
+     * damage to a fleet that happened to be nearby would be a rep hit with no conversation on it.
+     */
+    protected void blastMote(SectorEntityToken mote) {
+        Misc.fadeAndExpire(mote, 0.2f);
+
+        detonate(ExplosionFleetDamage.NONE);
+    }
+
+    /**
+     * A charge against somebody's hull, which is not a rope on it. Booked as a harpooning first -
+     * it is still the fishing gear pointed at people - and then the crew's patience is skipped
+     * entirely, since there is no version of this where they wait to hear an explanation.
+     */
+    protected void blastFleet(CampaignFleetAPI struck) {
+        if (HarpoonOffence.record(struck)) HarpoonOffence.turnHostile(struck);
+
+        detonate(ExplosionFleetDamage.MEDIUM);
+    }
+
+    /**
+     * Sets the charge off where the head is standing, using vanilla's own fireball entity - it
+     * already throws particles, drives a shockwave, plays the sound, and shoves and damages whatever
+     * is near enough, all of which this would otherwise grow its own copy of.
+     */
+    protected void detonate(ExplosionFleetDamage damage) {
+        LocationAPI where = entity.getContainingLocation();
+        Vector2f at = new Vector2f(entity.getLocation());
+
+        ExplosionParams params = new ExplosionParams(HarpoonConstants.BLAST_COLOR, where, at,
+                HarpoonConstants.BLAST_RADIUS, HarpoonConstants.BLAST_DURATION);
+        params.damage = damage;
+
+        SectorEntityToken explosion = where.addCustomEntity(Misc.genUID(), null,
+                Entities.EXPLOSION, Factions.NEUTRAL, params);
+        explosion.setLocation(at.x, at.y);
+
+        throwHead();
+    }
+
+    /**
+     * The head, off its line and going. Thrown on along the shot rather than away from the blast -
+     * it was standing in the middle of the blast, and there is no "away" from a point you are on.
+     */
+    protected void throwHead() {
+        float away = heading.lengthSquared() > 0f
+                ? Misc.getAngleInDegrees(heading) : (float) Math.random() * 360f;
+
+        //a little off line, so two shots at the same thing don't throw the head down the same path
+        Vector2f thrown = Misc.getUnitVectorAtDegreeAngle(
+                away + MathUtils.getRandomNumberInRange(-25f, 25f));
+
+        blastThrow = new Vector2f(thrown.x * HarpoonConstants.BLAST_THROW_SPEED,
+                thrown.y * HarpoonConstants.BLAST_THROW_SPEED);
+
+        enter(State.BLASTED);
+    }
+
+    /**
+     * The head coasting away from its own charge, rope trailing after it. Not routed through
+     * {@link #land} - there is no arrival here, only the last second of something already over.
+     */
+    protected void advanceBlasted(float amount) {
+        if (blastThrow == null) blastThrow = new Vector2f();
+
+        Vector2f loc = entity.getLocation();
+        entity.setLocation(loc.x + blastThrow.x * amount, loc.y + blastThrow.y * amount);
+
+        //drag, so it slows without ever reversing or quite stopping
+        blastThrow.scale(Math.max(0f, 1f - HarpoonConstants.BLAST_THROW_DRAG * amount));
+
+        entity.setFacing(entity.getFacing() + HarpoonConstants.BLAST_SPIN * amount);
+
+        if (stateTime < HarpoonConstants.BLAST_FADE_TIME) return;
+
+        state = State.DONE;
+        expire();
+    }
+
+    /**
+     * What is left of the line while the blast takes it, 1 down to 0. Faded here rather than left
+     * to {@link Misc#fadeAndExpire}, which drives the entity's own brightness - the rope is drawn by
+     * hand from this render pass, so the head would have dimmed out from under a full-strength line.
+     */
+    protected float getBlastFade() {
+        //keyed off the charge having gone off rather than off BLASTED, which the last frame of it
+        //leaves for DONE - a line already faded to nothing would otherwise come back at full
+        //strength for the length of the entity's own fade
+        if (blastThrow == null) return 1f;
+
+        return MathUtils.clamp(1f - stateTime / HarpoonConstants.BLAST_FADE_TIME, 0f, 1f);
     }
 
     /**
@@ -605,6 +732,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         switch (state) {
             case OUTBOUND:
             case PUSHING:
+            //a blown line is not being reeled in by anyone, so it keeps paying out behind the head
+            //the charge threw - which is what makes it go slack and whip rather than tidy itself up
+            case BLASTED:
                 paidOut = Math.max(paidOut, distance * HarpoonConstants.LINE_PAYOUT);
                 break;
             //a hull gets the same fast take-up as a fish - without naming it here, a haul falls
@@ -767,7 +897,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         CampaignFleetAPI fleet = getHomeFleet();
         if (fleet == null) return;
 
-        float alpha = viewport.getAlphaMult();
+        float alpha = viewport.getAlphaMult() * getBlastFade();
         if (alpha <= 0f) return;
 
         renderLine(fleet, alpha);

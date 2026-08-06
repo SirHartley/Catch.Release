@@ -74,12 +74,19 @@ public class TackleManager {
         getOwned().add(tackle.name());
     }
 
-    /** Everything that could go in a rig's slot, for a shop to list. */
+    /**
+     * Everything that could go in a rig's slot, for a shop to list - what the shelf stocks, plus
+     * anything already owned however it was come by. Without the second half, a module bought
+     * somewhere other than the shop could never be taken off and put back on again.
+     */
     public static List<Tackle> getOptions(Tackle.Fit rig) {
         List<Tackle> out = new ArrayList<>();
 
         for (Tackle tackle : Tackle.values()) {
-            if (tackle.fits(rig)) out.add(tackle);
+            if (!tackle.fits(rig)) continue;
+            if (!tackle.stocked && !isOwned(tackle)) continue;
+
+            out.add(tackle);
         }
 
         return out;
