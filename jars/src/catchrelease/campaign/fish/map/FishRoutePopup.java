@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -508,6 +509,12 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 icon.setAlphaMult(alphaMult);
                 icon.renderAtCenter(Math.round(x + PAD + ICON * 0.5f),
                         Math.round(rowBottom + ROW_HEIGHT * 0.5f));
+            }
+
+            //the shopping-list dot, bottom right of the icon, same corner as everywhere
+            if (ShopMarks.isMarked(row.spec)) {
+                ShopMarks.drawDot(x + PAD + ICON, rowBottom + (ROW_HEIGHT - ICON) * 0.5f + 1f,
+                        ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
             }
 
             LazyFont.DrawableString name = small.createText(row.spec.getDisplayName(),

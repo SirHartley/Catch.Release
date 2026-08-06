@@ -77,6 +77,11 @@ public final class FishTooltips {
                     tooltip.addPara("No region data in the table.", Misc.getNegativeHighlightColor(), 8f);
                 }
 
+                if (catchrelease.campaign.fish.shop.ShopMarks.isMarked(spec)) {
+                    tooltip.addPara("Would go towards a marked upgrade.",
+                            Misc.getHighlightColor(), 8f);
+                }
+
                 String action = actionLine == null ? null : actionLine.get();
                 tooltip.addPara(action != null ? action : "F2 opens the codex.",
                         Misc.getGrayColor(), 8f);

@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 183 Java files across eight top-level packages, plus
+What is where, and which file to open first. 184 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -278,6 +278,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
+| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |

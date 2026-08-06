@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.ShopMarks;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
@@ -110,6 +111,11 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         FishItemRenderer.render(x, y, w, h, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
+
+        //the shopping-list dot: this specimen would go towards a marked upgrade
+        if (ShopMarks.isMarked(entry)) {
+            ShopMarks.drawDot(x + w - 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+        }
     }
 
     /** Species icon, or the fallback - used by the codex, which builds this plugin with no stack/specimen to read from. */
@@ -167,6 +173,11 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         if (spec != null && spec.desc != null && !spec.desc.isEmpty()) {
             tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
+        }
+
+        //the shopping list speaking: this exact specimen would pay for something marked
+        if (ShopMarks.isMarked(entry)) {
+            tooltip.addPara("Would go towards a marked upgrade.", Misc.getHighlightColor(), opad);
         }
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
