@@ -186,9 +186,11 @@ Jobs given by a hull in space, which then has to still be there when you return.
 
 | File | What it does |
 |---|---|
-| `FleetQuest.java` | A `FishJob` whose giver is a fleet; pins it in place, releases it when the job ends |
-| `FleetQuestSpawner.java` | Rarely adopts a passing fleet or places a stranded one |
-| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth |
+| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `mark()` puts the offer on the hull, `hold()` sits it down; accepted on `take()`, not at spawn, so an offer nobody agreed to raises no intel |
+| `FleetQuestSpawner.java` | Rolls the offer and routes it: able to fly → arrives from beyond sensor range, cannot → distress call |
+| `FleetDistressCall.java` | The immobile half: picks a nearby empty system vanilla's own way, spawns at its distress jump point, raises vanilla `DistressCallIntel` |
+| `FleetQuestEncounter.java` | Runs one offer — intercepts the player, reads the answer once the dialogue closes, sends a refused fleet home, times the offer out |
+| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `wandering` is read off the complaint: a seized drive cannot come looking for you |
 
 ### `campaign/fish/minigame`
 The catch itself. Rules are separated from rendering on purpose.
