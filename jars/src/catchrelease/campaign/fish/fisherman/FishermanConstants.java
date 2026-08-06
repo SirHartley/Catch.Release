@@ -63,6 +63,19 @@ public class FishermanConstants {
     /** Survey data costs fish one rung below the species' own rarity; commons cost a common. */
     public static final int SURVEY_COST = 2;
 
+    /** The survey shelf: rolled once per visit, sold down, never restocked until the next boat. */
+    public static final String SURVEY_STOCK_KEY = "$catchrelease_fisherman_survey";
+    public static final int SURVEY_STOCK = 6;
+
+    /** Roll weight by rarity ordinal: commons likely, legendaries a long shot - and as the
+     *  commons become known they leave the pool, so a seasoned fisher is offered rarer charts. */
+    public static final float[] SURVEY_RARITY_WEIGHTS = {10f, 6f, 3f, 1.5f, 0.75f};
+
+    /** A rumored stranger is a prize specimen: quality floor and stability cap on its roll,
+     *  over whatever the water and tackle would have said. */
+    public static final float STRANGER_QUALITY_FLOOR = 0.85f;
+    public static final float STRANGER_MAX_ABERRATION = 0.15f;
+
     /** Rumors: one a month, and what the whispered-about system is better at, for how long. */
     public static final float RUMOR_COOLDOWN_DAYS = 30f;
     public static final float RUMOR_DURATION_DAYS = 30f;

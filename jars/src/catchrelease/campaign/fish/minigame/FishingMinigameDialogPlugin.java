@@ -99,8 +99,23 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         Tackle tackle = TackleManager.get(method);
         this.minigame = new FishingMinigame(fish, tackle);
 
-        // aberration comes from where it was taken, not from the fish species
-        this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias,
+        // aberration comes from where it was taken, not from the fish species - unless this is
+        // a rumored stranger, which is a prize specimen wherever it is: quality floored high and
+        // coherence capped stable, over whatever the water and tackle would have said
+        boolean stranger = fish != null && anchor != null && fish.id.equals(
+                catchrelease.campaign.fish.fisherman.FishRumors.getStrangerId(
+                        anchor.getContainingLocation()));
+
+        float quality = stranger
+                ? Math.max(tackle.qualityBias,
+                        catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_QUALITY_FLOOR)
+                : tackle.qualityBias;
+        float aberration = stranger
+                ? Math.min(Aberration.of(anchor),
+                        catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_MAX_ABERRATION)
+                : Aberration.of(anchor);
+
+        this.specimen = FishCatch.roll(fish, aberration, quality,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
 
         // must read off anchor before the catch resolves - the mote is gone afterward
