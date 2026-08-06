@@ -40,7 +40,6 @@ public class FishermanDialog implements InteractionDialogPlugin {
     protected enum Option {
         MAIN,
         SURVEY,
-        SURVEY_PAGE,
         OUTFITTER,
         SELL,
         SELL_PICK,
@@ -48,11 +47,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         LEAVE
     }
 
-    /** Species per page of the survey list - the dialog column only holds so many options. */
-    public static final int SURVEY_PAGE_SIZE = 5;
-
     protected InteractionDialogAPI dialog;
-    protected int surveyPage = 0;
 
     @Override
     public void init(InteractionDialogAPI dialog) {
@@ -84,10 +79,6 @@ public class FishermanDialog implements InteractionDialogPlugin {
     @Override
     public void optionSelected(String optionText, Object optionData) {
         if (!(optionData instanceof Option)) {
-            if (optionData instanceof SurveyOffer) {
-                buySurvey((SurveyOffer) optionData);
-                return;
-            }
             if (optionData instanceof FishRarity) {
                 sellUpTo((FishRarity) optionData);
                 return;
@@ -97,12 +88,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         switch ((Option) optionData) {
             case SURVEY:
-                surveyPage = 0;
-                showSurvey();
-                break;
-            case SURVEY_PAGE:
-                surveyPage++;
-                showSurvey();
+                openSurvey();
                 break;
             case OUTFITTER:
                 openOutfitter();
@@ -127,100 +113,26 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
     //---------------------------------------------------------------- survey data
 
-    /** One species on offer, with the fish that pay for it. */
-    protected static class SurveyOffer {
-        FishSpec spec;
-        FishRarity costRarity;
-        int costCount;
-    }
-
     /**
-     * The ladder: survey data costs fish one rung below the species' own rarity - commons cost a
-     * common, since there is nothing below them to pay with. What is already caught or bought is
-     * not on offer; knowing where it lives is no longer for sale.
+     * The chart counter: its own panel in the outfitter's dress, handed the frame the same way.
+     * The shelf itself lives on the boat - see {@link FishermanSurveyDialog}.
      */
-    protected void showSurvey() {
-        List<SurveyOffer> offers = getSurveyOffers();
-
-        dialog.getOptionPanel().clearOptions();
-
-        if (offers.isEmpty()) {
-            dialog.getTextPanel().addPara("\"Nothing left to sell you - you know these waters"
-                    + " as well as I do.\"", Misc.getGrayColor());
+    protected void openSurvey() {
+        if (FishermanSurveyDialog.getOffers(dialog.getInteractionTarget()).isEmpty()) {
+            dialog.getOptionPanel().clearOptions();
+            dialog.getTextPanel().addPara("\"Shelf's bare - what I had, you bought, and I don't"
+                    + " chart new waters mid-trip.\"", Misc.getGrayColor());
             dialog.getOptionPanel().addOption("Back", Option.MAIN);
             return;
         }
 
-        dialog.getTextPanel().addPara("\"Charts for charts. I mark your map, you fill my hold.\"");
+        //options cleared before the swap - they'd stand under the panel otherwise, and the
+        //hidden text panel drags them sideways with it
+        dialog.getOptionPanel().clearOptions();
 
-        int pages = (offers.size() + SURVEY_PAGE_SIZE - 1) / SURVEY_PAGE_SIZE;
-        if (surveyPage >= pages) surveyPage = 0;
-
-        int start = surveyPage * SURVEY_PAGE_SIZE;
-        int end = Math.min(offers.size(), start + SURVEY_PAGE_SIZE);
-
-        for (int i = start; i < end; i++) {
-            SurveyOffer offer = offers.get(i);
-
-            String label = offer.spec.getDisplayName()
-                    + " - " + offer.costCount + " "
-                    + offer.costRarity.name().toLowerCase()
-                    + (offer.costCount == 1 ? " specimen" : " specimens");
-
-            dialog.getOptionPanel().addOption(label, offer, offer.spec.rarity.color, null);
-
-            if (FishCurrency.count(offer.costRarity) < offer.costCount) {
-                dialog.getOptionPanel().setEnabled(offer, false);
-            }
-        }
-
-        if (pages > 1) {
-            dialog.getOptionPanel().addOption(
-                    "More (" + (surveyPage + 1) + "/" + pages + ")", Option.SURVEY_PAGE);
-        }
-
-        dialog.getOptionPanel().addOption("Back", Option.MAIN);
-    }
-
-    protected List<SurveyOffer> getSurveyOffers() {
-        List<SurveyOffer> offers = new ArrayList<>();
-
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
-
-            SurveyOffer offer = new SurveyOffer();
-            offer.spec = spec;
-
-            int rung = spec.rarity.ordinal();
-            offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.values()[rung - 1];
-            offer.costCount = rung == 0 ? 1 : FishermanConstants.SURVEY_COST;
-
-            offers.add(offer);
-        }
-
-        offers.sort(Comparator
-                .comparingInt((SurveyOffer offer) -> offer.spec.rarity.ordinal())
-                .thenComparing(offer -> offer.spec.getDisplayName()));
-
-        return offers;
-    }
-
-    protected void buySurvey(SurveyOffer offer) {
-        if (!FishCurrency.spend(offer.costRarity, offer.costCount)) {
-            dialog.getTextPanel().addPara("\"Hold's short. Come back with the fish.\"",
-                    Misc.getNegativeHighlightColor());
-            showSurvey();
-            return;
-        }
-
-        FishLog.unlockLocationData(offer.spec.id);
-
-        dialog.getTextPanel().addPara("The Fisherman marks your charts: "
-                        + offer.spec.getDisplayName() + "'s waters are on your map now.",
-                Misc.getPositiveHighlightColor());
-
-        showSurvey();
+        FishermanSurveyDialog counter = new FishermanSurveyDialog(this::resume);
+        dialog.setPlugin(counter);
+        counter.init(dialog);
     }
 
     //---------------------------------------------------------------- outfitter
@@ -230,6 +142,10 @@ public class FishermanDialog implements InteractionDialogPlugin {
      * afterwards rather than closing on top of the conversation it was opened from.
      */
     protected void openOutfitter() {
+        //options cleared before the swap - they'd stand under the shop otherwise, and the
+        //hidden text panel drags them sideways with it
+        dialog.getOptionPanel().clearOptions();
+
         FishShopDialog shop = new FishShopDialog(this::resume);
 
         dialog.setPlugin(shop);
@@ -266,14 +182,35 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().clearOptions();
 
         List<StackValue> held = readAllFish();
-        boolean any = false;
+
+        boolean anyAtAll = !held.isEmpty();
+        boolean anyMarked = false;
+        for (StackValue stack : held) anyMarked |= stack.marked;
+
+        if (!anyAtAll) {
+            dialog.getTextPanel().addPara("\"Empty hold. I know the feeling.\"",
+                    Misc.getGrayColor());
+            dialog.getOptionPanel().addOption("Back", Option.MAIN);
+            return;
+        }
+
+        dialog.getTextPanel().addPara("\"Market rate, no haggling. The market cannot hear"
+                + " you out here.\"");
+
+        //the door to the picker leads, in the one colour nothing else here wears
+        dialog.getOptionPanel().addOption("Open the fish buyer - pick what sells",
+                Option.SELL_PICK, Misc.getHighlightColor(), null);
+
         int listed = 0;
 
         for (FishRarity rarity : FishRarity.values()) {
             int upTo = 0;
             float value = 0f;
 
+            //batch options leave the shopping list alone - marked fish are being saved for
+            //something, and a bulk sale should not eat them
             for (StackValue stack : held) {
+                if (stack.marked) continue;
                 if (stack.rarity == null || stack.rarity.ordinal() > rarity.ordinal()) continue;
 
                 upTo += stack.count;
@@ -283,24 +220,83 @@ public class FishermanDialog implements InteractionDialogPlugin {
             //a rung is only worth a row if it takes more than the rung below it did
             if (upTo <= listed) continue;
             listed = upTo;
-            any = true;
 
-            dialog.getOptionPanel().addOption("Sell everything up to "
-                            + Misc.ucFirst(rarity.name().toLowerCase())
-                            + " (" + upTo + " fish, " + Misc.getDGSCredits(value) + ")",
-                    rarity, rarity.color, null);
+            String rarityWord = Misc.ucFirst(rarity.name().toLowerCase());
+
+            dialog.getOptionPanel().addOption("Sell all unmarked up to " + rarityWord
+                    + " (" + upTo + " fish, " + Misc.getDGSCredits(value) + ")", rarity);
+
+            //only the rarity's word in its colour, best-effort - a plain row still reads
+            highlightOptionWord(rarity, rarityWord, rarity.color);
         }
 
-        if (!any) {
-            dialog.getTextPanel().addPara("\"Empty hold. I know the feeling.\"",
-                    Misc.getGrayColor());
-        } else {
-            dialog.getTextPanel().addPara("\"Market rate, no haggling. The market cannot hear"
-                    + " you out here.\"");
-            dialog.getOptionPanel().addOption("Pick specimens to sell", Option.SELL_PICK);
+        if (anyMarked) {
+            dialog.getTextPanel().addPara("Marked fish stay aboard - the batch options leave"
+                    + " the shopping list alone.", Misc.getGrayColor());
         }
 
         dialog.getOptionPanel().addOption("Back", Option.MAIN);
+    }
+
+    /**
+     * Colours one word of an option's label, which the API cannot do - reached through the
+     * option panel's button map instead, and quietly skipped the moment any link in that chain
+     * is not where this build left it. A plain-coloured row is the graceful failure.
+     */
+    protected void highlightOptionWord(Object optionData, String word, java.awt.Color color) {
+        try {
+            Object panel = dialog.getOptionPanel();
+            Object map = catchrelease.reflection.ReflectionUtils.invokeIfExists(
+                    panel, "getButtonToItemMap");
+            if (!(map instanceof Map)) return;
+
+            for (Map.Entry<?, ?> pair : ((Map<?, ?>) map).entrySet()) {
+                //the item wraps the option's data in one of its fields; identity is the match
+                boolean ours = false;
+                for (catchrelease.reflection.ReflectionUtils.ReflectedField field
+                        : catchrelease.reflection.ReflectionUtils.getFieldsMatching(
+                        pair.getValue().getClass(), null, null, null, null, false)) {
+
+                    if (field.get(pair.getValue()) == optionData) {
+                        ours = true;
+                        break;
+                    }
+                }
+                if (!ours) continue;
+
+                highlightLabelIn(pair.getKey(), word, color, 0);
+                return;
+            }
+        } catch (Throwable ignored) {
+            //the row stays plain, which is what it was before this method existed
+        }
+    }
+
+    /** Finds the label inside a button (or its renderer) and sets the highlight on it. */
+    protected boolean highlightLabelIn(Object holder, String word, java.awt.Color color, int depth) {
+        if (holder == null || depth > 2) return false;
+
+        if (catchrelease.reflection.ReflectionUtils.hasMethodOfName(holder, "setHighlight")
+                && catchrelease.reflection.ReflectionUtils.hasMethodOfName(holder, "setHighlightColors")) {
+
+            catchrelease.reflection.ReflectionUtils.invoke(holder, "setHighlightColors",
+                    (Object) new java.awt.Color[]{color});
+            catchrelease.reflection.ReflectionUtils.invoke(holder, "setHighlight",
+                    (Object) new String[]{word});
+            return true;
+        }
+
+        for (catchrelease.reflection.ReflectionUtils.ReflectedField field
+                : catchrelease.reflection.ReflectionUtils.getFieldsMatching(
+                holder.getClass(), null, null, null, null, false)) {
+
+            Object value = field.get(holder);
+            if (value == null || value instanceof String || value instanceof Number) continue;
+
+            if (highlightLabelIn(value, word, color, depth + 1)) return true;
+        }
+
+        return false;
     }
 
     /** One stack's worth of fish: how many, their shared rarity, what they are worth together. */
@@ -309,6 +305,9 @@ public class FishermanDialog implements InteractionDialogPlugin {
         int count;
         FishRarity rarity;
         float value;
+
+        /** On the shopping list - the batch options step around it. */
+        boolean marked;
     }
 
     /** Every fish aboard, stack by stack - bundles valued by their contents. */
@@ -331,7 +330,8 @@ public class FishermanDialog implements InteractionDialogPlugin {
                 held.count = (int) stack.getSize();
                 held.rarity = entry.getSpec().rarity;
                 held.value = entry.getValue() * held.count;
-            } else if (FishItems.BUNDLE.equals(data.getId())) {
+                held.marked = catchrelease.campaign.fish.shop.ShopMarks.isMarked(entry);
+            } else if (FishItems.isContainer(data)) {
                 List<FishCatch> contents = FishItems.decodeBundle(data.getData());
                 if (contents.isEmpty()) continue;
 
@@ -348,6 +348,9 @@ public class FishermanDialog implements InteractionDialogPlugin {
                             || entry.getSpec().rarity.ordinal() > worst.ordinal()) {
                         worst = entry.getSpec().rarity;
                     }
+
+                    //one marked fish marks the crate - a batch sale must not eat it unseen
+                    held.marked |= catchrelease.campaign.fish.shop.ShopMarks.isMarked(entry);
                 }
                 held.rarity = worst;
             } else {
@@ -368,11 +371,12 @@ public class FishermanDialog implements InteractionDialogPlugin {
         float credits = 0f;
 
         for (StackValue held : readAllFish()) {
+            if (held.marked) continue;
             if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
 
             //a bundle is one item however many swim in it
             cargo.removeItems(CargoItemType.SPECIAL, held.data,
-                    FishItems.BUNDLE.equals(held.data.getId()) ? 1 : held.count);
+                    FishItems.isContainer(held.data) ? 1 : held.count);
 
             sold += held.count;
             credits += held.value;
@@ -388,7 +392,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         for (StackValue held : readAllFish()) {
             offer.addSpecial(held.data,
-                    FishItems.BUNDLE.equals(held.data.getId()) ? 1 : held.count);
+                    FishItems.isContainer(held.data) ? 1 : held.count);
         }
 
         dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
@@ -440,7 +444,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
             cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
 
             credits += value;
-            sold += FishItems.BUNDLE.equals(data.getId())
+            sold += FishItems.isContainer(data)
                     ? FishItems.decodeBundle(data.getData()).size() : (int) stack.getSize();
         }
 
@@ -466,7 +470,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
             return entry == null ? 0f : entry.getValue() * stack.getSize();
         }
 
-        if (FishItems.BUNDLE.equals(data.getId())) {
+        if (FishItems.isContainer(data)) {
             float total = 0f;
             for (FishCatch entry : FishItems.decodeBundle(data.getData())) {
                 total += entry.getValue();

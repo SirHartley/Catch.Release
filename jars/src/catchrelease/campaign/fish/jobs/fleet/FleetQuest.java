@@ -5,25 +5,41 @@ import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.memory.upgrades.StatIds;
+import catchrelease.rendering.renderers.FleetMarkerRenderer;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import java.awt.Color;
 
 
 /**
  * A {@link FishJob} given by a fleet in space rather than a bar contact - same asks, rewards,
  * hand-over and intel entry, just a hull as the giver instead of a person behind a counter.
  * <p>
- * Since the game would otherwise move, retask or despawn that fleet, it is pinned for the job's
- * duration: mission-important, a hold assignment that outlasts any campaign, no sidetracking.
+ * The giver is somebody already out there. Nothing is spawned: {@link FleetQuestSpawner} picks a
+ * hull that was going about its business and hangs an offer on it, and until that offer is taken
+ * <i>nothing about the fleet is touched</i> - not its name, not its orders, not its importance. It
+ * carries a {@link FleetQuestMarker} and two memory keys, and otherwise flies its route.
  * <p>
- * Never offered at a bar - created directly onto a fleet via {@link #startOn}.
+ * Accepting is where it changes hands. The original is copied into a fleet of our own and despawned
+ * with a report, so whatever was managing it - a trade route, a patrol rotation - hears that it is
+ * gone and tidies up rather than finding its fleet parked in a system for a month. What is left is
+ * a hull nobody else has an opinion about, which can then be pinned: mission-important, a hold
+ * assignment that outlasts any campaign, no sidetracking. When the job ends it heads home and goes.
+ * <p>
+ * Never offered at a bar - put onto a fleet via {@link #startOn}.
  */
 public class FleetQuest extends FishJob {
 
@@ -45,11 +61,29 @@ public class FleetQuest extends FishJob {
      */
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
 
+    /** Days the player has to bring the catch before the crew stop waiting and go home. */
+    public static final float DELIVERY_DAYS = 60f;
+
     /** Days the hold assignment is given for - not meant to be reached; a fleet whose assignment runs out gets sent home by the game's own cleanup. */
     public static final float HOLD_DAYS = 100000f;
 
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
+
+    /**
+     * The mark while the offer is only an offer.
+     * <p>
+     * Vanilla's own mission indicator, in a muted cyan rather than the usual colour. The colour is
+     * the whole message: yellow is something the player has taken on and is expected to go and do,
+     * and this is a fleet that would like a word if anybody happens to be passing. Once the offer is
+     * accepted the mark comes off and vanilla's own takes over, because it is no longer passive.
+     */
+    public static final String OFFER_SPRITE_CATEGORY = "systemMap";
+    public static final String OFFER_SPRITE = "mission_indicator";
+    public static final Color OFFER_COLOR = new Color(95, 200, 215);
+
+    /** Rebuilt after a load; see {@link #ensureMarked}. */
+    protected transient FleetMarkerRenderer marker;
 
     /**
      * Puts a job onto a fleet and starts it. Not found by the mission framework - there is no bar or
@@ -71,27 +105,132 @@ public class FleetQuest extends FishJob {
     }
 
     /**
-     * The player has agreed: the mission starts and the fleet settles down to wait for delivery.
+     * The player has agreed: the hull changes hands, and then settles down to wait for delivery.
      * <p>
-     * Accepting is what raises the intel, so it is not done at spawn - a job nobody has agreed to
-     * has no business in the log, and one that is turned down should leave nothing behind at all.
-     * {@link FleetQuestEncounter} watches for {@link #TAKEN_FLAG} and calls this.
+     * Accepting is what raises the intel, so it is not done when the offer is hung - a job nobody
+     * has agreed to has no business in the log, and one that is turned down should leave nothing
+     * behind at all. {@link FleetQuestEncounter} watches for {@link #TAKEN_FLAG} and calls this.
+     * <p>
+     * The supplant comes first and everything else is done to what it hands back, because from here
+     * on the giver is a different object to the one the player talked to.
      */
     public void take() {
         if (takenUp) return;
         takenUp = true;
 
-        accept(null, null);
+        dropMarker();
 
+        giver = supplant(giver);
+        if (giver == null) return;
+
+        //the rows reach the job through the hull's own memory, and this is a different hull
+        setEntityMissionRef(giver, REF_KEY);
+
+        mark();
         hold();
+
+        //deferred until now on purpose - it registers the hull whose memory the stage change writes
+        //to, and until this moment that hull was somebody else's
+        markDeliverable();
+
+        accept(null, null);
+    }
+
+    /**
+     * Copies a fleet into one of ours, puts it where the original was, and tells the sector the
+     * original is gone.
+     * <p>
+     * The fleet the player found belongs to something - a trade route, a patrol rotation, a
+     * scavenger sweep - and that something expects it back. Holding it in place for a month is how
+     * a route manager ends up waiting forever on a fleet that is never coming. So the original
+     * leaves through the front door, reported, and an identical hull stays behind that nobody but
+     * this job has any claim on.
+     * <p>
+     * Members are built fresh from the same variants rather than moved across, so nothing is ever
+     * owned by two fleets at once; a variant carries its own hull damage and d-mods, so what the
+     * player saw is what stays. Only the source market is carried over from the original's memory -
+     * everything else in there is the old owner's bookkeeping and is exactly what must not follow.
+     *
+     * @return the standing hull, or null if there was nothing to copy into
+     */
+    protected CampaignFleetAPI supplant(CampaignFleetAPI original) {
+        if (original == null || original.isExpired()) return null;
+
+        LocationAPI where = original.getContainingLocation();
+        if (where == null) return original;
+
+        //noAutoDespawn, since nothing owns this one now and the game's own sweeps would take it
+        CampaignFleetAPI copy = Global.getFactory().createEmptyFleet(
+                original.getFaction().getId(), type.fleetType, true);
+
+        for (FleetMemberAPI member : original.getFleetData().getMembersListCopy()) {
+            FleetMemberAPI made = Global.getFactory()
+                    .createFleetMember(FleetMemberType.SHIP, member.getVariant());
+
+            made.setShipName(member.getShipName());
+            made.getRepairTracker().setCR(member.getRepairTracker().getCR());
+
+            if (member.getCaptain() != null) made.setCaptain(member.getCaptain());
+
+            copy.getFleetData().addFleetMember(made);
+        }
+
+        if (copy.isEmpty()) {
+            copy.despawn();
+            return original;
+        }
+
+        copy.getFleetData().sort();
+        copy.forceSync();
+
+        copy.getCargo().addAll(original.getCargo());
+        copy.setCommander(original.getCommander());
+        copy.setName(original.getName());
+        copy.setTransponderOn(original.isTransponderOn());
+
+        String source = original.getMemoryWithoutUpdate()
+                .getString(MemFlags.MEMORY_KEY_SOURCE_MARKET);
+        if (source != null) {
+            copy.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_SOURCE_MARKET, source);
+        }
+
+        where.addEntity(copy);
+        copy.setLocation(original.getLocation().x, original.getLocation().y);
+        copy.setFacing(original.getFacing());
+
+        //reported rather than quietly removed: whoever was running this fleet finds out here
+        original.despawn(CampaignEventListener.FleetDespawnReason.OTHER, null);
+
+        return copy;
     }
 
     /** Whether {@link #take} has run, so a second look at the flag cannot start the job twice. */
     protected boolean takenUp = false;
 
-    /** Gives up on an offer that was never taken, leaving the hull as it was found. */
+    /** Gives up on an offer that was never taken, leaving the hull exactly as it was found. */
     public void abandon() {
         release();
+    }
+
+    /**
+     * Puts the mark back over the giver if it is missing, which after a load it always is.
+     * <p>
+     * Renderers are transient and the offer is not, so the mark has to be something that can be
+     * re-hung rather than something handed out once. Asked every tick by the encounter, which is
+     * the thing that knows the offer is still standing.
+     */
+    public void ensureMarked() {
+        if (takenUp || giver == null || giver.isExpired()) return;
+        if (marker != null && !marker.isExpired()) return;
+
+        marker = FleetMarkerRenderer.addTo(giver, OFFER_SPRITE_CATEGORY, OFFER_SPRITE,
+                OFFER_COLOR, FleetMarkerRenderer.SIZE);
+    }
+
+    protected void dropMarker() {
+        if (marker != null) marker.expire();
+
+        marker = null;
     }
 
     /** Whether this hull already has a job on it, so a second one is never stacked onto it. */
@@ -123,8 +262,10 @@ public class FleetQuest extends FishJob {
             addReward(FishReward.upgrade(StatIds.HARPOON_SPEED, 1));
         }
 
-        // No clock - the fleet can't go anywhere, so a deadline would just end with it stuck, unhelpable.
-        days = 0f;
+        // A clock, now that there is somewhere for it to end. The hull the job runs on is a copy
+        // that exists only for the job, so running out means it heads home and goes rather than
+        // sitting in a system forever waiting on somebody who has stopped coming.
+        days = DELIVERY_DAYS;
 
         setUpSpine();
 
@@ -132,28 +273,29 @@ public class FleetQuest extends FishJob {
         // interaction puts that memory in local scope, so the framework's own rules rows resolve it unchanged.
         if (!setEntityMissionRef(giver, REF_KEY)) return false;
 
-        pin();
+        offer();
 
         return true;
     }
 
     /**
-     * Makes the giver into something that will still be there later: mission-important (skips despawn
-     * sweeps), a hold assignment it can't run out of (the queue would otherwise send it home), and the
-     * sidetrack flag against its own AI. Keyed to the job's stage, so ending the job lifts the pin.
+     * Hangs the offer, and does nothing else to the hull.
+     * <p>
+     * Two memory keys for the dialogue rows and a mark somebody might notice. No rename, no orders,
+     * no importance: this is a fleet with its own reasons for being here, and until the player has
+     * agreed to something it goes on having them.
      */
-    protected void pin() {
-        mark();
+    protected void offer() {
+        giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
+        giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
 
-        // A fleet that is stuck where it is was stuck before the player arrived, so it holds from the
-        // start. One that came looking has to be able to fly - it is pinned when the job is taken.
-        if (!type.wandering) hold();
+        ensureMarked();
     }
 
     /**
-     * Marks the hull as carrying an offer: mission-important so despawn sweeps skip it and the
-     * exclamation shows, the memory the dialogue rows read, and the flags that stop its own AI
-     * picking a fight or wandering off after something else.
+     * Now that the hull is ours: mission-important so despawn sweeps skip it and vanilla's own
+     * exclamation takes over from the cyan one, and the flags that stop its AI picking a fight or
+     * wandering off after something else. Only ever run on the copy.
      */
     protected void mark() {
         // Must be Misc's overload, not the hub mission's - same signature, but the mission's second
@@ -163,6 +305,11 @@ public class FleetQuest extends FishJob {
 
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
+
+        //carried over rather than re-derived: the answer was given to the hull that is now gone, and
+        //without it the copy would open by making the same offer over again
+        giver.getMemoryWithoutUpdate().set(TAKEN_FLAG, true);
+
         giver.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
         giver.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true);
 
@@ -184,10 +331,16 @@ public class FleetQuest extends FishJob {
         giver.addAssignment(FleetAssignment.HOLD, null, HOLD_DAYS, type.actionText);
     }
 
-    /** Flags the hull, not a person - the base class flags a person, but a fleet quest has none. */
+    /**
+     * Flags the hull, not a person - the base class flags a person, but a fleet quest has none.
+     * <p>
+     * Silent until the job is taken, because it registers the entity whose memory a stage change
+     * writes to, and before that the entity is somebody else's fleet that is about to be replaced.
+     * {@link #take} calls it once the copy is standing.
+     */
     @Override
     protected void markDeliverable() {
-        if (giver == null) return;
+        if (!takenUp || giver == null) return;
 
         makeImportant(giver, getDeliverFlag(), Stage.WANTED);
     }
@@ -198,16 +351,28 @@ public class FleetQuest extends FishJob {
         return DELIVER_FLAG;
     }
 
-    /** Lets the fleet go back to whatever it would have been doing. */
+    /**
+     * Lets go, which means two quite different things.
+     * <p>
+     * An offer nobody took is hanging on a fleet with its own life to get on with, so it is
+     * unhooked and left alone - clearing its orders there would be taking the route it was flying
+     * away from it over a conversation that never happened. A job that was taken is running on a
+     * hull that exists only for it, and that one is sent home to despawn.
+     */
     protected void release() {
         if (giver == null) return;
 
-        Misc.makeUnimportant(giver, IMPORTANT_REASON);
+        dropMarker();
 
         giver.getMemoryWithoutUpdate().unset(QUEST_FLAG);
         giver.getMemoryWithoutUpdate().unset(PITCH_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
         giver.getMemoryWithoutUpdate().unset(REF_KEY);
+
+        if (!takenUp) return;
+
+        Misc.makeUnimportant(giver, IMPORTANT_REASON);
+
         giver.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_NO_JUMP);
         giver.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
 
@@ -251,6 +416,11 @@ public class FleetQuest extends FishJob {
 
         info.addPara("They are not going anywhere. Whatever else happens, they will be where you"
                 + " left them when you have it.", pad);
+
+        if (days > 0f) {
+            info.addPara("They will not wait forever, though - %s left.", pad,
+                    Misc.getHighlightColor(), Math.round(getDaysLeft()) + " days");
+        }
     }
 
     @Override

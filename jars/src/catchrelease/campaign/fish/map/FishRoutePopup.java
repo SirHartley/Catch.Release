@@ -1,14 +1,10 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -64,8 +60,18 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     /** The line above the button where the card answers back. */
     public static final float NOTICE_HEIGHT = 18f;
 
-    /** Top of the search field, measured down from the card's top edge. */
-    public static final float SEARCH_TOP = 48f;
+    /** Top of the search field, measured down from the card's top edge - the title block plus
+     *  the same breathing room the field keeps to the chips below it. */
+    public static final float SEARCH_TOP = 39f;
+
+    /** The help mark beside the X, carrying the card's explanation as a hover. */
+    public static final float HELP_SIZE = 20f;
+
+    /** The hover cards: text width and paddings, shared by the help and the species card. */
+    public static final float CARD_TEXT_WIDTH = 210f;
+    public static final float CARD_PAD = 10f;
+    public static final float CARD_LINE_GAP = 5f;
+    public static final float CARD_PORTRAIT = 48f;
 
     public static final String SEARCH_GHOST = "Search...";
 
@@ -114,8 +120,11 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         searchField = element.addTextField(width - PAD * 2f, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 0f);
         searchField.setText(SEARCH_GHOST);
 
-        //invisible on the card's black otherwise - the field's own face, not a painted backing
-        searchField.setBgColor(ShopUi.withAlpha(Misc.getDarkPlayerColor(), 0.55f));
+        //fully opaque - a translucent face still vanished into the card's black
+        searchField.setBgColor(ShopUi.withAlpha(Misc.getDarkPlayerColor(), 1f));
+
+        //the face reads light against the card - the type has to go the other way
+        searchField.setColor(Color.BLACK);
 
         searchSlot = panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
     }
@@ -422,16 +431,173 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         title.draw(Math.round(x + PAD), Math.round(y + h - PAD));
 
         renderClose(small, alphaMult);
-
-        LazyFont.DrawableString hint = small.createText(
-                "Pick up to " + FishRoutePlanner.MAX_PICKS + " - wanted fish first",
-                Misc.getGrayColor(), small.getBaseHeight());
-        hint.draw(Math.round(x + PAD), Math.round(y + h - PAD - title.getHeight() - 4f));
+        renderHelpMark(small, alphaMult);
+        renderSearchBacking(alphaMult);
 
         renderChips(small, alphaMult);
         renderRows(small, alphaMult);
         renderNotice(small, alphaMult);
         renderPlotButton(small, alphaMult);
+
+        //the hover cards last, so they stand over everything on the card
+        renderHoverCards(small, alphaMult);
+    }
+
+    /** The field's seat: a lit face and a one-pixel rim, drawn under the widget itself. */
+    protected void renderSearchBacking(float alphaMult) {
+        if (searchField == null) return;
+
+        PositionAPI field = searchField.getPosition();
+        if (field == null || field.getWidth() <= 0f) return;
+
+        ShopUi.drawQuad(field.getX() - 1f, field.getY() - 1f,
+                field.getWidth() + 2f, field.getHeight() + 2f,
+                Misc.getBasePlayerColor(), 0.35f * alphaMult);
+        ShopUi.drawQuad(field.getX(), field.getY(), field.getWidth(), field.getHeight(),
+                Misc.getDarkPlayerColor(), 0.8f * alphaMult);
+    }
+
+    /** The question mark beside the X, wearing the card's explanation as a hover. */
+    protected void renderHelpMark(LazyFont small, float alphaMult) {
+        float left = getHelpLeft();
+        float bottom = pos.getY() + pos.getHeight() - PAD - HELP_SIZE;
+
+        boolean hovered = isInHelp(mouseX, mouseY);
+        Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor();
+
+        ShopUi.drawQuad(left, bottom, HELP_SIZE, HELP_SIZE, Misc.getDarkPlayerColor(),
+                (hovered ? 0.5f : 0.3f) * alphaMult);
+
+        LazyFont.DrawableString mark = small.createText("?", ShopUi.withAlpha(color, alphaMult),
+                small.getBaseHeight());
+        mark.draw(Math.round(left + (HELP_SIZE - mark.getWidth()) * 0.5f),
+                Math.round(bottom + (HELP_SIZE + mark.getHeight()) * 0.5f));
+    }
+
+    protected float getHelpLeft() {
+        return pos.getX() + pos.getWidth() - PAD - CLOSE_SIZE - 6f - HELP_SIZE;
+    }
+
+    protected boolean isInHelp(float x, float y) {
+        float left = getHelpLeft();
+        float bottom = pos.getY() + pos.getHeight() - PAD - HELP_SIZE;
+
+        return x >= left && x <= left + HELP_SIZE
+                && y >= bottom && y <= bottom + HELP_SIZE;
+    }
+
+    /** Whatever hover has earned a card this frame: the help's explanation, or a row's species. */
+    protected void renderHoverCards(LazyFont small, float alphaMult) {
+        if (isInHelp(mouseX, mouseY)) {
+            renderHelpCard(small, alphaMult);
+            return;
+        }
+
+        if (isInSearch(mouseX, mouseY) || isInClose(mouseX, mouseY)) return;
+        if (chipIndexAt(mouseX, mouseY) >= 0) return;
+
+        int index = rowIndexAt(mouseX, mouseY);
+        if (index < 0 || index >= rows.size()) return;
+        if (mouseX < pos.getX() || mouseX > pos.getX() + pos.getWidth()) return;
+
+        renderSpeciesCard(small, rows.get(index).spec, alphaMult);
+    }
+
+    /** The explanation the card used to say in its own header, now told only when asked. */
+    protected void renderHelpCard(LazyFont small, float alphaMult) {
+        String[] lines = {
+                "Pick up to " + FishRoutePlanner.MAX_PICKS + " fish - wanted ones (open jobs,"
+                        + " marked gear) are pinned first, tagged with who is asking.",
+                "The search field and the type chips narrow the list.",
+                "PLOT ROUTE plots the shortest route through the picked species' waters and"
+                        + " draws it on the hyperspace map."};
+
+        float size = small.getBaseHeight();
+        float height = CARD_PAD * 2f;
+
+        LazyFont.DrawableString[] drawn = new LazyFont.DrawableString[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            drawn[i] = small.createText(lines[i], ShopUi.withAlpha(Misc.getTextColor(), alphaMult),
+                    size, CARD_TEXT_WIDTH);
+            height += drawn[i].getHeight() + (i > 0 ? CARD_LINE_GAP : 0f);
+        }
+
+        float width = CARD_TEXT_WIDTH + CARD_PAD * 2f;
+        float left = pos.getX() - width - 6f;
+        float top = pos.getY() + pos.getHeight() - PAD;
+
+        ShopUi.drawQuad(left - 1f, top - height - 1f, width + 2f, height + 2f,
+                Misc.getDarkPlayerColor(), 0.9f * alphaMult);
+        ShopUi.drawQuad(left, top - height, width, height, Color.BLACK, 0.92f * alphaMult);
+
+        float textY = top - CARD_PAD;
+        for (LazyFont.DrawableString line : drawn) {
+            line.draw(Math.round(left + CARD_PAD), Math.round(textY));
+            textY -= line.getHeight() + CARD_LINE_GAP;
+        }
+    }
+
+    /**
+     * The species card, the same story every other panel's tooltip tells - portrait, name in
+     * the rarity's colour, type, the catch record, where it lives, who is asking - hand-drawn,
+     * since the card's rows are paint rather than components. Hangs off the card's left edge,
+     * centred on the cursor, kept inside the screen.
+     */
+    protected void renderSpeciesCard(LazyFont small, FishSpec spec, float alphaMult) {
+        boolean caught = FishLog.isCaught(spec.id);
+        catchrelease.campaign.fish.data.FishLogEntry logged =
+                catchrelease.campaign.fish.data.FishLog.get(spec.id);
+
+        float size = small.getBaseHeight();
+
+        java.util.List<LazyFont.DrawableString> body = new ArrayList<>();
+        body.add(small.createText(spec.getDisplayName(),
+                ShopUi.withAlpha(spec.rarity.color, alphaMult), size, CARD_TEXT_WIDTH));
+        body.add(small.createText(spec.getTypeName(),
+                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), size, CARD_TEXT_WIDTH));
+        body.add(small.createText(caught && logged != null
+                        ? "Caught " + logged.caught + (logged.caught == 1 ? " time." : " times.")
+                        : "Known only from survey data.",
+                ShopUi.withAlpha(caught ? Misc.getTextColor() : Misc.getGrayColor(), alphaMult),
+                size, CARD_TEXT_WIDTH));
+        body.add(small.createText(
+                catchrelease.campaign.fish.data.FishLocationSummary.describe(spec),
+                ShopUi.withAlpha(Misc.getTextColor(), alphaMult), size, CARD_TEXT_WIDTH));
+
+        java.util.List<String> requiredBy =
+                catchrelease.campaign.fish.shop.ShopMarks.getRequiredBy(spec);
+        if (!requiredBy.isEmpty()) {
+            body.add(small.createText("Required by: " + String.join(", ", requiredBy),
+                    ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult), size, CARD_TEXT_WIDTH));
+        }
+
+        float height = CARD_PAD * 2f + CARD_PORTRAIT + CARD_LINE_GAP;
+        for (LazyFont.DrawableString line : body) height += line.getHeight() + CARD_LINE_GAP;
+        height -= CARD_LINE_GAP;
+
+        float width = CARD_TEXT_WIDTH + CARD_PAD * 2f;
+        float left = pos.getX() - width - 6f;
+        float bottom = mouseY - height * 0.5f;
+
+        //kept on the glass
+        bottom = Math.max(4f, Math.min(bottom,
+                pos.getY() + pos.getHeight() - height - 4f));
+
+        ShopUi.drawQuad(left - 1f, bottom - 1f, width + 2f, height + 2f,
+                Misc.getDarkPlayerColor(), 0.9f * alphaMult);
+        ShopUi.drawQuad(left, bottom, width, height, Color.BLACK, 0.92f * alphaMult);
+
+        float textY = bottom + height - CARD_PAD;
+
+        //the art once landed, its rimmed silhouette while only surveyed
+        FishIcons.draw(spec, left + CARD_PAD + CARD_PORTRAIT * 0.5f,
+                textY - CARD_PORTRAIT * 0.5f, CARD_PORTRAIT, alphaMult);
+        textY -= CARD_PORTRAIT + CARD_LINE_GAP;
+
+        for (LazyFont.DrawableString line : body) {
+            line.draw(Math.round(left + CARD_PAD), Math.round(textY));
+            textY -= line.getHeight() + CARD_LINE_GAP;
+        }
     }
 
     /** The answer-back line, anchored just above the button and growing upward - a wrapped
@@ -536,19 +702,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                         Misc.getDarkPlayerColor(), 0.25f * alphaMult);
             }
 
-            //the art only once one has been landed - a survey knows the name, not the face
-            String iconPath = FishLog.isCaught(row.spec.id)
-                    ? FishCodex.getIcon(row.spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-            if (icon != null) {
-                icon.setSize(ICON, ICON);
-                icon.setColor(Color.WHITE);
-                icon.setNormalBlend();
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(Math.round(x + PAD + ICON * 0.5f),
-                        Math.round(rowBottom + ROW_HEIGHT * 0.5f));
-            }
+            //the art once landed, its rimmed silhouette while only surveyed
+            FishIcons.draw(row.spec, x + PAD + ICON * 0.5f,
+                    rowBottom + ROW_HEIGHT * 0.5f, ICON, alphaMult);
 
             //the shopping-list dot, bottom right of the icon, same corner as everywhere
             if (ShopMarks.isMarked(row.spec)) {
@@ -561,7 +717,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             name.draw(Math.round(x + PAD + ICON + ICON_GAP),
                     Math.round(rowBottom + (ROW_HEIGHT + name.getHeight()) * 0.5f));
 
-            if (row.reason != null) {
+            //the marked tag retired: the yellow dot on the icon already says it, and the word
+            //ran into long names. Only a job's ask still gets a written-out tag
+            if (row.reason != null && !"marked".equals(row.reason)) {
                 LazyFont.DrawableString reason = small.createText(row.reason,
                         Misc.getHighlightColor(), small.getBaseHeight());
                 reason.draw(Math.round(x + pos.getWidth() - PAD - reason.getWidth()),

@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="concept work">
-      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Colour adjustments to treasure rarity scale">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/map/FishIntelPlanetPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/map/FishIntelPlanetPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/ShopRowPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/ShopRowPlugin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -352,7 +349,23 @@
       <option name="project" value="LOCAL" />
       <updated>1785891085413</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="some adjustments">
+      <option name="closed" value="true" />
+      <created>1786046381108</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1786046381108</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Colour adjustments to treasure rarity scale">
+      <option name="closed" value="true" />
+      <created>1786046631560</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1786046631560</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -367,8 +380,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Smth broke" />
-    <MESSAGE value="Initial Commit" />
     <MESSAGE value="fishing spot alpha test" />
     <MESSAGE value="file structure&#10;basic fish pond spawning" />
     <MESSAGE value="parallax, pond visuals" />
@@ -392,6 +403,8 @@
     <MESSAGE value="todo updates, constant update" />
     <MESSAGE value="completely fucked up the treasure stuff" />
     <MESSAGE value="concept work" />
-    <option name="LAST_COMMIT_MESSAGE" value="concept work" />
+    <MESSAGE value="some adjustments" />
+    <MESSAGE value="Colour adjustments to treasure rarity scale" />
+    <option name="LAST_COMMIT_MESSAGE" value="Colour adjustments to treasure rarity scale" />
   </component>
 </project>

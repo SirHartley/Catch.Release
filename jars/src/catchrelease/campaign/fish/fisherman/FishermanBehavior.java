@@ -7,6 +7,7 @@ import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.math.CircularArc;
+import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -57,6 +58,9 @@ public class FishermanBehavior implements EveryFrameScript {
     /** The lamps. Transient like every renderer-holding thing: rebuilt on the first frame after
      *  a load, which also quietly replays the light-up. */
     protected transient List<Lamp> lamps;
+
+    /** The mark over the boat. Transient for the same reason, and re-hung by {@link #keepVisible}. */
+    protected transient FleetMarkerRenderer marker;
     protected transient boolean litSoundPlayed = false;
 
     public FishermanBehavior(CampaignFleetAPI fleet) {
@@ -79,11 +83,14 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()) {
             expireLamps(0f);
+            dropMarker();
             done = true;
             return;
         }
 
         boolean watched = isPlayerHere();
+
+        keepVisible(watched);
 
         //the stay is counted in days the player was not here for. A boat that vanishes while
         //somebody is standing next to it was never really there, and a fortnight spent fishing
@@ -102,6 +109,7 @@ public class FishermanBehavior implements EveryFrameScript {
         //clock and the leaving carry on
         if (!watched) {
             expireLamps(0f);
+            dropMarker();
 
             if (daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
             return;
@@ -131,6 +139,34 @@ public class FishermanBehavior implements EveryFrameScript {
         if (isPlayerHere()) {
             Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
                     fleet.getLocation(), new Vector2f());
+        }
+    }
+
+    /**
+     * Keeps the boat plainly there while somebody is in the system to see it.
+     * <p>
+     * Two halves of one problem. The detectability modifier means it is never a blip at the edge of
+     * a sweep, and the fader is pinned bright because a fleet fading with distance takes its hull
+     * with it and leaves the lamps - which are drawn wherever the boat is, regardless - sweeping the
+     * dark on their own. The mark is so it can be picked out of a busy system at all.
+     * <p>
+     * Applied every tick rather than at spawn: the modifier is keyed, so re-applying it is free and
+     * it heals a boat that was already out there before any of this existed. Renderers do not
+     * survive a save, so the mark has to be something that can be re-hung.
+     */
+    protected void keepVisible(boolean watched) {
+        fleet.getStats().getDetectedRangeMod().modifyFlat(FishermanConstants.VISIBILITY_ID,
+                FishermanConstants.DETECTED_RANGE);
+
+        if (!watched) return;
+
+        //a per-frame override rather than a setting, which is how vanilla's own faders are driven
+        fleet.forceSensorFaderBrightness(1f);
+
+        if (marker == null || marker.isExpired()) {
+            marker = FleetMarkerRenderer.addTo(fleet,
+                    FishermanConstants.MARKER_SPRITE_CATEGORY, FishermanConstants.MARKER_SPRITE,
+                    FishermanConstants.LIGHT_COLOR, FishermanConstants.MARKER_SIZE);
         }
     }
 
@@ -173,6 +209,8 @@ public class FishermanBehavior implements EveryFrameScript {
 
         done = true;
 
+        dropMarker();
+
         Global.getSector().getMemoryWithoutUpdate().unset(FishermanConstants.ACTIVE_KEY);
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
                 Global.getSector().getClock().getTimestamp());
@@ -208,6 +246,13 @@ public class FishermanBehavior implements EveryFrameScript {
 
         for (Lamp lamp : lamps) lamp.expire(fadeSeconds);
         lamps = null;
+    }
+
+    /** Takes the mark down, for a boat that is leaving or gone. */
+    protected void dropMarker() {
+        if (marker != null) marker.expire();
+
+        marker = null;
     }
 
     /**

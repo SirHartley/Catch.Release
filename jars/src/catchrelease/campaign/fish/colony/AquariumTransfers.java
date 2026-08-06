@@ -32,17 +32,19 @@ public final class AquariumTransfers {
     private AquariumTransfers() {
     }
 
-    /** Loose specimens aboard - the only thing the tank takes. */
+    /**
+     * Specimens aboard, crates and the pile included.
+     * <p>
+     * It used to be loose ones only, which stopped being a useful answer the moment a landed fish
+     * went straight into a crate - the tank would have read as empty for a hold full of fish.
+     */
     public static int countFishAboard() {
         int count = 0;
 
         for (CargoStackAPI stack : Global.getSector().getPlayerFleet()
                 .getCargo().getStacksCopy()) {
 
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (data != null && FishItems.FISH.equals(data.getId())) {
-                count += (int) stack.getSize();
-            }
+            count += FishItems.countSpecimens(stack);
         }
 
         return count;
@@ -57,9 +59,7 @@ public final class AquariumTransfers {
                 .getCargo().getStacksCopy()) {
 
             SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (data != null && FishItems.FISH.equals(data.getId())) {
-                offer.addSpecial(data, stack.getSize());
-            }
+            if (FishItems.isCatch(data)) offer.addSpecial(data, stack.getSize());
         }
 
         dialog.showCargoPickerDialog("Select specimens for the tank", "Add", "Never mind",
@@ -116,16 +116,20 @@ public final class AquariumTransfers {
 
         for (CargoStackAPI stack : picked.getStacksCopy()) {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (data == null || !FishItems.FISH.equals(data.getId())) continue;
-            if (FishCatch.decode(data.getData()) == null) continue;
+            if (!FishItems.isCatch(data)) continue;
+
+            //a crate goes in whole: what the tank keeps is specimens, so the container is opened on
+            //the way and the fish inside it are what is added
+            java.util.List<FishCatch> going = FishItems.read(data);
+            if (going.isEmpty()) continue;
 
             int count = (int) stack.getSize();
             cargo.removeItems(CargoItemType.SPECIAL, data, count);
 
             for (int i = 0; i < count; i++) {
-                conservatory.getAquariumFish().add(data.getData());
+                for (FishCatch entry : going) conservatory.getAquariumFish().add(entry.encode());
             }
-            moved += count;
+            moved += count * going.size();
         }
 
         return moved;

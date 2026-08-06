@@ -147,6 +147,39 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
+    /**
+     * The dressed box a hover card is drawn in, and nothing else - the text is the caller's, since
+     * only the caller knows when it changed and a {@code DrawableString} is a display list rather
+     * than something worth rebuilding sixty times a second.
+     */
+    public static void drawCard(float x, float y, float width, float height, float alphaMult) {
+        drawQuad(x, y, width, height, java.awt.Color.BLACK, 0.9f * alphaMult);
+        drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);
+
+        dress(x, y, width, height, alphaMult);
+    }
+
+    /**
+     * Keeps a card on screen. Placed up and to the right of what it is about, and folded back over
+     * the other side rather than off the edge - a card the player cannot read is worse than none.
+     *
+     * @return {x, y} for the bottom-left corner
+     */
+    public static float[] placeCard(float atX, float atY, float width, float height, float gap) {
+        float screenWidth = Global.getSettings().getScreenWidth();
+        float screenHeight = Global.getSettings().getScreenHeight();
+
+        float x = atX + gap;
+        if (x + width > screenWidth - gap) x = atX - gap - width;
+        if (x < gap) x = gap;
+
+        float y = atY + gap;
+        if (y + height > screenHeight - gap) y = screenHeight - gap - height;
+        if (y < gap) y = gap;
+
+        return new float[]{x, y};
+    }
+
     public static boolean contains(float x, float y, float width, float height,
                                    float pointX, float pointY) {
 

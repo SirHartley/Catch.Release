@@ -177,9 +177,11 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
         }
 
-        //the shopping list speaking: this exact specimen would pay for something marked
-        if (ShopMarks.isMarked(entry)) {
-            tooltip.addPara("Would go towards a marked upgrade.", Misc.getHighlightColor(), opad);
+        //who is asking for this exact specimen: marked gear and open jobs both
+        java.util.List<String> requiredBy = ShopMarks.getRequiredBy(entry);
+        if (!requiredBy.isEmpty()) {
+            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+                    Misc.getHighlightColor(), String.join(", ", requiredBy));
         }
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);

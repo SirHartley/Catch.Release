@@ -16,27 +16,109 @@ scrapped
 ---------------------
 qa_
 
-Shop
-- Add the ability to "mark" an upgrade, which plays the fish required into the route planner and marks fish needed for that upgrade in quest yellow in inventory (border?), and wherever they are displayed by adding a yellow dot in the top left.
-
-Breach Lights
-- FAN ARRAY: The distortion shader effect of the breach lights should be present along the full length of the light, not only the end
-- FAN ARRAY: Centerline of cone should be darkened slightly
-- FAN ARRAY: Cone width should be wider at default size, roughly 30%
-
-Harpooning fleets
-- Non-combat fleet that gets harpooned should complain about it when approached but not run you down.
-- Non-combat fleet that you harpoon a second time should run you down, demand compensation but not turn hostile
-- Do it a third time and the fleet should start running away from you and try to notify a patrol if there are any in the system
-
-Minigame
-- Treasure BG animation should start upon panel spawn, not be paused
-- Treasure list entries should be centered, not left-aligned
-
+Codex
+- open map from codex still broken
 
 ---------------------
 
 handed off_
+
+x Fishing planner
+  - Search field text now invisible, should render black
+  - Search field add top pad 5px
+  - Remove "marked" text label, redundant and overlaps
+
+x  General
+  - Instead of a placeholder icon for fish that you only know the survey data of, make it a blacked out version of the actual icon (the normal icon just with all coloured pixels filled in black. Retain alpha)
+  -> this change affects all places where the placeholder for survey data fish icons is currently used
+
+
+x Shop
+  - "Mark important" button should have on hover tooltip telling you what it does
+
+x  Inventory
+  - Fish cargo should stack into crates by default
+  - Cargo icon should display the "marked" icon in the lower right.
+  - Cargo fish Tooltip should say why it's wanted.
+  - Fish crates should be stackable into a "pile of crates" by ctrl clicking it like packing fish into one crate. Only one pile of crates to exist in inventory, this is just to "clean up" all fish in your inventory.
+
+x Fisherman
+  - Survey data: There should be a maximum of 6 data sets on sale at any time. Once sold, does not replenish until fisherman spawns again. Chance-based for higher rarities, accounting for what you already know (can't sell known data so the more you fish, the more he will offer rare template because you already know all the common ones.)
+  - Survey data: There should be a proper UI panel for buying Survey data. Center it around the fish sprite but colour that sprite black so it's only the silhouette. I love what you did with the minigame icon holder (coloured fade circle bg), you can reuse that.
+  - Use the fish shop UI style so it's consistent.
+  - Selling fish: Option to open shop not conspicous enough when other options are coloured. Make "open shop" button entirely yellow and option 1, for "sell all unmarked of rarity X" only colour the rarity part, not the whole option
+  - Selling fish: Marked fish should not be batch-sold
+  - Rumors about species outside their own waters should always make these species spawn with abnormally high quality and/or stability and/or size, disregarding surrounding modifiers.
+
+
+x Map
+ - Route planner should feature on-hover tooltip like all the other panels
+ - Route planner search field still the same colour as bg, is invisible
+ - Route planner increase search field top pad to equal search field bottom distance to cat buttons
+ - Route planner explanation to be moved to a on-hover pop up on a ? just like hyperspace map sidebar has
+ - Hyperspace sidebar "marked" sign to be centered in row horizontally, not bl
+ - all fish tooltips should show section "Required by: " section if the fish is marked important or needed by quest, including cargo tooltip
+
+x Quest fleets
+- The randomly spawning fleets are annoying as shit. We're moving back to an attached implementation where the quest picks a random scav fleet or similar. Attach a muted cyan ! marker to those fleets (like Misc.makeImportant does, but different colour because passive quest)
+- Once accepted, the scavenger will reportFleetDestroyed to attached listeners. If the quest is accepted, copy the entire fleet into a new one and supplant it so it doesn't fuck with potential route managers. Make the fleet stationary until the quest is resolved or expired, then have it head to source and despawn.
+
+x Harpooning other fleets
+- Patrols should treat any harpooning action against fleets of factions they are not hostile with as infraction
+- Civ fleets should go tattle to a nearby patrol of any non-hostile faction to fine you. It's about the space you are in, not the fleets allegiance.
+- If a fleet can't find a patrol to tattle to, they will SOMETIMES send a hitman after you if they know who you are. Check Alpha Core Scientist bar quest, it features a hired merc that comes after you if you keep the core, just adapt that.
+- Harpooning a civ fleet with an exploding harpoon while transponder is on will always get you a hitman merc
+
+x Map
+ - hyperspace sidebar - left pad still too small
+ - hyperspace sidebar - add 2px distance between category text and below colour indicator line
+ - hyperspace sidebar panel border too bright now
+ - System sidebar - icons not centered
+ - System sidebar - get rid of scrollbar, looks terrible and I'll cut down on fish that can spawn in a system later anyway, assume that it will never overrun. After removing the scrollbar, make sure icons are centered and pads are not too big.
+ - System sidebar - panel border too bright now
+ - Plan a route - close button position should have top and side pad similar, currently top pad too little
+ - Plan a route - panel search bar barely visible due to same colour as bg
+ - Plan a route - panel search bar not aligned
+ - plan a route - panel "too many selected" tooltip doesn't fit into line and newlines, thus overlapping button+
+
+x Coherence/Aberration
+- black holes should lower coherence
+
+x Minigame
+- Treasure BG animation should start upon panel spawn, not be paused
+- Treasure list entries should be center aligned if one piece, left/right split as current if there is an amount
+
+x Shop
+  - Mark for later should be an empty round icon you can click to turn yellow. It should be integrated into the entry in the list, to the left: selection strip, mark as important, title, level. It should be centered horizontally
+  - Modifiers should also be mark-able
+
+X Breach Lights
+  - FAN ARRAY: The distortion shader effect of the breach lights should be present along the full length of the light, not only the end
+  - FAN ARRAY: Takes forever to initiate, should be the same spoolup animation intervals as the normal lights
+  - FAN ARRAY: Cone width should be wider at default size, roughly 30%
+
+x Cargo
+ - Fish in inventory can sometimes display as very small.
+
+x Fisherman
+- Should not despawn while you are in-system, timer only ticks down after you left.
+- Pressing esc in shop panel during fisherman encounter should throw you back to fleet dialogue, not close dialogue
+
+x Map
+  - Border colour for both big and small side panel not bright enough - use same as map panel
+  - Big sidepanel filter block too wide to the right, should be in line with list of entries below it
+  - Small filter panel should be one column max, and have a scroller if the icons exceed the panel. Make sure entries are centered.
+  - Small filter panel heading should have no H/L/R pad and fill the full width of the side panel
+
+x  FishIntelPlanetPanel  LazyFont body = ShopUi.getBodyFont(); should have black border to match other UI text
+
+x Harpooning fleets
+ - Non-combat fleet that gets harpooned should complain about it when approached but not run you down.
+ - Non-combat fleet that you harpoon a second time should run you down, demand compensation but not turn hostile
+ - Do it a third time and the fleet should start running away from you and try to notify a patrol if there are any in the system
+
+x Shop
+- Add the ability to "mark" an upgrade, which plays the fish required into the route planner and marks fish needed for that upgrade in quest yellow in inventory (border?), and wherever they are displayed by adding a yellow dot in the top left.
 
 x Map
   - Plot route lacks feedback when a fish can't be selected for or no location for a fish is found.
@@ -156,8 +238,6 @@ x Wandering fisherman
  - Fisherman should wander around the system and fish for 2 weeks, then turn off the searchlights and jump out, despawning immediately. 
  - Wandering fisherman should prefer spawning outside the core. Should never spawn in systems cut off from hyper, not in the abyss, not in special systems or systems that are not proc-gen.
  - Should prefer to spawn when the player has a cargo full of fish, or when it hasn't spawned in a while (2 months?)
-
-ai_
 
 x Bar encounters
 The mod will add bar encounters spawning individuals that request fish in certain make, quantity and quality. They sometimes request fish from a specific location.

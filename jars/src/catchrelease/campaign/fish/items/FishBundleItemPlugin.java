@@ -25,7 +25,11 @@ import java.util.Map;
  * <p>
  * The contents are the item's data, so a bundle that has grown is a different item to the one it
  * was - which is why stowing replaces the bundle rather than adding to it. Right-clicking one spills
- * it back out into individual specimens, each with the stats it went in with.
+ * it back out into individual specimens, each with the stats it went in with; holding control
+ * instead sweeps the whole hold into a single {@link FishPileItemPlugin}.
+ * <p>
+ * Control rather than shift, the same as on a specimen - shift+right-click is intercepted by the
+ * cargo screen's own mass-transfer path before the item ever sees it.
  */
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
@@ -68,11 +72,23 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         List<FishCatch> contents = getContents();
         if (contents.isEmpty() || helper == null) return;
 
+        //the tidy-up rather than the unpack: everything aboard onto one line
+        if (isBulkDown()) {
+            FishPileItemPlugin.sweep(helper, stack.getCargo());
+            return;
+        }
+
         helper.removeFromClickedStackFirst(1);
 
         for (FishCatch entry : contents) {
             helper.addItems(CargoItemType.SPECIAL, FishItems.toItem(entry), 1);
         }
+    }
+
+    /** Read from the keyboard directly - the click helper says what may be moved, not what was held. */
+    protected boolean isBulkDown() {
+        return org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_LCONTROL)
+                || org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_RCONTROL);
     }
 
     /** Marked with the species' rarity and the best grade in the crate. */
@@ -137,6 +153,18 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara("Contains: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
                 contents.size() + " specimens of " + contents.get(0).getDisplayName());
 
+        //who is asking for anything in the crate: marked gear and open jobs both
+        java.util.List<String> requiredBy = new java.util.ArrayList<>();
+        for (FishCatch entry : contents) {
+            for (String name : ShopMarks.getRequiredBy(entry)) {
+                if (!requiredBy.contains(name)) requiredBy.add(name);
+            }
+        }
+        if (!requiredBy.isEmpty()) {
+            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+                    Misc.getHighlightColor(), String.join(", ", requiredBy));
+        }
+
         Map<FishGrade, Integer> byGrade = new EnumMap<>(FishGrade.class);
         float best = 0f;
         for (FishCatch entry : contents) {
@@ -155,7 +183,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("Right-click to unpack.", Misc.getGrayColor(), opad);
+            tooltip.addPara("Right-click to unpack; hold %s to sweep every fish aboard into one"
+                    + " pile.", opad, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
         }
     }
 }

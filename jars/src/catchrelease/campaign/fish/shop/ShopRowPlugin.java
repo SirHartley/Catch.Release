@@ -35,6 +35,17 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
         /** The list's own rectangle, which is what rows clip and click against. */
         PositionAPI getListViewport();
+
+        /**
+         * Told by a row while the cursor is on its ring, and told again the moment it is not.
+         * <p>
+         * Reported upwards rather than drawn here because a row paints inside the list's scissor
+         * box, and a card that explains the ring would be cut off at the edge of the list. The pane
+         * draws it over everything instead, once it knows which ring is being asked about.
+         */
+        void setMarkHover(ShopEntry entry, float x, float y);
+
+        void clearMarkHover(ShopEntry entry);
     }
 
     public static final float PIP_SIZE = 8f;
@@ -77,6 +88,9 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         float width = pos.getWidth();
         float height = pos.getHeight();
 
+        //reported before the cull, so a row scrolled out from under the cursor takes its card with it
+        reportMarkHover(x, y, height);
+
         //culled if scrolled out of the visible window
         if (y + height < view.getY() || y > view.getY() + view.getHeight()) return;
 
@@ -99,6 +113,18 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         renderState(x, y, width, height, alphaMult);
 
         ShopUi.endClip();
+    }
+
+    /** Tells the pane whether the cursor is on this row's ring, so it can put a card up. */
+    protected void reportMarkHover(float x, float y, float height) {
+        boolean hasRing = ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry);
+
+        if (hasRing && isMouseOverMark()) {
+            host.setMarkHover(entry, x + ACCENT_WIDTH + MARK_SLOT * 0.5f, y + height * 0.5f);
+            return;
+        }
+
+        host.clearMarkHover(entry);
     }
 
     /** The shopping-list ring: hollow until clicked, filled quest-yellow while marked. */
@@ -208,16 +234,17 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             if (event.isConsumed() || !event.isLMBDownEvent()) continue;
             if (!contains(event.getX(), event.getY())) continue;
 
-            event.consume();
             Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
 
             //the ring's slot toggles the mark; everywhere else selects the row
             if (isInMarkSlot(event.getX()) &&
                     (ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry))) {
                 ShopMarks.toggle(entry.getKey());
+                event.consume();
                 return;
             }
 
+            event.consume();
             host.onRowClicked(entry);
 
             return;
