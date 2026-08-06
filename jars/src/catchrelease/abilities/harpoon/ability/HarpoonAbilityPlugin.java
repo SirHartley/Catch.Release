@@ -3,6 +3,7 @@ package catchrelease.abilities.harpoon.ability;
 import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -19,6 +20,8 @@ import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The other way to take a specimen: aim, fire, and hit one with a line rather than sending drones to
@@ -162,15 +165,11 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         SectorEntityToken best = null;
         float bestOff = assist;
 
-        for (SectorEntityToken mote : fleet.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-
-            //assist will not bend a shot onto something the shot could not take anyway - which is
-            //why it has to be told what the head can reach. Left asking the plain question, a
-            //fathom head could spear a diver it was never allowed to be aimed at
-            if (!FishEntityPlugin.isAvailable(mote, HarpoonEntityPlugin.reachesUnder())) continue;
-            if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
-
+        //both kinds of target, because a shot can take both. A buried mote under a beam is what the
+        //lamps exist to produce - sweep, expose, harpoon - and an assist that only knew about motes
+        //already through the fabric was silent for the whole of that loop, which is most of the
+        //shooting anybody does
+        for (SectorEntityToken mote : getStrikeableNearby(fleet, from)) {
             float off = Math.abs(Misc.getAngleDiff(aimAngle,
                     Misc.getAngleInDegrees(from, mote.getLocation())));
 
@@ -186,6 +185,28 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         //far the shot goes - only which way
         return MathUtils.getPointOnCircumference(from, distance,
                 Misc.getAngleInDegrees(from, best.getLocation()));
+    }
+
+    /**
+     * Everything in range that a shot could actually take, of either kind.
+     * <p>
+     * Whether it could be taken is the harpoon's own question rather than one asked again here -
+     * assist that bent a shot onto something the strike then refused would be worse than no assist,
+     * since the player would have hit what they aimed at if it had left them alone.
+     */
+    protected List<SectorEntityToken> getStrikeableNearby(CampaignFleetAPI fleet, Vector2f from) {
+        List<SectorEntityToken> out = new ArrayList<>();
+
+        for (String tag : new String[] {FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
+            for (SectorEntityToken mote : fleet.getContainingLocation().getEntitiesWithTag(tag)) {
+                if (!HarpoonEntityPlugin.canTake(mote)) continue;
+                if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
+
+                out.add(mote);
+            }
+        }
+
+        return out;
     }
 
     @Override
