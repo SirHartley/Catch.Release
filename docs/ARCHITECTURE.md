@@ -547,6 +547,15 @@ lean in rgb alone, and not the brighter edge that would have been the obvious wa
 `0.12f - 0.04f * flicker.getBrightness()`. Fitting a module is meant to change the *shape* of the
 light, not how much of it there is, so any change to that figure belongs in all three at once.
 
+**A harpoon has two kinds of target, with different rules.** An ordinary mote has to be unheld and
+above the fabric (or the head has to reach under); a **buried** mote has to be lit by a beam, or
+merely detected if a fathom head is fitted — and it carries `catchrelease_buried_mote`, not
+`catchrelease_mote`, so a scan by the ordinary tag misses the entire sweep-expose-harpoon loop.
+`HarpoonEntityPlugin.canTake()` is the single answer to "could a shot take this"; the strike and the
+aim assist both read it, and they must not disagree in either direction. Assist on a looser test
+pulls shots onto things the strike then refuses — worse than no assist, because the player would
+have hit what they aimed at.
+
 **`Stencil.startStencil` is deprecated — it breaks the campaign radar.** Use the depth-mask pair.
 
 **A camera snapped to a thing kills that thing's parallax.** `ParallaxUtil`'s camera term is the
