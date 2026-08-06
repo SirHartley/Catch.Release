@@ -185,6 +185,17 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         FishSpec spec = FishPresence.getSpec(id);
         if (spec == null || pane == null) return;
 
+        //the waters live in hyperspace coordinates, and a map opened from inside a system comes
+        //up showing that system - flipped to the hyper view first, through the same stable
+        //method the game calls when the player's location changes, so the jump lands on a map
+        //the focus point means something on
+        try {
+            ReflectionUtils.invoke(mapScreen, "notifyMapLocationChanged",
+                    Global.getSector().getHyperspace());
+        } catch (Throwable t) {
+            //the flip is a nicety - on the system view the pane still opens on the species
+        }
+
         pane.showSpecies(id);
         rebuildBlobs();
         onSpeciesFocused(spec);
