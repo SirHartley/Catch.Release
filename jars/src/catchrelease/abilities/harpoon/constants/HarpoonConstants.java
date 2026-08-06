@@ -59,6 +59,25 @@ public class HarpoonConstants {
      */
     public static final float FLEET_ARM_DISTANCE = 220f;
 
+    /**
+     * The charge in an explosive head. RADIUS is deliberately under {@link #FLEET_ARM_DISTANCE}, so
+     * a just-armed head can't catch the fleet that fired it. DURATION is vanilla's own multiplier on
+     * how long the fireball plays out.
+     */
+    public static final float BLAST_RADIUS = 150f;
+    public static final float BLAST_DURATION = 0.6f;
+    public static final Color BLAST_COLOR = new Color(255, 190, 110);
+
+    /**
+     * What the blast does to the head that set it off. THROW_SPEED is how hard it's flung and DRAG
+     * how fast that dies, so it goes out fast and coasts rather than travelling at one speed until
+     * it vanishes. SPIN is the tumble. FADE_TIME is how long the whole line has left afterwards.
+     */
+    public static final float BLAST_THROW_SPEED = 700f;
+    public static final float BLAST_THROW_DRAG = 1.6f;
+    public static final float BLAST_SPIN = 540f;
+    public static final float BLAST_FADE_TIME = 1.1f;
+
     /** Marks a fleet as hauled so a second line can't compete; expires so it can't outlive its harpoon. */
     public static final String HAULED_FLAG = "$catchrelease_hauled";
     public static final float HAULED_FLAG_EXPIRY_DAYS = 1f;
