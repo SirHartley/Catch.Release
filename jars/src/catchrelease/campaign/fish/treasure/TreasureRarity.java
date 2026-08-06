@@ -11,7 +11,7 @@ public enum TreasureRarity {
     COMMON("Salvage", 100f, new Color(180, 190, 205)),
     UNCOMMON("Wreckage", 32f, new Color(120, 220, 140)),
     RARE("Cache", 9f, new Color(110, 170, 255)),
-    LEGENDARY("Relic", 1.5f, new Color(255, 165, 60));
+    EPIC("Relic", 1.5f, new Color(163, 90, 220));
 
     public final String name;
     public final float weight;

@@ -75,7 +75,7 @@ public class TreasureRoller {
                 if (hasShipTackle) awardHull(award, HullSize.CAPITAL_SHIP);
                 else awardFromDropGroup(award, cargo, FishConstants.TREASURE_GROUP_BLUEPRINTS);
                 break;
-            case LEGENDARY:
+            case EPIC:
                 awardFromDropGroup(award, cargo, FishConstants.TREASURE_GROUP_RARE_TECH);
                 break;
             default:
