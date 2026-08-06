@@ -56,7 +56,7 @@ public enum FleetQuestType {
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
             "Engine offline",
-            true),
+            false),
 
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
@@ -90,7 +90,14 @@ public enum FleetQuestType {
     /** What the fleet reads as doing while it waits, on the campaign map. */
     public final String actionText;
 
-    /** Whether this type can appear on a fleet already in the system, vs. only spawned in place. */
+    /**
+     * Whether whatever is wrong with them still leaves them able to fly, which decides how they ask.
+     * <p>
+     * One that can fly comes and finds the player. One that cannot has no way to arrive at all, so
+     * it calls for help from wherever it is stuck and waits - see {@link FleetDistressCall}. Read
+     * off the complaint itself rather than chosen: a seized drive coil is not a thing you can go
+     * looking for somebody with.
+     */
     public final boolean wandering;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
@@ -152,18 +159,6 @@ public enum FleetQuestType {
             case QUOTA: return 5000;
             default: return 4000;
         }
-    }
-
-    /** The ones that can be hung off a fleet already out here, for the spawner to choose between. */
-    public static FleetQuestType rollWandering(Random random) {
-        FleetQuestType[] all = values();
-
-        for (int attempt = 0; attempt < 20; attempt++) {
-            FleetQuestType pick = all[random.nextInt(all.length)];
-            if (pick.wandering) return pick;
-        }
-
-        return QUOTA;
     }
 
     public static FleetQuestType rollAny(Random random) {
