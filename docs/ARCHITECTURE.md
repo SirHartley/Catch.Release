@@ -667,6 +667,11 @@ every other mod's commands. The bill adds a **global** marker beside the per-fle
 crew that was talked to need not still be near the player when anything reads it back; the marker is
 what keeps the sector-wide search off every other tick.
 
+**The loot card has two clocks, and only one of them is the readout's.** Its list is held back
+until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first
+readout — a backdrop driven off it hung motionless over an open card. `advanceBackdrop()` runs from
+the moment the card exists and is what the coin rain reads; `advance()` stays the list's own.
+
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a
 wind-down interrupted by the player turning up is cancelled outright, and the patrol assignment is

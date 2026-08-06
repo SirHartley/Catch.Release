@@ -50,7 +50,18 @@ public class LootResultPanel {
     protected final List<TreasureAward> awards;
     protected final List<Row> rows = new ArrayList<>();
 
+    /** The readout's own clock: how long the list has been arriving, a line at a time. */
     protected float elapsed = 0f;
+
+    /**
+     * The weather's clock, which is not the readout's.
+     * <p>
+     * The card is on screen from the moment the catch lands, but its list is held back until the
+     * specimen has finished being read out - so a rain driven off {@link #elapsed} hung motionless
+     * over an open card for the whole of the first tally. The backdrop starts when the card does.
+     */
+    protected float backdrop = 0f;
+
     protected int shown = 0;
     protected boolean skipped = false;
 
@@ -93,6 +104,11 @@ public class LootResultPanel {
 
     public boolean isEmpty() {
         return rows.isEmpty();
+    }
+
+    /** The rain, which runs from the moment there is a card to rain on. */
+    public void advanceBackdrop(float amount) {
+        backdrop += amount;
     }
 
     public void advance(float amount) {
@@ -144,8 +160,7 @@ public class LootResultPanel {
         for (Row row : rows) {
             build(row);
 
-            float width = FishConstants.MINIGAME_LOOT_ICON + FishConstants.MINIGAME_LOOT_ICON_GAP
-                    + row.nameText.getWidth();
+            float width = getRowWidth(row);
 
             if (row.countText != null) {
                 width += FishConstants.MINIGAME_LOOT_COUNT_GAP + row.countText.getWidth();
@@ -206,23 +221,23 @@ public class LootResultPanel {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         for (Coin c : coins) {
-            float fallen = (c.startY + c.speed * elapsed) % layout.lootPanelHeight;
+            float fallen = (c.startY + c.speed * backdrop) % layout.lootPanelHeight;
 
             float x = layout.lootPanelX + c.fx * layout.lootPanelWidth;
             float y = layout.lootPanelY + layout.lootPanelHeight - fallen;
 
             //1 face-on, 0 edge-on; the floor keeps a sliver of rim rather than a blink
-            float face = Math.abs((float) Math.cos(elapsed * c.flipRate + c.phase));
+            float face = Math.abs((float) Math.cos(backdrop * c.flipRate + c.phase));
             float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
 
             //second axis held off edge-on by the depth - both axes collapsing at once would
             //flatten the coin to a point
-            float wobble = Math.abs((float) Math.cos(elapsed * c.wobbleRate + c.wobblePhase));
+            float wobble = Math.abs((float) Math.cos(backdrop * c.wobbleRate + c.wobblePhase));
             float height = c.size * (1f - FishConstants.MINIGAME_LOOT_COIN_WOBBLE_DEPTH
                     * (1f - wobble));
 
             //the tilt of the whole ellipse this frame
-            float tilt = c.spinPhase + elapsed * c.spinRate;
+            float tilt = c.spinPhase + backdrop * c.spinRate;
             float cosT = (float) Math.cos(tilt);
             float sinT = (float) Math.sin(tilt);
 
@@ -347,6 +362,12 @@ public class LootResultPanel {
 
             float centerY = y - rowHeight * 0.5f;
 
+            //a line with a count has two ends, and the split is what lines the numbers up in a
+            //column. A single piece has nothing in that column, and icon and name hard against the
+            //left of a card sized for the longest row read as a list that stopped halfway
+            float left = row.countText != null ? layout.lootX
+                    : layout.lootX + (layout.lootWidth - getRowWidth(row)) * 0.5f;
+
             SpriteAPI sprite = getRowSprite(row);
             if (sprite != null) {
                 float scale = Math.min(iconSize / sprite.getWidth(), iconSize / sprite.getHeight());
@@ -354,11 +375,11 @@ public class LootResultPanel {
                 sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
                 sprite.setNormalBlend();
                 sprite.setAlphaMult(alpha);
-                sprite.renderAtCenter(Math.round(layout.lootX + iconSize * 0.5f), Math.round(centerY));
+                sprite.renderAtCenter(Math.round(left + iconSize * 0.5f), Math.round(centerY));
             }
 
             row.nameText.setBaseColor(CatchResultPanel.withAlpha(row.color, alpha));
-            row.nameText.draw(Math.round(layout.lootX + iconSize + FishConstants.MINIGAME_LOOT_ICON_GAP),
+            row.nameText.draw(Math.round(left + iconSize + FishConstants.MINIGAME_LOOT_ICON_GAP),
                     Math.round(centerY + row.nameText.getHeight() * 0.5f));
 
             if (row.countText != null) {
@@ -371,6 +392,15 @@ public class LootResultPanel {
         }
 
         return y;
+    }
+
+    /**
+     * Icon, gap and name - the part of a row that travels together. Not the count, which is pinned
+     * to the far edge rather than following the name, and so is not part of what gets centred.
+     */
+    protected float getRowWidth(Row row) {
+        return FishConstants.MINIGAME_LOOT_ICON + FishConstants.MINIGAME_LOOT_ICON_GAP
+                + row.nameText.getWidth();
     }
 
     /** Built on first sight rather than up front, so a row that is never shown is never made. */
