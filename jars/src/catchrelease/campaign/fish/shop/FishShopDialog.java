@@ -137,9 +137,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected PositionAPI listViewport;
         protected Object buyId;
 
-        /** The shopping-list toggle beside it. */
-        protected Object markId;
-
         /** Dev-mode free-grant button id, next to the buy button. Null outside dev mode. */
         protected Object devBuyId;
 
@@ -520,45 +517,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 dev.getPosition().rightOfMid(button, 10f);
             }
 
-            buildMarkButton(info, entry);
-        }
-
-        /**
-         * The shopping-list toggle: marking an upgrade feeds its ask to the route planner and
-         * hangs the quest-yellow dot on every fish that would go towards it. Only for upgrades
-         * whose price asks for fish - marking a credits-only purchase would mark nothing.
-         */
-        protected void buildMarkButton(TooltipMakerAPI info, ShopEntry entry) {
-            ShopPricing.Price price = entry.getPrice();
-            if (!entry.isUpgrade() || price == null || price.fish == null) return;
-
-            boolean marked = ShopMarks.isMarked(entry.getKey());
-
-            markId = new Object();
-
-            ButtonAPI mark = info.addButton(marked ? "UNMARK" : "MARK FOR LATER", markId,
-                    marked ? Misc.getHighlightColor() : Misc.getBasePlayerColor(),
-                    Misc.getDarkPlayerColor(), Alignment.MID, CutStyle.TL_BR, 240f, 26f, 8f);
-
-            info.addTooltipToPrevious(new com.fs.starfarer.api.ui.BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return 280f;
-                }
-
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
-                                          Object tooltipParam) {
-                    tooltip.addPara(marked
-                            ? "Take this upgrade off the shopping list - the planner and the"
-                            + " yellow dots let its fish go."
-                            : "Put this upgrade on the shopping list: the route planner"
-                            + " suggests the fish it needs, and every fish that would go"
-                            + " towards it wears a yellow dot.", 0f);
-                }
-            }, TooltipMakerAPI.TooltipLocation.BELOW);
-
-            mark.setEnabled(true);
         }
 
         /** The selected entry, falling back to the first visible one if the selection is stale. */
@@ -604,16 +562,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
                 refreshWallet();
-                rebuild(true);
-                return;
-            }
-
-            if (markId != null && buttonId == markId) {
-                ShopEntry entry = getSelected();
-                if (entry == null) return;
-
-                ShopMarks.toggle(entry.getKey());
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
                 rebuild(true);
                 return;
             }

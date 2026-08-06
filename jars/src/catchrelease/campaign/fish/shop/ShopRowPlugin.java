@@ -13,8 +13,13 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * One line of the shelf list: name, and state readable without selecting it (lit pips for a
- * ladder, a price-coloured mark for a module, MAX/FITTED said outright).
+ * One line of the shelf list: the selection strip, the shopping-list ring, the name, and state
+ * readable without selecting it (lit pips for a ladder, a price-coloured mark for a module,
+ * MAX/FITTED said outright).
+ * <p>
+ * The ring is the mark-for-later toggle, lived-in rather than a button in the detail pane:
+ * hollow until clicked, filled quest-yellow while the ware is on the shopping list. Every row
+ * indents past the ring's slot whether or not it draws one, so the names stay in a column.
  * <p>
  * Drawn from live data every frame rather than assembled once, so a purchase never leaves a stale
  * row. Input handled by hand since a stock button can't give a hover glow, selection bar, and pips
@@ -36,6 +41,10 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
     public static final float ACCENT_WIDTH = 3f;
+
+    /** The shopping-list ring's slot, sitting between the strip and the name. */
+    public static final float MARK_SLOT = 18f;
+    public static final float MARK_RADIUS = 5f;
 
     protected final ShopEntry entry;
     protected final Host host;
@@ -85,16 +94,33 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);
         }
 
+        renderMarkRing(x, y, height, alphaMult);
         renderName(x, y, height, selected, alphaMult);
         renderState(x, y, width, height, alphaMult);
 
-        //the shopping-list dot, bottom right - the same corner it stands in everywhere else
-        if (ShopMarks.isMarked(entry.getKey())) {
-            ShopMarks.drawDot(x + width - ShopMarks.DOT_RADIUS - 2f,
-                    y + ShopMarks.DOT_RADIUS + 2f, ShopMarks.DOT_RADIUS, alphaMult);
+        ShopUi.endClip();
+    }
+
+    /** The shopping-list ring: hollow until clicked, filled quest-yellow while marked. */
+    protected void renderMarkRing(float x, float y, float height, float alphaMult) {
+        boolean marked = ShopMarks.isMarked(entry.getKey());
+        if (!marked && !ShopMarks.isMarkable(entry)) return;
+
+        float cx = x + ACCENT_WIDTH + MARK_SLOT * 0.5f;
+        float cy = y + height * 0.5f;
+
+        boolean hovered = isMouseOverMark();
+
+        if (marked) {
+            catchrelease.rendering.helper.Disc.draw(cx, cy, MARK_RADIUS,
+                    Misc.getHighlightColor(), 0.95f * alphaMult, 0.95f * alphaMult, false);
         }
 
-        ShopUi.endClip();
+        Color rim = marked ? Misc.getHighlightColor()
+                : hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor();
+
+        catchrelease.rendering.helper.Disc.drawOutline(cx, cy, MARK_RADIUS, rim,
+                (marked ? 0.95f : hovered ? 0.9f : 0.6f) * alphaMult, 1.2f);
     }
 
     protected void renderName(float x, float y, float height, boolean selected, float alphaMult) {
@@ -111,8 +137,9 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
-        //rounded to the pixel - bitmap fonts blur off-pixel
-        name.draw(Math.round(x + PAD_SIDE + ACCENT_WIDTH),
+        //rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot
+        //whether or not this row draws one, so the names stay in a column
+        name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT + 4f),
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
 
@@ -183,10 +210,27 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
             event.consume();
             Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
+
+            //the ring's slot toggles the mark; everywhere else selects the row
+            if (isInMarkSlot(event.getX()) &&
+                    (ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry))) {
+                ShopMarks.toggle(entry.getKey());
+                return;
+            }
+
             host.onRowClicked(entry);
 
             return;
         }
+    }
+
+    protected boolean isInMarkSlot(float pointX) {
+        return pointX >= pos.getX() + ACCENT_WIDTH
+                && pointX <= pos.getX() + ACCENT_WIDTH + MARK_SLOT;
+    }
+
+    protected boolean isMouseOverMark() {
+        return isMouseOver() && isInMarkSlot(Global.getSettings().getMouseX());
     }
 
     /** Inside the row and inside the list - a row scrolled out of the window takes no clicks. */
