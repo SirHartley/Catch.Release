@@ -29,11 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Every buried mote's dent, drawn once for all the beams together rather than once per light -
- * so a mote under two overlapping beams is only as dented as the nearest beam makes it, not double.
- * <p>
- * Also owns the tracking upgrade: once a beam touches a mote, its mark outlives the beam by the
- * bought seconds and dies fading, leaving a trail of everything found rather than one moving glimpse.
+ * Every buried mote's dent, drawn once for all the beams together rather than once per light, so
+ * overlapping beams do not double-dent. Also owns the tracking upgrade: once a beam touches a mote,
+ * its mark outlives the beam by the bought seconds and dies fading.
  */
 public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugin {
     public transient SpriteAPI sprite;
@@ -47,17 +45,15 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      * and as motes die or leave the system, so the map cannot grow forever. */
     private final Map<SectorEntityToken, Float> marks = new HashMap<>();
 
-    /** How lit a mote is: 1 under a beam, fading to 0 over the bought tracking seconds once the beam
-     * has moved on. The only record of what the lights have found - a buried mote carries no mark of
-     * its own. */
+    /** 1 under a beam, fading to 0 over the bought tracking seconds once the beam moves on. */
     public float getMarkStrength(SectorEntityToken mote) {
         Float held = marks.get(mote);
 
         return held == null ? 0f : held;
     }
 
-    /** How plainly this one is showing, found or merely betrayed - the same number the dent is drawn
-     * at, so anything that acts on a dent agrees with what the player sees. */
+    /** The same number the dent is drawn at, so anything that acts on it agrees with what the
+     * player sees. */
     public float getDentStrength(SectorEntityToken mote) {
         if (mote == null || mote.isExpired()) return 0f;
 
@@ -108,11 +104,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         }
     }
 
-    /**
-     * Decay first, then let the beams overwrite: a mark is the strongest of what a beam is doing to
-     * the mote now and what is left of the last time one did, so a re-swept mote pops back to full
-     * instead of fading through its own refresh.
-     */
+    /** Decay first, then let beams overwrite, so a re-swept mote pops back to full instead of
+     * fading through its own refresh. */
     protected void advanceMarks(float amount) {
         if (Global.getSector() == null) return;
 
@@ -268,11 +261,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return strongest * FishConstants.IMPRESSION_NEAR_DENT_MAX;
     }
 
-    /**
-     * The colour of the standing ring (and the identify glow, which matches it), by identify level:
-     * unbought is the beam's plain orange; level 1 leans partway toward the rarity's colour (a hint,
-     * not a name); level 2 gives the rarity's colour outright.
-     */
+    /** Ring/glow colour by identify level: unbought is plain orange, level 1 leans partway toward
+     * rarity colour (a hint), level 2 gives it outright. */
     protected Color ringColor(SectorEntityToken buried, int identify) {
         if (identify <= 0) return Searchlight.COLOR;
 
@@ -301,19 +291,14 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
     }
 
     /**
-     * One dent: a subtractive core with a fainter ring standing off it, pulsing slowly. With
-     * identify bought there is a third pass, a wide additive wash of the ring's colour, so the glow
-     * says what colour the thing is while the dent stays the hole it always was.
-     * <p>
-     * Under a breach window the dent turns inside out: the core gives way by the reveal amount, and
-     * the mote is drawn in its place wearing its pond look. The ring stays through the change.
+     * One dent: a subtractive core with a fainter ring, pulsing slowly, plus an additive glow pass
+     * if identify is bought. Under a breach window the core gives way by the reveal amount and the
+     * mote is drawn in its place wearing its pond look; the ring stays through the change.
      *
      * @param glowMult   identify glow strength, 0 for none - carries the fade but not the beams'
-     *                   resting alpha, since cut down to that light it would be too faint to read
-     * @param reveal     how much of a live beam is on the mote through a breach window; trades the
-     *                   core away
-     * @param revealMult reveal with the fade applied, for the drawn body - like glowMult, not the
-     *                   resting alpha
+     *                   resting alpha (too faint to read as colour otherwise)
+     * @param reveal     how much of a live beam is on the mote through a breach window
+     * @param revealMult reveal with the fade applied, for the drawn body - likewise no resting alpha
      */
     protected void renderImpression(Vector2f at, float alphaMult, float glowMult, Color ringColor,
                                     float reveal, float revealMult, Color revealColor) {
