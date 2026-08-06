@@ -5,6 +5,11 @@ import java.awt.Color;
 /**
  * Rarity ladder: mote colour, plus how fast (SPEED) and erratically (WANDER) the mote moves before
  * it's caught - a rare fish is harder to get to as well as harder to land.
+ * <p>
+ * The top of the ladder is red rather than the orange it used to be. Orange is spoken for twice
+ * over: it is what the mod marks quest-relevant things in, and vanilla's own {@code textEnemyColor}
+ * - which every negative highlight in the game resolves to - is [255,100,0], near enough identical
+ * to the old legendary. A swatch on the best fish in the table was reading as a warning.
  */
 public enum FishRarity {
 
@@ -12,7 +17,7 @@ public enum FishRarity {
     UNCOMMON(Color.GREEN, 1.15f, 1.3f),
     RARE(Color.BLUE, 1.35f, 1.7f),
     EPIC(new Color(163, 53, 238), 1.6f, 2.2f),
-    LEGENDARY(new Color(255, 128, 0), 1.9f, 2.8f);
+    LEGENDARY(new Color(235, 55, 50), 1.9f, 2.8f);
 
     public final Color color;
 

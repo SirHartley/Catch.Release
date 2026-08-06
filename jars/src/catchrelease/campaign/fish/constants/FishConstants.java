@@ -127,7 +127,7 @@ public class FishConstants {
     public static final float TREASURE_COMMODITY_VALUE = 2500f;
 
     //minigame - the loot card, beside the track on the side the catch card is not
-    public static final String MINIGAME_LOOT_TITLE = "RECOVERED";
+    public static final String MINIGAME_LOOT_TITLE = "Recovered";
     public static final float MINIGAME_LOOT_LINE_HEIGHT = 30f;
     public static final float MINIGAME_LOOT_ICON = 24f;
     public static final float MINIGAME_LOOT_ICON_GAP = 8f;

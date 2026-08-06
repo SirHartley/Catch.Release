@@ -290,7 +290,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
 
             LazyFont body = ShopUi.getBodyFont();
             if (body != null) {
-                LazyFont.DrawableString title = body.createText("LOCAL CATCH",
+                LazyFont.DrawableString title = body.createText("Patterns",
                         ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult),
                         body.getBaseHeight());
                 title.draw(Math.round(x + (w - title.getWidth()) * 0.5f),

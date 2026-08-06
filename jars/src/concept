@@ -11,6 +11,113 @@ todo
 
 scrapped
     - Fishing logistics ships
+    - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate //irrelevant because selling fish on open market and storing fish doesnt matter. Trading in fish also doesn't matter...
+
+---------------------
+qa_
+
+Shop
+- Add the ability to "mark" an upgrade, which plays the fish required into the route planner and marks fish needed for that upgrade in quest yellow in inventory (border?), and wherever they are displayed by adding a yellow dot in the top left.
+
+Breach Lights
+- FAN ARRAY: The distortion shader effect of the breach lights should be present along the full length of the light, not only the end
+- FAN ARRAY: Centerline of cone should be darkened slightly
+- FAN ARRAY: Cone width should be wider at default size, roughly 30%
+
+Harpooning fleets
+- Non-combat fleet that gets harpooned should complain about it when approached but not run you down.
+- Non-combat fleet that you harpoon a second time should run you down, demand compensation but not turn hostile
+- Do it a third time and the fleet should start running away from you and try to notify a patrol if there are any in the system
+
+Minigame
+- Treasure BG animation should start upon panel spawn, not be paused
+- Treasure list entries should be centered, not left-aligned
+
+
+---------------------
+
+handed off_
+
+x Map
+  - Plot route lacks feedback when a fish can't be selected for or no location for a fish is found.
+  - Fish location overview (circles) should also not draw around systems that are cut off from hyper or abyssal. The only exception is the system "Limbo", which must stay available.
+  - local system sidebar should NOT be painted but via components like the large filter bar is. Scrap the entire paint bar version and make it via components, resizing the map window accordingly just like for the large filter bar.
+  - Big filter sidebar right pad isn't the same size as left pad - center content
+  - Panel background fill should be black transparent like the other panels in the UI (see intel-planets panels...)
+
+  Intel-Planets Catch Info
+  - Panel Border should be same colour as title fill
+  - Panel background fill should be black transparent like the other panels in the UI
+
+x Fish
+- Way too much overlap between fish habitats, they can be much more specific, like only being catchable near locations of low coherence or high coherence, sun colour, quadrant, constellation age.
+- Some fish might even only spawn in ponds or only spawn in searchlights
+
+x Map
+- Route planner must not pick systems that can't be procGen quest targets like cut off from hyper ect
+- Route planner "catch in this location" marker with the fish icons inside lacks padding to the inner edge when multiple icons are present
+- Route planner should support category filters and search just like the default panel does
+- Route planner confirm & close button overlaps list, hard to see
+- "Plot route" button text overruns borders of button. Move the close button to the top right of the tab
+- The massive filter bar should not be visible in the "system" tab, only in the "hyperspace" tab.
+- Local fish sidebar & intel-planets: The "catchable fish" tooltip should be the same as the filter block uses including codex linkage
+- Local fish sidebar & intel-planets: The circle around fish icons should reflect their rarity
+- intel-planets: box should be as high as planet desc it is aligned to, at max. Add a scroller to the content if the amount of fish exceed the height of the box.
+- intel-planets: title bar should be end to end with the borders of the box, no padding to either side. It should be about 1.5x as high to match the planet box.
+
+x Breach lamps
+- Fanned array should have slight purple "light" bands to each side to make it look like a seach lamp, the gradient isn't strong enough atm and the fanned array is too "clear"
+- increase flicker
+
+x Sound
+- Most sound bytes crash the game. Note. # denotes a comment in the json files, it's a custom parser.
+
+x Quests
+- Second stage of tuber doesn't allow handing in catch
+
+x Harpoon
+- Harpooning a random fleet twice does not trigger a patrol response twice, but the second incident should trigger the hostile patrol mode
+
+x Minigame
+- Coins should not only rotate horizontally - make them spin and wobble and flip unpredictably
+
+x Map
+- Hovering over a star system should add a tooltip showing the icons and names of the fish that can be caught in that system (adhere to location data / unlock system).
+- opening map via codex should jump to hyperspace map, not system map
+
+x Fishing planner on Map
+- Add a fishing planner that goes like "I need to catch fish -> select up to 5 fish you need to catch, pull suggested fish from open fishing quests & upgrades -> plot optimal route, least distance travelled -> display route on fishing map by having the icon(s) in circles above the relevant star systems and arrows between them (base game intel map has methods for arrow render) -> keep this route saved until the player actively clicks the label away (have a "X - close route") label in the top center of the map, clicking it resets route.
+- Fishing planner should be triggered by a button in the fishing map filter, above the search bar. It should ideally be a pop-up panel that renders over the map panel, with the fish selector icon&name based.
+- Account for slipstreams and, if the player found them, the hypershunts & abyss for stability
+
+x Codex
+- Remove the star map in the catch location data
+- If you have survey data unlocked the fish should show in the codex list using the category icon & the cat data codex entry that we already have
+- Pressing the "view map" button now just closes all windows...
+
+x shop
+- purchasing an upgrade to an ability should disable that ability if it's active
+- remove Store fish, retrieve fish and sell fish buttons
+
+x Drone Swarm
+- LINE drones / ROD ability gain a new effect: While breach lamps are active, using it dispatches roaming drones that try to intercept exposed motes. Use the normal ROD upgrades.
+
+x Searchlights
+- Breach mode visuals are insanely good, we're making this the default mode. Scrap the upgrade. Adjust Fanned array to use a similar visual
+- Rename seachlights to Breach Lamps
+- search light spawn animation in fanned array mode spawns them at radius 0 and then jumps the light into the correct pos a frame later, that's wrong, it should spawn in target pos immediately
+-- We're reworking search lights ability / gameplay loop. The new loop for them is: Search for mote, auto-expose it, harpoon it.
+- Breach Lamps always expose the mote they pass over and makes it harpoon-able
+- If a Breach Lamp travels across a mote, make the mote gradually switch to the normal colour and look it has in a pond, with it being fully switched at about 40% into the light cone.
+- Motes close to the lights but not in the lights show as negative mote by default - the radius at which searchlights show "unexposed" motes is upgradeable
+- Rarity indicator visuals not pronounced enough
+- Add an upgrade that slows any mote entering the light (expensive)
+- Searchlights and ROD are mutually exclusive. no searchlights near an active pond (ROD in LINE mode), and ROD can't be used to unlock a pond while lights are on since they switch into LINE mode when lights are on as per the recent ROD ability Drone change
+
+xReward Qualifications
+- Add new possible requirement for quest: Catch modes: Harpoon or LINE Drones
+- Add new possible requirement for quest: Catch Implement: Pond or Breach Lamps
+- These should be combineable, so a medium-difficulty quest might read: "Bass of average quality and low coherence, caught with a harpoon through a breach lamp."
 
 ---------------------
 
@@ -52,7 +159,7 @@ x Wandering fisherman
 
 ai_
 
-Bar encounters
+x Bar encounters
 The mod will add bar encounters spawning individuals that request fish in certain make, quantity and quality. They sometimes request fish from a specific location.
 They provide payment in fishing upgrades, tackles, location data, blueprints, special items or money. These bar encounters should support:
 - Factional spawning
@@ -71,44 +178,9 @@ galatian researcher requesting for a type of fish for a project
 TriTuber that wants one for a video
 Cultists request one, do not say why
 
-x Dive bomb
-- Still terrible. Make it spawn a temp pond for now, we'll work on the glass visuals later. Leave them in though, so I can refer to it later.
-
-x Drones
-- Now despawn way too early...
-
 x Pond
 - Swirl renderer still gone. Trial a new design that makes it look like a hole, include the warping hyperspace bg
 - unstable terrain should not spawn below ring bands
-
-x Minigame
- - Treasure panel image height/pos does not match catch panel
-
-x Shop
-- Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate
-- Modifier category lacks support for mod entries for searchlights and bombs - auto add them when there's stuff in the csv
-
-x Mote behaviour
-- Movement modes for motes made uncommon ones super easy to catch with the harpoon, way easier than the common ones
-- uncommon motes behaviour needs to have less pauses too it's super easy to catch em
-- Epic motes should turn invisible / dive in regular intervals so they are harder to get
-
-x Fish Map UI
-- areas are no longer filled in and outlines no longer connected, just broken fragments with no area fill
-- remove category / species toggle fields
-- category filters should have icons & text
-- search should have default text "Search..."
-- when you select a category filter, filter the fish for that species and show the "all species of this category" overlay on the map
-  -> when specific species are selected, show only those specific species on the map (multiselect)
-  -> add a button "deselect all" which reverts to the category view
-- Add codex hotlink via f2 while hovering species list entry
-- move species location data source text to on hover tooltip (regional data ect)
-- add fish icon into on hover tooltip
-
-x Codex
-- image is right top aligned. Should be placed to the right of the uppermost info panel with 10px distance. Should use the same kind of border as info boxes, not the fancy fish border.
-- Catch location data should be a summary of _where_ the fish _can_ be caught. Keep it human-readable, like "In the far reaches of the north-west, under a blue star when slipstreams run towards the core" or "In the core, under a red star, at any time of the cycle." or "In the Abyss."
-- Add a button that takes you to the pre-filtered fish map UI with the fish already selected
 
 x Harpooning fleets
 - low rep impact flag should not be set I think, mirroring cargo inspection

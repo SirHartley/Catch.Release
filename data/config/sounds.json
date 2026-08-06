@@ -21,5 +21,17 @@
 
 	"skillshot_denied": [
 		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 1},
-	]
+	],
+
+	"ui_char_increase_aptitude":{
+		"sounds":[
+			{"file":"sounds/sfx_charscreen/charscreen-aptitude_increase.ogg","pitch":1,"volume":0.4},
+		],
+	},
+
+	"ui_char_increase_aptitude_max":{
+		"sounds":[
+			{"file":"sounds/sfx_charscreen/charscreen-aptitude_max.ogg","pitch":1,"volume":0.4},
+		],
+	},
 }
