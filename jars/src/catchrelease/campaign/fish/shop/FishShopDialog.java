@@ -58,6 +58,18 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
 
+    /**
+     * What happens when the shop is closed.
+     * <p>
+     * The ability opens the outfitter as the whole dialog, so closing it closes that. Somebody who
+     * opened it inside a conversation of their own wants the frame handed back instead, and only
+     * they know what to put in it - the shop hides the text and visual panels and dims the
+     * background on the way in, and there is no getter for what any of that was before.
+     */
+    public interface OnClose {
+        void onShopClosed(InteractionDialogAPI dialog);
+    }
+
     /** Opens the outfitter, if the UI will have it. */
     public static boolean open() {
         return Global.getSector().getCampaignUI()
@@ -66,6 +78,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
     protected InteractionDialogAPI dialog;
     protected Delegate delegate;
+
+    /** Null for the outfitter opened on its own, which closes by closing the dialog. */
+    protected final OnClose onClose;
+
+    public FishShopDialog() {
+        this(null);
+    }
+
+    public FishShopDialog(OnClose onClose) {
+        this.onClose = onClose;
+    }
 
     @Override
     public void init(InteractionDialogAPI dialog) {
@@ -620,9 +643,24 @@ public class FishShopDialog implements InteractionDialogPlugin {
         public void advance(float amount) {
         }
 
+        /**
+         * Closing the shop, which is not the same as closing the dialog.
+         * <p>
+         * Escape out of the outfitter opened from the ability bar has nowhere to go but out. Escape
+         * out of the one the Fisherman opened inside his own conversation should put the player back
+         * in front of him - dropping the whole encounter there reads as the shop having hung up on
+         * somebody the player was in the middle of talking to.
+         */
         @Override
         public void reportDismissed(int option) {
-            if (dialog != null) dialog.dismiss();
+            if (dialog == null) return;
+
+            if (onClose == null) {
+                dialog.dismiss();
+                return;
+            }
+
+            onClose.onShopClosed(dialog);
         }
 
         /** Escape closes the dialog without confirmation. */

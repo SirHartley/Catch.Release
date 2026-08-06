@@ -225,11 +225,39 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
     //---------------------------------------------------------------- outfitter
 
-    /** The shop the player already has, rebuilt inside this same dialog frame. */
+    /**
+     * The shop the player already has, rebuilt inside this same dialog frame - and handed back
+     * afterwards rather than closing on top of the conversation it was opened from.
+     */
     protected void openOutfitter() {
-        FishShopDialog shop = new FishShopDialog();
+        FishShopDialog shop = new FishShopDialog(this::resume);
+
         dialog.setPlugin(shop);
         shop.init(dialog);
+    }
+
+    /**
+     * Back to the boat, with the frame put back the way the shop found it.
+     * <p>
+     * Not {@link #init}: the greeting is a greeting, and hearing it again on the way out of the
+     * outfitter would read as having walked up to him twice. The panels and the dim are restored by
+     * hand because the shop hid and dimmed them and nothing reads back what they were - the dim is
+     * the figure vanilla uses for its own comm screens, which is the screen this is.
+     */
+    protected void resume(InteractionDialogAPI dialog) {
+        this.dialog = dialog;
+
+        dialog.setPlugin(this);
+        dialog.setBackgroundDimAmount(FishermanConstants.DIALOG_DIM);
+
+        dialog.showTextPanel();
+        dialog.showVisualPanel();
+
+        dialog.getVisualPanel().showFleetInfo(FishermanConstants.FLEET_NAME,
+                (com.fs.starfarer.api.campaign.CampaignFleetAPI) dialog.getInteractionTarget(),
+                null, null);
+
+        showMain();
     }
 
     //---------------------------------------------------------------- selling

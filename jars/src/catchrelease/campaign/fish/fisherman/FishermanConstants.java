@@ -69,4 +69,12 @@ public class FishermanConstants {
     public static final float RUMOR_RARITY_BIAS = 1.5f;
     public static final float RUMOR_LOOT_MULT = 2.5f;
     public static final float RUMOR_STRANGER_WEIGHT = 8f;
+
+    /**
+     * How dark the map behind the conversation is once the outfitter has been closed out of.
+     * <p>
+     * Restored rather than remembered: the shop dims on the way in and {@code InteractionDialogAPI}
+     * has no getter for what it was. This is the figure vanilla uses for its own comm screens.
+     */
+    public static final float DIALOG_DIM = 0.9f;
 }
