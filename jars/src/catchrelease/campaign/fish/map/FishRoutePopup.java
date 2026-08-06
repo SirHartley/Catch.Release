@@ -114,13 +114,39 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         searchField = element.addTextField(width - PAD * 2f, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 0f);
         searchField.setText(SEARCH_GHOST);
 
-        panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
+        //invisible on the card's black otherwise - the field's own face, not a painted backing
+        searchField.setBgColor(ShopUi.withAlpha(Misc.getDarkPlayerColor(), 0.55f));
+
+        searchSlot = panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
+    }
+
+    /** Where the search element was told to stand, kept so a layout drift can be walked back. */
+    protected PositionAPI searchSlot;
+    protected boolean searchAligned = false;
+
+    /**
+     * The element machinery stands the field a few pixels off where it was told to; measured
+     * once against the card's own edge and walked back, so the field lines up with the chips
+     * and rows drawn by hand below it.
+     */
+    protected void alignSearch() {
+        if (searchAligned || searchSlot == null || pos == null || searchField == null) return;
+
+        PositionAPI field = searchField.getPosition();
+        if (field == null || field.getWidth() <= 0f) return;
+
+        float drift = field.getX() - (pos.getX() + PAD);
+        if (Math.abs(drift) > 0.5f) searchSlot.inTL(PAD - drift, SEARCH_TOP);
+
+        searchAligned = true;
     }
 
     /** Same hand-worked ghost text as the sidebar's field - there is no change callback. */
     @Override
     public void advance(float amount) {
         if (searchField == null) return;
+
+        alignSearch();
 
         String text = searchField.getText();
         boolean focused = searchField.hasFocus();
@@ -215,6 +241,16 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected boolean isInSearch(float x, float y) {
+        //the field's real rectangle when it has one - the assumed slot only as a fallback
+        if (searchField != null) {
+            PositionAPI field = searchField.getPosition();
+
+            if (field != null && field.getWidth() > 0f) {
+                return ShopUi.contains(field.getX(), field.getY(),
+                        field.getWidth(), field.getHeight(), x, y);
+            }
+        }
+
         float top = pos.getY() + pos.getHeight() - SEARCH_TOP;
 
         return x >= pos.getX() + PAD && x <= pos.getX() + pos.getWidth() - PAD
@@ -254,8 +290,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         if (!selected.remove(id)) {
             if (selected.size() >= FishRoutePlanner.MAX_PICKS) {
-                //refusal with a reason - a click that does nothing silently reads as a bug
-                say(FishRoutePlanner.MAX_PICKS + " picks are up - deselect one first.",
+                //refusal with a reason, short enough to stay one line
+                say("All " + FishRoutePlanner.MAX_PICKS + " picks used.",
                         Misc.getHighlightColor());
                 return;
             }
@@ -271,11 +307,12 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected boolean isInClose(float x, float y) {
+        //top pad matches the side pad, so the X sits square in its corner
         float left = pos.getX() + pos.getWidth() - PAD - CLOSE_SIZE;
-        float top = pos.getY() + pos.getHeight() - PAD * 0.5f;
+        float top = pos.getY() + pos.getHeight() - PAD;
 
-        return x >= left && x <= left + CLOSE_SIZE + PAD * 0.5f
-                && y <= top && y >= top - CLOSE_SIZE - PAD * 0.5f;
+        return x >= left && x <= left + CLOSE_SIZE + PAD
+                && y <= top + PAD && y >= top - CLOSE_SIZE;
     }
 
     protected int chipIndexAt(float x, float y) {
@@ -397,7 +434,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         renderPlotButton(small, alphaMult);
     }
 
-    /** The answer-back line, sitting on the button it explains. */
+    /** The answer-back line, anchored just above the button and growing upward - a wrapped
+     *  second line eats into the list rather than lying across the button it explains. */
     protected void renderNotice(LazyFont small, float alphaMult) {
         if (notice == null) return;
 
@@ -406,14 +444,15 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         LazyFont.DrawableString line = small.createText(notice,
                 ShopUi.withAlpha(noticeColor == null ? Misc.getGrayColor() : noticeColor,
                         alphaMult), small.getBaseHeight(), width);
-        line.draw(Math.round(pos.getX() + PAD),
-                Math.round(pos.getY() + PAD + BUTTON_HEIGHT + NOTICE_HEIGHT - 2f));
+
+        float bottom = pos.getY() + PAD + BUTTON_HEIGHT + 4f;
+        line.draw(Math.round(pos.getX() + PAD), Math.round(bottom + line.getHeight()));
     }
 
-    /** The X, top right, drawn like the route's own close label wears it. */
+    /** The X, top right, its top pad matching its side pad. */
     protected void renderClose(LazyFont small, float alphaMult) {
         float left = pos.getX() + pos.getWidth() - PAD - CLOSE_SIZE;
-        float bottom = pos.getY() + pos.getHeight() - PAD * 0.5f - CLOSE_SIZE;
+        float bottom = pos.getY() + pos.getHeight() - PAD - CLOSE_SIZE;
 
         boolean hovered = isInClose(mouseX, mouseY);
         Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
