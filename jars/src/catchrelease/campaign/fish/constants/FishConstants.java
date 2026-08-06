@@ -224,6 +224,22 @@ public class FishConstants {
     public static final float MINIGAME_LOOT_COIN_EDGE = 0.15f;
     public static final float MINIGAME_LOOT_COIN_EDGE_SHINE = 1.5f;
 
+    /**
+     * The rest of the tumble, because a coin knocked off a table does not turn on one axis.
+     * <p>
+     * The WOBBLE is a second, slower flip across the coin's other axis, taken to DEPTH rather
+     * than to the edge - the primary flip owns the full turn, and two full turns at once collapse
+     * the coin to a point. The SPIN walks the whole ellipse round in the fall, and every rate is
+     * rolled per coin from its own range with its own phase, none of them divisible into the
+     * others - which is the whole of what "unpredictable" is made of: three clean cycles that
+     * never line up twice the same way.
+     */
+    public static final float MINIGAME_LOOT_COIN_WOBBLE_RATE_MIN = 0.9f;
+    public static final float MINIGAME_LOOT_COIN_WOBBLE_RATE_MAX = 1.9f;
+    public static final float MINIGAME_LOOT_COIN_WOBBLE_DEPTH = 0.55f;
+    public static final float MINIGAME_LOOT_COIN_SPIN_RATE_MIN = 0.6f;
+    public static final float MINIGAME_LOOT_COIN_SPIN_RATE_MAX = 2.2f;
+
     /** Old gold rather than yellow. Yellow is a light source against the black field, and the coins
      *  are texture behind a readout, not lamps in it. */
     public static final Color MINIGAME_LOOT_COIN_COLOR = new Color(212, 172, 64);

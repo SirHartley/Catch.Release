@@ -62,12 +62,16 @@ public class LootResultPanel {
 
     /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
     protected static class Coin {
-        float fx;       //where across the card it falls, as a fraction of the panel's width
-        float startY;   //how far into the fall it began, in pixels, so they never start in a row
-        float speed;    //pixels per second, downward
-        float size;     //radius when face-on, in pixels
-        float flipRate; //radians per second of tumble
-        float phase;    //where in the tumble it began
+        float fx;          //where across the card it falls, as a fraction of the panel's width
+        float startY;      //how far into the fall it began, in pixels, so they never start in a row
+        float speed;       //pixels per second, downward
+        float size;        //radius when face-on, in pixels
+        float flipRate;    //radians per second of the main flip
+        float phase;       //where in that flip it began
+        float wobbleRate;  //radians per second of the second, slower flip across the other axis
+        float wobblePhase; //where in the wobble it began
+        float spinRate;    //radians per second the whole ellipse turns in the plane, signed
+        float spinPhase;   //the tilt it fell in at
     }
 
     /** Straight cuts around a coin. Half of what {@link Disc} uses - smooth at radii this small. */
@@ -189,12 +193,15 @@ public class LootResultPanel {
     }
 
     /**
-     * Gold coins raining down the card, each tumbling face over edge as it falls and wrapping back
-     * to the top, so the rain holds for however long the card is read.
+     * Gold coins raining down the card, each tumbling as it falls and wrapping back to the top,
+     * so the rain holds for however long the card is read.
      * <p>
-     * The tumble is the coin's width running on |cos| while its height holds - narrowing to a bright
-     * sliver at edge-on and opening back out - rather than any rotation, because a rotated disc
-     * reads as a plate spinning on the glass, not a coin turning in the fall.
+     * Three motions per coin, none sharing a rate: the flip - the width running on |cos| while
+     * the height holds, a disc narrowing to a bright sliver and opening back out; the wobble -
+     * the same thing across the other axis, slower and shallower, so the coin is never turning
+     * about one clean line; and the spin - the whole ellipse walking round in the plane. Each
+     * runs from its own rolled rate and phase, so the tumble never repeats on a beat and no two
+     * coins fall alike.
      */
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
@@ -219,6 +226,17 @@ public class LootResultPanel {
             float face = Math.abs((float) Math.cos(elapsed * c.flipRate + c.phase));
             float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
 
+            //the second axis, held off its own edge-on by the depth - the flip owns the full
+            //turn, and both axes collapsing at once leaves a point where the coin was
+            float wobble = Math.abs((float) Math.cos(elapsed * c.wobbleRate + c.wobblePhase));
+            float height = c.size * (1f - FishConstants.MINIGAME_LOOT_COIN_WOBBLE_DEPTH
+                    * (1f - wobble));
+
+            //the tilt of the whole ellipse this frame
+            float tilt = c.spinPhase + elapsed * c.spinRate;
+            float cosT = (float) Math.cos(tilt);
+            float sinT = (float) Math.sin(tilt);
+
             //the rim catches the light as the face turns away, which is what sells the turn
             float alpha = FishConstants.MINIGAME_LOOT_COIN_ALPHA * alphaMult
                     * (1f + FishConstants.MINIGAME_LOOT_COIN_EDGE_SHINE * (1f - face) * (1f - face));
@@ -229,8 +247,11 @@ public class LootResultPanel {
             GL11.glVertex2f(x, y);
             for (int i = 0; i <= COIN_SEGMENTS; i++) {
                 double angle = Math.toRadians(i * 360.0 / COIN_SEGMENTS);
-                GL11.glVertex2f(x + (float) Math.cos(angle) * width,
-                        y + (float) Math.sin(angle) * c.size);
+
+                float ex = (float) Math.cos(angle) * width;
+                float ey = (float) Math.sin(angle) * height;
+
+                GL11.glVertex2f(x + ex * cosT - ey * sinT, y + ex * sinT + ey * cosT);
             }
             GL11.glEnd();
         }
@@ -251,6 +272,19 @@ public class LootResultPanel {
             c.flipRate = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_LOOT_COIN_FLIP_RATE_MIN,
                     FishConstants.MINIGAME_LOOT_COIN_FLIP_RATE_MAX);
             c.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+
+            c.wobbleRate = MathUtils.getRandomNumberInRange(
+                    FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MAX);
+            c.wobblePhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+
+            //signed, so half spin one way and half the other - a rain all turning clockwise
+            //reads as a pattern, and the point of the tumble is that there is none
+            c.spinRate = MathUtils.getRandomNumberInRange(
+                    FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MAX)
+                    * (MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f);
+            c.spinPhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
 
             coins.add(c);
         }
