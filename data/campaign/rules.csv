@@ -562,7 +562,7 @@ catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score
 10:catchrelease_fqDecline:Decline",The pitch is read off the fleet's own memory so one row serves every kind of trouble it could be in.
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
 EndConversation",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,They take it the way anyone takes it. The link closes without anything further being said - and they are still going to be here.,,Declining does not end the job. The fleet is pinned either way and the offer stands the next time the player calls.
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile",FireAll CatchReleaseFleetQuestTurnIn,They are exactly where you left them and they have not stopped watching the water.,,

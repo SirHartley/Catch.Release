@@ -1,28 +1,30 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.crime.HarpoonOffence;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
-import org.lwjgl.util.vector.Vector2f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
- * Decides when somebody out there wants a fish, and which of the two ways they go about asking.
+ * Decides when somebody out there wants a fish, and hangs the asking on a hull that was already
+ * there.
  * <p>
- * Nothing appears in front of the player any more. A fleet that cannot move sends a distress call
- * from a system some way off and waits to be found - see {@link FleetDistressCall} - and a fleet
- * that can move arrives from beyond sensor range under its own power and comes looking. Which of the
- * two applies is the type's own {@link FleetQuestType#wandering} flag, since it is the same
- * question: whether whatever is wrong with them leaves them able to fly.
+ * Nothing is spawned. A fleet conjured up to carry an errand is a fleet the player can tell was
+ * conjured up - it arrives from nowhere, it behaves like nothing else in the sky, and there is one
+ * more of them every time the sector is asked. What is out there already is better in every way: a
+ * scavenger picking over a hulk, a small trader crossing the system. One of them gets a cyan mark
+ * and two lines of memory, and goes on doing exactly what it was doing.
+ * <p>
+ * Nothing else is touched until the player agrees to something - see {@link FleetQuest#take}.
  * <p>
  * Rare and capped on purpose - see {@link #CHANCE} and {@link #MAX_ACTIVE}.
  */
@@ -37,18 +39,6 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
     /** How many can be running at once, sector-wide. */
     public static final int MAX_ACTIVE = 2;
-
-    /**
-     * How far out a wandering fleet arrives, as a multiple of the longest sensor range anything in
-     * the game can have.
-     * <p>
-     * Measured against sensor range rather than written down as a distance, because the requirement
-     * is that the player cannot watch it arrive - and how far they can see is a thing they upgrade.
-     * A fixed number that is safely over the horizon for a stock fleet is a fleet blinking into
-     * existence in plain sight for a fitted one.
-     */
-    public static final float ARRIVAL_SENSOR_MULT = 1.3f;
-    public static final float ARRIVAL_DISTANCE_MIN = 4000f;
 
     /** Kept on the sector so a reload cannot be used to re-roll a check that just said no. */
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
@@ -77,35 +67,33 @@ public class FleetQuestSpawner implements EveryFrameScript {
         interval.advance(Global.getSector().getClock().convertToDays(amount));
         if (!interval.intervalElapsed()) return;
 
-        if (!canSpawn()) return;
+        if (!canOffer()) return;
         if (random.nextFloat() > CHANCE) return;
 
         FleetQuestType type = FleetQuestType.rollAny(random);
         if (type == null) return;
 
-        boolean spawned = type.wandering
-                ? sendWanderer(type)
-                : FleetDistressCall.raise(type, random) != null;
-
-        if (spawned) markSpawned();
+        if (adopt(type)) markOffered();
     }
 
     /**
      * Whether the sector is in any state to be given one of these.
      * <p>
-     * Hyperspace is allowed. A distress call is a thing heard on the way somewhere, and refusing to
-     * raise one while the player is between systems ruled out the case it is for.
+     * Only in a real system, because that is where the hulls are - hyperspace traffic is passing
+     * through at speed and a mark on something crossing the void is a mark nobody will ever reach.
      */
-    protected boolean canSpawn() {
+    protected boolean canOffer() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
+
+        if (!(player.getContainingLocation() instanceof StarSystemAPI)) return false;
 
         if (Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) return false;
 
         return countActive() < MAX_ACTIVE;
     }
 
-    protected void markSpawned() {
+    protected void markOffered() {
         Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
     }
 
@@ -122,70 +110,74 @@ public class FleetQuestSpawner implements EveryFrameScript {
     }
 
     /**
-     * Sends a fleet in from beyond what the player can see, to come and find them.
+     * Finds somebody in the player's system worth asking, and hangs the offer on them.
      * <p>
-     * Only into a real system: arriving out of nothing in open hyperspace is the same trick this was
-     * written to stop, and there is no horizon out there to come over.
+     * A hull whose own trade matches the errand is preferred where there is one - a scavenger for
+     * the ones who have been picking over wrecks, a hauler for the ones short of a quota - but any
+     * civilian will do rather than skip a check over flavour.
      */
-    protected boolean sendWanderer(FleetQuestType type) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        LocationAPI location = player.getContainingLocation();
+    protected boolean adopt(FleetQuestType type) {
+        LocationAPI location = Global.getSector().getPlayerFleet().getContainingLocation();
 
-        if (!(location instanceof StarSystemAPI)) return false;
+        List<CampaignFleetAPI> any = new ArrayList<>();
+        List<CampaignFleetAPI> matching = new ArrayList<>();
 
-        CampaignFleetAPI fleet = createFleet(player, type);
-        if (fleet == null) return false;
+        for (CampaignFleetAPI fleet : location.getFleets()) {
+            if (!canCarryAnOffer(fleet)) continue;
 
-        Vector2f at = Misc.getPointAtRadius(player.getLocation(), getArrivalDistance());
+            any.add(fleet);
 
-        location.addEntity(fleet);
-        fleet.setLocation(at.x, at.y);
-
-        FleetQuest quest = FleetQuest.startOn(fleet, type);
-
-        //nothing took it, so nothing should be left flying about out there
-        if (quest == null) {
-            fleet.despawn();
-            return false;
+            if (type.fleetType.equals(fleet.getMemoryWithoutUpdate()
+                    .getString(MemFlags.MEMORY_KEY_FLEET_TYPE))) {
+                matching.add(fleet);
+            }
         }
 
-        FleetQuestEncounter.attach(fleet, quest);
+        List<CampaignFleetAPI> pool = matching.isEmpty() ? any : matching;
+        if (pool.isEmpty()) return false;
+
+        CampaignFleetAPI chosen = pool.get(random.nextInt(pool.size()));
+
+        FleetQuest quest = FleetQuest.startOn(chosen, type);
+        if (quest == null) return false;
+
+        FleetQuestEncounter.attach(chosen, quest);
 
         return true;
     }
 
-    /** Far enough out that nothing the player could have fitted would have seen it arrive. */
-    protected float getArrivalDistance() {
-        return Math.max(ARRIVAL_DISTANCE_MIN,
-                Global.getSettings().getSensorRangeMax() * ARRIVAL_SENSOR_MULT);
-    }
-
     /**
-     * A hauler somebody would talk to rather than shoot at.
+     * Whether this is a hull that could plausibly want a fish and be talked to about it.
      * <p>
-     * The two flags are what keep it coming: without them a fleet sent to find the player treats
-     * them as traffic to be given a wide berth, and edges away as they close.
+     * Civilian, because a patrol has a job and a pirate has a different one; whole, because a fleet
+     * already on its way out of the world will take the offer with it; unspoken-for, because
+     * hanging a second errand on somebody else's story fleet is how two things end up owning one
+     * hull. And it needs a captain - the mission framework reaches through {@code getPerson()} in
+     * a dozen places that do not check.
      */
-    protected CampaignFleetAPI createFleet(CampaignFleetAPI player, FleetQuestType type) {
-        FleetParamsV3 params = new FleetParamsV3(
-                null,
-                player.getLocationInHyperspace(),
-                Factions.INDEPENDENT,
-                null,
-                type.fleetType,
-                0f,   //combat - a fleet asking for help is not one that looks like a threat
-                6f,   //freighter
-                2f,   //tanker
-                0f, 0f, 0f, 0f);
+    protected boolean canCarryAnOffer(CampaignFleetAPI fleet) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
-        CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
-        if (fleet == null || fleet.isEmpty()) return null;
+        if (fleet == null || fleet == player) return false;
+        if (fleet.isExpired() || !fleet.isAlive() || fleet.isEmpty()) return false;
+        if (fleet.isStationMode() || fleet.isHidden() || fleet.isDespawning()) return false;
+        if (fleet.getBattle() != null || fleet.isInHyperspaceTransition()) return false;
 
-        fleet.setTransponderOn(true);
+        if (fleet.getFaction() == null || fleet.getFaction().isPlayerFaction()) return false;
+        if (fleet.isHostileTo(player)) return false;
 
-        fleet.getMemoryWithoutUpdate().set(MemFlags.DO_NOT_TRY_TO_AVOID_NEARBY_FLEETS, true);
-        fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        if (fleet.getCommander() == null) return false;
 
-        return fleet;
+        //the same question the harpooned crews ask about themselves, and there is only one answer
+        //to it - a fleet that fights for a living is not one that stops to ask for a favour
+        if (HarpoonOffence.isCombatCrew(fleet)) return false;
+
+        if (FleetQuest.isQuestFleet(fleet)) return false;
+        if (fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {
+            return false;
+        }
+
+        //already heading home to be deleted; an offer on one of those has a day or two to live
+        return !Misc.isFleetReturningToDespawn(fleet);
     }
 }

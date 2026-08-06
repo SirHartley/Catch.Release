@@ -4,21 +4,20 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListenerAndScript;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
-import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
 /**
- * Runs one fleet's offer from the moment it arrives to the moment it is taken, turned down, or
- * gives up waiting.
+ * Runs one fleet's offer from the moment it is hung to the moment it is taken, turned down, or
+ * quietly lapses.
  * <p>
- * A fleet that can fly is flown at the player until they talk to it - one that came looking and then
- * sat waiting to be noticed is one nobody notices. Once the conversation has closed this reads the
- * answer off the hull: taken, and the job starts and the fleet settles down to wait for delivery;
- * not taken, and it drops the exclamation, turns for home and is gone.
+ * Nothing is driven at the player. The hull carrying the offer is somebody who was already going
+ * where they were going, and the whole of this side of it is a mark over them and the patience to
+ * wait for somebody to notice. Once a conversation has closed this reads the answer off the hull:
+ * taken, and the job takes the fleet over; not taken, and the offer is unhooked and the fleet is
+ * left exactly as it was found.
  * <p>
- * A stranded fleet does none of the flying, its drive being the reason it is asking, and turning one
- * down leaves it where it is - it cannot leave, and an offer that deleted itself because the player
- * said not now is one they could never come back to.
+ * That last part is why turning one down is cheap. There is no spawned hull to tidy away, so a
+ * player who says not now has cost nothing and lost nothing.
  * <p>
  * Extends vanilla's listener-and-script pair rather than implementing both, because that base
  * registers itself as a listener in its own constructor; doing it by hand as well registers twice
@@ -26,19 +25,14 @@ import com.fs.starfarer.api.campaign.InteractionDialogAPI;
  */
 public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript implements EveryFrameScript {
 
-    /** Days a fleet will keep chasing the player before giving up and going home. */
-    public static final float PURSUE_DAYS = 30f;
-
     /**
      * Days an offer stands before its owner stops waiting.
      * <p>
-     * Both exist so that an offer nobody ever answers cannot become permanent scenery - a fleet
-     * chasing the player forever with an exclamation over it, or a hull parked in a far system for
-     * the rest of the campaign. The stranded one is the longer of the two because its distress call
-     * is what the player is working from and that stands for sixty days on vanilla's own clock.
+     * So that an offer nobody ever answers cannot become permanent scenery, and because the hull is
+     * not ours - somebody else's trader wearing a mark for the rest of the campaign is a fleet with
+     * a thing on it nobody can explain.
      */
-    public static final float OFFER_DAYS_WANDERING = 20f;
-    public static final float OFFER_DAYS_STRANDED = 90f;
+    public static final float OFFER_DAYS = 30f;
 
     protected CampaignFleetAPI fleet;
     protected FleetQuest quest;
@@ -106,43 +100,18 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
         }
 
         daysWaited += Global.getSector().getClock().convertToDays(amount);
-        if (daysWaited > getOfferDays()) {
-            giveUp();
+        if (daysWaited > OFFER_DAYS) {
+            turnedDown();
             return;
         }
 
-        chase();
-    }
-
-    protected float getOfferDays() {
-        return isWandering() ? OFFER_DAYS_WANDERING : OFFER_DAYS_STRANDED;
-    }
-
-    protected boolean isWandering() {
-        return quest != null && quest.getType() != null && quest.getType().wandering;
+        //renderers do not survive a save, and the offer does
+        if (quest != null) quest.ensureMarked();
     }
 
     protected boolean isDialogOpen() {
         return Global.getSector().getCampaignUI() != null
                 && Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null;
-    }
-
-    /**
-     * Keeps a wandering fleet coming. Reasserted rather than set once: a fleet's own AI drops an
-     * assignment it has finished or thought better of, and one that quietly stopped chasing would
-     * sit at the edge of the system with an exclamation over it doing nothing.
-     */
-    protected void chase() {
-        if (!isWandering()) return;
-
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null || fleet.getContainingLocation() != player.getContainingLocation()) return;
-
-        if (fleet.getAI() == null) return;
-        if (fleet.getAI().getCurrentAssignmentType() == FleetAssignment.INTERCEPT) return;
-
-        fleet.clearAssignments();
-        fleet.addAssignment(FleetAssignment.INTERCEPT, player, PURSUE_DAYS, quest.getType().actionText);
     }
 
     /** Reads what the player decided off the hull, the dialogue having written it there. */
@@ -158,27 +127,13 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
     }
 
     /**
-     * Turned down, or waited out. A fleet that came looking has no further reason to be here, so it
-     * gives up the exclamation and leaves under its own power - the standard return assignments are
-     * what carry it out of the system and despawn it there.
+     * Turned down, or waited out. The mark comes off and the two memory keys with it, and that is
+     * the whole of the cleanup - the hull was never ours to move, rename or send anywhere.
      */
     protected void turnedDown() {
         if (quest != null) quest.abandon();
 
-        if (fleet.getAI() != null) fleet.getAI().setActionTextOverride(null);
-
         finish();
-    }
-
-    /**
-     * Nobody came. A wandering fleet leaves the same way a refused one does; a stranded one cannot,
-     * so it is simply let go of - unmarked, and left to the game's own cleanup rather than parked in
-     * a far system with an exclamation over it for the rest of the campaign.
-     */
-    protected void giveUp() {
-        turnedDown();
-
-        if (!isWandering() && fleet != null && !fleet.isExpired()) fleet.despawn();
     }
 
     protected void finish() {
