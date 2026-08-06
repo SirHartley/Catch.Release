@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 185 Java files across eight top-level packages, plus
+What is where, and which file to open first. 188 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -295,9 +295,10 @@ Fish in cargo.
 
 | File | What it does |
 |---|---|
-| `FishItems.java` | Ids and the encode/decode used by both item kinds |
+| `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes |
 | `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
-| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks |
+| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile |
+| `FishPileItemPlugin.java` | Every fish aboard on one line; right-click breaks it back into one crate per species |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
 
 ### `campaign/fish/crab`
@@ -674,6 +675,17 @@ what keeps the sector-wide search off every other tick.
 until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first
 readout — a backdrop driven off it hung motionless over an open card. `advanceBackdrop()` runs from
 the moment the card exists and is what the coin rain reads; `advance()` stays the list's own.
+
+**A landed fish goes into a crate, not into the hold.** `FishItems.stow()` is the only landing
+path — a good night produced forty single-fish stacks and a hold nobody could read. Loose specimens
+still exist and every buyer and job still spends them; nothing *makes* one by default any more.
+
+**A crate and a pile are the same shape, and that is the whole reason the pile was cheap.**
+`FishItems.isContainer()` is the question everything spending, selling or counting fish is really
+asking — it used to be spelled `BUNDLE.equals(...)` at a dozen call sites, which is a line that has
+to be found again every time a container is added. Anything taking fish out of one must put the
+remainder back with `FishItems.repack(id, …)` rather than `toBundle`: a part-spent pile rebuilt as a
+crate would file every species in it under whichever happened to be first.
 
 **A hand-drawn control has no tooltip, and cannot grow one where it lives.** The shopping-list ring
 is painted by `ShopRowPlugin` inside the list's scissor box, so a card drawn there would be sliced
