@@ -7,13 +7,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * The plotted fishing route, as the save knows it: an ordered list of stops, each a system and
- * the fish to take there.
- * <p>
- * Held as ids rather than as live objects, because the route outlives every screen it is drawn
- * on and has to ride the save - systems are looked back up when something wants to draw or fly
- * it. There is at most one route; plotting a new one replaces the old, and it stays until the
- * player closes it by hand off the map.
+ * The plotted fishing route as the save knows it: ordered stops, each a system and the fish to
+ * take there. Held as ids rather than live objects, since the route outlives every screen and
+ * has to ride the save - systems are looked up when something wants to draw or fly it. At most
+ * one route; plotting a new one replaces the old.
  */
 public class FishRoute {
 

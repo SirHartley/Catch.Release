@@ -31,21 +31,13 @@ import java.util.Map;
 /**
  * Draws the fish waters over the sector map, riding the map's own pan and zoom.
  * <p>
- * Each blob is painted by stencil parity: its smoothed rings are fanned into the stencil buffer,
- * where crossings flip a bit, and the fill is then one flat pass wherever the bit is set. The
- * fill therefore lands exactly once per pixel however the rings fold - no double-darkened
- * overlaps, no fill peeking past the outline, since both come from the same rings - and one
- * cover pass per blob is also the cheap way to draw it.
+ * Each blob is painted by stencil parity: rings are fanned into the stencil buffer (crossings
+ * flip a bit), then filled in one flat pass wherever the bit is set - exactly once per pixel
+ * regardless of how the rings fold. With more than one blob up, the fill is diagonal stripes
+ * (offset per blob) instead of a solid sheet, so overlapping waters interleave rather than stack.
  * <p>
- * When more than one blob is up at once, the cover pass is diagonal stripes instead of a solid
- * sheet, each blob's bands offset by its place in the list - so where two waters overlap, the
- * colours interleave instead of stacking. One blob alone gets the solid sheet, since it has
- * nobody to argue with.
- * <p>
- * The geometry is world-space and cached; only the transform is per-frame. The map widget draws
- * everything at {@code world * factor + centre}, so this reads those two numbers off the widget
- * each frame and applies the same arithmetic. The panel rides the map scroller's overlay layer,
- * which the game scissors to the map rectangle unconditionally.
+ * Geometry is world-space and cached; only the transform ({@code world * factor + centre}, read
+ * off the map widget) is per-frame. The panel rides the map scroller's overlay layer.
  */
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
@@ -60,11 +52,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final int STYLE_STRIPE_RIGHT = 1;
     public static final int STYLE_STRIPE_LEFT = 2;
 
-    /**
-     * One set of waters: its cached world-space rings, its colour, how its fill is painted, and
-     * which of fill and outline it actually draws - a same-coloured group shares one merged
-     * outline blob while each member keeps its own fill, so the border never stacks on itself.
-     */
+    /** One set of waters: cached rings, colour, fill style, and which of fill/outline actually
+     *  draw - a same-coloured group shares one merged outline while each member keeps its own fill. */
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
         public final Color color;
@@ -174,8 +163,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public void render(float alphaMult) {
         if (mapWidget == null || alphaMult <= 0f) return;
 
-        //the geometry is hyperspace geometry; the same screen also shows single systems, and
-        //waters drawn over a star system would be marking coordinates that mean nothing there
+        //geometry is hyperspace; a single-system view has no meaning for these coordinates
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
         if (!(location instanceof LocationAPI) || !((LocationAPI) location).isHyperspace()) return;
 
@@ -195,8 +183,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            //fills first, outlines over all of them - a merged border belongs on top of every
-            //member's fill, not underneath the next one's
+            //fills first, outlines over all of them - a merged border belongs above every member's fill
             for (Blob blob : blobs) {
                 if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
             }
@@ -212,10 +199,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * The plotted route's stops: a ringed badge above each system carrying the fish to take
-     * there, a stub down to the system itself, and the close label top centre. The arrows
-     * between the stops are not drawn here - they ride the map's own arrow list, the same one
-     * intel arrows use, so they wear exactly the game's arrow style.
+     * Plotted route's stops: a ringed badge above each system carrying its fish, a stub down to
+     * the system, and the close label. Arrows between stops ride the map's own arrow list (the
+     * one intel arrows use) rather than being drawn here.
      */
     protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
         FishRoute.Saved route = FishRoute.get();
@@ -292,12 +278,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * The tooltip on a hovered system: which known fish can be caught there, icon and name each.
-     * <p>
-     * Only what the player has earned the right to see - the same rule the list and the waters
-     * follow - so an unknown species is simply absent rather than teased, and a species known
-     * only from survey data wears the generic mark instead of its art. A system that hosts
-     * nothing the player knows about raises no tooltip at all.
+     * Tooltip on a hovered system: known fish catchable there, icon and name each. Follows the
+     * same visibility rule as the list and waters - unknown species are absent, survey-only ones
+     * wear the generic mark instead of their art.
      */
     protected void renderHoverTooltip(float factor, float centerX, float centerY, float alphaMult) {
         if (mouseX < 0f || Global.getSector() == null) return;
@@ -442,8 +425,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float boxMaxX = blob.mesh.maxX * factor + centerX;
         float boxMaxY = blob.mesh.maxY * factor + centerY;
 
-        //parity pass: fan every ring into the stencil, flipping a bit per crossing. Where the
-        //bit ends up set is inside the shape - however the rings nest or fold
+        //parity pass: fan rings into the stencil, flipping a bit per crossing - a set bit is
+        //inside the shape, however the rings nest or fold
         GL11.glClearStencil(0);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
 
@@ -511,10 +494,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnd();
     }
 
-    /**
-     * Diagonal bands clipped by the blob's stencil - rising to the right for the second pick,
-     * to the left for the third, so where waters overlap the weaves cross instead of piling.
-     */
+    /** Diagonal bands clipped by the blob's stencil - rising right for pick two, left for pick
+     *  three, so overlapping waters cross instead of piling. */
     protected void renderStripes(float minX, float minY, float maxX, float maxY, int style) {
         //the diagonal's unit vectors: along the stripe, and across it
         float dirX = 0.70710678f;

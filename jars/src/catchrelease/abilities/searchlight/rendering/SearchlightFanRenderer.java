@@ -15,59 +15,37 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 /**
- * The fanned face: the searchlight opened into a wedge thrown from the hull, worn while the fan
- * module is fitted. The spot and the burn are set down where the beam is aimed; this one has to
- * reach from the fleet out past the aim point, pivoting and stretching as the sweep moves, and no
- * sprite squashed and turned every frame survives that looking like light - so it is cut as
- * geometry instead, the way {@link catchrelease.rendering.helper.Disc} cuts its circles.
+ * The fanned face: the searchlight opened into a wedge from the hull, worn while the fan module
+ * is fitted. Cut as geometry rather than a sprite, since the wedge pivots and stretches every
+ * frame as the sweep moves. Its shape must match {@link Searchlight#getLitStrength(Vector2f)}
+ * exactly - the module's half-angle either side of aim, reaching aim distance plus the beam's own
+ * radius - or the light would visibly find things it doesn't touch; the far end is an arc, not a
+ * chord, since reach is a distance.
  * <p>
- * The shape is not this renderer's to choose. {@link Searchlight#getLitStrength(Vector2f)} already
- * decides what a fanned light touches - the module's half-angle either side of the aim, reaching
- * the aim distance plus the beam's own radius - and a wedge drawn wider or shorter than that would
- * show the player a light finding things it visibly is not touching. The far end is cut as an arc
- * rather than a chord for the same reason: the reach is a distance, not a baseline.
+ * Falloff runs on smootherStep rather than the gameplay's straight lines - a linear ramp reads as
+ * a hard-rimmed cardboard cutout. Along the length, the gameplay's tip strength is a floor up to
+ * the aim point; past it, the floor eases to nothing over the overshoot, so the wedge fades
+ * rather than ending at a visible rim.
  * <p>
- * The falloff is where drawing and finding part ways. A wedge with a straight ramp on it is a
- * cardboard cutout: hard-rimmed, with a crease down the middle where the ramp peaks. What sells a
- * beam is that nothing about it is linear - the brightness holds a shoulder at the emitter before
- * dying off down the length, and the sides ease out over the last few degrees instead of stopping
- * - so both runs are smootherStep here rather than the gameplay's own straight lines. Down the
- * length the gameplay's tip strength stays under the curve as a floor, so nothing short of the aim
- * point ever dims below what the light still finds there; past the aim - the overshoot the light
- * keeps beyond where it is looking - the floor eases the rest of the way to nothing, and the wedge
- * ends by fading instead of at a visible rim.
- * <p>
- * The colour is the one part of the drawing the window underneath does not mirror, and it is
- * where the lamp look lives. A single flat rgb over those alphas still reads as a tidy gradient;
- * a real lamp puts a rim of scattered light at the edge of its throw. So the rgb leans into a
- * harder purple in a band down each side - and only the rgb, with both falloffs left exactly the
- * shared curves above, so the window still opens precisely where the light over it is bright.
+ * Colour is the one thing the falloff doesn't drive: a harder purple band down each side reads as
+ * scattered rim light, with both falloffs kept as the shared curves above so the breach window
+ * still opens exactly where the light over it is bright.
  */
 public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
-    /**
-     * How finely the wedge is cut. GL runs colour straight across a triangle, so the curves above
-     * are only as curved as the mesh is fine - this is about the coarsest cut at which the shoulder
-     * and the eased edges survive, and a few hundred untextured vertices a frame cost nothing.
-     */
+    /** Wedge cut density - GL interpolates colour linearly across a triangle, so the falloff is
+     *  only as smooth as the mesh; about the coarsest cut where the curves still read. */
     public static final int STEPS_ACROSS = 16;
     public static final int STEPS_ALONG = 24;
 
     public static final float SUPERLUMINAL_TIME = 0.4f;
 
-    /**
-     * The rim bands' colour: the beam's own purple leant harder - red up, green down, the same
-     * energy - so the edges read as the lamp's light scattering at the rim rather than a second
-     * lamp behind it. Private where the shared constants above are not: the breach window
-     * deliberately takes no part of the colour.
-     */
+    /** Rim band colour: the beam's purple pushed harder (red up, green down), so edges read as
+     *  scattered light rather than a second lamp. Private - the breach window shares no colour. */
     private static final Color EDGE_TINT = new Color(230, 35, 255);
 
-    /**
-     * Where each band sits across the half-width and how far it spreads: centred out where the
-     * across-ease has mostly emptied the fill - any nearer the crease and the core drowns it -
-     * and wide enough to arrive and leave gradually, a band of light rather than a painted line.
-     */
+    /** Band position/spread across the half-width - centred where the across-ease has mostly
+     *  emptied the fill (nearer the crease and the core drowns it out), wide enough to fade gradually. */
     private static final float BAND_CENTER = 0.62f;
     private static final float BAND_WIDTH = 0.38f;
 
@@ -134,8 +112,8 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
-        //the spot's layer, and it matters as much here: the dents are cut out of this light one
-        //layer up, and drawn level with it they would subtract from the black underneath instead
+        //spot's layer - the dents are cut one layer up; drawn level with it, they'd subtract from
+        //black underneath instead
         return EnumSet.of(CampaignEngineLayers.TERRAIN_1);
     }
 
@@ -143,8 +121,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (expired) return;
 
-        //the spot's numbers exactly, flash and flicker included, so fitting the module changes the
-        //shape of the light and not how much of it there is
+        //matches the spot's numbers exactly (flash, flicker) so the module changes shape, not amount
         float alpha;
         if (extraAlphaMult > 0) alpha = extraAlphaMult;
         else alpha = 0.12f - 0.04f * flicker.getBrightness();
@@ -155,22 +132,17 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         }
         if (alpha <= 0f) return;
 
-        //with the aim on top of the fleet there is no direction to open around - the sweep rides
-        //an arc twice the beam's size out, so this only catches a degenerate first frame
+        //aim on top of the fleet has no direction to open around; catches a degenerate first frame
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
-        //the radius live rather than the one this was built with. The wedge is drawn every frame and
-        //the hit test is computed every frame off the current upgrade, so a cached size means a fan
-        //that finds things past where it is drawn until something happens to rebuild the renderer
+        //radius read live, not cached - both the draw and the hit test run off the current upgrade
+        //each frame
         drawWedge(Misc.getAngleInDegrees(origin, aim), distance + Searchlight.getArea(), distance, alpha);
     }
 
-    /**
-     * The wedge itself: bands of triangle strip walked out from the origin, each vertex placed in
-     * polar coordinates off the aim direction and given its own slice of the two falloffs. Additive
-     * and untextured, since it is meant to be light and not a surface.
-     */
+    /** The wedge: triangle-strip bands from the origin, each vertex in polar coordinates off the
+     *  aim direction with its own slice of both falloffs. Additive and untextured - light, not a surface. */
     protected void drawWedge(float direction, float length, float aimDistance, float alpha) {
         float r = color.getRed() / 255f;
         float g = color.getGreen() / 255f;
@@ -180,8 +152,8 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float eg = EDGE_TINT.getGreen() / 255f;
         float eb = EDGE_TINT.getBlue() / 255f;
 
-        //the ease past the aim point starts wherever the aim currently is, so the fade-out always
-        //covers exactly the overshoot however far the beam is leaning
+        //ease past the aim starts wherever the aim currently is, so the fade always covers exactly
+        //the overshoot
         float aimFract = aimDistance / length;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
@@ -224,11 +196,8 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         GL11.glPopAttrib();
     }
 
-    /**
-     * The brightness left at a fraction of the beam's length: the shoulder-and-die curve over the
-     * gameplay's tip floor out to the aim point, and the floor itself eased away to nothing across
-     * the overshoot beyond it.
-     */
+    /** Brightness at a fraction of the beam's length: shoulder-and-die curve over the gameplay's
+     *  tip floor up to the aim point, then the floor eased to nothing across the overshoot. */
     protected float along(float u, float aimFract) {
         float base = Searchlight.FAN_TIP_STRENGTH
                 + (1f - Searchlight.FAN_TIP_STRENGTH) * TrigHelper.smootherStep(1f - u);

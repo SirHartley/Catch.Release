@@ -23,16 +23,13 @@ import java.util.Set;
 
 /**
  * Turns "I need these fish" into "fly here, then here": picks the systems that cover the chosen
- * species and orders them for the least distance travelled.
+ * species and orders them for the least travel.
  * <p>
- * Two decisions, made separately. Which systems to stand in is a cover: each stop is chosen for
- * how many of the still-uncovered picks it hosts, ties broken by how far away it is and how
- * unstable it is known to be - a system beside a discovered hypershunt, inside the abyss, or
- * under a slipstream is a worse place to park a fishing fleet, and the penalty only counts
- * hazards the player has actually found ({@link Aberration#knownInstability}). What order to fly
- * them in is then solved exactly: five stops is at most a hundred and twenty orders, so the
- * shortest is found rather than guessed at. Legs that run near a slipstream are costed cheaper,
- * since that is what a slipstream is for.
+ * Two decisions, made separately. Which systems to stand in is a greedy cover - most
+ * still-uncovered picks first, ties broken by distance and known instability
+ * ({@link Aberration#knownInstability}, so only hazards the player has actually found count
+ * against a system). What order to fly them in is solved exactly, since five stops is at most
+ * 120 orders. Legs riding a slipstream are costed cheaper.
  */
 public class FishRoutePlanner {
 
@@ -60,11 +57,8 @@ public class FishRoutePlanner {
         }
     }
 
-    /**
-     * Every species with an open ask on it: the jobs - bar and fleet both come through the intel
-     * manager as {@link FishJob}s - and the shop's next rungs, upgrades and tackle alike. Only
-     * species the player actually knows make the list, since a plan needs waters to point at.
-     */
+    /** Every species with an open ask: job asks (bar/fleet, both {@link FishJob}s via the intel
+     *  manager) and the shop's next upgrade/tackle rungs. Only species the player knows make the list. */
     public static List<Suggestion> getSuggestions() {
         Map<String, String> byId = new LinkedHashMap<>();
 
