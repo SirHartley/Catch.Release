@@ -10,29 +10,16 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 /**
- * The species' icon, and the two marks a catch carries over it: rarity as a bar across the top left,
- * and the specimen's grade as pips after it.
- * <p>
- * Drawn rather than authored as sprites because both vary per specimen, and a hundred and eighty
- * icon variants is not a thing anyone wants to keep in step with the table. Deliberately quiet: the
- * icon has to stay readable as an icon, so the marks are a thin row in one corner rather than a wash
- * over the art, and the pips only fill as far as the grade goes.
+ * The species' icon, plus the two marks a catch carries over it: rarity as a bar across the top
+ * left, and the specimen's grade as pips after it. Drawn rather than authored as sprites since both
+ * vary per specimen.
  */
 public class FishItemRenderer {
 
     /**
-     * The species' own icon, fitted to the cargo cell.
-     * <p>
-     * Fitted rather than stretched: the art is square today and the cell is square today, and neither
-     * is ours, so the smaller of the two ratios is taken and a tall fish stays a tall fish.
-     * <p>
-     * Never enlarged past what it was drawn at. A cargo cell is bigger than the art, and filling it
-     * meant scaling an eighty pixel fish up to ninety-odd - which is where the softness came from.
-     * At native size there is nothing to sharpen.
-     * <p>
-     * The second pass is what the cargo view does for every other icon - the same sprite again,
-     * additive, at the mouse-over brightness - so a catch does not sit dead under the cursor while
-     * the rest of the hold lights up.
+     * Species icon fitted (not stretched) to the cargo cell, never enlarged past native size -
+     * upscaling read as soft. Second pass mimics the cargo view's own hover-brighten additive pass,
+     * so a catch lights up under the cursor like the rest of the hold.
      */
     public static void renderIcon(float x, float y, float w, float h, float alphaMult, float glowMult,
                                   String path) {
@@ -78,7 +65,6 @@ public class FishItemRenderer {
         float barWidth = FishConstants.ITEM_RARITY_BAR_PIPS * size
                 + (FishConstants.ITEM_RARITY_BAR_PIPS - 1f) * gap;
 
-        //laid out from the top left corner, so the row keeps that corner whatever is being drawn
         float barX = x + FishConstants.ITEM_MARK_INSET;
         float rowY = y + h - FishConstants.ITEM_MARK_INSET - size;
         float pipX = barX + barWidth + FishConstants.ITEM_RARITY_BAR_GAP;
@@ -89,7 +75,7 @@ public class FishItemRenderer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         if (rarity != null) {
-            //a dark backing under it, or the common grey sits on the art and reads as part of it
+            //backing needed or the common grey blends into the art instead of reading as a mark
             backing(barX, rowY, barWidth, size, alphaMult);
 
             quad(barX, rowY, barWidth, size, rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
@@ -100,10 +86,8 @@ public class FishItemRenderer {
         GL11.glPopAttrib();
     }
 
-    /**
-     * One pip per grade step, filled up to this specimen\'s. The empty ones are still drawn, faintly,
-     * so the mark reads as a scale with a position on it rather than as a number of dots.
-     */
+    /** One pip per grade step, filled up to this specimen's; empty pips stay faint so the mark
+     *  reads as a scale rather than a dot count. */
     protected static void renderPips(float pipX, float pipY, float size, float gap, float total,
                                      float alphaMult, FishGrade grade) {
 

@@ -13,10 +13,9 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * One tab over the shelf list, drawn in the rows' own language: a quiet field that lights under
- * the mouse and holds bright while it is the open one, with its mark - the underline along its
- * bottom edge - where a row carries its bar down the side. The main pair wear an icon beside the
- * label; the gear row wears its icon over the word, being taller than it is wide has any use for.
+ * One tab over the shelf list: a quiet field that lights on hover and holds bright while active,
+ * marked with an underline along its bottom edge. Main tabs show an icon beside the label; the
+ * (taller) gear tab shows it above the label instead.
  */
 public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
@@ -88,7 +87,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
         if (vertical && icon != null) {
-            //the icon over the word, for a tab that is taller than it is wide has any use for
             icon.setSize(ICON_SIZE, ICON_SIZE);
             icon.setColor(color);
             icon.setNormalBlend();
@@ -96,7 +94,7 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             icon.renderAtCenter(Math.round(x + width * 0.5f),
                     Math.round(y + height - ACCENT_HEIGHT - 4f - ICON_SIZE * 0.5f));
 
-            //on the pixel, since a bitmap font off the pixel is what blur is
+            //rounded to the pixel - bitmap fonts blur off-pixel
             text.draw(Math.round(x + (width - text.getWidth()) * 0.5f),
                     Math.round(y + 3f + text.getHeight()));
             return;

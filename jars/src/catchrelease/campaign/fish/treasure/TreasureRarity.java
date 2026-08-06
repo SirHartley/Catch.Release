@@ -3,10 +3,8 @@ package catchrelease.campaign.fish.treasure;
 import java.awt.Color;
 
 /**
- * How good a piece of treasure is, and how often that happens.
- * <p>
- * The weights are relative to each other, not chances - whether any treasure shows up at all is a
- * separate roll, and a low one. Once something has shown up, this decides what kind.
+ * How good a piece of treasure is. Weights are relative, not probabilities - whether treasure
+ * appears at all is a separate (low) roll; this only picks which kind once it has.
  */
 public enum TreasureRarity {
 

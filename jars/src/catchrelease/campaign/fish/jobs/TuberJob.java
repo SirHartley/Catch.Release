@@ -8,15 +8,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * A man who makes TriPad content and needs a fish to hold up.
- * <p>
- * Two rounds, and the second is the point. The first is what he thinks he wants - the best specimen
- * available, held at arm's length towards a lens. The second is what the numbers tell him he wants
- * after the first one underperforms, which is something that looks like it is dying, because that is
- * what people stop scrolling for.
- * <p>
- * He is not paying much. He is, however, paying in things he has been sent for free by people
- * hoping to be mentioned, which is a strange and occasionally excellent inventory.
+ * TriPad creator job, two rounds: round one asks for the best specimen available; round two
+ * (after delivery) instead asks for a low-coherence (aberrant-looking) specimen, at higher reward.
  */
 public class TuberJob extends FishJob {
 
@@ -51,12 +44,7 @@ public class TuberJob extends FishJob {
         return true;
     }
 
-    /**
-     * The second round, which is the point of him.
-     * <p>
-     * The first is what he thinks he wants. This is what the numbers told him he wants after the
-     * first one did fine, and fine is the worst thing that can happen to a video.
-     */
+    /** Replaces the ask/reward with round two; only fires once. */
     @Override
     protected boolean onDelivered() {
         if (getRound() > 1) return false;
