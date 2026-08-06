@@ -135,15 +135,33 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         try {
             //a parked request self-activates the filter - the memory flag only fires on a fresh
-            //attach, and the codex may have opened over a map already up with the filter off
-            if (hasFreshPendingSpecies() && !fishButton.isChecked()) fishButton.setChecked(true);
+            //attach, and the codex may have opened over a map already up with the filter off.
+            //It also flips to the hyper view up front: the pane only stands there now, and a
+            //request that waited for the pane while the pane waited for the view would wait forever
+            if (hasFreshPendingSpecies()) {
+                if (!fishButton.isChecked()) fishButton.setChecked(true);
 
-            boolean wanted = fishButton.isChecked();
+                if (!isHyperViewShown()) {
+                    ReflectionUtils.invoke(mapScreen, "notifyMapLocationChanged",
+                            Global.getSector().getHyperspace());
+                }
+            }
+
+            boolean checked = fishButton.isChecked();
+            if (checked != isRemembered()) remember(checked);
+
+            //the pane and the narrowed map are hyperspace furniture: the filter stays checked
+            //across a flip to the system view, but its sidebar steps off until the flip back
+            boolean wanted = checked && isHyperViewShown();
 
             if (wanted != applied) {
                 if (wanted) activate();
                 else deactivate();
             }
+
+            //the system view's strip follows the button, not the pane - it exists exactly so
+            //the filter still answers "and what about here?" while its sidebar is away
+            if (overlay != null) overlay.setFilterActive(checked);
 
             if (applied && pendingSpeciesId != null) applyPendingSpecies();
 
@@ -251,6 +269,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             popup = new FishRoutePopup(this);
             popupPanel = Global.getSettings().createCustom(FishMapPane.WIDTH, paneHeight, popup);
+            popup.mount(popupPanel, FishMapPane.WIDTH);
 
             ((UIPanelAPI) mapScreen).addComponent(popupPanel)
                     .setSize(FishMapPane.WIDTH, paneHeight)
@@ -527,10 +546,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             }
 
             rebuildBlobs();
-            remember(true);
             applied = true;
-
-            if (overlay != null) overlay.setFilterActive(true);
         } catch (Throwable t) {
             fail(t);
         }
@@ -561,10 +577,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 ReflectionUtils.invoke(mapScreen, "centerOn", keep);
             }
 
-            if (overlay != null) {
-                overlay.setBlobs(null);
-                overlay.setFilterActive(false);
-            }
+            if (overlay != null) overlay.setBlobs(null);
+
             if (overlayPanel != null) {
                 overlayPanel.getPosition().setSize(originalScrollerWidth, scrollerPos.getHeight());
             }
@@ -572,7 +586,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             pane = null;
             panePanel = null;
 
-            remember(false);
             applied = false;
         } catch (Throwable t) {
             fail(t);
