@@ -751,19 +751,38 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 continue;
             }
 
-            //exposed by a beam, or - with a head that reads the fabric - merely showing as a dent.
-            //The second is the case the passive reach created and left unanswerable: a mote inside
-            //the detect radius is drawn, ringed and named without any light ever crossing it, so
-            //the only shot the player had at one was to wait for a beam that might not come round
-            if (!SearchlightAbilityPlugin.isLit(buried)
-                    && !(reachesUnder() && SearchlightAbilityPlugin.isDetected(buried))) {
-                continue;
-            }
+            if (!canTake(buried)) continue;
 
             return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
         }
 
         return null;
+    }
+
+    /**
+     * Whether a shot could take this at all, leaving aside where it is.
+     * <p>
+     * Two kinds of thing answer to a harpoon and they answer differently. A buried mote has to be
+     * exposed by a beam, or - with a head that reads the fabric - merely showing as a dent; the
+     * second is the case the passive reach created and left unanswerable, since a mote inside the
+     * detect radius is drawn, ringed and named without any light ever crossing it, and the only
+     * shot the player had at one was to wait for a beam that might not come round. An ordinary mote
+     * has only to be unheld and within reach of the head.
+     * <p>
+     * Asked in one place because two things need the answer and they must not disagree: the strike
+     * itself, and the aim assist deciding what a shot is allowed to bend towards. Assist that used
+     * a looser test would pull shots onto things they cannot take, and a stricter one would refuse
+     * to help with targets that are the whole point of the lamps.
+     */
+    public static boolean canTake(SectorEntityToken target) {
+        if (target == null || target.isExpired()) return false;
+
+        if (target.getCustomPlugin() instanceof BuriedMoteEntityPlugin) {
+            return SearchlightAbilityPlugin.isLit(target)
+                    || (reachesUnder() && SearchlightAbilityPlugin.isDetected(target));
+        }
+
+        return FishEntityPlugin.isAvailable(target, reachesUnder());
     }
 
     /**
@@ -778,9 +797,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected SectorEntityToken findMote() {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            //already speared by something else, or under the fabric where an ordinary line cannot
-            //reach it - a fathom head can, which is the answer to the ones that dive to shake it
-            if (!FishEntityPlugin.isAvailable(mote, reachesUnder())) continue;
+            if (!canTake(mote)) continue;
 
             if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
