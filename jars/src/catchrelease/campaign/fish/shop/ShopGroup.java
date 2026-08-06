@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeStat;
 
@@ -47,6 +48,15 @@ public enum ShopGroup {
      *
      * @return null for anything that is not a rig
      */
+    /**
+     * The shelf a curio sits on. All of them go on the catch's own shelf, which nothing else uses -
+     * the tuning stats that map there are equipment and are dropped before the list is built, so
+     * this is the one thing in the shop that is about the catch rather than about the gear.
+     */
+    public static ShopGroup forWare(CrabWares ware) {
+        return THE_CATCH;
+    }
+
     public static ShopGroup forRig(Tackle.Fit rig) {
         if (rig == null) return null;
 

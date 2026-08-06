@@ -21,7 +21,8 @@ import java.util.List;
  * each frame, and every part times itself off {@link #elapsed} / {@link FishConstants#CELEBRATION_TIME}
  * so nothing can drift out of sync.
  * <p>
- * All of it but the confetti, which has to be bought - see {@link CrabWares#CONFETTI}.
+ * Never built at all unless the charges have been bought and are switched on - see
+ * {@link CrabWares#CELEBRATION}. Nothing in here asks; whoever builds one has already decided.
  */
 public class CatchCelebration {
 
@@ -120,13 +121,8 @@ public class CatchCelebration {
         if (!confettiSpawned) {
             confettiSpawned = true;
 
-            //bought rather than issued. Everything else here is the readout announcing itself and
-            //belongs to anyone who lands a fish; the paper is the one part that is purely for show,
-            //which is exactly the sort of thing somebody sells you in a bar
-            if (CrabWares.CONFETTI.isOwned()) {
-                for (int i = 0; i < FishConstants.CELEBRATION_CONFETTI; i++) {
-                    confetti.add(spawn(centerX, centerY, fish));
-                }
+            for (int i = 0; i < FishConstants.CELEBRATION_CONFETTI; i++) {
+                confetti.add(spawn(centerX, centerY, fish));
             }
         }
 

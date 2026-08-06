@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -8,7 +9,6 @@ import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.rendering.helper.Disc;
-import catchrelease.helper.CatchReleaseSettings;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.rendering.plugins.WarpGrid;
@@ -129,7 +129,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 
             //celebration reads its centre off the layout at render time, after the readout has settled
-            if (CatchReleaseSettings.isCelebrationEnabled()) {
+            if (CrabWares.CELEBRATION.isOn()) {
                 celebration = new CatchCelebration(minigame.getFish());
             }
         }

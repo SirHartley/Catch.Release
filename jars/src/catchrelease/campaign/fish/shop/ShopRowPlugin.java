@@ -100,7 +100,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = entry.isDone() ? Misc.getGrayColor()
+        Color color = entry.isDone() || (entry.isCurio() && !entry.isOn()) ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
@@ -120,6 +120,15 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             ShopUi.drawPips(Math.round(right - pipsWidth), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
                     Misc.getHighlightColor(), alphaMult);
+            return;
+        }
+
+        //a switch says which way it is thrown, both ways - OFF has to be as readable as ON, since
+        //an unmarked row would look like the shelf had simply not loaded
+        if (entry.isCurio()) {
+            drawMark(entry.isOn() ? "ON" : "OFF",
+                    entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
+                    right, y, height, alphaMult);
             return;
         }
 
