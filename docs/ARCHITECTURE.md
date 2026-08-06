@@ -202,7 +202,6 @@ Jobs hung on a hull that was already out there, which then has to still be there
 |---|---|
 | `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()` |
 | `FleetQuestSpawner.java` | Picks a civilian hull already in the player's system and hangs an offer on it. Spawns nothing |
-| `FleetQuestMarker.java` | The muted-cyan `!` while an offer is only an offer — vanilla's own sprite and geometry, a colour that is not vanilla's |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
 
@@ -444,6 +443,7 @@ Shader and GL machinery.
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
 | `plugins/WarpedRectRenderer.java` | A sprite warped per-vertex by a grid, no shader |
+| `renderers/FleetMarkerRenderer.java` | A small icon off a fleet's corner, in vanilla's own geometry and whoever's colour — the quest offer's cyan `!`, the Fisherman's own icon |
 | `renderers/RippleRingRenderer.java` | One growing, fading ring, pinned to one location |
 | `renderers/SimpleRippleDataRunner.java` | Advances and expires a `RippleData` |
 | `helper/Stencil.java` | Depth-mask sprite masking. Stencil-buffer variants are deprecated |
@@ -712,6 +712,13 @@ boolean with one colour, and setting it on somebody's trade fleet would also mak
 as story furniture. `FleetQuestMarker` copies vanilla's sprite, corner and zoom arithmetic exactly
 and changes only the tint. Once the offer is accepted the cyan comes off and vanilla's own takes
 over — at that point it is no longer passive.
+
+**The Fisherman is pinned visible while anybody is in the system to see him.** His lamps are drawn
+wherever the boat is, whether or not the hull carrying them can be made out — so a Fisherman at the
+edge of a sweep was two searchlights working the dark on their own. `keepVisible()` does both halves:
+a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrightness(1f)` every tick,
+which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
+re-applied each tick rather than set at spawn, so it heals a boat that predates it.
 
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a
