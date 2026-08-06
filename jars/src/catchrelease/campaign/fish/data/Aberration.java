@@ -67,10 +67,56 @@ public class Aberration {
     }
 
     /**
+     * The route planner's read: how unstable a system is known to be, deterministically - no
+     * spread - and counting only what the player has actually found. Slipstreams always count,
+     * since they are on every map the moment they run; a hypershunt that has never been
+     * discovered and an abyss never entered cannot steer a plan the player is meant to be able
+     * to reason about.
+     */
+    public static float knownInstability(com.fs.starfarer.api.campaign.StarSystemAPI system) {
+        if (system == null || system.getLocation() == null) return 0f;
+
+        Vector2f loc = system.getLocation();
+
+        float worst = getSlipstreamShare(loc);
+        worst = Math.max(worst, getDiscoveredHypershuntShare(loc));
+
+        if (hasEnteredAbyss()) worst = Math.max(worst, getAbyssShare(loc, system));
+
+        return MathUtils.clamp(worst, 0f, 1f);
+    }
+
+    /** Whether the player has ever stood in the abyss - before that, its depth is hearsay. */
+    protected static boolean hasEnteredAbyss() {
+        for (com.fs.starfarer.api.campaign.StarSystemAPI system
+                : Global.getSector().getStarSystems()) {
+
+            if (system.hasTag(Tags.SYSTEM_ABYSSAL) && system.isEnteredByPlayer()) return true;
+        }
+
+        return false;
+    }
+
+    /** The hypershunt share counting only taps the player has actually laid eyes on. */
+    protected static float getDiscoveredHypershuntShare(Vector2f locInHyper) {
+        float nearest = Float.MAX_VALUE;
+
+        for (SectorEntityToken tap : Global.getSector().getCustomEntitiesWithTag(Tags.CORONAL_TAP)) {
+            if (tap.isDiscoverable()) continue;
+
+            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, tap.getLocationInHyperspace()));
+        }
+
+        return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
+                * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
+    }
+
+    /**
      * Slipstreams are ribbons rather than points, so this measures to where the terrain is anchored
      * and takes the nearest. Close enough for a number that only says roughly how thin it is here.
+     * Public because the route planner discounts travel along them.
      */
-    protected static float getSlipstreamShare(Vector2f locInHyper) {
+    public static float getSlipstreamShare(Vector2f locInHyper) {
         float nearest = Float.MAX_VALUE;
 
         for (CampaignTerrainAPI terrain : Global.getSector().getHyperspace().getTerrainCopy()) {

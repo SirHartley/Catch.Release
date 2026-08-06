@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 159 Java files across eight top-level packages, plus
+What is where, and which file to open first. 162 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -270,11 +270,14 @@ The sector-map fish filter.
 
 | File | What it does |
 |---|---|
-| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane and overlay each frame |
-| `FishMapPane.java` | The side panel: search, type chips, species list |
+| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list |
+| `FishMapPane.java` | The side panel: planner button, search, type chips, species list |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
-| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap |
+| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; system hover tooltips, route badges, the close-route label |
+| `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
+| `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
+| `FishRoutePopup.java` | The planner card over the map: pick up to five, plot |
 | `FishType.java` | Filter categories with colour and icon |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
 
@@ -337,7 +340,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
-| `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, exposes `isLit(mote)` and `isBreaching()` (fitted **and** lit, which is not what `burnsIntoHyperspace()` answers), beam slow, detectability penalty, yields to open ponds |
+| `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |
 | `searchlight/rendering/SearchlightFanRenderer.java` | The wedge beam, for the fan-beam tackle |

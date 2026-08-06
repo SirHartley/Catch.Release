@@ -4,6 +4,8 @@ import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -749,7 +751,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 continue;
             }
 
-            if (!SearchlightAbilityPlugin.isLit(buried)) continue;
+            //exposed by a beam, or - with a head that reads the fabric - merely showing as a dent.
+            //The second is the case the passive reach created and left unanswerable: a mote inside
+            //the detect radius is drawn, ringed and named without any light ever crossing it, so
+            //the only shot the player had at one was to wait for a beam that might not come round
+            if (!SearchlightAbilityPlugin.isLit(buried)
+                    && !(reachesUnder() && SearchlightAbilityPlugin.isDetected(buried))) {
+                continue;
+            }
 
             return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
         }
@@ -757,10 +766,21 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return null;
     }
 
+    /**
+     * Whether the head fitted reads the fabric rather than only the water above it.
+     * <p>
+     * Read per call rather than kept from launch, so a head is what the rig has now - and because a
+     * harpoon in flight is a fraction of a second, there is nothing to be gained by remembering it.
+     */
+    public static boolean reachesUnder() {
+        return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
+    }
+
     protected SectorEntityToken findMote() {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            //already speared by something else, or under the fabric where a line cannot reach it
-            if (!FishEntityPlugin.isAvailable(mote)) continue;
+            //already speared by something else, or under the fabric where an ordinary line cannot
+            //reach it - a fathom head can, which is the answer to the ones that dive to shake it
+            if (!FishEntityPlugin.isAvailable(mote, reachesUnder())) continue;
 
             if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
