@@ -134,6 +134,13 @@ public class HarpoonOffence {
 
         remember(faction.getId());
         owe(faction.getId());
+
+        //a fresh rope is a fresh reason to come out. The quiet days a shaken-off patrol bought the
+        //player were bought against the last one, and this is not the last one - without this the
+        //second harpooning inside the wait is filed, resented, and answered by nobody, which is the
+        //one it most needs answering for
+        HarpoonPatrolResponse.clearRetryWait(faction.getId());
+
         applyRepLoss(faction.getId());
 
         return true;
