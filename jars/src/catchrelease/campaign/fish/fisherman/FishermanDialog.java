@@ -331,7 +331,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
                 held.rarity = entry.getSpec().rarity;
                 held.value = entry.getValue() * held.count;
                 held.marked = catchrelease.campaign.fish.shop.ShopMarks.isMarked(entry);
-            } else if (FishItems.BUNDLE.equals(data.getId())) {
+            } else if (FishItems.isContainer(data)) {
                 List<FishCatch> contents = FishItems.decodeBundle(data.getData());
                 if (contents.isEmpty()) continue;
 
@@ -376,7 +376,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
             //a bundle is one item however many swim in it
             cargo.removeItems(CargoItemType.SPECIAL, held.data,
-                    FishItems.BUNDLE.equals(held.data.getId()) ? 1 : held.count);
+                    FishItems.isContainer(held.data) ? 1 : held.count);
 
             sold += held.count;
             credits += held.value;
@@ -392,7 +392,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         for (StackValue held : readAllFish()) {
             offer.addSpecial(held.data,
-                    FishItems.BUNDLE.equals(held.data.getId()) ? 1 : held.count);
+                    FishItems.isContainer(held.data) ? 1 : held.count);
         }
 
         dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
@@ -444,7 +444,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
             cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
 
             credits += value;
-            sold += FishItems.BUNDLE.equals(data.getId())
+            sold += FishItems.isContainer(data)
                     ? FishItems.decodeBundle(data.getData()).size() : (int) stack.getSize();
         }
 
@@ -470,7 +470,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
             return entry == null ? 0f : entry.getValue() * stack.getSize();
         }
 
-        if (FishItems.BUNDLE.equals(data.getId())) {
+        if (FishItems.isContainer(data)) {
             float total = 0f;
             for (FishCatch entry : FishItems.decodeBundle(data.getData())) {
                 total += entry.getValue();
