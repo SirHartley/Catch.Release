@@ -56,6 +56,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
 
+    /**
+     * The chime for a completed purchase.
+     * <p>
+     * Named here rather than written into both call sites, because a sound id is a string the
+     * compiler cannot check and the game only disputes when the sound is asked for - which for a
+     * purchase chime is not at load, but the first time somebody buys something.
+     */
+    public static final String SOUND_BOUGHT = "ui_upgrade_industry";
+
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
@@ -530,7 +539,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 ShopEntry entry = getSelected();
                 if (entry == null || !entry.devBuy()) return;
 
-                Global.getSoundPlayer().playUISound("ui_char_increase_aptitude", 1f, 1f);
+                Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
                 refreshWallet();
                 rebuild(true);
@@ -542,7 +551,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             ShopEntry entry = getSelected();
             if (entry == null || !entry.buy()) return;
 
-            Global.getSoundPlayer().playUISound("ui_char_increase_aptitude", 1f, 1f);
+            Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
             refreshWallet();
             rebuild(true);
