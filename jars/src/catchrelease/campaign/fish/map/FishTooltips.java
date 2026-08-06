@@ -77,9 +77,12 @@ public final class FishTooltips {
                     tooltip.addPara("No region data in the table.", Misc.getNegativeHighlightColor(), 8f);
                 }
 
-                if (catchrelease.campaign.fish.shop.ShopMarks.isMarked(spec)) {
-                    tooltip.addPara("Would go towards a marked upgrade.",
-                            Misc.getHighlightColor(), 8f);
+                //who is asking: marked gear off the shopping list, and open jobs
+                java.util.List<String> requiredBy =
+                        catchrelease.campaign.fish.shop.ShopMarks.getRequiredBy(spec);
+                if (!requiredBy.isEmpty()) {
+                    tooltip.addPara("Required by: %s", 8f, Misc.getGrayColor(),
+                            Misc.getHighlightColor(), String.join(", ", requiredBy));
                 }
 
                 String action = actionLine == null ? null : actionLine.get();

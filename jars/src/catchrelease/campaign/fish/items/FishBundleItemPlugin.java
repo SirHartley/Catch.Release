@@ -137,6 +137,18 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara("Contains: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
                 contents.size() + " specimens of " + contents.get(0).getDisplayName());
 
+        //who is asking for anything in the crate: marked gear and open jobs both
+        java.util.List<String> requiredBy = new java.util.ArrayList<>();
+        for (FishCatch entry : contents) {
+            for (String name : ShopMarks.getRequiredBy(entry)) {
+                if (!requiredBy.contains(name)) requiredBy.add(name);
+            }
+        }
+        if (!requiredBy.isEmpty()) {
+            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+                    Misc.getHighlightColor(), String.join(", ", requiredBy));
+        }
+
         Map<FishGrade, Integer> byGrade = new EnumMap<>(FishGrade.class);
         float best = 0f;
         for (FishCatch entry : contents) {
