@@ -5,6 +5,7 @@ import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
+import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.campaign.fish.spawner.BuriedMoteSpawner;
@@ -49,6 +50,7 @@ public class ModPlugin extends BaseModPlugin {
 
         // transient - a save should never carry a screen-watcher
         Global.getSector().addTransientScript(new FishMapFilterScript());
+        Global.getSector().addTransientScript(new FishIntelPlanetPanel());
 
         //Testing
         //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());

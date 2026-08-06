@@ -80,10 +80,14 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
 
+    /** The pane's slot on the screen, kept so the planner can borrow it and hand it back. */
+    protected float paneX, paneY, paneHeight;
+
     /** The map's own arrow list and what this script put in it, for taking it back out. */
     protected Object arrowList;
     protected final List<Object> injectedArrows = new ArrayList<>();
     protected Object lastRouteSeen;
+    protected boolean arrowsIn = false;
 
     /** World-space meshes by species - the hosts never move during a session, so cut once. */
     protected final Map<String, FishPresenceField.Mesh> meshCache = new HashMap<>();
@@ -114,6 +118,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             try {
                 insertButton();
+
+                //the overlay rides every map open, filter or no filter - the route badges and
+                //the system view's fish row are map furniture, not filter furniture. The waters
+                //only ever appear in it once the filter fills the blob list
+                mountOverlay();
 
                 //the map reopens the way it was left
                 if (fishButton != null && isRemembered()) fishButton.setChecked(true);
@@ -148,18 +157,24 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
      * Keeps the map's own arrow list carrying the plotted route, so legs wear vanilla's own
      * arrow style. The list is found on the map's params object as the one non-null {@code List}
      * field (arrows vs markers, told apart by which is populated) - if that stops holding, the
-     * arrows are silently skipped. Re-run when the route's identity changes; anything this script
-     * previously added is pulled back out first.
+     * arrows are silently skipped. Re-run when the route's identity changes or the map flips
+     * between views - the legs are hyperspace geometry, and vanilla draws its params arrows on
+     * the system view too, where they point at nothing. Anything this script previously added is
+     * pulled back out first.
      */
     protected void syncRouteArrows() {
         FishRoute.Saved route = FishRoute.get();
-        if (route == lastRouteSeen) return;
+        boolean hyper = isHyperViewShown();
+        boolean want = route != null && !route.stops.isEmpty() && hyper;
+
+        if (route == lastRouteSeen && want == arrowsIn) return;
 
         if (arrowList instanceof List) ((List<?>) arrowList).removeAll(injectedArrows);
         injectedArrows.clear();
         lastRouteSeen = route;
+        arrowsIn = want;
 
-        if (route == null || route.stops.isEmpty() || mapScreen == null) return;
+        if (!want || mapScreen == null) return;
         if (Global.getSector().getPlayerFleet() == null) return;
 
         try {
@@ -207,29 +222,39 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The planner floats over the middle of the map, sized to itself. */
-    @Override
-    public void onPlannerRequested() {
-        if (popupPanel != null || mapScreen == null) return;
+    /** Whether the map is showing hyperspace right now, rather than a single system. */
+    protected boolean isHyperViewShown() {
+        if (mapScreen == null) return false;
 
         try {
-            Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
-            PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
-            PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
+            Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
+            Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
 
-            float x = scrollerPos.getX() + (scrollerPos.getWidth() - FishRoutePopup.WIDTH) * 0.5f
-                    - screenPos.getX();
-            float y = (screenPos.getY() + screenPos.getHeight())
-                    - (scrollerPos.getY() + scrollerPos.getHeight())
-                    + (scrollerPos.getHeight() - FishRoutePopup.HEIGHT) * 0.5f;
+            return location instanceof com.fs.starfarer.api.campaign.LocationAPI
+                    && ((com.fs.starfarer.api.campaign.LocationAPI) location).isHyperspace();
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /**
+     * The planner takes the sidebar's own slot: the pane steps aside, the planner stands exactly
+     * where it stood, and closing hands the slot back. A separate floating card was tried and
+     * looked like a guest; the sidebar is already the pane the player is working in.
+     */
+    @Override
+    public void onPlannerRequested() {
+        if (popupPanel != null || mapScreen == null || panePanel == null) return;
+
+        try {
+            ((UIPanelAPI) mapScreen).removeComponent(panePanel);
 
             popup = new FishRoutePopup(this);
-            popupPanel = Global.getSettings().createCustom(
-                    FishRoutePopup.WIDTH, FishRoutePopup.HEIGHT, popup);
+            popupPanel = Global.getSettings().createCustom(FishMapPane.WIDTH, paneHeight, popup);
 
             ((UIPanelAPI) mapScreen).addComponent(popupPanel)
-                    .setSize(FishRoutePopup.WIDTH, FishRoutePopup.HEIGHT)
-                    .inTL(x, y);
+                    .setSize(FishMapPane.WIDTH, paneHeight)
+                    .inTL(paneX, paneY);
         } catch (Throwable t) {
             fail(t);
         }
@@ -259,10 +284,17 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         closePlanner();
     }
 
+    /** Takes the planner down and puts the sidebar back in the slot it lent out. */
     protected void closePlanner() {
         if (popupPanel != null && mapScreen != null) {
             try {
                 ((UIPanelAPI) mapScreen).removeComponent(popupPanel);
+
+                if (applied && panePanel != null) {
+                    ((UIPanelAPI) mapScreen).addComponent(panePanel)
+                            .setSize(FishMapPane.WIDTH, paneHeight)
+                            .inTL(paneX, paneY);
+                }
             } catch (Throwable ignored) {
                 //the screen is already gone, and the panel with it
             }
@@ -439,6 +471,25 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
      * scroller (the map's real viewport, which content size and zoom clamps re-derive from) is
      * the whole resize, plus a re-centre on the world point that was in the middle.
      */
+    /**
+     * The always-on overlay: route badges and the system view's fish row belong to the map
+     * itself, so this goes up the moment the screen is found, before the filter has said a word.
+     * The waters arrive in it later, if and when the filter fills the blob list.
+     */
+    protected void mountOverlay() {
+        Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
+        Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
+        PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
+
+        overlay = new FishPresenceOverlay();
+        overlay.setMapWidget(mapWidget);
+        overlay.setFilterActive(applied);
+
+        overlayPanel = Global.getSettings().createCustom(
+                scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
+        ReflectionUtils.invoke(scroller, "addToOverlay", overlayPanel);
+    }
+
     protected void activate() {
         try {
             Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
@@ -454,12 +505,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             scrollerPos.setSize(narrowWidth, scrollerPos.getHeight());
             ReflectionUtils.invoke(mapScreen, "centerOn", keep);
 
-            //the pane, on the edge the map gave up
+            //the pane, on the edge the map gave up - its slot remembered so the planner can
+            //borrow it
             PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
-            float paneX = scrollerPos.getX() + narrowWidth + PANE_GAP - screenPos.getX();
-            float paneY = screenPos.getY() + screenPos.getHeight()
+            paneX = scrollerPos.getX() + narrowWidth + PANE_GAP - screenPos.getX();
+            paneY = screenPos.getY() + screenPos.getHeight()
                     - (scrollerPos.getY() + scrollerPos.getHeight());
-            float paneHeight = scrollerPos.getHeight();
+            paneHeight = scrollerPos.getHeight();
 
             pane = new FishMapPane(this);
             panePanel = Global.getSettings().createCustom(FishMapPane.WIDTH, paneHeight, pane);
@@ -469,24 +521,32 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     .setSize(FishMapPane.WIDTH, paneHeight)
                     .inTL(paneX, paneY);
 
-            //the waters, in the scroller's overlay layer - over the map, cut at its edge
-            overlay = new FishPresenceOverlay();
-            overlay.setMapWidget(mapWidget);
-
-            overlayPanel = Global.getSettings().createCustom(narrowWidth, paneHeight, overlay);
-            ReflectionUtils.invoke(scroller, "addToOverlay", overlayPanel);
+            //the standing overlay follows the narrowed viewport
+            if (overlayPanel != null) {
+                overlayPanel.getPosition().setSize(narrowWidth, paneHeight);
+            }
 
             rebuildBlobs();
             remember(true);
             applied = true;
+
+            if (overlay != null) overlay.setFilterActive(true);
         } catch (Throwable t) {
             fail(t);
         }
     }
 
-    /** The filter goes off: the pane and the waters leave, the map takes its edge back. */
+    /** The filter goes off: the pane and the waters leave; the overlay stays for the route and
+     *  the system view, with its blob list emptied. */
     protected void deactivate() {
         try {
+            //a planner holding the pane's slot goes down with it, without handing the slot back
+            if (popupPanel != null) {
+                ((UIPanelAPI) mapScreen).removeComponent(popupPanel);
+                popup = null;
+                popupPanel = null;
+            }
+
             Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
             Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
             PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
@@ -495,17 +555,22 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     scrollerPos.getCenterX(), scrollerPos.getCenterY());
 
             if (panePanel != null) ((UIPanelAPI) mapScreen).removeComponent(panePanel);
-            if (overlayPanel != null) ReflectionUtils.invoke(scroller, "removeFromOverlay", overlayPanel);
 
             if (originalScrollerWidth > 0f) {
                 scrollerPos.setSize(originalScrollerWidth, scrollerPos.getHeight());
                 ReflectionUtils.invoke(mapScreen, "centerOn", keep);
             }
 
+            if (overlay != null) {
+                overlay.setBlobs(null);
+                overlay.setFilterActive(false);
+            }
+            if (overlayPanel != null) {
+                overlayPanel.getPosition().setSize(originalScrollerWidth, scrollerPos.getHeight());
+            }
+
             pane = null;
             panePanel = null;
-            overlayPanel = null;
-            overlay = null;
 
             remember(false);
             applied = false;
