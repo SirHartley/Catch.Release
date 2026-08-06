@@ -71,7 +71,7 @@ public class ShopEntry {
 
         String id = stat.id;
         for (String prefix : new String[]{"searchlight_", "fishing_drone_", "drone_",
-                "harpoon_", "bomb_", "fishing_", "minigame_"}) {
+                "harpoon_", "fishing_", "minigame_"}) {
             if (id.startsWith(prefix) && id.length() > prefix.length()) {
                 id = id.substring(prefix.length());
                 break;

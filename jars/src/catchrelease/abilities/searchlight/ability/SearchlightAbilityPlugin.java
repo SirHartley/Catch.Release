@@ -142,10 +142,10 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     /**
      * The slow upgrade: the light itself drags on whatever swims through it.
      * <p>
-     * Applied through the same knock a depth bomb deals, so the two cannot disagree about what a
-     * slowed mote is - and refreshed every frame a mote stays in a beam, with a short linger so
-     * leaving the light lets it go rather than snapping it back to speed. Nothing without the
-     * upgrade: the strength is zero until bought.
+     * Applied through the mote's own blast-knock, so anything else that ever shakes a mote cannot
+     * disagree with this about what a slowed one is - and refreshed every frame a mote stays in a
+     * beam, with a short linger so leaving the light lets it go rather than snapping it back to
+     * speed. Nothing without the upgrade: the strength is zero until bought.
      */
     protected void applyBeamSlow(CampaignFleetAPI fleet) {
         float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);

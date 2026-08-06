@@ -89,8 +89,8 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
     }
 
     /**
-     * What is buried nearby, rather than what is swimming. An ordinary mote out here is somebody
-     * else's - the harpoon's, or a bomb's - and this rig has no business taking it off them.
+     * What is buried nearby, rather than what is swimming. An ordinary mote out here is the
+     * harpoon's, and this rig has no business taking it off the line.
      */
     @Override
     protected List<SectorEntityToken> getSearchArea() {

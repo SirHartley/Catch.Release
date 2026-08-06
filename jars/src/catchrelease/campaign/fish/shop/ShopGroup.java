@@ -15,12 +15,10 @@ public enum ShopGroup {
     SEARCHLIGHTS("Breach lamps", "Lamps"),
     DRONES("Drones", "Drones"),
     HARPOON("Harpoon", "Harpoon"),
-    DEPTH_BOMBS("Depth bombs", "Bombs"),
     THE_CATCH("The catch", "Catch"),
     DRONE_TACKLE("Drone tackle", "Drone rig"),
     HARPOON_TIPS("Harpoon tips", "Harpoon"),
-    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig"),
-    BOMB_RIG("Bomb rig", "Bomb rig");
+    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig");
 
     public final String title;
 
@@ -40,7 +38,6 @@ public enum ShopGroup {
 
         if (id.startsWith("searchlight")) return SEARCHLIGHTS;
         if (id.startsWith("harpoon")) return HARPOON;
-        if (id.startsWith("bomb")) return DEPTH_BOMBS;
         if (id.startsWith("drone") || id.startsWith("fishing_drone")) return DRONES;
 
         return THE_CATCH;
@@ -62,7 +59,6 @@ public enum ShopGroup {
             case DRONE: return DRONE_TACKLE;
             case HARPOON: return HARPOON_TIPS;
             case SEARCHLIGHT: return SEARCHLIGHT_RIG;
-            case BOMB: return BOMB_RIG;
             default: return null;
         }
     }
