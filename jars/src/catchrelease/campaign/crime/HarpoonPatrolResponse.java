@@ -58,8 +58,30 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     /** Which harpooning the patrol has come about, so the debt can be found again to settle it. */
     public static final String PATROL_FACTION_KEY = "$catchrelease_harpoonPatrolFaction";
 
-    /** Set by the encounter once this patrol has had its say, however that went. */
+    /**
+     * Set by the encounter once this patrol has had its say, however that went.
+     * <p>
+     * A signal rather than a record: it is read once, acted on, and cleared with the chase. What
+     * lasts is {@link #ANSWERED_KEY}, which is the part that has to say <i>what</i> was answered
+     * for. Left standing, this would meet the same patrol on its next errand and end that chase on
+     * the first frame, over a conversation it had about something else a fortnight ago.
+     */
     public static final String DEALT_WITH_KEY = "$catchrelease_harpoonPatrolDone";
+
+    /**
+     * How many of this faction's harpoonings this patrol has already been out about.
+     * <p>
+     * A count and not a flag, because the thing being excluded is not "this patrol" but "this patrol
+     * over this incident". A flag cannot tell the two apart: it says the crew has had the
+     * conversation and goes on saying it for the whole memory window, so a player harpooned the same
+     * faction twice in a fortnight had the second one met by nobody - every patrol in range was
+     * still marked as having already asked, about the first one.
+     * <p>
+     * Compared against {@link HarpoonOffence#getIncidentCount} rather than stored as a timestamp, so
+     * it needs nothing but an int and it lapses correctly by itself: the count is pruned to the same
+     * window, so a patrol whose answers scroll off the books becomes free to be sent again.
+     */
+    public static final String ANSWERED_KEY = "$catchrelease_harpoonPatrolAnswered";
 
     /** Set by the encounter when the fine was paid. */
     public static final String PAID_KEY = "$catchrelease_harpoonFinePaid";
@@ -95,11 +117,12 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     public static final float RETRY_DAYS = 5f;
 
     /**
-     * Days a patrol that has already had this conversation stays out of it.
+     * Days a patrol remembers what it has already been out about.
      * <p>
-     * The whole memory window, so one patrol is one conversation per incident. Shorter and the same
-     * ships come back to ask the same question; unbounded and a patrol that once collected a fine is
-     * excluded from every incident for the rest of the game.
+     * The whole memory window, matching the books it is compared against - a patrol should stop
+     * carrying answers exactly when the questions stop being on anybody's slate. That it is a whole
+     * month is only safe because what it holds is a count: one patrol is one conversation per
+     * incident, not one conversation per month.
      */
     public static final float DEALT_WITH_DAYS = HarpoonOffence.MEMORY_DAYS;
 
@@ -207,9 +230,14 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
                 //come for them anyway, and on their own terms
                 if (curr.isHostileTo(player)) return false;
 
-                //one that has already had this conversation, or is on its way to have it
+                //one that is already on its way to have this conversation
                 MemoryAPI mem = curr.getMemoryWithoutUpdate();
-                if (mem.getBoolean(DEALT_WITH_KEY) || mem.getBoolean(PATROL_FLAG)) return false;
+                if (mem.getBoolean(PATROL_FLAG)) return false;
+
+                //or one that has been out about everything this faction currently has on its books.
+                //Not "has been out at all" - a patrol that settled the last rope is the obvious crew
+                //to send about the next one, and is very often the only crew in range
+                if (hasAnsweredEverything(curr, faction.getId())) return false;
 
                 //patrols only. A war fleet carries the other flag and is on somebody's raid, and
                 //the fleet AI's own pursuit support is written against patrols in both of the
@@ -240,6 +268,25 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         }
 
         return closest;
+    }
+
+    /**
+     * Whether this crew has already been out about every harpooning currently on the faction's
+     * books, and so has nothing left to come and ask.
+     */
+    protected static boolean hasAnsweredEverything(CampaignFleetAPI patrol, String factionId) {
+        return patrol.getMemoryWithoutUpdate().getInt(ANSWERED_KEY)
+                >= HarpoonOffence.getIncidentCount(factionId);
+    }
+
+    /**
+     * Lets a faction send somebody again without waiting out the rest of the quiet spell.
+     * <p>
+     * Called when a new harpooning is booked. The wait exists so that shaking off a patrol is worth
+     * something; it was never meant to cover the player while they do it again.
+     */
+    public static void clearRetryWait(String factionId) {
+        Global.getSector().getMemoryWithoutUpdate().unset(RETRY_KEY + factionId);
     }
 
     protected void send(CampaignFleetAPI patrol, String factionId) {
@@ -345,6 +392,11 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId == null) return;
 
+        //everything on the books as of now, this one included, is something this crew has been out
+        //about. Written before the debt is settled only because reading it afterwards would be the
+        //same number - settling clears what is owed, not what happened
+        mem.set(ANSWERED_KEY, HarpoonOffence.getIncidentCount(factionId), DEALT_WITH_DAYS);
+
         HarpoonOffence.settle(factionId);
 
         if (mem.getBoolean(PAID_KEY)) {
@@ -368,8 +420,8 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
      * <p>
      * The assignment and the tactical target are cleared by hand because neither is on a clock -
      * left behind, a patrol that has lost interest keeps flying at the player anyway, on orders
-     * nothing will ever rescind. What is deliberately left is the flag saying this patrol has had
-     * its conversation, which has a clock and is supposed to outlive the chase.
+     * nothing will ever rescind. What is deliberately left is {@link #ANSWERED_KEY}, which is on a
+     * clock and is supposed to outlive the chase.
      */
     protected void endChase() {
         if (chasing == null) return;
@@ -399,6 +451,11 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (factionId != null) {
             Global.getSector().getMemoryWithoutUpdate().set(RETRY_KEY + factionId, true, RETRY_DAYS);
         }
+
+        //the conversation signal is spent. It is the encounter saying "just now", and left standing
+        //it would still be saying it the next time this crew is sent, ending that chase on its
+        //first frame before anybody had said anything
+        mem.unset(DEALT_WITH_KEY);
 
         mem.unset(PATROL_FLAG);
         mem.unset(PATROL_FACTION_KEY);
