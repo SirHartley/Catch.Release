@@ -118,8 +118,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             return;
         }
 
-        float mult = Global.getSettings().getFloat("campaignSpeedupMult"); //anim independent of speed up
-        timePassed += amount / mult;
+        //raw frame time: the old campaignSpeedupMult division meant to steady the animation
+        //under speed-up, but it applied at normal speed too, running every wait at double
+        //length - the spool read as taking forever, worst on the fan, which lights nothing
+        //until it ends. A spool that runs brisker under speed-up is fine; one that drags at
+        //normal speed is not
+        timePassed += amount;
 
         if (!spoolDone && timePassed > SPOOL_UP_TIME){
             timePassed = 0;
