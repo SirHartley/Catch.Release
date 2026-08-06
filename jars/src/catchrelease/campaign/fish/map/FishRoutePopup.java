@@ -39,9 +39,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         void onPlannerClosed();
     }
 
-    public static final float WIDTH = 380f;
-    public static final float HEIGHT = 460f;
-
     public static final float PAD = 12f;
     public static final float ROW_HEIGHT = 24f;
     public static final float ICON = 18f;
@@ -179,8 +176,12 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
     protected float getTitleHeight() {
         LazyFont body = ShopUi.getBodyFont();
+        LazyFont small = ShopUi.getSmallFont();
 
-        return body == null ? 16f : body.getBaseHeight() + 8f;
+        float bodyHeight = body == null ? 16f : body.getBaseHeight();
+        float smallHeight = small == null ? 13f : small.getBaseHeight();
+
+        return bodyHeight + 4f + smallHeight + 8f;
     }
 
     protected int rowIndexAt(float x, float y) {
@@ -216,10 +217,14 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.92f * alphaMult);
         ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
 
-        LazyFont.DrawableString title = body.createText(
-                "FISHING PLANNER - pick up to " + FishRoutePlanner.MAX_PICKS,
+        LazyFont.DrawableString title = body.createText("FISHING PLANNER",
                 Misc.getBasePlayerColor(), body.getBaseHeight());
         title.draw(Math.round(x + PAD), Math.round(y + h - PAD));
+
+        LazyFont.DrawableString hint = small.createText(
+                "Pick up to " + FishRoutePlanner.MAX_PICKS + " - wanted fish first",
+                Misc.getGrayColor(), small.getBaseHeight());
+        hint.draw(Math.round(x + PAD), Math.round(y + h - PAD - title.getHeight() - 4f));
 
         renderRows(small, alphaMult);
         renderButtons(small, alphaMult);
