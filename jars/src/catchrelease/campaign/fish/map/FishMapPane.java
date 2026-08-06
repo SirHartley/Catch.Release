@@ -165,8 +165,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         float w = pos.getWidth();
         float h = pos.getHeight();
 
-        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.8f * alphaMult);
-        ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+        //transparent black, the way the screen's own panels sit on it - no colour wash
+        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
         Color border = Misc.getDarkPlayerColor();
         ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
@@ -265,7 +265,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         shownCount = shown.size();
 
         float listHeight = height - CONTROLS_HEIGHT - PAD * 2f;
-        listElement = panel.createUIElement(width - PAD, listHeight, true);
+        //same air on both sides - the list's slot is inset PAD left and right alike
+        listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
 
         for (FishSpec spec : shown) {
             CustomPanelAPI row = panel.createCustomPanel(width - PAD * 2f - 6f, ROW_HEIGHT,

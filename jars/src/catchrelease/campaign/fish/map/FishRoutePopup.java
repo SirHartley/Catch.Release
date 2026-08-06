@@ -60,6 +60,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     public static final float CHIP_HEIGHT = 22f;
     public static final float CHIP_GAP = 4f;
 
+    /** The line above the button where the card answers back. */
+    public static final float NOTICE_HEIGHT = 18f;
+
     /** Top of the search field, measured down from the card's top edge. */
     public static final float SEARCH_TOP = 48f;
 
@@ -77,6 +80,10 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     protected final FishPresence.Filter filter = new FishPresence.Filter();
 
     protected TextFieldAPI searchField;
+
+    /** The card talking back: why a click did nothing, or why a plot refused. */
+    protected String notice;
+    protected Color noticeColor;
 
     protected PositionAPI pos;
     protected float scroll = 0f;
@@ -245,9 +252,21 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         String id = rows.get(index).spec.id;
 
         if (!selected.remove(id)) {
-            if (selected.size() >= FishRoutePlanner.MAX_PICKS) return;
+            if (selected.size() >= FishRoutePlanner.MAX_PICKS) {
+                //refusal with a reason - a click that does nothing silently reads as a bug
+                say(FishRoutePlanner.MAX_PICKS + " picks are up - deselect one first.",
+                        Misc.getHighlightColor());
+                return;
+            }
             selected.add(id);
         }
+
+        notice = null;
+    }
+
+    protected void say(String what, Color color) {
+        notice = what;
+        noticeColor = color;
     }
 
     protected boolean isInClose(float x, float y) {
@@ -279,10 +298,35 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected void plot() {
-        if (selected.isEmpty()) return;
+        if (selected.isEmpty()) {
+            say("Pick a fish first.", Misc.getGrayColor());
+            return;
+        }
+
+        //refuse rather than quietly go without: a route that silently dropped a pick would
+        //read as the fish being on it
+        List<String> stranded = FishRoutePlanner.getUnplaceable(new ArrayList<>(selected));
+        if (!stranded.isEmpty()) {
+            List<String> names = new ArrayList<>();
+            for (String id : stranded) {
+                FishSpec spec = FishPresence.getSpec(id);
+                names.add(spec == null ? id : spec.getDisplayName());
+            }
+
+            //the notice is one line; a long roll call gets counted instead of read out
+            String listed = names.size() > 2
+                    ? names.get(0) + ", " + names.get(1) + " +" + (names.size() - 2) + " more"
+                    : String.join(", ", names);
+
+            say("No charted waters for " + listed + ".", Misc.getNegativeHighlightColor());
+            return;
+        }
 
         FishRoute.Saved route = FishRoutePlanner.plan(new ArrayList<>(selected));
-        if (route == null) return;
+        if (route == null) {
+            say("No route - nothing picked has charted waters.", Misc.getNegativeHighlightColor());
+            return;
+        }
 
         FishRoute.set(route);
         host.onRoutePlotted(route);
@@ -298,7 +342,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected float getListBottom() {
-        return pos.getY() + PAD + BUTTON_HEIGHT + PAD;
+        return pos.getY() + PAD + BUTTON_HEIGHT + NOTICE_HEIGHT + PAD;
     }
 
     protected int rowIndexAt(float x, float y) {
@@ -333,8 +377,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         //the pane's own dressing: dark field, one-pixel player border, corners square
         ShopUi.drawQuad(x - 1f, y - 1f, w + 2f, h + 2f, Misc.getDarkPlayerColor(), alphaMult);
-        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.92f * alphaMult);
-        ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
         LazyFont.DrawableString title = body.createText("FISHING PLANNER",
                 Misc.getBasePlayerColor(), body.getBaseHeight());
@@ -349,7 +392,21 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         renderChips(small, alphaMult);
         renderRows(small, alphaMult);
+        renderNotice(small, alphaMult);
         renderPlotButton(small, alphaMult);
+    }
+
+    /** The answer-back line, sitting on the button it explains. */
+    protected void renderNotice(LazyFont small, float alphaMult) {
+        if (notice == null) return;
+
+        float width = pos.getWidth() - PAD * 2f;
+
+        LazyFont.DrawableString line = small.createText(notice,
+                ShopUi.withAlpha(noticeColor == null ? Misc.getGrayColor() : noticeColor,
+                        alphaMult), small.getBaseHeight(), width);
+        line.draw(Math.round(pos.getX() + PAD),
+                Math.round(pos.getY() + PAD + BUTTON_HEIGHT + NOTICE_HEIGHT - 2f));
     }
 
     /** The X, top right, drawn like the route's own close label wears it. */

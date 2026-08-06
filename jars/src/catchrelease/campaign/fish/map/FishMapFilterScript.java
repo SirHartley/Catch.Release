@@ -7,6 +7,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -76,6 +77,12 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected CustomPanelAPI panePanel;
     protected CustomPanelAPI overlayPanel;
     protected FishPresenceOverlay overlay;
+
+    /** The system view's own sidebar - same mechanism as the big pane, smaller tenant. */
+    protected FishSystemPane systemPane;
+    protected CustomPanelAPI systemPanePanel;
+    protected boolean systemApplied = false;
+    protected Object shownSystem;
 
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
@@ -151,17 +158,19 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             if (checked != isRemembered()) remember(checked);
 
             //the pane and the narrowed map are hyperspace furniture: the filter stays checked
-            //across a flip to the system view, but its sidebar steps off until the flip back
-            boolean wanted = checked && isHyperViewShown();
+            //across a flip to the system view, where the system's own smaller pane stands in.
+            //Deactivations run before activations, so a view flip hands the map's edge over
+            //instead of narrowing an already-narrowed map
+            boolean wantPane = checked && isHyperViewShown();
 
-            if (wanted != applied) {
-                if (wanted) activate();
-                else deactivate();
-            }
+            StarSystemAPI viewed = getViewedSystem();
+            boolean wantSystem = checked && viewed != null && hasAnyFish(viewed);
 
-            //the system view's strip follows the button, not the pane - it exists exactly so
-            //the filter still answers "and what about here?" while its sidebar is away
-            if (overlay != null) overlay.setFilterActive(checked);
+            if (applied && !wantPane) deactivate();
+            if (systemApplied && (!wantSystem || viewed != shownSystem)) deactivateSystemPane();
+
+            if (!applied && wantPane) activate();
+            if (!systemApplied && wantSystem) activateSystemPane(viewed);
 
             if (applied && pendingSpeciesId != null) applyPendingSpecies();
 
@@ -237,6 +246,105 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         } catch (Throwable t) {
             Global.getLogger(FishMapFilterScript.class)
                     .warn("Could not put the fishing route's arrows on the map", t);
+        }
+    }
+
+    /** The single system the map is showing, or null on the hyperspace view. */
+    protected StarSystemAPI getViewedSystem() {
+        if (mapScreen == null) return null;
+
+        try {
+            Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
+            Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
+
+            return location instanceof StarSystemAPI ? (StarSystemAPI) location : null;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /** Whether the system has anything to put on a pane - an empty pane is just a narrower map. */
+    protected boolean hasAnyFish(StarSystemAPI system) {
+        return !FishPresence.getKnownFishIn(system).isEmpty()
+                || FishPresence.getUnknownCountIn(system) > 0;
+    }
+
+    /**
+     * The system view's pane: the same hand-over as {@link #activate()} - the map gives up its
+     * right edge, the pane takes it - sized for a column of holders rather than the full
+     * filter. Rebuilt whenever the viewed system changes, since the stock is the system's.
+     */
+    protected void activateSystemPane(StarSystemAPI system) {
+        try {
+            Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
+            Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
+            PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
+
+            originalScrollerWidth = scrollerPos.getWidth();
+
+            Vector2f keep = (Vector2f) ReflectionUtils.invoke(mapWidget, "getWorldLocation",
+                    scrollerPos.getCenterX(), scrollerPos.getCenterY());
+
+            float narrowWidth = originalScrollerWidth - FishSystemPane.WIDTH - PANE_GAP;
+            scrollerPos.setSize(narrowWidth, scrollerPos.getHeight());
+            ReflectionUtils.invoke(mapScreen, "centerOn", keep);
+
+            PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
+            float x = scrollerPos.getX() + narrowWidth + PANE_GAP - screenPos.getX();
+            float y = screenPos.getY() + screenPos.getHeight()
+                    - (scrollerPos.getY() + scrollerPos.getHeight());
+            float height = scrollerPos.getHeight();
+
+            systemPane = new FishSystemPane();
+            systemPanePanel = Global.getSettings().createCustom(
+                    FishSystemPane.WIDTH, height, systemPane);
+            systemPane.mount(systemPanePanel, FishSystemPane.WIDTH, height, system);
+
+            ((UIPanelAPI) mapScreen).addComponent(systemPanePanel)
+                    .setSize(FishSystemPane.WIDTH, height)
+                    .inTL(x, y);
+
+            if (overlayPanel != null) {
+                overlayPanel.getPosition().setSize(narrowWidth, height);
+            }
+
+            shownSystem = system;
+            systemApplied = true;
+        } catch (Throwable t) {
+            fail(t);
+        }
+    }
+
+    /** The system pane steps off and the map takes its edge back. */
+    protected void deactivateSystemPane() {
+        try {
+            Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
+            Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
+            PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
+
+            Vector2f keep = (Vector2f) ReflectionUtils.invoke(mapWidget, "getWorldLocation",
+                    scrollerPos.getCenterX(), scrollerPos.getCenterY());
+
+            if (systemPanePanel != null) {
+                ((UIPanelAPI) mapScreen).removeComponent(systemPanePanel);
+            }
+
+            if (originalScrollerWidth > 0f) {
+                scrollerPos.setSize(originalScrollerWidth, scrollerPos.getHeight());
+                ReflectionUtils.invoke(mapScreen, "centerOn", keep);
+            }
+
+            if (overlayPanel != null) {
+                overlayPanel.getPosition().setSize(originalScrollerWidth,
+                        scrollerPos.getHeight());
+            }
+
+            systemPane = null;
+            systemPanePanel = null;
+            shownSystem = null;
+            systemApplied = false;
+        } catch (Throwable t) {
+            fail(t);
         }
     }
 
@@ -502,7 +610,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
-        overlay.setFilterActive(applied);
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
@@ -754,6 +861,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay = null;
         popup = null;
         popupPanel = null;
+        systemPane = null;
+        systemPanePanel = null;
+        systemApplied = false;
+        shownSystem = null;
         applied = false;
         originalScrollerWidth = 0f;
 
@@ -774,13 +885,16 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         try {
             if (mapScreen != null) {
                 if (panePanel != null) ((UIPanelAPI) mapScreen).removeComponent(panePanel);
+                if (systemPanePanel != null) {
+                    ((UIPanelAPI) mapScreen).removeComponent(systemPanePanel);
+                }
 
                 Object scroller = ReflectionUtils.invokeIfExists(mapScreen, "getScroller");
                 if (scroller != null && overlayPanel != null) {
                     ReflectionUtils.invokeIfExists(scroller, "removeFromOverlay", overlayPanel);
                 }
 
-                if (scroller != null && applied && originalScrollerWidth > 0f) {
+                if (scroller != null && (applied || systemApplied) && originalScrollerWidth > 0f) {
                     ((UIComponentAPI) scroller).getPosition()
                             .setSize(originalScrollerWidth,
                                     ((UIComponentAPI) scroller).getPosition().getHeight());

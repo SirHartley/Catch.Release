@@ -162,8 +162,8 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         StarSystemAPI system =
                 (StarSystemAPI) ((SectorEntityToken) entity).getContainingLocation();
 
-        List<FishSpec> known = getKnownFish(system);
-        int unknown = getUnknownCount(system);
+        List<FishSpec> known = FishPresence.getKnownFishIn(system);
+        int unknown = FishPresence.getUnknownCountIn(system);
         if (known.isEmpty() && unknown == 0) return;
 
         //the card's slot, in the planets panel's own inTL coordinates
@@ -223,7 +223,8 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 int index = placed + i;
                 FishSpec spec = index < known.size() ? known.get(index) : null;
 
-                CustomPanelAPI cell = panel.createCustomPanel(CELL, CELL, new HolderPlugin(spec));
+                CustomPanelAPI cell = panel.createCustomPanel(CELL, CELL,
+                        new FishHolderPlugin(spec));
                 rowPanel.addComponent(cell).inTL(i * (CELL + CELL_GAP), 0f);
 
                 //the sidebar's own species card - the question marks stay questions
@@ -239,40 +240,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
 
         panel.updateUIElementSizeAndMakeItProcessInput(content);
         panel.addUIElement(content).inTL(INNER_PAD, TITLE_HEIGHT + INNER_PAD);
-    }
-
-    /** Known species catchable in the system, caught first so the art leads the row. */
-    protected List<FishSpec> getKnownFish(StarSystemAPI system) {
-        List<FishSpec> caught = new ArrayList<>();
-        List<FishSpec> surveyed = new ArrayList<>();
-
-        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null) continue;
-            if (!FishPresence.livesIn(spec, system)) continue;
-            if (!FishPresence.isKnown(spec)) continue;
-
-            if (FishLog.isCaught(spec.id)) caught.add(spec);
-            else surveyed.add(spec);
-        }
-
-        caught.addAll(surveyed);
-
-        return caught;
-    }
-
-    /** How many species live here that the player has never heard of - counted, never named. */
-    protected int getUnknownCount(StarSystemAPI system) {
-        int count = 0;
-
-        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null) continue;
-            if (!FishPresence.livesIn(spec, system)) continue;
-            if (FishPresence.isKnown(spec)) continue;
-
-            count++;
-        }
-
-        return count;
     }
 
     protected void removePanel() {
@@ -313,12 +280,13 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
             float w = pos.getWidth();
             float h = pos.getHeight();
 
-            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.8f * alphaMult);
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+            //the field is transparent black, the way the screen's own panels sit on it
+            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
             //the title bar: flush with the borders on every side, the card's own header weight
+            float titleAlpha = 0.65f;
             ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
-                    Misc.getDarkPlayerColor(), 0.65f * alphaMult);
+                    Misc.getDarkPlayerColor(), titleAlpha * alphaMult);
 
             LazyFont body = ShopUi.getBodyFont();
             if (body != null) {
@@ -329,86 +297,13 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                         Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f));
             }
 
+            //the border wears exactly the title bar's colour, so the bar reads as part of the frame
             Color border = Misc.getDarkPlayerColor();
-            ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
-            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, alphaMult);
-            ShopUi.drawQuad(x, y, 1f, h, border, alphaMult);
-            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, alphaMult);
+            ShopUi.drawQuad(x, y, w, 1f, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x, y, 1f, h, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, titleAlpha * alphaMult);
         }
     }
 
-    /** One round holder: dark disc, the rarity's ring, and the face - art, mark, or question. */
-    protected static class HolderPlugin extends BaseCustomUIPanelPlugin {
-
-        protected final FishSpec spec;
-        protected PositionAPI pos;
-
-        public HolderPlugin(FishSpec spec) {
-            this.spec = spec;
-        }
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            pos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (pos == null || alphaMult <= 0f) return;
-
-            float x = pos.getCenterX();
-            float y = pos.getCenterY();
-            float radius = pos.getWidth() * 0.5f;
-
-            //the ring wears the rarity; a species with no name yet wears no colour either
-            Color ring = spec == null ? Misc.getDarkPlayerColor() : spec.rarity.color;
-
-            Disc.draw(x, y, radius, Color.BLACK, 0.8f * alphaMult, 0.8f * alphaMult, false);
-            Disc.drawOutline(x, y, radius, ring, 0.9f * alphaMult, 1.2f);
-
-            if (spec == null) {
-                LazyFont small = ShopUi.getSmallFont();
-                if (small != null) {
-                    LazyFont.DrawableString mark = small.createText("?",
-                            Misc.getGrayColor(), small.getBaseHeight());
-                    mark.draw(Math.round(x - mark.getWidth() * 0.5f),
-                            Math.round(y + mark.getHeight() * 0.5f));
-                }
-                return;
-            }
-
-            String iconPath = FishLog.isCaught(spec.id)
-                    ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-            if (icon != null) {
-                float iconSize = pos.getWidth() * ICON_SHARE;
-                icon.setSize(iconSize, iconSize);
-                icon.setColor(Color.WHITE);
-                icon.setNormalBlend();
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(Math.round(x), Math.round(y));
-            }
-        }
-
-        /** The codex key, the same one the sidebar's rows answer. */
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (pos == null || spec == null) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed()) continue;
-                if (!event.isKeyDownEvent() || event.getEventValue() != Keyboard.KEY_F2) continue;
-
-                if (!ShopUi.contains(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                        Global.getSettings().getMouseX(), Global.getSettings().getMouseY())) {
-                    continue;
-                }
-
-                event.consume();
-                FishCodex.show(spec.id);
-                return;
-            }
-        }
-    }
 }

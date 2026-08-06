@@ -187,6 +187,10 @@ public class FishRoutePlanner {
      * is not a stop.
      */
     protected static boolean isPlannable(StarSystemAPI system) {
+        //the standing exception, same as vanilla carves it out of its own skips: Limbo is
+        //hand-made and abyssal and stays a destination anyway
+        if ("Limbo".equals(system.getBaseName())) return true;
+
         if (!system.isProcgen()) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
         if (system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
@@ -194,6 +198,33 @@ public class FishRoutePlanner {
         if (system.hasTag(Tags.THEME_HIDDEN)) return false;
 
         return true;
+    }
+
+    /**
+     * The picks with no plannable water anywhere in the sector, so the planner card can say
+     * which fish a plot would strand instead of quietly going without them.
+     */
+    public static List<String> getUnplaceable(List<String> speciesIds) {
+        List<String> out = new ArrayList<>();
+        if (speciesIds == null || Global.getSector() == null) return out;
+
+        for (String id : speciesIds) {
+            FishSpec spec = FishPresence.getSpec(id);
+
+            boolean placed = false;
+            for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                if (system.getLocation() == null || !isPlannable(system)) continue;
+
+                if (FishPresence.livesIn(spec, system)) {
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed) out.add(id);
+        }
+
+        return out;
     }
 
     /** Every order tried, the cheapest kept. The chain starts wherever the player is standing. */
