@@ -426,6 +426,15 @@ whole sector, drawn wherever the player is.
 **`callAction` must return true for anything it handles.** Vanilla throws on an unhandled action
 rather than reading it as a failed condition. Outcomes travel back through memory flags.
 
+**A mission's time limit is measured against its *total* elapsed days, not the current stage's.**
+`setTimeLimit` stores a figure that `advanceImpl` compares to `elapsed`, which counts from when the
+job was accepted and never restarts. A `FishJob` that asks for something else instead of finishing
+stays in `WANTED`, so without re-arming the clock every round after the first shares the leftovers
+of the first one — and when it runs out the stage moves to `FAILED`, which tears down the flag that
+raises the hand-over option. The giver just stops offering to take the catch. `setClock()` re-arms
+it; `getDaysLeft()` is what the intel must use, since `getElapsedInCurrentStage()` is a different
+number from the one the failure is measured against.
+
 **A bar option id must start with its mission id.** `BarCMD` finds the wrapper by testing whether
 the selected option *begins with* the mission's trigger prefix, and `abortMissions` kills every
 mission that fails that test — including the one the option was meant to open. An option named for
