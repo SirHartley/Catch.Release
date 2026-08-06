@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
@@ -88,14 +89,31 @@ public class FishPresence {
     }
 
     /**
+     * Whether a system belongs on the fish chart at all: reachable from hyperspace and not the
+     * abyss. Limbo is the standing exception - vanilla itself carves it out of its own skips,
+     * and its water is the whole point of going.
+     */
+    public static boolean isChartable(StarSystemAPI system) {
+        if (system == null) return false;
+        if ("Limbo".equals(system.getBaseName())) return true;
+
+        if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
+        if (system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
+
+        return true;
+    }
+
+    /**
      * The systems a species is said to live in, as hyperspace positions. Asked of the habitat
-     * itself rather than of the region alone, so what is shaded is what could actually be caught.
+     * itself rather than of the region alone, so what is shaded is what could actually be
+     * caught - and only where a chart is any use, so unreachable water never draws a circle.
      */
     public static List<Vector2f> getHostLocations(FishSpec spec) {
         List<Vector2f> hosts = new ArrayList<>();
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (system.getLocation() == null) continue;
+            if (!isChartable(system)) continue;
 
             if (livesIn(spec, system)) hosts.add(system.getLocation());
         }
@@ -119,6 +137,40 @@ public class FishPresence {
         }
 
         return new ArrayList<>(hosts);
+    }
+
+    /** Known species catchable in the system, caught first so the art leads the row. */
+    public static List<FishSpec> getKnownFishIn(StarSystemAPI system) {
+        List<FishSpec> caught = new ArrayList<>();
+        List<FishSpec> surveyed = new ArrayList<>();
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (!livesIn(spec, system)) continue;
+            if (!isKnown(spec)) continue;
+
+            if (FishLog.isCaught(spec.id)) caught.add(spec);
+            else surveyed.add(spec);
+        }
+
+        caught.addAll(surveyed);
+
+        return caught;
+    }
+
+    /** How many species live here that the player has never heard of - counted, never named. */
+    public static int getUnknownCountIn(StarSystemAPI system) {
+        int count = 0;
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (!livesIn(spec, system)) continue;
+            if (isKnown(spec)) continue;
+
+            count++;
+        }
+
+        return count;
     }
 
     public static FishSpec getSpec(String id) {
