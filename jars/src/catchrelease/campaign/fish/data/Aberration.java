@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.util.Misc;
@@ -12,13 +13,12 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * How badly a specimen holds to reality, from where it was taken.
+ * How badly a specimen holds to reality, from where it was taken - the inverse of the coherence the
+ * player is shown on it.
  * <p>
- * Three things thin the local fabric, taken at their strongest rather than summed. Abyss reads
- * directly off depth; hypershunt and slipstream fall off with distance in light-years from the
- * system (not world units), since what matters is which part of the sector this is.
- * <p>
- * Nothing consumes this yet - recorded on every catch so it's already there once something does.
+ * Four things thin the local fabric, taken at their strongest rather than summed. Abyss reads
+ * directly off depth; black hole, hypershunt and slipstream fall off with distance in light-years
+ * from the system (not world units), since what matters is which part of the sector this is.
  */
 public class Aberration {
 
@@ -51,10 +51,31 @@ public class Aberration {
         if (locInHyper == null) return 0f;
 
         float worst = getAbyssShare(locInHyper, location);
+        worst = Math.max(worst, getBlackHoleShare(locInHyper));
         worst = Math.max(worst, getHypershuntShare(locInHyper));
         worst = Math.max(worst, getSlipstreamShare(locInHyper));
 
         return MathUtils.clamp(worst, 0f, 1f);
+    }
+
+    /**
+     * A collapsed star bends what is around it, so what comes out of the water near one is bent too.
+     * <p>
+     * Measured to the system rather than to the star itself: at this scale they are the same point,
+     * and a system's own coordinates are what the falloff is in light-years of. Full strength for
+     * anything caught in the system, tailing off into its neighbours.
+     */
+    protected static float getBlackHoleShare(Vector2f locInHyper) {
+        float nearest = Float.MAX_VALUE;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!system.hasBlackHole()) continue;
+
+            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, system.getLocation()));
+        }
+
+        return falloff(nearest, FishConstants.ABERRATION_BLACKHOLE_LY)
+                * FishConstants.ABERRATION_BLACKHOLE_WEIGHT;
     }
 
     /** Deepest in the abyss is as far from holding together as anything gets. */
@@ -80,12 +101,17 @@ public class Aberration {
      * slipstreams always count (visible the moment they run), but an undiscovered hypershunt or
      * an abyss never entered can't steer a plan the player is meant to reason about.
      */
-    public static float knownInstability(com.fs.starfarer.api.campaign.StarSystemAPI system) {
+    public static float knownInstability(StarSystemAPI system) {
         if (system == null || system.getLocation() == null) return 0f;
 
         Vector2f loc = system.getLocation();
 
         float worst = getSlipstreamShare(loc);
+
+        //no discovery check on this one: a system's star is drawn on the sector map from the start,
+        //so a black hole is a thing the player can already see and route around
+        worst = Math.max(worst, getBlackHoleShare(loc));
+
         worst = Math.max(worst, getDiscoveredHypershuntShare(loc));
 
         if (hasEnteredAbyss()) worst = Math.max(worst, getAbyssShare(loc, system));
@@ -95,9 +121,7 @@ public class Aberration {
 
     /** Whether the player has ever stood in the abyss - before that, its depth is hearsay. */
     protected static boolean hasEnteredAbyss() {
-        for (com.fs.starfarer.api.campaign.StarSystemAPI system
-                : Global.getSector().getStarSystems()) {
-
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (system.hasTag(Tags.SYSTEM_ABYSSAL) && system.isEnteredByPlayer()) return true;
         }
 

@@ -420,14 +420,21 @@ public class FishConstants {
     public static final float IMPRESSION_NEAR_DENT_MAX = 0.75f;
 
     /**
-     * Aberration: how far a specimen departs from normal, from where it was caught. The three
-     * sources take their strongest rather than summing (abyss alone reaches 1; hypershunt or
-     * slipstream alone don't). Ranges are light-years; SPREAD is jitter between two specimens
-     * from the same rupture.
+     * Aberration: how far a specimen departs from normal, from where it was caught - the inverse of
+     * the coherence the player is shown. The four sources take their strongest rather than summing
+     * (abyss alone reaches 1; none of the others do). Ranges are light-years; SPREAD is jitter
+     * between two specimens from the same rupture.
+     * <p>
+     * A black hole outweighs a hypershunt and reaches less far, which is the difference between a
+     * thing that bends space where it stands and a thing that draws power across a region. The
+     * ordering is vanilla's own: it rates black holes its strongest slipsurge source, above neutron
+     * stars, and a tap not at all.
      */
     public static final float ABERRATION_ABYSS_WEIGHT = 1f;
+    public static final float ABERRATION_BLACKHOLE_WEIGHT = 0.85f;
     public static final float ABERRATION_HYPERSHUNT_WEIGHT = 0.75f;
     public static final float ABERRATION_SLIPSTREAM_WEIGHT = 0.6f;
+    public static final float ABERRATION_BLACKHOLE_LY = 5f;
     public static final float ABERRATION_HYPERSHUNT_LY = 12f;
     public static final float ABERRATION_SLIPSTREAM_LY = 6f;
     public static final float ABERRATION_SPREAD = 0.05f;
