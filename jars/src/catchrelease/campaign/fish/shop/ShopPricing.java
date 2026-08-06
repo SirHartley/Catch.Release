@@ -98,6 +98,9 @@ public class ShopPricing {
     protected static int getTackleTier(Tackle tackle) {
         if (tackle.shipTackle) return 3;
         if (tackle.sonar || tackle.rarityBias > 1f || tackle.lockTime > 0f) return 2;
+
+        //reaching under the fabric is not a better catch, it is a catch that was not on offer
+        if (tackle.deepStrike) return 2;
         if (tackle.fanBeam) return 2;
         if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return 1;
 
