@@ -54,25 +54,21 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
     @Override
     public void advance(float amount) {
 
-        //Every pond in the sector runs this, not just the one being looked at - terrain and its
-        //entity scripts advance in every location. The rings go into LunaLib's renderer list, which
-        //is one list for the whole sector drawn wherever the player is, so a pond four systems away
-        //was painting its ripples over this one at its own world coordinates. Ponds sit on rings
-        //about their system's centre, which is what put those strays on a circle the same distance
-        //out as the pond actually in front of you.
+        // Every pond in the sector runs this (terrain scripts advance everywhere), but ripples go into
+        // LunaLib's one sector-wide renderer list - without this check, a distant pond's ripples would
+        // paint over this one at its own world coordinates.
         if (!attachedEntity.isInCurrentLocation()) return;
 
         extraRippleInterval.advance(amount);
 
         if (extraRippleInterval.intervalElapsed()){
-            //add new ripple source
             float radius = MathUtils.getRandomNumberInRange(size * INNER_SIZE_MULT, size);
             float angle = MathUtils.getRandomNumberInRange(0, 360);
             Vector2f loc = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), radius, angle);
             int amt = MathUtils.getRandomNumberInRange(2, 6);
 
-            //speed depends on distance from core
-            float mult = 0.5f + radius / size; //0.5 to 1.5 far out
+            // Scales with distance from core: 0.5 near the centre to 1.5 at the rim.
+            float mult = 0.5f + radius / size;
             float maxSize = EXTRA_RIPPLE_BASE_SIZE * mult;
 
             float growTime = EXTRA_RIPPLE_BASE_GROW_TIME * mult;

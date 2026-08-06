@@ -31,18 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The outfitter: upgrades and tackle, paid for in fish.
+ * The outfitter: upgrades and tackle, paid for in fish. Not hung off a market yet - opened directly
+ * via an ability for now.
  * <p>
- * A holding pen, like the map. This wants to hang off a market or a station eventually; for now it
- * is an ability that puts the panel up, which is enough to use it and to find out whether the prices
- * are anywhere near right.
- * <p>
- * Laid out the way every upgrade screen since the dawn of the genre is laid out, because that is
- * the layout players already know how to read: the purse across the top, the wares down the left
- * grouped by the gear they bolt onto, and the one selected thing large on the right with its
- * ladder, its numbers, and one button. The left side is drawn live off the data - a row reads its
- * own level and price every frame - so only the right side is ever rebuilt, and the list never
- * loses its scroll under the mouse.
+ * Standard upgrade-screen layout: purse on top, wares down the left grouped by gear, selected item
+ * detail on the right. The list is drawn live off the data each frame, so only the right pane is
+ * ever rebuilt, keeping the list's scroll position stable.
  */
 public class FishShopDialog implements InteractionDialogPlugin {
 
@@ -56,13 +50,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
 
-    /**
-     * The chime for a completed purchase.
-     * <p>
-     * Named here rather than written into both call sites, because a sound id is a string the
-     * compiler cannot check and the game only disputes when the sound is asked for - which for a
-     * purchase chime is not at load, but the first time somebody buys something.
-     */
+    /** Purchase chime; named once here since the sound id isn't checked until first played. */
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
 
     public static final float MAIN_TAB_HEIGHT = 28f;
@@ -82,8 +70,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
 
-        //the counter that used to stow a catch here is gone; anything a save is still holding in it
-        //comes back before the panel opens, since there is no longer a button that would let it out
+        //returns anything a save is still holding in shop storage - that button no longer exists
         ShopStorage.reclaim();
 
         dialog.setPromptText("");
@@ -105,31 +92,28 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected final List<ShopEntry> entries = new ArrayList<>();
         protected String selectedKey;
 
-        /** Which shelf is out: the big split first, the gear within it second. */
+        /** mainTab is the upgrade/tackle split, category the shelf within it. */
         protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
         protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
 
         protected TooltipMakerAPI list;
 
-        /** Counted once per change rather than once per frame - the purse walks the whole hold. */
+        /** Recomputed on change, not per frame - counting the wallet walks the whole cargo hold. */
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
         protected int credits = 0;
 
         /**
-         * Everything this build put on the panel, by the reference that can actually take it off
-         * again. A scrollable element is wrapped in a scroller on the way in and the wrapper is
-         * what the panel holds - removing the element itself removes nothing, which is where the
-         * stacked-up panels came from. So what goes in this list is the element's external
-         * scroller when it has one, and the element itself when it does not.
+         * Components added to the panel, tracked by the reference actually needed to remove them -
+         * a scrollable element's external scroller wraps it, and only removing the wrapper works.
          */
         protected final List<UIComponentAPI> added = new ArrayList<>();
 
-        /** The right-hand pane, torn down and rebuilt whenever what it shows stops being true. */
+        /** Right-hand pane, torn down and rebuilt whenever its content changes. */
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
         protected Object buyId;
 
-        /** Dev mode's side door beside the buy button. Null outside dev mode, so it matches nothing. */
+        /** Dev-mode free-grant button id, next to the buy button. Null outside dev mode. */
         protected Object devBuyId;
 
         @Override
@@ -144,15 +128,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
             build();
         }
 
-        /**
-         * Everything on sale, shelf by shelf: every stat the sheet knows grouped by its gear, then
-         * each rig's modules with the empty slot listed first as a way out of all of them.
-         */
+        /** All stock: every upgrade stat grouped by gear, then each rig's tackle options. */
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
 
-            //the sheet documents its own format with a row, which is not a thing for sale - and the
-            //catch's own tuning stats are not equipment, so the shop does not stock them at all
+            //"example" is a format-documentation row, not for sale; catch tuning stats aren't equipment
             stats.removeIf(stat -> stat.id == null || stat.id.equalsIgnoreCase("example"));
             stats.removeIf(stat -> ShopGroup.forStat(stat) == ShopGroup.THE_CATCH);
             stats.sort(Comparator.comparing(stat -> stat.id));
@@ -163,20 +143,16 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 }
             }
 
-            //every rig there is, rather than a list of the ones that had been thought of. A rig
-            //named here and nowhere else is a shelf that never appears, which is how the lights
-            //came to have tackle nobody could reach
+            //iterate every Fit rather than a fixed list, so a new rig automatically gets a shelf
             for (Tackle.Fit rig : Tackle.Fit.values()) {
                 if (!rig.isRig()) continue;
 
                 List<Tackle> options = TackleManager.getOptions(rig);
                 options.remove(Tackle.NONE);
 
-                //a rig with nothing to bolt on gets no shelf at all - an empty slot on its own is
-                //a shelf holding the absence of the thing it is a shelf for
                 if (options.isEmpty()) continue;
 
-                //the empty slot first: the way out of every module is the first thing on the shelf
+                //empty-slot entry listed first
                 entries.add(ShopEntry.of(Tackle.NONE, rig));
 
                 for (Tackle tackle : options) entries.add(ShopEntry.of(tackle, rig));
@@ -203,11 +179,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         /**
-         * Everything torn down by the reference it was tracked under and put back, since reaching
-         * back into a live panel is how stale copies get left behind it.
+         * Tears down and rebuilds everything tracked in {@link #added}.
          *
-         * @param keepScroll whether the list should come back at the scroll it was at - true for a
-         *                   click inside the shelf, false when the shelf itself changed
+         * @param keepScroll whether to restore the list's prior scroll offset
          */
         protected void rebuild(boolean keepScroll) {
             if (panel == null) return;
@@ -226,10 +200,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         /**
-         * Adds an element and remembers the thing the panel actually holds for it.
+         * Adds an element and records it in {@link #added}.
          *
-         * @return the position of that thing - for a scrollable element the scroller's, which is
-         *         the window on screen rather than the content behind it
+         * @return the on-screen position (the scroller's, not the content's, if scrollable)
          */
         protected PositionAPI place(TooltipMakerAPI element, float x, float y) {
             PositionAPI pos = panel.addUIElement(element);
@@ -250,17 +223,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         /**
-         * The gear a main tab sells, in shelf order - read off the stock rather than written down.
-         * <p>
-         * Both halves of the shop are stocked from somewhere that can grow: the upgrades off the
-         * rows in the sheet, the modifiers off whatever tackle exists for a rig. A list of shelves
-         * kept by hand beside either of those is a list that goes stale the first time something is
-         * added, and it did: the searchlight rig had tackle, had a shelf to put it on, and had its
-         * stock built every time the shop opened, and none of it could be reached because the tab
-         * it needed was not in the array.
-         * <p>
-         * Asked of the entries, so a shelf exists exactly when there is something on it. Order is
-         * the order the shelves are declared in, which is what the array said by hand.
+         * Shelves that actually have stock under the given tab, derived from {@link #entries} rather
+         * than a hand-kept list - a hard-coded list previously went stale when tackle was added for
+         * a rig with no shelf reachable to hold it.
          */
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
             List<ShopGroup> out = new ArrayList<>();
@@ -277,7 +242,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return out.toArray(new ShopGroup[0]);
         }
 
-        /** What the current shelf holds - the list and the default selection are both cut from this. */
+        /** Entries under the current shelf ({@link #category}). */
         protected List<ShopEntry> getVisible() {
             List<ShopEntry> visible = new ArrayList<>();
 
@@ -294,11 +259,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
         }
 
-        /**
-         * Two rows of tabs over the shelf list, drawn in the rows' own style: the big split
-         * between what is bought once and levelled (upgrades) and what is fitted to a slot
-         * (modifiers), each wearing its icon, and under it the gear within the chosen half.
-         */
+        /** Two tab rows: main split (upgrades/modifiers) on top, shelves within it below. */
         protected void buildTabs() {
             float top = PAD + HEADER_HEIGHT + 10f;
             float mainWidth = (LIST_WIDTH - TAB_GAP) / 2f;
@@ -313,8 +274,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryTop = top + MAIN_TAB_HEIGHT + TAB_GAP;
             ShopGroup[] groups = getCategories(mainTab);
 
-            //a tab with nothing stocked under it draws no shelves rather than dividing the row
-            //between none of them. Could not happen while the shelves were a written-down array
             if (groups.length == 0) return;
 
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
@@ -346,7 +305,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (id instanceof ShopEntry.Kind) {
                 mainTab = (ShopEntry.Kind) id;
 
-                //the first shelf that has anything on it, if any does
                 ShopGroup[] groups = getCategories(mainTab);
                 if (groups.length > 0) category = groups[0];
             } else if (id instanceof ShopGroup) {
@@ -413,7 +371,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildBuyButton(info, entry);
         }
 
-        /** The tag: credits, the catch beside them, and whether the hold can cover it. */
+        /** Price display: credits, fish cost, and whether the player can afford both. */
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isMaxed()) {
                 info.addPara("Fully upgraded.", Misc.getPositiveHighlightColor(), 16f);
@@ -425,8 +383,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            //two kinds of free, told apart: the empty slot never had a price, while an owned
-            //module was paid for once and is only being moved back into the slot
+            //empty slot never had a price; an owned module was already paid for once
             if (entry.tackle == Tackle.NONE) {
                 info.addPara("No charge for emptying a slot.", Misc.getGrayColor(), 16f);
                 return;
@@ -437,10 +394,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            //unreachable as things stand - the two branches above are the only free cases there are.
-            //It stays because the alternative to a wrong-looking pane is a dialog that throws
             ShopPricing.Price price = entry.getPrice();
-            if (price == null) return;
+            if (price == null) return; //defensive; the branches above cover the only null cases
 
             boolean creditsOk = credits >= price.credits;
 
@@ -483,9 +438,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             button.setEnabled(afford);
 
-            //dev mode's side door: the same grant with the till skipped. A tooltip only stacks
-            //vertically, so the button is added below and then re-anchored against the real one -
-            //the phantom row the tooltip still counts for it is height the pane has spare
+            //tooltip only stacks vertically, so add below then re-anchor beside the real button
             if (Global.getSettings().isDevMode()) {
                 devBuyId = new Object();
 
@@ -496,10 +449,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
         }
 
-        /**
-         * The counter itself, under the detail pane: stow the catch with the shop, take it back,
-         * or sell it outright - each through the game's own cargo picker, over only the fish.
-         */
+        /** The selected entry, falling back to the first visible one if the selection is stale. */
         protected ShopEntry getSelected() {
             List<ShopEntry> visible = getVisible();
 
@@ -576,7 +526,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (dialog != null) dialog.dismiss();
         }
 
-        /** Escape closes it. There is nothing to lose by leaving, so nothing to confirm. */
+        /** Escape closes the dialog without confirmation. */
         @Override
         public void processInput(List<InputEventAPI> events) {
             for (InputEventAPI event : events) {

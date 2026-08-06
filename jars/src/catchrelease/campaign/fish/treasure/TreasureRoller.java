@@ -21,40 +21,20 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * What a piece of treasure turns out to be.
- * <p>
- * The two rarer tiers go through the game's own drop groups - "blueprints" and "rare_tech" are
- * tables vanilla already maintains, and rolling them rather than listing their contents means this
- * keeps working when those tables change and when another mod adds to them. The two commoner tiers
- * are picked from the loaded specs directly, since "any commodity" and "any weapon" are not drop
- * groups and would have to be invented.
- * <p>
- * Ship hulls are gated on tackle: they come out only for a rig carrying the gear for it, and only up
- * to cruiser at uncommon and capital at rare. Nothing here decides whether that gear is fitted - the
- * caller passes it in, so the tackle system can turn it on without this having to know what tackle
- * is.
- * <p>
- * Everything awarded goes straight into the player's possession; what comes back is a
- * {@link TreasureAward} - the receipt, item by item with the icons the hold will show them under,
- * for the loot card to read out.
+ * Rolls treasure contents. The two rarer tiers roll the game's own "blueprints"/"rare_tech" drop
+ * groups (so they track vanilla/mod changes); the two commoner tiers pick directly from loaded
+ * specs. Ship hulls only come up when {@code hasShipTackle}, capped at cruiser (uncommon) or
+ * capital (rare). Awards go straight into the player's cargo; the returned {@link TreasureAward} is
+ * just the receipt.
  */
 public class TreasureRoller {
 
-    /**
-     * Whether anything at all is down there this time. Deliberately low: treasure that shows up
-     * every other catch is not treasure, it is a second reward slot.
-     */
     public static boolean rollForTreasure(float chanceMult) {
         return MathUtils.getRandomNumberInRange(0f, 1f)
                 < FishConstants.TREASURE_CHANCE * Math.max(0f, chanceMult);
     }
 
-    /**
-     * How many pieces this catch holds, 0 to {@link FishConstants#TREASURE_MAX_PER_CATCH}. The
-     * chance gate answers whether there is anything at all; past it, the weights pick how much,
-     * with three kept a story. Whether the later pieces are ever seen is the catch's problem -
-     * they spawn on a clock, and a short fight ends before they were due.
-     */
+    /** 0 to {@link FishConstants#TREASURE_MAX_PER_CATCH}; later pieces may go unspawned if the catch ends first. */
     public static int rollCount(float chanceMult) {
         if (!rollForTreasure(chanceMult)) return 0;
 
@@ -77,9 +57,8 @@ public class TreasureRoller {
     /**
      * Rolls the contents and puts them somewhere the player can get at them.
      *
-     * @param hasShipTackle whether the rig can bring a hull up. Without it, the tiers that would
-     *                      have given one give their usual contents instead
-     * @return the receipt - never null, never empty
+     * @param hasShipTackle whether a hull can be awarded; without it, those tiers fall back to their usual contents
+     * @return never null, never empty
      */
     public static TreasureAward award(TreasureRarity rarity, boolean hasShipTackle) {
         TreasureAward award = new TreasureAward(rarity);
@@ -106,7 +85,7 @@ public class TreasureRoller {
         return award;
     }
 
-    /** A pile of something, a weapon, or a fighter chip - whichever the roll lands on. */
+    /** A commodity pile, a weapon, or a fighter chip. */
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
@@ -123,8 +102,7 @@ public class TreasureRoller {
             if (spec.isNonEcon() || spec.isMeta() || spec.isPersonnel()) continue;
             if (spec.getBasePrice() <= 0f) continue;
 
-            //cheap things come up in bulk and expensive ones rarely, which is what makes a pile of
-            //something read as a find rather than as a rounding error
+            //weighted inversely by price: cheap commodities come up in bulk, expensive ones rarely
             picker.add(spec.getId(), 1f / Math.max(1f, spec.getBasePrice()));
         }
 
@@ -181,15 +159,7 @@ public class TreasureRoller {
         award.items.add(new TreasureAward.Item(wingName(spec), getWingSprite(spec), 1));
     }
 
-    /**
-     * What to call a wing on the card.
-     * <p>
-     * Most of them are already called one. getWingName comes back as "Spark Wing" far more often
-     * than it comes back as "Spark", so appending the word unconditionally - which is what this used
-     * to do - produced "Spark Wing wing" on every fighter in the game that names itself properly.
-     * Only added where it is missing, and matched case-insensitively because the spec's own
-     * capitalisation is not something this gets a say in.
-     */
+    /** Appends "wing" only if the spec's own name doesn't already end with it (case-insensitive). */
     protected static String wingName(FighterWingSpecAPI spec) {
         String name = spec.getWingName();
         if (name == null || name.isEmpty()) return "fighter wing";
@@ -197,7 +167,7 @@ public class TreasureRoller {
         return name.toLowerCase().endsWith("wing") ? name : name + " wing";
     }
 
-    /** A wing's cargo chip shows the fighter itself, so the card does too. Null if anything is off. */
+    /** Null on failure. */
     protected static String getWingSprite(FighterWingSpecAPI spec) {
         try {
             return Global.getSettings().getVariant(spec.getVariantId()).getHullSpec().getSpriteName();
@@ -206,12 +176,7 @@ public class TreasureRoller {
         }
     }
 
-    /**
-     * A hull, mothballed into the fleet, no bigger than the tackle can lift.
-     * <p>
-     * Mothballed rather than crewed: something dragged up out of a rupture arrives as a hull, and
-     * making the player decide whether to fit it out is more interesting than handing it over ready.
-     */
+    /** Adds a mothballed hull (uncrewed) no bigger than {@code maxSize}. */
     protected static void awardHull(TreasureAward award, HullSize maxSize) {
         WeightedRandomPicker<ShipHullSpecAPI> picker =
                 new WeightedRandomPicker<>();
@@ -225,7 +190,7 @@ public class TreasureRoller {
             if (spec.getHullSize().ordinal() > maxSize.ordinal()) continue;
             if (spec.getHullSize().ordinal() < HullSize.FRIGATE.ordinal()) continue;
 
-            //bigger is rarer, so a capital is a story rather than a Tuesday
+            //weight halves per hull size step, so bigger hulls are rarer
             picker.add(spec, 1f / (float) Math.pow(2, spec.getHullSize().ordinal()));
         }
 
@@ -244,10 +209,7 @@ public class TreasureRoller {
                 spec.getSpriteName(), 1));
     }
 
-    /**
-     * The game's own tables. Rolling a drop group rather than listing what is in one is what keeps
-     * "anything in rare_tech" true after the game or another mod changes what that means.
-     */
+    /** Rolls vanilla's own drop group rather than listing its contents, so it tracks changes to the table. */
     protected static void awardFromDropGroup(TreasureAward award, CargoAPI cargo, String group) {
         DropData drop = new DropData();
         drop.chances = 1;
@@ -274,11 +236,7 @@ public class TreasureRoller {
         }
     }
 
-    /**
-     * The icon the hold will show a stack under, asked type by type - a cargo stack has no single
-     * icon accessor, so each kind is asked in its own words. Null for anything exotic; the card
-     * has a fallback.
-     */
+    /** No single icon accessor on {@link CargoStackAPI}, so each stack type is asked separately. Null for anything else. */
     protected static String getStackSprite(CargoStackAPI stack) {
         try {
             if (stack.isCommodityStack() && stack.getResourceIfResource() != null) {
@@ -301,7 +259,7 @@ public class TreasureRoller {
                 return stack.getHullModSpecIfHullMod().getSpriteName();
             }
         } catch (Exception e) {
-            //an icon is decoration; a missing one is not worth more than the fallback
+            //icon is decorative; fall through to null
         }
 
         return null;

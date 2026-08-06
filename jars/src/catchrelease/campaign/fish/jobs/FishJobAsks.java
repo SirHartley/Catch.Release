@@ -13,20 +13,14 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Where a job's ask gets its numbers from.
- * <p>
- * A job that wants a heavy fish cannot simply pick a number. Forty kilograms is an idle afternoon
- * for one species and impossible for every other, and neither the job nor the person writing it
- * knows which - the table decides that, and the table is data somebody will edit. So a floor is read
- * off the species that exist rather than chosen, which keeps every ask reachable by somebody and
- * keeps a modded-in whale from making every size job trivial.
- * <p>
- * Everything here is read-only against the loaded table and takes the caller's own random, so the
- * same job asked twice on the same day asks for the same thing.
+ * Rolls the numbers a job's ask needs (weight floors, species, catch terms), scaled against the
+ * loaded fish table rather than fixed values, so mod-added species don't trivialize or break an
+ * ask. Read-only, and takes the caller's own {@link Random} so a job re-asked the same day is
+ * consistent.
  */
 public class FishJobAsks {
 
-    /** The kinds a person would name out loud, in the order the table's tags read. */
+    /** In the order the table's tags read. */
     public static final String[] TYPES = {"fish", "crab", "mollusc", "other"};
 
     /**
@@ -38,8 +32,7 @@ public class FishJobAsks {
         List<Float> ceilings = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            //the abyss is its own economy - a floor set by what lives down there is not a floor on
-            //size, it is an instruction to go to the abyss, which is a different ask entirely
+            //abyssal species excluded - a floor set by them would really be asking for an abyss trip
             if (spec == null || spec.tags.contains("abyssal")) continue;
 
             ceilings.add(spec.weightMax);
@@ -52,16 +45,11 @@ public class FishJobAsks {
         float spread = clamp(hardness) * 0.85f + 0.1f;
         int index = Math.min(ceilings.size() - 1, (int) (ceilings.size() * spread));
 
-        //below the species' own ceiling, so a specimen of it has to be a good one rather than the
-        //only one that ever existed
+        //60% of the chosen species' ceiling, so an average specimen doesn't satisfy it
         return Math.max(1f, Math.round(ceilings.get(index) * 0.6f));
     }
 
-    /**
-     * A few different kinds, for the asks that want variety rather than quantity.
-     *
-     * @return distinct type tags, in a settled order so the sentence reads the same twice
-     */
+    /** @return distinct type tags in a stable order, for asks wanting variety rather than quantity */
     public static List<String> rollTypes(Random random, int howMany) {
         List<String> pool = new ArrayList<>();
         for (String type : TYPES) {
@@ -73,7 +61,6 @@ public class FishJobAsks {
         return pool.subList(0, Math.min(howMany, pool.size()));
     }
 
-    /** One species by name, for the asks that are specific and will not explain themselves. */
     public static String rollSpecies(Random random, FishRarity minRarity) {
         List<FishSpec> pool = getSpecies(null, minRarity);
         if (pool.isEmpty()) return null;
@@ -82,21 +69,16 @@ public class FishJobAsks {
     }
 
     /**
-     * Sometimes asks for a fish taken a particular way, and never asks for an impossible one.
-     * <p>
-     * The two axes are not independent. The drones are played against the rupture itself, so
-     * anything they bring up came out of a pond by definition - "LINE drones through a breach lamp"
-     * is a sentence that reads fine and can never be filled. Only the harpoon can be asked about
-     * either way, because only the harpoon is played against the mote rather than against the hole.
+     * Method + implement, never an impossible combination: drones are only played against a rupture
+     * (so their catch is always POND), so only the harpoon can be narrowed by implement.
      *
-     * @param chance how often the ask says anything about this at all, 0 to 1
-     * @return whether anything was added, so the caller can price the extra difficulty
+     * @param chance how often the ask specifies a method at all, 0 to 1
+     * @return whether anything was added
      */
     public static boolean rollCatchTerms(Random random, FishRequirement ask, float chance) {
         if (ask == null || random.nextFloat() > clamp(chance)) return false;
 
-        //the harpoon more often than the drones: it is the axis that can then also be narrowed by
-        //where the fish was, and an ask that can say two things is worth reaching for more often
+        //weighted towards harpoon since it can also be narrowed by implement
         boolean harpoon = random.nextFloat() > 0.35f;
 
         ask.method = harpoon ? FishLogEntry.Method.HARPOON : FishLogEntry.Method.DRONE;
@@ -110,12 +92,7 @@ public class FishJobAsks {
         return true;
     }
 
-    /**
-     * What is on the table, filtered.
-     * <p>
-     * Abyssal species are left out of every pool here. A job handed out in a bar is a job somebody
-     * expects doing, and pointing an ordinary buyer at the abyss is not an ask, it is an expedition.
-     */
+    /** Filtered pool, always excluding abyssal species - a bar job isn't an expedition. */
     public static List<FishSpec> getSpecies(String type, FishRarity minRarity) {
         List<FishSpec> out = new ArrayList<>();
 

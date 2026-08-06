@@ -12,7 +12,6 @@ public class TrigHelper {
     }
 
     /**
-     *
      * @param fract 0..1
      * @return smoothed, 0.5 at 0.5
      */
@@ -36,7 +35,6 @@ public class TrigHelper {
         dx = center1.x - center0.x;
         dy = center1.y - center0.y;
 
-        // Determine the straight-line distance between the centers
         d = (float) Math.sqrt((dy * dy) + (dx * dx));
 
         if (d > (r0 + r1)) return null;
@@ -49,7 +47,6 @@ public class TrigHelper {
         rx = -dy * (h / d);
         ry = dx * (h / d);
 
-        // Determine the absolute intersection points
         Vector2f pos1 = new Vector2f(x2 + rx, y2 + ry);
         Vector2f pos2 = new Vector2f(x2 - rx, y2 - ry);
 
@@ -97,7 +94,6 @@ public class TrigHelper {
         double k = -f;
         double sqr_of_r = h * h + k * k - c;
 
-        // r is the radius
         float r = (float) Math.sqrt(sqr_of_r);
         Vector2f center = new Vector2f();
         center.x = (float) h;
@@ -117,12 +113,10 @@ public class TrigHelper {
         return new Pair<>(thirdPoint, radius);
     }
 
-    //for roughly 1 @ 1, s= 0.4f, m = 1
-    //more even distribution at s=0.7, m = 2
+    //roughly 1 @ 1 with s=0.4, m=1; more even distribution at s=0.7, m=2
     public static float getNormalDistributionCurve(float x, float s, float m) {
         if (s <= 0) {
             s = 0;
-            //ModPlugin.log("s = 0 normal dist error");
         }
 
         double coefficient = 1.0 / (Math.sqrt(2 * Math.PI) * s);

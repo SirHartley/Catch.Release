@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What one piece of treasure turned out to be, said in a form a card can draw: each thing that
- * was handed over, with the cargo icon it wears in the hold. The contents are already in the
- * player's possession by the time one of these exists - this is the receipt, not the goods.
+ * Describes what a treasure award contained, for display; items are already granted by the time
+ * this exists (a receipt, not the goods).
  */
 public class TreasureAward {
 

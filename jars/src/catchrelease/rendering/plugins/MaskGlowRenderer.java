@@ -18,9 +18,9 @@ public class MaskGlowRenderer {
     private transient int uGlowColor = -1;
     private transient int uGlowAlpha = -1;
 
-    private transient int uThreshold = -1;      // optional shaping threshold
-    private transient int uRadiusOutPx = -1;    // new
-    private transient int uRadiusInPx = -1;     // new
+    private transient int uThreshold = -1;
+    private transient int uRadiusOutPx = -1;
+    private transient int uRadiusInPx = -1;
     private transient int uMaskTexelSize = -1;
 
     private float threshold = 0f;
@@ -60,13 +60,12 @@ public class MaskGlowRenderer {
 
         if (uGlowAlpha >= 0) GL20.glUniform1f(uGlowAlpha, glowAlpha);
 
-        // Keep for compatibility. If shader does not declare it, location will be -1.
+        //uniforms not declared in the shader resolve to -1 and are skipped
         if (uThreshold >= 0) GL20.glUniform1f(uThreshold, threshold);
 
         if (uRadiusOutPx >= 0) GL20.glUniform1f(uRadiusOutPx, radiusOutPx);
         if (uRadiusInPx >= 0) GL20.glUniform1f(uRadiusInPx, radiusInPx);
 
-        // Bind mask on unit 1
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         maskSprite.bindTexture();
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -79,11 +78,8 @@ public class MaskGlowRenderer {
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
-
-        // Additive color
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-        // Normalized mask UVs 0..1
         GL11.glBegin(GL11.GL_QUADS);
         {
             GL13.glMultiTexCoord2f(GL13.GL_TEXTURE1, 0f, 0f); GL11.glVertex2f(0f, 0f);
@@ -121,7 +117,6 @@ public class MaskGlowRenderer {
         uGlowColor = GL20.glGetUniformLocation(program, "glowColor");
         uGlowAlpha = GL20.glGetUniformLocation(program, "glowAlpha");
 
-        // Optional / shader-dependent
         uThreshold = GL20.glGetUniformLocation(program, "threshold");
         uRadiusOutPx = GL20.glGetUniformLocation(program, "radiusOutPx");
         uRadiusInPx = GL20.glGetUniformLocation(program, "radiusInPx");

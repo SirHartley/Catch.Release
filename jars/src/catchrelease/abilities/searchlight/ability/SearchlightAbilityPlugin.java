@@ -49,12 +49,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private SearchlightImpressionRenderer impressionRenderer;
 
     /**
-     * Whether the player's lights have this one, and have not yet forgotten it.
-     * <p>
-     * The only way to ask. What the lights have found is held in the impression renderer's own map
-     * rather than on the motes, because being found is a property of having looked - so anything
-     * that wants to act on it has to come through the ability that owns the renderer. False with
-     * the rig off, not fitted, or simply never having swept over the thing being asked about.
+     * Whether the player's lights currently mark this mote as found. State lives in the impression
+     * renderer, not on the mote itself. False if the rig is off, unfitted, or never swept over it.
      */
     public static boolean isLit(SectorEntityToken mote) {
         SearchlightImpressionRenderer renderer = getImpressions();
@@ -63,13 +59,9 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether this one is showing at all - found by a beam, or merely betrayed by standing near one.
-     * <p>
-     * Weaker than {@link #isLit} on purpose, and the gap between the two is the whole of what the
-     * passive reach gave the lamps: a mote inside the detect radius bruises the fabric and is drawn
-     * as a dent, named by its ring, without any beam ever having been over it. Exposed enough to
-     * find, not exposed enough to take - which is right for an ordinary head and is exactly what a
-     * head fitted to read the fabric is for.
+     * Whether this mote is showing at all - lit by a beam, or merely detected within passive range.
+     * Weaker than {@link #isLit}: detected motes are visible but not strikeable by an ordinary
+     * harpoon head.
      */
     public static boolean isDetected(SectorEntityToken mote) {
         SearchlightImpressionRenderer renderer = getImpressions();
@@ -96,11 +88,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         activeSearchlights.clear();
         searchlightArcs.clear();
 
-        //one renderer for all the dents, made alongside the lights rather than inside one of them:
-        //drawn per light, a mote under two crossing beams was dented twice, at double the depth.
-        //It holds the live list, so lights arriving on the activation stagger are its problem.
-        //An old one still fading from the last toggle goes now - it would draw these same dents
-        //under the new one until its second ran out
+        //one shared renderer for all dents, avoiding double-depth dents where beams cross; a renderer
+        //still fading from a previous toggle is force-expired first
         if (impressionRenderer != null) impressionRenderer.fadeAndExpire(0f);
         impressionRenderer = new SearchlightImpressionRenderer(activeSearchlights);
         LunaCampaignRenderer.addTransientRenderer(impressionRenderer);
@@ -108,10 +97,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float size = Searchlight.getArea();
         float radius = size * 2f;
 
-        //an even share of the circle each, in the world's own degrees. A wedge reserved for straight
-        //ahead went with the heading it was measured from: with the arcs no longer turning with the
-        //hull there is no ahead to keep clear, and the light that used to hold it just swept a
-        //narrow strip of due east forever
+        //even share of the full circle per light, in world degrees (arcs don't track fleet heading)
         float areaPerLight = 360f / lightsToActivate;
 
         for (int i = 0; i < lightsToActivate; i++) {
@@ -135,7 +121,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         float mult = Global.getSettings().getFloat("campaignSpeedupMult"); //anim independent of speed up
         timePassed += amount / mult;
 
-        //animation and startup
         if (!spoolDone && timePassed > SPOOL_UP_TIME){
             timePassed = 0;
             spoolDone = true;
@@ -160,12 +145,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     public static final float SLOW_LINGER = 0.5f;
 
     /**
-     * The slow upgrade: the light itself drags on whatever swims through it.
-     * <p>
-     * Applied through the mote's own blast-knock, so anything else that ever shakes a mote cannot
-     * disagree with this about what a slowed one is - and refreshed every frame a mote stays in a
-     * beam, with a short linger so leaving the light lets it go rather than snapping it back to
-     * speed. Nothing without the upgrade: the strength is zero until bought.
+     * Slow upgrade: drags motes swimming through active beams, applied via the mote's blast-knock
+     * and refreshed each frame with a short linger on exit. No-op until bought (strength 0).
      */
     protected void applyBeamSlow(CampaignFleetAPI fleet) {
         float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
@@ -195,9 +176,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private void addSearchlight(){
         Searchlight searchlight = new Searchlight();
 
-        //the arcs keep a direct reference to the fleet's own location vector, which is how a light
-        //travels with the fleet without being told to. Taken from the front so they come on in the
-        //order they were laid out, going round rather than lighting up at random
+        //arcs hold a direct reference to the fleet's location vector, so lights track the fleet
+        //automatically; taken front-first for a consistent activation order
         searchlight.init(searchlightArcs.get(0));
         searchlightArcs.remove(0);
 
@@ -206,14 +186,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether the lamps will run where the fleet is standing: not in hyperspace, and not beside
-     * an open pond.
-     * <p>
-     * Hyperspace because all fishing is done from realspace into hyperspace - the fabric is the
-     * thing the gear works through, and standing on the far side of it leaves nothing to work
-     * through. The pond because the two rigs are the two ways of working the same fabric and they
-     * do not share it: an open rupture is the rod's water, and lamps burning windows at the edge
-     * of a hole that is already open would be two kinds of opening fighting over one patch.
+     * Whether the lamps can run here: not in hyperspace (nothing to fish through from the far side),
+     * and not beside an open pond rupture (that's the R.O.D.'s water).
      */
     public static boolean canRunHere(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return true;
@@ -243,15 +217,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * Whether there are windows open right now.
-     * <p>
-     * Every lamp burns one - that stopped being a fitting and became what the rig is - so this is
-     * only asking whether the lights are on. It is still worth a name of its own: what a caller
-     * reaching through a window wants to know is that there is a window, and asking the ability
-     * whether it happens to be toggled is the same fact said in terms of a button.
-     * <p>
-     * Note that {@link #canRunHere(CampaignFleetAPI)} already keeps the lamps off beside an open
-     * rupture, so this and an open pond are mutually exclusive without anybody arbitrating.
+     * Whether any lamp windows are currently open (i.e. the ability is active). Mutually exclusive
+     * with an open pond, since {@link #canRunHere(CampaignFleetAPI)} already keeps the lamps off near one.
      */
     public static boolean isBreaching() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
@@ -267,13 +234,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * How many lights sweep at once.
-     * <p>
-     * Two to start with, and bought upward from there. One was too little to read as a sweep at all
-     * - a single beam crawling round a whole circle spends most of its time somewhere the player is
-     * not looking - and two smaller ones working opposite halves cover the same ground while always
-     * having something in view. Eventually this is meant to depend on what the fleet has mounted;
-     * until then it is bought, and the fallback matches the sheet.
+     * Number of simultaneous lights; starts at 2, upgradeable. Intended to eventually depend on
+     * fleet loadout; currently purely a purchased stat.
      */
     public int getSearchlightNum(){
         return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 2f)));
@@ -285,9 +247,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         lightsToActivate = 0;
         spoolDone = false;
 
-        //the fade is only refused in hyperspace, where nothing of the rig should linger drawing.
-        //Going out because a pond opened nearby deserves the ordinary spool-down - the lamps are
-        //yielding to the rod, not being torn off
+        //fade skipped only in hyperspace, where nothing should linger drawing; deactivating near a
+        //pond still gets the normal spool-down
         CampaignFleetAPI fleet = getFleet();
         boolean withFade = fleet != null && fleet.getContainingLocation() != null
                 && !fleet.getContainingLocation().isHyperspace();
@@ -295,8 +256,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         expireLights(withFade);
         activeSearchlights.clear();
 
-        //the dents go on the lights' own terms - and like them, immediately when the fleet is in
-        //hyperspace, so nothing of this is left drawing out there
+        //dents fade on the same terms as the lights - instantly in hyperspace
         if (impressionRenderer != null) {
             impressionRenderer.fadeAndExpire(withFade ? 1f : 0f);
             impressionRenderer = null;
@@ -316,12 +276,10 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     @Override
     public boolean showProgressIndicator() {
         return super.showProgressIndicator();
-        //return false;
     }
 
     @Override
     public boolean showActiveIndicator() {
-        //super.showActiveIndicator()
         return isActive();
     }
 
@@ -367,11 +325,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     /**
-     * What has been fitted, and only what has been fitted.
-     * <p>
-     * A rig with nothing bought says nothing here rather than listing four zeroes - the shop is
-     * where you go to find out what is for sale, and a tooltip that reads like a price list every
-     * time you hover the button is a tooltip nobody finishes reading.
+     * Lists only upgrades actually purchased; an unupgraded rig shows nothing rather than a list of
+     * zeroes.
      */
     protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
         Color highlight = Misc.getHighlightColor();

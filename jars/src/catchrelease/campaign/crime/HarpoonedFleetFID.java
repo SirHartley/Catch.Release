@@ -8,11 +8,8 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 
 /**
- * What a crew has to say to the person who put a harpoon in them.
- * <p>
- * The encounter itself is left exactly as vanilla built it - every option, every disengage rule,
- * every allied-fleet branch. Stripping those out to say something rude is how a player ends up
- * unable to leave a conversation. This adds a line and nothing else.
+ * What a crew has to say to the person who harpooned them. Vanilla's encounter (options,
+ * disengage rules, allied-fleet branches) is left untouched; this only adds a line.
  */
 public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
 
@@ -20,27 +17,21 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
     protected boolean spoken = false;
 
     /**
-     * Vanilla's own key for "this fleet is worth talking to", read and cleared by
-     * {@code updateMainState} as it builds the comm link option. Not in MemFlags - vanilla only
-     * ever writes it from the HighlightComms rule command, and reads it as a literal.
+     * Vanilla's key for "this fleet is worth talking to", read and cleared by
+     * {@code updateMainState} while building the comm link option. Not in MemFlags - vanilla only
+     * writes it from the HighlightComms rule command and reads it as a literal.
      */
     public static final String HIGHLIGHT_COMMS = "$highlightComms";
 
     /**
-     * Spoken as the encounter opens, which is the only hook that sees every encounter.
-     * <p>
-     * The obvious-looking one is updatePreCombat, and it is wrong: vanilla only reaches it from the
-     * options that commit to a fight, so the line would have been read out on the deployment screen
-     * to a player who had already decided to shoot - and never at all to one who looked, talked and
-     * left. After super, so it lands under the encounter's own description rather than ahead of it.
-     * <p>
-     * Cutting a comm link comes back through reinit rather than init, so this stays said once.
+     * Speaks once as the encounter opens - {@code updatePreCombat} only fires for options that
+     * commit to a fight, so it would miss a player who talks and leaves. Runs after super so the
+     * line lands under the encounter description, not above it. Not resaid on reinit ({@link
+     * #spoken}).
      */
     @Override
     public void init(InteractionDialogAPI dialog) {
-        //before super, because super is what builds the options: vanilla reads this key while it is
-        //adding the comm link and clears it on the way past. Set afterwards it would colour nothing
-        //and sit on the fleet waiting to colour the next encounter instead
+        //before super: vanilla reads/clears this key while building the comm link option in super.init
         highlightComms(dialog);
 
         super.init(dialog);
@@ -49,17 +40,9 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
     }
 
     /**
-     * Lights the comm link up when there is something on the other end of it.
-     * <p>
-     * Which there is, for as long as this dialogue is the one being used at all: the comm rules are
-     * keyed on the same harpooning flag that chooses this plugin, and they come in a pair - one set
-     * for a crew still willing to talk about it and another for one that is not - so a harpooned
-     * fleet always has a line waiting. Highlighting it says the encounter has changed rather than
-     * leaving the player to open a link on the off-chance.
-     * <p>
-     * Through vanilla's key rather than by colouring the option directly, so it clears itself the
-     * moment the link is opened. The highlight is a notice that something is waiting, and once it
-     * has been heard there is nothing left to give notice of.
+     * Highlights the comm link, since a harpooned fleet always has a comm rule waiting (willing or
+     * unwilling to talk). Set through vanilla's key rather than coloring the option directly, so it
+     * self-clears once the link is opened.
      */
     protected void highlightComms(InteractionDialogAPI dialog) {
         if (dialog == null) return;
@@ -85,12 +68,7 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
         dialog.getTextPanel().addPara(pick(other), colour);
     }
 
-    /**
-     * Something to say about the rope.
-     * <p>
-     * Picked off the fleet's own id rather than at random, so one crew says one thing however many
-     * times they are talked to, and the line does not change while it is being read.
-     */
+    /** Picked deterministically off the fleet id, so the same crew always says the same line. */
     protected String pick(CampaignFleetAPI other) {
         String name = other.getFaction() == null ? "The crew" : other.getFaction().getDisplayNameWithArticle();
 

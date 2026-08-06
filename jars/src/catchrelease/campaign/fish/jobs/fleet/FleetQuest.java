@@ -17,21 +17,13 @@ import com.fs.starfarer.api.util.Misc;
 
 
 /**
- * A job given by a fleet rather than by a bar, and by a fleet that then has to still be there.
+ * A {@link FishJob} given by a fleet in space rather than a bar contact - same asks, rewards,
+ * hand-over and intel entry, just a hull as the giver instead of a person behind a counter.
  * <p>
- * The bar jobs and these are the same transaction underneath, so this is a {@link FishJob} like the
- * rest of them: the asks, the rewards, the hand-over and the intel entry all come from there, and
- * what is added here is the giver being a hull in space instead of a person behind a counter.
+ * Since the game would otherwise move, retask or despawn that fleet, it is pinned for the job's
+ * duration: mission-important, a hold assignment that outlasts any campaign, no sidetracking.
  * <p>
- * That difference is most of the work. A bar contact is somewhere by definition - the market it
- * stands in is not going to wander off - whereas a fleet is a thing the game is actively trying to
- * move, retask, and eventually delete. So the fleet is pinned: marked mission-important so nothing
- * despawns it, handed a hold assignment long enough to outlast any campaign anybody is going to
- * play, and left with no reason to go anywhere. It stays where it asked until the fish arrives or
- * the job ends, and the intel entry points at it the whole time.
- * <p>
- * Never offered at a bar. It is created onto a fleet directly - see {@link #startOn} - so the
- * market hook that every other job is found through is answered no.
+ * Never offered at a bar - created directly onto a fleet via {@link #startOn}.
  */
 public class FleetQuest extends FishJob {
 
@@ -48,33 +40,20 @@ public class FleetQuest extends FishJob {
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
 
     /**
-     * This job's own hand-over flag, rather than the one the bar jobs share.
-     * <p>
-     * The shared rows put their option up on {@link FishJob#DELIVER_FLAG} wherever they find it, and
-     * this one brings rows of its own - so sharing the flag would offer the catch to a fleet twice,
-     * once through each set. A flag nothing else looks for is how a job keeps its own hand-over.
+     * This job's own hand-over flag rather than the shared {@link FishJob#DELIVER_FLAG} - this job
+     * brings its own rows too, so sharing the flag would offer the catch twice.
      */
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
 
-    /**
-     * Days the hold assignment is given for.
-     * <p>
-     * Not a duration anybody is meant to reach. An assignment that runs out leaves the fleet with
-     * none, and a fleet with no assignment is one the game's own cleanup hands a course home - which
-     * is the exact failure this class exists to prevent. Vanilla writes a thousand for the same
-     * reason in its own return-to-source assignments.
-     */
+    /** Days the hold assignment is given for - not meant to be reached; a fleet whose assignment runs out gets sent home by the game's own cleanup. */
     public static final float HOLD_DAYS = 100000f;
 
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
 
     /**
-     * Puts a job onto a fleet and starts it, or leaves the fleet alone and answers no.
-     * <p>
-     * The whole entry point. These are not found by the mission framework - there is no bar and no
-     * creator - so the instance is made, told what it is, and accepted here rather than being
-     * offered somewhere and picked up.
+     * Puts a job onto a fleet and starts it. Not found by the mission framework - there is no bar or
+     * creator - so the instance is made and accepted here directly.
      *
      * @return the running job, or null if it could not be set up
      */
@@ -100,14 +79,10 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        //a bar can never produce one of these, and being asked is how it finds that out
         if (barEvent || giver == null || type == null) return false;
 
-        //the framework assumes a person all the way through. The intel's icon and faction colour,
-        //the reputation lines, the reward text - a dozen places reach through getPerson() without
-        //checking, and a job given by a hull has nobody standing anywhere. It has a captain though,
-        //and that is who is actually asking, so the framework is handed them. One answer to all of
-        //it, and a truer one than overriding the dozen methods that would each have thrown in turn.
+        // The framework assumes a person throughout (icon, faction colour, reputation, reward text all
+        // reach through getPerson() unchecked); a hull has none, so its captain stands in for it.
         PersonAPI captain = giver.getCommander();
         if (captain == null) return false;
 
@@ -122,22 +97,17 @@ public class FleetQuest extends FishJob {
 
         addReward(FishReward.credits(worth));
 
-        //the ones who have been out here a while are paying in what they found, not in money they
-        //do not have - and a scavenger's answer to "what have you got" is never credits
         if (ask.minRarity != null && ask.minRarity.ordinal() >= FishRarity.RARE.ordinal()) {
             addReward(FishReward.upgrade(StatIds.HARPOON_SPEED, 1));
         }
 
-        //no clock. The fleet is sitting there until this is done, and a deadline on somebody who
-        //cannot go anywhere is a deadline that ends with them still sitting there, unhelpable
+        // No clock - the fleet can't go anywhere, so a deadline would just end with it stuck, unhelpable.
         days = 0f;
 
         setUpSpine();
 
-        //the same key the bar jobs are reached through, put on the hull instead of on a person.
-        //A fleet interaction has no active person, which puts the fleet's own memory in the local
-        //scope - so the framework's own rows, "Call $catchrelease_jobRef turnIn" and the rest,
-        //resolve here exactly as they do across a counter, and none of them had to learn about this
+        // Same ref key the bar jobs use, but on the fleet's memory instead of a person's - a fleet
+        // interaction puts that memory in local scope, so the framework's own rules rows resolve it unchanged.
         if (!setEntityMissionRef(giver, REF_KEY)) return false;
 
         pin();
@@ -146,22 +116,14 @@ public class FleetQuest extends FishJob {
     }
 
     /**
-     * Makes the giver into something that will still be there later.
-     * <p>
-     * Three separate things want to move this fleet and each needs its own answer. The despawn
-     * sweeps skip anything mission-important. The assignment queue hands a course home to any fleet
-     * that runs out of orders, so it is given one it cannot run out of. And its own AI would take it
-     * off after something interesting, which the sidetrack flag settles.
-     * <p>
-     * All of it keyed to the job's live stage, so finishing or failing lifts the pin by itself.
+     * Makes the giver into something that will still be there later: mission-important (skips despawn
+     * sweeps), a hold assignment it can't run out of (the queue would otherwise send it home), and the
+     * sidetrack flag against its own AI. Keyed to the job's stage, so ending the job lifts the pin.
      */
     protected void pin() {
-        //Misc's overload and not the hub mission's. They take different kinds of string and the
-        //compiler cannot tell them apart: the mission's second argument is a memory key it will
-        //write on a stage change, so it has to start with a $, while Misc's is a reason held
-        //alongside the flag and must not. Handing the reason to the mission's version is what threw
-        //on the first stranded fleet - and this is the half that pairs with the makeUnimportant in
-        //release, which is reason-based too
+        // Must be Misc's overload, not the hub mission's - same signature, but the mission's second
+        // argument is a $-prefixed memory key, while Misc's is a plain reason string; release() pairs
+        // with Misc.makeUnimportant, which is also reason-based.
         Misc.makeImportant(giver, IMPORTANT_REASON);
 
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
@@ -177,12 +139,7 @@ public class FleetQuest extends FishJob {
         giver.setName(type.title);
     }
 
-    /**
-     * The hull is where the hand-over happens, there being nobody to hand it to.
-     * <p>
-     * The base class flags a person and a fleet quest has none - which is what crashed this on the
-     * first one that ever spawned, since marking a null important throws rather than passing.
-     */
+    /** Flags the hull, not a person - the base class flags a person, but a fleet quest has none. */
     @Override
     protected void markDeliverable() {
         if (giver == null) return;
@@ -214,13 +171,7 @@ public class FleetQuest extends FishJob {
         if (!giver.isExpired()) Misc.giveStandardReturnToSourceAssignments(giver);
     }
 
-    /**
-     * The job ending, however it ended.
-     * <p>
-     * The pin comes off here rather than on success alone: a job the player walked away from leaves
-     * a fleet that has been sitting in one spot with its drive locked, and nothing else was ever
-     * going to come and let it go.
-     */
+    /** Unpins on any ending, not just success - otherwise an abandoned job leaves the fleet stuck forever. */
     @Override
     protected void notifyEnded() {
         super.notifyEnded();

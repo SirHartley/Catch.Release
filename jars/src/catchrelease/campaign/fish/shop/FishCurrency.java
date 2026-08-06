@@ -17,14 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Fish as money.
- * <p>
- * Everything in the shop is priced in specimens of a rarity, so what is in the hold has to be
- * counted and spent by rarity rather than by species. Bundles count too - a crate of forty is forty,
- * and making the player unpack one before spending it would be busywork rather than a decision.
- * <p>
- * Spending takes the worst first. A player paying a common price should not have their legendary
- * taken because it happened to be at the front of the hold.
+ * Fish as money: shop prices are in specimens of a rarity, counted/spent by rarity rather than
+ * species. Bundles count as their contents. Spending always takes the worst specimens first.
  */
 public class FishCurrency {
 
@@ -242,11 +236,8 @@ public class FishCurrency {
     }
 
     /**
-     * The best specimen aboard that would go towards a requirement, or null for none.
-     * <p>
-     * For the buyers who pay on quality rather than on count. Judged by where a specimen sits in its
-     * own species' range rather than by what it weighs, so a magnificent prawn beats a poor tuna -
-     * somebody impressed by a fish is impressed by a good one of its kind, not by a heavy one.
+     * Best specimen aboard matching a requirement (null if none), for buyers who pay on quality
+     * rather than count. Judged by where it sits in its own species' size range, not raw weight.
      */
     public static FishCatch findBest(FishRequirement req) {
         CargoAPI cargo = getCargo();

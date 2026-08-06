@@ -10,15 +10,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * People who want one particular species and will not say what for.
- * <p>
- * The only job that names its fish. Every other buyer describes a shape - three of a kind, one over
- * forty kilograms, something barely holding together - because every other buyer has a use and the
- * use is what the description is made of. These have a use too. They simply are not going to tell
- * you it, and what is left when you take the reason out of a request is a name.
- * <p>
- * No credits. Not out of principle, as far as anybody can tell - they seem to regard money as one
- * more thing they have, rather than as the thing you would want.
+ * Job asking for one specific species by name (other jobs describe a shape instead). Pays in
+ * non-credit rewards only.
  */
 public class CultJob extends FishJob {
 
@@ -26,7 +19,6 @@ public class CultJob extends FishJob {
 
     public static final float DAYS = 55f;
 
-    /** The species, which is the entire brief. */
     protected String speciesId;
 
     @Override
@@ -51,15 +43,13 @@ public class CultJob extends FishJob {
 
         addAsk(ask);
 
-        //no money, which is the one thing they are consistent about
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, false));
+        addRewards(FishRewardRoller.roll(genRandom, VALUE, false)); //no credit reward
 
         setUpSpine();
 
         return true;
     }
 
-    /** The name they use, which is the table's name, said without elaboration. */
     protected String getSpeciesName() {
         FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
 

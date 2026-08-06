@@ -24,28 +24,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Puts a Fish toggle on the sector map's own filter row, beside Starscape and Fuel range, and
- * runs everything that follows from pressing it: the map narrows, the filter pane takes the
- * freed edge, and the shown species' waters appear over the map as merged shapes.
+ * Puts a Fish toggle on the sector map's filter row (beside Starscape, Fuel range) and runs
+ * everything that follows from pressing it: the map narrows, a filter pane takes the freed edge,
+ * and the shown species' waters are drawn as merged shapes over the map.
  * <p>
- * The button is built the way vanilla builds its own - the same checkbox renderer class, found
- * through the row's last button rather than by name, with the player faction's colours and the
- * game's default font - so it is pixel-for-pixel a member of the row rather than a guest at it.
- * Clicks are read by polling {@code isChecked} every frame: the game's buttons flip that flag
- * before consulting any listener, so no listener - and no obfuscated listener interface - is
- * needed at all.
+ * The button is built via reflection to match vanilla's own checkbox renderer/class exactly, and
+ * clicks are read by polling {@code isChecked} rather than through a listener. Narrowing resizes
+ * the scroller - the map's real viewport, which content size and zoom clamps re-derive from -
+ * and re-centres on the world point that was in the middle; the waters render in the scroller's
+ * overlay layer.
  * <p>
- * The narrowing leans on how the map actually lays itself out: the visible viewport is the
- * scroller's rectangle, the map re-derives content size and zoom clamps from that rectangle
- * every frame, and the frame is drawn around it - so resizing the scroller and re-centring on
- * the world point the player was looking at is the whole of the resize, and everything else
- * corrects itself a frame later. The waters ride in the scroller's overlay layer, which the
- * game scissors to the map rectangle unconditionally.
- * <p>
- * The map screen is rebuilt on every open, so the insertion is redone each time; whether the
- * filter was on is kept in sector memory, so the map reopens the way it was left. Every step
- * fails soft - a surprise means the button simply is not there, and the sector map is exactly
- * as vanilla made it.
+ * The map screen rebuilds on every open, so the button is re-inserted each time; whether the
+ * filter was on persists in sector memory. Every step fails soft - a broken assumption just
+ * means no button, and the sector map is exactly as vanilla made it.
  */
 public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishRoutePopup.Host {
@@ -62,18 +53,12 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     /** How far a lone system's water reaches, in hyperspace units. */
     public static final float BLOB_RADIUS = 3200f;
 
-    /**
-     * How long a parked species request stays good. Generous next to the frame or two the tab
-     * switch actually takes, and short next to a play session - a request the player never
-     * followed through on must not lie in wait and reshape a map they open much later.
-     */
+    /** How long a parked species request stays valid - generous next to a tab switch, short
+     *  next to a session, so a stale request can't reshape a map opened much later. */
     public static final long PENDING_SPECIES_MILLIS = 10_000L;
 
-    /**
-     * A species somebody outside asked the map to open on - the codex's "show on the sector map".
-     * Parked statically because the asker lives in a dialog that is gone before the map exists,
-     * and nothing outside can reach the live pane anyway.
-     */
+    /** Species someone outside asked the map to focus (the codex's "show on the sector map").
+     *  Static, since the asker's dialog is gone before the map exists. */
     protected static String pendingSpeciesId;
     protected static long pendingSpeciesSetAt;
 
@@ -140,9 +125,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         if (failed || fishButton == null) return;
 
         try {
-            //a parked request turns the filter on itself: the memory flag only speaks when the
-            //screen is freshly attached, and the codex may have been opened over a map that was
-            //already up with the filter off
+            //a parked request self-activates the filter - the memory flag only fires on a fresh
+            //attach, and the codex may have opened over a map already up with the filter off
             if (hasFreshPendingSpecies() && !fishButton.isChecked()) fishButton.setChecked(true);
 
             boolean wanted = fishButton.isChecked();
@@ -161,15 +145,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /**
-     * Keeps the map's own arrow list carrying the plotted route - the same list intel arrows
-     * ride, so the legs wear exactly the game's arrow style and show on the plain map too.
-     * <p>
-     * The list is found on the map's params object by shape: the one non-null {@code List}
-     * field. Two lists live there - arrows and markers - and only the arrows are built non-null,
-     * which is the whole of how they are told apart; if that ever stops being true, the arrows
-     * are quietly skipped and the route still shows as its badges. Re-run whenever the route
-     * object changes identity, and everything this script added is pulled back out first, so a
-     * closed route takes its arrows with it.
+     * Keeps the map's own arrow list carrying the plotted route, so legs wear vanilla's own
+     * arrow style. The list is found on the map's params object as the one non-null {@code List}
+     * field (arrows vs markers, told apart by which is populated) - if that stops holding, the
+     * arrows are silently skipped. Re-run when the route's identity changes; anything this script
+     * previously added is pulled back out first.
      */
     protected void syncRouteArrows() {
         FishRoute.Saved route = FishRoute.get();
@@ -259,8 +239,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     public void onRoutePlotted(FishRoute.Saved route) {
         closePlanner();
 
-        //the arrows and badges land this same frame through syncRouteArrows; the map is pointed
-        //at the first stop so the route reads from its beginning
+        //arrows/badges land this frame via syncRouteArrows; point the map at the first stop
         try {
             if (route != null && !route.stops.isEmpty()) {
                 com.fs.starfarer.api.campaign.StarSystemAPI first =
@@ -294,10 +273,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /**
-     * Parks a species for the next time the filter is up, and turns the remembered flag on so the
-     * filter comes up by itself - which, when the map is already open with the filter on, is this
-     * same frame. The rest happens in {@link #applyPendingSpecies()} once there is a pane to
-     * apply it to.
+     * Parks a species and flags the filter to come on next frame (same frame, if the map's
+     * already open). Applied in {@link #applyPendingSpecies()} once a pane exists.
      */
     public static void requestSpeciesFocus(String speciesId) {
         pendingSpeciesId = speciesId;
@@ -314,10 +291,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /**
-     * The parked request, honoured now that the pane exists: the pane flips to SPECIES with the
-     * species picked, the waters are re-cut, and the map points where a row click would have
-     * pointed it. Consumed before anything else is done, so a request that goes wrong is a
-     * request that is over rather than one that fires again on the next open.
+     * Honours the parked request now the pane exists: flips to SPECIES with the species picked,
+     * re-cuts the waters, and points the map like a row click would. Consumed up front, so a
+     * failed request doesn't retry on the next open.
      */
     protected void applyPendingSpecies() {
         boolean fresh = hasFreshPendingSpecies();
@@ -329,10 +305,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishSpec spec = FishPresence.getSpec(id);
         if (spec == null || pane == null) return;
 
-        //the waters live in hyperspace coordinates, and a map opened from inside a system comes
-        //up showing that system - flipped to the hyper view first, through the same stable
-        //method the game calls when the player's location changes, so the jump lands on a map
-        //the focus point means something on
+        //waters are in hyperspace coordinates; flip to the hyper view first (same method the
+        //game calls on a location change), so the focus point means something once there
         try {
             ReflectionUtils.invoke(mapScreen, "notifyMapLocationChanged",
                     Global.getSector().getHyperspace());
@@ -358,15 +332,14 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         Object tab = ReflectionUtils.invokeIfExists(core, "getCurrentTab");
         if (tab == null) return null;
 
-        //the map screen by capability: the one panel in the game that resizes a map and scroller
+        //identified by capability - the one panel that resizes a map and scroller together
         return ReflectionUtils.hasMethodOfName(tab, "updateMapAndScrollerSize") ? tab : null;
     }
 
     /**
-     * Builds the Fish button out of the row's own parts and hangs it after the last vanilla
-     * button. The checkbox renderer is found by shape - the field on the template's renderer
-     * whose class takes (label, font, three colours) - so no obfuscated name is ever written
-     * down, and the row's look is inherited rather than imitated.
+     * Builds the Fish button from the row's own parts and hangs it after the last vanilla button.
+     * The checkbox renderer is found by shape - a constructor taking (label, font, three colours)
+     * - so no obfuscated name is ever written down.
      */
     protected void insertButton() {
         Object filterRow = ReflectionUtils.invoke(mapScreen, "getFilter");
@@ -375,8 +348,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         ButtonAPI template = (ButtonAPI) ReflectionUtils.get(filterRow, "constellations");
         Object renderer = ReflectionUtils.invoke(template, "getRenderer");
 
-        //the checkbox class is either the renderer itself or the one thing the renderer wraps -
-        //both are asked, by shape, for the (label, font, three colours) constructor
+        //checkbox class is either the renderer itself or the one thing it wraps - both tried by shape
         ReflectionUtils.ReflectedConstructor checkboxCtor = null;
         Class<?> checkboxClass = null;
 
@@ -404,8 +376,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         if (checkboxCtor == null) throw new IllegalStateException("no checkbox renderer to clone");
 
-        //the bracketed key is written into the label by hand: vanilla's auto-append only runs
-        //for its own rebindable keys, and the raw-code path carries no display name
+        //bracketed key written into the label by hand - vanilla's auto-append only covers its
+        //own rebindable keys
         FactionAPI player = Global.getSector().getPlayerFaction();
         Object checkbox = checkboxCtor.newInstance("Fish [7]",
                 Global.getSettings().getString("defaultFont"),
@@ -418,12 +390,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             ((LabelAPI) title).setHighlight("7");
         }
 
-        //the game's buttons do not take the checkbox raw: vanilla's factory reads
-        //  new n(new m(checkbox), listener)
-        //where m is the adapter the template's getRenderer() returned - the checkbox speaks one
-        //renderer dialect and the button another, and m is the translation. So the adapter route
-        //goes first, through the template renderer's own one-argument constructor; the direct
-        //route stays as the fallback for the day the adapter stops existing.
+        //vanilla's factory wraps the checkbox in an adapter (new n(new m(checkbox), listener))
+        //before the button ctor accepts it - try the adapter route first, direct ctor as fallback
         fishButton = null;
 
         if (!renderer.getClass().equals(checkboxClass)) {
@@ -467,10 +435,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /**
-     * The filter goes on: the map hands its right edge to the pane and the waters appear.
-     * The scroller is the map's real viewport - content size, zoom clamps and the drawn frame
-     * all re-derive from its rectangle - so the resize is the scroller's, plus a re-centre on
-     * the world point the player had in the middle.
+     * Filter on: the map hands its right edge to the pane and the waters appear. Resizing the
+     * scroller (the map's real viewport, which content size and zoom clamps re-derive from) is
+     * the whole resize, plus a re-centre on the world point that was in the middle.
      */
     protected void activate() {
         try {
@@ -548,11 +515,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /**
-     * The waters the current mode calls for, cut once and cached. The survey shades each enabled
-     * type's whole territory; the species view shades exactly what the player has picked, up to
-     * three, each fill in its own weave - solid, striped right, striped left - so overlaps cross
-     * instead of piling. Picks that share a colour also share one merged border, cut from the
-     * union of their systems: the same colour twice over would only stack lines.
+     * Cuts and caches the current mode's waters. Category view shades each enabled type's whole
+     * territory; species view shades up to three picks, each in its own weave (solid /
+     * stripe-right / stripe-left) so overlaps cross instead of stacking, with picks sharing a
+     * colour sharing one merged border instead of doubled lines.
      */
     protected void rebuildBlobs() {
         if (pane == null || overlay == null) return;
@@ -713,17 +679,15 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         applied = false;
         originalScrollerWidth = 0f;
 
-        //the arrow list belonged to the screen that just went - forget it, and force the next
-        //screen to re-inject by making the last-seen route compare unequal to any real one
+        //arrow list belonged to the old screen - drop it and force re-injection on the next one
         arrowList = null;
         injectedArrows.clear();
         lastRouteSeen = new Object();
     }
 
     /**
-     * Something on this screen-open did not read the way the recipe expects. Put the map back
-     * if it was narrowed, log the reason once, and sit the rest of this open out - a failed
-     * filter costs a convenience and leaves the sector map exactly as vanilla made it.
+     * Something on this screen-open broke the recipe: un-narrow the map if narrowed, log once,
+     * and sit the rest of this open out.
      */
     protected void fail(Throwable t) {
         Global.getLogger(FishMapFilterScript.class)

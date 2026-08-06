@@ -56,7 +56,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-    /** The bundle is removed here, along with the specimens that come back out of it. */
+    /** Removal handled in {@link #performRightClickAction}, not here. */
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
@@ -94,12 +94,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
     }
 
-    /**
-     * The same anatomy the specimen's tooltip has, which is the anatomy vanilla gives an item:
-     * title, typed line, labelled rows, and the base class's cost label so the price speaks with
-     * the market's voice. The contents are said by grade rather than a line each - a full crate
-     * would run off the screen.
-     */
+    /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -112,8 +107,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         FishSpec spec = contents.get(0).getSpec();
         float opad = 10f;
 
-        //F2 over the crate would otherwise open the codex on the generic bundle item, which is what
-        //vanilla resolves from the item spec; point it at the species the crate holds instead
+        //without this, F2 resolves to the generic bundle item spec rather than the species it holds
         tooltip.setCodexEntryId(FishCodex.getEntryId(contents.get(0).speciesId));
 
         if (!Global.CODEX_TOOLTIP_MODE) {

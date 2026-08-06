@@ -11,17 +11,10 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 /**
- * The pond as a hole: the mask stencilled out of the fabric, and through it hyperspace - alive,
- * warping - with the interior shaded the way a hole shades. Darkest down the middle, where the
- * eye is told the depth is; shadowed again just inside the rim, where a real aperture's wall
- * would cut the light; the moving background between the two is what reads as somewhere else
- * showing through.
- * <p>
- * Built deliberately out of parts that are already proven on screen: the stencil helper the
- * pond's own mote layer uses, and the warp-grid rect renderer the minigame's track backing uses.
- * No shader anywhere in it - this is the trial design standing beside the shader swirl, which
- * stays in the code untouched behind {@link PondConstants#POND_HOLE_LOOK} in case the verdict
- * goes the other way.
+ * The pond as a hole: mask stencilled out of the fabric, warping hyperspace showing through,
+ * shaded dark at center and at the rim to read as an aperture. No shader - built from
+ * {@link Stencil} and {@link WarpedRectRenderer}, both already used elsewhere. Alternative to the
+ * shader-based look behind {@link PondConstants#POND_HOLE_LOOK}.
  */
 public class PondHoleRenderer {
 
@@ -40,12 +33,10 @@ public class PondHoleRenderer {
 
         float radius = maskSize * 0.5f;
 
-        //the floor: opaque dark, so the hole never shows the terrain behind it even where the
-        //background is thin
+        //opaque floor so the hole never shows terrain through a thin background
         drawDisc(loc, radius * 1.05f, 0f, Color.BLACK, 0.95f * alpha, Color.BLACK, 0.95f * alpha);
 
-        //hyperspace through the opening, warping on the grid and wandering slowly - motion of its
-        //own, because a camera snapped to the pond contributes none (see PondDepthField's note)
+        //own drift motion since a camera snapped to the pond kills parallax (see PondDepthField)
         float driftPhase = elapsed * (float) (Math.PI * 2.0) / PondConstants.HOLE_DRIFT_PERIOD;
         float driftX = (float) Math.cos(driftPhase) * PondConstants.HOLE_DRIFT;
         float driftY = (float) Math.sin(driftPhase * 0.7f) * PondConstants.HOLE_DRIFT;
@@ -57,11 +48,11 @@ public class PondHoleRenderer {
                 PondConstants.HOLE_BG_TINT, PondConstants.HOLE_BG_ALPHA * alpha,
                 PondConstants.HOLE_BG_ZOOM);
 
-        //the funnel: dark pooling in the middle and thinning outwards, which is what says "down"
+        //funnel: dark pooling at center, thinning outward, reads as depth
         drawDisc(loc, radius * PondConstants.HOLE_WELL_REACH, 0f,
                 Color.BLACK, PondConstants.HOLE_WELL_ALPHA * alpha, Color.BLACK, 0f);
 
-        //the wall: shadow rising again just inside the rim, which is what says "through"
+        //wall shadow just inside the rim, reads as an aperture edge
         drawRing(loc, radius * PondConstants.HOLE_RIM_START, radius * 1.02f,
                 Color.BLACK, 0f, PondConstants.HOLE_RIM_SHADOW * alpha);
 

@@ -30,20 +30,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The filter pane that appears beside the sector map when the Fish filter is on: a search field
- * the list chases a keystroke at a time, one chip per type - each wearing a face borrowed from
- * its own species - and the known species as rows. Everything that would have been a paragraph
- * of instructions is a tooltip, and each row's tooltip carries the species' own art.
+ * Filter pane beside the sector map when the Fish filter is on: a search field, one chip per
+ * type, and the known species as rows, with the explaining pushed into tooltips instead.
  * <p>
- * There is no mode switch; the selection is the mode. With nothing picked, the map shades each
- * enabled type's whole territory - the survey view. Picking species off the list narrows the
- * shading to exactly those, several at once, which is how a route gets planned; DESELECT ALL
- * hands the map back to the survey. F2 over a row opens that species' codex page.
+ * No mode switch - the selection is the mode. Nothing picked shades each enabled type's whole
+ * territory (the survey view); picking species narrows the shading to exactly those, up to
+ * three at once, which is how a route gets planned. F2 over a row opens its codex page.
  * <p>
- * This class is the pane's own panel plugin as well as its builder - the host makes a custom
- * panel with this as the plugin, then calls {@link #mount}. The controls are built once and never
- * rebuilt; only the row list is torn down on a filter change, which is what lets the search field
- * keep the keyboard.
+ * Also the panel's own plugin - the host mounts it via {@link #mount}. Controls are built once;
+ * only the row list rebuilds on a filter change, so the search field keeps the keyboard.
  */
 public class FishMapPane extends BaseCustomUIPanelPlugin {
 
@@ -130,11 +125,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * Picks a species without a click on anything - how a request from outside the map, the codex's
-     * jump, arrives. Anything already picked stays picked: a selection is a route being planned, and
-     * being sent here to look at one more fish is no reason to lose the route.
-     * <p>
-     * Selecting is the whole of it, since a selection is what the species view is.
+     * Picks a species without a click - how an outside request (the codex's jump) arrives.
+     * Existing picks stay, since a selection is a route being planned.
      */
     public void showSpecies(String speciesId) {
         if (speciesId == null || selectedIds.contains(speciesId)) return;
@@ -162,11 +154,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-    /**
-     * The pane's own field and border, under the widgets. The border is the game's own manner -
-     * one pixel of the player colour, corners square - because this pane sits among vanilla
-     * panels, and a guest dresses like the house.
-     */
+    /** Pane's own field and border, drawn under the widgets in vanilla's manner - 1px
+     *  player-colour border, square corners, since this pane sits among vanilla panels. */
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -186,12 +175,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, alphaMult);
     }
 
-    /**
-     * A text field has no change callback, so it is polled - and it has no placeholder either,
-     * so one is worked by hand off {@code hasFocus}: the ghost text sits in the empty field,
-     * clears itself the moment the field takes the keyboard, and comes back if the field is
-     * left empty. The ghost never reaches the filter.
-     */
+    /** Text field has no change callback or placeholder, so both are worked by hand off
+     *  {@code hasFocus} - the ghost text fills the empty field and never reaches the filter. */
     @Override
     public void advance(float amount) {
         if (searchField == null) return;
@@ -222,8 +207,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         float innerWidth = width - PAD * 2f;
         TooltipMakerAPI controls = panel.createUIElement(innerWidth, CONTROLS_HEIGHT, false);
 
-        //the planner sits over the search on purpose: planning is what the pane is for, and the
-        //search is only how a plan's species get found
+        //planner sits above search - planning is the point, search is just how species get found
         CustomPanelAPI planner = panel.createCustomPanel(innerWidth, PLANNER_HEIGHT,
                 new PlannerButtonPlugin());
         controls.addCustom(planner, 0f);
@@ -294,7 +278,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         listViewport = panel.addUIElement(listElement);
         listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
 
-        //a scrollable element goes in wrapped in a scroller, and the wrapper is what comes out
+        //a scrollable element comes back wrapped in a scroller - that's what's removed/stored
         listRemovable = listElement.getExternalScroller() != null
                 ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
     }
@@ -306,11 +290,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         host.onPresenceChanged();
     }
 
-    /**
-     * A click toggles the row's waters in and out of the picture - several at once is the point,
-     * that is how a route gets planned. The first pick leaves the survey; emptying the picks by
-     * hand or by DESELECT ALL returns to it.
-     */
+    /** A click toggles the row's waters in/out - several at once is the point, that's how a
+     *  route gets planned. */
     protected void onRowClicked(FishSpec spec) {
         if (selectedIds.contains(spec.id)) {
             selectedIds.remove(spec.id);
@@ -318,8 +299,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //three weaves, three picks: a fourth is refused rather than repainted over the others.
-        //The row's tooltip says so while the hand is full
+        //three weaves, three picks - a fourth is refused rather than repainted over the others
         if (selectedIds.size() >= MAX_SELECTED) return;
 
         selectedIds.add(spec.id);
@@ -409,8 +389,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 boolean caught = FishLog.isCaught(spec.id);
                 FishLogEntry logged = FishLog.get(spec.id);
 
-                //the generic mark rather than the creature for something nobody aboard has seen. A
-                //survey says where a thing lives; what it looks like is learned by landing one
+                //generic mark for anything nobody's seen - survey tells where it lives, not what it looks like
                 String icon = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
                 if (icon != null && !icon.isEmpty()) {
                     try {
@@ -423,8 +402,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
                 tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);
 
-                //the type stays whether or not one has been landed. It is what the list is sorted
-                //and filtered by, so a row whose type is a blank is a row that cannot be found
+                //type persists whether or not caught - it's what the list sorts/filters by
                 tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
 
                 if (caught && logged != null) {
@@ -454,11 +432,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     // --- The drawn controls. ---
 
-    /**
-     * One type as a chip: a stand-in mark over its name, lit in its colour while it is being
-     * shown. The mark is the mod's placeholder on purpose - category art does not exist yet, and
-     * borrowing some species' face made one fish stand for a whole type it does not speak for.
-     */
+    /** One type as a chip: a placeholder mark (category art doesn't exist yet) over the name,
+     *  lit in the type's colour while shown. */
     protected class ChipPlugin extends BaseCustomUIPanelPlugin {
 
         public static final float ICON_SIZE = 16f;
@@ -496,8 +471,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 ShopUi.drawQuad(x, y, w, h, type.color, (hovered ? 0.5f : 0.35f) * alphaMult);
                 ShopUi.drawQuad(x, y, w, 2f, type.color, 0.95f * alphaMult);
             } else {
-                //off is absence, not another colour: the dark field with only the underline
-                //remembering what would come back
+                //off is absence, not another colour - dark field with just the underline remembering
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered ? 0.35f : 0.18f) * alphaMult);
                 ShopUi.drawQuad(x, y, w, 2f, type.color, 0.35f * alphaMult);
@@ -562,8 +536,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The way back to the survey: lit while there is anything to deselect, quiet otherwise. */
-    /** The planner's door: one drawn button, always live - a plan can be made from nothing. */
+    /** Always-live button that opens the planner - a plan can be made from nothing. */
     protected class PlannerButtonPlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI buttonPos;
@@ -625,6 +598,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
+    /** Way back to the survey: lit while there is anything to deselect, quiet otherwise. */
     protected class DeselectPlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI buttonPos;
@@ -689,10 +663,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /**
-     * The line over the list: what it is, how much of it there is, and the question mark that
-     * holds the legend - drawn live, so the count is never stale.
-     */
+    /** Line over the list: what it is, how many match, and the help mark - drawn live so the
+     *  count is never stale. */
     protected class ListHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI headerPos;
@@ -741,12 +713,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /**
-     * One species in the list: an accent bar in the rarity's colour, a circle carrying what the
-     * log knows of the species - filled once one has been landed, hollow while it is survey data
-     * only - and the name. Everything else the row used to say moved into its tooltip. The bar
-     * stays lit while its waters are on the map. F2 while hovering opens the codex on it.
-     */
+    /** One species row: rarity-coloured accent bar, a circle marking caught (filled) vs
+     *  survey-only (hollow), and the name. Bar stays lit while its waters are on the map;
+     *  F2 opens the codex. */
     protected class RowPlugin extends BaseCustomUIPanelPlugin {
 
         public static final float PAD_SIDE = 8f;
@@ -794,10 +763,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-            //the shop's pip vocabulary again: filled is a thing you have, hollow is the slot
-            //waiting for it. Knowledge is a shape rather than a shade because every shade the row
-            //owns already means selection or rarity, and a dimmed row reads as one that cannot be
-            //clicked. Asked of the log each frame so the ring fills the moment a first catch lands
+            //filled = caught, hollow = survey-only; a shape rather than a shade, since every
+            //shade here already means selection or rarity
             boolean caught = FishLog.isCaught(spec.id);
             float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
             float markY = y + h * 0.5f;
@@ -806,8 +773,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 Disc.draw(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 0.9f * alphaMult, false);
             }
 
-            //over the fill as well as instead of it: the smoothed line is what keeps a circle
-            //this small round
+            //drawn over the fill too - the outline is what keeps a circle this small round
             Disc.drawOutline(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 1.5f);
 
             LazyFont body = ShopUi.getBodyFont();

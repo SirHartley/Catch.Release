@@ -6,11 +6,8 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
- * Opens the outfitter.
- * <p>
- * An ability rather than a skill: a skill is a passive with levels and has no press to hang a panel
- * off, and the point of this for now is a way to reach the shop at all. It belongs on a market or a
- * station eventually, at which point this row can go.
+ * Opens the outfitter. An ability (not a skill) only because a skill has no press to hang a panel
+ * off; temporary until this moves to a market/station.
  */
 public class FishShopAbilityPlugin extends BaseDurationAbility {
 

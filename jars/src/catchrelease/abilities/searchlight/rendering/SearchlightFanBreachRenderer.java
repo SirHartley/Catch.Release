@@ -16,14 +16,11 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.EnumSet;
 
 /**
- * The fan's window: {@link SearchlightBreachRenderer} cut as a wedge instead of a disc.
- * <p>
- * Same claim, same construction. The deep is drawn at its natural size with UVs taken from where
- * each vertex stands in the sector, so the wedge pivots and stretches across a starfield that
- * stays put; the parallax lean and wander are the disc's, for the disc's reason. What changes is
- * only the shape of the opening, and the shape is not this renderer's to choose any more than it
- * is the fan's - the geometry and both falloffs are {@link SearchlightFanRenderer}'s exactly, so
- * the window opens precisely where the light over it is bright.
+ * The fan's window: {@link SearchlightBreachRenderer} cut as a wedge instead of a disc. Same
+ * construction - the deep is drawn at natural size with UVs taken from each vertex's world position,
+ * so the wedge pivots across a starfield that stays put, and parallax lean/wander are the disc's own.
+ * Geometry and both falloffs are {@link SearchlightFanRenderer}'s exactly, so the window opens where
+ * the light over it is bright.
  */
 public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin {
 
@@ -85,7 +82,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
 
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
-        //under the fan on its own layer, by registration order - the light is over the window
+        // Same layer as the fan light; draw order between them follows registration order.
         return EnumSet.of(CampaignEngineLayers.TERRAIN_1);
     }
 
@@ -103,7 +100,6 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
         }
         if (alpha <= 0f) return;
 
-        //the fan's own degenerate first frame, caught the fan's own way
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
@@ -113,8 +109,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
 
         float fillSizeWorld = texW;
 
-        //the lean is taken off the aim point rather than the hull - the aim is where the player
-        //is looking through the window, so that is where the depth should answer
+        // Lean is taken off the aim point, not the hull - that's where the player is looking through.
         Vector2f lean = ParallaxUtil.computeFillUvOffsetPx(viewport, aim,
                 SearchlightBreachRenderer.PARALLAX_MAX_DISPLACEMENT, fillSizeWorld, texW, texH);
         Vector2f wander = ParallaxUtil.computeDriftUvOffsetPx(timePassed,
@@ -140,7 +135,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         fill.bindTexture();
 
-        //world-coordinate UVs run past [0,1], so the texture has to tile
+        // World-coordinate UVs run past [0,1], so the texture has to tile.
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
 

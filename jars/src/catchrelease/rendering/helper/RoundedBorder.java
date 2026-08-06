@@ -8,13 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A rounded rectangle outline, drawn where the caller says in whatever coordinates are current -
- * screen coordinates from a UI panel's render pass, world coordinates from a campaign renderer.
- * <p>
- * The shape vanilla dresses its panels with. One call is one line; a second call a few units further
- * out is what gives the dressing its depth.
- * <p>
- * All GL state this touches is pushed and popped, so anything drawn after the call is unaffected.
+ * A rounded rectangle outline, drawn in whatever coordinate space is current (screen or world).
+ * Matches vanilla's panel styling; a second call a few units out gives it depth. All touched GL
+ * state is pushed and popped.
  */
 public class RoundedBorder {
 
@@ -47,10 +43,7 @@ public class RoundedBorder {
         GL11.glPopAttrib();
     }
 
-    /**
-     * The corners rounded off, going round once. The radius is clamped to what actually fits, so a
-     * narrow bar comes out with the tightest corners its width allows rather than a bowed edge.
-     */
+    /** Radius is clamped to what fits, so a narrow bar gets the tightest corners its width allows. */
     protected static List<Vector2f> getOutline(float x, float y, float width, float height, float radius) {
         float r = Math.max(0f, Math.min(radius, Math.min(width, height) * 0.5f));
 

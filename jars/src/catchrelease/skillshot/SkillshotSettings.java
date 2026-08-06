@@ -3,17 +3,14 @@ package catchrelease.skillshot;
 import java.awt.*;
 
 /**
- * Every id, size and colour the framework uses, in one place.
- * <p>
- * All fields are non-final on purpose - a mod can rewrite them once during startup (before any
- * ability is used) to point at its own sprites and sounds, or to rename the tag if "skillshot"
- * collides with something else.
+ * Every id, size and colour the framework uses. Non-final so a mod can rewrite them once at
+ * startup, before any ability is used.
  */
 public class SkillshotSettings {
 
     /**
-     * Abilities carrying this tag in abilities.csv are picked up by the framework's input listener.
-     * The ability plugin must also implement {@link catchrelease.skillshot.ability.SkillshotAbility}.
+     * abilities.csv tag the framework's input listener looks for; the plugin must also implement
+     * {@link catchrelease.skillshot.ability.SkillshotAbility}.
      */
     public static String TAG_SKILLSHOT = "skillshot";
 
@@ -62,12 +59,7 @@ public class SkillshotSettings {
      */
     public static GuideLineStyle GUIDE_LINE_STYLE = GuideLineStyle.SOLID;
 
-    /**
-     * {@link GuideLineStyle#DASHED}: length of one dash, and of the gap after it, in screen pixels.
-     * <p>
-     * Both are drawn as asked at the zoom level they are seen at - the lines are cut into dashes
-     * rather than stippled, so these are exact rather than approximate.
-     */
+    /** {@link GuideLineStyle#DASHED}: dash length and gap, in screen pixels; cut as geometry, not stippled. */
     public static float GUIDE_LINE_DASH_PX = 24f;
     public static float GUIDE_LINE_DASH_GAP_PX = 24f;
 

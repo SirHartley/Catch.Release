@@ -13,12 +13,9 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * The band across the top: the shop's name on the left, the purse on the right.
- * <p>
- * The purse is one chip per rarity - the specimen mark in the rarity's colour and how many are
- * aboard - because every price below is quoted in exactly those terms, and a buyer should not have
- * to open the cargo screen to know what they are worth. Counts are read off the dialog's cache and
- * redrawn when they change, so a purchase shows up in the purse the same frame it is paid.
+ * The band across the top: shop name on the left, purse on the right. The purse is one chip per
+ * rarity - specimen mark plus count - since every price below is quoted in exactly those terms.
+ * Counts are read off the dialog's cache, so a purchase shows up the same frame it is paid.
  */
 public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
@@ -128,7 +125,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     }
 
     protected void renderChip(FishRarity rarity, int count, float x, float y, float alphaMult) {
-        //an empty pocket goes quiet rather than away, so the ladder itself stays readable
+        //empty pockets go quiet rather than away, so the ladder stays readable
         float presence = count > 0 ? 1f : 0.4f;
 
         ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, Color.BLACK, 0.5f * alphaMult);

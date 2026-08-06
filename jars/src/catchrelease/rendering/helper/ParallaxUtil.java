@@ -6,16 +6,9 @@ import org.lwjgl.util.vector.Vector2f;
 public class ParallaxUtil {
 
     /**
-     * A slow wander of the fill, in the same uv pixels the camera term is in, so the two can simply
-     * be added.
-     * <p>
-     * The camera term is worked out from how far the thing is from the middle of the screen, which
-     * makes it exactly zero for anything the camera is centred on. Something that is always centred
-     * - a pond the camera snaps to - therefore has no parallax at all, and its background sits dead
-     * still behind it. This is what moves instead.
-     * <p>
-     * Two sines whose periods do not divide into each other, so the path never repeats on a beat the
-     * eye can pick up and never reverses on itself the way a single one would.
+     * Slow drift offset, in the same UV pixels as {@link #computeFillUvOffsetPx} so they can be
+     * added: fakes parallax for things the camera is snapped to, since that method's camera term is
+     * zero when centered. Two sines with incommensurate periods so the path never visibly repeats.
      */
     public static Vector2f computeDriftUvOffsetPx(float time,
                                                   float amplitudeWorld,

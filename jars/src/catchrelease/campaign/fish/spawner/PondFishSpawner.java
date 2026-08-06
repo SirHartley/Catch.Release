@@ -68,12 +68,9 @@ public class PondFishSpawner {
     }
 
     /**
-     * How much a rarer species is favoured, from whatever is fitted to the drones.
-     * <p>
-     * The pond is the drones' own ground, so it is the drone slot that is read - a resonator sings
-     * to what is down there whether or not anything has been sent after it yet. One at a time: the
-     * bias is raised to the rarity's own step, so a legendary feels it four times over and a common
-     * not at all.
+     * How much a rarer species is favoured, from whatever's fitted to the drones (drone slot is
+     * read regardless of whether one's been sent - the pond is their own ground). Bias is raised to
+     * the rarity's ordinal, so a legendary feels it several times over and a common not at all.
      */
     protected static float getRarityWeight(FishSpec spec, float extraBias) {
         float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias + extraBias;

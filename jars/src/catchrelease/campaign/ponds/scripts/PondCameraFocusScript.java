@@ -12,22 +12,13 @@ import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * Holds the campaign camera on an open pond so it can be aimed at comfortably, and closes the pond
- * once the player has left it behind.
+ * Holds the campaign camera on an open pond while the fleet is within
+ * {@link PondConstants#POND_INTERACT_RANGE_MULT} (same range the rod ability uses), eases it back
+ * to the fleet once out of range, and closes the pond once it or the fleet leaves view.
  * <p>
- * Three phases, in order:
- * <ol>
- * <li>Fleet within {@link PondConstants#POND_INTERACT_RANGE_MULT} of the pond - the camera eases onto
- * the pond and holds it. That range is the same one the rod ability uses, so the camera holds exactly
- * while the skillshot is available. Held is not quite centred: the pond is what the camera aims at,
- * but it gives ground rather than let the fleet leave the screen - see {@link #keepFleetOnScreen}.</li>
- * <li>Fleet moves out of that range - the camera eases back onto the fleet and control goes back to
- * the game, leaving the player where they expect to be.</li>
- * <li>Pond drifts off screen, or the player leaves the system - the pond closes.</li>
- * </ol>
- * Has to be a sector-level script rather than one on the pond entity: entity scripts only advance
- * as part of the location advance, which the campaign engine skips entirely while paused - and
- * aiming a skillshot is something the player does paused.
+ * Must be a sector-level script, not one on the pond entity: entity scripts only advance as part
+ * of the location advance, which the campaign engine skips while paused, and aiming a skillshot
+ * happens paused.
  */
 public class PondCameraFocusScript implements EveryFrameScript {
 
@@ -45,11 +36,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;
 
-    /**
-     * Where the camera actually was when this started, as an offset from the fleet - free look, in
-     * practice. Eased away rather than dropped, so the move begins from where the player is looking
-     * instead of snapping to the fleet first.
-     */
+    /** Camera's offset from the fleet when this started (free look); eased to zero rather than dropped. */
     transient protected Vector2f carry = null;
 
     public PondCameraFocusScript(SectorEntityToken pond) {
@@ -110,10 +97,8 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         keepFleetOnScreen(center, fleet.getLocation());
 
-        //a dialog over the top - the catch, most likely. Everything freezes where it is: sliding back
-        //to the fleet under a panel the player is busy with is a move they did not ask for, cannot
-        //see a reason for, and cannot stop. Only while we already hold it; a dialog is no reason to
-        //take a camera we had given back
+        //dialog open (e.g. the catch minigame): freeze camera in place; only hold it if we already
+        //do - a dialog is no reason to take over a camera we'd already given back
         if (uiUp) {
             if (holdingCamera) holdCameraAt(center);
             return;
@@ -136,12 +121,8 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Notes where the camera is before anything is done to it, and puts free look away.
-     * <p>
-     * Both halves matter. Free look pans the camera off the fleet, so a hold that assumes the fleet
-     * position starts by jumping the width of that pan - and a pan still set when the camera goes
-     * back jumps again on the way out. Turning it off clears the pan; carrying the offset the camera
-     * already had covers the gap that clearing it would otherwise leave.
+     * Records the camera's offset from the fleet (free look) once, and clears free look - carrying
+     * the offset avoids a jump to the fleet position that clearing it alone would cause.
      */
     protected void start(CampaignFleetAPI fleet) {
         if (carry != null) return;
@@ -175,13 +156,9 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Where the camera sits for the current {@link #focus} - on the fleet at 0, on the pond at 1.
-     * <p>
-     * Deliberately anchored to the fleet rather than eased from wherever the camera happens to be: a
-     * fleet under way is a moving target, and easing towards one leaves a permanent lag of about its
-     * speed times {@link PondConstants#POND_FOCUS_TIME_CONSTANT}. The camera would never arrive, so
-     * it would never be handed back - and the fleet would sit that far off centre, which runs it off
-     * the top or bottom of the screen first, there being less room that way.
+     * Interpolated centre for the current {@link #focus} (fleet at 0, pond at 1). Anchored directly
+     * to the fleet rather than eased toward it - easing toward a moving target would leave a
+     * permanent lag, so the camera would never reach handback distance.
      */
     protected Vector2f getFocusedCenter(Vector2f fleetLocation, Vector2f pondLocation) {
         return new Vector2f(
@@ -190,31 +167,10 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Gives ground rather than letting the fleet walk off the edge of the view.
-     * <p>
-     * The hold is a circle and the screen is a wide rectangle, and the two do not agree. Pinned to
-     * the pond, the camera lets the fleet get {@link PondConstants#POND_INTERACT_RANGE_MULT} of the
-     * pond's radius away in any direction it likes - which fits across a screen and does not fit up
-     * it, so a fleet that burned off sideways stayed in view and one that burned off upward left the
-     * top of it while the camera sat still watching the water. That asymmetry was never a rule
-     * anybody wrote; it is the difference between a circle and 16:9.
-     * <p>
-     * So the pin is not absolute. The fleet may be pushed out to
-     * {@link PondConstants#POND_FOCUS_FLEET_MARGIN} of whatever half-screen there is on that axis,
-     * and past that the camera goes with it - which is the boundary the player can actually see,
-     * measured on the axis it is being crossed on. Sideways nothing changes, there being room; going
-     * up the view starts travelling a good deal sooner than it used to.
-     * <p>
-     * The pond does not go anywhere either. The camera only ever gives up as much ground as the
-     * fleet asked for, and the fleet cannot ask for more than the hold allows, so at ordinary zoom
-     * the water stays framed alongside it. Zoomed right in it is the pond's near rim that stays
-     * framed rather than its centre - but a pond is five hundred units across and the view at full
-     * zoom is not much more, so at that point the rim is the pond as far as anyone can see.
-     * <p>
-     * Read off the viewport every frame, so zooming out slackens this and zooming in tightens it,
-     * both without anything to keep in step. Zoomed out far enough that the whole hold fits on the
-     * screen this stops doing anything at all, which is right - there is nothing to save the fleet
-     * from, and the camera sits dead on the pond exactly as it always did.
+     * Clamps the camera centre so the fleet stays within
+     * {@link PondConstants#POND_FOCUS_FLEET_MARGIN} of the half-screen extent on each axis; a
+     * circular hold radius doesn't fit a rectangular screen, so X/Y are clamped independently rather
+     * than as one radius. Read from the viewport every frame, so zoom changes it live.
      */
     protected void keepFleetOnScreen(Vector2f center, Vector2f fleetLocation) {
         ViewportAPI viewport = Global.getSector().getViewport();
@@ -222,8 +178,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
         float maxX = viewport.getVisibleWidth() * 0.5f * PondConstants.POND_FOCUS_FLEET_MARGIN;
         float maxY = viewport.getVisibleHeight() * 0.5f * PondConstants.POND_FOCUS_FLEET_MARGIN;
 
-        //a viewport that has not been sized yet says nothing about where the edges are, and clamping
-        //to zero would drop the camera onto the fleet and hand it straight back
+        //unsized viewport (maxX/Y == 0) would clamp onto the fleet position and hand the camera back immediately
         if (maxX > 0f) center.x = clamp(center.x, fleetLocation.x - maxX, fleetLocation.x + maxX);
         if (maxY > 0f) center.y = clamp(center.y, fleetLocation.y - maxY, fleetLocation.y + maxY);
     }
@@ -233,12 +188,8 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Eases a value a frame's worth of the way towards a target. Exponential, so it covers the same
-     * fraction of what is left every second no matter the frame rate - quick at first, gentle as it
-     * arrives.
-     * <p>
-     * Sector-level scripts are handed the real frame time even while the campaign is paused, so this
-     * needs no special case for it.
+     * Frame-rate-independent exponential ease toward {@code target}. Sector-level scripts get real
+     * frame time even while paused, so no special-casing needed here.
      */
     protected float approach(float current, float target, float delta, float timeConstant) {
         float travelled = 1f - (float) Math.exp(-delta / Math.max(0.01f, timeConstant));
@@ -246,11 +197,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
         return current + (target - current) * travelled;
     }
 
-    /**
-     * Softer going out to the pond than coming back from it. The way back ends with the camera being
-     * handed over, and until it is handed over free look stays suppressed - so the return is the part
-     * that wants to be brisk.
-     */
+    /** Faster time constant returning to the fleet than approaching the pond - free look stays suppressed until handback, so the return should be brisk. */
     protected float getTimeConstant(float target) {
         return target > focus
                 ? PondConstants.POND_FOCUS_TIME_CONSTANT
@@ -258,22 +205,18 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Takes the camera off the game for this frame and puts it where we want it.
+     * Takes the camera for this frame and points it at {@code center}.
      * <p>
-     * Sets the whole viewport rather than just its centre, because external control means the game
-     * stops sizing the viewport too - and it never stops feeding the player's scrolling into the zoom
-     * tracker. Left on its own the visible size would be frozen at whatever it was when we took over,
-     * so scrolling would do nothing until the camera was handed back and the whole accumulated zoom
-     * arrived at once. Reading the zoom factor back every frame keeps scrolling live throughout.
+     * Sets the whole viewport, not just its centre - external control stops the game from resizing
+     * it, but zoom-scroll input keeps accumulating regardless, so the zoom factor must be re-read
+     * every frame or scrolling has no visible effect until handback.
      */
     protected void holdCameraAt(Vector2f center) {
         ViewportAPI viewport = Global.getSector().getViewport();
         float zoom = Global.getSector().getCampaignUI().getZoomFactor();
 
-        //while the camera is ours and only while it is ours: free look switched on under the hold
-        //would pan against it and leave an offset behind to jump on when it goes back. Once the
-        //camera has been handed over this stops being called, which is what lets free look work
-        //again - the script goes on running for as long as the pond is open
+        //suppress free look only while we hold the camera - stops being called once handed back,
+        //which is what lets free look work again
         Global.getSector().getCampaignUI().resetViewOffset();
 
         if (!holdingCamera) {

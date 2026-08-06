@@ -20,15 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Keeps a population of buried motes around the player, so a searchlight always has the chance of
- * finding something.
- * <p>
- * They are seeded out of sight rather than in view - a mote that pops into existence inside the
- * light was not found, it was handed over - and culled once the player has left them well behind, so
- * a long game does not end up with a system full of things nobody is ever going to look for.
- * <p>
- * Deliberately a population rather than a spawn rate: the number in range is what is aimed at, so
- * sitting still does not accumulate them and travelling does not outrun them.
+ * Keeps a population of buried motes around the player, so a searchlight always has a chance of
+ * finding something. Seeded out of sight and culled once well behind the player. A population
+ * target rather than a spawn rate, so sitting still does not accumulate them and travel does not
+ * outrun them.
  */
 public class BuriedMoteSpawner implements EveryFrameScript {
 
@@ -62,8 +57,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) return;
 
-        //nothing is seeded around a fleet standing in hyperspace - no fishing gear works out
-        //there, so a population on that side of the fabric is one nobody can ever touch
+        //no fishing gear works in hyperspace, so nothing is seeded there
         if (fleet.isInHyperspace()) return;
 
         LocationAPI location = fleet.getContainingLocation();
@@ -78,23 +72,14 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /**
-     * Just past what the lights can see, rather than a number picked to sound far away.
-     * <p>
-     * This was fixed at a distance chosen before the lights were, and the two never met: the beams
-     * reach a little over a thousand units and nothing was ever seeded inside sixteen hundred, so
-     * every mote the player ever found had wandered several hundred units inward on its own. That is
-     * why so few turned up. Measured off the lights now, so it stays just out of sight when the
-     * area upgrade widens them instead of falling inside the beam.
-     */
+    /** Just past what the lights can see, measured off their own reach so it stays out of sight
+     * as the area upgrade widens them. */
     protected static float getSpawnMinRange() {
         return Searchlight.getMaxReach() + FishConstants.BURIED_SPAWN_CLEARANCE;
     }
 
-    /**
-     * And a band rather than the whole surrounding disc. Seeded out to the old range most of them
-     * sat too far out to ever drift in, so the population was real and unreachable at the same time.
-     */
+    /** A band rather than the whole surrounding disc, so motes stay reachable rather than seeded
+     * too far out to ever drift in. */
     protected static float getSpawnMaxRange() {
         return getSpawnMinRange() + FishConstants.BURIED_SPAWN_BAND;
     }
@@ -129,25 +114,14 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /**
-     * How much better the lights are at turning up something worth having.
-     * <p>
-     * Applied where the population is seeded rather than where a light passes over one, which is the
-     * only place it can honestly go: a buried mote is a specific species from the moment it exists,
-     * and a beam that changed what was already down there would be deciding rather than finding.
-     * What the upgrade actually buys is a better class of thing put out there to be found.
-     * <p>
-     * Added to the drones' own bias rather than replacing it, so a fleet that has invested in both
-     * gets both, and a fleet that has bought neither sees exactly what it saw before.
-     */
+    /** Applied where the population is seeded, not where a beam passes over one - a buried mote is
+     * a fixed species from the moment it exists, so this buys a better class of thing, not a re-roll. */
     protected static float getRareChance() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
     }
 
-    /**
-     * Out past the light's reach, in a ring rather than a disc - one appearing inside the searchlight
-     * would read as the light making them rather than finding them.
-     */
+    /** Out past the light's reach, in a ring rather than a disc - one appearing inside the
+     * searchlight would read as the light making it rather than finding it. */
     protected void spawn(LocationAPI location, Vector2f around) {
         String fishId = PondFishSpawner.pickFishId(location, getRareChance());
         if (fishId == null) return;

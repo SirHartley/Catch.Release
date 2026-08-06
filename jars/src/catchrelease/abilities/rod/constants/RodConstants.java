@@ -8,72 +8,31 @@ public class RodConstants {
     public static final Color DRONE_COLOR = Color.ORANGE;
 
     //drones
-    /** Radius of the ring the drones fly once they arrive. The reticule is sized to match. */
+    /** Radius of the ring drones fly once arrived; the reticule matches. */
     public static final float DRONE_ORBIT_RADIUS = 60f;
 
-    /**
-     * Radius of the ring a roaming drone flies, which it flies around the fleet rather than around a
-     * spot on the water.
-     * <p>
-     * Wider than the cast ring, and for a reason that has nothing to do with fishing: a circle of
-     * sixty units centred on the player's own hull is drawn straight through the fleet's sprites,
-     * where the drones are neither visible nor legible as an escort. Far enough out to read as a
-     * screen flying with the fleet, close enough that they are still obviously yours.
-     */
+    /** Radius of the ring a roaming drone flies around the fleet. Wider than the orbit ring so it clears the fleet's own sprites. */
     public static final float DRONE_ROAM_RADIUS = 140f;
 
-    /**
-     * The ring the swarm fishes inside, when the upgrade sheet has no row for it. Every real read
-     * goes through the upgrade, so this is the number a save with a missing sheet falls back to
-     * rather than the number the game normally uses.
-     * <p>
-     * Kept well under {@code PondConstants.POND_RADIUS}. At four hundred against a pond of five
-     * this covered most of the water from wherever it was dropped, and a cast that catches
-     * everything is not a cast - the aim stops being a decision.
-     */
+    /** Fallback fishing ring radius when the upgrade sheet has no row; kept well under {@code PondConstants.POND_RADIUS}. */
     public static final float RING_RADIUS_FALLBACK = 150f;
 
-    /**
-     * How far past that ring a drone still reacts, without the upgrade. See
-     * {@code FishingDroneSwarmScript.getChaseMargin()} for why this is not zero.
-     */
+    /** Fallback reaction margin past the ring; see {@code FishingDroneSwarmScript.getChaseMargin()}. */
     public static final float CHASE_MARGIN_FALLBACK = 40f;
 
-    /** World units per second on the way out and the way home. */
+    /** World units per second, both outbound and returning. */
     public static final float DRONE_SPEED = 300f;
 
-    /**
-     * Seconds for a drone to converge on the velocity it wants - the give in its steering. Higher is
-     * heavier and wider-turning, lower is twitchier. This is what curves the flight paths: the drone
-     * steers its velocity rather than being placed along a line.
-     */
+    /** Seconds for a drone to converge on its target velocity (steering); higher is heavier/wider-turning. */
     public static final float DRONE_STEER_RESPONSE = 0.45f;
 
-    /**
-     * Distance over which a drone eases off as it closes on whatever it is heading for. Tuned
-     * against {@link #DRONE_SPEED}; a returning drone works out its own from the speed it is
-     * actually doing, and uses this as the floor.
-     */
+    /** Distance to ease off on approach; tuned against {@link #DRONE_SPEED}, used as the floor for returning drones. */
     public static final float DRONE_SLOWING_DISTANCE = 120f;
 
     /**
-     * How hard a returning drone brakes, as a multiple of {@link #DRONE_STEER_RESPONSE}: it asks for
-     * the closing speed that would cover what is left of the gap in that long. Lower brakes later
-     * and flies straighter, higher eases off sooner and comes in gently.
-     * <p>
-     * This is a damping ratio in disguise: the drone asks for a closing speed of {@code gap /
-     * (response * margin)} but only eases onto it, over that same response, so the gap is a mass on
-     * a spring damping at {@code sqrt(margin) / 2}. At 0.5 that is 0.35, underdamped, and the drone
-     * crosses the fleet by about a third of whatever the gap was when braking started.
-     * <p>
-     * Left underdamped on purpose. Damping it properly costs the approach: braking starts at
-     * {@code speed * response * margin}, so a margin high enough not to overshoot begins easing off
-     * most of two thousand units out, and a drone easing off that early never closes on a fleet
-     * that is under way at all - it settles into a chase it cannot win. Overshooting a fleet you
-     * have caught is a better failure than never catching one.
-     * <p>
-     * The overshoot is left as the cost of that, and it is the cheaper of the two: a drone that
-     * swings past and comes round again is a drone that got there.
+     * Braking strength for returning drones, as a multiple of {@link #DRONE_STEER_RESPONSE}; acts as
+     * an underdamped damping ratio (~0.35 at 0.5), so drones overshoot and swing back rather than
+     * ease off too early and never close the gap.
      */
     public static final float DRONE_BRAKE_MARGIN = 0.5f;
 
@@ -84,21 +43,13 @@ public class RodConstants {
     /** How close a drone has to get to a mote to have hold of it. */
     public static final float DRONE_CATCH_DISTANCE = 15f;
 
-    /**
-     * Degrees per second around the ring. At 250 units out this is about 130 units/second of
-     * tangential motion - deliberately well under {@link #DRONE_SPEED}, so a drone has the headroom
-     * to close on its slot instead of permanently trailing it.
-     */
+    /** Degrees per second around the ring; kept well under {@link #DRONE_SPEED} so a drone can still close on its slot. */
     public static final float DRONE_ORBIT_SPEED = 30f;
 
     /** How close to the ring counts as being on it, in world units. */
     public static final float DRONE_JOIN_DISTANCE = 15f;
 
-    /**
-     * Degrees ahead of its own slot a launching drone aims for. Aiming straight at the slot means
-     * meeting the ring head-on and having to turn ninety degrees on arrival; aiming ahead of it
-     * curves the approach round so the drone is already going the right way when it gets there.
-     */
+    /** Degrees ahead of its slot a launching drone aims for, curving the approach so it's already heading the right way on arrival. */
     public static final float DRONE_JOIN_LEAD_ANGLE = 55f;
 
     /** How closely a drone's heading must match the ring's before it takes up circle flight. */
@@ -107,38 +58,20 @@ public class RodConstants {
     /** Seconds to bleed off the heading error a drone joined the circle with. */
     public static final float DRONE_FACING_RESPONSE = 0.4f;
 
-    /**
-     * Degrees per second a drone may trim its position round the ring, on top of the ring's own
-     * rotation, while closing on its slot. This is what keeps it from sprinting round to its place:
-     * uncapped, a drone rejoining from the far side turns two to three times faster than one simply
-     * flying the circle, which reads as a sharp snap rather than drifting back into formation.
-     */
+    /** Degrees per second a drone may trim its ring position (on top of the ring's own rotation) while closing on its slot; caps rejoin speed. */
     public static final float DRONE_TRIM_RATE = 25f;
 
     /** Seconds for a drone on the circle to settle into its exact slot and radius. */
     public static final float DRONE_SETTLE_RESPONSE = 1.2f;
 
-    /**
-     * How much faster a returning drone gets per second on the way home, and the ceiling on it.
-     * {@link #DRONE_SLOWING_DISTANCE} is not what stops it - a returning drone brakes off the gap
-     * instead, see {@link #DRONE_BRAKE_MARGIN} - and the faster it has wound up to, the further out
-     * that braking starts.
-     */
+    /** Acceleration per second on the way home, and its cap. Braking is governed by {@link #DRONE_BRAKE_MARGIN}, not {@link #DRONE_SLOWING_DISTANCE}. */
     public static final float DRONE_RETURN_ACCELERATION = 0.2f;
     public static final float DRONE_RETURN_MAX_MULT = 3.5f;
 
-    //the ring the drones fly, drawn so it is clear where a mote has to drift to count
     public static final int RING_SEGMENTS = 72;
     public static final float RING_WIDTH = 1.5f;
 
-    /**
-     * Dashes around the ring, and how much of each one is drawn rather than gap.
-     * <p>
-     * A count rather than a length, so the pattern belongs to the ring: it is the same at every zoom
-     * level and it closes at the seam instead of clipping the last dash short. Sizing dashes in
-     * screen pixels - which is right for a reticule, since that is drawn at whatever zoom the player
-     * is aiming at - would have this circle re-cut its dashes every time the camera changed distance.
-     */
+    /** Dash count (not length) so the pattern stays consistent at any zoom and closes cleanly at the seam. */
     public static final int RING_DASH_COUNT = 24;
     public static final float RING_DASH_DUTY = 0.5f;
     /** Alpha while nothing is in it, and while something is. */

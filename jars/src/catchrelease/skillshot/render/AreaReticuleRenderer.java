@@ -10,12 +10,9 @@ import catchrelease.skillshot.SkillshotSettings;
 import java.awt.*;
 
 /**
- * Reticule for abilities that land on a spot rather than fly in a direction: a circle at the cursor
- * sized to the effect radius.
- * <p>
- * The guide lines on {@link BaseReticuleRenderer} work here too - {@code withTrajectory()} draws the
- * path from the fleet to the impact point, {@code withBounds(30f)} the arc it can land in. They stop
- * at the circle's edge instead of running across it.
+ * Reticule for abilities that land on a spot: a circle at the cursor sized to the effect radius.
+ * {@link BaseReticuleRenderer}'s guide lines ({@code withTrajectory()}, {@code withBounds()}) stop
+ * at the circle's edge rather than crossing it.
  */
 public class AreaReticuleRenderer extends BaseReticuleRenderer {
 

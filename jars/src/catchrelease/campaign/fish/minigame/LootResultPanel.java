@@ -18,18 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What else came up, on a card of its own: the catch readout's mirror, hung off the other side of
- * the track, up only once the game is over the way the readout is. The treasure was a thing on
- * the track while the catch ran; this is the receipt afterwards, and mixing the two - a tally
- * arriving while there was still a fish to fly - would put reading where playing goes.
- * <p>
- * Same anatomy as the readout on purpose - the square at the top, the title under it, the list
- * under that, arriving a line at a time to the same sound - but not the same frame: the card
- * hugs its content instead of standing floor to ceiling around three rows, and its square is
- * pinned level with the readout's specimen, so the two read as a pair of exhibits rather than
- * a pair of pillars. Each line is a
- * thing that went into the hold, wearing the cargo icon the hold will show it under, in its
- * tier's colour - so the card reads as cargo, not as prose.
+ * What else came up, on a card of its own - the catch readout's mirror, hung off the other side
+ * of the track, shown only once the game is over. Same anatomy as the readout (icon square,
+ * title, list arriving a line at a time to the same sound) but sized to its own content rather
+ * than the readout's fixed frame, with its square pinned level with the readout's specimen so
+ * the two read as a pair of exhibits. Each line wears the cargo icon the hold will show it
+ * under, in its tier's colour.
  */
 public class LootResultPanel {
 
@@ -193,15 +187,10 @@ public class LootResultPanel {
     }
 
     /**
-     * Gold coins raining down the card, each tumbling as it falls and wrapping back to the top,
-     * so the rain holds for however long the card is read.
-     * <p>
-     * Three motions per coin, none sharing a rate: the flip - the width running on |cos| while
-     * the height holds, a disc narrowing to a bright sliver and opening back out; the wobble -
-     * the same thing across the other axis, slower and shallower, so the coin is never turning
-     * about one clean line; and the spin - the whole ellipse walking round in the plane. Each
-     * runs from its own rolled rate and phase, so the tumble never repeats on a beat and no two
-     * coins fall alike.
+     * Gold coins raining down the card, tumbling as they fall and wrapping to the top for as
+     * long as the card is read. Three independent motions per coin - flip (width on |cos| while
+     * height holds), wobble (same, slower/shallower, across the other axis), spin (whole ellipse
+     * turning) - each at its own rolled rate and phase, so no two coins fall alike.
      */
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
@@ -226,8 +215,8 @@ public class LootResultPanel {
             float face = Math.abs((float) Math.cos(elapsed * c.flipRate + c.phase));
             float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
 
-            //the second axis, held off its own edge-on by the depth - the flip owns the full
-            //turn, and both axes collapsing at once leaves a point where the coin was
+            //second axis held off edge-on by the depth - both axes collapsing at once would
+            //flatten the coin to a point
             float wobble = Math.abs((float) Math.cos(elapsed * c.wobbleRate + c.wobblePhase));
             float height = c.size * (1f - FishConstants.MINIGAME_LOOT_COIN_WOBBLE_DEPTH
                     * (1f - wobble));
@@ -278,8 +267,7 @@ public class LootResultPanel {
                     FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MAX);
             c.wobblePhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
 
-            //signed, so half spin one way and half the other - a rain all turning clockwise
-            //reads as a pattern, and the point of the tumble is that there is none
+            //signed so half spin each way - all-clockwise would read as a pattern
             c.spinRate = MathUtils.getRandomNumberInRange(
                     FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MIN,
                     FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MAX)
@@ -290,10 +278,8 @@ public class LootResultPanel {
         }
     }
 
-    /**
-     * The square at the top, at the readout's height and size: the salvage marker washed in the
-     * best tier's colour - the square is what says "cargo", and the wash is what says how good.
-     */
+    /** Square at the top, readout's height/size: the salvage marker washed in the best tier's
+     *  colour - the square says "cargo", the wash says how good. */
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
         Color accent = getBestRarity().color;
 
@@ -339,10 +325,8 @@ public class LootResultPanel {
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
 
-    /**
-     * The things themselves, each fading in as it lands: the cargo icon, the name in the tier's
-     * colour, and the count out in the right column where the readout keeps its numbers.
-     */
+    /** Each award fading in as it lands: cargo icon, name in the tier's colour, and the count in
+     *  the readout's own number column. */
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
@@ -423,10 +407,7 @@ public class LootResultPanel {
         return boxSprite;
     }
 
-    /**
-     * A sprite off a raw path. Vanilla has most of these loaded already; loadTexture makes the
-     * ones it does not - modded weapon art, mostly - real before they are asked for.
-     */
+    /** Sprite off a raw path - loadTexture makes modded art real before getSprite can find it. */
     protected SpriteAPI loadSprite(String path) {
         if (path == null || path.isEmpty()) return null;
 

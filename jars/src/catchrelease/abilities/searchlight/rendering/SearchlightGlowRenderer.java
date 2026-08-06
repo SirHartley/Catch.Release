@@ -27,7 +27,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
 
     public static final float SUPERLUMINAL_TIME = 0.4f;
 
-    //fadeAndExpire
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -39,7 +38,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     private float timePassed = 0f;
     private float extraAlphaMult = 1f;
 
-    //flicker
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightGlowRenderer(Vector2f loc, float size, Color color) {
@@ -70,7 +68,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
         float progress = Math.min(timePassed / SUPERLUMINAL_TIME, 1f);
         extraAlphaMult = 0.8f * TrigHelper.smootherStep(1f - progress);
 
-        //flicker
         flicker.advance(amount);
 
         if (fading) {
@@ -106,7 +103,7 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
         if (alpha <= 0f) return;
 
         sprite.setAdditiveBlend();
-        sprite.setSize(size * 1.8f, size * 1.8f); //double because we do radius, not diameter
+        sprite.setSize(size * 1.8f, size * 1.8f); // x2: size is a radius, not a diameter
         sprite.setAlphaMult(alpha);
         sprite.setColor(color);
         sprite.renderAtCenter(loc.x, loc.y);

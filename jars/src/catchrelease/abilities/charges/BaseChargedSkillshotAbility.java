@@ -6,17 +6,10 @@ import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 
 /**
- * A skillshot that fires out of a charge pool rather than off a rearm timer.
- * <p>
- * The pool is the whole gate, so the ability's own cooldown has to get out of its way. Left to the
- * vanilla one the two contradict each other: the pool says "you have two harpoons, spend them how
- * you like" and a flat rearm answers "one at a time anyway", which is the decision the pool exists
- * to hand back to the player.
- * <p>
- * So the icon shows the wait that is actually in front of you. With charges in hand that is the
- * blink between two shots - long enough that one press is one shot, short enough that a pass over a
- * shoal is a burst. With the pool empty it is the next charge arriving, and the sweep fills at
- * exactly the rate the pool does.
+ * A skillshot that fires out of a charge pool rather than a rearm timer. The pool alone gates
+ * firing - no vanilla flat rearm on top. {@link #getCooldownFraction()} shows whichever wait is
+ * actually in front of the player: the short inter-shot blink with charges in hand, or the pool's
+ * own refill progress when empty.
  */
 public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
 
@@ -32,12 +25,7 @@ public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
     /** How big that pool is and how fast it fills. */
     public abstract ChargeManager.Refill getRefill();
 
-    /**
-     * Registers the refill rule and hands it back.
-     * <p>
-     * Done on every query rather than once: the manager lives on the sector, so every new game and
-     * every load has to be told again. It takes the last call, so repeating it costs nothing.
-     */
+    /** Registers the refill rule and returns it. Called every query since the manager lives on the sector and forgets on load. */
     protected ChargeManager.Refill defineRefill() {
         ChargeManager.Refill refill = getRefill();
         ChargeManager.define(getChargeId(), refill);
@@ -90,13 +78,7 @@ public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
         if (rearmLeft < 0f) rearmLeft = 0f;
     }
 
-    /**
-     * The wait in front of the player, rather than the one in the spec.
-     * <p>
-     * Empty pool: the next charge, which the manager is already tracking as a fraction - so the
-     * sweep is the pool filling rather than a second timer that happens to run alongside it.
-     * Otherwise: the blink between shots, and nothing once that is up.
-     */
+    /** Progress toward next charge when the pool is empty; otherwise the inter-shot rearm blink. */
     @Override
     public float getCooldownFraction() {
         ChargeManager.Refill refill = defineRefill();
@@ -115,12 +97,7 @@ public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
         return hasCharge() && !isInHyperspace() && super.isUsable();
     }
 
-    /**
-     * No fishing gear works in hyperspace. All fishing is done from realspace into hyperspace -
-     * the fabric is what the gear works through, and out there is the wrong side of it. The gate
-     * sits here so every charged skillshot answers the same way, rather than each rig
-     * rediscovering the rule.
-     */
+    /** No fishing gear works in hyperspace - fishing is done from realspace into it, through the fabric. */
     protected boolean isInHyperspace() {
         CampaignFleetAPI fleet = getFleet();
 

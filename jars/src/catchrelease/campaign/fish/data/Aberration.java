@@ -12,15 +12,13 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * How badly a specimen holds to reality, worked out from where it was taken.
+ * How badly a specimen holds to reality, from where it was taken.
  * <p>
- * Three things thin the local fabric, and being near any of them is enough - so the three are taken
- * at their strongest rather than added up. The abyss is the worst of them and reads directly off the
- * depth; a coronal hypershunt and a slipstream both fall off with distance, measured in light-years
- * from the system rather than in world units, since what matters is which part of the sector this is.
+ * Three things thin the local fabric, taken at their strongest rather than summed. Abyss reads
+ * directly off depth; hypershunt and slipstream fall off with distance in light-years from the
+ * system (not world units), since what matters is which part of the sector this is.
  * <p>
- * Nothing consumes this yet. It is recorded on every catch so that when something does, the fish
- * already in the hold have it.
+ * Nothing consumes this yet - recorded on every catch so it's already there once something does.
  */
 public class Aberration {
 
@@ -67,11 +65,9 @@ public class Aberration {
     }
 
     /**
-     * The route planner's read: how unstable a system is known to be, deterministically - no
-     * spread - and counting only what the player has actually found. Slipstreams always count,
-     * since they are on every map the moment they run; a hypershunt that has never been
-     * discovered and an abyss never entered cannot steer a plan the player is meant to be able
-     * to reason about.
+     * Route planner's read: deterministic (no spread), counting only what the player has found -
+     * slipstreams always count (visible the moment they run), but an undiscovered hypershunt or
+     * an abyss never entered can't steer a plan the player is meant to reason about.
      */
     public static float knownInstability(com.fs.starfarer.api.campaign.StarSystemAPI system) {
         if (system == null || system.getLocation() == null) return 0f;
@@ -111,11 +107,9 @@ public class Aberration {
                 * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
     }
 
-    /**
-     * Slipstreams are ribbons rather than points, so this measures to where the terrain is anchored
-     * and takes the nearest. Close enough for a number that only says roughly how thin it is here.
-     * Public because the route planner discounts travel along them.
-     */
+    /** Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes
+     *  the nearest, close enough for a rough number. Public since the route planner discounts
+     *  travel along them. */
     public static float getSlipstreamShare(Vector2f locInHyper) {
         float nearest = Float.MAX_VALUE;
 

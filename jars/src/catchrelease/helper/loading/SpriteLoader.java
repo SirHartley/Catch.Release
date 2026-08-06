@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class SpriteLoader {
 
-    /** Paths already asked for, with what came back - a miss included, so it is only logged once. */
+    /** Cache including misses (null), so a missing file is only logged once. */
     protected static final Map<String, SpriteAPI> BY_PATH = new HashMap<>();
 
     public static SpriteAPI getSprite(String id){
@@ -18,13 +18,10 @@ public class SpriteLoader {
     }
 
     /**
-     * A sprite by its path rather than by the id it was registered under - which is what the data
-     * tables hold, since a table names a file.
-     * <p>
-     * Loaded on first ask and remembered after, misses included: this is called from render passes,
-     * and a missing file should cost one line in the log rather than one per frame.
+     * Loads a sprite by file path (what data tables store), caching the result including misses -
+     * called from render passes, so a missing file logs once, not every frame.
      *
-     * @return null if there is nothing at that path, which callers are expected to survive
+     * @return null if nothing exists at that path; callers must handle it
      */
     public static SpriteAPI loadSprite(String path) {
         if (path == null || path.isEmpty()) return null;

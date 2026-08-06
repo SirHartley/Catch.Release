@@ -9,11 +9,8 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
- * Hands the game our own encounter screen for the fleets we have wronged, and nothing else.
- * <p>
- * Keyed on a flag on the fleet rather than applied to fleets in general, and at the narrowest
- * priority there is: every other mod that overrides an encounter expects to be able to, and a mod
- * that claims all of them because one of its abilities can annoy people is a bad neighbour.
+ * Hands the game our own encounter screen for fleets we have wronged, and nothing else. Keyed on a
+ * flag on the fleet, at the narrowest priority, so other mods overriding encounters still can.
  */
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 

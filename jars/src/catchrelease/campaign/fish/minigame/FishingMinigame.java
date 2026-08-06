@@ -12,15 +12,13 @@ import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 
 /**
- * The rules of the catch, with no screen anywhere in them.
+ * The rules of the catch, with no rendering or input in them - advances on a delta-time float and
+ * a boolean so it can be reasoned about and tuned without a game running.
  * <p>
- * Everything lives in a 0..1 track: the bar is a window somewhere in it, the fish is a point in it,
- * and progress fills while the window is over the point and drains while it is not. Hold to lift the
- * bar, let go and it falls. The fish's {@link FishSpec} decides how it moves and how fast the meter
- * swings, and the bar's size is the player's {@link StatIds#FISHING_BAR_SIZE} upgrade.
- * <p>
- * Kept free of rendering and input on purpose - it advances on a number of seconds and a boolean, so
- * it can be reasoned about, and tuned, without a game running.
+ * Everything lives in a 0..1 track: the bar is a window in it, the fish a point in it, and progress
+ * fills while the window covers the point and drains otherwise. Hold to lift the bar, release to
+ * fall. {@link FishSpec} sets fish movement and meter swing; bar size comes from the player's
+ * {@link StatIds#FISHING_BAR_SIZE} upgrade.
  */
 public class FishingMinigame {
 
@@ -33,10 +31,8 @@ public class FishingMinigame {
     protected FishSpec fish;
 
     /**
-     * The fish's numbers, copied rather than read through.
-     * <p>
-     * Two reasons: the spec comes from a loader cache shared by every mote in the session, so writing
-     * to it would quietly retune the whole species - and the dev controls need somewhere to write.
+     * Copied from {@link FishSpec} rather than read live - the spec is a shared loader-cache
+     * instance, so writing to it would retune every mote; dev controls need a place to write too.
      */
     protected float difficulty;
     protected float motionSpeed;
@@ -59,11 +55,9 @@ public class FishingMinigame {
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
 
     /**
-     * What else is down there. The count is rolled once when the catch starts - up to
-     * {@link FishConstants#TREASURE_MAX_PER_CATCH}, usually zero - and the pieces surface one at a
-     * time: the first straight away, each later one on a clock after the previous resolved. A
-     * short catch simply ends before the late ones were due, which is what keeps a three-piece
-     * catch a long story rather than a lucky moment.
+     * Treasure count rolled once at catch start (up to {@link FishConstants#TREASURE_MAX_PER_CATCH},
+     * usually zero); pieces surface one at a time, first immediately, each next one on a clock after
+     * the previous resolves - see {@link #advanceTreasure}.
      */
     protected MinigameTreasure treasure;
     protected final java.util.List<MinigameTreasure> takenTreasures = new java.util.ArrayList<>();
@@ -82,10 +76,8 @@ public class FishingMinigame {
     protected float timeTotal = 0f;
 
     /**
-     * The tackle is taken here rather than set afterwards, because everything the tackle changes is
-     * decided in this constructor. Handed over after the fact it arrived too late to be read: the
-     * window was already sized against an empty rig, and the treasure - had it ever been rolled -
-     * would have been rolled against one too.
+     * Tackle must be passed here, not set afterward - bar size and the treasure roll are both
+     * computed in this constructor and would already be locked in against an empty rig otherwise.
      */
     public FishingMinigame(FishSpec fish, Tackle tackle) {
         this.fish = fish;
@@ -107,12 +99,7 @@ public class FishingMinigame {
         rollTreasure();
     }
 
-    /**
-     * How much is down there this time, if anything - rolled once at the start of a catch, so
-     * treasure is something to react to rather than something to wait for. The first piece, when
-     * there is one, is on the track from the first frame; the rest are only a possibility until
-     * the catch has lasted long enough to see them.
-     */
+    /** Rolls this catch's treasure count; the first piece, if any, spawns immediately. */
     protected void rollTreasure() {
         takenTreasures.clear();
         treasureClock = 0f;
@@ -181,9 +168,8 @@ public class FishingMinigame {
     }
 
     /**
-     * Elastic ends. The bar keeps a share of its speed back the other way on contact, so dropping it
-     * on the floor gives a run of smaller and smaller bounces before it settles rather than one dead
-     * stop - and below a crawl it is put to rest, which is what stops it juddering there forever.
+     * Elastic bounce off track ends (restitution &lt; 1, so bounces shrink each time); velocity below
+     * {@link FishConstants#MINIGAME_BAR_REST_SPEED} is zeroed so it doesn't judder forever.
      */
     protected void bounce(float lowest, float highest) {
         if (barPosition < lowest) {
@@ -200,9 +186,8 @@ public class FishingMinigame {
     }
 
     /**
-     * The fish swims towards whatever it last decided on, and decides again when its timer runs out.
-     * Which spot it decides on is the archetype's business; how often, and how fast it gets there, is
-     * the spec's.
+     * Eases toward the current target, repicking a new one when {@link #fishThinkTimer} runs out.
+     * Target choice is per-archetype ({@link #pickFishTarget}); speed and frequency come from the spec.
      */
     protected void advanceFish(float amount) {
         fishThinkTimer -= amount;
@@ -214,8 +199,7 @@ public class FishingMinigame {
 
         float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
 
-        //the speed it would like: proportional to how far it still has to go, so it eases off as it
-        //arrives instead of stopping dead on the spot
+        //desired speed proportional to remaining distance, so it eases off on arrival
         float desired = MathUtils.clamp((fishTarget - fishPosition) * FishConstants.MINIGAME_FISH_STIFFNESS,
                 -maxSpeed, maxSpeed);
 
@@ -225,9 +209,8 @@ public class FishingMinigame {
 
         fishPosition += fishVelocity * amount;
 
-        //clamped by extent the way the bar is: the icon is drawn centred on this, so at raw 0 or 1
-        //half of it hung outside the track. The margin is half an icon in track fractions, and the
-        //narrowest bar is deeper than it, so the fish is still catchable pressed against either end
+        //margin = half icon size (in track fractions) so the centred icon never hangs off the track
+        //edge; narrowest bar is still deeper than the margin, so the fish stays catchable there
         float margin = FishConstants.MINIGAME_FISH_ICON_SIZE * 0.5f / FishConstants.MINIGAME_TRACK_HEIGHT;
 
         if (fishPosition < margin || fishPosition > 1f - margin) fishVelocity = 0f;
@@ -253,8 +236,7 @@ public class FishingMinigame {
             return;
         }
 
-        //in dev mode the meter bottoms out instead of ending it, so a fish can be sat with and
-        //retuned for as long as it takes rather than escaping the moment it gets away from you
+        //dev mode: floor instead of escaping, so the fish can be retuned indefinitely
         if (cannotLose) {
             progress = Math.max(progress, FishConstants.MINIGAME_DEV_PROGRESS_FLOOR);
             return;
@@ -276,12 +258,9 @@ public class FishingMinigame {
     }
 
     /**
-     * The treasure's own clock. It neither moves nor affects the fish - taking it costs the ground
-     * the bar gives up going to get it, and that is the whole of the trade.
-     * <p>
-     * A piece that resolves - taken or timed out - makes room, and the next owed piece surfaces
-     * {@link FishConstants#TREASURE_SPAWN_INTERVAL} seconds later. Timed out pieces count against
-     * the debt the same as taken ones: letting one go is a decision, not a reroll.
+     * Treasure doesn't move or affect the fish - taking it just costs bar time spent reaching it. A
+     * resolved piece (taken or timed out, either counts against the debt) makes room for the next
+     * owed piece {@link FishConstants#TREASURE_SPAWN_INTERVAL} seconds later.
      */
     protected void advanceTreasure(float amount) {
         if (treasure != null && treasure.isActive()) {
@@ -423,18 +402,12 @@ public class FishingMinigame {
         state = State.CAUGHT;
     }
 
-    /**
-     * Dev controls: a piece straight into the taken pile, as if it had been held for. Only the
-     * rarity is ever read off a taken piece, so a fresh roll is all "with treasure" needs.
-     */
+    /** Dev: adds a piece directly to the taken pile - only rarity is ever read off a taken piece. */
     public void devTakeTreasure() {
         takenTreasures.add(new MinigameTreasure(TreasureRoller.rollRarity()));
     }
 
-    /**
-     * Dev controls: a fresh piece on the track right now, owed or not. Replaces whatever piece is
-     * up - it is for practising the take, not for auditing the debt.
-     */
+    /** Dev: spawns a fresh piece now, replacing any current one - for practising the take, not auditing the debt. */
     public void devSpawnTreasure() {
         treasuresLeft++;
         treasure = spawnTreasure();

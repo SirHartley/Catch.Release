@@ -7,15 +7,9 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * A Galatian researcher who wants one that is coming apart.
- * <p>
- * The only job that asks for a bad specimen on purpose, and the only one whose ask gets harder the
- * better the player's rig gets - a stable fish is what good tackle produces, and this is a request
- * for the opposite. She is not being difficult. A fish that is holding its shape tells her nothing;
- * the interesting sentence is the one the sector is writing on the ones that are not.
- * <p>
- * Offered on Galatia where it exists, and in independent space generally, since a stipend from the
- * Academy does not keep anybody at home.
+ * Galatian researcher job asking for a low-coherence (unstable) specimen - the only job whose ask
+ * gets harder as the player's rig improves, since better tackle produces more stable fish. Offered
+ * at Galatia and independent markets generally.
  */
 public class AcademyJob extends FishJob {
 

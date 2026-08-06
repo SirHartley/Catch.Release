@@ -12,13 +12,9 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 /**
- * The shop's shared hand: fonts, quads, and the dressed-box look the minigame established.
- * <p>
- * The outfitter is drawn rather than assembled from stock widgets wherever the state on screen can
- * change under it - a row that reads its level fresh every frame never goes stale, where a label
- * would have to be found and rewritten. The drawing itself borrows the catch panels' language
- * (dark field, bright line, dimmer line outside it) so the shop reads as another panel of the same
- * interface.
+ * Shared rendering helpers for the shop UI: fonts, quads, and the dressed-box look established by
+ * the minigame panels. The outfitter draws its own state each frame, rather than using stock
+ * widgets, so it never goes stale.
  */
 public class ShopUi {
 
@@ -114,10 +110,7 @@ public class ShopUi {
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
-    /**
-     * A ladder's worth of pips, the bought ones lit. What every upgrade screen since the dawn of
-     * the genre has taught players to read at a glance, which is the point of using it.
-     */
+    /** Draws an upgrade pip row, lit pips up to {@code level}. */
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha) {
 

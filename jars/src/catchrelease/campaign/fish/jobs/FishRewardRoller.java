@@ -19,17 +19,11 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * What somebody pays, decided fresh each time they ask.
+ * Rolls a job's payment fresh each time, rather than a fixed rate - jobs repeat, and a fixed payment
+ * would turn a repeatable job into either a grind or something never taken twice.
  * <p>
- * These are repeatable jobs, which is the whole reason this exists. A fixed payment turns a
- * repeatable job into a rate - the player works out what a chef is worth once and then either farms
- * it forever or never looks at one again. Rolled, the same chef is worth taking twice because the
- * second one might be the time they hand over something off the back of the workshop.
- * <p>
- * The pool is deliberately weighted away from credits without excluding them. Money is the reward
- * every other job in the game already pays, and a fishing mod paying only money would be asking why
- * anyone would fish rather than run cargo - but a person in a bar who has nothing else on them is
- * also a real person, and always producing a blueprint would be a stranger world than that.
+ * Weighted away from credits without excluding them: money alone would beg the question of why fish
+ * instead of running cargo, but some givers genuinely have nothing else to offer.
  */
 public class FishRewardRoller {
 
@@ -49,8 +43,7 @@ public class FishRewardRoller {
      * One payment, or two when the job is worth enough to be interesting.
      *
      * @param worth        the job's reckoned value in credits, before it is turned into things
-     * @param allowCredits false for the givers who have no money to offer, which is its own
-     *                     characterisation - a pair of children do not pay in cash
+     * @param allowCredits false for givers who have no money to offer (e.g. children)
      */
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
         List<FishReward> rewards = new ArrayList<>();
@@ -61,15 +54,13 @@ public class FishRewardRoller {
         FishReward main = rollOne(random, value, allowCredits);
         if (main != null) rewards.add(main);
 
-        //a second, smaller thing on the better jobs. Two rewards read as somebody emptying their
-        //pockets, which is what a person who badly wants something actually does
+        // A second, smaller reward on the better jobs.
         if (value > VALUE_PER_FISH * 3 && random.nextFloat() > 0.45f) {
             FishReward extra = rollOne(random, value / 3, allowCredits);
             if (extra != null) rewards.add(extra);
         }
 
-        //nobody hands over nothing. If every other kind declined - no upgrades left to buy, no
-        //species left to survey - it falls back to the one payment that is always available
+        // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
         if (rewards.isEmpty()) rewards.add(FishReward.credits(Math.max(500, value)));
 
         return rewards;
@@ -96,7 +87,6 @@ public class FishRewardRoller {
             if (stat == null || stat.id == null) continue;
             if (stat.id.equalsIgnoreCase("example")) continue;
 
-            //nothing is gained by being handed a rung that does not exist any more
             if (stat.maxLevel > 0 && stat.level >= stat.maxLevel) continue;
 
             open.add(stat);
@@ -107,12 +97,7 @@ public class FishRewardRoller {
         return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
     }
 
-    /**
-     * A module the player does not already have.
-     * <p>
-     * Filtered like the other kinds here, and for the same reason: a module is owned once and fitted
-     * as often as you like, so handing over a second copy of one is handing over nothing at all.
-     */
+    /** A module the player does not already own - owned once, fitted freely, so a duplicate is nothing. */
     protected static FishReward rollTackle(Random random) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
@@ -124,13 +109,7 @@ public class FishRewardRoller {
         return FishReward.tackle(options.get(random.nextInt(options.size())));
     }
 
-    /**
-     * A word about where something lives, for a species the player does not already know.
-     * <p>
-     * Filtered rather than rolled blind, since survey data on a fish already in the log is a reward
-     * that does nothing at all - and the one thing worse than a small payment is one the player can
-     * see is empty.
-     */
+    /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */
     protected static FishReward rollLocationData(Random random) {
         List<FishSpec> unknown = new ArrayList<>();
 
@@ -150,22 +129,17 @@ public class FishRewardRoller {
     protected static FishReward rollGoods(Random random, int value) {
         String commodity = GOODS[random.nextInt(GOODS.length)];
 
-        //a rough count rather than a priced one, since the point is a crate of something useful
         int quantity = Math.max(5, value / 120);
 
         return FishReward.commodity(commodity, quantity);
     }
 
     /**
-     * A weapon or fighter pattern the player does not already hold.
-     * <p>
-     * Named rather than blank, because a blueprint item is an id and a payload and the payload is
-     * the whole of what it is - a weapon_bp carrying nothing is not a generic blueprint, it is an
-     * item the game cannot draw a tooltip for. Filtered the way vanilla's own blueprint drops are:
-     * only the patterns marked worth finding, nothing tagged undroppable, and nothing already known.
+     * A weapon or fighter blueprint the player doesn't already know, named rather than blank - a
+     * blueprint item's payload is its id, and one carrying nothing breaks its tooltip. Filtered the
+     * way vanilla's own drops are: {@code TAG_RARE_BP} only, nothing {@code NO_DROP}.
      */
     protected static FishReward rollBlueprint(Random random) {
-        //weapons and fighters are the ones a stranger plausibly has a copy of lying about
         boolean weapon = random.nextBoolean();
 
         List<String> options = new ArrayList<>();

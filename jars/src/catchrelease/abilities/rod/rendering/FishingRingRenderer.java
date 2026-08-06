@@ -14,14 +14,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * The ring the drones are working, drawn for the player rather than for debugging.
- * <p>
- * It answers the only question the cast leaves open - how close a mote has to drift before anything
- * happens - and it is the same circle the reticule showed while aiming, so what you aimed is what
- * stays on screen.
- * <p>
- * Quiet while nothing is in it, and it brightens and pulses while something is, which reads as the
- * swarm noticing. Fades in when the cast lands and out when they are recalled, so it never blinks.
+ * The drone swarm's working ring, same radius as the aim reticule. Dim while empty, brighter and
+ * pulsing while a mote is in range; fades in on cast and out on recall.
  */
 public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
@@ -37,8 +31,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
     @Override
     public boolean isExpired() {
-        //hangs on past the swarm just long enough to fade out
-        return swarm == null || (swarm.isDone() && fade <= 0.01f);
+        return swarm == null || (swarm.isDone() && fade <= 0.01f); //outlives swarm until faded out
     }
 
     @Override
@@ -47,7 +40,6 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
         pulseTime += amount;
 
-        //on the way out from the moment they are called back, so the ring goes with them
         float target = swarm.isDone() || swarm.isRecalling() ? 0f : 1f;
         float step = amount / Math.max(0.01f, RodConstants.RING_FADE_TIME);
 
@@ -64,8 +56,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (swarm == null || fade <= 0.01f) return;
 
-        //asked for every frame rather than kept, so a roaming swarm's ring travels with the fleet it
-        //is drawn around instead of being left behind at the spot the drones launched from
+        //queried fresh each frame so the ring follows a roaming swarm rather than its launch point
         Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 

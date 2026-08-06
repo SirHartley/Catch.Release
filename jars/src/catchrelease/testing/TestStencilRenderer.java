@@ -72,7 +72,6 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
         Vector2f loc = Global.getSector().getPlayerFleet().getLocation();
         Stencil.startDepthMask(stencil, SIZE, SIZE, loc, true);
 
-        //background
         if (layer == CampaignEngineLayers.TERRAIN_1) {
             if (warp == null) {
                 int cells = 6;
@@ -91,7 +90,6 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
                     loc.y - starfield.getHeight() / 2f, true);
         }
 
-        //motes
         if (layer == CampaignEngineLayers.ABOVE) {
             for (SectorEntityToken mote : containingLoc.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);
         }

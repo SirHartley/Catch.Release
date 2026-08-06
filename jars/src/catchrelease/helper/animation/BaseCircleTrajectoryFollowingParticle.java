@@ -34,7 +34,7 @@ public abstract class BaseCircleTrajectoryFollowingParticle implements LunaCampa
         this.position = start;
         this.totalAngle = Misc.getAngleDiff(Misc.getAngleInDegrees(relativeCenter, start), Misc.getAngleInDegrees(relativeCenter, end));
         this.currentAngle = Misc.getAngleInDegrees(relativeCenter, start);
-        this.turnDirection = 1; //Misc.getAngleInDegrees(originLocation, targetLocation) > 0 ? -1 : 1;
+        this.turnDirection = 1;
     }
 
     @Override
@@ -46,13 +46,11 @@ public abstract class BaseCircleTrajectoryFollowingParticle implements LunaCampa
     public void advance(float amount) {
         elapsed += amount;
 
-        //update center
         relativeCenter = TrigHelper.findTwoPointCircle(originLocation, targetLocation, radius).one;
-        currentAngle += (float) ((((totalAngle *1.5) / duration) * amount) * turnDirection); //I do not know why it stops short exactly by factor 1.5 but it does.
+        // The 1.5 factor is an empirical correction - without it the arc consistently stops short; cause unclear.
+        currentAngle += (float) ((((totalAngle *1.5) / duration) * amount) * turnDirection);
         Vector2f nextPos = MathUtils.getPointOnCircumference(relativeCenter, radius, currentAngle);
         float projRotation = Misc.getAngleInDegrees(position, nextPos);
-
-        //ModPlugin.log("angle " + currentAngle + " target angle " + circleData.endAngle);
 
         position = nextPos;
         facing = projRotation;

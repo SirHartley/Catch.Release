@@ -72,7 +72,6 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         if (flashed) return;
         if (target == null) return;
 
-        //trail w/ buncha magic numbers
         MagicCampaignTrailPlugin.addTrailMemberSimple(
                 entity,
                 entity.getId().hashCode(),
@@ -88,7 +87,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
                 true,
                 new Vector2f(0, 0));
 
-        //making sure the flash doesn't carry over
+        //clear flash/ripples if the entity left this system
         if (!entity.isInCurrentLocation()){
             if (flash != null) flash.expire(); //so short we don't need fade
             if (ripples != null) ripples.fadeAndExpire(0f);
@@ -107,7 +106,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         flash = new Flash(color, entity.getLocation(), Flash.DEFAULT_EXPLOSION_SIZE);
         LunaCampaignRenderer.addRenderer(flash);
 
-        RippleData data = new RippleData(entity.getLocation(), 0.1f, 0.3f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,600f,4f, 2.5f, 0.05f, 3); //magic bullshit go
+        RippleData data = new RippleData(entity.getLocation(), 0.1f, 0.3f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,600f,4f, 2.5f, 0.05f, 3);
         data.home = entity.getContainingLocation();
         ripples = new SimpleRippleDataRunner(data);
         entity.addScript(ripples);
@@ -120,7 +119,6 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
             }
         });
 
-        //sound
         float volumeDistance = 1000f;
         float distance = Misc.getDistance(Global.getSector().getPlayerFleet().getLocation(), loc);
         float fract = 1f - MathUtils.clamp(distance / volumeDistance, 0f, 1f);
@@ -152,8 +150,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         Vector2f nextPos = MathUtils.getPointOnCircumference(entity.getLocation(), dist, angle);
         entity.setLocation(nextPos.x, nextPos.y);
 
-        //the trail is laid out relative to facing, and this mote flies a curve - without this every
-        //trail segment comes out at the same angle regardless of where the mote is actually going
+        //trail is laid out relative to facing; this mote flies a curve, so facing must track heading
         entity.setFacing(angle);
     }
 

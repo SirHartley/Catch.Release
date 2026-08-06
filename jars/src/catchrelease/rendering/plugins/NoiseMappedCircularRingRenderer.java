@@ -52,7 +52,7 @@ public class NoiseMappedCircularRingRenderer {
         ensureShader();
         if (program == 0) return;
 
-        // (2) Snapshot blend state so we can restore it
+        // save blend state to restore after
         final boolean blendWasEnabled = GL11.glIsEnabled(GL11.GL_BLEND);
         final int prevBlendSrc = GL11.glGetInteger(GL11.GL_BLEND_SRC);
         final int prevBlendDst = GL11.glGetInteger(GL11.GL_BLEND_DST);
@@ -95,10 +95,9 @@ public class NoiseMappedCircularRingRenderer {
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        // (1) Force fixed-function color to white so no external tint can modulate your quad
+        // force color white - avoids external tint modulating the quad
         GL11.glColor4f(1f, 1f, 1f, 1f);
 
-        // Your blend choice
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -121,7 +120,7 @@ public class NoiseMappedCircularRingRenderer {
         GL11.glPopMatrix();
 
 
-        // Always restore program and blend state even if something throws
+        // restore program and blend state
         GL20.glUseProgram(0);
 
         GL11.glBlendFunc(prevBlendSrc, prevBlendDst);
@@ -132,7 +131,6 @@ public class NoiseMappedCircularRingRenderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }
 
-    //This needs to be fixed holy shit
     private void ensureShader() {
         if (program != 0) return;
 

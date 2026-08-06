@@ -21,15 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One landed specimen in the hold.
+ * One landed specimen in the hold. Each carries its own length/weight/aberration so specimens
+ * never stack; right-click stows it into that species' bundle, hold ctrl to stow all of them.
  * <p>
- * Every specimen carries its own length, weight and aberration, so no two stack - which is correct
- * but fills a hold quickly. Right-clicking one stows it into that species' bundle, and holding
- * control stows every one of that species at once.
- * <p>
- * Control rather than shift, which is what a bulk action would normally be: the cargo screen routes
- * shift and right-click together to its own mass-transfer path and never asks the item about it, so
- * a shift-right-click on a fish is a transfer and cannot be anything else.
+ * Ctrl, not shift - shift+right-click is intercepted by the cargo screen's own mass-transfer path
+ * before the item ever sees it.
  */
 public class FishItemPlugin extends BaseSpecialItemPlugin {
 
@@ -89,8 +85,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         if (stowed.isEmpty()) return;
 
-        //fold into the species' existing bundle if it has one, which means replacing it - a bundle's
-        //contents are its data, so a bundle that has grown is a different item to the one before it
+        //bundle contents ARE its data, so growing it means replacing the stack, not appending
         CargoStackAPI existing = FishItems.getBundleStack(stack.getCargo(), clicked.speciesId);
         if (existing != null) {
             SpecialItemData data = existing.getSpecialDataIfSpecial();
@@ -117,10 +112,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
                 spec == null ? null : spec.rarity, entry.getGrade());
     }
 
-    /**
-     * The species' icon where there is a species. The stand-in covers the codex, which builds a
-     * plugin with no stack behind it and so has no specimen to read one off.
-     */
+    /** Species icon, or the fallback - used by the codex, which builds this plugin with no stack/specimen to read from. */
     protected String getIconPath(FishSpec spec) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) {
             return FishConstants.ITEM_ICON_FALLBACK;
@@ -129,22 +121,12 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return spec.icon;
     }
 
-    /**
-     * Whether this click is the bulk one.
-     * <p>
-     * Read off the keyboard because the click never arrives with the modifier attached - the helper
-     * the cargo screen hands us says what may be moved, not what was pressed to ask for it.
-     */
+    /** Read from the keyboard directly - the cargo screen's click helper says what may be moved, not what modifier was held. */
     protected boolean isBulkDown() {
         return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
 
-    /**
-     * Laid out the way vanilla lays out a special item: title, the typed line under it, labelled
-     * rows for the numbers, the description in the text colour, and the cost label the base class
-     * builds - which is what makes the price say "Sells for" at a market and "Base value" in the
-     * hold, the same way every other item's does.
-     */
+    /** Vanilla special-item layout (title, type line, stat rows, description, cost label) so price reads "Sells for"/"Base value" consistently with other items. */
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -158,8 +140,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishGrade grade = entry.getGrade();
         float opad = 10f;
 
-        //F2 over the stack would otherwise open the codex on the generic "Fish" item, which is what
-        //vanilla resolves from the item spec; point it at the species being held instead
+        //vanilla resolves F2 to the generic "Fish" item spec; point it at this specimen's species instead
         tooltip.setCodexEntryId(FishCodex.getEntryId(entry.speciesId));
 
         if (!Global.CODEX_TOOLTIP_MODE) {

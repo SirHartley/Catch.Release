@@ -20,18 +20,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Puts fishing jobs onto fleets, either by finding one that was already out here or by arriving one
- * that has run out of the ability to be anywhere else.
- * <p>
- * Two ways in, because the jobs come in two kinds. Most of them are somebody's ordinary bad week -
- * a quota that came up short, a crew tired of printed protein - and the honest way to meet those is
- * on a hull that was already flying past, so a scavenger who happens to be nearby is quietly turned
- * into somebody with a problem. The rest could not have flown in at all, being the kind of trouble
- * that ends with the drive off, and those are put in place near water on the reasoning that a fleet
- * adrift within reach of a rupture is a fleet with one thing left to try.
- * <p>
- * Rare on purpose, and capped. The point of one of these is that it interrupts something - a thing
- * that happens on every third jump is not an interruption, it is a toll.
+ * Periodically spawns fleet quests: either adopts an existing wandering scavenger/trader fleet, or
+ * arrives a stranded fleet near a pond (or the player, if none nearby). Deliberately rare and capped
+ * (see {@link #CHANCE}, {@link #MAX_ACTIVE}) so it reads as an interruption rather than routine.
  */
 public class FleetQuestSpawner implements EveryFrameScript {
 
@@ -84,8 +75,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (!canSpawn()) return;
         if (random.nextFloat() > CHANCE) return;
 
-        //a hull already out here first. Meeting somebody who turns out to need something is a
-        //better story than something appearing because you were due one
+        //tries an existing wandering fleet before spawning a new one
         if (adoptWanderer()) {
             markSpawned();
             return;
@@ -114,12 +104,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size();
     }
 
-    /**
-     * Finds somebody already out here and gives them a problem.
-     * <p>
-     * Only hulls that could plausibly have one: a scavenger or a trader, nobody's warship, nobody
-     * already hostile, and nobody who is already carrying one of these.
-     */
+    /** Picks a random adoptable fleet (scavenger/trader, non-hostile, no existing quest) and starts a quest on it. */
     protected boolean adoptWanderer() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
@@ -158,11 +143,8 @@ public class FleetQuestSpawner implements EveryFrameScript {
     }
 
     /**
-     * Arrives a fleet that is not going anywhere, by water if there is any.
-     * <p>
-     * Put near a rupture on purpose when the system has one: the job is to fish something out, and a
-     * fleet stranded a jump away from anywhere to fish is a job that opens by sending the player
-     * somewhere else. Failing that, near the player, which at least reads as having limped this far.
+     * Spawns a stranded fleet near a pond if the system has one (so the quest doesn't send the
+     * player elsewhere), otherwise near the player.
      */
     protected boolean placeStranded() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -197,7 +179,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         if (FleetQuest.startOn(fleet, type) != null) return true;
 
-        //nothing took it, so nothing is left standing about with no reason to be there
+        //no quest took it; despawn rather than leave it standing idle
         fleet.despawn();
 
         return false;

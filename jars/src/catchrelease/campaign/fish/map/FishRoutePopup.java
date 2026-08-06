@@ -24,12 +24,11 @@ import java.util.Set;
  * The fishing planner: a card over the map that asks one question - which fish do you need? -
  * and turns the answer into a plotted route.
  * <p>
- * The list leads with what is already being asked for: species named by open jobs and by the
- * shop's next rungs, each tagged with who wants it, then every other known species below. Up to
+ * Leads with what's already being asked for (open jobs and the shop's next rungs, each tagged
+ * with who wants it), then every other known species below. Up to
  * {@link FishRoutePlanner#MAX_PICKS} picks; PLOT ROUTE hands them to the planner and closes.
- * Everything is drawn by hand for the same reason the pane's chips are - the popup floats over
- * the map screen, where the tooltip-and-button machinery belongs to the map underneath - and
- * every event inside the card is consumed so a click here never pans the map under it.
+ * Drawn by hand, like the pane's chips - the tooltip/button machinery belongs to the map screen
+ * underneath - and every event inside the card is consumed so a click here never pans the map.
  */
 public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 

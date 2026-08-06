@@ -29,26 +29,13 @@ import java.util.List;
 /**
  * GraphicsLib's distortion, running in the campaign.
  * <p>
- * The shaders themselves were never the problem. What is combat-bound is the plumbing around them:
- * {@code DistortionShader} is a {@code BaseCombatLayeredRenderingPlugin} that keeps its distortion
- * list in {@code Global.getCombatEngine().getCustomData()}, and outside a battle there is no engine
- * to hold it. So the plumbing is rebuilt here against the campaign - a Luna campaign renderer for
- * the draw and a static list for the distortions - and GraphicsLib's own shader files are loaded and
- * driven directly.
- * <p>
- * Two passes, which is how the effect works at all:
- * <ol>
- * <li>Every distortion sprite is drawn into ShaderLib's auxiliary buffer through 2dtangent, which
- * turns each one into a field of screen-space offsets rather than a picture.</li>
- * <li>The screen is copied to a texture and drawn back over itself through distortion, which reads
- * that offset field and samples the screen displaced by it.</li>
- * </ol>
- * Only two of ShaderLib's helpers are unusable out here, and both for the same reason - they ask the
- * combat viewport for the zoom. {@link #unitsToUV} and {@link #isOnScreen} do the same arithmetic
- * against the campaign viewport we are handed.
- * <p>
- * The distortion objects are GraphicsLib's own: {@code RippleDistortion} and {@code WaveDistortion}
- * are plain data with an advance on them and no engine inside, so they work as they are.
+ * {@code DistortionShader} keeps its distortion list in {@code Global.getCombatEngine().getCustomData()},
+ * unavailable outside a battle - so the plumbing is rebuilt here (a Luna campaign renderer for the
+ * draw, a static list for the distortions) driving GraphicsLib's shader files directly. Two passes:
+ * distortion sprites render into ShaderLib's auxiliary buffer via 2dtangent as an offset field, then
+ * the screen is copied and redrawn displaced by that field. {@link #unitsToUV} and {@link #isOnScreen}
+ * reimplement the two ShaderLib helpers that read zoom off the combat viewport, unusable here for the
+ * same reason.
  */
 public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
@@ -80,12 +67,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected final int[] indexAux = new int[7];
 
     /**
-     * Adds a distortion to the campaign, hooking the renderer up the first time one is asked for -
-     * and again after a load, see {@link #get()}.
-     * <p>
-     * Registered transient, so it is never written into a save - the distortions in flight at the
-     * moment of saving are worth nothing on load, and a renderer holding GL program ids certainly is
-     * not.
+     * Adds a distortion, hooking the renderer up on first use (see {@link #get()}). Registered
+     * transient - never saved, since in-flight distortions and GL program ids are worthless after load.
      */
     public static void addDistortion(DistortionAPI distortion) {
         if (distortion == null) return;
@@ -97,29 +80,22 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         if (instance != null) instance.distortions.remove(distortion);
     }
 
-    /**
-     * Whether the campaign can run this at all - shaders and framebuffers both have to be on, and the
-     * user has to have left distortion on in GraphicsLib. Somebody who turned it off for combat did
-     * not mean "except in the campaign".
-     */
+    /** Requires shaders and framebuffers enabled, and distortion left on in GraphicsLib's settings. */
     public static boolean isSupported() {
         readSettings();
 
         return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed() && enableDistortion;
     }
 
-    /** How many distortions one pass may draw, which the user gets a say in as well. */
+    /** User-configurable cap on distortions drawn per pass. */
     public static int getMaxDistortions() {
         readSettings();
 
         return maxDistortions;
     }
 
-    /**
-     * The two settings combat obeys, read where GraphicsLib reads them: the file sits in its mod root
-     * and {@code loadJSON} merges it across mods. Once per run, since nothing can change them without
-     * a restart.
-     */
+    /** Reads the same GRAPHICS_OPTIONS.ini GraphicsLib reads (merged across mods via loadJSON).
+     *  Once per run - nothing changes these without a restart. */
     protected static void readSettings() {
         if (settingsRead) return;
         settingsRead = true;
@@ -130,7 +106,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
             enableDistortion = settings.getBoolean("enableDistortion");
             maxDistortions = settings.getInt("maximumDistortions");
         } catch (IOException | JSONException e) {
-            //off rather than on, which is what GraphicsLib does with the same file unreadable
+            //fail off, matching GraphicsLib's own behavior when this file is unreadable
             Global.getLogger(CampaignDistortionRenderer.class).log(Level.ERROR,
                     "GraphicsLib's graphics options will not read - campaign distortion stays off", e);
             enableDistortion = false;
@@ -138,14 +114,9 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     }
 
     /**
-     * The instance is a static and lives as long as the application does; Luna's renderer list does
-     * not. It hangs off a script in sector memory and the transient half of it is {@code @Transient},
-     * so every load and every new game leaves this one still here and no longer registered with
-     * anybody. Hence the check on every ask rather than only the first: the first distortion after a
-     * load is what hooks the pass back in.
-     * <p>
-     * Only the registration has to be rebuilt. The GL programs outlive a load along with the context
-     * they were compiled in.
+     * The instance is a static that outlives loads and saves; Luna's renderer registration does not,
+     * so every ask checks and re-registers if needed - the GL programs are unaffected and don't need
+     * rebuilding.
      */
     public static CampaignDistortionRenderer get() {
         if (instance == null) instance = new CampaignDistortionRenderer();
@@ -189,10 +160,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         draw(viewport);
     }
 
-    /**
-     * Loaded on the first frame that has something to draw rather than up front, so a game that
-     * never opens a rupture never compiles any of it.
-     */
+    /** Lazily loaded on the first frame with something to draw, so a game that never opens a
+     *  rupture never compiles any of it. */
     protected boolean load() {
         if (loaded) return usable;
         loaded = true;
@@ -242,7 +211,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected void draw(ViewportAPI viewport) {
         Vector2f norm = renderOffsetField(viewport);
 
-        //and now the screen, sampled through the field that was just built
         ShaderLib.beginDraw(program);
 
         GL20.glUniform2f(index[3], norm.x, norm.y);
@@ -259,13 +227,9 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     }
 
     /**
-     * Every distortion drawn into the auxiliary buffer through 2dtangent, which turns each sprite
-     * into a field of offsets rather than a picture. Returns the normalisation the second pass needs
-     * to read those offsets back at the right strength.
-     * <p>
-     * The screen is copied first. In combat GraphicsLib's own pipeline has already done that by the
-     * time this runs; out here nothing has, and sampling a texture nobody filled gives a black
-     * screen bent into interesting shapes.
+     * Draws every distortion into the auxiliary buffer via 2dtangent as a field of offsets; returns
+     * the normalization the second pass needs to read them back at the right strength. Copies the
+     * screen first - in combat GraphicsLib's pipeline already does this, but nothing does out here.
      */
     protected Vector2f renderOffsetField(ViewportAPI viewport) {
         ShaderLib.copyScreen(ShaderLib.getScreenTexture(), GL13.GL_TEXTURE0);
@@ -364,12 +328,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    /**
-     * World units as a share of the screen texture, which is what the shader wants its strength in.
-     * <p>
-     * ShaderLib has this, and it is one of the two things in there that cannot be used out here - it
-     * reads the zoom off the combat viewport. Same arithmetic, campaign viewport.
-     */
+    /** World units as a share of the screen texture. Reimplements ShaderLib's version (unusable here
+     *  - it reads zoom off the combat viewport) against the campaign viewport instead. */
     protected static float unitsToUV(ViewportAPI viewport, float units) {
         float zoom = viewport.getViewMult();
         if (zoom <= 0f) return 0f;
@@ -377,7 +337,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return units / (ShaderLib.getInternalHeight() * zoom);
     }
 
-    /** The other one. */
+    /** Same reason as {@link #unitsToUV} - reimplemented against the campaign viewport. */
     protected static boolean isOnScreen(ViewportAPI viewport, Vector2f location, float radius) {
         return viewport.isNearViewport(location, radius);
     }

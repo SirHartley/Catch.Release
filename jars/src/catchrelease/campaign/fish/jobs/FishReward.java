@@ -17,16 +17,10 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
- * What somebody in a bar is offering for a fish.
+ * A job's payout: an abstract thing that can describe and hand itself over.
  * <p>
- * The point of the fishing is that it is worth doing, and credits alone make it a job. The people
- * who want a specimen badly enough to ask a stranger for one are the people with something better
- * than money: a spare rig off the back of a workshop, a word about where a thing lives, a crate
- * nobody is going to miss. So a reward is a thing that knows how to describe itself and how to hand
- * itself over, and a job holds a list of them without caring what they are.
- * <p>
- * Every kind here already exists somewhere in the mod - this does not invent a currency, it borrows
- * the shop's own grants so a reward and a purchase put the same thing in the same place.
+ * Every kind here reuses an existing grant elsewhere in the mod (upgrades, tackle, shop items), so
+ * a reward and a purchase put the same thing in the same place.
  */
 public abstract class FishReward {
 
@@ -93,12 +87,7 @@ public abstract class FishReward {
         }
     }
 
-    /**
-     * A rung on the rig, which is the reward the shop would otherwise have charged for.
-     * <p>
-     * Levels rather than a flat unlock, so the same reward can be handed out by a small favour and a
-     * large one without needing two kinds of it. Clamped by the sheet's own ceiling on the way in.
-     */
+    /** An upgrade-stat level grant, clamped to the sheet's ceiling on the way in; levels (not a flat unlock) let small and large favours reuse the same reward type. */
     public static class Upgrade extends FishReward {
         public final String statId;
         public final int levels;
@@ -126,13 +115,7 @@ public abstract class FishReward {
         }
     }
 
-    /**
-     * A module for one of the rigs.
-     * <p>
-     * Granting it is owning it and then wearing it. Worth knowing that fitting displaces whatever was
-     * in that slot - which is what buying one does too, and which now costs nothing to undo, since
-     * the thing that was displaced is still the player's.
-     */
+    /** A rig module: grants ownership and fits it, displacing whatever was in that slot (same as a purchase) - free to undo since the displaced module stays owned. */
     public static class TackleReward extends FishReward {
         public final Tackle tackle;
 
@@ -147,12 +130,10 @@ public abstract class FishReward {
 
         @Override
         public void grant() {
-            //BOTH fits either rig, so it has to be told which - the drones, since that is the rig
-            //everything fits and the one a module is most likely to be wanted on
+            //BOTH fits either rig; default to drones, since everything fits there
             Tackle.Fit rig = tackle.fit == Tackle.Fit.BOTH ? Tackle.Fit.DRONE : tackle.fit;
 
-            //given, so owned. Somebody who hands you a module has not lent you a slot - taking it
-            //out later and putting it back must not send you to the shop to buy your own gift
+            //grants ownership, not just a fit - removing it later must not require buying it back
             TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
         }
@@ -180,13 +161,7 @@ public abstract class FishReward {
         }
     }
 
-    /**
-     * Anything the game carries as a special item, blueprints included.
-     * <p>
-     * One class for the lot because that is genuinely all a blueprint is - a special item whose id
-     * says what kind it is and whose data says which one. Splitting them would be three classes that
-     * differ by a string.
-     */
+    /** Any special item, blueprints included - a blueprint is a special item where id says the kind and data says which one. */
     public static class Blueprint extends FishReward {
         public final String itemId;
         public final String data;
@@ -198,8 +173,7 @@ public abstract class FishReward {
 
         @Override
         public String describe() {
-            //named where the game can name it, since "a weapon blueprint" is a worse offer than the
-            //same offer with the weapon in it - the player decides whether to take a job on this
+            //name the specific item when possible - better offer text for deciding whether to take the job
             if (Items.SHIP_BP.equals(itemId)) return named("blueprint", hullName());
             if (Items.WEAPON_BP.equals(itemId)) return named("weapon blueprint", weaponName());
             if (Items.FIGHTER_BP.equals(itemId)) return named("fighter blueprint", wingName());

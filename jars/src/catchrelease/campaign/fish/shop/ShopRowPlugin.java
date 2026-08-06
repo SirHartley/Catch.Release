@@ -13,14 +13,12 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * One line of the shelf list: the thing's name, and its state readable without selecting it - lit
- * pips for a ladder, a price-coloured mark for a module, MAX and FITTED said outright.
+ * One line of the shelf list: name, and state readable without selecting it (lit pips for a
+ * ladder, a price-coloured mark for a module, MAX/FITTED said outright).
  * <p>
- * Drawn rather than assembled, because everything on it moves: the row reads level, fit, and
- * affordability off the live data every frame, so a purchase never leaves a stale row behind and
- * nothing has to find and rewrite it. Input is handled by hand for the same reason the look is -
- * a stock button owns its whole rectangle, and this row wants a hover glow, a selection bar, and
- * pips inside the same one.
+ * Drawn from live data every frame rather than assembled once, so a purchase never leaves a stale
+ * row. Input handled by hand since a stock button can't give a hover glow, selection bar, and pips
+ * their own regions within one row.
  */
 public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
@@ -70,7 +68,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         float width = pos.getWidth();
         float height = pos.getHeight();
 
-        //a row the scroller has moved out of the window is not there
+        //culled if scrolled out of the visible window
         if (y + height < view.getY() || y > view.getY() + view.getHeight()) return;
 
         ShopUi.startClip(view.getX(), view.getY(), view.getWidth(), view.getHeight());
@@ -78,7 +76,6 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         boolean selected = host.isSelected(entry);
         boolean hovered = !selected && isMouseOver();
 
-        //the field: quiet by default, lit under the mouse, held bright while selected
         if (selected) {
             ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.5f * alphaMult);
             ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, Misc.getBrightPlayerColor(), 0.9f * alphaMult);
@@ -108,7 +105,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
-        //on the pixel, since a bitmap font off the pixel is what blur is
+        //rounded to the pixel - bitmap fonts blur off-pixel
         name.draw(Math.round(x + PAD_SIDE + ACCENT_WIDTH),
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
@@ -132,15 +129,12 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //an owned module wears no price, so without a mark the row's end would just be blank.
-        //The empty slot counts as owned too, but stays bare - OWNED on an absence would claim
-        //there is a thing there
+        //empty slot (NONE) counts as owned but stays unmarked - OWNED on an absence would claim there's a thing there
         if (entry.isOwned() && entry.tackle != Tackle.NONE) {
             drawMark("OWNED", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 
-        //an unbought module wears a swatch of what it is paid in
         FishRarity rarity = entry.getPriceRarity();
         if (rarity == null) return;
 

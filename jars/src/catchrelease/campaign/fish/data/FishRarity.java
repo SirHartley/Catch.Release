@@ -3,12 +3,8 @@ package catchrelease.campaign.fish.data;
 import java.awt.Color;
 
 /**
- * Rarity ladder: the mote colour that goes with it, and how the thing behaves before it is caught.
- * <p>
- * A rare fish is harder to get to as well as harder to land. SPEED is how fast its mote crosses the
- * gap and WANDER how far it strays from a straight line on the way - a common one drifts over and is
- * where you left it, a legendary one is quick and does not hold a course, so getting a drone or a
- * harpoon onto it is its own problem before the catch has even started.
+ * Rarity ladder: mote colour, plus how fast (SPEED) and erratically (WANDER) the mote moves before
+ * it's caught - a rare fish is harder to get to as well as harder to land.
  */
 public enum FishRarity {
 

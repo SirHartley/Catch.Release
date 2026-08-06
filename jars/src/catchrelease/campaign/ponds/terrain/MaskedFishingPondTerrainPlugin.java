@@ -35,23 +35,19 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 /**
- * The pond, as terrain rather than as a custom entity.
- * <p>
- * Terrain differs from a custom entity in a few ways that matter here:
+ * The pond, as terrain rather than a custom entity. Differences that matter here:
  * <ul>
- * <li>The spec lives in data/campaign/terrain.json and only carries a plugin class - everything the
- * custom entity spec used to declare (name, radius, layers, tags, map icon) is now the plugin's job,
- * and is set up in {@link #init(String, SectorEntityToken, Object)} or answered by an override.</li>
- * <li>A terrain entity is created with a radius of 0 and {@link CampaignTerrainAPI#setRadius(float)}
- * is the only way to change it - {@code SectorEntityToken} does not expose it.</li>
- * <li>The plugin hangs off {@link CampaignTerrainAPI#getPlugin()}, not {@code getCustomPlugin()};
- * see {@link #getPondPlugin(SectorEntityToken)}.</li>
- * <li>{@link #getActiveLayers()} and {@link #getRenderRange()} throw in {@link BaseTerrain} unless
- * overridden, and {@link #advance(float)} in the base class walks the local fleets to apply terrain
- * effects - which a pond has none of, hence {@link #shouldCheckFleetsToApplyEffect()}.</li>
+ * <li>Spec is in data/campaign/terrain.json (plugin class only); name/radius/layers/tags/icon are
+ * set up in {@link #init(String, SectorEntityToken, Object)} or by an override here instead.</li>
+ * <li>Radius starts at 0; only {@link CampaignTerrainAPI#setRadius(float)} can change it.</li>
+ * <li>Plugin is {@link CampaignTerrainAPI#getPlugin()}, not {@code getCustomPlugin()} - see
+ * {@link #getPondPlugin(SectorEntityToken)}.</li>
+ * <li>{@link #getActiveLayers()}/{@link #getRenderRange()} throw in {@link BaseTerrain} unless
+ * overridden; {@link #advance(float)} walks local fleets for effects unless
+ * {@link #shouldCheckFleetsToApplyEffect()} returns false.</li>
  * </ul>
- * Entity scripts still work: the terrain entity advances its own scripts before it advances this
- * plugin, so the ripple renderer can stay attached to the entity.
+ * The entity still advances its own scripts before this plugin, so the ripple renderer stays
+ * attached to the entity.
  */
 public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
@@ -63,12 +59,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         public boolean temporary = false;
         public float lifetime = 0f;
 
-        /**
-         * A pond that is only the look of one: no pond tag, so the rod cannot target it, the
-         * spawner does not count it and quests do not pick it; no camera hold; no motes of its
-         * own; no map icon. Built for the depth bomb's break to wear; the bomb is gone, and this
-         * stays as the way to put the look of a rupture somewhere without putting a rupture there.
-         */
+        /** Look-only pond: no pond tag (untargetable, not counted/pickable), no camera hold, no motes, no map icon. */
         public boolean visualOnly = false;
 
         public PondParams(long seed, float radius) {
@@ -98,19 +89,18 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     protected PondParams params;
 
-    /** Temporary ponds: how long the rupture holds before it pulls itself shut on its own. */
     protected boolean temporary = false;
     protected float lifeLeft = 0f;
     protected boolean wasOpened = false;
     protected boolean expiring = false;
 
-    /** Only the look of a pond - see {@link PondParams#visualOnly}. */
+    /** See {@link PondParams#visualOnly}. */
     protected boolean visualOnly = false;
 
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
 
-    /** Seconds the pond has been advancing. What the deep field's own drift runs off. */
+    /** Seconds advancing; drives the depth field's drift. */
     protected float elapsed = 0f;
 
     transient protected PondDepthField depthField;
@@ -121,10 +111,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     transient protected EnumSet<CampaignEngineLayers> layers = createLayers();
 
-    /**
-     * The pond plugin on an entity, or null if that entity is not a pond. Replaces the
-     * {@code getCustomPlugin()} cast the custom entity version needed.
-     */
+    /** The pond plugin on an entity, or null if it isn't one. */
     public static MaskedFishingPondTerrainPlugin getPondPlugin(SectorEntityToken entity) {
         if (!(entity instanceof CampaignTerrainAPI)) return null;
 
@@ -148,10 +135,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         name = NAME;
 
-        //the terrain entity is built with no name, no tags of ours and a radius of 0.
-        //A visual-only pond does not carry the pond tag: the tag is how the rod finds a target,
-        //how the spawner counts and spaces the real ones, and how the quests pick theirs -
-        //dressing is none of those things
+        //entity is built with no name/tags/radius; visualOnly ponds skip the pond tag (see PondParams.visualOnly)
         entity.setName(NAME);
         if (!visualOnly) entity.addTag(TERRAIN_ID);
         if (entity instanceof CampaignTerrainAPI) {
@@ -179,19 +163,17 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         return layers;
     }
 
-    /** Same range the custom entity plugin used, so the pond pops in and out exactly as it did. */
     @Override
     public float getRenderRange() {
         return entity.getRadius() + 100f;
     }
 
-    /** A pond does nothing to fleets sitting in it, so the base class need not go looking for any. */
     @Override
     protected boolean shouldCheckFleetsToApplyEffect() {
         return false;
     }
 
-    /** Never reached while there are no fleet effects, but the base class throws rather than answer. */
+    /** Unreachable with no fleet effects, but {@link BaseTerrain} throws unless overridden. */
     @Override
     public String getEffectCategory() {
         return TERRAIN_ID;
@@ -204,8 +186,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     @Override
     public boolean hasMapIcon() {
-        //dressing is not a place - it is gone shortly, and a map icon would promise somewhere
-        //worth flying to
         return !visualOnly;
     }
 
@@ -242,10 +222,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!isActive && activity > 0) activity -= amount / ACTIVATION_SPOOL_UP_TIME;
         activity = Math.max(0f, Math.min(1f, activity));
 
-        //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
-        //since they are stencilled to the mask - invisible, but real enough to be harpooned.
-        //And never into dressing: a visual-only pond is only the look of the water, and it does
-        //not breed anything of its own
+        //only spawns while active and not visualOnly - motes on a closed pond are stencilled invisible but still harpoonable
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed() && isActive && !visualOnly) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
@@ -253,11 +230,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         advanceTemporary(amount);
     }
 
-    /**
-     * A temporary pond runs down its clock while open and removes itself once it has spooled
-     * shut, whichever of the clock or the player leaving closed it. The campaign pauses for the
-     * catch itself, so time spent actually fishing the rupture costs none of its life.
-     */
+    /** Counts down while open (campaign is paused during the catch itself); removes entity once spooled shut. */
     protected void advanceTemporary(float amount) {
         if (!temporary || expiring) return;
 
@@ -277,7 +250,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     public void initRippleRenderer(){
         if (rippleRenderer == null){
-            RippleData data = new RippleData(entity.getLocation(), 3f, 6f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f); //magic bullshit go
+            RippleData data = new RippleData(entity.getLocation(), 3f, 6f, UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR,entity.getRadius(),3f, 12f, 0.05f);
             data.home = entity.getContainingLocation();
             rippleRenderer = new UnstableFabricRippleTerrainRenderer(data, entity);
             entity.addScript(rippleRenderer);
@@ -287,7 +260,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void activate(){
         if (isActive) return;
 
-        //the idle ripples may not exist yet: activate can arrive before this plugin has advanced once
+        //activate can arrive before this plugin has ever advanced, so the idle ripples may not exist yet
         initRippleRenderer();
 
         isActive = true;
@@ -295,21 +268,11 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         throwOpeningDistortion();
 
-        //holds the camera while the player is here, and closes the pond once they have left. Sector
-        //level rather than on the entity: entity scripts do not advance while the game is paused.
-        //Not over dressing: a visual-only pond takes the camera nowhere, and a temporary one
-        //closes on its own clock rather than on the player leaving
+        //on the sector, not the entity: entity scripts don't advance while paused
         if (!visualOnly) Global.getSector().addScript(new PondCameraFocusScript(entity));
     }
 
-    /**
-     * The shove space takes as the rupture opens.
-     * <p>
-     * A real distortion rather than another drawn ring: GraphicsLib's own ripple, run through
-     * {@link CampaignDistortionRenderer}, so what bends is whatever happens to be behind the pond.
-     * Silently does nothing where shaders or framebuffers are off, which is the same thing
-     * GraphicsLib does in combat.
-     */
+    /** GraphicsLib ripple through {@link CampaignDistortionRenderer}; no-ops if shaders/framebuffers are off. */
     protected void throwOpeningDistortion() {
         if (!CampaignDistortionRenderer.isSupported()) return;
 
@@ -333,8 +296,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         isActive = false;
 
-        //expired rather than simply dropped: the renderer is an entity script, and letting go of the
-        //reference without ending it leaves it running and spawning ripples for a pond that is shut
+        //expired, not just dropped - it's an entity script; an unexpired reference keeps running
         if (rippleRenderer != null) rippleRenderer.fadeAndExpire(1f);
         rippleRenderer = null;
     }
@@ -347,7 +309,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
 
-        //not !isActive: a closing pond keeps rendering while it spools back down
+        //not !isActive - a closing pond keeps rendering while it spools down
         if (activity <= 0f) return;
 
         loadSpritesIfNeeded();
@@ -373,13 +335,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             starfield.setAlphaMult(1f);
             starfield.setNormalBlend();
 
-            //pushed and popped: this used to leave blending enabled for whatever drew next
+            //push/pop so blend state doesn't leak to whatever draws next
             GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            //the trial design: the hole, cut with the stencil and shaded with gradients, no
-            //shader anywhere in it. The swirl path below stays whole for switching back
+            //alternate look: stencilled hole with gradients, no shader; swirl path below kept intact to switch back
             if (PondConstants.POND_HOLE_LOOK) {
                 holeRenderer.render(starfield, mask, warpGrid, loc, maskSize, alpha, elapsed);
 
@@ -387,7 +348,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                 return;
             }
 
-            //the camera's contribution, which is nothing at all while the camera is snapped to us
+            //zero while the camera is snapped to us - the drift term below covers that case
             Vector2f fillUvOffsetPx = ParallaxUtil.computeFillUvOffsetPx(
                     viewport,
                     loc,
@@ -397,7 +358,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
                     starfield.getTextureHeight()
             );
 
-            //and the field's own wander, which is what is left when that is zero
             Vector2f drift = ParallaxUtil.computeDriftUvOffsetPx(
                     elapsed,
                     PondConstants.POND_FILL_DRIFT,
@@ -409,15 +369,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
             Vector2f.add(fillUvOffsetPx, drift, fillUvOffsetPx);
 
-            //the eddy at the rim, spooling up with the pond - a rupture half open turns half as
-            //hard. The breathing is folded in here, so the angle the shader gets is always
-            //bounded: a standing turn that swells and eases, never one that winds up forever
+            //rim eddy, scaled by activity; breathing bounds the angle to a swell-and-ease rather than winding up forever
             float breathe = 1f + PondConstants.POND_SWIRL_BREATHE
                     * (float) Math.sin(elapsed * PondConstants.POND_SWIRL_RATE);
             maskedRenderer.setSwirl(PondConstants.POND_SWIRL_TWIST * activity * breathe,
                     PondConstants.POND_SWIRL_EDGE);
 
-            //and the funnel under it, opening out with the pond the same way
             maskedRenderer.setWell(PondConstants.POND_WELL_DEPTH * activity,
                     PondConstants.POND_WELL_GAMMA,
                     PondConstants.POND_WELL_DIM);
@@ -468,11 +425,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (layer == CampaignEngineLayers.ABOVE) {
             Stencil.startDepthMask(mask, maskSize, maskSize, loc, true);
 
-            //under the motes, and inside the same mask - depth first, then the things swimming in it.
-            //At full radius whatever the pond is doing: the mask is already spooling up around it, so
-            //an opening pond wipes across a field that was always there. Scaled by activity as well,
-            //the field started as a knot in the middle and fanned outwards, which read as the motes
-            //arriving rather than as the hole widening onto them
+            //full radius but scaled by activity, so an opening pond reads as the field fanning out, not the hole widening onto it
             getDepthField().render(loc, entity.getRadius(), alpha);
 
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
@@ -486,15 +439,12 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public void spawnRandomMote() {
         Vector2f loc = entity.getLocation();
 
-        //the rim as it stands rather than as it will be: the mask is only open this far, and a mote
-        //born at the full radius while the pond was still spooling up spawned outside its own
-        //stencil - invisible from the first frame, and catchable from it too
+        //scaled by activity, not full radius - else a mote spawns outside the still-opening stencil, invisible but catchable
         float rim = entity.getRadius() * activity * PondConstants.MOTE_SPAWN_INSET;
 
         float angle = MathUtils.getRandomNumberInRange(0, 360);
         Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, rim, angle);
         Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, rim, angle - 180);
-        //what lives here depends on the system, and the mote carries it from here on
         SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 new FishEntityPlugin.Params(targetLoc,

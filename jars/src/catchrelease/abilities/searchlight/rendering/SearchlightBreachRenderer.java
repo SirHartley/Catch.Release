@@ -15,47 +15,36 @@ import java.util.EnumSet;
 /**
  * What the breach lamp's light is sweeping across: hyperspace, seen through the beam.
  * <p>
- * The deep is drawn at its natural size and anchored to the world, not to the light - the UVs are
- * taken from where each vertex stands in the sector, so the beam slides across a starfield that
- * stays put, the way a torch slides across a floor. That anchoring is most of the effect: a window
- * shows what is behind it, a sticker travels with whatever it is stuck to.
+ * Drawn at natural size and world-anchored - UVs come from each vertex's sector position, so the
+ * beam slides across a starfield that stays put. Cropped by a gradient (vertex-ring alpha falloff
+ * matching the glow sprite's own falloff), not a stencil, so the window's edge is soft like the beam.
  * <p>
- * The searchlight's own shape does the cropping, as a gradient rather than a stencil: the fill is
- * drawn as rings of vertices whose alpha falls off the way the beam's glow sprite falls off, full
- * in the middle and nothing at the rim, so the window has the beam's soft edge rather than a
- * cookie-cutter one. The purple glow drawn over it is what says the light is doing the looking.
- * <p>
- * The parallax is borrowed from the pond, and for the pond's reason: the fill wanders on its own
- * and leans against the camera, because a beam the player is travelling with contributes no motion
- * of its own, and a hole with a dead-still background in it reads as a hole cut in paper.
+ * Parallax is borrowed from the pond: the fill leans on the camera and drifts on its own, since a
+ * beam the player travels with otherwise reads as a hole cut in dead-still paper.
  */
 public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
 
-    /** Seconds the window takes to open. Quicker than the glow's own flash fades, so the burn
-     * reads as the lamp punching through rather than the deep fading up behind it. */
+    /** Seconds the window takes to open; faster than the glow's flash fade so the burn reads as punching through, not fading up. */
     public static final float OPEN_TIME = 0.6f;
 
-    /** The window's reach as a share of the beam's radius, matched to where the glow sprite has
-     * visibly fallen off so the two shapes read as one light. */
+    /** Window's reach as a share of beam radius, matched to where the glow sprite has visibly fallen off. */
     public static final float RADIUS_MULT = 0.9f;
 
-    /** How much of the deep shows in the middle of the beam. Short of full on purpose - the
-     * fabric thins under the light rather than ceasing to exist. */
+    /** Deep's visibility at beam center; short of full since the fabric thins rather than vanishes. */
     public static final float CENTER_ALPHA = 0.85f;
 
-    /** The gradient's resolution: vertex rings from centre to rim, and segments around each. */
+    /** Gradient resolution: rings from centre to rim, segments per ring. */
     public static final int RINGS = 4;
     public static final int SEGMENTS = 48;
 
-    /** The camera lean and the standing wander, both in world units - the pond's pair, scaled
-     * down to something beam-sized. */
+    /** Camera lean and standing wander in world units - the pond's pair, scaled down. */
     public static final float PARALLAX_MAX_DISPLACEMENT = 60f;
     public static final float DRIFT = 25f;
     public static final float DRIFT_PERIOD = 17f;
 
     public transient SpriteAPI fill;
 
-    /** The light's own vector, not a copy - travelling with the beam is holding this. */
+    /** Live reference to the light's position, not a copy - travels with the beam. */
     private final Vector2f loc;
     private final float size;
 
@@ -64,7 +53,6 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
 
     private boolean expired = false;
 
-    //fadeAndExpire
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -104,8 +92,7 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
 
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
-        //the beams' own layer, registered before the glow that wears it - within a layer, draw
-        //order is registration order, and the window has to be under the light sweeping it
+        // must register before the glow layer, since draw order within a layer follows registration order
         return EnumSet.of(CampaignEngineLayers.TERRAIN_1);
     }
 
@@ -130,11 +117,10 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         float texH = fill.getHeight();
         if (texW <= 0f || texH <= 0f) return;
 
-        //natural size: one texture pixel is one world unit, which is the "full size" the deep is
-        //drawn at everywhere else it shows through
+        // natural size: 1 texture pixel = 1 world unit, matching how the deep is drawn elsewhere
         float fillSizeWorld = texW;
 
-        //both terms come back in texture pixels, added, and taken down to UVs here
+        // both offsets are in texture pixels; converted to UV below
         Vector2f lean = ParallaxUtil.computeFillUvOffsetPx(viewport, loc,
                 PARALLAX_MAX_DISPLACEMENT, fillSizeWorld, texW, texH);
         Vector2f wander = ParallaxUtil.computeDriftUvOffsetPx(timePassed,
@@ -149,15 +135,14 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         fill.bindTexture();
 
-        //the UVs run past [0,1] because they are world coordinates - the texture has to tile
+        // UVs run past [0,1] (world coords), so the texture must tile
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
 
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        //rim to rim in annuli rather than one fan, so the alpha can fall off in steps between the
-        //rings - a single fan only ever draws a linear gradient, and the beam's edge is softer
+        // drawn as annuli rather than one fan, so alpha can fall off in steps rather than linearly
         for (int ring = 0; ring < RINGS; ring++) {
             float tInner = ring / (float) RINGS;
             float tOuter = (ring + 1) / (float) RINGS;
@@ -182,16 +167,14 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         GL11.glPopAttrib();
     }
 
-    /** The beam's own falloff - squared, like {@code getLitStrength} answers for a spot - so the
-     * window is exactly as open as the light over any part of it is bright. */
+    /** Beam's own falloff (squared, like {@code getLitStrength}), so the window is as open as the light there is bright. */
     protected float falloff(float t) {
         float inBeam = 1f - t;
 
         return inBeam * inBeam;
     }
 
-    /** One vertex: drawn where it stands, sampling the deep by where it stands - world-anchored
-     * UVs at natural scale, plus whatever the parallax has leaned the whole fill by. */
+    /** One vertex: world-anchored UV at natural scale, plus the parallax lean/drift offset. */
     protected void emit(float x, float y, float fillSizeWorld, float uOff, float vOff, float alpha) {
         GL11.glColor4f(1f, 1f, 1f, alpha);
         GL11.glTexCoord2f(x / fillSizeWorld + uOff, y / fillSizeWorld + vOff);

@@ -5,11 +5,8 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 
 /**
- * How good a specimen is for its species, in five steps.
- * <p>
- * Judged against the species' own range rather than against fish in general, so a fine prawn is
- * graded as a prawn and not thrown out for weighing less than a poor tuna. The bands are uneven on
- * purpose: most specimens should come out average, and EXCEPTIONAL should be worth saying out loud.
+ * How good a specimen is for its species (not fish in general), in five steps. Bands are uneven -
+ * most specimens land AVERAGE, and EXCEPTIONAL is meant to be rare.
  */
 public enum FishGrade {
 

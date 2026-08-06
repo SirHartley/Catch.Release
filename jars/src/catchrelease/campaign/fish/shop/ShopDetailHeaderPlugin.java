@@ -12,13 +12,9 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.awt.Color;
 
 /**
- * The top of the detail pane: the item's portrait in a cargo-square, its name beside it, and its
- * ladder - or its slot - spelled out underneath.
- * <p>
- * The square is the same shape the catch readout uses, backlit the same way, because everything in
- * this mod that is a thing-you-own gets shown in one. The backlight is the colour of what the next
- * purchase costs, so the price tier reads before a single word does; a finished thing glows the
- * done-colour instead. The portrait is the placeholder mark until there is art.
+ * Detail pane header: portrait in a cargo-square, name beside it, ladder or slot info underneath.
+ * Square backlight colour is the next purchase's price tier, or the done-colour once finished.
+ * Portrait art is a placeholder pending real assets.
  */
 public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
 

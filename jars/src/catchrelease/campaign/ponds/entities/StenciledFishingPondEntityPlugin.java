@@ -57,14 +57,12 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         Vector2f center = viewport.getCenter();
         Vector2f spriteLoc = new Vector2f(entity.getLocation());
 
-        //direction = center - sprite
         Vector2f direction = Vector2f.sub(center, spriteLoc, null);
         float distToCenter = direction.length();
 
         if (distToCenter > 0f) {
             float maxDisplacement = starfield.getWidth() * 0.3f;
 
-            //circle radius
             float halfW = viewport.getVisibleWidth() * 0.5f;
             float halfH = viewport.getVisibleHeight() * 0.5f;
             float radius = (float) Math.sqrt(halfW * halfW + halfH * halfH);
@@ -106,7 +104,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
         Stencil.startDepthMask(stencil, entity.getRadius(), entity.getRadius(), entity.getLocation(), true);
 
-        // background (draw at displaced position)
         if (layer == CampaignEngineLayers.TERRAIN_2) {
             if (warp == null) {
                 int cells = 6;
@@ -128,7 +125,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
             );
         }
 
-        // motes
         if (layer == CampaignEngineLayers.ABOVE) {
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
                 ((FishEntityPlugin) mote.getCustomPlugin()).externalRender(viewport);

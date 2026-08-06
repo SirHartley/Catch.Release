@@ -19,13 +19,12 @@ import java.util.List;
 /**
  * The hotkey path: hold the ability's number key to aim, release to fire.
  * <p>
- * This is a single long-lived listener rather than one per session - it has to be watching before
- * the key goes down. It intercepts the 1-9 keys itself instead of letting the UI turn them into
- * button presses, because a button press fires the ability immediately and there would be nothing
- * left to aim.
+ * A single long-lived listener rather than one per session, since it must already be watching before
+ * the key goes down. Intercepts 1-9 itself rather than letting the UI turn them into button presses,
+ * which would fire the ability immediately with nothing left to aim.
  * <p>
- * An ability is only picked up here if its spec carries {@link SkillshotSettings#TAG_SKILLSHOT} and
- * its plugin implements {@link SkillshotAbility}.
+ * Only picks up abilities whose spec carries {@link SkillshotSettings#TAG_SKILLSHOT} and whose plugin
+ * implements {@link SkillshotAbility}.
  */
 public class OnKeyPressSkillshotListener implements SkillshotInputListener, CampaignInputListener {
 
@@ -68,9 +67,8 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
             if (input.isConsumed()) continue;
 
             if (input.getEventType().equals(InputEventType.KEY_DOWN)) {
-                //already aiming: this is the held key auto-repeating, or a macro re-sending a down
-                //event without an up. Eat our own key so the ability bar cannot turn the repeat into
-                //a button press, and keep scanning - the release can be later in this same frame
+                // Already aiming: a repeat/macro re-sent KEY_DOWN. Consume it so it can't become a
+                // button press, but keep scanning - the matching KEY_UP may be later this frame.
                 if (isActive()) {
                     if (input.getEventValue() == heldSlotKey) input.consume();
                     continue;
@@ -90,8 +88,7 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
         SkillshotAbility ability = getSlottedSkillshotAbility(keyValue - FIRST_SLOT_KEY);
         if (ability == null || !ability.isUsable()) return;
 
-        //the ability does not want a reticule right now - leave the key unconsumed so the UI turns it
-        //into an ordinary button press and the ability activates the vanilla way
+        // Leave unconsumed so the UI turns it into an ordinary button press and activates vanilla-style.
         if (!ability.showReticuleOnActivation()) return;
 
         SkillshotFramework.log("Starting hotkey targeting for " + ability.getId());
@@ -143,7 +140,7 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
 
         PersistentUIDataAPI.AbilitySlotAPI slot = slots.get(slotIndex);
 
-        //the bar swaps in a different ability per slot while in hyperspace
+        // The bar swaps in a different ability per slot while in hyperspace.
         String abilityId = Global.getSector().getPlayerFleet().isInHyperspace() ? slot.getInHyperAbilityId() : slot.getAbilityId();
         if (abilityId == null || abilityId.isEmpty()) return null;
 
