@@ -112,6 +112,14 @@ public class HarpoonOffence {
      * @return whether this was an offence against anyone
      */
     public static boolean record(CampaignFleetAPI victim) {
+        return record(victim, false);
+    }
+
+    /**
+     * @param explosive whether the hull took a charge rather than a barb, which nobody treats as an
+     *                  accident and which is the one case that always ends in a contract
+     */
+    public static boolean record(CampaignFleetAPI victim, boolean explosive) {
         FactionAPI faction = getOffendedFaction(victim);
         if (faction == null) return false;
 
@@ -133,9 +141,39 @@ public class HarpoonOffence {
         //a fresh harpooning resets any patrol retry wait, so it isn't silently absorbed into the last one
         HarpoonPatrolResponse.clearRetryWait(faction.getId());
 
+        report(victim, faction.getId(), explosive);
+
         applyRepLoss(faction.getId());
 
         return true;
+    }
+
+    /**
+     * A crew that cannot answer this itself going to find somebody who can.
+     * <p>
+     * Only the ones who do not fight for a living, and only while they are still willing to talk
+     * about it - a crew already coming at the player for the repair bill, or already running, has
+     * made its own arrangements and is not also going to run an errand.
+     */
+    protected static void report(CampaignFleetAPI victim, String factionId, boolean explosive) {
+        if (isCombatCrew(victim)) return;
+
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+        if (mem.getBoolean(DEMAND_FLAG) || mem.getBoolean(FLEEING_FLAG)) return;
+
+        HarpoonWitness.begin(victim, factionId, isPlayerIdentified(), explosive);
+    }
+
+    /**
+     * Whether anybody could put a name to the player.
+     * <p>
+     * The transponder, and nothing else. Running dark is the whole of what it buys here: a crew that
+     * never learned who holed them has nobody to name to a patrol and nobody to put on a contract.
+     */
+    public static boolean isPlayerIdentified() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+
+        return player != null && player.isTransponderOn();
     }
 
     /**

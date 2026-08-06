@@ -281,7 +281,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * entirely, since there is no version of this where they wait to hear an explanation.
      */
     protected void blastFleet(CampaignFleetAPI struck) {
-        if (HarpoonOffence.record(struck)) HarpoonOffence.turnHostile(struck);
+        if (HarpoonOffence.record(struck, true)) HarpoonOffence.turnHostile(struck);
 
         detonate(ExplosionFleetDamage.MEDIUM);
     }
