@@ -1,3 +1,0 @@
-fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-catchrelease_headerCatch,Catch Header,Header,The catch,,,,,Catch
-catchrelease_celebration,Celebration effects,Boolean,FALSE,,"Confetti, a flash and the specimen thrown up over the track when a fish is landed. The readout beside the track is shown either way, so turning this off costs no information.",,,Catch

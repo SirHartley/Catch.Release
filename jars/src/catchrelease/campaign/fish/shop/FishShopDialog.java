@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -157,6 +158,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                 for (Tackle tackle : options) entries.add(ShopEntry.of(tackle, rig));
             }
+
+            //nothing here is for sale - these were bought in a bar, and the shop is only where the
+            //switch on one lives. An unbought curio has no row, so the whole shelf and the tab over
+            //it appear the moment the first one is
+            for (CrabWares ware : CrabWares.getSwitchable()) entries.add(ShopEntry.of(ware));
         }
 
         protected void refreshWallet() {
@@ -242,12 +248,37 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return out.toArray(new ShopGroup[0]);
         }
 
-        /** Entries under the current shelf ({@link #category}). */
+        /**
+         * Main tabs with anything under them, derived the same way the shelves are - the extras tab
+         * has nothing in it until something has been bought out of a coat, and a tab that opens onto
+         * an empty list is a promise the shop cannot keep.
+         */
+        protected List<ShopEntry.Kind> getStockedKinds() {
+            List<ShopEntry.Kind> out = new ArrayList<>();
+
+            for (ShopEntry.Kind kind : ShopEntry.Kind.values()) {
+                for (ShopEntry entry : entries) {
+                    if (entry.kind != kind) continue;
+
+                    out.add(kind);
+                    break;
+                }
+            }
+
+            return out;
+        }
+
+        /**
+         * Entries under the current shelf ({@link #category}), and under the current tab. Both,
+         * even though every shelf today belongs to exactly one tab - a shelf shared by two kinds
+         * would otherwise put a module on the extras list, and the shelving is derived rather than
+         * declared, so that is a thing a later change could do without meaning to.
+         */
         protected List<ShopEntry> getVisible() {
             List<ShopEntry> visible = new ArrayList<>();
 
             for (ShopEntry entry : entries) {
-                if (entry.group == category) visible.add(entry);
+                if (entry.kind == mainTab && entry.group == category) visible.add(entry);
             }
 
             return visible;
@@ -259,15 +290,20 @@ public class FishShopDialog implements InteractionDialogPlugin {
             selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
         }
 
-        /** Two tab rows: main split (upgrades/modifiers) on top, shelves within it below. */
+        /** Two tab rows: main split (upgrades/modifiers/extras) on top, shelves within it below. */
         protected void buildTabs() {
             float top = PAD + HEADER_HEIGHT + 10f;
-            float mainWidth = (LIST_WIDTH - TAB_GAP) / 2f;
 
-            ShopEntry.Kind[] kinds = ShopEntry.Kind.values();
-            for (int i = 0; i < kinds.length; i++) {
-                addTab(kinds[i], kinds[i] == ShopEntry.Kind.UPGRADE ? "Upgrades" : "Modifiers",
-                        kinds[i] == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2",
+            List<ShopEntry.Kind> kinds = getStockedKinds();
+            if (kinds.isEmpty()) return;
+
+            float mainWidth = (LIST_WIDTH - (kinds.size() - 1) * TAB_GAP) / kinds.size();
+
+            for (int i = 0; i < kinds.size(); i++) {
+                ShopEntry.Kind kind = kinds.get(i);
+
+                addTab(kind, kind.tabTitle,
+                        kind == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2",
                         false, PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
@@ -373,6 +409,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         /** Price display: credits, fish cost, and whether the player can afford both. */
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
+            if (entry.isCurio()) {
+                info.addPara(entry.isOn() ? "Switched on." : "Switched off.",
+                        entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(), 16f);
+
+                info.addPara("Already paid for. Switching it off costs nothing and does not lose"
+                        + " it.", Misc.getGrayColor(), 4f);
+                return;
+            }
+
             if (entry.isMaxed()) {
                 info.addPara("Fully upgraded.", Misc.getPositiveHighlightColor(), 16f);
                 return;
@@ -424,7 +469,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             FishRarity rarity = entry.getPriceRarity();
             boolean afford = entry.canAfford();
 
-            String label = entry.isUpgrade() ? "UPGRADE" : "FIT";
+            String label = entry.isCurio() ? (entry.isOn() ? "SWITCH OFF" : "SWITCH ON")
+                    : entry.isUpgrade() ? "UPGRADE" : "FIT";
             Color base = afford
                     ? (rarity == null ? Misc.getBasePlayerColor() : rarity.color)
                     : Misc.getGrayColor();
@@ -439,7 +485,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             button.setEnabled(afford);
 
             //tooltip only stacks vertically, so add below then re-anchor beside the real button
-            if (Global.getSettings().isDevMode()) {
+            if (Global.getSettings().isDevMode() && !entry.isCurio()) {
                 devBuyId = new Object();
 
                 ButtonAPI dev = info.addButton("DEV", devBuyId, Misc.getHighlightColor(),
