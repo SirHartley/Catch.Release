@@ -368,7 +368,7 @@ What harpooning a fleet costs.
 
 | File | What it does |
 |---|---|
-| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, hostility escalation, rep loss |
+| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the two escalation ladders — armed and unarmed |
 | `HarpoonPatrolResponse.java` | Sends one faction patrol at a time after the player |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a highlighted comm link |
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog - and the Fisherman its own - at the narrowest priority |
@@ -646,6 +646,23 @@ lean in rgb alone, and not the brighter edge that would have been the obvious wa
 **The three lamp renderers share one resting alpha on purpose.** Fan, glow and impression all read
 `0.12f - 0.04f * flicker.getBrightness()`. Fitting a module is meant to change the *shape* of the
 light, not how much of it there is, so any change to that figure belongs in all three at once.
+
+**Being harpooned escalates two different ways, and which one depends on what the crew is for.**
+`HarpoonOffence.isCombatCrew()` reads vanilla's own `$isPatrol` / `$isWarFleet` / `$isPirate`. A crew
+that fights for a living turns hostile on the second hit, which is the old rule. Everybody else gets
+a ladder of their own: once is a complaint to your face and nothing more, twice brings them after you
+for the repair bill — pursuit without hostility, which is a state vanilla supports and uses for its
+own hasslers — and three times and they stop talking, set `AVOID_PLAYER_SLOWLY`, and put it on the
+channel through `HarpoonPatrolResponse.callForHelp()`. Asked rather than inferred from strength: a
+heavily escorted convoy is still a convoy.
+
+**A rules row can take credits but cannot close a faction's books.** Both the patrol's fine and a
+holed crew's repair bill hand the outcome back through memory flags that the crime script reads on
+its next tick — there is no rule command, and adding one would mean overriding vanilla's
+`ruleCommandPackages` array in `settings.json`, which replaces rather than merges and would drop
+every other mod's commands. The bill adds a **global** marker beside the per-fleet flags, because the
+crew that was talked to need not still be near the player when anything reads it back; the marker is
+what keeps the sector-wide search off every other tick.
 
 **A harpoon has two kinds of target, with different rules.** An ordinary mote has to be unheld and
 above the fabric (or the head has to reach under); a **buried** mote has to be lit by a beam, or

@@ -555,21 +555,53 @@ catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:
 !$catchrelease_fleetQuestTaken
 !$catchrelease_fleetQuestHailed","$catchrelease_fleetQuestHailed = true
 FleetDesc
-HailPlayer",,,"They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger."
+HailPlayer",,,They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger.
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
 !$entity.isHostile",,"""$entity.catchrelease_fleetQuestPitch""","0:catchrelease_fqAccept:""We can find you one.""
 10:catchrelease_fqDecline:Decline",The pitch is read off the fleet's own memory so one row serves every kind of trouble it could be in.
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-EndConversation","They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.",,
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,"They take it the way anyone takes it. The link closes without anything further being said - and they are still going to be here.",,"Declining does not end the job. The fleet is pinned either way and the offer stands the next time the player calls."
+EndConversation",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,They take it the way anyone takes it. The link closes without anything further being said - and they are still going to be here.,,Declining does not end the job. The fleet is pinned either way and the offer stands the next time the player calls.
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile",FireAll CatchReleaseFleetQuestTurnIn,They are exactly where you left them and they have not stopped watching the water.,,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
-$catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,"The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about."
+$catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn
-EndConversation","The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.",,
+EndConversation",The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,EndConversation,The link closes. They go back to waiting.,,
+catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
+!$catchrelease_harpoonDemandDone
+!$isHostile","$catchrelease_harpoonDemandDone = true 1
+unset $ignorePlayerCommRequests
+$catchrelease_damagesConv = true 0
+AddText ""The $faction $otherShipOrFleet comes alongside without hurrying, and hails you."" $faction.baseColor
+OpenComms",,,"A holed crew that has come to be paid rather than to fight. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. The done flag is a day rather than the patrol's thirty: this is not enforcement, so a player who breaks off is hailed again next time rather than never again - the day is only there to stop the encounter reopening the comm the instant it is closed. Paying or refusing sets the long one through the command."
+catchrelease_damagesDemand,OpenCommLink,$entity.catchrelease_damagesConv score:1300,"SetTextHighlights $entity.catchrelease_harpoonDamagesDGS
+FireAll CatchReleaseDamagesOptions","""You are the one with the rope."" It is not a question, and $PersonRank $personName does not sound angry so much as tired of the shift.
+
+""We are not the navy and we are not going to pretend we are. There is a hole in a hull that was surveyed clean this morning, and somebody has to pay a yard to close it. $entity.catchrelease_harpoonDamagesDGS credits and we log it as debris.""",,
+catchrelease_damagesOptPay,CatchReleaseDamagesOptions,,DoCanAffordCheck $entity.catchrelease_harpoonDamages catchrelease_payDamages,,0:catchrelease_payDamages:Pay for the repair ($entity.catchrelease_harpoonDamagesDGS credits),"Same affordability handling as the patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
+catchrelease_damagesOptRefuse,CatchReleaseDamagesOptions,,,,"10:catchrelease_refuseDamages:""Take it up with your insurer.""",
+catchrelease_damagesPaySel,DialogOptionSelected,$option == catchrelease_payDamages,"AddRemoveCommodity credits -$entity.catchrelease_harpoonDamages true
+$entity.catchrelease_harpoonDamagesPaid = true 1
+$entity.catchrelease_harpoonDemandDone = true 30
+$global.catchrelease_damagesAnswered = true 1
+unset $entity.catchrelease_damagesConv
+ShowDefaultVisual
+EndConversation","""Right."" $PersonRank $personName reads something off a screen, nods at it, and cuts the link without another word. The $otherShipOrFleet peels away and goes back to its heading.",,"Paying the people you holed closes the faction's books as well, which is the whole point of settling with them - nobody else comes asking about a hole already paid for. The flags are given a day rather than a zero, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. The global one is what tells that script to go looking at all."
+catchrelease_damagesRefuseSel,DialogOptionSelected,$option == catchrelease_refuseDamages,"$entity.catchrelease_harpoonDamagesRefused = true 1
+$entity.catchrelease_harpoonDemandDone = true 30
+$global.catchrelease_damagesAnswered = true 1
+unset $entity.catchrelease_damagesConv
+ShowDefaultVisual
+EndConversation","There is a pause on the other end that goes on slightly too long.
+
+""Noted,"" $PersonRank $personName says, and writes something down. The link closes and the $otherShipOrFleet holds its heading, which is somehow worse than if it had not.",,"Nothing happens to the player here and nothing happens to the crew - a hauler has no enforcement behind it. It goes in the report instead, which is filed as an evasion and charged in reputation a few days later, out of sight of the conversation."
+catchrelease_harpoonedCommsFleeing,OpenCommLink,"$entity.catchrelease_harpooned score:1250
+$entity.catchrelease_harpoonFleeing","ShowDefaultVisual
+AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
+EndConversation NO_CONTINUE",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
