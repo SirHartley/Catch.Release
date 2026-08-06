@@ -75,10 +75,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         harpoon.setFacing(angleFromFleet);
     }
 
-    /**
-     * The press cuts the line while one is hauling, and only fires when none is. Checked ahead of
-     * the vanilla path, same as the rod's recall, since a shot leaves the ability on rearm.
-     */
+    /** Cuts the line while one is hauling; fires otherwise. Checked ahead of the vanilla path,
+     * same as the rod's recall, since a shot leaves the ability on rearm. */
     @Override
     public void pressButton() {
         if (cutIfHauling()) return;
@@ -87,11 +85,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     }
 
     /**
-     * No reticule while a line is out, because the press is a cut then, not a shot. Necessary for
-     * the cut to be reachable at all: the framework's key listener consumes the hotkey to open an
-     * aiming session whenever a reticule is wanted, so without this a towed player's press fired a
-     * second harpoon instead of releasing the first. With no reticule wanted, activation instead
-     * routes to {@link #onActivatedWithoutReticule()}, which cuts.
+     * No reticule while a line is out: the framework's key listener otherwise consumes the hotkey
+     * to open an aiming session, so a towed player's press would fire a second harpoon instead of
+     * releasing the first. Activation instead routes to {@link #onActivatedWithoutReticule()}, which cuts.
      */
     @Override
     public boolean showReticuleOnActivation() {
@@ -115,12 +111,10 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        //a line already out can always be cut, regardless of charges/rearm - safe only because
-        //showReticuleOnActivation is false at the same time, so hauling only ever lets go
+        //cuttable regardless of charges/rearm - safe since showReticuleOnActivation is false too
         if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
 
-        //no check for anything in range to hit - missing is allowed and is most of the skill.
-        //Charges and rearm still gate it
+        //no check for anything in range - missing is allowed and is most of the skill
         return super.isUsable();
     }
 

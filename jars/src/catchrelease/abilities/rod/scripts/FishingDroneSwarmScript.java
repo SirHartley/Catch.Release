@@ -142,18 +142,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 StatIds.FISHING_DRONE_COUNT, RodConstants.DRONE_COUNT_FALLBACK)));
     }
 
-    /**
-     * How far out the swarm will fish. The ring the player sees is drawn from the same number, so
-     * buying a bigger one is visible before anything is caught with it.
-     */
+    /** How far out the swarm will fish; the ring the player sees is drawn from the same number. */
     public static float getRingRadius() {
         return UpgradeManager.getValue(StatIds.DRONE_CATCH_AREA, RodConstants.RING_RADIUS_FALLBACK);
     }
 
-    /**
-     * How far past the ring a drone will notice and chase something. Lets a drone set off to meet
-     * a mote drifting in, and finish a chase that carries past the ring line. Widened by the upgrade.
-     */
+    /** How far past the ring a drone will notice and chase something, letting it meet a mote
+     * drifting in or finish a chase that carries past the line. */
     public static float getChaseMargin() {
         return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN,
                 RodConstants.CHASE_MARGIN_FALLBACK);
@@ -326,9 +321,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             SectorEntityToken mote = plugin.getChaseTarget();
             if (mote == null) continue;
 
-            //let it go if it drifted back outside reach - measured against the reach, not the
-            //tighter patrol orbit, or every chase past that inner circle would be called off
-            //the frame after it began
+            //measured against reach, not the tighter patrol orbit, or every chase past that inner
+            //circle would be called off immediately
             if (center == null || Misc.getDistance(mote.getLocation(), center) > getReach()) {
                 plugin.returnToOrbit();
                 continue;

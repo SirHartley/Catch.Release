@@ -53,11 +53,8 @@ public class PondCreator {
         //ponds intentionally do not orbit - following them around is tedious
     }
 
-    /**
-     * A spot with nothing in it, working outwards ring by ring until one turns up. Every bearing on
-     * a ring is tried, walked from a random start so ponds in different systems do not all end up
-     * due east of their star.
-     */
+    /** A spot with nothing in it, working outwards ring by ring, each walked from a random start
+     * so ponds do not all end up due east of their star. */
     private Vector2f getPondSpawnLoc() {
         float radius = PondConstants.MIN_DISTANCE;
         if (!system.isNebula()) radius += system.getStar().getRadius();
@@ -99,11 +96,8 @@ public class PondCreator {
         return !isInNebula(point) && !isOnRingBand(point);
     }
 
-    /**
-     * Whether a ring band runs through this spot. Rings that are terrain answer through their
-     * plugin; rings that are only art have no plugin, so their band is measured by hand off the
-     * focus, middle radius and width they carry.
-     */
+    /** Whether a ring band runs through this spot. Terrain rings answer through their plugin;
+     * art-only rings have none, so their band is measured by hand off focus/radius/width. */
     private boolean isOnRingBand(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
             if (!(terrain.getPlugin() instanceof BaseRingTerrain)) continue;
@@ -132,11 +126,8 @@ public class PondCreator {
         return false;
     }
 
-    /**
-     * Whether a nebula reaches this spot. Asked of the terrain's own containsPoint rather than
-     * measured off its centre, since a nebula is a grid of tiles with holes - distance to the
-     * entity says nothing about a given point.
-     */
+    /** Asks the terrain's own containsPoint rather than measuring off its centre, since a nebula
+     * is a grid of tiles with holes. */
     private boolean isInNebula(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
             if (!(terrain.getPlugin() instanceof NebulaTerrainPlugin)) continue;

@@ -22,16 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What was actually caught, beside the track: the specimen in a cargo-square, its name under that,
- * and its numbers under that a line at a time.
- * <p>
- * The square matches the shape and size of a cargo cell so the fish is recognisable once it is in
- * the hold, marks and all. The lines arrive one at a time, each with its own sound, so the readout
- * reads as a tally being counted out rather than a wall of numbers dumped at once.
+ * What was actually caught, beside the track: the specimen in a cargo-square (matching a cargo
+ * cell's shape/size so it's recognisable once in the hold), its name, then its numbers a line at a
+ * time, each with its own sound, reading as a tally being counted out.
  */
 public class CatchResultPanel {
 
-    /** One row of the readout: what it is on the left, what it says on the right. */
     protected static class Line {
         final String label;
         final String value;
@@ -131,13 +127,12 @@ public class CatchResultPanel {
         }
     }
 
-    /** Everything at once, for a player who would rather not be read to. */
     public void revealAll() {
         shown = lines.size();
         skipped = true;
     }
 
-    /** True once there is nothing left to arrive, which is when a keypress means "close". */
+    /** Once true, a keypress means "close" rather than "skip to end". */
     public boolean isComplete() {
         return shown >= lines.size();
     }
@@ -262,7 +257,6 @@ public class CatchResultPanel {
         }
     }
 
-    /** The bright outline just off a box and the dimmer one outside it, as the catch's panel has. */
     protected static void dress(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
         float spacing = FishConstants.MINIGAME_BORDER_SPACING;

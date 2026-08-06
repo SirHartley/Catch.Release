@@ -21,10 +21,9 @@ import java.util.List;
 
 /**
  * Keeps a population of buried motes around the player, so a searchlight always has a chance of
- * finding something. Seeded out of sight - one popping into existence inside the light would be
- * handed over, not found - and culled once well behind the player, so long games do not accumulate
- * unreachable clutter. A population target rather than a spawn rate: sitting still does not
- * accumulate them and travelling does not outrun them.
+ * finding something. Seeded out of sight and culled once well behind the player. A population
+ * target rather than a spawn rate, so sitting still does not accumulate them and travel does not
+ * outrun them.
  */
 public class BuriedMoteSpawner implements EveryFrameScript {
 
@@ -73,10 +72,8 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /**
-     * Just past what the lights can see. Measured off the lights' own reach, so it stays just out
-     * of sight when the area upgrade widens them, rather than falling inside the beam.
-     */
+    /** Just past what the lights can see, measured off their own reach so it stays out of sight
+     * as the area upgrade widens them. */
     protected static float getSpawnMinRange() {
         return Searchlight.getMaxReach() + FishConstants.BURIED_SPAWN_CLEARANCE;
     }
@@ -117,11 +114,8 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /**
-     * How much better the lights are at turning up something worth having. Applied where the
-     * population is seeded, not where a beam passes over one - a buried mote is a fixed species from
-     * the moment it exists, so this buys a better class of thing to be found, not a re-roll.
-     */
+    /** Applied where the population is seeded, not where a beam passes over one - a buried mote is
+     * a fixed species from the moment it exists, so this buys a better class of thing, not a re-roll. */
     protected static float getRareChance() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
     }
