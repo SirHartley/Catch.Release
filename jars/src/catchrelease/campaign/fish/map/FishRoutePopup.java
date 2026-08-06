@@ -66,7 +66,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
     /** Top of the search field, measured down from the card's top edge - the title block plus
      *  the same breathing room the field keeps to the chips below it. */
-    public static final float SEARCH_TOP = 34f;
+    public static final float SEARCH_TOP = 39f;
 
     /** The help mark beside the X, carrying the card's explanation as a hover. */
     public static final float HELP_SIZE = 20f;
@@ -126,6 +126,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         //fully opaque - a translucent face still vanished into the card's black
         searchField.setBgColor(ShopUi.withAlpha(Misc.getDarkPlayerColor(), 1f));
+
+        //the face reads light against the card - the type has to go the other way
+        searchField.setColor(Color.BLACK);
 
         searchSlot = panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
     }
@@ -738,7 +741,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             name.draw(Math.round(x + PAD + ICON + ICON_GAP),
                     Math.round(rowBottom + (ROW_HEIGHT + name.getHeight()) * 0.5f));
 
-            if (row.reason != null) {
+            //the marked tag retired: the yellow dot on the icon already says it, and the word
+            //ran into long names. Only a job's ask still gets a written-out tag
+            if (row.reason != null && !"marked".equals(row.reason)) {
                 LazyFont.DrawableString reason = small.createText(row.reason,
                         Misc.getHighlightColor(), small.getBaseHeight());
                 reason.draw(Math.round(x + pos.getWidth() - PAD - reason.getWidth()),
