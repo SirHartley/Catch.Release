@@ -72,6 +72,19 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return held == null ? 0f : held;
     }
 
+    /**
+     * How plainly this one is showing, found or merely betrayed.
+     * <p>
+     * The same number the dent is drawn at, and deliberately the same number rather than a second
+     * opinion about it: anything that lets a rig act on a dent has to agree with what the player is
+     * looking at, or it offers a shot at something invisible, or draws something that cannot be shot.
+     */
+    public float getDentStrength(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired()) return 0f;
+
+        return Math.max(getMarkStrength(mote), nearestBeamShadow(mote.getLocation()));
+    }
+
     private boolean expired = false;
 
     //fadeAndExpire

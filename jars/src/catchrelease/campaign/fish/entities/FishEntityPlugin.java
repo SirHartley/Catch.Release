@@ -404,10 +404,24 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
      * is one answer rather than three separate checks that can drift apart.
      */
     public static boolean isAvailable(SectorEntityToken mote) {
+        return isAvailable(mote, false);
+    }
+
+    /**
+     * The same question, asked by something that can reach under the fabric.
+     * <p>
+     * Only the dive is waived, and only for a rig fitted to see through it. Being held is not a
+     * depth - it means something else already has this one, and no amount of reach makes it yours.
+     *
+     * @param reachesUnder whether the rig asking can take a mote that has gone under
+     */
+    public static boolean isAvailable(SectorEntityToken mote, boolean reachesUnder) {
         if (mote == null || mote.isExpired()) return false;
         if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) return true;
 
-        return !fish.isHeld() && !fish.isDiving();
+        if (fish.isHeld()) return false;
+
+        return reachesUnder || !fish.isDiving();
     }
 
     /** The archetype's signature on the course, in degrees, over the shared weave. */

@@ -165,8 +165,10 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         for (SectorEntityToken mote : fleet.getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
 
-            //assist will not bend a shot onto something the shot could not take anyway
-            if (!FishEntityPlugin.isAvailable(mote)) continue;
+            //assist will not bend a shot onto something the shot could not take anyway - which is
+            //why it has to be told what the head can reach. Left asking the plain question, a
+            //fathom head could spear a diver it was never allowed to be aimed at
+            if (!FishEntityPlugin.isAvailable(mote, HarpoonEntityPlugin.reachesUnder())) continue;
             if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
 
             float off = Math.abs(Misc.getAngleDiff(aimAngle,

@@ -57,15 +57,35 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
      * the rig off, not fitted, or simply never having swept over the thing being asked about.
      */
     public static boolean isLit(SectorEntityToken mote) {
+        SearchlightImpressionRenderer renderer = getImpressions();
+
+        return renderer != null && mote != null && renderer.getMarkStrength(mote) > 0f;
+    }
+
+    /**
+     * Whether this one is showing at all - found by a beam, or merely betrayed by standing near one.
+     * <p>
+     * Weaker than {@link #isLit} on purpose, and the gap between the two is the whole of what the
+     * passive reach gave the lamps: a mote inside the detect radius bruises the fabric and is drawn
+     * as a dent, named by its ring, without any beam ever having been over it. Exposed enough to
+     * find, not exposed enough to take - which is right for an ordinary head and is exactly what a
+     * head fitted to read the fabric is for.
+     */
+    public static boolean isDetected(SectorEntityToken mote) {
+        SearchlightImpressionRenderer renderer = getImpressions();
+
+        return renderer != null && mote != null && renderer.getDentStrength(mote) > 0f;
+    }
+
+    /** The live map of what the lights have made of the dark, or null while they are off. */
+    protected static SearchlightImpressionRenderer getImpressions() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
-        if (fleet == null || mote == null) return false;
+        if (fleet == null) return null;
 
         AbilityPlugin ability = fleet.getAbility(ABILITY_ID);
-        if (!(ability instanceof SearchlightAbilityPlugin)) return false;
+        if (!(ability instanceof SearchlightAbilityPlugin)) return null;
 
-        SearchlightImpressionRenderer renderer = ((SearchlightAbilityPlugin) ability).impressionRenderer;
-
-        return renderer != null && renderer.getMarkStrength(mote) > 0f;
+        return ((SearchlightAbilityPlugin) ability).impressionRenderer;
     }
 
     @Override

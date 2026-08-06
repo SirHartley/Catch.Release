@@ -86,6 +86,16 @@ public enum Tackle {
         }
     },
 
+    //--- harpoon
+    FATHOM_HEAD("Fathom Head", Fit.HARPOON,
+            "Reads the fabric rather than the water above it. The head takes what is under the"
+                    + " surface: a specimen that has dived to shake the line, and anything the lamps"
+                    + " have betrayed as a dent rather than exposed outright.") {
+        {
+            deepStrike = true;
+        }
+    },
+
     //--- searchlights
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
             "A light that finds something breaks off its sweep and follows it for a few seconds"
@@ -138,6 +148,20 @@ public enum Tackle {
     public float qualityBias = 0f;
     public boolean shipTackle = false;
     public boolean sonar = false;
+
+    /**
+     * Whether the head reaches below the fabric, rather than only across the water.
+     * <p>
+     * Two things sit under there and neither can otherwise be taken with a line. A mote from epic
+     * upward dives on a beat and is not there to be hit while it is under - and the tool that used
+     * to answer that was the depth bomb, which is no longer in the game, so without this nothing
+     * answers it at all. And a buried mote inside a lamp's passive reach shows as a dent without
+     * ever being exposed by a beam: seen, named by its ring, and not shootable.
+     * <p>
+     * One flag for both because they are one capability. What the surface hides is a single kind of
+     * problem, and a head that can read the fabric does not care which side of it something is on.
+     */
+    public boolean deepStrike = false;
 
     /** Seconds a light holds on what it found before going back to its sweep. Zero never stops. */
     public float lockTime = 0f;

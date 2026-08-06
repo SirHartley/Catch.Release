@@ -337,7 +337,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
-| `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, exposes `isLit(mote)` and `isBreaching()` (fitted **and** lit, which is not what `burnsIntoHyperspace()` answers), beam slow, detectability penalty, yields to open ponds |
+| `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |
 | `searchlight/rendering/SearchlightFanRenderer.java` | The wedge beam, for the fan-beam tackle |
