@@ -25,6 +25,10 @@ public class FishSpec {
 
     /** Icon twitch multiplier; visual only. */
     public float jitter = 1f;
+
+    /** World angle the art faces as drawn (0 = right, 90 = up, 180 = left). Anything that
+     *  renders the sprite swimming subtracts this from the heading. Most of the art faces left. */
+    public float spriteDirection = 180f;
     public float difficulty = 50f;
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;
