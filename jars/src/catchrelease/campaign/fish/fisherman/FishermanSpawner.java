@@ -18,7 +18,8 @@ import java.util.Map;
 
 /**
  * Puts the Fisherman in the sky: a wandering independent boat that fishes the player's system
- * for two weeks and serves as an upgrade and trade stop while it does.
+ * and serves as an upgrade and trade stop while it does. It stays a fortnight of the player's
+ * absence rather than a fortnight outright - see FishermanBehavior.
  * <p>
  * Spawning is a daily roll in whatever system the player is standing in, leaned on by a hold
  * full of fish and by the boat not having come by in a couple of months. It never spawns in

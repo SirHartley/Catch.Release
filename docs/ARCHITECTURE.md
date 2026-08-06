@@ -667,6 +667,20 @@ every other mod's commands. The bill adds a **global** marker beside the per-fle
 crew that was talked to need not still be near the player when anything reads it back; the marker is
 what keeps the sector-wide search off every other tick.
 
+**The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
+front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a
+wind-down interrupted by the player turning up is cancelled outright, and the patrol assignment is
+topped up rather than cut to fit a stay that no longer has a fixed length. The same check silences
+him while nobody is watching — his lamps go into LunaLib's one sector-wide renderer list and his
+sounds play wherever the player is standing, not where they were asked for.
+
+**Closing the outfitter is not the same as closing the dialog.** `FishShopDialog` takes an optional
+`OnClose`; without one, escape closes the whole interaction, which is what the ability bar wants.
+The Fisherman passes one, because the shop runs inside his conversation and dropping the encounter
+would read as the shop having hung up on somebody the player was mid-sentence with. The way back is
+the opener's to write: the shop hides the text and visual panels and dims the background going in,
+and `InteractionDialogAPI` has no getter for what any of that was before.
+
 **A harpoon has two kinds of target, with different rules.** An ordinary mote has to be unheld and
 above the fabric (or the head has to reach under); a **buried** mote has to be lit by a beam, or
 merely detected if a fathom head is fitted — and it carries `catchrelease_buried_mote`, not

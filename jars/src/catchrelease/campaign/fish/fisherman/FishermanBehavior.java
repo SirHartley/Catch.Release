@@ -10,7 +10,9 @@ import catchrelease.helper.math.CircularArc;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
@@ -22,7 +24,10 @@ import java.util.List;
 
 /**
  * Everything the Fisherman does between arriving and leaving: sweeps a pair of yellow fan lamps,
- * stages fish under them, harpoons what it stages, and packs up after two weeks.
+ * stages fish under them, harpoons what it stages, and packs up once the visit is spent.
+ * <p>
+ * The visit is spent in days the player was not there for. He never disappears in front of
+ * anybody, and a player who stays and fishes alongside him keeps him for as long as they like.
  * <p>
  * The lamps are deliberately the old look - {@link SearchlightFanRenderer} in the original
  * yellow, no breach window, no upgrades read from anywhere - because this is somebody else's rig,
@@ -78,10 +83,27 @@ public class FishermanBehavior implements EveryFrameScript {
             return;
         }
 
-        daysOut += Global.getSector().getClock().convertToDays(amount);
+        boolean watched = isPlayerHere();
+
+        //the stay is counted in days the player was not here for. A boat that vanishes while
+        //somebody is standing next to it was never really there, and a fortnight spent fishing
+        //alongside it is a fortnight of the visit the player gets none of
+        if (!watched) daysOut += Global.getSector().getClock().convertToDays(amount);
+
+        keepWorking();
 
         if (windingDown) {
             advanceWindDown(amount);
+            return;
+        }
+
+        //the lamps are renderers in one sector-wide list and the sounds play wherever the player is
+        //standing, so an unwatched boat is put away rather than run into an empty room. Only the
+        //clock and the leaving carry on
+        if (!watched) {
+            expireLamps(0f);
+
+            if (daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
             return;
         }
 
@@ -94,8 +116,6 @@ public class FishermanBehavior implements EveryFrameScript {
 
         harpoonInterval.advance(amount);
         if (harpoonInterval.intervalElapsed()) throwHarpoon();
-
-        if (daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
     }
 
     /** Lights out, the one departure sound, and a short grace for the fade before the boat goes. */
@@ -105,12 +125,49 @@ public class FishermanBehavior implements EveryFrameScript {
 
         expireLamps(FishermanConstants.WIND_DOWN_SECONDS);
 
-        Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
-                fleet.getLocation(), new Vector2f());
+        //only ever heard by somebody who turned up during it - the packing up now happens with
+        //nobody there by definition, and a sound plays wherever the player is rather than where
+        //it was asked for
+        if (isPlayerHere()) {
+            Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
+                    fleet.getLocation(), new Vector2f());
+        }
+    }
+
+    /** Whether the player is in the same place as the boat, which is what holds the clock. */
+    protected boolean isPlayerHere() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+
+        return player != null && fleet != null
+                && player.getContainingLocation() == fleet.getContainingLocation();
+    }
+
+    /**
+     * Keeps the boat working, however long the visit turns out to be.
+     * <p>
+     * The orders are topped up rather than given once at the length of the stay, because the stay is
+     * no longer a fixed number of days - a player who never leaves keeps him here indefinitely, and
+     * an assignment cut to fit two weeks would run out under him and leave him drifting.
+     */
+    protected void keepWorking() {
+        if (fleet.getCurrentAssignment() != null) return;
+        if (!(fleet.getContainingLocation() instanceof StarSystemAPI)) return;
+
+        fleet.addAssignment(FleetAssignment.PATROL_SYSTEM,
+                ((StarSystemAPI) fleet.getContainingLocation()).getCenter(),
+                FishermanConstants.STAY_DAYS, "fishing the deep");
     }
 
     /** The lights have faded; the boat jumps out - which, for the player, is it simply going. */
     protected void advanceWindDown(float amount) {
+        //somebody turned up while the lights were going out. The visit is over when nobody is there
+        //to watch it end and not before, so the lamps come back on and the clock waits again
+        if (isPlayerHere()) {
+            windingDown = false;
+            litSoundPlayed = false;
+            return;
+        }
+
         windDownLeft -= amount;
         if (windDownLeft > 0f) return;
 
