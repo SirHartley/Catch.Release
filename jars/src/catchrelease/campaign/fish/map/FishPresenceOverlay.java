@@ -3,7 +3,9 @@ package catchrelease.campaign.fish.map;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.rendering.helper.Disc;
+import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.shop.ShopUi;
@@ -20,6 +22,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
@@ -71,11 +74,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The route badges: a ringed disc lifted off its system, growing with what it carries. */
+    /** The route badges: a ringed disc lifted off its system, sized from the icon row it
+     *  carries so the outermost fish always keeps clear water to the ring. */
     public static final float ROUTE_BADGE_RADIUS = 14f;
-    public static final float ROUTE_BADGE_GROW = 7f;
     public static final float ROUTE_BADGE_LIFT = 14f;
     public static final float ROUTE_ICON = 16f;
+    public static final float ROUTE_ICON_GAP = 2f;
+    public static final float ROUTE_BADGE_PAD = 5f;
 
     /**
      * The system view's fish strip: a thin sidebar down the map's right edge, one round holder
@@ -91,9 +96,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float SYSTEM_ICON_SHARE = 0.68f;
     public static final float STRIP_PAD = 10f;
 
-    /** The hover card over a known holder: name and status, roomy on purpose. */
+    /** The hover card over a known holder: the sidebar tooltip's story, hand-drawn. */
     public static final float INFO_PAD = 10f;
     public static final float INFO_LINE_GAP = 5f;
+    public static final float INFO_TEXT_WIDTH = 230f;
+    public static final float INFO_PORTRAIT = 48f;
 
     protected List<Blob> blobs = new ArrayList<>();
 
@@ -114,6 +121,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     /** Whether the Fish filter is on - the system strip only shows for a player who asked. */
     protected boolean filterActive = false;
+
+    /** The strip holder under the cursor as of the last render, for the codex key. */
+    protected transient FishSpec hoveredStripSpec;
 
     public void setMapWidget(Object mapWidget) {
         this.mapWidget = mapWidget;
@@ -148,6 +158,15 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
                 FishRoute.clear();
                 event.consume();
+                continue;
+            }
+
+            //the codex key over a strip holder, the same one the sidebar's rows answer
+            if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2
+                    && hoveredStripSpec != null) {
+
+                event.consume();
+                FishCodex.show(hoveredStripSpec.id);
             }
         }
     }
@@ -176,6 +195,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     @Override
     public void render(float alphaMult) {
+        //re-earned every frame - a stale hover must not keep answering the codex key
+        hoveredStripSpec = null;
+
         if (mapWidget == null || alphaMult <= 0f) return;
 
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
@@ -264,7 +286,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float hoveredY = 0f;
 
         for (FishSpec spec : known) {
-            drawHolder(x, y, radius, alphaMult);
+            drawHolder(x, y, radius, spec.rarity.color, alphaMult);
 
             String iconPath = FishLog.isCaught(spec.id)
                     ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
@@ -289,7 +311,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
         //the unknowns: catchable here, and that is all anyone is told - no name, no hover
         for (int i = 0; i < unknown; i++) {
-            drawHolder(x, y, radius, alphaMult);
+            drawHolder(x, y, radius, Misc.getDarkPlayerColor(), alphaMult);
 
             if (small != null) {
                 LazyFont.DrawableString mark = small.createText("?",
@@ -301,15 +323,18 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             y -= radius * 2f + gap;
         }
 
+        hoveredStripSpec = hovered;
+
         if (hovered != null) {
             drawFishInfo(hovered, stripLeft - 8f, hoveredY, alphaMult);
         }
     }
 
-    /** One round holder: a dark disc under a player-colour ring. */
-    protected void drawHolder(float x, float y, float radius, float alphaMult) {
+    /** One round holder: a dark disc under the rarity's ring - or the quiet player ring for a
+     *  species with no name yet. */
+    protected void drawHolder(float x, float y, float radius, Color ring, float alphaMult) {
         Disc.draw(x, y, radius, Color.BLACK, 0.8f * alphaMult, 0.8f * alphaMult, false);
-        Disc.drawOutline(x, y, radius, Misc.getDarkPlayerColor(), 0.9f * alphaMult, 1.2f);
+        Disc.drawOutline(x, y, radius, ring, 0.9f * alphaMult, 1.2f);
     }
 
     protected boolean isOver(float x, float y, float radius) {
@@ -319,20 +344,47 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         return dx * dx + dy * dy <= radius * radius;
     }
 
-    /** The hover card beside a known holder: the species' name in its rarity's colour, its
-     *  status under it, with room to breathe. Hangs off the strip's left edge, centred on the
-     *  holder, and kept inside the map rectangle. */
+    /**
+     * The hover card beside a known holder: the same story the sidebar's tooltip tells -
+     * portrait, name in the rarity's colour, type, the catch record, where it lives, and the
+     * codex key - hand-drawn, since the strip's holders are paint rather than components.
+     * Hangs off the strip's left edge, centred on the holder, kept inside the map rectangle.
+     */
     protected void drawFishInfo(FishSpec spec, float rightEdge, float centerY, float alphaMult) {
         LazyFont small = ShopUi.getSmallFont();
         if (small == null) return;
 
-        LazyFont.DrawableString name = small.createText(spec.getDisplayName(),
-                spec.rarity.color, small.getBaseHeight());
-        LazyFont.DrawableString status = small.createText(FishPresence.getStatus(spec),
-                Misc.getGrayColor(), small.getBaseHeight());
+        boolean caught = FishLog.isCaught(spec.id);
+        FishLogEntry logged = FishLog.get(spec.id);
 
-        float width = Math.max(name.getWidth(), status.getWidth()) + INFO_PAD * 2f;
-        float height = INFO_PAD * 2f + name.getHeight() + INFO_LINE_GAP + status.getHeight();
+        float textWidth = INFO_TEXT_WIDTH;
+        float size = small.getBaseHeight();
+
+        LazyFont.DrawableString name = small.createText(spec.getDisplayName(),
+                spec.rarity.color, size, textWidth);
+        LazyFont.DrawableString type = small.createText(spec.getTypeName(),
+                Misc.getGrayColor(), size, textWidth);
+        LazyFont.DrawableString record = small.createText(caught && logged != null
+                        ? "Caught " + logged.caught + (logged.caught == 1 ? " time." : " times.")
+                        : "Known only from survey data.",
+                caught ? Misc.getTextColor() : Misc.getGrayColor(), size, textWidth);
+        LazyFont.DrawableString where = small.createText(FishLocationSummary.describe(spec),
+                Misc.getTextColor(), size, textWidth);
+        LazyFont.DrawableString key = small.createText("F2 opens the codex.",
+                Misc.getGrayColor(), size, textWidth);
+
+        String iconPath = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+        SpriteAPI portrait = SpriteLoader.loadSprite(iconPath);
+        float portraitSize = portrait == null ? 0f : INFO_PORTRAIT;
+
+        float width = textWidth + INFO_PAD * 2f;
+        float height = INFO_PAD * 2f
+                + portraitSize + (portraitSize > 0f ? INFO_LINE_GAP : 0f)
+                + name.getHeight() + INFO_LINE_GAP
+                + type.getHeight() + INFO_LINE_GAP
+                + record.getHeight() + INFO_LINE_GAP
+                + where.getHeight() + INFO_LINE_GAP
+                + key.getHeight();
 
         float left = rightEdge - width;
         float bottom = centerY - height * 0.5f;
@@ -349,9 +401,30 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(left, bottom, width, height, Color.BLACK, 0.92f * alphaMult);
 
         float textY = bottom + height - INFO_PAD;
+
+        if (portrait != null) {
+            portrait.setSize(INFO_PORTRAIT, INFO_PORTRAIT);
+            portrait.setColor(Color.WHITE);
+            portrait.setNormalBlend();
+            portrait.setAlphaMult(alphaMult);
+            portrait.renderAtCenter(Math.round(left + INFO_PAD + INFO_PORTRAIT * 0.5f),
+                    Math.round(textY - INFO_PORTRAIT * 0.5f));
+            textY -= INFO_PORTRAIT + INFO_LINE_GAP;
+        }
+
         name.draw(Math.round(left + INFO_PAD), Math.round(textY));
-        status.draw(Math.round(left + INFO_PAD),
-                Math.round(textY - name.getHeight() - INFO_LINE_GAP));
+        textY -= name.getHeight() + INFO_LINE_GAP;
+
+        type.draw(Math.round(left + INFO_PAD), Math.round(textY));
+        textY -= type.getHeight() + INFO_LINE_GAP;
+
+        record.draw(Math.round(left + INFO_PAD), Math.round(textY));
+        textY -= record.getHeight() + INFO_LINE_GAP;
+
+        where.draw(Math.round(left + INFO_PAD), Math.round(textY));
+        textY -= where.getHeight() + INFO_LINE_GAP;
+
+        key.draw(Math.round(left + INFO_PAD), Math.round(textY));
     }
 
     /** How many species live here that the player has never heard of - counted, never named. */
@@ -391,7 +464,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             float sy = system.getLocation().y * factor + centerY;
 
             int count = Math.max(1, stop.fishIds.size());
-            float radius = ROUTE_BADGE_RADIUS + (count - 1) * ROUTE_BADGE_GROW;
+
+            //the ring hugs the row's far corner plus breathing room, never tighter than the base
+            float rowWidth = count * ROUTE_ICON + (count - 1) * ROUTE_ICON_GAP;
+            float radius = Math.max(ROUTE_BADGE_RADIUS, (float) Math.hypot(
+                    rowWidth * 0.5f, ROUTE_ICON * 0.5f) + ROUTE_BADGE_PAD);
             float bx = sx;
             float by = sy + ROUTE_BADGE_LIFT + radius;
 
@@ -403,7 +480,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             Disc.drawOutline(bx, by, radius, player, 0.9f * alphaMult, 1.5f);
 
             //the fish, in a row across the badge
-            float iconX = bx - (stop.fishIds.size() - 1) * (ROUTE_ICON + 2f) * 0.5f;
+            float iconX = bx - (stop.fishIds.size() - 1) * (ROUTE_ICON + ROUTE_ICON_GAP) * 0.5f;
 
             for (String id : stop.fishIds) {
                 FishSpec spec = FishPresence.getSpec(id);
