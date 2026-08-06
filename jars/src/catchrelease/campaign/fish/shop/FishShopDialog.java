@@ -22,6 +22,7 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
@@ -53,6 +54,23 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
     /** Purchase chime; named once here since the sound id isn't checked until first played. */
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
+
+    /** The card that explains the shopping-list ring, which is hand-drawn and has no tooltip of its own. */
+    public static final float TOOLTIP_WIDTH = 320f;
+    public static final float TOOLTIP_PAD = 10f;
+    public static final float TOOLTIP_GAP = 8f;
+    public static final float TOOLTIP_OFFSET = 14f;
+
+    public static final String TOOLTIP_TITLE = "Shopping list";
+
+    public static final String TOOLTIP_BODY = "Marks this as something you are saving for. Every"
+            + " fish its price asks for wears a dot wherever it is shown - in the hold, on the"
+            + " sector map, in the codex - and the route planner offers you the systems they swim"
+            + " in. The mark follows the ware rather than the price, so buying a rung moves it onto"
+            + " whatever the next one costs.";
+
+    public static final String TOOLTIP_SET = "Click the ring to add it to the list.";
+    public static final String TOOLTIP_CLEAR = "Click the ring to take it off the list.";
 
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
@@ -139,6 +157,23 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         /** Dev-mode free-grant button id, next to the buy button. Null outside dev mode. */
         protected Object devBuyId;
+
+        /**
+         * The shopping-list ring the cursor is on, and where it is - written by the rows as they
+         * draw, read here once they all have. The ring is hand-drawn rather than a stock button, so
+         * there is no tooltip to hang off it and no way to hang one that would survive the list's
+         * scissor box; this pane draws the card over everything instead.
+         */
+        protected ShopEntry markHover;
+        protected float markHoverX;
+        protected float markHoverY;
+
+        /** Built when the hovered ring changes rather than every frame - a DrawableString is a
+         *  display list, and three of them sixty times a second is a lot of display lists. */
+        protected transient String tipKey;
+        protected transient LazyFont.DrawableString tipTitle;
+        protected transient LazyFont.DrawableString tipBody;
+        protected transient LazyFont.DrawableString tipAction;
 
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
@@ -634,6 +669,86 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void render(float alphaMult) {
+            renderMarkTooltip(alphaMult);
+        }
+
+        @Override
+        public void setMarkHover(ShopEntry entry, float x, float y) {
+            markHover = entry;
+            markHoverX = x;
+            markHoverY = y;
+        }
+
+        /** Only the row that owns the card can take it down, so a row drawn later cannot clear it. */
+        @Override
+        public void clearMarkHover(ShopEntry entry) {
+            if (markHover == entry) markHover = null;
+        }
+
+        /**
+         * What the ring is for, said where the ring is.
+         * <p>
+         * Drawn from the pane rather than from the row: a plugin's own {@code render} paints over
+         * its children, and a row paints inside the list's scissor box - a card explaining the ring
+         * on the last visible row would have been sliced off at the edge of the list.
+         */
+        protected void renderMarkTooltip(float alphaMult) {
+            if (markHover == null || alphaMult <= 0f) return;
+
+            buildTooltip(markHover);
+            if (tipTitle == null) return;
+
+            float width = TOOLTIP_WIDTH;
+            float height = TOOLTIP_PAD * 2f + tipTitle.getHeight() + TOOLTIP_GAP
+                    + tipBody.getHeight() + TOOLTIP_GAP + tipAction.getHeight();
+
+            float[] at = ShopUi.placeCard(markHoverX, markHoverY, width, height, TOOLTIP_OFFSET);
+
+            ShopUi.drawCard(at[0], at[1], width, height, alphaMult);
+
+            float textX = Math.round(at[0] + TOOLTIP_PAD);
+            float textY = Math.round(at[1] + height - TOOLTIP_PAD);
+
+            tipTitle.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
+            tipTitle.draw(textX, textY);
+            textY -= tipTitle.getHeight() + TOOLTIP_GAP;
+
+            tipBody.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+            tipBody.draw(textX, textY);
+            textY -= tipBody.getHeight() + TOOLTIP_GAP;
+
+            tipAction.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+            tipAction.draw(textX, textY);
+        }
+
+        /**
+         * The card's three strings, rebuilt only when the ring under the cursor changes or is
+         * clicked - the key carries the marked state for exactly that second reason.
+         */
+        protected void buildTooltip(ShopEntry entry) {
+            boolean marked = ShopMarks.isMarked(entry.getKey());
+            String key = entry.getKey() + ":" + marked;
+
+            if (key.equals(tipKey) && tipTitle != null) return;
+
+            LazyFont body = ShopUi.getBodyFont();
+            LazyFont small = ShopUi.getSmallFont();
+            if (body == null || small == null) return;
+
+            tipKey = key;
+
+            tipTitle = ShopUi.createText(body, TOOLTIP_TITLE);
+
+            tipBody = ShopUi.createText(small, TOOLTIP_BODY);
+            tipBody.setMaxWidth(TOOLTIP_WIDTH - TOOLTIP_PAD * 2f);
+
+            tipAction = ShopUi.createText(small, marked ? TOOLTIP_CLEAR : TOOLTIP_SET);
+            tipAction.setMaxWidth(TOOLTIP_WIDTH - TOOLTIP_PAD * 2f);
+
+            for (LazyFont.DrawableString line
+                    : new LazyFont.DrawableString[]{tipTitle, tipBody, tipAction}) {
+                line.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
         }
     }
 
