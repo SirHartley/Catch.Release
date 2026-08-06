@@ -99,7 +99,7 @@ public class Searchlight implements EveryFrameScript {
     private float lockBearing = 0f;
 
     /** Fan half-angle at base radius, and minimum strength kept at its tip (never fades to nothing). */
-    public static final float FAN_HALF_ANGLE = 11f;
+    public static final float FAN_HALF_ANGLE = 14.3f;
     public static final float FAN_TIP_STRENGTH = 0.35f;
 
     /** Fan sweep rate relative to a spot's, reduced since the fan's far end covers more sky per degree. */
@@ -114,6 +114,12 @@ public class Searchlight implements EveryFrameScript {
 
     /** GraphicsLib distortion for the beam's bend; moved not respawned. Transient - holds GL state. */
     private transient WaveDistortion lens;
+
+    /** The fan's bend: a chain of stations down the wedge, since one disc only bent the tip. */
+    public static final int FAN_LENS_STATIONS = 5;
+    public static final float FAN_LENS_INTENSITY = 6f;
+
+    private transient List<WaveDistortion> fanLenses;
 
     @Override
     public boolean isDone() {
@@ -311,9 +317,28 @@ public class Searchlight implements EveryFrameScript {
                 getArea() * LOCK_HOLD_RADIUS_SHARE, lockBearing);
     }
 
-    /** Keeps the GraphicsLib distortion lens tracking the beam. */
+    /** Keeps the GraphicsLib distortion tracking the beam - one lens on a spot's landing,
+     *  a chain of them down a fan's whole wedge. */
     protected void advanceLens() {
         if (!CampaignDistortionRenderer.isSupported()) return;
+
+        if (isFanned()) {
+            //the tip lens retires; the wedge bends along its whole length instead
+            if (lens != null) {
+                CampaignDistortionRenderer.removeDistortion(lens);
+                lens = null;
+            }
+
+            advanceFanLenses();
+            return;
+        }
+
+        if (fanLenses != null) {
+            for (WaveDistortion station : fanLenses) {
+                CampaignDistortionRenderer.removeDistortion(station);
+            }
+            fanLenses = null;
+        }
 
         float size = getArea();
 
@@ -333,6 +358,50 @@ public class Searchlight implements EveryFrameScript {
 
         //skipped during fade-in, which owns size itself; otherwise picks up area upgrades
         if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
+    }
+
+    /**
+     * The chain: stations spaced evenly from the hull to the wedge's far arc, each sized to
+     * the local wedge width - never smaller than half the spacing, so the bend reads as one
+     * continuous ribbon rather than beads. Intensity sits under the spot's, since neighbouring
+     * stations overlap and their bending stacks.
+     */
+    protected void advanceFanLenses() {
+        Vector2f origin = getOrigin();
+
+        float distance = Misc.getDistance(origin, currentRenderLoc);
+        if (distance < 1f) return;
+
+        float length = distance + getArea();
+        float direction = Misc.getAngleInDegrees(origin, currentRenderLoc);
+        float tanHalf = (float) Math.tan(Math.toRadians(getFanHalfAngle()));
+
+        if (fanLenses == null) {
+            fanLenses = new ArrayList<>();
+
+            for (int i = 0; i < FAN_LENS_STATIONS; i++) {
+                WaveDistortion station = new WaveDistortion(new Vector2f(origin), new Vector2f());
+
+                station.setIntensity(FAN_LENS_INTENSITY);
+                station.setLifetime(Float.MAX_VALUE);
+                station.fadeInSize(LENS_FADE_IN);
+
+                CampaignDistortionRenderer.addDistortion(station);
+                fanLenses.add(station);
+            }
+        }
+
+        float spacing = length / FAN_LENS_STATIONS;
+
+        for (int i = 0; i < fanLenses.size(); i++) {
+            WaveDistortion station = fanLenses.get(i);
+
+            float along = (i + 0.5f) * spacing;
+            station.setLocation(MathUtils.getPointOnCircumference(origin, along, direction));
+
+            float radius = Math.max(along * tanHalf, spacing * 0.5f) * LENS_SIZE_MULT;
+            if (!station.isFading()) station.setSize(radius);
+        }
     }
 
     public Vector2f getRenderLoc() {
@@ -420,6 +489,13 @@ public class Searchlight implements EveryFrameScript {
         if (lens != null) {
             CampaignDistortionRenderer.removeDistortion(lens);
             lens = null;
+        }
+
+        if (fanLenses != null) {
+            for (WaveDistortion station : fanLenses) {
+                CampaignDistortionRenderer.removeDistortion(station);
+            }
+            fanLenses = null;
         }
 
         expired = true;
