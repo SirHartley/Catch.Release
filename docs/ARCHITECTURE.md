@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 159 Java files across eight top-level packages, plus
+What is where, and which file to open first. 162 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -270,11 +270,14 @@ The sector-map fish filter.
 
 | File | What it does |
 |---|---|
-| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane and overlay each frame |
-| `FishMapPane.java` | The side panel: search, type chips, species list |
+| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list |
+| `FishMapPane.java` | The side panel: planner button, search, type chips, species list |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
-| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap |
+| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; system hover tooltips, route badges, the close-route label |
+| `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
+| `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
+| `FishRoutePopup.java` | The planner card over the map: pick up to five, plot |
 | `FishType.java` | Filter categories with colour and icon |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
 
@@ -533,6 +536,25 @@ remainder. Never mutate in place.
 
 **`GL_LINE_STIPPLE` is useless here.** GL restarts the pattern at every segment of a `GL_LINES`
 batch, so anything shorter than one dash draws solid. Dashes are cut as geometry in `SkillshotUtils`.
+
+**The fan's breach window copies its light's shape, but not its colour.** `SearchlightFanBreachRenderer`
+reuses `SearchlightFanRenderer`'s `STEPS_ACROSS`/`STEPS_ALONG` and both falloff curves vertex for
+vertex, so the hole opens exactly where the light above it is bright. Changing the geometry or
+either alpha ramp in one and not the other pulls them apart — which is why the rim bands are a hue
+lean in rgb alone, and not the brighter edge that would have been the obvious way to draw them.
+
+**The three lamp renderers share one resting alpha on purpose.** Fan, glow and impression all read
+`0.12f - 0.04f * flicker.getBrightness()`. Fitting a module is meant to change the *shape* of the
+light, not how much of it there is, so any change to that figure belongs in all three at once.
+
+**A harpoon has two kinds of target, with different rules.** An ordinary mote has to be unheld and
+above the fabric (or the head has to reach under); a **buried** mote has to be lit by a beam, or
+merely detected if a fathom head is fitted — and it carries `catchrelease_buried_mote`, not
+`catchrelease_mote`, so a scan by the ordinary tag misses the entire sweep-expose-harpoon loop.
+`HarpoonEntityPlugin.canTake()` is the single answer to "could a shot take this"; the strike and the
+aim assist both read it, and they must not disagree in either direction. Assist on a looser test
+pulls shots onto things the strike then refuses — worse than no assist, because the player would
+have hit what they aimed at.
 
 **`Stencil.startStencil` is deprecated — it breaks the campaign radar.** Use the depth-mask pair.
 

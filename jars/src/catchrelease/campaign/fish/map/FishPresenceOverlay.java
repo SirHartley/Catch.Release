@@ -1,26 +1,51 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.rendering.helper.Disc;
+import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
+import com.fs.starfarer.api.util.Misc;
+import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Draws the fish waters over the sector map, riding its pan and zoom.
+ * Draws the fish waters over the sector map, riding the map's own pan and zoom.
  * <p>
- * Each blob fills by stencil parity: its rings are fanned into the stencil buffer (crossings flip a
- * bit), then one flat cover pass fills wherever the bit ends up set - exact coverage regardless of how
- * the rings fold, and cheap. With more than one blob up, the cover pass is diagonal stripes offset per
- * blob instead of a solid sheet, so overlapping waters interleave rather than stack.
+ * Each blob is painted by stencil parity: its smoothed rings are fanned into the stencil buffer,
+ * where crossings flip a bit, and the fill is then one flat pass wherever the bit is set. The
+ * fill therefore lands exactly once per pixel however the rings fold - no double-darkened
+ * overlaps, no fill peeking past the outline, since both come from the same rings - and one
+ * cover pass per blob is also the cheap way to draw it.
  * <p>
- * Geometry is world-space and cached; only the transform ({@code world * factor + centre}, read off
- * the map widget each frame) changes per frame.
+ * When more than one blob is up at once, the cover pass is diagonal stripes instead of a solid
+ * sheet, each blob's bands offset by its place in the list - so where two waters overlap, the
+ * colours interleave instead of stacking. One blob alone gets the solid sheet, since it has
+ * nobody to argue with.
+ * <p>
+ * The geometry is world-space and cached; only the transform is per-frame. The map widget draws
+ * everything at {@code world * factor + centre}, so this reads those two numbers off the widget
+ * each frame and applies the same arithmetic. The panel rides the map scroller's overlay layer,
+ * which the game scissors to the map rectangle unconditionally.
  */
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
@@ -36,8 +61,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final int STYLE_STRIPE_LEFT = 2;
 
     /**
-     * One set of waters: cached world-space rings, colour, fill style, and which of fill/outline to
-     * draw - a same-coloured group shares one merged outline while each member keeps its own fill.
+     * One set of waters: its cached world-space rings, its colour, how its fill is painted, and
+     * which of fill and outline it actually draws - a same-coloured group shares one merged
+     * outline blob while each member keeps its own fill, so the border never stacks on itself.
      */
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
@@ -56,6 +82,22 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
     }
 
+    /** How close, in screen pixels, the cursor has to stand to a system to be hovering it. */
+    public static final float HOVER_RADIUS_PX = 14f;
+
+    /** The tooltip's dressing: the shop's dark card with a one-pixel player-colour border. */
+    public static final float TIP_PAD = 8f;
+    public static final float TIP_ICON = 16f;
+    public static final float TIP_ICON_GAP = 6f;
+    public static final float TIP_ROW_GAP = 3f;
+    public static final float TIP_OFFSET = 16f;
+
+    /** The route badges: a ringed disc lifted off its system, growing with what it carries. */
+    public static final float ROUTE_BADGE_RADIUS = 14f;
+    public static final float ROUTE_BADGE_GROW = 7f;
+    public static final float ROUTE_BADGE_LIFT = 14f;
+    public static final float ROUTE_ICON = 16f;
+
     protected List<Blob> blobs = new ArrayList<>();
 
     /** The map's inner render widget - the thing that knows the camera. */
@@ -63,6 +105,15 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     /** Scratch for transformed rings, grown on demand - per-frame allocation is a stutter tax. */
     protected transient float[] scratch = new float[512];
+
+    /** Where the cursor was last seen, in the same screen space the map draws in. */
+    protected float mouseX = -1f;
+    protected float mouseY = -1f;
+
+    protected PositionAPI panelPos;
+
+    /** What lives where, worked out once per overlay - a catch cannot land while the map is up. */
+    protected transient Map<String, List<FishSpec>> systemFish;
 
     public void setMapWidget(Object mapWidget) {
         this.mapWidget = mapWidget;
@@ -73,13 +124,62 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     @Override
-    public void render(float alphaMult) {
-        if (blobs.isEmpty() || mapWidget == null || alphaMult <= 0f) return;
+    public void positionChanged(PositionAPI position) {
+        panelPos = position;
+    }
 
-        // Geometry is hyperspace-only; the same widget also shows single systems, where these coordinates mean nothing.
+    @Override
+    public void processInput(List<InputEventAPI> events) {
+        for (InputEventAPI event : events) {
+            if (event.isConsumed()) continue;
+
+            if (event.isMouseMoveEvent() || event.isMouseEvent()) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+            }
+
+            //the route's close label, top centre of the map - the one clickable thing out here
+            if (event.isLMBDownEvent() && FishRoute.get() != null
+                    && isInCloseLabel(event.getX(), event.getY())) {
+
+                FishRoute.clear();
+                event.consume();
+            }
+        }
+    }
+
+    protected boolean isInCloseLabel(float x, float y) {
+        float[] bounds = getCloseLabelBounds();
+        if (bounds == null) return false;
+
+        return x >= bounds[0] && x <= bounds[0] + bounds[2]
+                && y >= bounds[1] && y <= bounds[1] + bounds[3];
+    }
+
+    /** The close label's rectangle as {x, y, width, height}, or null with nowhere to put it. */
+    protected float[] getCloseLabelBounds() {
+        if (panelPos == null) return null;
+
+        LazyFont small = ShopUi.getSmallFont();
+        float width = 160f;
+        float height = (small == null ? 14f : small.getBaseHeight()) + 10f;
+
+        return new float[]{
+                panelPos.getX() + (panelPos.getWidth() - width) * 0.5f,
+                panelPos.getY() + panelPos.getHeight() - height - 8f,
+                width, height};
+    }
+
+    @Override
+    public void render(float alphaMult) {
+        if (mapWidget == null || alphaMult <= 0f) return;
+
+        //the geometry is hyperspace geometry; the same screen also shows single systems, and
+        //waters drawn over a star system would be marking coordinates that mean nothing there
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
         if (!(location instanceof LocationAPI) || !((LocationAPI) location).isHyperspace()) return;
 
+        //the whole camera, in two numbers: everything on the map is world * factor + centre
         Object factorValue = ReflectionUtils.invokeIfExists(mapWidget, "getFactor");
         if (!(factorValue instanceof Float)) return;
 
@@ -88,21 +188,244 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float centerX = mapPos.getCenterX();
         float centerY = mapPos.getCenterY();
 
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT
-                | GL11.GL_STENCIL_BUFFER_BIT);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        if (!blobs.isEmpty()) {
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT
+                    | GL11.GL_STENCIL_BUFFER_BIT);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // Fills first, then all outlines - a merged border must sit on top of every member's fill.
-        for (Blob blob : blobs) {
-            if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
-        }
-        for (Blob blob : blobs) {
-            if (blob.drawOutline) renderOutline(blob, factor, centerX, centerY, alphaMult);
+            //fills first, outlines over all of them - a merged border belongs on top of every
+            //member's fill, not underneath the next one's
+            for (Blob blob : blobs) {
+                if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
+            }
+            for (Blob blob : blobs) {
+                if (blob.drawOutline) renderOutline(blob, factor, centerX, centerY, alphaMult);
+            }
+
+            GL11.glPopAttrib();
         }
 
-        GL11.glPopAttrib();
+        renderRoute(factor, centerX, centerY, alphaMult);
+        renderHoverTooltip(factor, centerX, centerY, alphaMult);
+    }
+
+    /**
+     * The plotted route's stops: a ringed badge above each system carrying the fish to take
+     * there, a stub down to the system itself, and the close label top centre. The arrows
+     * between the stops are not drawn here - they ride the map's own arrow list, the same one
+     * intel arrows use, so they wear exactly the game's arrow style.
+     */
+    protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
+        FishRoute.Saved route = FishRoute.get();
+        if (route == null || route.stops.isEmpty()) return;
+
+        Color player = Misc.getBasePlayerColor();
+
+        for (FishRoute.Stop stop : route.stops) {
+            StarSystemAPI system = FishRoute.getSystem(stop);
+            if (system == null || system.getLocation() == null) continue;
+
+            float sx = system.getLocation().x * factor + centerX;
+            float sy = system.getLocation().y * factor + centerY;
+
+            int count = Math.max(1, stop.fishIds.size());
+            float radius = ROUTE_BADGE_RADIUS + (count - 1) * ROUTE_BADGE_GROW;
+            float bx = sx;
+            float by = sy + ROUTE_BADGE_LIFT + radius;
+
+            //the stub that says which system the badge belongs to
+            ShopUi.drawQuad(sx - 0.5f, sy + 2f, 1f, by - radius - sy - 2f,
+                    player, 0.6f * alphaMult);
+
+            Disc.draw(bx, by, radius, Color.BLACK, 0.85f * alphaMult, 0.85f * alphaMult, false);
+            Disc.drawOutline(bx, by, radius, player, 0.9f * alphaMult, 1.5f);
+
+            //the fish, in a row across the badge
+            float iconX = bx - (stop.fishIds.size() - 1) * (ROUTE_ICON + 2f) * 0.5f;
+
+            for (String id : stop.fishIds) {
+                FishSpec spec = FishPresence.getSpec(id);
+                if (spec == null) continue;
+
+                String iconPath = FishLog.isCaught(id)
+                        ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+
+                SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
+                if (icon != null) {
+                    icon.setSize(ROUTE_ICON, ROUTE_ICON);
+                    icon.setColor(Color.WHITE);
+                    icon.setNormalBlend();
+                    icon.setAlphaMult(alphaMult);
+                    icon.renderAtCenter(Math.round(iconX), Math.round(by));
+                }
+
+                iconX += ROUTE_ICON + 2f;
+            }
+        }
+
+        renderCloseLabel(alphaMult);
+    }
+
+    /** "X - CLOSE ROUTE", top centre of the map, the only way a route ever goes away. */
+    protected void renderCloseLabel(float alphaMult) {
+        float[] bounds = getCloseLabelBounds();
+        if (bounds == null) return;
+
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        boolean hovered = isInCloseLabel(mouseX, mouseY);
+        Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+        ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], bounds[3], Color.BLACK, 0.85f * alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], 1f, color, alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1] + bounds[3] - 1f, bounds[2], 1f, color, alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1], 1f, bounds[3], color, alphaMult);
+        ShopUi.drawQuad(bounds[0] + bounds[2] - 1f, bounds[1], 1f, bounds[3], color, alphaMult);
+
+        LazyFont.DrawableString text = small.createText("X - CLOSE ROUTE", color,
+                small.getBaseHeight());
+        text.draw(Math.round(bounds[0] + (bounds[2] - text.getWidth()) * 0.5f),
+                Math.round(bounds[1] + (bounds[3] + text.getHeight()) * 0.5f));
+    }
+
+    /**
+     * The tooltip on a hovered system: which known fish can be caught there, icon and name each.
+     * <p>
+     * Only what the player has earned the right to see - the same rule the list and the waters
+     * follow - so an unknown species is simply absent rather than teased, and a species known
+     * only from survey data wears the generic mark instead of its art. A system that hosts
+     * nothing the player knows about raises no tooltip at all.
+     */
+    protected void renderHoverTooltip(float factor, float centerX, float centerY, float alphaMult) {
+        if (mouseX < 0f || Global.getSector() == null) return;
+
+        //inside the map's own rectangle only - the pane on the right has its own hovers
+        if (panelPos != null
+                && (mouseX < panelPos.getX() || mouseX > panelPos.getX() + panelPos.getWidth()
+                || mouseY < panelPos.getY() || mouseY > panelPos.getY() + panelPos.getHeight())) {
+            return;
+        }
+
+        StarSystemAPI hovered = null;
+        float best = HOVER_RADIUS_PX;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.getLocation() == null) continue;
+
+            float dx = system.getLocation().x * factor + centerX - mouseX;
+            float dy = system.getLocation().y * factor + centerY - mouseY;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < best) {
+                best = distance;
+                hovered = system;
+            }
+        }
+
+        if (hovered == null) return;
+
+        List<FishSpec> fish = getSystemFish(hovered);
+        if (fish.isEmpty()) return;
+
+        drawTooltip(hovered, fish, alphaMult);
+    }
+
+    /** What lives in one system, by the regions the table assigns - cached for the overlay's life. */
+    protected List<FishSpec> getSystemFish(StarSystemAPI system) {
+        if (systemFish == null) systemFish = new HashMap<>();
+
+        List<FishSpec> cached = systemFish.get(system.getId());
+        if (cached != null) return cached;
+
+        List<FishSpec> fish = new ArrayList<>();
+        SectorRegion at = SectorRegion.of(system);
+
+        if (at != null) {
+            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+                if (spec == null || spec.id == null) continue;
+                if (!spec.regions.contains(at)) continue;
+                if (!FishPresence.isKnown(spec)) continue;
+
+                fish.add(spec);
+            }
+        }
+
+        systemFish.put(system.getId(), fish);
+
+        return fish;
+    }
+
+    /** The card itself: the system's name over one row per fish, hung off the cursor and kept
+     *  inside the map rectangle. Built per frame - it is one small card under a moving mouse. */
+    protected void drawTooltip(StarSystemAPI system, List<FishSpec> fish, float alphaMult) {
+        LazyFont body = ShopUi.getBodyFont();
+        LazyFont small = ShopUi.getSmallFont();
+        if (body == null || small == null) return;
+
+        LazyFont.DrawableString title = body.createText(system.getNameWithNoType(),
+                Misc.getBasePlayerColor(), body.getBaseHeight());
+
+        List<LazyFont.DrawableString> names = new ArrayList<>();
+        float rowsWidth = 0f;
+
+        for (FishSpec spec : fish) {
+            LazyFont.DrawableString name = small.createText(spec.getDisplayName(),
+                    spec.rarity.color, small.getBaseHeight());
+            names.add(name);
+
+            rowsWidth = Math.max(rowsWidth, TIP_ICON + TIP_ICON_GAP + name.getWidth());
+        }
+
+        float rowHeight = Math.max(TIP_ICON, small.getBaseHeight()) + TIP_ROW_GAP;
+        float width = Math.max(title.getWidth(), rowsWidth) + TIP_PAD * 2f;
+        float height = TIP_PAD * 2f + title.getHeight() + TIP_ROW_GAP + fish.size() * rowHeight;
+
+        float x = mouseX + TIP_OFFSET;
+        float y = mouseY + TIP_OFFSET + height;
+
+        //kept on the glass: flipped to the cursor's other side rather than sliding, so it never
+        //sits under the pointer
+        if (panelPos != null) {
+            if (x + width > panelPos.getX() + panelPos.getWidth()) x = mouseX - TIP_OFFSET - width;
+            if (y > panelPos.getY() + panelPos.getHeight()) y = mouseY - TIP_OFFSET;
+            if (y - height < panelPos.getY()) y = panelPos.getY() + height;
+        }
+
+        //the shop's card: a one-pixel player border around a dark field
+        ShopUi.drawQuad(x - 1f, y - height - 1f, width + 2f, height + 2f,
+                Misc.getDarkPlayerColor(), 0.9f * alphaMult);
+        ShopUi.drawQuad(x, y - height, width, height, Color.BLACK, 0.92f * alphaMult);
+
+        float textY = y - TIP_PAD;
+        title.draw(Math.round(x + TIP_PAD), Math.round(textY));
+        textY -= title.getHeight() + TIP_ROW_GAP;
+
+        for (int i = 0; i < fish.size(); i++) {
+            FishSpec spec = fish.get(i);
+
+            //the art only once one has been landed; a survey knows the name, not the face
+            String iconPath = FishLog.isCaught(spec.id)
+                    ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+
+            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
+            if (icon != null) {
+                icon.setSize(TIP_ICON, TIP_ICON);
+                icon.setColor(Color.WHITE);
+                icon.setNormalBlend();
+                icon.setAlphaMult(alphaMult);
+                icon.renderAtCenter(Math.round(x + TIP_PAD + TIP_ICON * 0.5f),
+                        Math.round(textY - TIP_ICON * 0.5f));
+            }
+
+            LazyFont.DrawableString name = names.get(i);
+            name.draw(Math.round(x + TIP_PAD + TIP_ICON + TIP_ICON_GAP),
+                    Math.round(textY - (rowHeight - TIP_ROW_GAP - name.getHeight()) * 0.5f));
+
+            textY -= rowHeight;
+        }
     }
 
     protected void renderFill(Blob blob, float factor,
@@ -113,13 +436,14 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float g = blob.color.getGreen() / 255f;
         float b = blob.color.getBlue() / 255f;
 
-        // Blob's box on screen, for the cover pass.
+        //the blob's box on screen, for the cover pass
         float boxMinX = blob.mesh.minX * factor + centerX;
         float boxMinY = blob.mesh.minY * factor + centerY;
         float boxMaxX = blob.mesh.maxX * factor + centerX;
         float boxMaxY = blob.mesh.maxY * factor + centerY;
 
-        // Parity pass: fan every ring into the stencil, flipping a bit per crossing.
+        //parity pass: fan every ring into the stencil, flipping a bit per crossing. Where the
+        //bit ends up set is inside the shape - however the rings nest or fold
         GL11.glClearStencil(0);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
 
@@ -144,7 +468,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glEnd();
         }
 
-        // Cover pass: fill (sheet or stripes) wherever the parity landed inside.
+        //cover pass: one flat sheet - or one set of bands - wherever the parity landed inside
         GL11.glColorMask(true, true, true, true);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 1);
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
@@ -192,11 +516,12 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
      * to the left for the third, so where waters overlap the weaves cross instead of piling.
      */
     protected void renderStripes(float minX, float minY, float maxX, float maxY, int style) {
-        // Diagonal's unit vectors: along the stripe, and across it.
+        //the diagonal's unit vectors: along the stripe, and across it
         float dirX = 0.70710678f;
         float dirY = style == STYLE_STRIPE_LEFT ? -0.70710678f : 0.70710678f;
         float normX = -dirY, normY = dirX;
 
+        //the box's reach along each axis, from its corners
         float alongMin = Float.MAX_VALUE, alongMax = -Float.MAX_VALUE;
         float acrossMin = Float.MAX_VALUE, acrossMax = -Float.MAX_VALUE;
 

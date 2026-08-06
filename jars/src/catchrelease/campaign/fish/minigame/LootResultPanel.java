@@ -18,9 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Post-catch loot summary card shown alongside {@link CatchResultPanel}, once the minigame ends.
- * Same layout pattern (icon square, title, list arriving line-by-line) but sized to its content
- * rather than a fixed frame.
+ * What else came up, on a card of its own: the catch readout's mirror, hung off the other side of
+ * the track, up only once the game is over the way the readout is. The treasure was a thing on
+ * the track while the catch ran; this is the receipt afterwards, and mixing the two - a tally
+ * arriving while there was still a fish to fly - would put reading where playing goes.
+ * <p>
+ * Same anatomy as the readout on purpose - the square at the top, the title under it, the list
+ * under that, arriving a line at a time to the same sound - but not the same frame: the card
+ * hugs its content instead of standing floor to ceiling around three rows, and its square is
+ * pinned level with the readout's specimen, so the two read as a pair of exhibits rather than
+ * a pair of pillars. Each line is a
+ * thing that went into the hold, wearing the cargo icon the hold will show it under, in its
+ * tier's colour - so the card reads as cargo, not as prose.
  */
 public class LootResultPanel {
 
@@ -53,12 +62,16 @@ public class LootResultPanel {
 
     /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
     protected static class Coin {
-        float fx;       //where across the card it falls, as a fraction of the panel's width
-        float startY;   //how far into the fall it began, in pixels, so they never start in a row
-        float speed;    //pixels per second, downward
-        float size;     //radius when face-on, in pixels
-        float flipRate; //radians per second of tumble
-        float phase;    //where in the tumble it began
+        float fx;          //where across the card it falls, as a fraction of the panel's width
+        float startY;      //how far into the fall it began, in pixels, so they never start in a row
+        float speed;       //pixels per second, downward
+        float size;        //radius when face-on, in pixels
+        float flipRate;    //radians per second of the main flip
+        float phase;       //where in that flip it began
+        float wobbleRate;  //radians per second of the second, slower flip across the other axis
+        float wobblePhase; //where in the wobble it began
+        float spinRate;    //radians per second the whole ellipse turns in the plane, signed
+        float spinPhase;   //the tilt it fell in at
     }
 
     /** Straight cuts around a coin. Half of what {@link Disc} uses - smooth at radii this small. */
@@ -164,7 +177,8 @@ public class LootResultPanel {
         return height;
     }
 
-    /** Same panel styling as the catch readout, but coin rain instead of bubbles. */
+    /** The readout's field and dressing on the loot card's own rectangle - but coin rain where the
+     *  readout has bubbles. The frames match on purpose; the weather is what tells the cards apart. */
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Color.BLACK, 0.85f * alphaMult);
@@ -179,8 +193,15 @@ public class LootResultPanel {
     }
 
     /**
-     * Gold coins falling and wrapping to the top, tumbling via width scaled by |cos| (not rotation)
-     * so they read as coins turning edge-on rather than a spinning plate.
+     * Gold coins raining down the card, each tumbling as it falls and wrapping back to the top,
+     * so the rain holds for however long the card is read.
+     * <p>
+     * Three motions per coin, none sharing a rate: the flip - the width running on |cos| while
+     * the height holds, a disc narrowing to a bright sliver and opening back out; the wobble -
+     * the same thing across the other axis, slower and shallower, so the coin is never turning
+     * about one clean line; and the spin - the whole ellipse walking round in the plane. Each
+     * runs from its own rolled rate and phase, so the tumble never repeats on a beat and no two
+     * coins fall alike.
      */
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
@@ -205,6 +226,17 @@ public class LootResultPanel {
             float face = Math.abs((float) Math.cos(elapsed * c.flipRate + c.phase));
             float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
 
+            //the second axis, held off its own edge-on by the depth - the flip owns the full
+            //turn, and both axes collapsing at once leaves a point where the coin was
+            float wobble = Math.abs((float) Math.cos(elapsed * c.wobbleRate + c.wobblePhase));
+            float height = c.size * (1f - FishConstants.MINIGAME_LOOT_COIN_WOBBLE_DEPTH
+                    * (1f - wobble));
+
+            //the tilt of the whole ellipse this frame
+            float tilt = c.spinPhase + elapsed * c.spinRate;
+            float cosT = (float) Math.cos(tilt);
+            float sinT = (float) Math.sin(tilt);
+
             //the rim catches the light as the face turns away, which is what sells the turn
             float alpha = FishConstants.MINIGAME_LOOT_COIN_ALPHA * alphaMult
                     * (1f + FishConstants.MINIGAME_LOOT_COIN_EDGE_SHINE * (1f - face) * (1f - face));
@@ -215,8 +247,11 @@ public class LootResultPanel {
             GL11.glVertex2f(x, y);
             for (int i = 0; i <= COIN_SEGMENTS; i++) {
                 double angle = Math.toRadians(i * 360.0 / COIN_SEGMENTS);
-                GL11.glVertex2f(x + (float) Math.cos(angle) * width,
-                        y + (float) Math.sin(angle) * c.size);
+
+                float ex = (float) Math.cos(angle) * width;
+                float ey = (float) Math.sin(angle) * height;
+
+                GL11.glVertex2f(x + ex * cosT - ey * sinT, y + ex * sinT + ey * cosT);
             }
             GL11.glEnd();
         }
@@ -238,11 +273,27 @@ public class LootResultPanel {
                     FishConstants.MINIGAME_LOOT_COIN_FLIP_RATE_MAX);
             c.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
 
+            c.wobbleRate = MathUtils.getRandomNumberInRange(
+                    FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MAX);
+            c.wobblePhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+
+            //signed, so half spin one way and half the other - a rain all turning clockwise
+            //reads as a pattern, and the point of the tumble is that there is none
+            c.spinRate = MathUtils.getRandomNumberInRange(
+                    FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MIN,
+                    FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MAX)
+                    * (MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f);
+            c.spinPhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
+
             coins.add(c);
         }
     }
 
-    /** Icon square washed in the best award's rarity color. */
+    /**
+     * The square at the top, at the readout's height and size: the salvage marker washed in the
+     * best tier's colour - the square is what says "cargo", and the wash is what says how good.
+     */
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
         Color accent = getBestRarity().color;
 
@@ -288,7 +339,10 @@ public class LootResultPanel {
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
 
-    /** Draws each row's icon, name (tier-colored), and count, fading in as it's revealed. */
+    /**
+     * The things themselves, each fading in as it lands: the cargo icon, the name in the tier's
+     * colour, and the count out in the right column where the readout keeps its numbers.
+     */
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
@@ -369,7 +423,10 @@ public class LootResultPanel {
         return boxSprite;
     }
 
-    /** Loads a sprite by raw path; loadTexture ensures unloaded ones (mostly modded weapon art) are registered first. */
+    /**
+     * A sprite off a raw path. Vanilla has most of these loaded already; loadTexture makes the
+     * ones it does not - modded weapon art, mostly - real before they are asked for.
+     */
     protected SpriteAPI loadSprite(String path) {
         if (path == null || path.isEmpty()) return null;
 
