@@ -4,11 +4,9 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeStat;
 
 /**
- * The shelves of the shop, in the order they are walked past.
- * <p>
- * The sheet only knows CAMPAIGN from MINIGAME, which is a slot rule rather than a shelf label - a
- * buyer thinks in terms of the gear a thing bolts onto. The gear is already in the stat ids, so the
- * shelf comes from the id rather than from a new column that would have to be kept in step with it.
+ * The shelves of the shop, in the order they are walked past. The sheet only knows CAMPAIGN from
+ * MINIGAME (a slot rule, not a shelf label), so the shelf is derived from the stat id rather than a
+ * separate sheet column that would need to be kept in step with it.
  */
 public enum ShopGroup {
 
@@ -44,13 +42,10 @@ public enum ShopGroup {
     }
 
     /**
-     * The shelf a piece of tackle sits on, by the rig it bolts onto.
-     * <p>
-     * Here rather than at the point the entry is made, for the same reason {@link #forStat} is: a
-     * new rig should be one line in one place, and the thing that has to learn about it is the
-     * shelving, not everything that puts something on a shelf.
+     * The shelf a piece of tackle sits on, by the rig it bolts onto. Centralised here for the same
+     * reason as {@link #forStat} - a new rig should be one line in one place.
      *
-     * @return null for anything that is not a rig, which has no shelf because nobody owns one
+     * @return null for anything that is not a rig
      */
     public static ShopGroup forRig(Tackle.Fit rig) {
         if (rig == null) return null;

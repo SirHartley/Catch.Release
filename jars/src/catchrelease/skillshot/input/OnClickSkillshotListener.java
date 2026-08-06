@@ -55,9 +55,8 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
         }
 
         for (InputEventAPI input : events) {
-            //any key press other than the pause/hold-modifier keys cancels. a key coming back *up*
-            //does not: the session can open while a key is still held - the ability's own hotkey, for
-            //one - and that release is not the player asking to cancel
+            //any key-down other than the pause/hold-modifier keys cancels; key-up is ignored, since a
+            //session can open while its own hotkey is still held down
             if (input.getEventType().equals(InputEventType.KEY_DOWN)
                     && input.getEventValue() != Keyboard.KEY_SPACE && input.getEventValue() != Keyboard.KEY_LSHIFT) {
                 SkillshotActivationManager.getInstanceOrRegister().deregisterListenerOnNextTick(this);

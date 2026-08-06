@@ -6,19 +6,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * A man with a project and no supply chain.
- * <p>
- * The multi-stage one, and the reason a job may ask again instead of ending. He does not want fish;
- * he wants proof that fish can be got, and having been shown once he wants it at a scale that would
- * mean it was worth proving. So the same job runs three rounds, each larger than the last, paid at
- * every step - which is what a supply chain looks like from the supplier's end, and the shape the
- * later follow-ups will hang off when he has something to be the supplier for.
+ * Multi-stage job: three rounds of asks, each larger than the last, paid at every step - a pilot, a
+ * scale-up, and a run.
  */
 public class StartupJob extends FishJob {
 
     public static final int VALUE_PER_FISH = 800;
 
-    /** How many rounds he asks for before he stops asking. Three is a pilot, a scale-up, and a run. */
     public static final int ROUNDS = 3;
 
     /** How much bigger each round is than the last. */
@@ -35,9 +29,7 @@ public class StartupJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        //no clock. A man building something is not going to give up on it in forty days, and a time
-        //limit on a three-round job is a time limit on the third round
-        days = 0f;
+        days = 0f; //no deadline - a time limit here would really be a limit on the third round
 
         setAsk(2 + genRandom.nextInt(2));
 
@@ -46,7 +38,7 @@ public class StartupJob extends FishJob {
         return true;
     }
 
-    /** Replaces the ask and the payment with this round's, which is how the job grows. */
+    /** Replaces the ask and reward with this round's values. */
     protected void setAsk(int count) {
         asks.clear();
         rewards.clear();
@@ -57,8 +49,7 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        //he pays a little over the odds and knows it. Somebody proving a supply exists is buying the
-        //proof, not the fish, and the proof is worth more to him than the crates are
+        //pays 20% over VALUE_PER_FISH - he's buying proof of supply, not the fish
         addRewards(FishRewardRoller.roll(genRandom, (int) (VALUE_PER_FISH * count * 1.2f), true));
     }
 

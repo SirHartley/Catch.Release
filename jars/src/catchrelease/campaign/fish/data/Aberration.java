@@ -12,15 +12,13 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * How badly a specimen holds to reality, worked out from where it was taken.
+ * How badly a specimen holds to reality, based on where it was caught.
  * <p>
- * Three things thin the local fabric, and being near any of them is enough - so the three are taken
- * at their strongest rather than added up. The abyss is the worst of them and reads directly off the
- * depth; a coronal hypershunt and a slipstream both fall off with distance, measured in light-years
- * from the system rather than in world units, since what matters is which part of the sector this is.
+ * Three sources thin the fabric - abyssal depth, coronal hypershunts, slipstreams - taken at their
+ * strongest rather than summed. Hypershunt/slipstream falloff is measured in light-years from the
+ * system, since sector-scale position is what matters, not world units.
  * <p>
- * Nothing consumes this yet. It is recorded on every catch so that when something does, the fish
- * already in the hold have it.
+ * Not consumed anywhere yet; recorded on every catch so it's available once something reads it.
  */
 public class Aberration {
 
@@ -42,7 +40,7 @@ public class Aberration {
         worst = Math.max(worst, getHypershuntShare(locInHyper));
         worst = Math.max(worst, getSlipstreamShare(locInHyper));
 
-        //two specimens out of the same rupture should not read identically
+        // Adds spread so two specimens out of the same rupture don't read identically.
         worst += MathUtils.getRandomNumberInRange(-FishConstants.ABERRATION_SPREAD, FishConstants.ABERRATION_SPREAD);
 
         return MathUtils.clamp(worst, 0f, 1f);
@@ -52,7 +50,7 @@ public class Aberration {
     protected static float getAbyssShare(Vector2f locInHyper, LocationAPI location) {
         float depth = Misc.getAbyssalDepth(locInHyper);
 
-        //an abyssal system reads as fully in it even where the depth at its own coordinates does not
+        // An abyssal-tagged system counts as fully in it, even where its own coordinates read shallow.
         if (depth <= 0f && location != null && location.hasTag(Tags.SYSTEM_ABYSSAL)) depth = 1f;
 
         return MathUtils.clamp(depth, 0f, 1f) * FishConstants.ABERRATION_ABYSS_WEIGHT;
@@ -66,10 +64,7 @@ public class Aberration {
                 * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
     }
 
-    /**
-     * Slipstreams are ribbons rather than points, so this measures to where the terrain is anchored
-     * and takes the nearest. Close enough for a number that only says roughly how thin it is here.
-     */
+    /** Slipstreams are ribbons, not points - measures to each terrain's anchor point and takes the nearest. */
     protected static float getSlipstreamShare(Vector2f locInHyper) {
         float nearest = Float.MAX_VALUE;
 

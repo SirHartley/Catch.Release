@@ -6,17 +6,10 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 /**
- * Fills a rectangle with a sprite, warping it as it goes.
- * <p>
- * The rectangle is cut into a grid and the inner vertices are pushed around by a {@link WarpGrid},
- * which is what makes the image swim. The outer ones are not: {@link WarpGrid#getOffset} pins its
- * border, so the fill stays exactly inside the rectangle it was given - no clipping, no mask and no
- * shader needed, which is what makes this usable from a UI panel's render pass.
- * <p>
- * The sprite is fitted the way a background is: scaled to cover the rectangle and centred, so it
- * fills without ever being stretched out of shape.
- * <p>
- * All GL state this touches is pushed and popped.
+ * Fills a rectangle with a sprite warped by a {@link WarpGrid}. Border vertices are pinned by
+ * {@link WarpGrid#getOffset} so the fill stays inside the rectangle with no clipping/mask/shader -
+ * usable directly from a UI panel's render pass. Sprite is scaled to cover and centred. GL state
+ * pushed/popped.
  */
 public class WarpedRectRenderer {
 
@@ -85,12 +78,8 @@ public class WarpedRectRenderer {
     }
 
     /**
-     * One grid vertex, as {x, y, u, v}: the texture is sampled where the vertex belongs, and the
-     * vertex is drawn where the warp has pushed it. Sampling straight and drawing bent is what bends
-     * the image.
-     * <p>
-     * Written into the array handed in rather than returned, so a frame's worth of vertices costs no
-     * allocations - and so the shape can be looked at without a GL context in front of it.
+     * One grid vertex as {x, y, u, v} - texture sampled at the unwarped position, vertex drawn at
+     * the warped one. Written into {@code out} rather than returned to avoid per-frame allocation.
      */
     protected static void getVertex(WarpGrid warp, int i, int j,
                                     float x, float y, float width, float height,

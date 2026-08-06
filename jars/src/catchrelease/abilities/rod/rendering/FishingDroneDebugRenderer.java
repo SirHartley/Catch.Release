@@ -17,12 +17,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Dev mode only: draws the ring the drones are flying, and a spoke from each drone to the slot it is
- * supposed to be in.
- * <p>
- * The spokes are the useful part - a drone sitting in its slot has no spoke worth seeing, so any
- * visible spoke is tracking error, and a spoke that swings wildly is a drone chasing its place rather
- * than holding it.
+ * Dev-mode overlay: the ring drones fly, plus a spoke from each drone to its target slot. A visible
+ * spoke is tracking error - a drone sitting in its slot has none.
  */
 public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
 
@@ -56,9 +52,7 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (isExpired()) return;
 
-        //the middle as the swarm currently understands it, rather than the spot it was cast at - a
-        //roaming swarm was never cast at one, and drawing its circle where it isn't is worse than
-        //not drawing it
+        //live centre, not cast location - a roaming swarm was never cast at a fixed point
         Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 

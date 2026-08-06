@@ -8,12 +8,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * Somebody who wants a quantity of fish and is not interesting about it.
- * <p>
- * The plain one, and the framework's own proof that it runs: a person, an ask, a payment, a clock.
- * Everything the flavoured jobs do - three species at once, a size floor, a wager, a faction that
- * will only talk to you at home - is this with more said, and none of it needs anything this one
- * does not already exercise.
+ * The plain fish-buying job: a person, an ask, a payment, a clock. Other job types add more (size
+ * floors, wagers, faction gating) but build on the same mechanics this one exercises.
  */
 public class StandingOrderJob extends FishJob {
 
@@ -28,8 +24,7 @@ public class StandingOrderJob extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        //one at a time, sector-wide. Two of these running at once is two people asking for the same
-        //crates in the same words, which reads as the game repeating itself rather than as a world
+        //only one active sector-wide - two at once would read as the game repeating itself
         if (!setGlobalReference("$catchrelease_orderRef", "$catchrelease_orderInProgress")) {
             return false;
         }
@@ -56,13 +51,7 @@ public class StandingOrderJob extends FishJob {
         return true;
     }
 
-    /**
-     * What this one happens to want.
-     * <p>
-     * Rolled off the mission's own seeded random rather than a fresh one, so the same bar on the
-     * same day asks for the same thing however many times it is looked at - a job that re-rolled on
-     * every glance would let a player shop for an easy one by walking in and out.
-     */
+    /** Rolled from the job's seeded random, not a fresh one, so re-opening it doesn't reroll into an easier ask. */
     protected FishRequirement rollAsk() {
         FishRequirement ask = new FishRequirement();
 
@@ -77,8 +66,7 @@ public class StandingOrderJob extends FishJob {
             ask.minRarity = FishRarity.UNCOMMON;
         }
 
-        //a floor on grade rather than on size, because a buyer of a crate does not care how heavy
-        //any one of them is - they care that none of them are rubbish
+        //grade floor, not size - a bulk buyer cares about quality, not individual weight
         if (genRandom.nextFloat() > 0.6f) ask.minGrade = FishGrade.FINE;
 
         if (genRandom.nextFloat() > 0.7f) ask.sameSpecies = true;

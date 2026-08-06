@@ -9,21 +9,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 import java.util.List;
 
-/**
- * A cook who needs three different things on the same plate.
- * <p>
- * The one job that is genuinely about variety rather than quantity, and the reason a job holds a
- * list of asks rather than one. Three asks of one specimen each is a harder afternoon than one ask
- * of three, because a hold full of the same crab satisfies neither and the player has to go and
- * find a mollusc.
- */
+/** Job needing three different fish types, one each - variety rather than quantity. */
 public class ChefJob extends FishJob {
 
     public static final int VALUE_PER_TYPE = 1400;
 
     public static final float DAYS = 40f;
 
-    /** What is being made, chosen so the same dish is not being cooked in every bar in the sector. */
     protected String dish;
 
     @Override
@@ -48,7 +40,6 @@ public class ChefJob extends FishJob {
             ask.tag = type;
             ask.count = 1 + genRandom.nextInt(2);
 
-            //a chef cares what is put in front of them in a way a wholesaler does not
             if (genRandom.nextFloat() > 0.45f) ask.minGrade = FishGrade.FINE;
 
             addAsk(ask);
@@ -61,7 +52,6 @@ public class ChefJob extends FishJob {
         return true;
     }
 
-    /** Nothing anybody would order twice. */
     protected static final String[] DISHES = {
             "a terrine", "a cold course", "a broth", "a service of three",
             "something the menu calls a study", "a dish with no name yet",

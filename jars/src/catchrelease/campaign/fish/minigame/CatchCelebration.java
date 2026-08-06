@@ -15,18 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What happens when the fish is landed: a flash behind it, the specimen growing over the catch
- * card's cargo-square, confetti, and the word for it at an angle.
- * <p>
- * Centred on the card's specimen rather than the track - the card is where the eye goes the moment
- * the fish is landed, and the flourish should land where the eye is. The centre is read off the
- * layout every frame, after the card has settled it, so there is exactly one source of it.
- * <p>
- * Driven by one clock. Everything reads its own timing off that rather than keeping its own, so the
- * whole thing can be retimed from {@link FishConstants#CELEBRATION_TIME} without any part of it
- * drifting out of step with the rest.
- * <p>
- * Sound is left as hooks rather than guessed at - see {@link #playHook(String)}.
+ * Plays out over the catch card's specimen box when a fish is landed: a flash, the specimen
+ * growing in, confetti, and the catch text at an angle. Centered on {@code layout.getBoxCenter*}
+ * each frame, and every part times itself off {@link #elapsed} / {@link FishConstants#CELEBRATION_TIME}
+ * so nothing can drift out of sync.
  */
 public class CatchCelebration {
 
@@ -44,8 +36,7 @@ public class CatchCelebration {
     transient protected LazyFont.DrawableString text;
     transient protected boolean fontChecked = false;
 
-    /** Set once the confetti has been thrown - which is on first render, not construction, because
-     * only a layout the card has settled knows where the burst should come from. */
+    /** Set on first render, not construction - only then is the settled layout center known. */
     protected boolean confettiSpawned = false;
 
     public CatchCelebration(FishSpec fish) {
@@ -54,7 +45,6 @@ public class CatchCelebration {
         playHook(FishConstants.SOUND_CATCH);
     }
 
-    /** Thrown up and out, with gravity taking it back down - so the burst has a shape to it. */
     protected Confetto spawn(float x, float y, FishSpec fish) {
         Confetto c = new Confetto();
 
@@ -62,8 +52,7 @@ public class CatchCelebration {
         float angle = 90f + MathUtils.getRandomNumberInRange(-arc, arc);
         float spread = FishConstants.CELEBRATION_CONFETTI_SPREAD;
 
-        //the slow ones stay near the middle and the fast ones reach the edge of the panel, which is
-        //what makes the burst read as a burst rather than as a ring leaving
+        //speed varies so pieces spread across the burst radius instead of moving as one ring
         float speed = MathUtils.getRandomNumberInRange(
                 FishConstants.CELEBRATION_CONFETTI_SPEED * 0.35f, FishConstants.CELEBRATION_CONFETTI_SPEED);
 
@@ -79,12 +68,7 @@ public class CatchCelebration {
         return c;
     }
 
-    /**
-     * Most of it is drawn from across the wheel, and a share of it takes the fish's own colour.
-     * <p>
-     * All of one colour said what was caught and nothing about the catching; all of every colour
-     * would say the opposite. The share is what keeps both.
-     */
+    /** Most confetti is random hue; a fraction takes the fish's own rarity colour. */
     protected Color pickColor(FishSpec fish) {
         if (fish != null
                 && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
@@ -111,7 +95,7 @@ public class CatchCelebration {
         return elapsed >= FishConstants.CELEBRATION_TIME;
     }
 
-    /** 0 at the start, 1 at the end. Everything below is written against this. */
+    /** 0 at the start, 1 at the end. */
     protected float getProgress() {
         return MathUtils.clamp(elapsed / Math.max(0.01f, FishConstants.CELEBRATION_TIME), 0f, 1f);
     }
@@ -119,7 +103,6 @@ public class CatchCelebration {
     public void render(FishingMinigameLayout layout, SpriteAPI fishSprite, float alphaMult) {
         float progress = getProgress();
 
-        //everything fades together over the last of it, so nothing is left hanging
         float fade = progress > FishConstants.CELEBRATION_FADE_FROM
                 ? 1f - (progress - FishConstants.CELEBRATION_FADE_FROM)
                         / (1f - FishConstants.CELEBRATION_FADE_FROM)
@@ -128,8 +111,6 @@ public class CatchCelebration {
         float alpha = alphaMult * MathUtils.clamp(fade, 0f, 1f);
         if (alpha <= 0f) return;
 
-        //the card's specimen, not the track - and read here, each frame, so the burst follows
-        //wherever the card's own layout put the box this frame
         float centerX = layout.getBoxCenterX();
         float centerY = layout.getBoxCenterY();
 
@@ -147,20 +128,16 @@ public class CatchCelebration {
         renderText(centerX, centerY, progress, alpha);
     }
 
-    /** A disc of light behind everything, thrown out fast and gone before the rest of it. */
+    /** A disc of light behind everything, thrown out fast and gone before the rest. */
     protected void renderFlash(float centerX, float centerY, float progress, float alpha) {
         float share = MathUtils.clamp(progress / FishConstants.CELEBRATION_FLASH_TIME, 0f, 1f);
         if (share >= 1f) return;
 
-        //no art and no shader: a fan takes the rarity colour as it is
         Disc.draw(centerX, centerY, FishConstants.CELEBRATION_FLASH_SIZE * (0.2f + share * 0.8f),
                 getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha, 0f, true);
     }
 
-    /**
-     * What the specimen is read against. The disc is lit in the fish's own colour; the two rings are
-     * in the player's UI colours, the same bright-line-and-dimmer-line the panel is framed with.
-     */
+    /** Backing disc in the fish's rarity colour, ringed in the player's UI bright/dim border colours. */
     protected void renderBacklight(float centerX, float centerY, float progress, float alpha) {
         float radius = getBacklightRadius(progress);
 
@@ -176,7 +153,6 @@ public class CatchCelebration {
                 FishConstants.CELEBRATION_RING_ALPHA * alpha, FishConstants.CELEBRATION_RING_WIDTH);
     }
 
-    /** Opens out with the same ease the fish grows on, then breathes rather than sitting still. */
     protected float getBacklightRadius(float progress) {
         float pulse = 1f + FishConstants.CELEBRATION_BACKLIGHT_PULSE
                 * (float) Math.sin(elapsed * FishConstants.CELEBRATION_BACKLIGHT_PULSE_RATE);
@@ -184,12 +160,7 @@ public class CatchCelebration {
         return FishConstants.CELEBRATION_BACKLIGHT_SIZE * (0.55f + 0.45f * ease(progress)) * pulse;
     }
 
-    /**
-     * The specimen itself, over the card's cargo-square and growing as it comes.
-     * <p>
-     * On the centre rather than lifted off it: the fish is the thing being looked at, and it was
-     * being drawn away from the light that was meant to be behind it.
-     */
+    /** The specimen sprite, centered over the backlight and growing in. */
     protected void renderFish(SpriteAPI sprite, float centerX, float centerY, float progress, float alpha) {
         if (sprite == null) return;
 
@@ -214,7 +185,7 @@ public class CatchCelebration {
 
             GL11.glColor4f(c.color.getRed() / 255f, c.color.getGreen() / 255f, c.color.getBlue() / 255f, alpha);
 
-            //oblong rather than square, which is what makes the spin read
+            //oblong, not square, so the spin is visible
             float w = c.size, h = c.size * 0.45f;
             GL11.glBegin(GL11.GL_QUADS);
             GL11.glVertex2f(-w, -h);
@@ -229,7 +200,7 @@ public class CatchCelebration {
         GL11.glPopAttrib();
     }
 
-    /** The word for it, slanted, popping past its size before settling back to it. */
+    /** Catch text, slanted, popping past full size before settling. */
     protected void renderText(float centerX, float centerY, float progress, float alpha) {
         LazyFont.DrawableString drawable = getText();
         if (drawable == null) return;
@@ -248,7 +219,7 @@ public class CatchCelebration {
         drawable.drawAtAngle(centerX - drawable.getWidth() * 0.5f, y, FishConstants.CELEBRATION_TEXT_ANGLE);
     }
 
-    /** The rarity colour, which is what ties the text, the flash and the confetti together. */
+    /** The rarity colour, shared by text, flash and confetti. */
     protected Color getAccentColor() {
         return fish == null ? Color.WHITE : fish.rarity.color;
     }
@@ -258,7 +229,7 @@ public class CatchCelebration {
                 (int) MathUtils.clamp(alpha * 255f, 0f, 255f));
     }
 
-    /** Loaded once and kept; a missing font costs the text and nothing else. */
+    /** Loaded once; a missing font just means no text renders. */
     protected LazyFont.DrawableString getText() {
         if (!fontChecked) {
             fontChecked = true;
@@ -274,17 +245,14 @@ public class CatchCelebration {
         return text;
     }
 
-    /**
-     * Where the sound goes when there is one. The ids are blank in {@link FishConstants} and nothing
-     * plays until they are filled in, so this is a hook rather than a placeholder that rattles.
-     */
+    /** Sound hook; a no-op until sound ids are filled in {@link FishConstants}. */
     public static void playHook(String soundId) {
         if (soundId == null || soundId.isEmpty()) return;
 
         Global.getSoundPlayer().playUISound(soundId, 1f, 1f);
     }
 
-    /** Slow at the end rather than linear, so the rise arrives rather than stopping. */
+    /** Ease-out curve. */
     protected static float ease(float t) {
         return 1f - (1f - t) * (1f - t);
     }

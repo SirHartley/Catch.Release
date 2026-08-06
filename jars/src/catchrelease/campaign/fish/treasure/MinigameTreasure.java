@@ -4,14 +4,9 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import org.lazywizard.lazylib.MathUtils;
 
 /**
- * A piece of treasure sitting in the track while the catch runs.
- * <p>
- * It does not move. That is the whole of what makes it different from the fish: the fish is the
- * thing you are chasing and this is a thing you can choose to detour for, and a detour is only a
- * decision if the thing you are detouring to stays put.
- * <p>
- * It does not last, either. The clock under it is the pressure - take it now and give up ground on
- * the fish, or let it go.
+ * A piece of treasure sitting in the track while the catch runs. Unlike the fish it does not move -
+ * taking it is a detour, not a chase. It does time out though, forcing the choice: take it now and
+ * give up ground on the fish, or let it go.
  */
 public class MinigameTreasure {
 
@@ -31,8 +26,7 @@ public class MinigameTreasure {
     public MinigameTreasure(TreasureRarity rarity) {
         this.rarity = rarity;
 
-        //away from the very ends, where the bar rests anyway - treasure you get by doing nothing is
-        //not treasure
+        //away from the very ends, where the bar rests anyway by default
         this.position = MathUtils.getRandomNumberInRange(
                 FishConstants.TREASURE_POSITION_INSET, 1f - FishConstants.TREASURE_POSITION_INSET);
 
@@ -48,8 +42,7 @@ public class MinigameTreasure {
 
         elapsed += amount;
 
-        //the hold is not a ratchet: letting the bar slip off it gives the time back, so taking one
-        //is a commitment rather than something that happens by accident on the way past
+        //not a ratchet: letting the bar slip off gives the held time back
         if (covered) held += amount;
         else held = Math.max(0f, held - amount * FishConstants.TREASURE_HOLD_DECAY);
 

@@ -19,27 +19,16 @@ import java.util.List;
 /**
  * Draws the ring around the player fleet, rotated to face the cursor and tinted by
  * {@link #isValidPosition()}, then hands off to {@link #renderCursorBoundObject} for whatever the
- * concrete reticule wants to draw at the cursor.
+ * concrete reticule wants to draw at the cursor. Subclass this to make a new reticule; return it
+ * from {@link catchrelease.skillshot.ability.SkillshotAbility#createReticule()}.
  * <p>
- * Subclass this to make a new reticule; return it from
- * {@link catchrelease.skillshot.ability.SkillshotAbility#createReticule()}.
- * <p>
- * Any reticule can optionally show guide lines out from the fleet along the aim direction - a single
- * line for the trajectory, a pair for the bounds of a spread, or all three. They are off by default,
- * so a reticule that does not ask for them looks exactly as it did before:
+ * Optionally shows guide lines from the fleet along the aim direction, sharing the reticule's
+ * valid/invalid tint. Off by default:
  *
  * <pre>
- * //straight shot, one line showing where it goes
- * return new DirectionReticuleRenderer().withTrajectory();
- *
- * //30 degree spread out to a fixed range, two lines showing what it can hit
- * return new AreaReticuleRenderer(400f).withBounds(30f).withLength(2000f);
- *
- * //dashed instead of solid
- * return new DirectionReticuleRenderer().withTrajectory().withLineStyle(GuideLineStyle.DASHED);
+ * return new DirectionReticuleRenderer().withTrajectory();                 //one line, aim direction
+ * return new AreaReticuleRenderer(400f).withBounds(30f).withLength(2000f); //spread edges, capped range
  * </pre>
- *
- * The lines share the reticule's valid/invalid tint.
  */
 public abstract class BaseReticuleRenderer implements SkillshotRenderer {
 
@@ -64,47 +53,31 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
         return this;
     }
 
-    /**
-     * Draws two lines marking the edges of the shot.
+    /** Draws two lines marking the edges of the shot.
      *
-     * @param spreadDegrees total angle between the two lines. 0 gives a pair on top of each other, so
-     *                      pass the ability's actual spread - the arc the shot can end up in
-     */
+     * @param spreadDegrees total angle between the two lines - the arc the shot can end up in */
     public BaseReticuleRenderer withBounds(float spreadDegrees) {
         showBounds = true;
         boundsSpread = spreadDegrees;
         return this;
     }
 
-    /**
-     * A ceiling on the line's length in world units - pass the ability's range so the lines stop
-     * where the shot does. Without this they run out to the cursor, however far away it is.
-     * <p>
-     * A ceiling rather than a fixed length: aiming inside the range still ends the line at what is
-     * being aimed at. Set outright, the line ran to the range whatever the cursor was doing, so an
-     * area reticule sat in a puddle of line that carried on past it.
-     */
+    /** A ceiling on the line's length in world units - without this it runs out to the cursor,
+     * however far away it is. A ceiling, not a fixed length: aiming inside it still ends at the cursor. */
     public BaseReticuleRenderer withLength(float worldUnits) {
         length = worldUnits;
         return this;
     }
 
-    /**
-     * Solid, dashed or dotted. Without this the lines follow
-     * {@link SkillshotSettings#GUIDE_LINE_STYLE}, and the dash lengths come from
-     * {@link SkillshotSettings} either way.
-     */
+    /** Solid, dashed or dotted; defaults to {@link SkillshotSettings#GUIDE_LINE_STYLE}. */
     public BaseReticuleRenderer withLineStyle(GuideLineStyle style) {
         lineStyle = style;
         return this;
     }
 
-    /**
-     * How far short of the end the guide lines stop, so they do not run underneath whatever
-     * {@link #renderCursorBoundObject} draws there. Applies wherever the line ends, a
-     * {@link #withLength(float)} one included - the thing at the cursor is drawn at the cursor
-     * either way, so a line that ignored this ran through it.
-     */
+    /** How far short of the end the guide lines stop, so they do not run underneath whatever
+     * {@link #renderCursorBoundObject} draws there. Applies wherever the line ends, including a
+     * {@link #withLength(float)} ceiling. */
     protected float getGuideLineEndPadding() {
         return 0f;
     }
@@ -149,7 +122,7 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
             fleetReticule = Global.getSettings().getSprite(SkillshotSettings.SPRITE_CATEGORY, SkillshotSettings.SPRITE_FLEET_RETICULE);
         }
 
-        //update the aim point before anything reads it - isValidPosition() below depends on it
+        //before anything reads it - isValidPosition() below depends on it
         cursorPos = SkillshotUtils.getCursorWorldPosition();
 
         float angleToCursor = Misc.getAngleInDegrees(fleet.getLocation(), cursorPos);
@@ -163,27 +136,24 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
         fleetReticule.setColor(color);
         fleetReticule.renderAtCenter(fleet.getLocation().x, fleet.getLocation().y);
 
-        //under the cursor object, so that stays the thing the eye lands on
+        //drawn under the cursor object, so that stays what the eye lands on
         renderGuideLines(fleet, reticuleSize, angleToCursor, cursorPos, color);
 
         renderCursorBoundObject(layer, viewport, angleToCursor, cursorPos, color);
     }
 
-    /**
-     * The optional trajectory / bounds lines, drawn out from the fleet along the aim direction. Does
-     * nothing unless {@link #withTrajectory()} or {@link #withBounds(float)} asked for them.
-     */
+    /** The optional trajectory / bounds lines, out from the fleet along the aim direction. Does
+     * nothing unless {@link #withTrajectory()} or {@link #withBounds(float)} asked for them. */
     protected void renderGuideLines(CampaignFleetAPI fleet, float reticuleSize, float angleToCursor, Vector2f cursorPos, Color colour) {
         if (!showTrajectory && !showBounds) return;
 
         Vector2f origin = fleet.getLocation();
 
-        //start outside the fleet reticule ring instead of at the fleet centre, where the lines would
-        //just cross the ring sprite
+        //start outside the fleet reticule ring, not at the fleet centre, so lines do not cross the ring sprite
         float from = reticuleSize * 0.5f;
 
-        //the cursor is where the shot is going, and the range is only as far as it can get - so the
-        //line ends at the nearer of the two, then stops short of whatever is drawn there
+        //ends at the nearer of the cursor and the range ceiling, then stops short of whatever is
+        //drawn there
         float reach = Misc.getDistance(origin, cursorPos);
         if (length > 0f) reach = Math.min(reach, length);
 
@@ -206,7 +176,7 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
                 lineStyle != null ? lineStyle : SkillshotSettings.GUIDE_LINE_STYLE);
     }
 
-    /** Appends the two endpoints of a line running out from origin at the given angle. */
+    /** Appends the two endpoints of a line from origin at the given angle. */
     protected void addLine(List<Vector2f> vertices, Vector2f origin, float angle, float from, float to) {
         Vector2f direction = Misc.getUnitVectorAtDegreeAngle(angle);
 

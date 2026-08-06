@@ -9,23 +9,11 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 /**
- * Motes of light hanging at different depths inside the rupture, drifting past each other.
- * <p>
- * The pond used to read as deep because the starfield behind it slid against the mask as the camera
- * moved. Snapping the camera to the pond took that away - a parallax offset computed from the
- * distance to the middle of the screen is zero when the thing is in the middle of the screen - and a
- * hole with a still background in it reads as a hole cut in paper.
- * <p>
- * So the depth is put back into the contents rather than into the camera. Everything here turns on
- * one number per particle: how deep it is. A deep one is small, dim, blue and slow; a shallow one is
- * larger, brighter, warmer and quicker. Because they all circle the same middle at speeds that
- * differ by depth, they slide across each other continuously - which is motion parallax, and it does
- * not care whether the camera is moving.
- * <p>
- * And they do not merely circle: they drain. Every particle spirals slowly inward, turning faster
- * the closer to the middle it gets and sinking as it goes - dimmer, smaller, bluer - until the
- * drain takes it and it starts again out at the rim, near the surface. The eye follows the spiral
- * down, which is the pull the whole pond wants.
+ * Motes of light at different depths inside the rupture, drifting past each other to fake depth.
+ * Camera-snap to the pond kills ordinary background parallax (the offset is computed from distance
+ * to screen center, which is zero when centered), so depth-cueing lives in the particles instead:
+ * each has a depth driving size/color/speed (deep = small, dim, blue, slow), and spirals slowly
+ * inward and down, accelerating near the middle, respawning at the rim on reaching the drain.
  */
 public class PondDepthField {
 
@@ -81,8 +69,7 @@ public class PondDepthField {
         p.size = MathUtils.getRandomNumberInRange(0.6f, 1.4f);
         p.phase = MathUtils.getRandomNumberInRange(0f, 6.283f);
 
-        //one direction, near enough: a whirlpool that cannot decide which way it turns is two
-        //effects fighting, and the few counter-spinners are texture rather than argument
+        //mostly one direction; DEPTH_COUNTER_SHARE gives a few counter-spinners for texture
         p.spin = MathUtils.getRandomNumberInRange(PondConstants.DEPTH_SPIN_MIN, PondConstants.DEPTH_SPIN_MAX)
                 * (MathUtils.getRandomNumberInRange(0f, 1f) < PondConstants.DEPTH_COUNTER_SHARE ? -1f : 1f);
 
@@ -93,10 +80,9 @@ public class PondDepthField {
     }
 
     /**
-     * A shallow particle moves faster than a deep one at the same distance out - the layers shear
-     * and the eye reads distance - and every particle is on its way down the drain: inward a
-     * little each second, turning harder the nearer the middle it gets, sinking as it goes. One
-     * that reaches the drain starts over at the rim.
+     * Shallow particles orbit faster than deep ones at the same radius (shear reads as depth); all
+     * particles spiral inward and down, accelerating near center, and respawn at the rim on
+     * reaching the drain.
      */
     public void advance(float amount) {
         time += amount;
@@ -136,16 +122,10 @@ public class PondDepthField {
     }
 
     /**
-     * The same soft glow sprite the fish motes use, but a single pass per particle - the motes stack
-     * six shrinking passes into a bloom, and ninety of those would be both a draw-call pile and a
-     * wall of light.
-     * <p>
-     * Additive, so they read as light in a medium rather than as objects floating on top of it.
-     * Additive can only ever add, though, which is why "darker with depth" lives entirely in the
-     * colour and alpha ramps - a deep particle contributes almost nothing rather than being painted
-     * dark. The caller is expected to have the pond's mask stencilled: the field deliberately
-     * overshoots the rim and relies on being cut, so a particle half-swallowed by the edge reads as
-     * one that continues underneath it.
+     * Single glow-sprite pass per particle, additive-blended (unlike the six-pass bloom fish motes
+     * use, which would be too costly at this particle count). "Darker with depth" is done via
+     * color/alpha ramps since additive blending can't paint darker. The field intentionally
+     * overshoots the pond radius - caller must have the pond mask stencilled to cut it at the rim.
      */
     public void render(Vector2f center, float pondRadius, float alphaMult) {
         if (alphaMult <= 0f || pondRadius <= 0f) return;
@@ -156,8 +136,8 @@ public class PondDepthField {
         for (Particle p : particles) {
             float depth = getDepth(p);
 
-            //a deep particle sits nearer the middle as well as being smaller, so the rupture reads as
-            //a well narrowing away from you rather than as a cylinder
+            //deep particles sit nearer the middle too, so the rupture reads as a narrowing well
+            //rather than a cylinder
             float reach = PondConstants.DEPTH_REACH_FLOOR
                     + (1f - PondConstants.DEPTH_REACH_FLOOR) * depth;
 
@@ -183,9 +163,8 @@ public class PondDepthField {
     }
 
     /**
-     * Deep is dark and cold, shallow is bright and warm. The brightness half matters more than the
-     * hue half: over a lit background an additive particle is only as dark as how little it adds,
-     * so the deep end of the ramp has to be genuinely dim rather than merely blue.
+     * Deep = dark/cold, shallow = bright/warm. Brightness matters more than hue here, since
+     * additive blending means "dark" requires low alpha, not just a darker color.
      */
     protected static Color getColor(float depth) {
         Color deep = PondConstants.DEPTH_COLOR_DEEP;

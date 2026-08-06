@@ -12,10 +12,7 @@ import java.util.List;
 
 public class SkillshotUtils {
 
-    /**
-     * The cursor position in campaign world coordinates. Both the reticules and the fire hook read
-     * the aim point through here, so they can never disagree about where the player is pointing.
-     */
+    /** Cursor position in campaign world coordinates - single source for reticules and the fire hook. */
     public static Vector2f getCursorWorldPosition() {
         return new Vector2f(
                 Global.getSector().getViewport().convertScreenXToWorldX(Global.getSettings().getMouseX()),
@@ -31,21 +28,14 @@ public class SkillshotUtils {
     }
 
     /**
-     * Draws straight lines in campaign world coordinates - call it from a renderer's render pass, the
-     * campaign layers are already in world space.
-     * <p>
-     * Dashes are sized in screen pixels here, which suits a reticule: it is drawn while the player is
-     * aiming and wants the same look whatever the zoom happens to be. The cost is that the pattern
-     * re-flows as the camera moves, since a shape of a fixed world size fits a different number of
-     * dashes at every zoom level. Anything drawn at a fixed size in the world - a ring around a
-     * point, say - wants {@link #drawDashedLines} instead, so its dashes scale with it.
-     * <p>
-     * All GL state this touches is pushed and popped, so sprites drawn after the call are unaffected.
+     * Draws lines in campaign world coordinates (call from a render pass; campaign layers are
+     * already in world space). Dash lengths are in screen pixels, so the pattern re-flows with
+     * zoom - for a fixed world-size shape use {@link #drawDashedLines} instead. GL state is
+     * pushed/popped, so later draws are unaffected.
      *
-     * @param vertices consecutive pairs, i.e. start, end, start, end - a trailing odd vertex is
-     *                 dropped
-     * @param widthPx  line width in screen pixels, so it stays readable at any zoom level
-     * @param style    dash pattern; its lengths are in screen pixels
+     * @param vertices consecutive pairs (start, end, start, end...); trailing odd vertex dropped
+     * @param widthPx  line width in screen pixels
+     * @param style    dash pattern, lengths in screen pixels
      */
     public static void drawLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx, GuideLineStyle style) {
         if (vertices == null || vertices.size() < 2) return;
@@ -53,11 +43,7 @@ public class SkillshotUtils {
         drawCut(cutDashes(vertices, style), colour, alpha, widthPx);
     }
 
-    /**
-     * The same, with the dash and gap given in world units rather than screen pixels - so the pattern
-     * is fixed to whatever is being drawn and zooming moves the whole thing together, rather than
-     * re-cutting the dashes every time the camera changes distance.
-     */
+    /** Like {@link #drawLines}, but dash/gap are in world units so the pattern scales with zoom. */
     public static void drawDashedLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx,
                                        float dashWorld, float gapWorld) {
         if (vertices == null || vertices.size() < 2) return;
@@ -93,16 +79,11 @@ public class SkillshotUtils {
     }
 
     /**
-     * Cuts a run of lines into the dashes a style asks for, as more lines.
-     * <p>
-     * Cut here rather than left to GL_LINE_STIPPLE, which cannot do this job: GL restarts the stipple
-     * pattern at every segment of a GL_LINES batch, and a pattern always starts on a drawn bit. Every
-     * segment shorter than one dash therefore comes out solid - and a ring built from 72 short
-     * segments is nothing but those, which is why it drew as an unbroken circle.
-     * <p>
-     * Dash lengths are in screen pixels and converted here, so they hold their look at any zoom.
+     * Cuts a run of lines into dashes as geometry, not GL_LINE_STIPPLE - GL restarts the stipple
+     * pattern at every segment of a GL_LINES batch, so any segment shorter than one dash draws
+     * solid. Dash lengths are screen pixels, converted here.
      *
-     * @return the vertices to draw, as pairs; the input unchanged for a solid style
+     * @return vertices to draw, as pairs; unchanged for a solid style
      */
     protected static List<Vector2f> cutDashes(List<Vector2f> vertices, GuideLineStyle style) {
         if (style == null || style == GuideLineStyle.SOLID) return vertices;
@@ -129,8 +110,7 @@ public class SkillshotUtils {
             Vector2f from = vertices.get(i);
             Vector2f to = vertices.get(i + 1);
 
-            //a break in the run starts the pattern over; segments that carry on from the last one
-            //keep its phase, so dashes run evenly along a path however finely it is chopped up
+            //break in the run resets phase; continuing segments keep it, so dashes run evenly along a chopped-up path
             if (previousEnd == null || !isSamePoint(previousEnd, from)) phase = 0f;
 
             phase = cutSegment(dashes, from, to, dash, period, phase);

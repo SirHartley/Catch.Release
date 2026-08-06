@@ -4,12 +4,9 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.ui.PositionAPI;
 
 /**
- * Where the parts of the catch sit on screen, worked out once per frame from the panel's own
- * position.
- * <p>
- * Split out so custom framing art has something to line up against: anything added later can ask for
- * the track or the meter rather than recomputing the same offsets and drifting out of step with them.
- * All values are screen coordinates, with y going up.
+ * Where the parts of the catch minigame sit on screen, computed once per frame from the panel's
+ * position. Split out so other code can query the track/meter position rather than recomputing it.
+ * Screen coordinates, y going up.
  */
 public class FishingMinigameLayout {
 
@@ -29,11 +26,7 @@ public class FishingMinigameLayout {
     public float frameWidth;
     public float frameHeight;
 
-    /**
-     * The readout's own panel, off the right edge of the catch's. Everything here is in the same
-     * screen coordinates as the rest, so it lines up with the track whatever the dialog does with
-     * the panel it was given.
-     */
+    /** The readout's panel, off the right edge of the catch's playfield. */
     public float panelX;
     public float panelY;
     public float panelWidth;
@@ -46,11 +39,7 @@ public class FishingMinigameLayout {
     public float boxY;
     public float boxSize;
 
-    /**
-     * The loot card's panel, off the LEFT edge - the readout's mirror in width and box size, but
-     * not in height: it hugs its content, and its square is pinned level with the readout's, so
-     * the two flank the catch as a pair of exhibits rather than a pair of pillars.
-     */
+    /** The loot card's panel, off the left edge - mirrors the readout in width and box size, not height. */
     public float lootPanelX;
     public float lootPanelY;
     public float lootPanelWidth;
@@ -74,9 +63,7 @@ public class FishingMinigameLayout {
         meterX = trackX + trackWidth + FishConstants.MINIGAME_METER_GAP;
         meterY = trackY;
 
-        //a panel of its own, off the right edge of this one - not a column inside it. It takes the
-        //dialog panel's full vertical extent rather than the playfield frame's, so the two stand as
-        //a pair instead of the readout hanging short beside the catch
+        //takes the dialog panel's full vertical extent, not the playfield frame's
         panelX = position.getX() + position.getWidth() + FishConstants.MINIGAME_RESULT_GAP;
         panelY = position.getY();
         panelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
@@ -89,9 +76,7 @@ public class FishingMinigameLayout {
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
         boxY = panelY + panelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
 
-        //the readout's mirror, off the other edge and at the readout's own measurements, so a
-        //catch with both up reads as one interface with a pane on each side. Its right edge is
-        //the fixed one: growing wider means growing leftward, away from the catch
+        //right edge is fixed - growing wider grows leftward, away from the catch
         lootPanelWidth = FishConstants.MINIGAME_RESULT_WIDTH;
         lootPanelX = position.getX() - FishConstants.MINIGAME_RESULT_GAP - lootPanelWidth;
         lootPanelY = position.getY();
@@ -103,8 +88,7 @@ public class FishingMinigameLayout {
         lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
         lootBoxY = lootPanelY + lootPanelHeight - FishConstants.MINIGAME_RESULT_PAD - boxSize;
 
-        //the extra is on the frame alone - the track and meter hold their ground, the frame
-        //reaches further left around them
+        //extra reach is on the frame only - track and meter positions are unaffected
         frameX = trackX - FishConstants.MINIGAME_FRAME_PAD - FishConstants.MINIGAME_FRAME_EXTRA_LEFT;
         frameY = trackY - FishConstants.MINIGAME_FRAME_PAD;
         frameWidth = totalWidth + FishConstants.MINIGAME_FRAME_PAD * 2f
@@ -112,14 +96,7 @@ public class FishingMinigameLayout {
         frameHeight = trackHeight + FishConstants.MINIGAME_FRAME_PAD * 2f;
     }
 
-    /**
-     * Widens the readout's panel to hold something too wide for it, and puts the column back in the
-     * middle of whatever width that leaves.
-     * <p>
-     * A floor rather than a size: the panel is a fixed width for the fish that fit, and only the
-     * ones that do not get to argue with it. Capped, because the name is read off a table and a
-     * long enough one would otherwise walk the panel off the side of the screen.
-     */
+    /** Widens the readout panel to fit content, clamped between the default and max width. */
     public void fitResultContent(float contentWidth) {
         float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
 
@@ -133,16 +110,10 @@ public class FishingMinigameLayout {
     }
 
     /**
-     * Drops the readout's content column to the middle of its panel. The panel is taller than the
-     * column ever is, and a column pinned to the top left the difference as a void under the last
-     * line; centred, the spare height splits evenly, the way the playfield sits in its own panel.
-     * <p>
-     * The height has to come from the readout, since only it knows its fonts and how many lines it
-     * ended up with. {@code boxY} stays at its top-anchored default until this is called.
+     * Vertically centres the readout's content column in its panel. Caller must know its own
+     * rendered height (fonts/line count), so {@code boxY} stays top-anchored until this is called.
      *
-     * @param headroom space to keep clear above the box, for anything that floats over it - the
-     *                 record banner. Centred as part of the column and held inside the pad, so the
-     *                 floater neither unbalances the card nor gets pushed off the top of it.
+     * @param headroom space kept clear above the box for a floating overlay (e.g. record banner)
      */
     public void centerResultContent(float contentHeight, float headroom) {
         float total = contentHeight + headroom;
@@ -161,12 +132,7 @@ public class FishingMinigameLayout {
         return trackX + trackWidth * 0.5f;
     }
 
-    /**
-     * The middle of the readout's cargo-square - where the specimen is shown, and so where anything
-     * about the specimen should centre itself. Only settled once the readout has laid itself out;
-     * before {@code fitResultContent} and {@code centerResultContent} run this is the top-anchored
-     * default.
-     */
+    /** Centre of the readout's specimen box. Top-anchored default until {@code fitResultContent}/{@code centerResultContent} run. */
     public float getBoxCenterX() {
         return boxX + boxSize * 0.5f;
     }
@@ -175,10 +141,7 @@ public class FishingMinigameLayout {
         return boxY + boxSize * 0.5f;
     }
 
-    /**
-     * The loot card's version of {@link #fitResultContent}: same floor, same cap, but the growth
-     * goes leftward - the card's right edge holds its distance from the catch.
-     */
+    /** {@link #fitResultContent} for the loot card: same clamping, but grows leftward (right edge fixed). */
     public void fitLootContent(float contentWidth) {
         float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
         float right = lootPanelX + lootPanelWidth;
@@ -194,22 +157,11 @@ public class FishingMinigameLayout {
     }
 
     /**
-     * Puts the loot card's square level with the readout's, and leaves its frame alone.
-     * <p>
-     * The frame is the readout's frame: the same width, the same full height, standing on the same
-     * line. Shrinking it to hug its rows was tried, on the reasoning that a card holding three
-     * things should not be as tall as one holding a whole tally - and what it actually produced was
-     * two cards of different heights either side of the track, which reads as one of them having
-     * gone wrong rather than as either of them fitting its contents.
-     * <p>
-     * The square is pinned rather than centred, which is the one thing worth keeping from that: the
-     * two icons sit on the same line, so the eye crosses from one card to the other without
-     * travelling. {@code boxY} is already settled by the time this runs, because the readout
-     * renders first.
+     * Levels the loot card's box with the readout's box; frame height/width match the readout's
+     * unconditionally (mismatched card heights read as broken, not content-fitted).
+     * Requires the readout to have rendered first, so {@code boxY} is already settled.
      *
-     * @param contentHeight what the card holds, unused now the frame no longer bends to it - kept
-     *                      so the caller still measures before it draws, which is what stops the
-     *                      column resizing while its rows are still arriving
+     * @param contentHeight unused - kept so callers still measure before drawing, avoiding resize mid-layout
      */
     public void alignLootContent(float contentHeight) {
         lootBoxY = boxY;

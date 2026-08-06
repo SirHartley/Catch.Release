@@ -7,23 +7,14 @@ public class PondConstants {
     public static final float POND_RADIUS = 500f;
     public static final float MIN_EMPTY_RADIUS_AROUND_POND = 1000;
     public static final float MIN_DISTANCE = 10000f;
-    public static final float DIST_PER_FITTING_ATTEMPT = 500f; //technical
+    public static final float DIST_PER_FITTING_ATTEMPT = 500f;
 
-    /**
-     * How far one rupture has to be from the next.
-     * <p>
-     * Nothing measured this before - a spot was only ever checked against planets, so the second
-     * pond in a system was free to land on the first, and did. Generous, because two of them within
-     * sight of each other makes the cast a choice of which one rather than where in one.
-     */
+    /** How far one rupture must be from the next - generous, so two in sight of each other read as a choice of which, not where. */
     public static final float MIN_POND_SEPARATION = 6000f;
 
     /**
-     * How far clear of a nebula tile a rupture has to sit.
-     * <p>
-     * Handed to the nebula's own containsPoint, which walks its tiles - so this is clearance from
-     * the cloud where it actually is, not from the middle of the terrain that owns it. A rupture
-     * inside one is invisible under the cloud and unreachable through the slowdown around it.
+     * Clearance from a nebula tile, checked via the nebula's own {@code containsPoint} - i.e. from the
+     * actual cloud shape, not the terrain's centre. A rupture inside one is hidden and unreachable.
      */
     public static final float MIN_NEBULA_CLEARANCE = 1200f;
 
@@ -33,17 +24,12 @@ public class PondConstants {
     public static final int MIN_POND_AMT_PER_SYSTEM = 1;
     public static final int PLANETS_PER_ADDITIONAL_POND = 4;
 
-    //interaction - multiplied by the pond radius. The fleet is "at" the pond within this, which is
-    //both where the rod ability can be used and where the camera holds onto the pond
+    // Multiplied by pond radius: range at which the fleet is "at" the pond (rod usable, camera holds).
     public static final float POND_INTERACT_RANGE_MULT = 1.5f;
 
     /**
-     * How far inside the rim a mote is put when it spawns, as a share of it.
-     * <p>
-     * Inside rather than on it for two reasons. A mote outside the mask is culled, and one born
-     * exactly on the line could be tipped over it by its own first wander and go straight back out.
-     * And the mask is a ragged shape inscribed in a square, so the circle's own edge is mostly not
-     * drawn - a mote spawned there would appear out of nothing some way in.
+     * Inset from the rim, as a fraction of it. Spawning outside this risks a mote drifting past the
+     * mask (culled) or appearing on the ragged mask edge, which is mostly undrawn.
      */
     public static final float MOTE_SPAWN_INSET = 0.85f;
 
@@ -51,104 +37,57 @@ public class PondConstants {
     /** Seconds for the focus to close most of the distance - higher is softer and slower. */
     public static final float POND_FOCUS_TIME_CONSTANT = 1f;
 
-    /**
-     * The same, for the way back. Deliberately quicker than the way out: the camera is handed over
-     * once the eased centre reaches the fleet, and how long that takes scales with how far the pond
-     * has been left behind - at the outbound constant a fleet burning away holds the camera, and the
-     * free look it suppresses, for six or seven seconds after leaving. Long enough that the pond has
-     * usually gone out of sight and closed itself by then, which made the two look connected.
-     */
+    /** Same, for the way back - quicker than outbound, so the handback (scaled by distance from the pond) doesn't linger once it's out of sight. */
     public static final float POND_FOCUS_RETURN_TIME_CONSTANT = 0.4f;
 
     /** World units. Once the camera is this close to the fleet again, control goes back to the game. */
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
 
     /**
-     * How far off centre the fleet may be pushed while the camera is held on a pond, as a share of
-     * the half-screen it has to play with.
-     * <p>
-     * Not a distance, because the thing it has to stay inside is not one. The hold is a circle -
-     * {@link #POND_INTERACT_RANGE_MULT} of the pond's radius, the same range the rod works at - and
-     * the screen it is being watched on is a wide rectangle. At the numbers above that circle
-     * reaches seven hundred and fifty units in every direction while a sixteen-by-nine view affords
-     * something like nine hundred and sixty sideways and only five hundred and forty up: fits going
-     * across, overshoots going up, which is why this only ever went wrong at the top and the bottom.
-     * <p>
-     * Read off the live viewport rather than written down, so it is right at every zoom level and on
-     * every aspect ratio rather than right on the monitor it was measured on. The share left over is
-     * breathing room - a fleet pinned to the last pixel of the screen is on it, but it does not look
-     * like it is.
+     * Room the fleet may be pushed off-centre while the camera holds a pond, as a share of the
+     * half-screen. A fraction rather than a distance because the hold region is circular
+     * ({@link #POND_INTERACT_RANGE_MULT} x pond radius) but the screen isn't - read off the live
+     * viewport so it holds at every zoom and aspect ratio.
      */
     public static final float POND_FOCUS_FLEET_MARGIN = 0.8f;
 
     /**
-     * The motes of light hanging inside the rupture at different depths.
-     * <p>
-     * Depth runs 0 at the bottom to 1 just under the surface, and every one of these is read off it.
-     * SPEED_FLOOR is how fast the deepest layer turns compared to the shallowest - the gap between
-     * them is what the eye reads as distance, so this being well under 1 is the point of the whole
-     * thing. REACH_FLOOR narrows the deep layers towards the middle, which turns a cylinder into a
-     * well - gently, or the field bunches into a disc with a dead ring around it. FILL runs past 1
-     * on purpose: the mask stencil cuts whatever crosses the rim, and a mote cut in half by the edge
-     * reads as one that continues underneath it.
-     * <p>
-     * SIZE is the full width handed to the glow sprite, most of which is transparent falloff. The
-     * ceiling is set against the catchable motes rather than picked on its own: those draw at
-     * {@code FishEntityPlugin.GLOW_SIZE}, and scenery that outgrows the thing you are there to catch
-     * puts the eye on the wrong light. The shallowest of these lands comfortably under it.
-     * <p>
-     * The colours are a brightness ramp as much as a hue ramp: additive blending can
-     * only add light, so a deep mote is dark by contributing nearly nothing - dim colour, low alpha
-     * - not by being painted dark.
-     * <p>
-     * COUNTER_SHARE is how many turn the other way. Not many: enough that the field is not a wheel.
+     * The light motes at depth, keyed off a 0 (bottom) - 1 (near surface) depth value. SPEED_FLOOR is
+     * the deepest layer's speed relative to the shallowest (keep well under 1 - the gap reads as
+     * distance). REACH_FLOOR narrows deep layers toward the centre - too low and it reads as a disc
+     * with a dead ring. FILL runs past 1 deliberately: the mask clips it, so a mote cut by the rim
+     * reads as continuing underneath. SIZE is capped below {@code FishEntityPlugin.GLOW_SIZE} so
+     * scenery never outshines the motes you're there to catch. Colours are a brightness ramp, not a
+     * hue ramp - additive blending only adds light, so depth is dim colour + low alpha, not dark paint.
+     * COUNTER_SHARE is the small fraction spinning the other way, enough that the field isn't a wheel.
      */
     public static final int DEPTH_PARTICLES = 90;
     public static final float DEPTH_SPIN_MIN = 1.5f;
     public static final float DEPTH_SPIN_MAX = 6f;
     public static final float DEPTH_COUNTER_SHARE = 0.1f;
 
-    /**
-     * The drain. Radius lost per second (before the depth speed scaling), depth lost per second,
-     * how much extra turn a particle picks up by the middle, and the radius at which the drain
-     * takes it and it starts over at the rim.
-     */
+    /** Drain: radius/sec and depth/sec lost (before depth-speed scaling), extra swirl gained approaching the middle, and the radius at which a particle recycles to the rim. */
     public static final float DEPTH_SINK_RADIUS = 0.045f;
     public static final float DEPTH_SINK_DEPTH = 0.03f;
     public static final float DEPTH_SWIRL_BOOST = 2.2f;
     public static final float DEPTH_DRAIN = 0.08f;
 
     /**
-     * The well: what makes the rupture read as a hole rather than a disc of space. Not a rotation
-     * - a rotation only ever reads as a lens error - but a radial remap of the fill, r to
-     * r^GAMMA, which compresses the fill ever harder towards the centre the way a funnel wall
-     * does when looked at from above, and lands back where it started at the rim so the remapped
-     * fill meets the space outside the mask without a seam.
-     * <p>
-     * DEPTH is how far that remap is blended in, 0 flat to 1 the full funnel, and is what to turn
-     * first if the hole is too shallow or too deep. GAMMA is the funnel's profile: under 1, and
-     * lower is a steeper, narrower throat - at 1 the remap does nothing at any DEPTH. DIM is how
-     * dark the fill goes at the dead centre, gone by two thirds of the way out; the throat is dark
-     * because it is far away, and the depth motes read better lighting a dark floor than floating
-     * on a bright one. The remap is static, so nothing here can smear over a long session - the
-     * only motion through it is the fill's own drift, which the funnel bends as it passes.
+     * The well - reads as a hole via a radial remap of the fill (r to r^GAMMA), not a rotation (which
+     * reads as a lens error); meets the mask edge seamlessly since the remap returns to its start at
+     * the rim. DEPTH blends the remap in (0 flat, 1 full funnel). GAMMA is the profile: below 1, lower
+     * means a narrower throat, 1 is a no-op. DIM darkens the centre, fading out by two-thirds of the radius.
      */
     public static final float POND_WELL_DEPTH = 0.7f;
     public static final float POND_WELL_GAMMA = 0.6f;
     public static final float POND_WELL_DIM = 0.4f;
 
     /**
-     * The eddy at the rim, riding on the well rather than carrying the effect alone. TWIST is
-     * radians at the strongest point of the band and EDGE the radius the band starts at, as a
-     * fraction of the mask's own radius - kept off the middle, where the funnel and the warp grid
-     * own the water, so the twist is something the eye catches at the rim and not a second,
-     * louder warper fighting the first. TWIST is a standing turn, not a spin: the drifting fill
-     * flows through a fixed curl, which is what keeps the band from shearing itself into mush
-     * over hours the way an accumulating angle did.
-     * <p>
-     * BREATHE and RATE are the life on top: the twist swells by BREATHE of itself and eases back
-     * once per 2*pi/RATE seconds. BREATHE stays under 1 so the turn never reverses - a rim that
-     * changes direction reads as a glitch, not water.
+     * The rim eddy, layered on the well. TWIST is peak radians, EDGE the band's start as a fraction of
+     * the mask radius (kept off-centre so the well/warp grid own the middle). TWIST is a standing curl,
+     * not a spin - the drifting fill flows through a fixed curl rather than accumulating angle, which
+     * would shear over a long session. BREATHE/RATE add an oscillation; BREATHE stays under 1 so the
+     * turn never reverses (a direction change reads as a glitch).
      */
     public static final float POND_SWIRL_TWIST = 0.45f;
     public static final float POND_SWIRL_BREATHE = 0.35f;
@@ -167,19 +106,9 @@ public class PondConstants {
     public static final java.awt.Color DEPTH_COLOR_NEAR = new java.awt.Color(215, 175, 255);
 
     /**
-     * The deep field's own drift, in world units, and how long one wander takes.
-     * <p>
-     * The starfield behind the mask used to slide because the camera moved relative to the pond.
-     * With the camera snapped to the pond it never does, so the field is given a slow wander of its
-     * own - the two are added, so this is what is left when the camera contributes nothing.
-     */
-    /**
-     * The hole look, trialled against the shader swirl. HOLE_LOOK picks which of the two draws
-     * the fill: true is the new stencil-and-gradient hole, false is the old masked-warp shader,
-     * kept whole in case the verdict goes the other way. The rest shape the hole itself: the
-     * background's alpha, zoom and slow wander; the funnel pooling dark in the middle
-     * (WELL_ALPHA at the centre, gone by WELL_REACH of the radius); and the wall shadow rising
-     * again from RIM_START of the radius to the rim.
+     * Toggles between the new stencil+gradient hole (true) and the old masked-warp shader (false, kept
+     * as fallback). The rest shape it: background alpha/zoom/drift; funnel darkening (WELL_ALPHA at
+     * centre, gone by WELL_REACH); rim shadow rising from RIM_START to the rim.
      */
     public static final boolean POND_HOLE_LOOK = false;
     public static final float HOLE_FILL_MULT = 1.5f;
@@ -196,16 +125,14 @@ public class PondConstants {
     /** How much room a pond keeps from a ring band - terrain or purely visual - when spawning. */
     public static final float MIN_RING_CLEARANCE = 200f;
 
+    /** The deep field's own wander (world units) and period - substitutes for parallax, which the camera being snapped to the pond kills. */
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
 
     /**
-     * The shove space takes when a rupture opens - a real screen-space distortion through
-     * GraphicsLib, not another ring drawn over the top of the ones that are already there.
-     * <p>
-     * SIZE is the radius it reaches in world units and INTENSITY how hard it bends what is behind
-     * it. GROW is the seconds it takes to open out and FADE the seconds it takes to die; the ripple
-     * runs for the longer of the two and removes itself.
+     * Screen-space distortion (GraphicsLib) from a rupture opening. SIZE is world-unit radius,
+     * INTENSITY the bend strength. GROW/FADE are seconds to open/die; the effect runs for the longer
+     * of the two and then removes itself.
      */
     public static final float OPEN_DISTORTION_SIZE = 620f;
     public static final float OPEN_DISTORTION_INTENSITY = 26f;

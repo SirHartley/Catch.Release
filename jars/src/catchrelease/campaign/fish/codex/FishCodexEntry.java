@@ -35,18 +35,12 @@ import java.awt.Color;
 import java.util.List;
 
 /**
- * One species in the codex.
+ * One species in the codex - a fish.csv row, not a loaded game item, so the page is built by hand:
+ * one box per informational area (description, catch data, record, location), plus the species'
+ * art beside the topmost box.
  * <p>
- * Custom throughout, because a fish is not a thing the game has loaded - only a row in fish.csv
- * and whatever the player has managed to catch. The page is built the way the game builds an
- * item's page crossed with the way the catch card is built: each informational area in a box of
- * its own - what it is, what it takes, the record, where it was found - all of it said with the
- * game's own text machinery, and the species' art beside the topmost box, boxed the same way and
- * at the size it was drawn.
- * <p>
- * Hidden until the species has been caught. {@link #isVisible()} is asked at draw time rather than
- * at build time, which matters: the codex is generated once when the game loads and would otherwise
- * be a snapshot of what had been caught at that moment.
+ * {@link #isVisible()} is checked at draw time, not build time - the codex is generated once at
+ * load, so build-time visibility would freeze at whatever had been caught at that moment.
  */
 public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin {
 
@@ -67,8 +61,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     protected transient Object mapButtonId;
 
     public FishCodexEntry(String id, FishSpec spec) {
-        //the spec rides along as vanilla's param only so isCategory() sees a leaf - it is never
-        //read back as data, since a stored spec would go stale on a reload; see getSpec()
+        //spec passed only so isCategory() sees a leaf; never read back - see getSpec()
         super(id, spec.getDisplayName(), FishCodex.getIcon(spec), spec);
 
         this.speciesId = spec.id;
@@ -82,27 +75,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishLog.get(speciesId);
     }
 
-    /**
-     * A species nobody has caught is not in the codex at all - not greyed out, not a silhouette with
-     * a name under it. The point of the thing is that the list gets longer as you fish.
-     */
-    /**
-     * The picture in the tree, which is not the fish until there is a fish to picture.
-     * <p>
-     * Asked at draw time rather than fixed in the constructor, like visibility above and for the
-     * same reason: entries are built before a game exists, so anything that depends on what has been
-     * caught cannot be settled when they are made. A species known only from a survey shows the
-     * generic mark - somebody has told you it is out there and where to look, which is not the same
-     * as having seen one, and a list that draws the creature is answering a question nobody has
-     * earned the answer to yet.
-     */
+    /** Generic category icon until the species is caught, not just surveyed. */
     @Override
     public String getIcon() {
         FishSpec spec = getSpec();
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
 
-        //the category's own mark for anything not yet caught, so a surveyed species files under
-        //the same sign as the shelf it sits on rather than borrowing art it has not earned
         return FishLog.isCaught(speciesId) ? FishCodex.getIcon(spec)
                 : FishConstants.CODEX_CATEGORY_ICON;
     }
@@ -111,17 +89,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public boolean isVisible() {
         if (Global.getSector() == null) return false;
 
-        //bought survey data is worth an entry of its own. It is a species somebody has told you
-        //about and where to look for it, which is exactly the thing a codex is for - and an entry
-        //that appears only once you no longer need it is an entry nobody ever uses
+        //bought survey data earns an entry too, not just an actual catch
         return FishLog.isCaught(speciesId) || FishLog.isLocationDataUnlocked(speciesId);
     }
 
-    /**
-     * A species is always a leaf, never a folder of anything. Stated outright on top of the param
-     * passed up from the constructor, so an edit to either cannot silently turn every fish back
-     * into a category - which loses the entry from search and puts it in the category font.
-     */
     @Override
     public boolean isCategory() {
         return false;
@@ -152,24 +123,18 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishSpec spec = getSpec();
         FishLogEntry logged = getLogged();
 
-        //bought the survey, never seen one. Everything on this page except where it lives is a thing
-        //you learn by landing one - what it looks like, what it does on the line, how big they run -
-        //so a page that showed them would be handing over the catch as well as the tip
+        //survey-only: everything but location is earned by actually landing one
         boolean unseen = logged != null && logged.hintOnly;
 
         float width = panel.getPosition().getWidth();
         float leftWidth = width - RIGHT_WIDTH - 20f;
 
-        //the boxes, one per informational area, stacked down the left
         float y = 0f;
 
         UIPanelAPI description = addBox(leftWidth, y, "Description",
                 box -> addDescription(box, spec, unseen));
         y += description.getPosition().getHeight() + BOX_GAP;
 
-        //the catch data comes with the survey - difficulty and behaviour are exactly the things a
-        //buyer wants to know before going after something they have never seen. What stays earned
-        //is the creature itself: the art and the landed count are still the catch's to give
         if (spec != null) {
             UIPanelAPI box = addBox(leftWidth, y, "Catch data", b -> addCatchData(b, spec, logged));
             y += box.getPosition().getHeight() + BOX_GAP;
@@ -184,7 +149,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 b -> addLocationData(b, spec, logged));
         y += location.getPosition().getHeight() + BOX_GAP;
 
-        //the art off the topmost box's shoulder, with the related entries hanging under it
         float rightHeight = 0f;
         UIPanelAPI card = buildIconCard(unseen ? null : spec, logged, width - leftWidth - BOX_GAP);
 
@@ -206,11 +170,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         panel.getPosition().setSize(width, Math.max(y, rightHeight));
     }
 
-    /** One boxed area: the game's own heading, the content, the game's own box around both. */
+    /** One boxed area: heading, content, box - all via the game's own text machinery. */
     protected UIPanelAPI addBox(float width, float y, String title,
                                 java.util.function.Consumer<TooltipMakerAPI> content) {
 
-        //the box pads its tooltip by fifteen a side on the way in
+        //15px padding each side
         TooltipMakerAPI text = panel.createUIElement(width - 30f, 0, false);
         text.setParaSmallInsignia();
 
@@ -227,10 +191,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return box;
     }
 
-    /** What it is: its type off the table's tags, its rarity beside that, and the words. */
+    /** Type, rarity, and description text. */
     protected void addDescription(TooltipMakerAPI text, FishSpec spec, boolean unseen) {
-        //what somebody else told you about a thing you have never seen. They said where it lives,
-        //which is the whole of what a survey is - the rest of this page is earned by landing one
         if (unseen) {
             text.addPara("Known only from survey data. Nothing of this species has been seen"
                     + " aboard - only where to look, and what the instruments made of the way"
@@ -254,7 +216,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** What it takes to land one, and how often one has been landed. */
+    /** Difficulty, behaviour, and times caught. */
     protected void addCatchData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
         text.addPara("Difficulty: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 getDifficultyLabel(spec.difficulty));
@@ -270,10 +232,9 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** The best one, and the story of it: how big, from where, when, and by what. */
+    /** Best catch's length, weight, grade, and where/when/how it was taken. */
     protected void addRecord(TooltipMakerAPI text, FishLogEntry logged) {
-        //rebuilt from the recorded numbers rather than stored, so a retuned table regrades old
-        //catches instead of leaving a grade behind that its own numbers no longer support
+        //grade recomputed from stored numbers, not stored itself, so table retuning regrades old catches
         FishGrade best = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
                 logged.recordAberration).getGrade();
 
@@ -295,13 +256,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
 
-    /**
-     * Where to go looking. Open once the species has actually been caught - a fisher who landed one
-     * knows where they were standing - or once the data has been bought for one that is only known
-     * about. Stated as sealed rather than hidden otherwise, so the block says there is something
-     * here to have. The survey line is behind the same seal as the rest: it is precisely the
-     * bought data said as a sentence, and a seal that leaks its own contents sells nothing.
-     */
+    /** Location box: sealed until caught or survey data bought, then survey summary + record system. */
     protected void addLocationData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
         boolean open = logged != null
                 && (FishLog.isCaught(speciesId) || logged.locationDataUnlocked);
@@ -312,12 +267,9 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             return;
         }
 
-        //the species before the specimen: where any of them can be caught, then where this one was
         text.addPara("Survey: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 FishLocationSummary.describe(spec));
 
-        //a survey bought for something never landed has no specimen to talk about, and the rest of
-        //this box is all about one particular fish on one particular day
         if (logged.hintOnly) {
             text.addPara("Nothing of this one has been landed. The waters are on the map.",
                     Misc.getGrayColor(), 3f);
@@ -327,16 +279,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
 
-        //no little map in here any more - the real one is a button away, wearing the fish filter,
-        //and a sketch beside a door to the actual thing only ever got read as the actual thing
         addMapButton(text, spec);
     }
 
-    /**
-     * The jump from the little map to the real one. Only in the campaign proper - the codex also
-     * opens where there is no sector map to jump to - and only when the species is still in the
-     * table, since the map cannot point at a fish it cannot look up.
-     */
+    /** Only shown in the campaign proper, and only if the species is still in the table. */
     protected void addMapButton(TooltipMakerAPI text, FishSpec spec) {
         if (spec == null || Global.getCurrentState() != GameState.CAMPAIGN) return;
 
@@ -347,19 +293,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /**
-     * Hands the species to the map filter and swaps the screens. The request is parked with
-     * {@link FishMapFilterScript} rather than applied here, because the map screen this is aiming
-     * at does not exist yet - the script picks the request up when it attaches, and lets it
-     * quietly expire if the player never arrives. The codex is closed the way its own close
-     * button closes it - detail destroyed, then {@code dismiss(1)}, a stable name on an
-     * obfuscated class - because the API offers a way in but none back out.
-     * <p>
-     * The tab switch is NOT made here. The UI refuses {@code showCoreUITab} while any dialog is
-     * still showing, and on the frame this runs the codex is still mid-dismissal - so the switch
-     * was silently swallowed and the button read as "close everything". A transient script makes
-     * the switch on the first frame the dialog is actually gone, and gives up quietly if the
-     * dismissal somehow never finishes. One failure anywhere abandons the whole jump: the worst
-     * outcome is the button doing nothing, logged once.
+     * Requests species focus on {@link FishMapFilterScript} (map doesn't exist yet, so the script
+     * picks it up once it attaches), closes the codex via {@code dismiss(1)} - the only way out the
+     * API exposes, on an obfuscated class with no other name for it - then queues {@link
+     * MapTabOpener} to open the map tab. The tab switch can't happen here: {@code showCoreUITab}
+     * is refused while a dialog is still showing, and the codex is still mid-dismissal on this frame.
      */
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
@@ -380,15 +318,13 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /**
-     * Opens the map tab on the first frame no dialog is in the way, then removes itself.
-     * <p>
-     * Runs while paused, necessarily - the campaign is paused under the codex, and a script that
-     * waits for the clock would wait for the player to unpause and wonder why the button did
-     * nothing. The timeout is frames rather than seconds for the same reason.
+     * Opens the map tab on the first frame no dialog is in the way, then removes itself. Must run
+     * while paused (the campaign is paused under the codex), so the give-up timer is frame-counted
+     * rather than clock-based.
      */
     protected static class MapTabOpener implements com.fs.starfarer.api.EveryFrameScript {
 
-        /** Frames to keep trying before deciding the dismissal is never finishing. */
+        /** Frames to try before giving up on the codex ever finishing its dismissal. */
         public static final int GIVE_UP_FRAMES = 30;
 
         private boolean done = false;
@@ -428,17 +364,15 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /**
-     * The species' art in a square of the catch card's making - dark field, rarity backlight, the
-     * rarity and record-grade marks along the bottom - wrapped in the same box the informational
-     * areas wear, rather than the card's own rounded dressing: one page, one frame. The art is
-     * drawn at the size it was drawn at - a bitmap scaled is a bitmap gone soft - and only capped
-     * when it would not fit the column with the box's padding around it.
+     * Species art card - dark field, rarity backlight, rarity/grade marks - wrapped in the same box
+     * style as the other panels rather than the catch card's rounded dressing. Art is drawn at
+     * native size and only scaled down if it wouldn't fit the column.
      */
     protected UIPanelAPI buildIconCard(FishSpec spec, FishLogEntry logged, float maxWidth) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) return null;
 
-        //loaded through the cache once so the texture exists, then asked for fresh - the cached
-        //instance is shared and other draws resize it, and this one needs the native size
+        //load through the cache first to ensure the texture exists, then fetch fresh since the
+        //cached instance is shared and gets resized by other draws
         if (SpriteLoader.loadSprite(spec.icon) == null) return null;
 
         SpriteAPI fresh = Global.getSettings().getSprite(spec.icon);
@@ -446,7 +380,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         float artWidth = fresh.getWidth();
         float artHeight = fresh.getHeight();
 
-        //the box takes thirty for its own padding before the card gets a pixel
+        //30px box padding reserved before the card gets any width
         float artMax = Math.min(ART_MAX, maxWidth - 30f - CARD_PAD * 2f);
         if (artMax <= 0f) return null;
 
@@ -465,8 +399,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         CustomPanelAPI card = panel.createCustomPanel(cardSize, cardSize,
                 new IconCard(spec, artWidth, artHeight, best));
 
-        //through a tooltip only because that is what the box-wrapper takes - the same road the
-        //informational areas travel, which is what makes the frames come out identical
+        //wrapped in a tooltip since that's what wrapTooltipWithBox requires
         TooltipMakerAPI holder = panel.createUIElement(cardSize, cardSize, false);
         holder.addCustom(card, 0f);
 
@@ -475,7 +408,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return panel.wrapTooltipWithBox(holder);
     }
 
-    /** The card itself: the field, the backlight and one sprite, no text to go soft. */
+    /** Renders the field, backlight, and sprite for {@link #buildIconCard}. */
     protected static class IconCard extends BaseCustomUIPanelPlugin {
 
         protected final FishSpec spec;
@@ -507,7 +440,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
             ShopUi.drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
 
-            //a wash of the rarity colour behind the art, so the silhouette has something to sit against
             Disc.draw(x + size * 0.5f, y + size * 0.5f, size * 0.5f, spec.rarity.color,
                     0.3f * alphaMult, 0f, true);
 
@@ -526,16 +458,14 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** The clock's epoch is cycle 206, which is long before 1970 - a real stamp is negative. Only an exact zero means unset. */
+    /** Epoch is cycle 206 (before 1970, so a real stamp is negative); only exact 0 means unset. */
     protected static String getDate(long timestamp) {
         if (Global.getSector() == null || timestamp == 0L) return "an unrecorded date";
 
-        //a clock built on the stored stamp, rather than a date string written when it was stored -
-        //so a cycle rolling over cannot leave a stale one behind
         return Global.getSector().getClock().createClock(timestamp).getDateString();
     }
 
-    /** Said as words, since the number behind it is a tuning value rather than a thing to read. */
+    /** Difficulty tier as a word rather than the raw tuning value. */
     protected static String getDifficultyLabel(float difficulty) {
         if (difficulty >= 150f) return "extreme";
         if (difficulty >= 100f) return "very high";

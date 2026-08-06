@@ -8,16 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Charges for abilities that fire in bursts rather than on a cooldown.
- * <p>
- * A cooldown asks you to wait the same amount every time. A pool asks you to decide: fire three
- * harpoons at one pass and wait for all three, or spend one and keep two in hand. That is a more
- * interesting question than "is it up yet", and it is the whole reason this exists rather than the
- * ability's own rearm timer being turned down.
- * <p>
- * Charges regenerate continuously rather than in whole steps, so the pool is a float and a partial
- * charge is real progress rather than a hidden timer. Both the size of the pool and how fast it
- * fills come off the upgrade sheet, so this knows nothing about either ability.
+ * Charge pools for abilities that fire in bursts rather than on a cooldown - spend some, keep some
+ * in hand. Pools regenerate continuously as a float (not whole steps); size and refill rate come
+ * off the upgrade sheet, so this class knows nothing about specific abilities.
  */
 public class ChargeManager implements EveryFrameScript {
 
@@ -33,10 +26,10 @@ public class ChargeManager implements EveryFrameScript {
     }
 
     /**
-     * How many charges are in hand, rounded down - a pool at 2.9 can be spent twice.
+     * Rounded down - a pool at 2.9 can be spent twice.
      *
-     * @param maxStat     upgrade id for how big the pool is
-     * @param maxFallback what it is without a row in the sheet
+     * @param maxStat     upgrade id for pool size
+     * @param maxFallback used if the sheet has no row for it
      */
     public static int getCharges(String abilityId, String maxStat, float maxFallback) {
         return (int) Math.floor(getPool(abilityId, maxStat, maxFallback));
@@ -46,11 +39,7 @@ public class ChargeManager implements EveryFrameScript {
         return getCharges(abilityId, maxStat, maxFallback) >= 1;
     }
 
-    /**
-     * Takes one, if there is one.
-     *
-     * @return false if the pool was empty, in which case nothing was taken
-     */
+    /** @return false if the pool was empty; nothing taken in that case */
     public static boolean spend(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
         if (pool < 1f) return false;
@@ -60,17 +49,14 @@ public class ChargeManager implements EveryFrameScript {
         return true;
     }
 
-    /** 0 to 1 towards the next charge, for anything that wants to show the wait. */
+    /** 0 to 1 towards the next charge. */
     public static float getProgressToNext(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
 
         return pool - (float) Math.floor(pool);
     }
 
-    /**
-     * A new pool starts full. Anything else means a save that has never fired the ability begins by
-     * waiting for something it has not spent.
-     */
+    /** A new pool starts full - a save that never fired the ability shouldn't begin waiting. */
     protected static float getPool(String abilityId, String maxStat, float maxFallback) {
         Map<String, Float> pools = getPools();
 
@@ -82,7 +68,7 @@ public class ChargeManager implements EveryFrameScript {
             return max;
         }
 
-        //an upgrade that shrinks the pool should not leave more in it than it holds
+        //clamp: a downgrade shouldn't leave more in the pool than it now holds
         if (pool > max) {
             pools.put(abilityId, max);
             return max;
@@ -108,14 +94,9 @@ public class ChargeManager implements EveryFrameScript {
         return pools;
     }
 
-    /** Every pool that has been used, refilling. Registered abilities add themselves by spending. */
     protected final Map<String, Refill> refills = new HashMap<>();
 
-    /**
-     * What a pool needs to know to refill itself: which upgrade says how big it is and which says
-     * how long a charge takes. Registered by the ability rather than listed here, so this class
-     * never has to be edited to add another one.
-     */
+    /** Which upgrades say pool size and refill time; registered by the ability, not listed here. */
     public static class Refill {
         public final String maxStat;
         public final float maxFallback;

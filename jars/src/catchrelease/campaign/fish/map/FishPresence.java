@@ -71,11 +71,8 @@ public class FishPresence {
         if (spec == null || spec.regions.isEmpty()) return false;
         if (Global.getSettings().isDevMode()) return true;
 
-        //knowing where it lives is the whole of it. This used to stop the moment a species was
-        //caught, on the reasoning that shading is for finding one you have not got - which reads
-        //backwards the moment you want it again: the shading is the answer to where the species can
-        //be caught, and landing one is not a reason to be told less. Catching now teaches the
-        //location outright, so the two halves of knowing are the same fact
+        //shading tracks isKnown() - catching a species also teaches its location, so there's no
+        //separate cutoff once landed
         return isKnown(spec);
     }
 
@@ -137,7 +134,7 @@ public class FishPresence {
     public static String getStatus(FishSpec spec) {
         if (FishLog.isCaught(spec.id)) return "landed";
 
-        //a table row with nowhere to be is a data problem, and dev mode is where it gets caught
+        //missing region data is flagged only in dev mode
         if (Global.getSettings().isDevMode() && spec.regions.isEmpty()) return "no data";
 
         return "region data";

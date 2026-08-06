@@ -1,20 +1,13 @@
 package catchrelease.memory.upgrades;
 
 /**
- * Every upgradeable number, by id.
- * <p>
- * The ids are the join between the code and data/config/UpgradeData.csv - a stat that is named here
- * and not there simply has no upgrade, and {@link UpgradeManager#getValue(String, float)} hands back
- * the fallback the caller passed. That is deliberate: a missing row should cost the upgrade, not the
- * feature.
- * <p>
- * Which category a stat is in lives in the sheet rather than here, since it is a property of the
- * upgrade rather than of the thing being upgraded.
+ * Every upgradeable number, by id. Ids join the code to data/config/UpgradeData.csv - a stat named
+ * here but missing from the sheet just has no upgrade, and {@link UpgradeManager#getValue(String, float)}
+ * returns the caller's fallback. Category lives in the sheet, not here.
  */
 public class StatIds {
 
-    //breach lamps. The ids still say searchlight because ids live in saves; the display name is
-    //translated in the shop
+    //breach lamps - ids still say "searchlight" since ids are saved; display name is translated in the shop
     public static final String
             SEARCHLIGHT_AREA = "searchlight_area",
             SEARCHLIGHT_SPEED = "searchlight_speed",
@@ -55,15 +48,10 @@ public class StatIds {
             HARPOON_ABILITY = "catchrelease_harpoon";
 
     /**
-     * Which ability a stat is a number on, or null for one that is not about an ability at all.
-     * <p>
-     * Listed rather than matched on the id's prefix. The prefixes happen to be consistent today and
-     * a convention held together by nothing is a convention somebody breaks - {@code fishing_bar_size}
-     * already sits with the minigame despite reading like a drone stat, which is what that failure
-     * looks like when it happens.
-     * <p>
-     * The point of asking is that a running ability was built from these numbers when it started, so
-     * changing one under it leaves it running on the old figure until it is turned off and on again.
+     * Which ability a stat is a number on, or null if it is not about an ability. Listed explicitly
+     * rather than matched on id prefix - {@code fishing_bar_size} already breaks that pattern. A
+     * running ability was built from these numbers at activation, so changing one under it only
+     * takes effect after it is turned off and on again.
      */
     public static String getAbilityId(String statId) {
         if (statId == null) return null;
@@ -72,7 +60,6 @@ public class StatIds {
         for (String id : ROD) if (id.equals(statId)) return ROD_ABILITY;
         for (String id : HARPOON) if (id.equals(statId)) return HARPOON_ABILITY;
 
-        //the minigame stats belong to no ability - nothing is running to be interrupted
         return null;
     }
 

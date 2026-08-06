@@ -12,23 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Draws the fish waters over the sector map, riding the map's own pan and zoom.
+ * Draws the fish waters over the sector map, riding its pan and zoom.
  * <p>
- * Each blob is painted by stencil parity: its smoothed rings are fanned into the stencil buffer,
- * where crossings flip a bit, and the fill is then one flat pass wherever the bit is set. The
- * fill therefore lands exactly once per pixel however the rings fold - no double-darkened
- * overlaps, no fill peeking past the outline, since both come from the same rings - and one
- * cover pass per blob is also the cheap way to draw it.
+ * Each blob fills by stencil parity: its rings are fanned into the stencil buffer (crossings flip a
+ * bit), then one flat cover pass fills wherever the bit ends up set - exact coverage regardless of how
+ * the rings fold, and cheap. With more than one blob up, the cover pass is diagonal stripes offset per
+ * blob instead of a solid sheet, so overlapping waters interleave rather than stack.
  * <p>
- * When more than one blob is up at once, the cover pass is diagonal stripes instead of a solid
- * sheet, each blob's bands offset by its place in the list - so where two waters overlap, the
- * colours interleave instead of stacking. One blob alone gets the solid sheet, since it has
- * nobody to argue with.
- * <p>
- * The geometry is world-space and cached; only the transform is per-frame. The map widget draws
- * everything at {@code world * factor + centre}, so this reads those two numbers off the widget
- * each frame and applies the same arithmetic. The panel rides the map scroller's overlay layer,
- * which the game scissors to the map rectangle unconditionally.
+ * Geometry is world-space and cached; only the transform ({@code world * factor + centre}, read off
+ * the map widget each frame) changes per frame.
  */
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
@@ -44,9 +36,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final int STYLE_STRIPE_LEFT = 2;
 
     /**
-     * One set of waters: its cached world-space rings, its colour, how its fill is painted, and
-     * which of fill and outline it actually draws - a same-coloured group shares one merged
-     * outline blob while each member keeps its own fill, so the border never stacks on itself.
+     * One set of waters: cached world-space rings, colour, fill style, and which of fill/outline to
+     * draw - a same-coloured group shares one merged outline while each member keeps its own fill.
      */
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
@@ -85,12 +76,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public void render(float alphaMult) {
         if (blobs.isEmpty() || mapWidget == null || alphaMult <= 0f) return;
 
-        //the geometry is hyperspace geometry; the same screen also shows single systems, and
-        //waters drawn over a star system would be marking coordinates that mean nothing there
+        // Geometry is hyperspace-only; the same widget also shows single systems, where these coordinates mean nothing.
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
         if (!(location instanceof LocationAPI) || !((LocationAPI) location).isHyperspace()) return;
 
-        //the whole camera, in two numbers: everything on the map is world * factor + centre
         Object factorValue = ReflectionUtils.invokeIfExists(mapWidget, "getFactor");
         if (!(factorValue instanceof Float)) return;
 
@@ -105,8 +94,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        //fills first, outlines over all of them - a merged border belongs on top of every
-        //member's fill, not underneath the next one's
+        // Fills first, then all outlines - a merged border must sit on top of every member's fill.
         for (Blob blob : blobs) {
             if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
         }
@@ -125,14 +113,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float g = blob.color.getGreen() / 255f;
         float b = blob.color.getBlue() / 255f;
 
-        //the blob's box on screen, for the cover pass
+        // Blob's box on screen, for the cover pass.
         float boxMinX = blob.mesh.minX * factor + centerX;
         float boxMinY = blob.mesh.minY * factor + centerY;
         float boxMaxX = blob.mesh.maxX * factor + centerX;
         float boxMaxY = blob.mesh.maxY * factor + centerY;
 
-        //parity pass: fan every ring into the stencil, flipping a bit per crossing. Where the
-        //bit ends up set is inside the shape - however the rings nest or fold
+        // Parity pass: fan every ring into the stencil, flipping a bit per crossing.
         GL11.glClearStencil(0);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
 
@@ -157,7 +144,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glEnd();
         }
 
-        //cover pass: one flat sheet - or one set of bands - wherever the parity landed inside
+        // Cover pass: fill (sheet or stripes) wherever the parity landed inside.
         GL11.glColorMask(true, true, true, true);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 1);
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
@@ -205,12 +192,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
      * to the left for the third, so where waters overlap the weaves cross instead of piling.
      */
     protected void renderStripes(float minX, float minY, float maxX, float maxY, int style) {
-        //the diagonal's unit vectors: along the stripe, and across it
+        // Diagonal's unit vectors: along the stripe, and across it.
         float dirX = 0.70710678f;
         float dirY = style == STYLE_STRIPE_LEFT ? -0.70710678f : 0.70710678f;
         float normX = -dirY, normY = dirX;
 
-        //the box's reach along each axis, from its corners
         float alongMin = Float.MAX_VALUE, alongMax = -Float.MAX_VALUE;
         float acrossMin = Float.MAX_VALUE, acrossMax = -Float.MAX_VALUE;
 

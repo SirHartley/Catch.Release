@@ -13,17 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ponds a job cares about, and the fish it put in them.
+ * Ponds a job cares about, and the fish it placed in them - for jobs that need a specific fish in
+ * a specific pond rather than anything caught anywhere the species swims.
  * <p>
- * Most of what a fishing job wants can be caught anywhere its species swims, and those jobs need
- * nothing from this. The ones that need it are the ones where a particular fish is in a particular
- * hole in the fabric - something placed rather than found, that has to still be there when the
- * player arrives however long they take about it.
- * <p>
- * All of it hangs off the pond entity's own memory rather than a register kept somewhere else. A
- * register would have to be kept in step with a world that deletes ponds without asking, and the
- * failure would be silent: a job pointing at a pond that is no longer there. Memory on the entity
- * goes when the entity goes, which is exactly the lifetime this wants.
+ * State lives on the pond entity's own memory rather than a separate register, so it disappears
+ * automatically when the pond does instead of leaving a dangling reference.
  */
 public class QuestPond {
 
@@ -36,12 +30,7 @@ public class QuestPond {
     /** Set on a mote a job placed, which is what makes it look like one. */
     public static final String QUEST_MOTE_FLAG = "$catchrelease_questMote";
 
-    /**
-     * Marks a pond as one a job needs, under the name of the job that needs it.
-     * <p>
-     * Named rather than merely flagged so two jobs cannot quietly share a pond and then release it
-     * out from under each other - the one that claimed it is the one that may let it go.
-     */
+    /** Marks a pond as needed by this job; named so only the claiming job can later release it. */
     public static boolean claim(SectorEntityToken pond, String jobId) {
         if (pond == null || jobId == null) return false;
         if (!isPond(pond)) return false;
@@ -70,12 +59,8 @@ public class QuestPond {
     }
 
     /**
-     * Puts a named species into a pond and leaves it there.
-     * <p>
-     * Not the same thing as a pond spawning one of its own. Those are rolled from what lives in the
-     * system and swim off to a target and expire, which is right for scenery and wrong for the only
-     * specimen of the thing somebody is waiting for - so this one is flagged, and the flag is what
-     * anything drawing or culling motes is expected to read before treating it as ordinary.
+     * Puts a named species into a pond and flags it {@link #QUEST_MOTE_FLAG}, so it's exempt from
+     * ordinary spawn/expire handling that would otherwise treat it like scenery.
      *
      * @return the mote, or null if the pond could not take one
      */
@@ -86,8 +71,7 @@ public class QuestPond {
         LocationAPI location = pond.getContainingLocation();
         if (location == null) return null;
 
-        //inside the mask rather than on its rim, because a placed fish is not arriving - it is
-        //already there, and the edge is where the pond puts the ones that are only passing through
+        //placed inside the mask, not on the rim - the rim is where transient motes appear
         float radius = pond.getRadius() * 0.5f;
 
         Vector2f at = MathUtils.getPointOnCircumference(pond.getLocation(),
@@ -99,8 +83,7 @@ public class QuestPond {
 
         mote.setLocation(at.x, at.y);
 
-        //flagged and then told to look again, because the colour is settled when the mote is made
-        //and the mote has to exist before there is anything to flag
+        //flag set, then color refreshed - color is decided at construction, before the flag exists
         mote.getMemoryWithoutUpdate().set(QUEST_MOTE_FLAG, true);
 
         if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
@@ -113,12 +96,7 @@ public class QuestPond {
         return mote != null && mote.getMemoryWithoutUpdate().getBoolean(QUEST_MOTE_FLAG);
     }
 
-    /**
-     * Every pond in a system, for a job that needs to choose one.
-     * <p>
-     * Ponds are terrain rather than entities of their own, so they are found by the terrain's tag -
-     * the same way everything else in the mod finds them.
-     */
+    /** Every pond in a system, found by the terrain's tag since ponds are terrain, not entities. */
     public static List<SectorEntityToken> getPonds(LocationAPI location) {
         List<SectorEntityToken> ponds = new ArrayList<>();
         if (location == null) return ponds;

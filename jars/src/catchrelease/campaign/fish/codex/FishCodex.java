@@ -8,17 +8,12 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.impl.codex.CodexEntryV2;
 
 /**
- * The fish category in the game's codex.
+ * The fish category in the game's codex, built by hand since fish specs (csv rows, not game data)
+ * aren't something the codex knows how to describe on its own.
  * <p>
- * Built by hand, because none of this is loaded as game data. A hull, a weapon or a commodity has a
- * spec the codex can be pointed at and will happily describe on its own; a fish has a row in a csv
- * and a png, and the codex has never heard of either. So the category, the entries, the icons and
- * every line of detail are ours.
- * <p>
- * Installed from {@code ModPlugin.onCodexDataGenerated()}, which runs once after the codex has been
- * built. Entries are created for every species in the table and hide themselves until caught - see
- * {@link FishCodexEntry#isVisible()} - so the list grows as the player fishes without the codex
- * needing to be rebuilt.
+ * Installed from {@code ModPlugin.onCodexDataGenerated()}. Entries exist for every species but
+ * hide themselves until caught (see {@link FishCodexEntry#isVisible()}), so the visible list grows
+ * as the player fishes without rebuilding the codex.
  */
 public class FishCodex {
 
@@ -43,28 +38,18 @@ public class FishCodex {
 
         CodexDataV2.ROOT.addChild(category);
 
-        //Hanging the category off ROOT puts it in the tree, which is enough to browse to and no use
-        //for anything that looks an entry up by id. Those go through CodexDataV2.getEntry, which
-        //reads a flat map built by rebuildIdToEntryMap - and the last rebuild happens before the
-        //onCodexDataGenerated hook we are standing in, with none after it. So every entry added here
-        //is browsable and unfindable at once.
-        //
-        //That is not a cosmetic gap. TooltipMakerAPI.setCodexEntryId silently does nothing when the
-        //id does not resolve, so F2 on a specimen fell back to the generic item entry; showCodex and
-        //related-entry links go the same way.
+        //required: CodexDataV2.getEntry() reads a flat id->entry map that's last rebuilt before
+        //onCodexDataGenerated runs, so entries added here are browsable but unresolvable by id
+        //until this call - otherwise setCodexEntryId/showCodex/related-entry links fail silently
         CodexDataV2.rebuildIdToEntryMap();
     }
 
-    /**
-     * Opens the codex on a species, for anything that wants to point at one - a hint being sold, a
-     * catch being celebrated. Does nothing for a species that has never been caught, since the entry
-     * hides itself and there would be nothing to open.
-     */
+    /** Opens the codex on a species; a no-op if it's never been caught, since the entry hides itself. */
     public static void show(String speciesId) {
         Global.getSettings().showCodex(getEntryId(speciesId));
     }
 
-    /** The row's own art. The stand-in covers a row that never had any. */
+    /** The species' icon, or the fallback if it has none. */
     public static String getIcon(FishSpec spec) {
         if (spec.icon == null || spec.icon.isEmpty()) return FishConstants.ITEM_ICON_FALLBACK;
 

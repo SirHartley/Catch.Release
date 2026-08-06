@@ -17,12 +17,12 @@ import java.util.EnumSet;
 
 import static catchrelease.helper.math.TrigHelper.smootherStep;
 
-//each ripple has its own renderer which is inefficient, but cpu cycles are free
+//one renderer instance per ripple; not pooled
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
     public static final float MAX_ALPHA = 0.7f;
 
-    //default params for searchlight
+    //defaults for the searchlight
     public static final float START_RADIUS_OFFSET = 0.7f;
     public static final float FEATHER_PX = 2f;
     public static final float RING_WIDTH_PX = 2f;
@@ -49,15 +49,9 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     public Color color;
 
     /**
-     * The location this ring belongs to, and the only one it will be drawn in.
-     * <p>
-     * LunaLib keeps a single list of campaign renderers for the whole sector and draws all of it
-     * wherever the player happens to be, so a ring is otherwise painted at its raw world
-     * coordinates in whatever system is on screen - somewhere else entirely. Left null the ring
-     * draws anywhere, which is only safe for something made and finished in front of the player.
-     * <p>
-     * Saved rather than transient on purpose: a ring restored from a save with this cleared would
-     * go back to drawing itself into whatever system the game was loaded into.
+     * Location this ring is confined to. LunaLib draws all campaign renderers wherever the player
+     * currently is, so without this a ring would paint at its raw coordinates in whatever system is
+     * on screen. Null draws unconditionally. Not transient - must survive save/load.
      */
     public LocationAPI home;
 
@@ -138,7 +132,6 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
         float t = MathUtils.clamp(age / growTime, 0f, 1f);
 
-        // Ring width decreases linearly to 0 over lifetime
         currentWidth = Math.max(0f, startWidth * (1f - t));
 
         float maxRadiusPx = Math.max(minRadius, maxRadius);
@@ -148,9 +141,9 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         float rT = smootherStep(t);
         float radiusPx = lerp(minRadius, maxRadius, rT);
 
-        float up = smootherStep(2 * t); // Fade in twice as fast
+        float up = smootherStep(2 * t); //fades in twice as fast as it fades out
         float down = smootherStep(1f - t);
-        float alphaMult = up * down * 4f; // *4 normalizes peak to ~1 at t=0.5
+        float alphaMult = up * down * 4f; //normalizes peak to ~1 at t=0.5
 
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);
@@ -160,7 +153,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         if (alphaMult <= 0f) return;
 
         float radiusUv = radiusPx / sizePx;
-        float ringWidthUv = currentWidth / sizePx; // use shrinking width
+        float ringWidthUv = currentWidth / sizePx;
         float featherUv = FEATHER_PX / sizePx;
 
         float angularTiling = 1f;

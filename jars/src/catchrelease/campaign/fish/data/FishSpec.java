@@ -4,12 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * One row of data/campaign/fish.csv: what a fish is, where it turns up, and how it behaves once it is
- * on the hook.
- * <p>
- * Every criterion is "blank means anything", so a row that fills in nothing but its id can be caught
- * anywhere. Narrow a fish down by listing the star types, system tags or {@link SectorRegion}s it
- * belongs to.
+ * One row of data/campaign/fish.csv. Every criterion is "blank means anything" - a row with only an
+ * id can be caught anywhere; narrow it with star types, system tags, or {@link SectorRegion}s.
  */
 public class FishSpec {
 
@@ -27,17 +23,13 @@ public class FishSpec {
     public float motionSpeed = 1f;
     public float restlessness = 1f;
 
-    /** Multiplier on how much the fish's icon twitches. Visual only - it never moves the real fish. */
+    /** Icon twitch multiplier; visual only. */
     public float jitter = 1f;
     public float difficulty = 50f;
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;
 
-    /**
-     * What one is worth before anything is known about the individual, and the range a specimen of
-     * this species comes in. Length is metres and weight kilograms; a catch rolls inside the range
-     * and its value moves with where in that range it landed.
-     */
+    /** Length in metres, weight in kilograms; a catch rolls inside the range and value scales with it. */
     public float baseValue = 100f;
     public float lengthMin = 0.3f;
     public float lengthMax = 0.6f;
@@ -49,16 +41,12 @@ public class FishSpec {
     public Set<String> systemTags = new LinkedHashSet<>();
     public Set<SectorRegion> regions = new LinkedHashSet<>();
 
-    /** The name to show, falling back to the id for rows that have not been named yet. */
+    /** Falls back to id if unnamed. */
     public String getDisplayName() {
         return name == null || name.isEmpty() ? id : name;
     }
 
-    /**
-     * What kind of thing this is, read off the table's tags - a crab is not a mollusc, and neither
-     * is a matter of rarity. The abyssal tag rides along as a qualifier rather than a type of its
-     * own, since an abyssal crab is still a crab.
-     */
+    /** Base type from tags (crab/mollusc/fish/other); "abyssal" is a qualifier, not its own type. */
     public String getTypeName() {
         String base = tags.contains("crab") ? "Crab"
                 : tags.contains("mollusc") ? "Mollusc"
@@ -70,9 +58,9 @@ public class FishSpec {
     /**
      * Whether this fish can turn up in the given system.
      *
-     * @param starType   the star's planet type id, e.g. "star_red" - null for a system without one
+     * @param starType   star's planet type id (e.g. "star_red"), null if none
      * @param systemTags tags on the system
-     * @param region     which part of the sector the system is in
+     * @param region     part of the sector the system is in
      */
     public boolean matches(String starType, Set<String> systemTags, SectorRegion region) {
         if (!starTypes.isEmpty() && (starType == null || !starTypes.contains(starType))) return false;
@@ -81,7 +69,6 @@ public class FishSpec {
         if (!this.systemTags.isEmpty()) {
             if (systemTags == null) return false;
 
-            //any one of the listed tags is enough
             boolean found = false;
             for (String tag : this.systemTags) {
                 if (systemTags.contains(tag)) {

@@ -13,17 +13,12 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * Something on the other side of the fabric, not yet through it.
+ * A real entity with a real species, hidden until revealed - renders nothing itself; a breach lamp
+ * shows its dent, or the mote plainly under the beam. {@link #unearth()} replaces it with an
+ * ordinary mote once struck.
  * <p>
- * A buried mote is a real entity in a real place with a real species on it, and it draws nothing at
- * all. The only way to know one is there is to put a breach lamp over it, which shows the dent it
- * makes - or, under the beam itself, the mote plainly. A harpoon through an exposed one breaks the
- * fabric and lets it through, at which point it comes home an ordinary mote like any other.
- * <p>
- * It never arrives anywhere. Where an ordinary mote swims to a target and expires on reaching it,
- * this one picks a new heading whenever it has held the old one long enough - so it is always there,
- * always moving, and can be followed across a system rather than being a thing that blinks out while
- * you are lining up on it. That is the whole point of it: something to chase.
+ * Never arrives anywhere: instead of swimming to a target and expiring, it repicks a heading
+ * whenever the current one runs out, so it stays followable rather than blinking out.
  */
 public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
@@ -74,11 +69,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         return spec == null ? FishRarity.COMMON : spec.rarity;
     }
 
-    /**
-     * Wanders rather than travels. The heading is held for a while and then replaced, and the same
-     * rarity that makes an ordinary mote quick and unreadable does it here - a legendary one turns
-     * more often, turns harder and covers more ground between turns.
-     */
+    /** Heading held then replaced periodically; rarity's {@code wanderMult} drives turn frequency and sharpness. */
     @Override
     public void advance(float amount) {
         time += amount;
@@ -111,10 +102,9 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Through. The buried entity goes and an ordinary mote takes its place, swimming away from where
-     * it came up - so a strike does not merely reveal one, it puts one in play.
+     * Replaces this entity with an ordinary mote swimming away from the surfacing point.
      *
-     * @return the mote that came through, or null if it could not be made
+     * @return the new mote, or null if it could not be made
      */
     public SectorEntityToken unearth() {
         if (entity == null || entity.isExpired()) return null;

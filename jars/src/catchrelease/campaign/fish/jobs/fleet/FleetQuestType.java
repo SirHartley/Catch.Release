@@ -8,16 +8,9 @@ import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import java.util.Random;
 
 /**
- * The kinds of trouble a fleet can be in that a fisherman is any use for.
- * <p>
- * One enum rather than a class each. Every one of these is the same transaction - somebody out here
- * wants fish and has something to trade for it - and the only things that actually differ are what
- * they want, what they are offering, and what they say about it. A subclass per flavour would be
- * seven copies of a constructor around seven strings.
- * <p>
- * WANDERING is which of these can be found on a fleet that was already out here going about its
- * business, as opposed to one that turned up broken and asking. A scavenger with a dead engine is
- * plausibly any scavenger; a fleet adrift with no drive at all had to have arrived that way.
+ * Fleet quest flavors: each is the same fish-for-payment transaction, differing only in flavor text
+ * and requested catch. {@link #wandering} marks types that can appear on a fleet already in the
+ * system, versus ones only ever spawned in place (e.g. STRANDED - a dead drive can't have flown in).
  */
 public enum FleetQuestType {
 
@@ -97,12 +90,7 @@ public enum FleetQuestType {
     /** What the fleet reads as doing while it waits, on the campaign map. */
     public final String actionText;
 
-    /**
-     * Whether this can be found on a fleet that was already out here.
-     * <p>
-     * A crew that has merely run short of something can be any passing hull. A fleet whose drive is
-     * dead cannot have flown in, so that one is only ever spawned in place.
-     */
+    /** Whether this type can appear on a fleet already in the system, vs. only spawned in place. */
     public final boolean wandering;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
@@ -115,25 +103,17 @@ public enum FleetQuestType {
         this.wandering = wandering;
     }
 
-    /**
-     * What this one wants, rolled.
-     * <p>
-     * Deliberately smaller asks than the standing orders in the bars. A bar job is planned for; this
-     * is somebody stopping you in the middle of what you were already doing, and an ask that means
-     * a fresh expedition is an ask that gets declined and never thought about again.
-     */
+    /** Rolls the requested catch; smaller asks than bar job orders, since this interrupts rather than being planned for. */
     public FishRequirement rollAsk(Random random) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
             case STRANDED:
             case SCAVENGER_ENGINE:
-                //one specific thing, out of the water right there. The count is the whole mercy
                 ask.count = 1;
                 break;
 
             case STARVING:
-                //nobody starving is fussy, they are just hungry, and they are hungry in numbers
                 ask.count = 3 + random.nextInt(4);
                 break;
 
@@ -144,7 +124,7 @@ public enum FleetQuestType {
 
             case SEEKER:
             case COLLECTOR:
-                //the whole point of these two is that it has to be a particular thing
+                //must be a specific rare/uncommon species
                 ask.count = 1;
                 ask.minRarity = random.nextFloat() > 0.5f ? FishRarity.RARE : FishRarity.UNCOMMON;
                 break;

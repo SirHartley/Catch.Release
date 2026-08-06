@@ -5,17 +5,9 @@ import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
- * What let you get at a fish, as opposed to what you hooked it with.
- * <p>
- * Two different questions, and a specimen answers both. The method is the tackle at the end of the
- * line - a harpoon or the LINE drones. This is the thing that made the fish reachable in the first
- * place: either a rupture was open and it was swimming in one, or it was loose in the dark and the
- * lamps found it. A buyer who cares which is asking about how it was taken rather than about what it
- * is, and those are worth being able to ask separately.
- * <p>
- * Read off the mote's own provenance rather than off whatever ability happened to be running. A mote
- * carries the pond it rose out of, or carries none because nothing bounds it - and that fact is
- * settled when the mote is made and cannot be argued with later.
+ * What made a fish reachable at all - a rupture (pond) it was swimming in, or the breach lamps
+ * finding it loose in the dark - as distinct from {@code FishLogEntry.Method}, the tackle used to
+ * take it (harpoon vs. drones). Read off the mote's own provenance, fixed when the mote is made.
  */
 public enum CatchImplement {
 
@@ -32,20 +24,13 @@ public enum CatchImplement {
         this.name = name;
     }
 
-    /**
-     * What the thing being fished at says about itself.
-     * <p>
-     * The drones are played against the pond itself, so their anchor is the rupture. A harpoon is
-     * played against the mote it speared, which knows whether it came out of one.
-     */
+    /** Derives the implement from the anchor: a pond directly, or a mote's own provenance. */
     public static CatchImplement of(SectorEntityToken anchor) {
         if (anchor == null) return UNKNOWN;
 
         if (MaskedFishingPondTerrainPlugin.getPondPlugin(anchor) != null) return POND;
 
         if (anchor.getCustomPlugin() instanceof FishEntityPlugin fish) {
-            //a mote with no rupture behind it is one loose in the dark - unearthed from under the
-            //fabric - and the only reason anybody can see it out there is the lamps
             return fish.isFromPond() ? POND : BREACH_LAMP;
         }
 

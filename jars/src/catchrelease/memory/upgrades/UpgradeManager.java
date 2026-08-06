@@ -52,13 +52,7 @@ public class UpgradeManager {
         return stat != null ? stat.maxLevel : 0;
     }
 
-    /**
-     * The current value of a stat, or the fallback if the sheet has no row for it.
-     * <p>
-     * The one call anything using an upgrade should make. A stat that is not in the sheet should
-     * cost the upgrade rather than the feature, and every caller writing its own null check is how
-     * that stops being true.
-     */
+    /** Current value of a stat, or fallback if it has no row in the sheet. The one call to use. */
     public static float getValue(String statId, float fallback) {
         UpgradeManager manager = getInstance();
 

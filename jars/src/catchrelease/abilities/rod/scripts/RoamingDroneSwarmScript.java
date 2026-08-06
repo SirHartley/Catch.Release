@@ -14,20 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A swarm with no pond under it: drones flying a screen around the fleet, going after whatever the
- * breach lamps have found down there.
+ * A drone swarm with no pond under it: drones screen the fleet and go after whatever the breach
+ * lamps ({@link SearchlightAbilityPlugin}) have lit up as buried nearby, pulling it through on
+ * contact and playing the same catch as any other rig.
  * <p>
- * The lamps are what makes this possible and what limits it. A breach lamp does not merely sweep - it
- * burns a window - and a window is something a drone can go through, which is the only reason
- * anything buried is reachable at all. So the whole mode lives and dies with the lights: cast while
- * they are on, recalled the moment they go off.
- * <p>
- * What it is fishing is the other half of the difference. A cast waits on motes drifting into a ring
- * dropped on the water; this one hunts things that are still on the far side of the fabric and have
- * been lit up, pulls them through on contact, and then plays the same catch as anything else. Nothing
- * about the flying, the catching, or the upgrades is new - the drone count, the reach, the follow-on
- * margin, the rarity priority, the speed and the steering are read exactly where they always were.
- * The only things that changed are where the middle is and what counts as a fish.
+ * Depends entirely on the lamps - a breach lamp burns a window a drone can pass through, which is
+ * the only way anything buried is reachable, so this swarm is cast while the lights are on and
+ * recalled the moment they go off. Drone count, reach, rarity priority, speed and steering are
+ * unchanged from the normal swarm; only the search center and target type differ.
  */
 public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
@@ -40,18 +34,13 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
         super(null, null);
     }
 
-    /** Around the fleet, and read live - the drones are escorting it, not holding a spot. */
+    /** Drones escort the fleet live rather than holding a fixed spot. */
     @Override
     protected FishingDroneEntityPlugin.Params createDroneParams(float slotAngle) {
         return new FishingDroneEntityPlugin.Params(null, slotAngle, RodConstants.DRONE_COLOR, true);
     }
 
-    /**
-     * The fleet, which is what everything here is measured from.
-     * <p>
-     * Its own location vector rather than a copy of it, so the reach, the break-off and the ring the
-     * player sees all follow the fleet without anybody having to keep them up to date.
-     */
+    /** The fleet's own location vector, not a copy, so reach/break-off/ring all track it live. */
     @Override
     public Vector2f getSearchCenter() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
@@ -60,24 +49,16 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
     }
 
     /**
-     * As far as the lights can see, and then as far again as the rod can reach past them.
-     * <p>
-     * Not the cast ring on its own, which is the trap this mode is one line away from at all times.
-     * A cast ring is a hundred and fifty units because it is dropped onto water the player aimed at;
-     * the beams throw three times their own radius, and everything this mode fishes is by definition
-     * something a beam found. Gated on the ring alone the drones would circle the fleet forever
-     * while every mote they could have had sat lit and several hundred units outside the line.
-     * <p>
-     * So the lights set the leash and the rod extends it - which leaves both upgrades doing the same
-     * thing they do on a cast, one widening what is worth going after and the other how far past
-     * that a drone will still follow.
+     * As far as the lights can see, plus the rod's own reach past them. Must include the lamp
+     * range - everything this mode fishes was found by a lamp, and the lamps throw far past the
+     * normal cast ring, so gating on the cast ring alone would leave drones circling the fleet
+     * while lit motes sit unreachable outside it.
      */
     @Override
     protected float getReach() {
         return Searchlight.getMaxReach() + super.getReach();
     }
 
-    /** The leash itself out here, since it is the only line there is to draw. */
     @Override
     public float getRingDrawRadius() {
         return getReach();
@@ -88,10 +69,7 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
         return RodConstants.DRONE_ROAM_RADIUS;
     }
 
-    /**
-     * What is buried nearby, rather than what is swimming. An ordinary mote out here is the
-     * harpoon's, and this rig has no business taking it off the line.
-     */
+    /** Buried motes only - an ordinary swimming mote belongs to the harpoon, not this rig. */
     @Override
     protected List<SectorEntityToken> getSearchArea() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
@@ -100,30 +78,17 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
         return fleet.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
     }
 
-    /**
-     * Lit, and only lit. A buried mote nobody has swept over is not somewhere a drone could go even
-     * if it knew where to look: there is no window through to it, and the fleet has no idea it is
-     * there. Being found is the whole of what makes one reachable, and the lights forget - so this
-     * goes false again on its own when a mark fades, and whoever was chasing it turns back.
-     */
+    /** Only motes currently lit by a lamp - unlit ones have no window through and go unreachable again as the mark fades. */
     @Override
     protected boolean isReachable(SectorEntityToken mote) {
         return SearchlightAbilityPlugin.isLit(mote);
     }
 
-    /**
-     * Through the window and into the game.
-     * <p>
-     * A drone reaching one of these has not caught anything yet - it has arrived somewhere something
-     * is buried. Pulling it through is what the trip was for, and what comes up is an ordinary mote
-     * standing exactly where the drone is, so the catch that follows is the catch every other rig
-     * plays and none of it had to be written twice.
-     */
+    /** Reaching a buried mote unearths it into an ordinary mote, then plays the normal catch. */
     @Override
     protected void onMoteReached(SectorEntityToken drone, SectorEntityToken mote) {
         if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin) {
-            //marked before it is opened rather than after: the entity is on its way out either way,
-            //and leaving it unmarked lets the same one be picked up again while it fades
+            //marked before unearthing so a fading entity can't be picked up twice
             handled.add(mote.getId());
 
             SectorEntityToken surfaced = ((BuriedMoteEntityPlugin) mote.getCustomPlugin()).unearth();
@@ -135,8 +100,8 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
                 return;
             }
 
-            //moved onto what came up before the catch is offered, so a UI that was too busy to take
-            //it leaves the drone holding the mote rather than holding a hole in the fabric
+            //drone re-targeted onto the surfaced mote before the catch is offered, so a busy UI
+            //leaves it holding the mote rather than a hole in the fabric
             if (plugin != null) plugin.chase(surfaced);
 
             mote = surfaced;
@@ -146,13 +111,9 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
     }
 
     /**
-     * Home when the windows close, when there is no fleet left to fly around, or when the fleet has
-     * gone somewhere the drones cannot.
-     * <p>
-     * The last of those is not a case a cast ever really meets - a swarm dropped on a pond is
-     * recalled the moment the player travels far enough from it, long before they leave the system.
-     * This one travels with the fleet by design, so it is still out and still working at the moment
-     * the fleet jumps, and drones left behind in the system it jumped out of have no way home.
+     * Recalls when the lamps go off, the fleet is gone, or the fleet has jumped to a system a
+     * drone isn't in - a case a pond-anchored swarm never hits, since it's recalled by distance
+     * long before the player leaves the system.
      */
     @Override
     protected boolean shouldRecall() {

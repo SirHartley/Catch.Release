@@ -5,15 +5,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * A servant buying on somebody else's behalf, and above a stated size.
- * <p>
- * The first job that asks about the specimen rather than about the species. A grade floor asks for a
- * good one of its kind, which a prawn can satisfy; a weight floor asks for a heavy one, which it
- * cannot. The distinction is the whole job - his employer has not asked for a fine fish, he has
- * asked for a large one, and the difference between those two sentences is the difference between a
- * fisherman and a man who wants to be seen owning something.
- */
+/** Delivery job for a single fish above a minimum weight, regardless of species or rarity. */
 public class ButlerJob extends FishJob {
 
     public static final int VALUE_PER_KILO = 45;

@@ -18,10 +18,7 @@ public class Disc {
     /** Straight cuts around the circle. Thirty-two is smooth at any radius a panel uses, and cheap. */
     public static final int SEGMENTS = 32;
 
-    /**
-     * A fan from the middle out. Additive is what makes it read as light rather than as paint - use
-     * it for anything meant to be glowing, and the normal blend for anything meant to be a surface.
-     */
+    /** Filled circle as a triangle fan; additive blend for glow effects, normal blend for surfaces. */
     public static void draw(float x, float y, float radius, Color color,
                             float centerAlpha, float edgeAlpha, boolean additive) {
 

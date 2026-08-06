@@ -25,13 +25,9 @@ import java.util.List;
  * What was actually caught, beside the track: the specimen in a cargo-square, its name under that,
  * and its numbers under that a line at a time.
  * <p>
- * The square is deliberately the shape and size of a cargo cell, because the next place this fish
- * will be seen is the hold, and it should be recognisable when it gets there - down to the grade and
- * rarity marks along the bottom of it.
- * <p>
- * The lines arrive one at a time rather than all at once. A number that lands has been read; five
- * numbers that appear together have been skipped. Each one is a sound as well as a line, which is
- * what turns a readout into a tally being counted out.
+ * The square matches the shape and size of a cargo cell so the fish is recognisable once it is in
+ * the hold, marks and all. The lines arrive one at a time, each with its own sound, so the readout
+ * reads as a tally being counted out rather than a wall of numbers dumped at once.
  */
 public class CatchResultPanel {
 
@@ -70,11 +66,8 @@ public class CatchResultPanel {
     /** Whether this specimen set a personal best, from the log. Drives the mark and the banner. */
     protected boolean record = false;
 
-    /**
-     * The bubbles drifting up the card, in panel fractions so a card that grows keeps them. Their
-     * motion is a function of {@link #elapsed} rather than state of their own, so they need no
-     * advancing and cannot drift out of step with the rest of the card.
-     */
+    /** A bubble drifting up the card, in panel fractions so a card that grows keeps them. Motion is
+     * a function of {@link #elapsed}, not stored state, so it needs no advancing of its own. */
     protected static class Bubble {
         float fx;
         float startY;
@@ -100,19 +93,15 @@ public class CatchResultPanel {
         buildLines();
     }
 
-    /**
-     * What is worth saying about one specimen, in the order it is worth saying it: what kind of
-     * thing this was, then how good an example of it, then the measurements that decide that, then
-     * what it is worth.
-     */
+    /** Builds the readout rows: species, grade, the measurements that decide it, then value. */
     protected void buildLines() {
         if (entry == null) return;
 
         FishSpec spec = entry.getSpec();
         FishGrade grade = entry.getGrade();
 
-        //filed before anything is drawn, since the comparison is against what was there beforehand.
-        //This is also where a species stops being unknown to the codex
+        //filed before anything is drawn, since the comparison is against what was there beforehand;
+        //this is also where a species stops being unknown to the codex
         record = FishLog.record(entry, where, method);
 
         if (spec != null) {
@@ -128,9 +117,7 @@ public class CatchResultPanel {
                 FishItemPlugin.getAberrationColor(entry.aberration)));
         lines.add(new Line("Value", Misc.getDGSCredits(entry.getValue()), Misc.getHighlightColor()));
 
-        //what else came up is not a row here - it has a card of its own, in LootResultPanel; this
-        //tally is the specimen's alone. And a record is not a row either - it is the banner over
-        //the specimen, in renderRecord
+        //other loot is not a row here - see LootResultPanel; a record isn't either - see renderRecord
     }
 
     public void advance(float amount) {
@@ -183,17 +170,8 @@ public class CatchResultPanel {
                 + FishConstants.MINIGAME_RESULT_RECORD_BOUNCE;
     }
 
-    /**
-     * The widest thing that has to fit across the column.
-     * <p>
-     * The species name is the usual offender - it is read off a table, and the long ones ran off the
-     * card - but a row is a label drawn to the left edge and a value drawn to the right one, so a
-     * long enough pair collides in the middle the same way. A treasure is the other candidate.
-     * <p>
-     * Measured off every line up front rather than off the ones that have arrived, for the same
-     * reason the height is: the tally reads out one row at a time, and a card that grew as it filled
-     * in would be worse than one that was too narrow to begin with.
-     */
+    /** Widest thing in the column, measured off every line up front - the card must not grow
+     * while the tally reads out. */
     protected float getContentWidth() {
         float widest = 0f;
 
@@ -213,11 +191,8 @@ public class CatchResultPanel {
         return widest;
     }
 
-    /**
-     * Box top to prompt bottom, as the render methods will space it. Counted off the full line list
-     * and with the prompt in, not off what has arrived so far - so the column is measured once and
-     * nothing shifts while the tally is still being read out.
-     */
+    /** Box top to prompt bottom, counted off the full line list so nothing shifts while the tally
+     * reads out. */
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -237,11 +212,8 @@ public class CatchResultPanel {
         return height;
     }
 
-    /**
-     * The readout's own frame: a dark field with the same bright-line-and-dimmer-line dressing the
-     * catch's panel carries, so the two read as two panels of one interface rather than as one panel
-     * with something bolted to the side of it.
-     */
+    /** The readout's own frame: a dark field with the same border dressing the catch's panel
+     * carries, so the two read as one interface rather than something bolted on. */
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
                 Color.BLACK, 0.85f * alphaMult);
@@ -249,16 +221,14 @@ public class CatchResultPanel {
         drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
                 Misc.getDarkPlayerColor(), 0.07f * alphaMult);
 
-        //between the field and the content, so they are texture in the card rather than on it
+        //between the field and the content, so they read as texture in the card rather than on it
         renderBubbles(layout, alphaMult);
 
         dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
     }
 
-    /**
-     * The card's own water: a few faint outlines rising bottom to top, swaying as they go, wrapping
-     * round when they leave. Drawn from {@link #elapsed} alone - see {@link Bubble}.
-     */
+    /** Faint outlines rising bottom to top, swaying and wrapping round. Drawn purely from
+     * {@link #elapsed} - see {@link Bubble}. */
     protected void renderBubbles(FishingMinigameLayout layout, float alphaMult) {
         if (bubbles.isEmpty()) spawnBubbles();
 
@@ -274,12 +244,12 @@ public class CatchResultPanel {
         }
     }
 
-    /** Scattered once, over the whole height - so the card starts already mid-bubble, not filling up. */
+    /** Scattered once, over the whole height, so the card starts already mid-bubble. */
     protected void spawnBubbles() {
         for (int i = 0; i < FishConstants.MINIGAME_RESULT_BUBBLES; i++) {
             Bubble b = new Bubble();
 
-            //held off the edges by a share that covers the sway, so none of them leave the card
+            //held off the edges by a share that covers the sway
             b.fx = MathUtils.getRandomNumberInRange(0.1f, 0.9f);
             b.startY = MathUtils.getRandomNumberInRange(0f, FishConstants.MINIGAME_PANEL_HEIGHT);
             b.speed = MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_RESULT_BUBBLE_SPEED_MIN,
@@ -312,10 +282,8 @@ public class CatchResultPanel {
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
-    /**
-     * The cargo-square: dark, backlit in the fish's own colour, ringed the way the rest of the panel
-     * is ringed, with the specimen in it and its marks along the bottom.
-     */
+    /** The cargo-square: dark, backlit in the fish's own colour, ringed like the rest of the panel,
+     * with the specimen in it and its marks along the bottom. */
     protected void renderBox(FishingMinigameLayout layout, SpriteAPI sprite, float alphaMult) {
         FishSpec spec = entry.getSpec();
         Color accent = spec == null ? Color.WHITE : spec.rarity.color;
@@ -326,7 +294,7 @@ public class CatchResultPanel {
 
         drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
 
-        //a wash of the rarity colour behind the art, so the silhouette has something to sit against
+        //wash of the rarity colour behind the art, so the silhouette has something to sit against
         Disc.draw(x + size * 0.5f, y + size * 0.5f, size * 0.5f, accent,
                 0.3f * alphaMult, 0f, true);
 
@@ -340,18 +308,15 @@ public class CatchResultPanel {
             sprite.renderAtCenter(x + size * 0.5f, y + size * 0.5f);
         }
 
-        //the same two marks it will carry in the hold, in the same corner of the same square
+        //the same marks it will carry in the hold, in the same corner
         catchrelease.campaign.fish.items.FishItemRenderer.render(x, y, size, size, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
 
         dress(x, y, size, size, alphaMult);
     }
 
-    /**
-     * The banner over the specimen, when this one set a record. On its own sine so it moves and the
-     * readout under it does not; the layout has already kept its headroom clear, in
-     * {@link #getRecordHeadroom()}.
-     */
+    /** The banner over the specimen when this one set a record; bounces on its own sine while the
+     * readout below stays still. Headroom for it is reserved by {@link #getRecordHeadroom()}. */
     protected void renderRecord(FishingMinigameLayout layout, float alphaMult) {
         if (!record || recordText == null || !isComplete()) return;
 
@@ -375,10 +340,7 @@ public class CatchResultPanel {
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
 
-    /**
-     * The numbers, each fading in as it lands rather than appearing. @return the y under the last of
-     * them.
-     */
+    /** The numbers, fading in as each lands. @return the y under the last of them. */
     protected float renderLines(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
@@ -390,8 +352,7 @@ public class CatchResultPanel {
             Line line = lines.get(i);
             build(line);
 
-            //the newest line arrives rather than switching on - unless it was skipped to, in which
-            //case it is already meant to be here and fading it in would be a second wait
+            //fades in unless skipped to, in which case it should already be fully visible
             float age = elapsed - (i + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY;
             float alpha = skipped
                     ? alphaMult
@@ -403,10 +364,8 @@ public class CatchResultPanel {
             line.valueText.setBaseColor(withAlpha(line.color, alpha));
             line.valueText.draw(right, y);
 
-            //a record is marked on the row that set it as well as being said in words below, so the
-            //eye lands on the number rather than on the announcement. Hung in the gutter past the
-            //value, in the value's own colour - the number column keeps its edge, and the mark
-            //reads as part of the number rather than as a second thing on the row
+            //marked on the row that set it, in the gutter past the value and in the value's own
+            //colour, so it reads as part of the number rather than a second thing on the row
             if (line.record && line.markText != null) {
                 line.markText.setBaseColor(withAlpha(Misc.getHighlightColor(), alpha));
                 line.markText.draw(right + FishConstants.MINIGAME_RESULT_MARK_GAP, y);
@@ -418,11 +377,8 @@ public class CatchResultPanel {
         return y;
     }
 
-    /**
-     * Said once there is nothing left to wait for, since that is the only point at which it is true.
-     * Breathes between its two greys rather than sitting still, which is what makes it read as
-     * waiting for the key rather than as one more line of the tally.
-     */
+    /** Shown once the tally is done. Breathes between its two greys so it reads as waiting for a
+     * key rather than one more line of the tally. */
     protected void renderPrompt(FishingMinigameLayout layout, float y, float alphaMult) {
         if (!isComplete() || prompt == null) return;
 
@@ -461,8 +417,8 @@ public class CatchResultPanel {
             font = LazyFont.loadFont(FishConstants.MINIGAME_RESULT_FONT);
             titleFont = LazyFont.loadFont(FishConstants.MINIGAME_RESULT_TITLE_FONT);
 
-            //wrapped at the widest the card can grow, not at its floor - the wrap is also the
-            //measurement, and a title wrapped at the floor never asked for more than the floor
+            //wrapped at the widest the card can grow, not its floor - the wrap doubles as the
+            //width measurement, so wrapping at the floor would cap it there
             title = titleFont.createText(entry.getDisplayName(), Color.WHITE,
                     FishConstants.MINIGAME_RESULT_TITLE_SIZE,
                     FishConstants.MINIGAME_RESULT_MAX_WIDTH - FishConstants.MINIGAME_RESULT_PAD * 2f);

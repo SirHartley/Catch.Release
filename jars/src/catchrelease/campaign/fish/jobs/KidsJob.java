@@ -14,15 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Two children who have decided that fish fight each other.
- * <p>
- * They do not. The job is two specimens and a decision about which child gets the better one, which
- * is a decision with no correct answer and no mechanical consequence beyond who is pleased - the
- * bonus is paid for bringing something worth arguing over, not for choosing right.
- * <p>
- * No credits, on purpose. Children do not have money, and a job that paid out in credits because
- * the framework found that easiest would be the framework talking rather than the children. What
- * they have is the contents of their pockets and things adults gave them without looking.
+ * Two children who claim their fish will fight; a job for two specimens and a flavour-only choice
+ * of which kid gets the better one. No credits reward - items only, since children don't have money.
  */
 public class KidsJob extends FishJob {
 
@@ -52,7 +45,7 @@ public class KidsJob extends FishJob {
 
         days = DAYS;
 
-        //two, because there are two of them, and that is the entire specification they gave
+        //two specimens, one per kid
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
 
@@ -85,10 +78,7 @@ public class KidsJob extends FishJob {
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
-    /**
-     * Paid for the specimen rather than for the choice, since the choice cannot be got wrong and
-     * rewarding it would only teach the player to guess.
-     */
+    /** Bonus for specimen grade, not for the (consequence-free) loud/quiet choice. */
     @Override
     protected boolean payBonus(FishCatch offered) {
         if (offered == null || offered.getGrade().ordinal() < BONUS_GRADE.ordinal()) return false;

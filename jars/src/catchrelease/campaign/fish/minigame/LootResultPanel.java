@@ -18,18 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What else came up, on a card of its own: the catch readout's mirror, hung off the other side of
- * the track, up only once the game is over the way the readout is. The treasure was a thing on
- * the track while the catch ran; this is the receipt afterwards, and mixing the two - a tally
- * arriving while there was still a fish to fly - would put reading where playing goes.
- * <p>
- * Same anatomy as the readout on purpose - the square at the top, the title under it, the list
- * under that, arriving a line at a time to the same sound - but not the same frame: the card
- * hugs its content instead of standing floor to ceiling around three rows, and its square is
- * pinned level with the readout's specimen, so the two read as a pair of exhibits rather than
- * a pair of pillars. Each line is a
- * thing that went into the hold, wearing the cargo icon the hold will show it under, in its
- * tier's colour - so the card reads as cargo, not as prose.
+ * Post-catch loot summary card shown alongside {@link CatchResultPanel}, once the minigame ends.
+ * Same layout pattern (icon square, title, list arriving line-by-line) but sized to its content
+ * rather than a fixed frame.
  */
 public class LootResultPanel {
 
@@ -173,8 +164,7 @@ public class LootResultPanel {
         return height;
     }
 
-    /** The readout's field and dressing on the loot card's own rectangle - but coin rain where the
-     *  readout has bubbles. The frames match on purpose; the weather is what tells the cards apart. */
+    /** Same panel styling as the catch readout, but coin rain instead of bubbles. */
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Color.BLACK, 0.85f * alphaMult);
@@ -189,12 +179,8 @@ public class LootResultPanel {
     }
 
     /**
-     * Gold coins raining down the card, each tumbling face over edge as it falls and wrapping back
-     * to the top, so the rain holds for however long the card is read.
-     * <p>
-     * The tumble is the coin's width running on |cos| while its height holds - narrowing to a bright
-     * sliver at edge-on and opening back out - rather than any rotation, because a rotated disc
-     * reads as a plate spinning on the glass, not a coin turning in the fall.
+     * Gold coins falling and wrapping to the top, tumbling via width scaled by |cos| (not rotation)
+     * so they read as coins turning edge-on rather than a spinning plate.
      */
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
@@ -256,10 +242,7 @@ public class LootResultPanel {
         }
     }
 
-    /**
-     * The square at the top, at the readout's height and size: the salvage marker washed in the
-     * best tier's colour - the square is what says "cargo", and the wash is what says how good.
-     */
+    /** Icon square washed in the best award's rarity color. */
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
         Color accent = getBestRarity().color;
 
@@ -305,10 +288,7 @@ public class LootResultPanel {
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
 
-    /**
-     * The things themselves, each fading in as it lands: the cargo icon, the name in the tier's
-     * colour, and the count out in the right column where the readout keeps its numbers.
-     */
+    /** Draws each row's icon, name (tier-colored), and count, fading in as it's revealed. */
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
@@ -389,10 +369,7 @@ public class LootResultPanel {
         return boxSprite;
     }
 
-    /**
-     * A sprite off a raw path. Vanilla has most of these loaded already; loadTexture makes the
-     * ones it does not - modded weapon art, mostly - real before they are asked for.
-     */
+    /** Loads a sprite by raw path; loadTexture ensures unloaded ones (mostly modded weapon art) are registered first. */
     protected SpriteAPI loadSprite(String path) {
         if (path == null || path.isEmpty()) return null;
 

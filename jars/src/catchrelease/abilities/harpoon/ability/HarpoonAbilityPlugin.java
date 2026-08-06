@@ -22,18 +22,13 @@ import java.awt.Color;
 
 /**
  * The other way to take a specimen: aim, fire, and hit one with a line rather than sending drones to
- * circle a spot and wait.
- * <p>
- * Aimed rather than placed, so the reticule is a direction rather than a spot. Dashed on purpose,
- * and the only dashed thing here: the guide is a guide, and the line that goes out is solid, so
- * there is never a moment where the two could be mistaken for each other.
+ * circle a spot and wait. Aimed rather than placed, so the reticule is a direction. The guide line
+ * is dashed and the fired line is solid, so the two are never mistaken for each other.
  */
 public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
-    /**
-     * What the charge pool is kept under. Named here rather than in the manager, so another charged
-     * ability never means editing the manager.
-     */
+    /** Charge pool key. Named here rather than in the manager, so a new charged ability never
+     * means editing the manager. */
     public static final String CHARGE_ID = "catchrelease_harpoon";
 
     @Override
@@ -70,7 +65,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         Vector2f from = new Vector2f(fleet.getLocation());
         worldTarget = applyAimAssist(from, worldTarget);
 
-        //fired at the aim point rather than at a mote: missing is allowed, and is most of the skill
+        //fired at the aim point rather than at a mote - missing is allowed
         SectorEntityToken harpoon = fleet.getContainingLocation().addCustomEntity(
                 Misc.genUID(), null, HarpoonConstants.ENTITY_ID, null,
                 new HarpoonEntityPlugin.Params(from, new Vector2f(worldTarget)));
@@ -81,12 +76,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     }
 
     /**
-     * The press cuts the line while one is hauling, and only fires when none is.
-     * <p>
-     * Being towed is the one part of this the player has done to them rather than by them, and a
-     * rope with no way out of it is a cutscene. This is the way out. Ahead of the vanilla path for
-     * the same reason the rod's recall is: a shot leaves the ability on its rearm, and the stretch
-     * a cut is worth asking for is exactly the stretch that would swallow the press.
+     * The press cuts the line while one is hauling, and only fires when none is. Checked ahead of
+     * the vanilla path, same as the rod's recall, since a shot leaves the ability on rearm.
      */
     @Override
     public void pressButton() {
@@ -96,16 +87,11 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     }
 
     /**
-     * No reticule while a line is out, because the press is not a shot then - it is the cut.
-     * <p>
-     * This is what makes the cut reachable from the keyboard at all. The hotkey never arrives at
-     * pressButton while a reticule is wanted: the framework's key listener consumes the key first
-     * and opens an aiming session, so a towed player pressing the ability's number fired a second
-     * harpoon instead of letting go of the first. Answering no here leaves the key unconsumed, the
-     * UI turns it into an ordinary button press, and both inputs end up in the same place.
-     * <p>
-     * It also makes firing while towed impossible rather than merely discouraged - with no reticule
-     * wanted, activation routes to {@link #onActivatedWithoutReticule()}, which cuts.
+     * No reticule while a line is out, because the press is a cut then, not a shot. Necessary for
+     * the cut to be reachable at all: the framework's key listener consumes the hotkey to open an
+     * aiming session whenever a reticule is wanted, so without this a towed player's press fired a
+     * second harpoon instead of releasing the first. With no reticule wanted, activation instead
+     * routes to {@link #onActivatedWithoutReticule()}, which cuts.
      */
     @Override
     public boolean showReticuleOnActivation() {
@@ -129,25 +115,19 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     @Override
     public boolean isUsable() {
-        //a line already out can always be cut, whatever the charges or the rearm say about firing.
-        //Safe to open this far only because showReticuleOnActivation is false at the same time, so
-        //the one thing an activation can do while hauling is let go
+        //a line already out can always be cut, regardless of charges/rearm - safe only because
+        //showReticuleOnActivation is false at the same time, so hauling only ever lets go
         if (HarpoonEntityPlugin.isAnyHauling()) return disableFrames <= 0;
 
-        //no check on there being anything out there to hit. Missing is allowed - it is most of what
-        //aiming this thing is - and a button that only lights when something is already in range
-        //answers a question about what is out there that the player was not given any other way to
-        //ask. Charges and the rearm still gate it; being pointed at nothing does not
+        //no check for anything in range to hit - missing is allowed and is most of the skill.
+        //Charges and rearm still gate it
         return super.isUsable();
     }
 
     /**
      * Bends the shot towards a mote it was nearly aimed at, by however many degrees the rig has been
-     * taught to forgive.
-     * <p>
-     * Deliberately small and deliberately only towards something that is already almost under the
-     * cursor: a shot that finds its own target is not aimed, and the point of the ability is the
-     * aiming. Zero without the upgrade, in which case this returns the aim point untouched.
+     * taught to forgive. Small, and only towards something already almost under the cursor. Zero
+     * without the upgrade, in which case the aim point is returned untouched.
      */
     protected Vector2f applyAimAssist(Vector2f from, Vector2f worldTarget) {
         float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
@@ -165,9 +145,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         for (SectorEntityToken mote : fleet.getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
 
-            //assist will not bend a shot onto something the shot could not take anyway - which is
-            //why it has to be told what the head can reach. Left asking the plain question, a
-            //fathom head could spear a diver it was never allowed to be aimed at
+            //assist must not bend a shot onto something the head could not actually reach
             if (!FishEntityPlugin.isAvailable(mote, HarpoonEntityPlugin.reachesUnder())) continue;
             if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
 
@@ -182,8 +160,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         if (best == null) return worldTarget;
 
-        //aimed at the mote's bearing but kept at the player's own range, so assist never changes how
-        //far the shot goes - only which way
+        //aimed at the mote's bearing but kept at the player's own range - assist changes direction only
         return MathUtils.getPointOnCircumference(from, distance,
                 Misc.getAngleInDegrees(from, best.getLocation()));
     }

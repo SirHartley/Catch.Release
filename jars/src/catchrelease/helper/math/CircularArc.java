@@ -154,7 +154,7 @@ public class CircularArc extends Circle{
 
         if (onArc) return Math.abs(dist - radius);
 
-        //if not on arc, get dist to endpoints (not sure if smart)
+        //off-arc: distance to the nearer endpoint
         Vector2f p1 = getPointForAngle(startAngle);
         Vector2f p2 = getPointForAngle(endAngle);
         return Math.min(Misc.getDistance(point, p1), Misc.getDistance(point, p2));

@@ -58,9 +58,8 @@ public class UpgradeStatLoader {
 
         s.baseValue = optDouble(row, "baseValue", 0d);
 
-        //the sheet calls these "type" and "increaseType" - reading them under the old names meant
-        //every row silently fell back to DOUBLE/FLAT, so MULT never applied. Both spellings are
-        //accepted, in case anything out there wrote the other one
+        //CSV columns are "type"/"increaseType"; both current and legacy ("baseType"/"upgradeType")
+        //names are accepted
         s.baseType = parseEnum(optString(row, "type", optString(row, "baseType", "DOUBLE")),
                 UpgradeStat.BaseType.class, UpgradeStat.BaseType.DOUBLE);
 

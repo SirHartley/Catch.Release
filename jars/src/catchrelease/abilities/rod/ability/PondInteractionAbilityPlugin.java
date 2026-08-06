@@ -36,12 +36,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     /**
-     * The two presses that involve no aiming: sending a screen out, and forcing a shut pond open.
-     * <p>
-     * The lamps come first, and it is the same rule read from either side. The rod cannot force a
-     * rupture open under them - the two rigs take turns on the fabric - and it has something better
-     * to do than try, because the beams have already cut the windows the drones would be going
-     * through. With the lights out the press is exactly what it always was.
+     * No-aim presses: dispatch a roaming screen, or force open a shut pond. Lamps checked first -
+     * the rod can't open a rupture while breach lamps are lit (the two rigs take turns), and roaming
+     * is preferred there since the lamps already cut windows to fish through.
      */
     @Override
     protected void onActivatedWithoutReticule() {
@@ -56,14 +53,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     /**
-     * Whether the rod can fish without a pond, which is entirely a question about the lights.
-     * <p>
-     * A screen with no windows to reach through would fly a circle around the fleet catching nothing
-     * at all, so the lamps burning is the whole of the condition - and it is also the condition
-     * under which the rod could not have opened a rupture anyway, the two rigs taking turns on the
-     * fabric. Those being one question rather than two is why the press does not have to choose:
-     * beside an open pond the lamps have already yielded, and everywhere else they are what the rod
-     * has to work with.
+     * True when breach lamps are lit - only then does a roaming screen have windows to fish through,
+     * and it's also when the rod can't open a rupture anyway (the two rigs take turns).
      */
     public boolean isRoamingAvailable() {
         return SearchlightAbilityPlugin.isBreaching();
@@ -94,9 +85,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public SkillshotRenderer createReticule() {
-        //sized to the ring the swarm fishes rather than the tight circle it patrols, so the reticule
-        //shows what the cast will actually cover. Doubled because the reticule takes a diameter, and
-        //read off the upgrade so a wider ring is visible while aiming rather than only afterwards
+        //doubled to diameter for the reticule API; read from the upgrade so a wider ring shows while aiming
         float radius = FishingDroneSwarmScript.getRingRadius() * 2f;
         return new ValidatedAreaReticuleRenderer(radius, new PondProximityValidator(radius));
     }
@@ -109,11 +98,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     /**
-     * The press means "bring them back" while a swarm is out, and only casts when the rod is idle.
-     * <p>
-     * Deliberately ahead of the vanilla path: a cast leaves the ability on its spec cooldown, so the
-     * ordinary press would be swallowed for exactly the stretch the drones are away - the one stretch
-     * a recall has to be possible.
+     * While a swarm is out, the press means recall, not cast - checked ahead of the vanilla path
+     * since a cast leaves the ability on cooldown, which would otherwise swallow the press for
+     * exactly the stretch a recall needs to be reachable.
      */
     @Override
     public void pressButton() {
@@ -134,14 +121,11 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     public boolean isUsable() {
         FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
 
-        //out fishing: the button is the recall, so it stays live regardless of the cast's rearm.
-        //already coming home: nothing left to ask for until they land.
-        //Asked before the pond is, because a roaming screen is out nowhere near one and the recall
-        //has to stay reachable wherever the drones happen to be working
+        //swarm out: button is recall, usable regardless of cast cooldown; already recalling: nothing
+        //to do until landed. Checked before pond lookup - a roaming screen has no pond nearby
         if (swarm != null) return !swarm.isRecalling() && disableFrames <= 0;
 
-        //a screen can go out anywhere there are windows to send it through. Without them the rod is
-        //back to needing water in reach, which is the only other thing this button has ever done
+        //roaming needs no pond; otherwise falls back to requiring a pond in range
         if (!isRoamingAvailable() && getPond() == null) return false;
 
         return super.isUsable();
@@ -158,12 +142,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         return isActive();
     }
 
-    /**
-     * The wait is the drones' trip home, not a fixed timer.
-     * <p>
-     * While they are fishing there is nothing to wait for - the button is the recall - so the icon
-     * reads active rather than darkened. Once they are on their way back it fills as they land.
-     */
+    /** Fills as drones return home, not on a fixed timer - stays at 1f while still out fishing since the button is the recall, not a cooldown wait. */
     @Override
     public float getCooldownFraction() {
         FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
@@ -193,8 +172,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
                 + " whatever they have found down there.", pad, highlight, "breach lamps");
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            //one line, in the order the press itself decides in. The lamps burning is not a
-            //complaint any more - it is what the button is going to do
+            //mirrors the press's own decision order
             if (isRoamingAvailable()) {
                 tooltip.addPara("The breach lamps are lit. The drones will roam.", highlight, pad);
             } else if (getPond() == null) {

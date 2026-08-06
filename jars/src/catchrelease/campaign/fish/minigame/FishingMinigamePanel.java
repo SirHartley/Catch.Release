@@ -29,11 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Draws the catch and takes the input for it. The rules live in {@link FishingMinigame}; this is the
- * screen and the mouse.
- * <p>
- * Hold the left button to lift the bar, let go and it falls. Everything is drawn from the panel's own
- * position, so it does not care where the dialog puts it.
+ * Draws the catch and takes the input for it. Rules live in {@link FishingMinigame}. Hold the left
+ * button to lift the bar, let go and it falls.
  */
 public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
@@ -44,43 +41,42 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected FishingMinigame minigame;
     protected Listener listener;
 
-    /** Rolled before the catch begins, shown only if it is won. What the readout reads. */
+    /** Rolled before the catch begins; shown only on a win. */
     protected FishCatch specimen;
 
-    /** Where this one was taken and how, for the log. Only read once, on a win. */
+    /** For the log, read once on a win. */
     protected SectorEntityToken where;
     protected FishLogEntry.Method method;
 
     protected PositionAPI position;
 
-    /** Rebuilt each frame from the panel's position; also what custom framing should line up against. */
+    /** Rebuilt each frame from the panel's position. */
     protected FishingMinigameLayout layout;
     protected boolean reeling = false;
     protected boolean reported = false;
 
-    /** Runs once the fish is landed, and holds the dialog open while it does. */
+    /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
-    /** The readout of what was caught. Up until the player dismisses it. */
     transient protected CatchResultPanel result;
 
-    /** The receipt for what else came up, on the readout's other side. Null when nothing was. */
+    /** Null when nothing else came up. */
     transient protected LootResultPanel lootResult;
 
-    /** What came up alongside the fish - every piece that was held onto, resolved once at the end. */
+    /** Everything held onto during the catch, resolved once at the end. */
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
     protected boolean treasureResolved = false;
 
-    /** Held after a fish is lost, so the result is readable before the dialog closes itself. */
+    /** Held after a fish is lost so the result stays readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
 
-    /** Drives the icon's twitch. Visual only - it never moves what the bar has to be over. */
+    /** Drives the icon's twitch; visual only, never affects where the bar has to be. */
     protected float jitterTime = 0f;
 
     transient protected SpriteAPI fishSprite;
     transient protected boolean fishSpriteChecked = false;
 
-    /** The track's backing, and the warp that keeps it swimming. Built on first use. */
+    /** Track backing and its warp; built on first use. */
     transient protected SpriteAPI backgroundSprite;
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
@@ -103,7 +99,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     public void advance(float amount) {
         jitterTime += amount;
 
-        //ahead of anything that returns early: the backing swims whether or not the catch is still on
         getWarp().advance(amount);
 
         if (minigame.isRunning()) {
@@ -112,34 +107,28 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
 
         if (minigame.isCaught()) {
-            //only now. Taking the treasure is a detour and losing the fish is what the detour costs
-            //- banking it either way made the detour free, and a free detour is not a decision
+            //only on a win - losing the fish also loses whatever was taken
             resolveTreasure();
 
             advanceCaught(amount);
             return;
         }
 
-        //a lost fish has nothing to read - whatever was prised out went down with it - so it
-        //closes itself once the result has been seen
+        //closes itself once the linger has elapsed
         endLingerLeft -= amount;
         if (endLingerLeft > 0f) return;
 
         end(false);
     }
 
-    /**
-     * A landed fish puts up its readout and waits. Nothing here closes the dialog - the player does
-     * that, once they have read what they caught.
-     */
+    /** Puts up the readout and waits; does not close the dialog, the player does that. */
     protected void advanceCaught(float amount) {
         if (result == null) {
             result = new CatchResultPanel(specimen, where, method);
 
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 
-            //no centre handed over: the celebration reads it off the layout at render time, once
-            //the readout has settled where its specimen actually is
+            //celebration reads its centre off the layout at render time, after the readout has settled
             if (CatchReleaseSettings.isCelebrationEnabled()) {
                 celebration = new CatchCelebration(minigame.getFish());
             }
@@ -147,20 +136,13 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         result.advance(amount);
 
-        //the loot reads out after the fish - the fish is what was played, and two tallies
-        //counting over each other would be one sound played twice
+        //loot tally starts only after the fish tally finishes, so they don't sound-overlap
         if (lootResult != null && result.isComplete()) lootResult.advance(amount);
 
         if (celebration != null) celebration.advance(amount);
     }
 
-    /**
-     * Puts anything that was taken into the hold, once, and only on a landed fish.
-     * <p>
-     * Whatever was prised out of the track goes down with the specimen if the specimen gets away.
-     * That is what makes taking it a decision: the hold that takes it costs ground on the fish, and
-     * a prize that survived losing the fish would make paying that ground free.
-     */
+    /** Adds taken treasure to the hold, once, only on a landed fish. */
     protected void resolveTreasure() {
         if (treasureResolved) return;
         treasureResolved = true;
@@ -170,7 +152,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
     }
 
-    /** Reports the outcome once, whatever route got here. */
+    /** Reports the outcome once. */
     protected void end(boolean caught) {
         if (reported) return;
         reported = true;
@@ -203,12 +185,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /**
-     * The readout is up, so the fish is already caught and there is nothing left to play.
-     * <p>
-     * Escape takes the catch and closes, rather than meaning "give up" as it did while the fish was
-     * still on. Anything else fills the readout in if it is still arriving, and closes once it has
-     * arrived - so an impatient player skips the tally rather than dismissing a screen they have not
-     * read yet.
+     * Once the readout is up, Escape accepts the catch and closes (rather than giving up, as it did
+     * mid-catch). Any other input skips straight to the full readout, or closes it if already full.
      */
     protected void processResultInput(InputEventAPI event) {
         if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
@@ -229,7 +207,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
     }
 
-    /** Both cards, when both are up - closing mid-tally would eat the half not yet read. */
+    /** True only once both cards are up, so closing mid-tally never skips the unread half. */
     protected boolean isReadoutComplete() {
         return result.isComplete() && (lootResult == null || lootResult.isComplete());
     }
@@ -251,37 +229,28 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderTreasure(layout, alphaMult);
         renderMeter(layout, alphaMult);
 
-        //the readout first: rendering it is what settles the card's geometry, and the celebration
-        //centres on the card's specimen - so it has to read a settled layout, and it has to draw
-        //over the card or the flourish would be buried under the thing it is pointing at
+        //result rendered first so its geometry is settled before the celebration centres on it
         if (result != null) result.render(layout, getFishSprite(), alphaMult);
         if (lootResult != null) lootResult.render(layout, alphaMult);
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
     /**
-     * Whatever frames the playfield. Empty on purpose - this is the seam for the custom UI: draw
-     * against {@link FishingMinigameLayout#frameX} and friends and it will stay lined up with the
-     * track wherever the dialog puts the panel.
-     * <p>
-     * Anything that wants to be a real UI element rather than a drawn one goes in the dialog plugin's
-     * addFramingElements() instead, so it can take part in layout and mouse-over.
+     * Seam for custom framing: draw against {@link FishingMinigameLayout#frameX} and friends to stay
+     * lined up with the track. Real UI elements (needing layout/mouse-over) belong in the dialog
+     * plugin's addFramingElements() instead.
      */
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
         drawDressing(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight, alphaMult);
         drawDressing(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight, alphaMult);
     }
 
-    /**
-     * The border dressing around one bar: a bright rounded outline just off it, and a dimmer one
-     * outside that. Drawn in the player's own UI colour, so it matches the rest of the interface
-     * rather than being a colour of its own.
-     */
+    /** Bright rounded outline just off the bar, plus a dimmer one outside it, in the UI's player colour. */
     protected void drawDressing(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
         float spacing = FishConstants.MINIGAME_BORDER_SPACING;
 
-        //outer first, so the bright line lands on top of it where they meet at the corners
+        //outer drawn first so the bright line lands on top at the corners
         drawBorder(x, y, width, height, inset + spacing,
                 Misc.getDarkPlayerColor(), FishConstants.MINIGAME_BORDER_OUTER_ALPHA * alphaMult);
 
@@ -289,7 +258,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 Misc.getBrightPlayerColor(), FishConstants.MINIGAME_BORDER_ALPHA * alphaMult);
     }
 
-    /** One outline, grown out from the bar by {@code offset} on every side. */
+    /** One outline, grown out by {@code offset} on every side. */
     protected void drawBorder(float x, float y, float width, float height, float offset,
                               Color color, float alpha) {
         RoundedBorder.draw(
@@ -303,12 +272,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
-    /**
-     * The track the fish is played in: hyperspace behind it, swimming, fading into the dark towards
-     * the bottom.
-     */
+    /** Hyperspace backing behind the fish, warped, fading dark towards the bottom. */
     protected void renderTrack(FishingMinigameLayout layout, float alphaMult) {
-        //black underneath, so the backing reads against the dialog rather than through it
+        //solid black first so the backing reads against the dialog rather than through it
         drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
                 Color.BLACK, 0.9f * alphaMult);
 
@@ -321,18 +287,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                     FishConstants.MINIGAME_TRACK_BG_ZOOM);
         }
 
-        //deepening dark down the bar. Over the backing, under everything in play
         drawVerticalGradient(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
                 Color.BLACK,
                 FishConstants.MINIGAME_TRACK_FADE_BOTTOM * alphaMult,
                 FishConstants.MINIGAME_TRACK_FADE_TOP * alphaMult);
 
-        //the tint the track always had, holding the two bars together as one piece of UI
+        //player-colour tint tying the track and meter bars together as one UI piece
         drawQuad(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight,
                 Misc.getDarkPlayerColor(), 0.05f * alphaMult);
     }
 
-    /** The track's backing, loaded on first use. Null if the sprite is missing; the bar just goes dark. */
+    /** Null if the sprite is missing; the track just goes dark. */
     protected SpriteAPI getBackgroundSprite() {
         if (backgroundChecked) return backgroundSprite;
         backgroundChecked = true;
@@ -366,14 +331,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         Color color = holding ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
         float alpha = (holding ? FishConstants.BAR_ALPHA_HOLDING : FishConstants.BAR_ALPHA_EMPTY) * alphaMult;
 
-        //body: full at top and bottom, thinning through the middle, so the window is something to
-        //look through and the two edges are what the eye lands on
+        //full alpha at top/bottom, thinning through the middle, so the edges read and the middle is see-through
         float mid = height * 0.5f;
         drawVerticalGradient(x, y, w, mid, color, alpha, alpha * FishConstants.BAR_CENTER_MULT);
         drawVerticalGradient(x, y + mid, w, height - mid, color, alpha * FishConstants.BAR_CENTER_MULT, alpha);
 
-        //bright at the edge, dark a couple of pixels inside it: two lines rather than one is what
-        //reads as a lip, and the lip is what puts the window above the track instead of in it
+        //bright edge + inset dark line reads as a lip, lifting the bar above the track
         float inset = FishConstants.BAR_BORDER_INNER_INSET;
 
         RoundedBorder.draw(x + inset, y + inset, w - inset * 2f, height - inset * 2f,
@@ -388,16 +351,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
         float size = FishConstants.MINIGAME_FISH_ICON_SIZE;
 
-        //the twitch goes on the drawing only. The fish the bar has to cover is exactly where the
-        //rules say it is, so nothing here can make a catch feel stolen
+        //jitter is visual only; the hit position the rules use is unaffected
         float centerX = layout.getTrackCenterX() + getJitter(0f);
         float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
 
         SpriteAPI sprite = getTrackSprite();
 
         if (sprite == null) {
-            //no stand-in art - a marker is better than nothing to aim at. Deliberately not the
-            //rarity colour: that would say what is on the line as plainly as the art would
+            //fallback marker; not the rarity colour, which would give away what's on the line
             drawQuad(centerX - size * 0.25f, centerY - size * 0.25f, size * 0.5f, size * 0.5f,
                     Misc.getBrightPlayerColor(), alphaMult);
             return;
@@ -408,13 +369,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.renderAtCenter(centerX, centerY);
     }
 
-    /**
-     * The treasure, if there is any: a stand-in icon with its clock running out underneath it.
-     * <p>
-     * The clock is the whole of the pressure. It does not move and it does not fight, so the only
-     * question it asks is whether it is worth leaving the fish for, and the bar under it is what
-     * that question is asked with.
-     */
+    /** The treasure, if any: a stand-in icon with its time-left bar underneath. */
     protected void renderTreasure(FishingMinigameLayout layout, float alphaMult) {
         MinigameTreasure treasure = minigame.getTreasure();
         if (treasure == null || !treasure.isActive()) return;
@@ -422,7 +377,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerX = layout.getTrackCenterX();
         float centerY = layout.getTrackY(treasure.position);
 
-        //a wash of its own colour behind it, so the tier reads before the icon does
+        //rarity-colour wash behind the icon so tier reads before the icon does
         Disc.draw(centerX, centerY, FishConstants.TREASURE_ICON_SIZE * 0.9f, treasure.rarity.color,
                 0.5f * alphaMult, 0f, true);
 
@@ -434,11 +389,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             sprite.renderAtCenter(centerX, centerY);
         }
 
-        //the ring closing as it is held, so the player can see the hold landing rather than guess.
-        //It closes onto the icon's own edge and stops a little outside it: the radius used to be
-        //worked out off the icon's full width rather than its half, so the ring gave up while it was
-        //still most of its own width clear of the thing it was closing on - which is what read as
-        //the animation being cut off rather than finishing
+        //ring shrinks from full icon size down to TREASURE_RING_END as it's held
         float held = treasure.getHeldFraction();
         if (held > 0f) {
             float from = FishConstants.TREASURE_ICON_SIZE;
@@ -451,7 +402,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderTreasureClock(treasure, centerX, centerY, alphaMult);
     }
 
-    /** How long is left, under it. Runs down rather than filling up - it is a loss, not a gain. */
+    /** Time left; drains rather than fills. */
     protected void renderTreasureClock(MinigameTreasure treasure, float centerX, float centerY,
                                        float alphaMult) {
 
@@ -466,7 +417,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         drawQuad(x, y, width * treasure.getTimeLeft(), height, treasure.rarity.color, 0.9f * alphaMult);
     }
 
-    /** Progress towards landing it, beside the track. */
+    /** Landing progress, beside the track. */
     protected void renderMeter(FishingMinigameLayout layout, float alphaMult) {
         drawQuad(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight,
                 Misc.getDarkPlayerColor(), 0.55f * alphaMult);
@@ -480,13 +431,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     /**
-     * A few pixels of twitch, from three sines that do not divide into each other - so it never
-     * repeats on a beat the eye can catch, and never jumps the way frame-by-frame randomness would.
-     * <p>
-     * A fish thrashing about is livelier than one gliding, so the amount rises with how fast it is
-     * actually moving.
+     * Icon twitch from three non-aligned sine waves (avoids a repeating beat or per-frame jumps).
+     * Scales up with the fish's current velocity.
      *
-     * @param offset phase shift, so the two axes are not the same wobble twice
+     * @param offset phase shift so both axes don't wobble identically
      */
     protected float getJitter(float offset) {
         float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
@@ -497,28 +445,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         float effort = 1f + Math.abs(minigame.getFishVelocity()) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
 
-        //the constant is the baseline; the fish's own row says how much of it this one gets
         return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
     }
 
-    /**
-     * What is drawn on the track: a stand-in, not the species.
-     * <p>
-     * The catch is played against something you have not identified yet, and the readout at the end
-     * is where you find out what it was. Showing the art up front answered the question before it
-     * had been asked.
-     * <p>
-     * This is the one place that decides it, so sonar - which is supposed to hand the species back -
-     * is a condition here and nothing else changes.
-     */
+    /** Generic stand-in icon; the real species is withheld until the readout unless sonar is active. */
     protected SpriteAPI getTrackSprite() {
-        //sonar hands the species back, which is the whole of what it does
         if (minigame.getTackle().sonar) return getFishSprite();
 
         return SpriteLoader.loadSprite(FishConstants.MINIGAME_TRACK_ICON);
     }
 
-    /** The fish's own icon from the table, loaded on first use. For the celebration and the readout. */
+    /** Loaded on first use, for the celebration and the readout. */
     protected SpriteAPI getFishSprite() {
         if (fishSpriteChecked) return fishSprite;
         fishSpriteChecked = true;
@@ -537,11 +474,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return fishSprite;
     }
 
-    /** Flat rectangle in screen coordinates, with everything it touches pushed and popped. */
-    /**
-     * A quad whose alpha runs from one value at the bottom to another at the top - the colour is the
-     * same throughout, only how much of it there is changes.
-     */
+    /** Quad with alpha interpolated bottom-to-top; colour stays constant. */
     protected static void drawVerticalGradient(float x, float y, float width, float height,
                                                Color color, float bottomAlpha, float topAlpha) {
         if (width <= 0f || height <= 0f) return;
@@ -589,7 +522,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
 
-    /** Nothing to press: the catch has no buttons, in dev mode or out of it. */
     @Override
     public void buttonPressed(Object buttonId) {
     }

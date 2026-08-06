@@ -15,14 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What a purchase asks for in fish: so many specimens, and the qualities every one of them has to
- * have. The axes stack - a type, a floor on rarity, a floor on grade, all of one species, a named
- * species outright, barely holding together - and the shop's price generator decides which of them
- * a given rung asks for, so no two campaigns want the same catch for the same gear.
+ * A shop purchase's fish requirement: a count plus stackable qualities (type, rarity/grade floors,
+ * same-species, named species, low coherence). The shop's price generator picks which axes a given
+ * rung uses.
  * <p>
- * Coherence is the odd axis: a specimen that is barely holding together is a rarer find than a
- * stable one, so asking for low coherence is asking for something hard - except from the abyss,
- * where nothing is stable and the ask would be free, so abyssal species never satisfy it.
+ * Coherence is the odd axis: low coherence normally asks for a rare, unstable specimen, but
+ * abyssal species are never stable, so they never satisfy it.
  */
 public class FishRequirement {
 
@@ -38,54 +36,30 @@ public class FishRequirement {
     public boolean lowCoherence = false;
 
     /**
-     * Floors on the specimen itself rather than on its grade, in metres and kilograms.
-     * <p>
-     * Grade is relative - a fine specimen of a small species is a small fish - so somebody who wants
-     * something big is not asking for a good one, they are asking for a heavy one. Zero for an ask
-     * that does not care.
+     * Absolute floors (metres/kg), independent of grade - grade is relative to species size, so
+     * "big" and "well-graded" are different asks. Zero means no floor.
      */
     public float minLength = 0f;
     public float minWeight = 0f;
 
     /**
-     * Where the specimen has to have been taken, or null for anywhere.
-     * <p>
-     * A question about this fish rather than about its kind: the species already says where its sort
-     * can be found, which cannot tell you whether the one on the table came from there. A fish
-     * landed before the origin was being recorded satisfies no origin, since nothing about it says
-     * it came from anywhere in particular.
+     * Region the specimen must have been caught in, or null for any. Per-fish, not per-species - a
+     * fish logged before origin tracking existed matches no origin filter.
      */
     public SectorRegion origin = null;
 
     /**
-     * How the specimen had to have been taken, or null for either.
-     * <p>
-     * A question about the fisherman rather than about the fish. Somebody who wants one brought in
-     * on a harpoon is asking for a thing that was chased down and speared, not a thing that swam
-     * into a drone line, and the specimen is the same either way - which is exactly why it has to be
-     * recorded at the catch rather than worked out afterwards.
+     * Catch method required, or null for any - recorded at catch time since the specimen itself
+     * can't tell you how it was taken.
      */
     public FishLogEntry.Method method = null;
 
-    /**
-     * What had to have made it reachable, or null for either.
-     * <p>
-     * Stacks with the method, and the two together are the whole of how a catch happened: a harpoon
-     * through a breach lamp is a different afternoon from a harpoon into an open rupture, even for
-     * the same species at the same grade.
-     */
+    /** Catch implement required, or null for any; combines with {@link #method} to describe how a catch happened. */
     public CatchImplement implement = null;
 
     /**
-     * Alternative ways to satisfy the same ask, any one of which will do.
-     * <p>
-     * Every other axis here stacks - a type and a rarity floor and a grade floor are all true at
-     * once - which cannot say "a good one or a strange one", and that is a real thing for somebody
-     * to want. A collector after something worth looking at will take the best of its kind or the
-     * one that is barely holding together, and does not care which.
-     * <p>
-     * When this is set the parent's own axes are ignored except for the count: the parent is the
-     * question and these are the acceptable answers.
+     * Alternative ways to satisfy this ask (OR, unlike the other axes which AND). When non-empty,
+     * the parent's own axes are ignored except {@link #count}.
      */
     public List<FishRequirement> anyOf = new ArrayList<>();
 
@@ -120,8 +94,7 @@ public class FishRequirement {
 
         if (origin != null && entry.origin != origin) return false;
 
-        //a specimen from before either was written down satisfies neither - nothing about it says
-        //it was taken any particular way, which is not the same as having been taken this one
+        //unset method/implement (predates tracking) never satisfies a specific requirement
         if (method != null && entry.method != method) return false;
         if (implement != null && entry.implement != implement) return false;
 
@@ -167,8 +140,7 @@ public class FishRequirement {
         }
         if (minGrade != null) text.append(", graded ").append(minGrade.name).append(" or better");
 
-        //said in the units the thing is measured in, since that is the ask - a heavy fish and a
-        //well-graded one are different requests and reading them the same way loses the difference
+        //weight and length are separate asks, described in their own units
         if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
         if (minLength > 0f) text.append(", over ").append(trim(minLength)).append(" m");
 
@@ -181,20 +153,13 @@ public class FishRequirement {
         return text.toString();
     }
 
-    /**
-     * How it had to have been taken: "caught with a harpoon through a breach lamp". Without a
-     * leading separator, since whether one is wanted is the caller's question - an alternative that
-     * says nothing else is the first thing in its own clause, and a comma there reads as a stutter.
-     * <p>
-     * Empty when the ask does not care, which is most of the time.
-     */
+    /** e.g. "caught with a harpoon through a breach lamp"; no leading separator (caller decides), empty when unspecified. */
     public String describeCatch() {
         StringBuilder text = new StringBuilder();
 
         if (method != null) text.append("caught with ").append(getMethodName());
         if (implement != null) {
-            //"caught with a harpoon through a breach lamp" reads as one thought; "through a breach
-            //lamp" on its own has to say what it is qualifying
+            //"through X" alone needs "taken" to read as a sentence; with a method it continues that clause
             text.append(method == null ? "taken through " : " through ").append(implement.name);
         }
 
@@ -236,12 +201,7 @@ public class FishRequirement {
                 : String.valueOf(Math.round(value * 10f) / 10f);
     }
 
-    /**
-     * The qualities without the count, for an alternative inside another ask.
-     * <p>
-     * An alternative saying its own count would be saying it three times over in a sentence with one
-     * number in it - the parent already asked for two, and both ways of satisfying it are still two.
-     */
+    /** Same as {@link #describe()} minus the count - alternatives share the parent's count. */
     public String describeQualities() {
         StringBuilder text = new StringBuilder();
 

@@ -16,19 +16,13 @@ import catchrelease.skillshot.input.SkillshotActivationManager;
  */
 public class SkillshotFramework {
 
-    /**
-     * Installs the hotkey listener and the activation manager. Idempotent - safe to call on every
-     * game load.
-     */
+    /** Idempotent - safe to call on every game load. */
     public static void register() {
         OnKeyPressSkillshotListener.getInstanceOrRegister();
         SkillshotActivationManager.getInstanceOrRegister();
     }
 
-    /**
-     * Tears down any in-progress targeting session. Call this from beforeGameSave so a half-aimed
-     * skillshot is never written into the save.
-     */
+    /** Tears down any in-progress targeting session, so a half-aimed skillshot isn't saved. */
     public static void reset() {
         OnKeyPressSkillshotListener.getInstanceOrRegister().reset();
 

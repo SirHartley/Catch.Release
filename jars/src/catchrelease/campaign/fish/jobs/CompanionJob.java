@@ -8,16 +8,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 /**
- * A woman buying a fish for a client, who is not going to say why, and will not be asked.
- * <p>
- * Hegemony space only. That is the joke and it is also the reason the job works: this is a
- * transaction that requires a great deal of nobody writing anything down, and the Hegemony is the
- * one place in the sector where everything is written down. What that produces is not fewer
- * arrangements, only quieter ones.
- * <p>
- * The other axis is size, and unlike the butler she means it in a way that scales. He has a number
- * and no interest above it; she pays for every kilogram over, because whatever this is for, more of
- * it is apparently better.
+ * Fish job giver restricted to Hegemony space. Unlike {@link ButlerJob}'s flat pass/fail threshold,
+ * the bonus here scales with size above {@link #BONUS_FRACTION}.
  */
 public class CompanionJob extends FishJob {
 
@@ -28,10 +20,6 @@ public class CompanionJob extends FishJob {
     /** Where in its own range a specimen has to sit before the extra is paid. */
     public static final float BONUS_FRACTION = 0.6f;
 
-    /**
-     * Hegemony space and nowhere else, which is the joke and also the point - this is a transaction
-     * that needs nobody writing anything down, in the one place where everything is.
-     */
     @Override
     protected String getRequiredFactionId() {
         return Factions.HEGEMONY;
@@ -63,10 +51,7 @@ public class CompanionJob extends FishJob {
         return true;
     }
 
-    /**
-     * Paid for the excess rather than for meeting the floor, which is the difference between this
-     * job and the butler's - his number is a specification, hers is a starting point.
-     */
+    /** Paid for size above {@link #BONUS_FRACTION}, not for merely meeting it. */
     @Override
     protected boolean payBonus(FishCatch offered) {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;

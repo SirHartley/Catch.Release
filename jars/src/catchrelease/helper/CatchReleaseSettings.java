@@ -5,12 +5,9 @@ import com.fs.starfarer.api.Global;
 import lunalib.lunaSettings.LunaSettings;
 
 /**
- * What the player has turned on and off, from the LunaLib settings menu.
- * <p>
- * Every read goes through here rather than through LunaSettings directly, for two reasons: the ids
- * are written down once instead of being repeated as strings at each use, and every setting has a
- * value even when the menu has never been opened - LunaLib hands back null until it has loaded the
- * defaults out of the csv, and a null is not an answer anything can be drawn from.
+ * Player toggles from the LunaLib settings menu, read through here rather than LunaSettings directly
+ * so ids aren't repeated as strings everywhere, and so a fallback is used before the menu has loaded
+ * defaults from the csv (LunaLib returns null until then).
  */
 public class CatchReleaseSettings {
 
@@ -21,11 +18,7 @@ public class CatchReleaseSettings {
         return getBoolean(CELEBRATION, false);
     }
 
-    /**
-     * @param fallback used when the setting has no value yet, and when LunaLib is not there at all -
-     *                 it is a declared dependency, but a missing one should cost the setting rather
-     *                 than the mod
-     */
+    /** @param fallback used when unset, or when LunaLib itself is missing despite being a declared dependency */
     protected static boolean getBoolean(String id, boolean fallback) {
         try {
             Boolean value = LunaSettings.getBoolean(ModPlugin.MOD_ID, id);

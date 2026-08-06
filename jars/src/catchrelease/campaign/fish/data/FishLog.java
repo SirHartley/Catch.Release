@@ -9,25 +9,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * What the player has caught, and what they know about it.
- * <p>
- * The one place a catch is written down. The codex reads it to decide which species exist as far as
- * the player is concerned, what the record is, and whether the location data has been paid for -
- * nothing else in the mod needs to know how any of that is stored.
- * <p>
- * Lives in sector persistent data, so it survives without a script running to hold it.
+ * What the player has caught: species seen, records, and unlocked location data. Single source
+ * the codex reads from. Lives in sector persistent data, so it survives without a script holding it.
  */
 public class FishLog {
 
     public static final String KEY = "$catchrelease_log";
 
     /**
-     * Files a catch. Everything the codex shows about a species comes from here.
+     * Files a catch.
      *
-     * @param where  what it was taken from or near - the pond, the mote, the break. Only its system
-     *               and where that system sits are read off it
+     * @param where  entity the catch was taken near (pond/mote/break) - only its system and location are read
      * @param method how it came out
-     * @return true if this one beat the record, which is also true for the first of a species
+     * @return true if this beat the record (also true for the species' first catch)
      */
     public static boolean record(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
         if (entry == null || entry.speciesId == null) return false;
@@ -45,10 +39,7 @@ public class FishLog {
         logged.caught++;
         logged.hintOnly = false;
 
-        //landing one is knowing where it came from. Buying the survey and catching one were separate
-        //facts before, so a species could be in the log, in the codex, and on the map list while the
-        //map itself refused to shade the waters it had just been pulled out of
-        logged.locationDataUnlocked = true;
+        logged.locationDataUnlocked = true; //landing a catch always unlocks its location too
 
         boolean record = first || logged.isRecord(entry);
 
@@ -85,20 +76,16 @@ public class FishLog {
     }
 
     /**
-     * Opens up where a species is found - the map and the circle on it.
-     * <p>
-     * The one call anything selling a hint needs to make. Silently does nothing for a species that
-     * has never been caught, since there is nothing recorded to unlock.
+     * Unlocks a species' map location, e.g. from a purchased hint.
      *
-     * @return true if there was something to unlock and it is now unlocked
+     * @return true if it is now unlocked
      */
     public static boolean unlockLocationData(String speciesId) {
         if (speciesId == null) return false;
 
         FishLogEntry entry = get(speciesId);
 
-        //a hint is worth buying for something never caught, which is most of the point of one - so
-        //this makes the entry rather than refusing, and marks it as having no catch behind it
+        //creates a hint-only entry if the species was never caught, rather than refusing
         if (entry == null) {
             entry = new FishLogEntry(speciesId);
             entry.hintOnly = true;
@@ -116,7 +103,7 @@ public class FishLog {
         return entry != null && entry.locationDataUnlocked;
     }
 
-    /** The clock's own stamp. Turned into a date at the point it is shown, not here. */
+    /** Raw clock timestamp; formatted as a date only where displayed. */
     protected static long getTimestamp() {
         if (Global.getSector() == null) return 0L;
 
@@ -131,7 +118,7 @@ public class FishLog {
         return location == null ? null : location.getName();
     }
 
-    /** Where the system sits on the sector map, which is what a circle is drawn around. */
+    /** Hyperspace location, used to draw the map circle. */
     protected static Vector2f getLocationInHyper(SectorEntityToken where) {
         if (where == null) return null;
 
