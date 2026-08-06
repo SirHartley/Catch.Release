@@ -101,11 +101,73 @@ public class FishItems {
         return contents;
     }
 
-    /** Puts a specimen in the player's hold. */
+    /**
+     * Puts a specimen in the player's hold, crating it if it has company.
+     * <p>
+     * Three cases, in order. A crate of the species already aboard takes it. Otherwise a loose one
+     * already aboard means this is the second, and the pair goes into a new crate along with any
+     * others of the species. A species arriving for the first time stays loose.
+     * <p>
+     * The rule is about company rather than count: one fish is a specimen and worth looking at on
+     * its own, and crating it puts a single catch behind a click. Two of anything is inventory.
+     */
     public static void addToPlayerCargo(FishCatch catchData) {
         if (catchData == null || Global.getSector().getPlayerFleet() == null) return;
 
-        Global.getSector().getPlayerFleet().getCargo().addSpecial(toItem(catchData), 1);
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+        CargoStackAPI bundle = getBundleStack(cargo, catchData.speciesId);
+        if (bundle != null) {
+            addToBundle(cargo, bundle, catchData);
+            return;
+        }
+
+        List<CargoStackAPI> loose = getFishStacks(cargo, catchData.speciesId);
+        if (!loose.isEmpty()) {
+            crate(cargo, loose, catchData);
+            return;
+        }
+
+        cargo.addSpecial(toItem(catchData), 1);
+    }
+
+    /**
+     * Drops one specimen into an existing crate.
+     * <p>
+     * A crate's contents are its data, so growing one means replacing it rather than appending to
+     * it. Exactly one is taken off the stack: identical crates stack together, and removing the
+     * whole stack to put a single merged crate back would throw away every crate but one.
+     */
+    protected static void addToBundle(CargoAPI cargo, CargoStackAPI bundle, FishCatch catchData) {
+        SpecialItemData data = bundle.getSpecialDataIfSpecial();
+
+        List<FishCatch> contents = decodeBundle(data.getData());
+        contents.add(catchData);
+
+        cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+        cargo.addSpecial(toBundle(contents), 1);
+    }
+
+    /** Sweeps every loose specimen of the species, plus the new one, into a crate of their own. */
+    protected static void crate(CargoAPI cargo, List<CargoStackAPI> loose, FishCatch catchData) {
+        List<FishCatch> contents = new ArrayList<>();
+
+        for (CargoStackAPI stack : loose) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+
+            FishCatch entry = FishCatch.decode(data.getData());
+            if (entry == null) continue;
+
+            //a stack is n identical specimens, and all n of them go in
+            int count = (int) stack.getSize();
+            for (int i = 0; i < count; i++) contents.add(entry);
+
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, count);
+        }
+
+        contents.add(catchData);
+
+        cargo.addSpecial(toBundle(contents), 1);
     }
 
     /** Every specimen stack of one species in a hold, the clicked one included. */
