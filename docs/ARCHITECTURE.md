@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 166 Java files across eight top-level packages, plus
+What is where, and which file to open first. 173 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -28,6 +28,7 @@ that is wrong is worse than no map, because it is believed.
 | Aiming and reticules | `skillshot/` (has its own README) |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
+| The wandering Fisherman fleet | `campaign/fish/fisherman/` |
 | Consequences of harpooning a fleet | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
 
@@ -45,13 +46,15 @@ Everything game-facing is wired from `ModPlugin.java`.
 1. `OnJumpPondSpawner.register()` — ponds appear as the player jumps into systems
 2. `BuriedMoteSpawner.register()` — maintains the buried-mote population near the player
 3. `ChargeManager.register()` — regenerating charge pools for the charged abilities
-4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets a custom encounter dialog
+4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets and the Fisherman their
+   custom encounter dialogs
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
-7. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-8. `SkillshotFramework.register()` — the aiming framework
-9. `FishMapFilterScript` as a transient script — the sector-map filter
-10. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+7. `FishermanSpawner.register()` — the daily roll for the wandering Fisherman
+8. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
+9. `SkillshotFramework.register()` — the aiming framework
+10. `FishMapFilterScript` as a transient script — the sector-map filter
+11. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -194,6 +197,18 @@ Jobs given by a hull in space, which then has to still be there when you return.
 | `FleetQuestEncounter.java` | Runs one offer — intercepts the player, reads the answer once the dialogue closes, sends a refused fleet home, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `wandering` is read off the complaint: a seized drive cannot come looking for you |
 
+### `campaign/fish/fisherman`
+The wandering Fisherman: an independent fleet that fishes the player's system for two weeks and
+trades while it does.
+
+| File | What it does |
+|---|---|
+| `FishermanSpawner.java` | The daily roll: where the boat may spawn, and what leans the odds |
+| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
+| `FishermanDialog.java` | Talking to it: survey ladder, outfitter hand-off, fish buyer, rumors |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
+| `FishermanConstants.java` | Every number the above read |
+
 ### `campaign/fish/minigame`
 The catch itself. Rules are separated from rendering on purpose.
 
@@ -230,7 +245,7 @@ Which fish, where.
 
 | File | What it does |
 |---|---|
-| `PondFishSpawner.java` | Weighted selection filtered by star type, tags and region; biased by drone tackle |
+| `PondFishSpawner.java` | Weighted selection filtered by star type, tags and region; biased by drone tackle and rumors |
 | `BuriedMoteSpawner.java` | Keeps a target buried-mote population around the player |
 
 ### `campaign/fish/shop`
@@ -334,7 +349,7 @@ What harpooning a fleet costs.
 | `HarpoonOffence.java` | Incident history, outstanding debts, evasions, hostility escalation, rep loss |
 | `HarpoonPatrolResponse.java` | Sends one faction patrol at a time after the player |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a highlighted comm link |
-| `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog, at the narrowest priority |
+| `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog - and the Fisherman its own - at the narrowest priority |
 
 ### `abilities`
 Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `entities/`.
@@ -352,7 +367,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
-| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering |
+| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering; an NPC-owned line skips the minigame and always lands |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
