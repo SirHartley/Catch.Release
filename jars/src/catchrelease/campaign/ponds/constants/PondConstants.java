@@ -64,6 +64,24 @@ public class PondConstants {
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
 
     /**
+     * How far off centre the fleet may be pushed while the camera is held on a pond, as a share of
+     * the half-screen it has to play with.
+     * <p>
+     * Not a distance, because the thing it has to stay inside is not one. The hold is a circle -
+     * {@link #POND_INTERACT_RANGE_MULT} of the pond's radius, the same range the rod works at - and
+     * the screen it is being watched on is a wide rectangle. At the numbers above that circle
+     * reaches seven hundred and fifty units in every direction while a sixteen-by-nine view affords
+     * something like nine hundred and sixty sideways and only five hundred and forty up: fits going
+     * across, overshoots going up, which is why this only ever went wrong at the top and the bottom.
+     * <p>
+     * Read off the live viewport rather than written down, so it is right at every zoom level and on
+     * every aspect ratio rather than right on the monitor it was measured on. The share left over is
+     * breathing room - a fleet pinned to the last pixel of the screen is on it, but it does not look
+     * like it is.
+     */
+    public static final float POND_FOCUS_FLEET_MARGIN = 0.8f;
+
+    /**
      * The motes of light hanging inside the rupture at different depths.
      * <p>
      * Depth runs 0 at the bottom to 1 just under the surface, and every one of these is read off it.

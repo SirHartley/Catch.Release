@@ -97,9 +97,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     /**
      * Seconds it is still stopped for, and how much of its speed it has back.
      * <p>
-     * A depth bomb going off near a mote knocks the wind out of it. The stun is a hard stop and the
-     * slow is what is left afterwards, easing back to normal - so a bomb makes a mote catchable for
-     * a while rather than merely moving it.
+     * A blast or a beam knocks the wind out of a mote. The stun is a hard stop and the slow is
+     * what is left afterwards, easing back to normal - so being knocked about makes a mote
+     * catchable for a while rather than merely moving it. The breach lamps' slow upgrade comes
+     * through here too.
      */
     private float stunLeft = 0f;
     private float slowLeft = 0f;
@@ -136,7 +137,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         public final SectorEntityToken pond;
 
         /**
-         * For a mote that belongs to no rupture - one shaken loose by a bomb, or unearthed. Nothing
+         * For a mote that belongs to no rupture - one unearthed from under the fabric. Nothing
          * bounds it, because there is no mask it could be said to have left.
          */
         public Params(Vector2f target, String fishId) {
@@ -470,10 +471,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     /**
-     * Knocked about by a blast: stopped dead for a moment, then slowed for a while after.
+     * Knocked about: stopped dead for a moment, then slowed for a while after.
      * <p>
-     * Taken at the strongest rather than added to what is already on it, so two bombs on the same
-     * mote do not stack into a permanent stop.
+     * Taken at the strongest rather than added to what is already on it, so two knocks on the
+     * same mote do not stack into a permanent stop.
      */
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);

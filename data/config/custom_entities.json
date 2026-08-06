@@ -49,18 +49,6 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
-	"catchrelease_DepthBomb":{
-		"defaultRadius":15, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true,
-		"showIconOnMap":false,
-		"showNameOnMap":false,
-		"renderCircleIndicator":false,
-		"interactable":false,
-		"layers":[ABOVE], # the break and the bomb both draw here
-		"tags":["catchrelease_DepthBomb"],
-		"pluginClass":"catchrelease.abilities.depthbomb.entities.DepthBombEntityPlugin"
-	},
-
 	"catchrelease_FishingDrone":{
 		"defaultRadius":15, # used if radius<0 in addCustomEntity()
 		"showInCampaign":true, # show in campaign layer

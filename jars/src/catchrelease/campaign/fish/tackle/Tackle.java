@@ -109,7 +109,6 @@ public enum Tackle {
         DRONE,
         HARPOON,
         SEARCHLIGHT,
-        BOMB,
         BOTH;
 
         /**
@@ -154,7 +153,7 @@ public enum Tackle {
 
     /**
      * BOTH means both of the rigs a catch is played on, which is the drones and the harpoon. Nothing
-     * is landed on a searchlight or a bomb, so a barbed head does not become a lamp fitting just
+     * is landed on a breach lamp, so a barbed head does not become a lamp fitting just
      * because it said both.
      * <p>
      * Said as what BOTH covers rather than as which rigs are exempt from it. The old spelling named

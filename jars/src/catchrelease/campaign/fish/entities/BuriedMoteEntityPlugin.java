@@ -16,10 +16,9 @@ import org.lwjgl.util.vector.Vector2f;
  * Something on the other side of the fabric, not yet through it.
  * <p>
  * A buried mote is a real entity in a real place with a real species on it, and it draws nothing at
- * all. The only way to know one is there is to put a searchlight over it, which shows the dent it
- * makes rather than the thing itself - see {@code SearchlightGlowRenderer}. A depth bomb over one
- * breaks the fabric and lets it through, at which point it becomes an ordinary mote and can be
- * harpooned or dived on like any other.
+ * all. The only way to know one is there is to put a breach lamp over it, which shows the dent it
+ * makes - or, under the beam itself, the mote plainly. A harpoon through an exposed one breaks the
+ * fabric and lets it through, at which point it comes home an ordinary mote like any other.
  * <p>
  * It never arrives anywhere. Where an ordinary mote swims to a target and expires on reaching it,
  * this one picks a new heading whenever it has held the old one long enough - so it is always there,
@@ -113,7 +112,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     /**
      * Through. The buried entity goes and an ordinary mote takes its place, swimming away from where
-     * it came up - so a bomb does not merely reveal one, it puts one in play.
+     * it came up - so a strike does not merely reveal one, it puts one in play.
      *
      * @return the mote that came through, or null if it could not be made
      */

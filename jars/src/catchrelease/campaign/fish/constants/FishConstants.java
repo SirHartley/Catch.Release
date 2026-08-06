@@ -458,8 +458,8 @@ public class FishConstants {
     public static final float MAP_SIDEBAR_WIDTH = 240f;
 
     /**
-     * Buried motes: the things on the other side of the fabric that a searchlight finds and a depth
-     * bomb lets through.
+     * Buried motes: the things on the other side of the fabric that a breach lamp exposes and a
+     * harpoon takes through.
      * <p>
      * POPULATION is how many are kept within RANGE of the player, aimed at as a number rather than
      * as a spawn rate - so sitting still does not accumulate them and travelling does not outrun

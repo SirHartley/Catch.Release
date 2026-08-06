@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 165 Java files across eight top-level packages, plus
+What is where, and which file to open first. 159 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -63,14 +63,13 @@ are rebuilt every load because their state lives in sector memory rather than in
 
 Classes the game instantiates by name. Grep the data file, not the call sites — there aren't any.
 
-**`data/campaign/abilities.csv`** — 6 abilities
+**`data/campaign/abilities.csv`** — 5 abilities
 
 | Id | Class |
 |---|---|
 | `catchrelease_searchlights` | `abilities/searchlight/ability/SearchlightAbilityPlugin` |
 | `catchrelease_rod` | `abilities/rod/ability/PondInteractionAbilityPlugin` |
 | `catchrelease_harpoon` | `abilities/harpoon/ability/HarpoonAbilityPlugin` |
-| `catchrelease_depthbomb` | `abilities/depthbomb/ability/DepthBombAbilityPlugin` |
 | `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
@@ -91,7 +90,7 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
 `catchrelease_fish_bundle` → `FishBundleItemPlugin`.
 
-**`data/config/custom_entities.json`** — the motes, harpoon, drone and depth bomb. The pond is
+**`data/config/custom_entities.json`** — the motes, harpoon and drone. The pond is
 **not** here any more.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
@@ -228,7 +227,6 @@ Which fish, where.
 |---|---|
 | `PondFishSpawner.java` | Weighted selection filtered by star type, tags and region; biased by drone tackle |
 | `BuriedMoteSpawner.java` | Keeps a target buried-mote population around the player |
-| `StarSystemFishSpawner.java` | **Empty stub.** No fields, no methods |
 
 ### `campaign/fish/shop`
 The outfitter: upgrades and tackle bought with fish.
@@ -339,9 +337,6 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
-| `depthbomb/ability/DepthBombAbilityPlugin.java` | Throws a bomb at a clamped-range point |
-| `depthbomb/entities/DepthBombEntityPlugin.java` | Falls, arms, detonates; dresses the break as a visual-only pond, stuns motes, unearths buried ones |
-| `depthbomb/constants/DepthBombConstants.java` | Range, blast, glass look, shockwave, and the `SPAWN_POND` toggle |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, exposes `isLit(mote)` and `isBreaching()` (fitted **and** lit, which is not what `burnsIntoHyperspace()` answers), beam slow, detectability penalty, yields to open ponds |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |
@@ -386,8 +381,6 @@ Shader and GL machinery.
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
-| `plugins/FractureRenderer.java` | Procedural shattered-glass break |
-| `plugins/GlassShardBurst.java` | Spinning triangle debris off a fracture |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
 | `plugins/WarpedRectRenderer.java` | A sprite warped per-vertex by a grid, no shader |
 | `renderers/RippleRingRenderer.java` | One growing, fading ring, pinned to one location |
@@ -556,7 +549,5 @@ do nothing.
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. The pond is terrain now |
 | `campaign/fish/intel/FishMapIntel` | Dead husk, kept so old saves can delete it. Removable once no save predates the map filter |
 | `campaign/fish/shop/ShopStorage` | The store/retrieve/sell counter is gone. Kept only to hand back fish a save is still holding in it, once, on the next shop open |
-| `campaign/fish/spawner/StarSystemFishSpawner` | Empty stub |
 | `testing/TestStencilRenderer` | Commented out of `ModPlugin` |
-| Depth bomb's glass fracture and shards | Fully implemented but dormant — `DepthBombConstants.SPAWN_POND` routes detonation to a temporary pond instead |
 | The pond's shader swirl | Dormant behind `PondConstants.POND_HOLE_LOOK`, which currently selects the stencil hole renderer |

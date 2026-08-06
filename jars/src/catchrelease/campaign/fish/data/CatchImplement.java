@@ -44,8 +44,8 @@ public enum CatchImplement {
         if (MaskedFishingPondTerrainPlugin.getPondPlugin(anchor) != null) return POND;
 
         if (anchor.getCustomPlugin() instanceof FishEntityPlugin fish) {
-            //a mote with no rupture behind it is one loose in the dark - shaken out by a bomb or
-            //unearthed - and the only reason anybody can see it out there is the lamps
+            //a mote with no rupture behind it is one loose in the dark - unearthed from under the
+            //fabric - and the only reason anybody can see it out there is the lamps
             return fish.isFromPond() ? POND : BREACH_LAMP;
         }
 

@@ -14,10 +14,13 @@ import java.io.Serializable;
  */
 public class FishLogEntry implements Serializable {
 
-    /** How a specimen came out. Recorded because the three are not interchangeable. */
+    /** How a specimen came out. Recorded because the methods are not interchangeable. */
     public enum Method {
         DRONE("LINE drones"),
         HARPOON("Harpoon"),
+
+        /** The depth bomb is gone from the game, and the records it set are not - kept so an old
+         * save's log still names its gear instead of failing to read. */
         BOMB("Depth bomb"),
         UNKNOWN("Unrecorded");
 
