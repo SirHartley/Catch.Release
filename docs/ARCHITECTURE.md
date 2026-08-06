@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 173 Java files across eight top-level packages, plus
+What is where, and which file to open first. 179 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -29,6 +29,7 @@ that is wrong is worse than no map, because it is believed.
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
 | The wandering Fisherman fleet | `campaign/fish/fisherman/` |
+| The colony structure and its aquarium | `campaign/fish/colony/` |
 | Consequences of harpooning a fleet | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
 
@@ -51,10 +52,12 @@ Everything game-facing is wired from `ModPlugin.java`.
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the wandering Fisherman
-8. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-9. `SkillshotFramework.register()` — the aiming framework
-10. `FishMapFilterScript` as a transient script — the sector-map filter
-11. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+8. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
+9. `AquariumTankScript.register()` — the aquarium on the colony's main menu
+10. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
+11. `SkillshotFramework.register()` — the aiming framework
+12. `FishMapFilterScript` as a transient script — the sector-map filter
+13. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -95,6 +98,9 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
 `catchrelease_fish_bundle` → `FishBundleItemPlugin`.
+
+**`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
+the colony structure that opens the fishing trade and keeps the aquarium.
 
 **`data/config/custom_entities.json`** — the motes, harpoon and drone. The pond is
 **not** here any more.
@@ -196,6 +202,18 @@ Jobs given by a hull in space, which then has to still be there when you return.
 | `FleetDistressCall.java` | The immobile half: picks a nearby empty system vanilla's own way, spawns at its distress jump point, raises vanilla `DistressCallIntel` |
 | `FleetQuestEncounter.java` | Runs one offer — intercepts the player, reads the answer once the dialogue closes, sends a refused fleet home, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `wandering` is read off the complaint: a seized drive cannot come looking for you |
+
+### `campaign/fish/colony`
+The Breach Conservatory: the structure that brings the fishing trade to the player's own colony.
+
+| File | What it does |
+|---|---|
+| `BreachConservatory.java` | The structure itself; also holds the aquarium's stock and its on/off switch |
+| `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
+| `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
+| `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
+| `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image |
+| `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
 The wandering Fisherman: an independent fleet that fishes the player's system for two weeks and

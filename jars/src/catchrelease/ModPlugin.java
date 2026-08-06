@@ -4,6 +4,8 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.colony.AquariumTankScript;
+import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
 import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
@@ -47,6 +49,10 @@ public class ModPlugin extends BaseModPlugin {
 
         // the wandering fisherman - transient watcher, the fleet itself is what persists
         FishermanSpawner.register();
+
+        // the colony conservatory's doors and its tank
+        ConservatoryOptionProvider.register();
+        AquariumTankScript.register();
 
         // data
         UpgradeManager.getInstance().updateBaseValues();
