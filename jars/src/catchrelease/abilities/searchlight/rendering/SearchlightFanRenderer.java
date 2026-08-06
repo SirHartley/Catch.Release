@@ -36,6 +36,12 @@ import java.util.EnumSet;
  * point ever dims below what the light still finds there; past the aim - the overshoot the light
  * keeps beyond where it is looking - the floor eases the rest of the way to nothing, and the wedge
  * ends by fading instead of at a visible rim.
+ * <p>
+ * The colour is the one part of the drawing the window underneath does not mirror, and it is
+ * where the lamp look lives. A single flat rgb over those alphas still reads as a tidy gradient;
+ * a real lamp puts a rim of scattered light at the edge of its throw. So the rgb leans into a
+ * harder purple in a band down each side - and only the rgb, with both falloffs left exactly the
+ * shared curves above, so the window still opens precisely where the light over it is bright.
  */
 public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
@@ -48,6 +54,22 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     public static final int STEPS_ALONG = 24;
 
     public static final float SUPERLUMINAL_TIME = 0.4f;
+
+    /**
+     * The rim bands' colour: the beam's own purple leant harder - red up, green down, the same
+     * energy - so the edges read as the lamp's light scattering at the rim rather than a second
+     * lamp behind it. Private where the shared constants above are not: the breach window
+     * deliberately takes no part of the colour.
+     */
+    private static final Color EDGE_TINT = new Color(230, 35, 255);
+
+    /**
+     * Where each band sits across the half-width and how far it spreads: centred out where the
+     * across-ease has mostly emptied the fill - any nearer the crease and the core drowns it -
+     * and wide enough to arrive and leave gradually, a band of light rather than a painted line.
+     */
+    private static final float BAND_CENTER = 0.62f;
+    private static final float BAND_WIDTH = 0.38f;
 
     /** Where the light is thrown from and where it is aimed - the live vectors, not copies, which
      * is all it takes for the wedge to ride the fleet and follow the sweep. */
@@ -125,7 +147,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         //shape of the light and not how much of it there is
         float alpha;
         if (extraAlphaMult > 0) alpha = extraAlphaMult;
-        else alpha = 0.12f - 0.03f * flicker.getBrightness();
+        else alpha = 0.12f - 0.04f * flicker.getBrightness();
 
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);
@@ -154,6 +176,10 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float g = color.getGreen() / 255f;
         float b = color.getBlue() / 255f;
 
+        float er = EDGE_TINT.getRed() / 255f;
+        float eg = EDGE_TINT.getGreen() / 255f;
+        float eb = EDGE_TINT.getBlue() / 255f;
+
         //the ease past the aim point starts wherever the aim currently is, so the fade-out always
         //covers exactly the overshoot however far the beam is leaning
         float aimFract = aimDistance / length;
@@ -181,9 +207,15 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
                 float across = TrigHelper.smootherStep(1f - Math.abs(t));
 
-                GL11.glColor4f(r, g, b, across * alongFar);
+                float rim = TrigHelper.smootherStep(
+                        1f - Math.abs(Math.abs(t) - BAND_CENTER) / BAND_WIDTH);
+                float vr = r + (er - r) * rim;
+                float vg = g + (eg - g) * rim;
+                float vb = b + (eb - b) * rim;
+
+                GL11.glColor4f(vr, vg, vb, across * alongFar);
                 GL11.glVertex2f(origin.x + cos * length * uFar, origin.y + sin * length * uFar);
-                GL11.glColor4f(r, g, b, across * alongNear);
+                GL11.glColor4f(vr, vg, vb, across * alongNear);
                 GL11.glVertex2f(origin.x + cos * length * uNear, origin.y + sin * length * uNear);
             }
             GL11.glEnd();
