@@ -209,7 +209,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
         //the beams' own resting alpha, so a dent takes out about as much light as a beam put in -
         //deeper and it reads as a hole in the world rather than in the light
-        float alpha = 0.12f - 0.03f * flicker.getBrightness();
+        float alpha = 0.12f - 0.04f * flicker.getBrightness();
 
         //kept apart from the beam alpha because the identify glow takes the fade but not the
         //resting alpha - see renderImpression for why
