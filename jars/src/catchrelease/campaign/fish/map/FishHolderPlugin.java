@@ -1,16 +1,12 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -23,7 +19,7 @@ import java.util.List;
 /**
  * One round fish holder, wherever a screen lines fish up in circles - the intel Planets panel
  * and the system view's sidebar both. A dark disc under the rarity's ring and the face: the art
- * for a landed species, the generic mark for one known only from survey data, and a bare
+ * for a landed species, its silhouette for one known only from survey data, and a bare
  * question mark - no colour, no name, no answers - for one the player has never heard of.
  * F2 over a named holder opens its codex page, the same key every fish row answers.
  */
@@ -68,18 +64,8 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        String iconPath = FishLog.isCaught(spec.id)
-                ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-        SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-        if (icon != null) {
-            float iconSize = pos.getWidth() * ICON_SHARE;
-            icon.setSize(iconSize, iconSize);
-            icon.setColor(Color.WHITE);
-            icon.setNormalBlend();
-            icon.setAlphaMult(alphaMult);
-            icon.renderAtCenter(Math.round(x), Math.round(y));
-        }
+        //the art as painted once landed, its rimmed silhouette while only surveyed
+        FishIcons.draw(spec, x, y, pos.getWidth() * ICON_SHARE, alphaMult);
 
         //the shopping-list dot, bottom right on the ring - a marked upgrade wants this species
         if (ShopMarks.isMarked(spec)) {
