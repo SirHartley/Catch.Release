@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.memory.upgrades.StatIds;
+import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -19,6 +20,8 @@ import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import java.awt.Color;
 
 
 /**
@@ -67,8 +70,20 @@ public class FleetQuest extends FishJob {
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
 
-    /** The cyan mark, while the offer is only an offer. Rebuilt after a load; see {@link #ensureMarked}. */
-    protected transient FleetQuestMarker marker;
+    /**
+     * The mark while the offer is only an offer.
+     * <p>
+     * Vanilla's own mission indicator, in a muted cyan rather than the usual colour. The colour is
+     * the whole message: yellow is something the player has taken on and is expected to go and do,
+     * and this is a fleet that would like a word if anybody happens to be passing. Once the offer is
+     * accepted the mark comes off and vanilla's own takes over, because it is no longer passive.
+     */
+    public static final String OFFER_SPRITE_CATEGORY = "systemMap";
+    public static final String OFFER_SPRITE = "mission_indicator";
+    public static final Color OFFER_COLOR = new Color(95, 200, 215);
+
+    /** Rebuilt after a load; see {@link #ensureMarked}. */
+    protected transient FleetMarkerRenderer marker;
 
     /**
      * Puts a job onto a fleet and starts it. Not found by the mission framework - there is no bar or
@@ -208,7 +223,8 @@ public class FleetQuest extends FishJob {
         if (takenUp || giver == null || giver.isExpired()) return;
         if (marker != null && !marker.isExpired()) return;
 
-        marker = FleetQuestMarker.addTo(giver);
+        marker = FleetMarkerRenderer.addTo(giver, OFFER_SPRITE_CATEGORY, OFFER_SPRITE,
+                OFFER_COLOR, FleetMarkerRenderer.SIZE);
     }
 
     protected void dropMarker() {
