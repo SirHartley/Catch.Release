@@ -274,10 +274,10 @@ The sector-map fish filter.
 | `FishMapPane.java` | The side panel: planner button, search, type chips, species list |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
-| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; system hover tooltips, route badges, the close-route label |
+| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges, the close-route label, the system view's fish row |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
-| `FishRoutePopup.java` | The planner card over the map: pick up to five, plot |
+| `FishRoutePopup.java` | The planner in the sidebar's slot: pick up to five, plot |
 | `FishType.java` | Filter categories with colour and icon |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
 

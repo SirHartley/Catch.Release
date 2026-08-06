@@ -71,21 +71,27 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** How close, in screen pixels, the cursor has to stand to a system to be hovering it. */
-    public static final float HOVER_RADIUS_PX = 14f;
-
-    /** The tooltip's dressing: the shop's dark card with a one-pixel player-colour border. */
-    public static final float TIP_PAD = 8f;
-    public static final float TIP_ICON = 16f;
-    public static final float TIP_ICON_GAP = 6f;
-    public static final float TIP_ROW_GAP = 3f;
-    public static final float TIP_OFFSET = 16f;
-
     /** The route badges: a ringed disc lifted off its system, growing with what it carries. */
     public static final float ROUTE_BADGE_RADIUS = 14f;
     public static final float ROUTE_BADGE_GROW = 7f;
     public static final float ROUTE_BADGE_LIFT = 14f;
     public static final float ROUTE_ICON = 16f;
+
+    /**
+     * The system view's fish row: one round holder per species catchable in the viewed system,
+     * bottom left of the map. Known-and-caught wears its art, known-only-from-survey wears the
+     * generic mark, and a species the player has never heard of shows as a bare question mark -
+     * it is catchable here, and that is the whole of what is given away. The row shrinks to fit
+     * rather than wrapping, since a second row would climb into the map.
+     */
+    public static final float SYSTEM_HOLDER_RADIUS = 17f;
+    public static final float SYSTEM_HOLDER_GAP = 8f;
+    public static final float SYSTEM_ICON_SHARE = 0.68f;
+    public static final float SYSTEM_MARGIN = 16f;
+
+    /** The hover card over a known holder: name and status, roomy on purpose. */
+    public static final float INFO_PAD = 10f;
+    public static final float INFO_LINE_GAP = 5f;
 
     protected List<Blob> blobs = new ArrayList<>();
 
@@ -163,9 +169,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public void render(float alphaMult) {
         if (mapWidget == null || alphaMult <= 0f) return;
 
-        //geometry is hyperspace; a single-system view has no meaning for these coordinates
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
-        if (!(location instanceof LocationAPI) || !((LocationAPI) location).isHyperspace()) return;
+        if (!(location instanceof LocationAPI)) return;
 
         //the whole camera, in two numbers: everything on the map is world * factor + centre
         Object factorValue = ReflectionUtils.invokeIfExists(mapWidget, "getFactor");
@@ -175,6 +180,14 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         PositionAPI mapPos = ((UIComponentAPI) mapWidget).getPosition();
         float centerX = mapPos.getCenterX();
         float centerY = mapPos.getCenterY();
+
+        //the waters and the route are hyperspace geometry; the system view gets its own furniture
+        if (!((LocationAPI) location).isHyperspace()) {
+            if (location instanceof StarSystemAPI) {
+                renderSystemFish((StarSystemAPI) location, alphaMult);
+            }
+            return;
+        }
 
         if (!blobs.isEmpty()) {
             GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT
@@ -195,7 +208,146 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
 
         renderRoute(factor, centerX, centerY, alphaMult);
-        renderHoverTooltip(factor, centerX, centerY, alphaMult);
+    }
+
+    /**
+     * The viewed system's catch, bottom left: a row of round holders, one per species that can
+     * be caught here. Icon only - a known face or the generic mark - except for species the
+     * player has no survey on at all, which show a question mark and answer no hover. The row
+     * scales itself down before it would run past the map's width.
+     */
+    protected void renderSystemFish(StarSystemAPI system, float alphaMult) {
+        if (panelPos == null) return;
+
+        List<FishSpec> known = getSystemFish(system);
+        int unknown = getUnknownCount(system);
+        int total = known.size() + unknown;
+        if (total == 0) return;
+
+        LazyFont small = ShopUi.getSmallFont();
+
+        //shrink to fit one row inside the map's width, never grow
+        float radius = SYSTEM_HOLDER_RADIUS;
+        float gap = SYSTEM_HOLDER_GAP;
+        float available = panelPos.getWidth() - SYSTEM_MARGIN * 2f;
+        float needed = total * radius * 2f + (total - 1) * gap;
+
+        if (needed > available && needed > 0f) {
+            float scale = available / needed;
+            radius *= scale;
+            gap *= scale;
+        }
+
+        float x = panelPos.getX() + SYSTEM_MARGIN + radius;
+        float y = panelPos.getY() + SYSTEM_MARGIN + radius;
+
+        FishSpec hovered = null;
+        float hoveredX = 0f;
+
+        for (FishSpec spec : known) {
+            drawHolder(x, y, radius, alphaMult);
+
+            String iconPath = FishLog.isCaught(spec.id)
+                    ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+
+            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
+            if (icon != null) {
+                float iconSize = radius * 2f * SYSTEM_ICON_SHARE;
+                icon.setSize(iconSize, iconSize);
+                icon.setColor(Color.WHITE);
+                icon.setNormalBlend();
+                icon.setAlphaMult(alphaMult);
+                icon.renderAtCenter(Math.round(x), Math.round(y));
+            }
+
+            if (isOver(x, y, radius)) {
+                hovered = spec;
+                hoveredX = x;
+            }
+
+            x += radius * 2f + gap;
+        }
+
+        //the unknowns: catchable here, and that is all anyone is told - no name, no hover
+        for (int i = 0; i < unknown; i++) {
+            drawHolder(x, y, radius, alphaMult);
+
+            if (small != null) {
+                LazyFont.DrawableString mark = small.createText("?",
+                        Misc.getGrayColor(), small.getBaseHeight());
+                mark.draw(Math.round(x - mark.getWidth() * 0.5f),
+                        Math.round(y + mark.getHeight() * 0.5f));
+            }
+
+            x += radius * 2f + gap;
+        }
+
+        if (hovered != null) {
+            drawFishInfo(hovered, hoveredX, y + radius + 8f, alphaMult);
+        }
+    }
+
+    /** One round holder: a dark disc under a player-colour ring. */
+    protected void drawHolder(float x, float y, float radius, float alphaMult) {
+        Disc.draw(x, y, radius, Color.BLACK, 0.8f * alphaMult, 0.8f * alphaMult, false);
+        Disc.drawOutline(x, y, radius, Misc.getDarkPlayerColor(), 0.9f * alphaMult, 1.2f);
+    }
+
+    protected boolean isOver(float x, float y, float radius) {
+        float dx = mouseX - x;
+        float dy = mouseY - y;
+
+        return dx * dx + dy * dy <= radius * radius;
+    }
+
+    /** The hover card over a known holder: the species' name in its rarity's colour, its status
+     *  under it, with room to breathe. Sits just above the row so it never covers a neighbour. */
+    protected void drawFishInfo(FishSpec spec, float x, float bottom, float alphaMult) {
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        LazyFont.DrawableString name = small.createText(spec.getDisplayName(),
+                spec.rarity.color, small.getBaseHeight());
+        LazyFont.DrawableString status = small.createText(FishPresence.getStatus(spec),
+                Misc.getGrayColor(), small.getBaseHeight());
+
+        float width = Math.max(name.getWidth(), status.getWidth()) + INFO_PAD * 2f;
+        float height = INFO_PAD * 2f + name.getHeight() + INFO_LINE_GAP + status.getHeight();
+
+        float left = x - width * 0.5f;
+
+        //kept inside the map rectangle
+        if (panelPos != null) {
+            left = Math.max(panelPos.getX() + 4f,
+                    Math.min(left, panelPos.getX() + panelPos.getWidth() - width - 4f));
+        }
+
+        ShopUi.drawQuad(left - 1f, bottom - 1f, width + 2f, height + 2f,
+                Misc.getDarkPlayerColor(), 0.9f * alphaMult);
+        ShopUi.drawQuad(left, bottom, width, height, Color.BLACK, 0.92f * alphaMult);
+
+        float textY = bottom + height - INFO_PAD;
+        name.draw(Math.round(left + INFO_PAD), Math.round(textY));
+        status.draw(Math.round(left + INFO_PAD),
+                Math.round(textY - name.getHeight() - INFO_LINE_GAP));
+    }
+
+    /** How many species live here that the player has never heard of - counted, never named. */
+    protected int getUnknownCount(StarSystemAPI system) {
+        SectorRegion at = SectorRegion.of(system);
+        if (at == null) return 0;
+
+        int count = 0;
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (!spec.regions.contains(at)) continue;
+            if (FishPresence.isKnown(spec)) continue;
+
+            count++;
+        }
+
+        return count;
     }
 
     /**
@@ -277,45 +429,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 Math.round(bounds[1] + (bounds[3] + text.getHeight()) * 0.5f));
     }
 
-    /**
-     * Tooltip on a hovered system: known fish catchable there, icon and name each. Follows the
-     * same visibility rule as the list and waters - unknown species are absent, survey-only ones
-     * wear the generic mark instead of their art.
-     */
-    protected void renderHoverTooltip(float factor, float centerX, float centerY, float alphaMult) {
-        if (mouseX < 0f || Global.getSector() == null) return;
-
-        //inside the map's own rectangle only - the pane on the right has its own hovers
-        if (panelPos != null
-                && (mouseX < panelPos.getX() || mouseX > panelPos.getX() + panelPos.getWidth()
-                || mouseY < panelPos.getY() || mouseY > panelPos.getY() + panelPos.getHeight())) {
-            return;
-        }
-
-        StarSystemAPI hovered = null;
-        float best = HOVER_RADIUS_PX;
-
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.getLocation() == null) continue;
-
-            float dx = system.getLocation().x * factor + centerX - mouseX;
-            float dy = system.getLocation().y * factor + centerY - mouseY;
-            float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < best) {
-                best = distance;
-                hovered = system;
-            }
-        }
-
-        if (hovered == null) return;
-
-        List<FishSpec> fish = getSystemFish(hovered);
-        if (fish.isEmpty()) return;
-
-        drawTooltip(hovered, fish, alphaMult);
-    }
-
     /** What lives in one system, by the regions the table assigns - cached for the overlay's life. */
     protected List<FishSpec> getSystemFish(StarSystemAPI system) {
         if (systemFish == null) systemFish = new HashMap<>();
@@ -339,76 +452,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         systemFish.put(system.getId(), fish);
 
         return fish;
-    }
-
-    /** The card itself: the system's name over one row per fish, hung off the cursor and kept
-     *  inside the map rectangle. Built per frame - it is one small card under a moving mouse. */
-    protected void drawTooltip(StarSystemAPI system, List<FishSpec> fish, float alphaMult) {
-        LazyFont body = ShopUi.getBodyFont();
-        LazyFont small = ShopUi.getSmallFont();
-        if (body == null || small == null) return;
-
-        LazyFont.DrawableString title = body.createText(system.getNameWithNoType(),
-                Misc.getBasePlayerColor(), body.getBaseHeight());
-
-        List<LazyFont.DrawableString> names = new ArrayList<>();
-        float rowsWidth = 0f;
-
-        for (FishSpec spec : fish) {
-            LazyFont.DrawableString name = small.createText(spec.getDisplayName(),
-                    spec.rarity.color, small.getBaseHeight());
-            names.add(name);
-
-            rowsWidth = Math.max(rowsWidth, TIP_ICON + TIP_ICON_GAP + name.getWidth());
-        }
-
-        float rowHeight = Math.max(TIP_ICON, small.getBaseHeight()) + TIP_ROW_GAP;
-        float width = Math.max(title.getWidth(), rowsWidth) + TIP_PAD * 2f;
-        float height = TIP_PAD * 2f + title.getHeight() + TIP_ROW_GAP + fish.size() * rowHeight;
-
-        float x = mouseX + TIP_OFFSET;
-        float y = mouseY + TIP_OFFSET + height;
-
-        //kept on the glass: flipped to the cursor's other side rather than sliding, so it never
-        //sits under the pointer
-        if (panelPos != null) {
-            if (x + width > panelPos.getX() + panelPos.getWidth()) x = mouseX - TIP_OFFSET - width;
-            if (y > panelPos.getY() + panelPos.getHeight()) y = mouseY - TIP_OFFSET;
-            if (y - height < panelPos.getY()) y = panelPos.getY() + height;
-        }
-
-        //the shop's card: a one-pixel player border around a dark field
-        ShopUi.drawQuad(x - 1f, y - height - 1f, width + 2f, height + 2f,
-                Misc.getDarkPlayerColor(), 0.9f * alphaMult);
-        ShopUi.drawQuad(x, y - height, width, height, Color.BLACK, 0.92f * alphaMult);
-
-        float textY = y - TIP_PAD;
-        title.draw(Math.round(x + TIP_PAD), Math.round(textY));
-        textY -= title.getHeight() + TIP_ROW_GAP;
-
-        for (int i = 0; i < fish.size(); i++) {
-            FishSpec spec = fish.get(i);
-
-            //the art only once one has been landed; a survey knows the name, not the face
-            String iconPath = FishLog.isCaught(spec.id)
-                    ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-            if (icon != null) {
-                icon.setSize(TIP_ICON, TIP_ICON);
-                icon.setColor(Color.WHITE);
-                icon.setNormalBlend();
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(Math.round(x + TIP_PAD + TIP_ICON * 0.5f),
-                        Math.round(textY - TIP_ICON * 0.5f));
-            }
-
-            LazyFont.DrawableString name = names.get(i);
-            name.draw(Math.round(x + TIP_PAD + TIP_ICON + TIP_ICON_GAP),
-                    Math.round(textY - (rowHeight - TIP_ROW_GAP - name.getHeight()) * 0.5f));
-
-            textY -= rowHeight;
-        }
     }
 
     protected void renderFill(Blob blob, float factor,

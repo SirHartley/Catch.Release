@@ -294,10 +294,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
     /**
      * Requests species focus on {@link FishMapFilterScript} (map doesn't exist yet, so the script
-     * picks it up once it attaches), closes the codex via {@code dismiss(1)} - the only way out the
-     * API exposes, on an obfuscated class with no other name for it - then queues {@link
-     * MapTabOpener} to open the map tab. The tab switch can't happen here: {@code showCoreUITab}
-     * is refused while a dialog is still showing, and the codex is still mid-dismissal on this frame.
+     * picks it up once it attaches), closes the codex via {@code dismiss(1)} - the only way out
+     * the API exposes, on an obfuscated class with no other name for it - and asks for the map
+     * tab in the same breath. A deferred, wait-for-no-dialog switch was tried here and opened the
+     * wrong tab entirely; the straight call is the one that lands on the map.
      */
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
@@ -310,56 +310,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 ReflectionUtils.invoke(shown, "dismiss", 1);
             }
 
-            Global.getSector().addTransientScript(new MapTabOpener());
+            Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.MAP);
         } catch (Throwable t) {
             Global.getLogger(FishCodexEntry.class)
                     .warn("Could not jump from the codex to the sector map", t);
-        }
-    }
-
-    /**
-     * Opens the map tab on the first frame no dialog is in the way, then removes itself. Must run
-     * while paused (the campaign is paused under the codex), so the give-up timer is frame-counted
-     * rather than clock-based.
-     */
-    protected static class MapTabOpener implements com.fs.starfarer.api.EveryFrameScript {
-
-        /** Frames to try before giving up on the codex ever finishing its dismissal. */
-        public static final int GIVE_UP_FRAMES = 30;
-
-        private boolean done = false;
-        private int frames = 0;
-
-        @Override
-        public boolean isDone() {
-            return done;
-        }
-
-        @Override
-        public boolean runWhilePaused() {
-            return true;
-        }
-
-        @Override
-        public void advance(float amount) {
-            if (done) return;
-
-            if (++frames > GIVE_UP_FRAMES) {
-                done = true;
-                return;
-            }
-
-            if (Global.getSector() == null || Global.getSector().getCampaignUI() == null) return;
-            if (Global.getSector().getCampaignUI().isShowingDialog()) return;
-
-            try {
-                Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.MAP);
-            } catch (Throwable t) {
-                Global.getLogger(FishCodexEntry.class)
-                        .warn("Could not open the sector map after the codex closed", t);
-            }
-
-            done = true;
         }
     }
 
