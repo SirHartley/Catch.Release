@@ -95,6 +95,9 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
 
+**`data/config/sounds.json`** — 5 ids of our own, merged into vanilla's ~600. Ability sounds are
+named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
+
 ---
 
 ## The rules.csv contract
@@ -452,6 +455,22 @@ waiting for the row to be reached. Set a companion boolean — `MafiaJob` carrie
 **Every memory key starts with `$`.** `Memory.set` throws on one that does not, and it throws
 whenever the write happens rather than where the key was written down - which can be a stage change
 minutes later.
+
+**A sound id is a string nothing checks until it is played.** The compiler cannot see it and the
+game only disputes it at the moment the sound is asked for — so a wrong id in a rarely-hit branch
+survives indefinitely, and one in the shop's buy button fires on the most common action there is.
+`ui_char_increase_aptitude` looked exactly like the real ids around it (`ui_char_level_up`,
+`ui_char_decrease_skill`, `ui_char_reset`) and did not exist.
+
+To check them: **`#` starts a comment anywhere in the game's `.json` files** — a custom parser, not
+strict JSON, which also tolerates trailing commas. Strip `#`-to-end-of-line before parsing vanilla's
+`sounds.json`, or commented-out entries read as valid ids. The ids live at the **top level** beside
+`"music"`, and both `"id":[…]` and `"id":{"sounds":[…]}` are legal forms.
+
+**Sound files have a shape that depends on how they are played.** `SoundPlayerAPI` is explicit:
+`playUISound` wants **stereo**, `playSound` (positional) **must be mono**, `playLoop` should be
+mono. Our `spotlight_toggle.ogg` is mono because it goes through `playSound`; `skillshot_denied.ogg`
+is stereo because it goes through `playUISound`. Getting a new one backwards is not a compile error.
 
 **`BaseHubMission` assumes there is a person, in about a dozen places that do not check.** The
 intel's icon and faction colour, the reputation lines, the reward text and the distance readouts all
