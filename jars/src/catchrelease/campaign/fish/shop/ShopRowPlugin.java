@@ -234,16 +234,17 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             if (event.isConsumed() || !event.isLMBDownEvent()) continue;
             if (!contains(event.getX(), event.getY())) continue;
 
-            event.consume();
             Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
 
             //the ring's slot toggles the mark; everywhere else selects the row
             if (isInMarkSlot(event.getX()) &&
                     (ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry))) {
                 ShopMarks.toggle(entry.getKey());
+                event.consume();
                 return;
             }
 
+            event.consume();
             host.onRowClicked(entry);
 
             return;
