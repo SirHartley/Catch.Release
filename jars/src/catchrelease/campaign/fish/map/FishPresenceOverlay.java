@@ -78,16 +78,18 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float ROUTE_ICON = 16f;
 
     /**
-     * The system view's fish row: one round holder per species catchable in the viewed system,
-     * bottom left of the map. Known-and-caught wears its art, known-only-from-survey wears the
-     * generic mark, and a species the player has never heard of shows as a bare question mark -
-     * it is catchable here, and that is the whole of what is given away. The row shrinks to fit
-     * rather than wrapping, since a second row would climb into the map.
+     * The system view's fish strip: a thin sidebar down the map's right edge, one round holder
+     * per species catchable in the viewed system, shown only while the Fish filter is on.
+     * Known-and-caught wears its art, known-only-from-survey wears the generic mark, and a
+     * species the player has never heard of shows as a bare question mark - it is catchable
+     * here, and that is the whole of what is given away. The holders shrink to fit the column
+     * rather than spilling past it.
      */
-    public static final float SYSTEM_HOLDER_RADIUS = 17f;
+    public static final float STRIP_WIDTH = 46f;
+    public static final float SYSTEM_HOLDER_RADIUS = 16f;
     public static final float SYSTEM_HOLDER_GAP = 8f;
     public static final float SYSTEM_ICON_SHARE = 0.68f;
-    public static final float SYSTEM_MARGIN = 16f;
+    public static final float STRIP_PAD = 10f;
 
     /** The hover card over a known holder: name and status, roomy on purpose. */
     public static final float INFO_PAD = 10f;
@@ -110,8 +112,15 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     /** What lives where, worked out once per overlay - a catch cannot land while the map is up. */
     protected transient Map<String, List<FishSpec>> systemFish;
 
+    /** Whether the Fish filter is on - the system strip only shows for a player who asked. */
+    protected boolean filterActive = false;
+
     public void setMapWidget(Object mapWidget) {
         this.mapWidget = mapWidget;
+    }
+
+    public void setFilterActive(boolean filterActive) {
+        this.filterActive = filterActive;
     }
 
     public void setBlobs(List<Blob> blobs) {
@@ -211,13 +220,14 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     /**
-     * The viewed system's catch, bottom left: a row of round holders, one per species that can
-     * be caught here. Icon only - a known face or the generic mark - except for species the
-     * player has no survey on at all, which show a question mark and answer no hover. The row
-     * scales itself down before it would run past the map's width.
+     * The viewed system's catch, as a thin sidebar down the map's right edge - and only while
+     * the Fish filter is on, since the strip is the filter answering "and what about here?".
+     * Icon only - a known face or the generic mark - except for species the player has no survey
+     * on at all, which show a question mark and answer no hover. The holders shrink before they
+     * would spill past the column.
      */
     protected void renderSystemFish(StarSystemAPI system, float alphaMult) {
-        if (panelPos == null) return;
+        if (!filterActive || panelPos == null) return;
 
         List<FishSpec> known = getSystemFish(system);
         int unknown = getUnknownCount(system);
@@ -226,10 +236,19 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
         LazyFont small = ShopUi.getSmallFont();
 
-        //shrink to fit one row inside the map's width, never grow
+        float stripLeft = panelPos.getX() + panelPos.getWidth() - STRIP_WIDTH;
+        float stripTop = panelPos.getY() + panelPos.getHeight();
+
+        //the sidebar itself: a dark column with the player's one-pixel line down its left edge
+        ShopUi.drawQuad(stripLeft, panelPos.getY(), STRIP_WIDTH, panelPos.getHeight(),
+                Color.BLACK, 0.7f * alphaMult);
+        ShopUi.drawQuad(stripLeft, panelPos.getY(), 1f, panelPos.getHeight(),
+                Misc.getDarkPlayerColor(), alphaMult);
+
+        //shrink to fit the column, never grow
         float radius = SYSTEM_HOLDER_RADIUS;
         float gap = SYSTEM_HOLDER_GAP;
-        float available = panelPos.getWidth() - SYSTEM_MARGIN * 2f;
+        float available = panelPos.getHeight() - STRIP_PAD * 2f;
         float needed = total * radius * 2f + (total - 1) * gap;
 
         if (needed > available && needed > 0f) {
@@ -238,11 +257,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             gap *= scale;
         }
 
-        float x = panelPos.getX() + SYSTEM_MARGIN + radius;
-        float y = panelPos.getY() + SYSTEM_MARGIN + radius;
+        float x = stripLeft + STRIP_WIDTH * 0.5f;
+        float y = stripTop - STRIP_PAD - radius;
 
         FishSpec hovered = null;
-        float hoveredX = 0f;
+        float hoveredY = 0f;
 
         for (FishSpec spec : known) {
             drawHolder(x, y, radius, alphaMult);
@@ -262,10 +281,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             if (isOver(x, y, radius)) {
                 hovered = spec;
-                hoveredX = x;
+                hoveredY = y;
             }
 
-            x += radius * 2f + gap;
+            y -= radius * 2f + gap;
         }
 
         //the unknowns: catchable here, and that is all anyone is told - no name, no hover
@@ -279,11 +298,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                         Math.round(y + mark.getHeight() * 0.5f));
             }
 
-            x += radius * 2f + gap;
+            y -= radius * 2f + gap;
         }
 
         if (hovered != null) {
-            drawFishInfo(hovered, hoveredX, y + radius + 8f, alphaMult);
+            drawFishInfo(hovered, stripLeft - 8f, hoveredY, alphaMult);
         }
     }
 
@@ -300,9 +319,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         return dx * dx + dy * dy <= radius * radius;
     }
 
-    /** The hover card over a known holder: the species' name in its rarity's colour, its status
-     *  under it, with room to breathe. Sits just above the row so it never covers a neighbour. */
-    protected void drawFishInfo(FishSpec spec, float x, float bottom, float alphaMult) {
+    /** The hover card beside a known holder: the species' name in its rarity's colour, its
+     *  status under it, with room to breathe. Hangs off the strip's left edge, centred on the
+     *  holder, and kept inside the map rectangle. */
+    protected void drawFishInfo(FishSpec spec, float rightEdge, float centerY, float alphaMult) {
         LazyFont small = ShopUi.getSmallFont();
         if (small == null) return;
 
@@ -314,12 +334,14 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float width = Math.max(name.getWidth(), status.getWidth()) + INFO_PAD * 2f;
         float height = INFO_PAD * 2f + name.getHeight() + INFO_LINE_GAP + status.getHeight();
 
-        float left = x - width * 0.5f;
+        float left = rightEdge - width;
+        float bottom = centerY - height * 0.5f;
 
         //kept inside the map rectangle
         if (panelPos != null) {
-            left = Math.max(panelPos.getX() + 4f,
-                    Math.min(left, panelPos.getX() + panelPos.getWidth() - width - 4f));
+            left = Math.max(panelPos.getX() + 4f, left);
+            bottom = Math.max(panelPos.getY() + 4f,
+                    Math.min(bottom, panelPos.getY() + panelPos.getHeight() - height - 4f));
         }
 
         ShopUi.drawQuad(left - 1f, bottom - 1f, width + 2f, height + 2f,

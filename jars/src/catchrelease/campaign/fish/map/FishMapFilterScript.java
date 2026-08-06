@@ -483,6 +483,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
+        overlay.setFilterActive(applied);
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
@@ -528,6 +529,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             rebuildBlobs();
             remember(true);
             applied = true;
+
+            if (overlay != null) overlay.setFilterActive(true);
         } catch (Throwable t) {
             fail(t);
         }
@@ -558,7 +561,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 ReflectionUtils.invoke(mapScreen, "centerOn", keep);
             }
 
-            if (overlay != null) overlay.setBlobs(null);
+            if (overlay != null) {
+                overlay.setBlobs(null);
+                overlay.setFilterActive(false);
+            }
             if (overlayPanel != null) {
                 overlayPanel.getPosition().setSize(originalScrollerWidth, scrollerPos.getHeight());
             }
