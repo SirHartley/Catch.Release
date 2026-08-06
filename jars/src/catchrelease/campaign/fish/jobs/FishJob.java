@@ -112,6 +112,17 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     /** Days before the giver gives up, or zero for a job with no clock on it. */
     protected float days = 0f;
 
+    /**
+     * The mission-elapsed reading at which the clock runs out, or zero for a job without one.
+     * <p>
+     * Held as an absolute rather than as a countdown because vanilla's time limit is one too: it
+     * compares its figure against {@code elapsed}, which counts from when the job was taken and
+     * never restarts. Anything that wants to say how long is left has to subtract from the same
+     * number the failure is measured against, or the entry counts down to a moment that is not when
+     * it ends.
+     */
+    protected float deadline = 0f;
+
     /** How many hand-overs this one has taken, for the jobs that ask twice. */
     protected int round = 0;
 
@@ -171,11 +182,38 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         setFailureStage(Stage.FAILED);
         setAbandonStage(Stage.ABANDONED);
 
-        if (days > 0f) setTimeLimit(Stage.FAILED, days, null, Stage.DONE);
+        setClock();
 
         //while the fish are owed and no longer once they are not, which is the whole lifetime of the
         //hand-over option - the flag going away is what takes the option away
         markDeliverable();
+    }
+
+    /**
+     * Gives the job its full allowance of days, counted from now.
+     * <p>
+     * Called again whenever a job asks for something else instead of finishing. Vanilla's limit is
+     * measured against the mission's total elapsed time rather than the current stage's, and a job
+     * that adds a round does not change stage - so without this a two-round job gets one round's
+     * worth of time between them, and quietly fails somewhere in the second while the player is
+     * still out looking. What that looks like from the bar is a giver who has stopped offering to
+     * take the catch, with nothing on screen having said why.
+     */
+    protected void setClock() {
+        if (days <= 0f) return;
+
+        deadline = elapsed + days;
+
+        setTimeLimit(Stage.FAILED, deadline, null, Stage.DONE);
+    }
+
+    /** How long is left, against the same number the failure is measured against. */
+    protected float getDaysLeft() {
+        //a job accepted before the deadline was recorded has vanilla's limit running against the
+        //plain allowance, so read that rather than reporting a job with no time left on it
+        float ends = deadline > 0f ? deadline : days;
+
+        return Math.max(0f, ends - elapsed);
     }
 
     /**
@@ -364,6 +402,10 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         //intel entry reads as the same person wanting more, which is what a supply chain looks like
         boolean more = onDelivered();
 
+        //a fresh ask is a fresh errand, so it gets the full allowance again rather than whatever
+        //was left of the last one
+        if (more) setClock();
+
         token(mem, MORE_KEY, more);
 
         //re-read after a new round has been set, so the row describing what is wanted next describes
@@ -508,9 +550,7 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
         //the clock belongs with the ask rather than with the payment - it is a fact about how long
         //there is to catch them, not about what is being handed over
-        if (days > 0f) {
-            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text);
-        }
+        if (days > 0f) addDays(info, "remaining", getDaysLeft(), text);
         unindent(info);
 
         info.addPara("On delivery:", opad);
@@ -537,9 +577,7 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         //nothing to highlight
         if (!asks.isEmpty()) line.setHighlight(String.valueOf(asks.get(0).count));
 
-        if (days > 0f && !isEnding()) {
-            addDays(info, "remaining", Math.max(0f, days - getElapsedInCurrentStage()), text, 0f);
-        }
+        if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
     }
 
     /**
