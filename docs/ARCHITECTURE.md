@@ -196,15 +196,15 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `TuberJob.java` | Two rounds: a fine rare first, then a low-coherence one "for content" |
 
 ### `campaign/fish/jobs/fleet`
-Jobs given by a hull in space, which then has to still be there when you return.
+Jobs hung on a hull that was already out there, which then has to still be there when you return.
 
 | File | What it does |
 |---|---|
-| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `mark()` puts the offer on the hull, `hold()` sits it down; accepted on `take()`, not at spawn, so an offer nobody agreed to raises no intel |
-| `FleetQuestSpawner.java` | Rolls the offer and routes it: able to fly → arrives from beyond sensor range, cannot → distress call |
-| `FleetDistressCall.java` | The immobile half: picks a nearby empty system vanilla's own way, spawns at its distress jump point, raises vanilla `DistressCallIntel` |
-| `FleetQuestEncounter.java` | Runs one offer — intercepts the player, reads the answer once the dialogue closes, sends a refused fleet home, times the offer out |
-| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `wandering` is read off the complaint: a seized drive cannot come looking for you |
+| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()` |
+| `FleetQuestSpawner.java` | Picks a civilian hull already in the player's system and hangs an offer on it. Spawns nothing |
+| `FleetQuestMarker.java` | The muted-cyan `!` while an offer is only an offer — vanilla's own sprite and geometry, a colour that is not vanilla's |
+| `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
+| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
 
 ### `campaign/fish/colony`
 The Breach Conservatory: the structure that brings the fishing trade to the player's own colony.
@@ -671,6 +671,24 @@ what keeps the sector-wide search off every other tick.
 until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first
 readout — a backdrop driven off it hung motionless over an open card. `advanceBackdrop()` runs from
 the moment the card exists and is what the coin rain reads; `advance()` stays the list's own.
+
+**A fleet quest never spawns a fleet, and until it is accepted it never touches one either.** The
+offer is two memory keys and a `FleetQuestMarker` hung on a civilian hull already in the player's
+system — no rename, no orders, no `$missionImportant`. Turning one down costs nothing because there
+is nothing to tidy away.
+
+**Accepting supplants the hull.** `FleetQuest.supplant()` builds a copy (fresh members off the same
+variants, so nothing is owned by two fleets at once; only the source market carried over from the
+old memory) and despawns the original *with a report*, so whatever was running it — a trade route, a
+scavenger sweep — hears that it is gone rather than waiting forever on a fleet parked in a system
+for two months. What is left answers to nobody but the job, which is what makes it safe to pin. When
+the job ends or its clock runs out, `release()` sends it home to despawn.
+
+**The mark's colour is the message, and it is drawn rather than flagged.** `$missionImportant` is one
+boolean with one colour, and setting it on somebody's trade fleet would also make the game treat it
+as story furniture. `FleetQuestMarker` copies vanilla's sprite, corner and zoom arithmetic exactly
+and changes only the tint. Once the offer is accepted the cyan comes off and vanilla's own takes
+over — at that point it is no longer passive.
 
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a

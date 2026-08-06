@@ -9,19 +9,22 @@ import java.util.Random;
 
 /**
  * Fleet quest flavors: each is the same fish-for-payment transaction, differing only in flavor text
- * and requested catch. {@link #wandering} marks types that can appear on a fleet already in the
- * system, versus ones only ever spawned in place (e.g. STRANDED - a dead drive can't have flown in).
+ * and requested catch.
+ * <p>
+ * Every one of them is hung on a hull that was already flying, so none of them can be about a fleet
+ * that cannot move - the two that used to be say "failing" rather than "gone" for exactly that
+ * reason. {@link #fleetType} is now a preference rather than a recipe: the kind of hull the errand
+ * suits, used to pick between candidates rather than to build one.
  */
 public enum FleetQuestType {
 
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
-            "Drive's gone. We are not going anywhere and the ration printer wants organics it has"
-                    + " not got. There is water nearby - bring us something out of it and we will"
-                    + " make it worth the detour.",
+            "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
+                    + " it has not got. There is water nearby - bring us something out of it and we"
+                    + " will make it worth the detour.",
             "They need something living out of the local water before the printer will run again.",
-            "Adrift, drive offline",
-            false),
+            "Holding position"),
 
     SEEKER("Fleet on a Hunt",
             FleetTypes.SCAVENGER_SMALL,
@@ -29,8 +32,7 @@ public enum FleetQuestType {
                     + " equipped for it. You clearly are. Land it for us and we will hand over what"
                     + " we came out with instead.",
             "They have been hunting one specimen for weeks with the wrong gear entirely.",
-            "Searching",
-            true),
+            "Searching"),
 
     QUOTA("Short of Quota",
             FleetTypes.TRADE_SMALL,
@@ -38,25 +40,22 @@ public enum FleetQuestType {
                     + " is a hearing neither of us wants to attend. Make up the numbers and we will"
                     + " pay out of the margin.",
             "Their filed quota is short and the deadline is not moving.",
-            "Filling quota",
-            true),
+            "Filling quota"),
 
     STARVING("Hungry Fleet",
             FleetTypes.TRADE_SMALL,
             "We have been on printed protein for nineteen days. Nobody is dying. Everybody is"
                     + " furious. Bring us something that was recently alive and name a price.",
             "Nineteen days of printed protein and a crew about to mutiny over it.",
-            "Rationing",
-            true),
+            "Rationing"),
 
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
-            "Coil's seized and the gel that packs it is not something you can synthesise out here."
+            "Coil's going and the gel that packs it is not something you can synthesise out here."
                     + " You can fish it out of the local water, apparently. We looked it up. Bring"
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
-            "Engine offline",
-            false),
+            "Holding position"),
 
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
@@ -64,8 +63,7 @@ public enum FleetQuestType {
                     + " specimen I have been trying to buy for two years and nobody will sell me"
                     + " one. Catch it and the price stops being a problem.",
             "A private collector who has run out of people willing to sell to them.",
-            "Waiting",
-            true),
+            "Waiting"),
 
     WAGER("Settling a Bet",
             FleetTypes.SCAVENGER_SMALL,
@@ -73,12 +71,11 @@ public enum FleetQuestType {
                     + " being funny. Go and settle it. Whoever is wrong is paying, and it will not"
                     + " be coming out of our pocket either way.",
             "An argument aboard that has outlasted everyone's patience for it.",
-            "Arguing",
-            true);
+            "Arguing");
 
     public final String title;
 
-    /** What the giver's hull looks like, for the ones that have to be spawned rather than found. */
+    /** The kind of hull the errand suits, used to pick between candidates already out there. */
     public final String fleetType;
 
     /** What they say when the link opens, before any of it is agreed to. */
@@ -90,24 +87,12 @@ public enum FleetQuestType {
     /** What the fleet reads as doing while it waits, on the campaign map. */
     public final String actionText;
 
-    /**
-     * Whether whatever is wrong with them still leaves them able to fly, which decides how they ask.
-     * <p>
-     * One that can fly comes and finds the player. One that cannot has no way to arrive at all, so
-     * it calls for help from wherever it is stuck and waits - see {@link FleetDistressCall}. Read
-     * off the complaint itself rather than chosen: a seized drive coil is not a thing you can go
-     * looking for somebody with.
-     */
-    public final boolean wandering;
-
-    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
-                   boolean wandering) {
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
         this.note = note;
         this.actionText = actionText;
-        this.wandering = wandering;
     }
 
     /** Rolls the requested catch; smaller asks than bar job orders, since this interrupts rather than being planned for. */
