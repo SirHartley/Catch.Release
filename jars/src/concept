@@ -5,12 +5,6 @@ todo
     - The Ribcage fishing hub
     - Main quest tie-in (fish the 4th drone for galatia)
     - Tutorial
-    - Bar quests
-    - Fleet quests
-    - Fleet interactions
-    - Colony Aquarium
-    - Confetti effects should be purchaseable upgrade from Crablobab the crab salesman
-    - explosive harpoon should be purchaseable upgrade from Crablobab the crab salesman (- Add an explosive harpoon modifier. This modifier should explode any fish it hits, then fade out the line while having it thrown away by the force. Use vanilla explosion vfx,there's a class for that). Doesn't do anything else for now. If it hits a fleet it turns hostile immediately and takes damage.
     - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
@@ -19,6 +13,42 @@ scrapped
     - Fishing logistics ships
 
 ---------------------
+
+x Colony Aquarium
+- Add a structure: Breach Conservatory (as usual, use placeholder image).
+- This is a local fish store & aquarium unlocking the fishing interactions features for your own colony.
+- If you need info on how to do industries, here's a lot of my implementations: https://github.com/SirHartley/Industrial.Evolution/tree/master/jars/src/indevo/industries
+- Allows access to the fishing shop on this colony (on-click via IndustryOptionProvider & custom panel as we already have)
+- Allows managing the aquarium (including disabling it)
+- Adds a fully animated aquarium to the colony main menu on the right, side bar, below planet interaction image. This should be a basic opengl rendered one for now, we'll add sprites later.
+- Add button to add/remove fish below this render
+- Fish in aquarium should behave according to their movement mode.
+- Fish in aquarium should have slight warp making them "breathe" and seem alive. Rotate the sprites in the tank accordingly so they actually swim with heading. We'll have to specify the "sprite direction", maybe via 360 degree field in csv.
+- Should show which are larger via size stat
+
+x Crablobab
+- Add Crablobab the Crab Salesman as a bar encounter. He randomly shows up every now and then and sells two things:
+- Confetti minigame effects should be purchaseable upgrade from Crablobab the crab salesman
+- explosive harpoon should be purchaseable upgrade from Crablobab the crab salesman (- Add an explosive harpoon modifier. This modifier should explode any fish it hits, then fade out the line while having it thrown away by the force. Use vanilla explosion vfx,there's a class for that). Doesn't do anything else for now. If it hits a fleet it turns hostile immediately and takes damage.
+
+x Fleet encounters
+- Static fleets shouldn't just randomly appear. Move all fleets that are in distress to a distress call implementation. Use the vanilla way to do this, it should have a framework.
+- Fleets without an immediate problem immobilizing them should spawn off-screen, wander into view with a ! on them. Once you interact with the fleet, if you don't take the quest, unmark important, have the fleet leave and despawn off-screen, mirror the brhaviour of the https://github.com/SirHartley/Industrial.Evolution/blob/master/jars/src/indevo/exploration/meteor/scripts/TutorialEncounterScript.java
+
+x Wandering fisherman
+- There should be instances of a fleet wandering a system you are in that serves as on-the-go upgrade and fishing interaction hub. This fleet should be called "The Fisherman".
+- Spawn it with one cruiser and a few logi ships.
+- Faction: Indie
+- It should be using the searchlights in "fan" mode, don't need to account for upgrades. Searchlight visuals should be using the old, yellow light impl, not the new breach one. No sounds to be played except during start and wind-down.
+- The fisherman should sometimes harpoon random fish under the searchlights. No minigame, just spool the animation and assume immediate success where the game would usually pop up.
+- Talking to this fleet should give the following options:
+    - Purchase survey data (uncommon survey requires common fish, to purchase rare survey data -> requires uncommon fish, ect). UI required.
+    - Access outfitter, throw up the UI we already have.
+    - Sell fish at market price - check how the vanilla AI core trade-in panel does it and mirror that. Add a button to sell all fish up to a certain rarity.
+    - Ask about rumors (Rumors should give intel about a system with temporarily increased overall rarity, with higher loot chance when fishing, or with fish that usually don't spawn there. Rumors are only available once a month.) 
+ - Fisherman should wander around the system and fish for 2 weeks, then turn off the searchlights and jump out, despawning immediately. 
+ - Wandering fisherman should prefer spawning outside the core. Should never spawn in systems cut off from hyper, not in the abyss, not in special systems or systems that are not proc-gen.
+ - Should prefer to spawn when the player has a cargo full of fish, or when it hasn't spawned in a while (2 months?)
 
 ai_
 
