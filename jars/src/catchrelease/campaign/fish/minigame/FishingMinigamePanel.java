@@ -137,7 +137,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         result.advance(amount);
 
         //loot tally starts only after the fish tally finishes, so they don't sound-overlap
-        if (lootResult != null && result.isComplete()) lootResult.advance(amount);
+        if (lootResult != null) {
+            //the rain runs from the moment the card is up; only the list waits its turn
+            lootResult.advanceBackdrop(amount);
+
+            if (result.isComplete()) lootResult.advance(amount);
+        }
 
         if (celebration != null) celebration.advance(amount);
     }
