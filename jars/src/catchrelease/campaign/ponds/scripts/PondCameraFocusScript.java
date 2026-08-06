@@ -18,8 +18,9 @@ import org.lwjgl.util.vector.Vector2f;
  * Three phases, in order:
  * <ol>
  * <li>Fleet within {@link PondConstants#POND_INTERACT_RANGE_MULT} of the pond - the camera eases onto
- * the pond and stays centred on it. That range is the same one the rod ability uses, so the camera
- * holds exactly while the skillshot is available.</li>
+ * the pond and holds it. That range is the same one the rod ability uses, so the camera holds exactly
+ * while the skillshot is available. Held is not quite centred: the pond is what the camera aims at,
+ * but it gives ground rather than let the fleet leave the screen - see {@link #keepFleetOnScreen}.</li>
  * <li>Fleet moves out of that range - the camera eases back onto the fleet and control goes back to
  * the game, leaving the player where they expect to be.</li>
  * <li>Pond drifts off screen, or the player leaves the system - the pond closes.</li>
@@ -107,6 +108,8 @@ public class PondCameraFocusScript implements EveryFrameScript {
         center.x += carry.x;
         center.y += carry.y;
 
+        keepFleetOnScreen(center, fleet.getLocation());
+
         //a dialog over the top - the catch, most likely. Everything freezes where it is: sliding back
         //to the fleet under a panel the player is busy with is a move they did not ask for, cannot
         //see a reason for, and cannot stop. Only while we already hold it; a dialog is no reason to
@@ -184,6 +187,49 @@ public class PondCameraFocusScript implements EveryFrameScript {
         return new Vector2f(
                 fleetLocation.x + (pondLocation.x - fleetLocation.x) * focus,
                 fleetLocation.y + (pondLocation.y - fleetLocation.y) * focus);
+    }
+
+    /**
+     * Gives ground rather than letting the fleet walk off the edge of the view.
+     * <p>
+     * The hold is a circle and the screen is a wide rectangle, and the two do not agree. Pinned to
+     * the pond, the camera lets the fleet get {@link PondConstants#POND_INTERACT_RANGE_MULT} of the
+     * pond's radius away in any direction it likes - which fits across a screen and does not fit up
+     * it, so a fleet that burned off sideways stayed in view and one that burned off upward left the
+     * top of it while the camera sat still watching the water. That asymmetry was never a rule
+     * anybody wrote; it is the difference between a circle and 16:9.
+     * <p>
+     * So the pin is not absolute. The fleet may be pushed out to
+     * {@link PondConstants#POND_FOCUS_FLEET_MARGIN} of whatever half-screen there is on that axis,
+     * and past that the camera goes with it - which is the boundary the player can actually see,
+     * measured on the axis it is being crossed on. Sideways nothing changes, there being room; going
+     * up the view starts travelling a good deal sooner than it used to.
+     * <p>
+     * The pond does not go anywhere either. The camera only ever gives up as much ground as the
+     * fleet asked for, and the fleet cannot ask for more than the hold allows, so at ordinary zoom
+     * the water stays framed alongside it. Zoomed right in it is the pond's near rim that stays
+     * framed rather than its centre - but a pond is five hundred units across and the view at full
+     * zoom is not much more, so at that point the rim is the pond as far as anyone can see.
+     * <p>
+     * Read off the viewport every frame, so zooming out slackens this and zooming in tightens it,
+     * both without anything to keep in step. Zoomed out far enough that the whole hold fits on the
+     * screen this stops doing anything at all, which is right - there is nothing to save the fleet
+     * from, and the camera sits dead on the pond exactly as it always did.
+     */
+    protected void keepFleetOnScreen(Vector2f center, Vector2f fleetLocation) {
+        ViewportAPI viewport = Global.getSector().getViewport();
+
+        float maxX = viewport.getVisibleWidth() * 0.5f * PondConstants.POND_FOCUS_FLEET_MARGIN;
+        float maxY = viewport.getVisibleHeight() * 0.5f * PondConstants.POND_FOCUS_FLEET_MARGIN;
+
+        //a viewport that has not been sized yet says nothing about where the edges are, and clamping
+        //to zero would drop the camera onto the fleet and hand it straight back
+        if (maxX > 0f) center.x = clamp(center.x, fleetLocation.x - maxX, fleetLocation.x + maxX);
+        if (maxY > 0f) center.y = clamp(center.y, fleetLocation.y - maxY, fleetLocation.y + maxY);
+    }
+
+    protected static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     /**
