@@ -78,6 +78,10 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
     @Override
     public void optionSelected(String optionText, Object optionData) {
+        //the player's line goes into the log before anything answers it - the engine's own
+        //echo, the same convention every vanilla dialog reads by
+        if (optionData != null) dialog.addOptionSelectedText(optionData);
+
         if (!(optionData instanceof Option)) {
             if (optionData instanceof FishRarity) {
                 sellUpTo((FishRarity) optionData);
