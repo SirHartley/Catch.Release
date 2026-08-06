@@ -66,8 +66,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         /**
          * A pond that is only the look of one: no pond tag, so the rod cannot target it, the
          * spawner does not count it and quests do not pick it; no camera hold; no motes of its
-         * own; no map icon. What the depth bomb dresses its break in - the break keeps the bomb's
-         * own behaviour, and this is just the water it appears to be made of.
+         * own; no map icon. Built for the depth bomb's break to wear; the bomb is gone, and this
+         * stays as the way to put the look of a rupture somewhere without putting a rupture there.
          */
         public boolean visualOnly = false;
 
@@ -151,7 +151,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         //the terrain entity is built with no name, no tags of ours and a radius of 0.
         //A visual-only pond does not carry the pond tag: the tag is how the rod finds a target,
         //how the spawner counts and spaces the real ones, and how the quests pick theirs -
-        //dressing on a bomb's break is none of those things
+        //dressing is none of those things
         entity.setName(NAME);
         if (!visualOnly) entity.addTag(TERRAIN_ID);
         if (entity instanceof CampaignTerrainAPI) {
@@ -204,8 +204,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     @Override
     public boolean hasMapIcon() {
-        //dressing on a bomb's break is not a place - it is gone in half a minute, and a map icon
-        //would promise somewhere worth flying to
+        //dressing is not a place - it is gone shortly, and a map icon would promise somewhere
+        //worth flying to
         return !visualOnly;
     }
 
@@ -244,8 +244,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         //only into an open rupture. A closed pond used to keep filling with motes that nothing drew,
         //since they are stencilled to the mask - invisible, but real enough to be harpooned.
-        //And never into dressing: a bomb's break frees what was already under it, it does not
-        //breed anything of its own
+        //And never into dressing: a visual-only pond is only the look of the water, and it does
+        //not breed anything of its own
         moteSpawnInterval.advance(amount);
         if (moteSpawnInterval.intervalElapsed() && isActive && !visualOnly) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
@@ -254,10 +254,9 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     }
 
     /**
-     * A temporary pond - a bomb's, not the sector's - runs down its clock while open and
-     * removes itself once it has spooled shut, whichever of the clock or the player leaving
-     * closed it. The campaign pauses for the catch itself, so time spent actually fishing the
-     * rupture costs none of its life.
+     * A temporary pond runs down its clock while open and removes itself once it has spooled
+     * shut, whichever of the clock or the player leaving closed it. The campaign pauses for the
+     * catch itself, so time spent actually fishing the rupture costs none of its life.
      */
     protected void advanceTemporary(float amount) {
         if (!temporary || expiring) return;
@@ -298,8 +297,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         //holds the camera while the player is here, and closes the pond once they have left. Sector
         //level rather than on the entity: entity scripts do not advance while the game is paused.
-        //Not over dressing: a bomb's break takes the camera nowhere, exactly like the fracture it
-        //stands in for, and it closes on its own clock rather than on the player leaving
+        //Not over dressing: a visual-only pond takes the camera nowhere, and a temporary one
+        //closes on its own clock rather than on the player leaving
         if (!visualOnly) Global.getSector().addScript(new PondCameraFocusScript(entity));
     }
 
