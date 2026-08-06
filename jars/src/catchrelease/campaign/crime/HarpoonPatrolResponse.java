@@ -104,7 +104,13 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         //independent of any active chase - a refusal owed to one faction must not wait on another
         //faction's patrol to finish flying about before it's charged for
-        if (tick) HarpoonOffence.applyDueEvasions();
+        if (tick) {
+            HarpoonOffence.applyDueEvasions();
+
+            //and whatever a holed crew's own conversation settled, which is the same shape of
+            //handoff and has no more reason than that one to own a script
+            HarpoonOffence.resolveAnsweredDemands();
+        }
 
         if (chasing != null) {
             maintainChase();
@@ -154,33 +160,84 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         }
     }
 
+    /**
+     * Whether this fleet is one that could be sent after the player about a harpooning.
+     * <p>
+     * Its own method because two things ask it and they look for candidates differently: the sweep
+     * takes whoever is near the player, and a holed crew calling it in takes whoever is in earshot
+     * of *them*. What makes a fleet a suitable answer is the same question either way.
+     */
+    protected static boolean canBeSent(CampaignFleetAPI curr, FactionAPI faction,
+                                       CampaignFleetAPI player) {
+        if (curr.getFaction() != faction) return false;
+        if (curr.isStationMode()) return false;
+
+        //already at war - nothing left to intercept the player about
+        if (curr.isHostileTo(player)) return false;
+
+        MemoryAPI mem = curr.getMemoryWithoutUpdate();
+        if (mem.getBoolean(PATROL_FLAG)) return false;
+
+        if (hasAnsweredEverything(curr, faction.getId())) return false;
+
+        //patrols only - MEMORY_KEY_PATROL_FLEET is what the fleet AI's own pursuit support checks
+        //to decide whether a chase is sustained
+        if (!mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
+
+        if (curr.getAI() instanceof ModularFleetAIAPI) {
+            ModularFleetAIAPI ai = (ModularFleetAIAPI) curr.getAI();
+            if (ai.isFleeing()) return false;
+            if (curr.getInteractionTarget() instanceof CampaignFleetAPI) return false;
+        }
+
+        return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
+    }
+
+    /**
+     * A holed crew putting it on the local channel, which is a different search to the sweep's.
+     * <p>
+     * Anywhere in their own system rather than within the sweep's range of the player, because the
+     * distance that matters is how far the call carries rather than how far the patrol is from
+     * whoever it is being sent after. The retry wait is cleared for the same reason a fresh
+     * harpooning clears it: somebody has just asked, and being asked is the point.
+     *
+     * @return whether anyone was in earshot
+     */
+    public static boolean callForHelp(CampaignFleetAPI victim) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (victim == null || player == null) return false;
+
+        FactionAPI faction = victim.getFaction();
+        if (faction == null || victim.getContainingLocation() == null) return false;
+
+        CampaignFleetAPI nearest = null;
+        float best = Float.MAX_VALUE;
+
+        for (CampaignFleetAPI curr : victim.getContainingLocation().getFleets()) {
+            if (curr == victim || curr == player) continue;
+            if (!canBeSent(curr, faction, player)) continue;
+
+            float distance = Misc.getDistance(victim.getLocation(), curr.getLocation());
+            if (distance >= best) continue;
+
+            best = distance;
+            nearest = curr;
+        }
+
+        if (nearest == null) return false;
+
+        clearRetryWait(faction.getId());
+        dispatch(nearest, faction.getId());
+
+        return true;
+    }
+
     /** The nearest patrol of this faction that is in a position to be sent after anybody. */
     protected CampaignFleetAPI findPatrol(final CampaignFleetAPI player, final FactionAPI faction) {
         List<CampaignFleetAPI> patrols = Misc.findNearbyFleets(player, SEARCH_RANGE, new FleetFilter() {
             @Override
             public boolean accept(CampaignFleetAPI curr) {
-                if (curr.getFaction() != faction) return false;
-                if (curr.isStationMode()) return false;
-
-                //already at war - nothing left to intercept the player about
-                if (curr.isHostileTo(player)) return false;
-
-                MemoryAPI mem = curr.getMemoryWithoutUpdate();
-                if (mem.getBoolean(PATROL_FLAG)) return false;
-
-                if (hasAnsweredEverything(curr, faction.getId())) return false;
-
-                //patrols only - MEMORY_KEY_PATROL_FLEET is what the fleet AI's own pursuit support
-                //checks to decide whether a chase is sustained
-                if (!mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
-
-                if (curr.getAI() instanceof ModularFleetAIAPI) {
-                    ModularFleetAIAPI ai = (ModularFleetAIAPI) curr.getAI();
-                    if (ai.isFleeing()) return false;
-                    if (curr.getInteractionTarget() instanceof CampaignFleetAPI) return false;
-                }
-
-                return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
+                return canBeSent(curr, faction, player);
             }
         });
 
@@ -210,6 +267,19 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     }
 
     protected void send(CampaignFleetAPI patrol, String factionId) {
+        dispatch(patrol, factionId);
+
+        chasing = patrol;
+    }
+
+    /**
+     * Puts a patrol on the player, and nothing else.
+     * <p>
+     * Static and without touching {@link #chasing}, because a crew calling one in has no script
+     * instance to hand - the flag is the chase, and the running script re-finds it by that flag on
+     * its next tick the same way it does after a reload.
+     */
+    protected static void dispatch(CampaignFleetAPI patrol, String factionId) {
         MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
         //1-day flag, refreshed in maintainChase() while the patrol still has eyes on the player;
@@ -225,8 +295,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         mem.set(FINE_KEY, FINE, CHASE_DAYS);
         mem.set(FINE_TEXT_KEY, Misc.getWithDGS(FINE), CHASE_DAYS);
         mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
-
-        chasing = patrol;
     }
 
     /** Ends the chase on death, hostility, expiry, hyperspace, location split, or a settled conversation. */

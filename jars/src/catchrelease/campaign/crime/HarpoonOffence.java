@@ -3,6 +3,7 @@ package catchrelease.campaign.crime;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
@@ -45,8 +46,52 @@ public class HarpoonOffence {
     public static final String HIT_COUNT_KEY = "$catchrelease_harpoonHits";
     public static final String HOSTILE_FLAG = "$catchrelease_harpoonHostile";
 
-    /** Hit count at which a crew turns hostile. */
+    /** Hit count at which a crew that fights for a living turns hostile. */
     public static final int HITS_BEFORE_HOSTILE = 2;
+
+    /**
+     * What a crew with no guns does instead, in order.
+     * <p>
+     * Once is a complaint made to your face and nothing more - they have a route to fly and no
+     * appetite for chasing anybody. Twice and they will run you down for the repair bill, which is
+     * as far as a hauler's nerve goes: they want paying, not a fight, and nothing about it makes
+     * them hostile. Three times and they have stopped believing there is a conversation to be had,
+     * so they get away from you and put it on the local patrol channel on the way out.
+     */
+    public static final int HITS_BEFORE_DEMAND = 2;
+    public static final int HITS_BEFORE_FLIGHT = 3;
+
+    /** What a holed hauler wants for it. Under a patrol's fine - this is a repair, not a charge. */
+    public static final int DAMAGES = 8000;
+
+    /** Days a crew keeps trying to catch you about the bill, and days they keep clear afterwards. */
+    public static final float DEMAND_DAYS = 10f;
+    public static final float FLIGHT_DAYS = 20f;
+
+    /** Set on a crew coming after you for the repair bill, with the figure beside it. */
+    public static final String DEMAND_FLAG = "$catchrelease_harpoonDemand";
+    public static final String DAMAGES_KEY = "$catchrelease_harpoonDamages";
+    public static final String DAMAGES_TEXT_KEY = "$catchrelease_harpoonDamagesDGS";
+
+    /** Set once the bill has been had out either way, so it is not reopened on the next pass. */
+    public static final String DEMAND_DONE_KEY = "$catchrelease_harpoonDemandDone";
+
+    /** Set on a crew that has given up on talking and is putting distance between you. */
+    public static final String FLEEING_FLAG = "$catchrelease_harpoonFleeing";
+
+    /**
+     * How the sheet tells this side what happened, since a rules row can take credits but cannot
+     * close a faction's books, file a refusal against a clock, or call a pursuit off.
+     * <p>
+     * The same handoff the patrol's fine already uses, with one addition: a global marker, because
+     * the crew that was talked to is not necessarily anywhere near the player by the time anything
+     * reads this back - a player who pays and immediately jumps out would otherwise leave the bill
+     * settled on their side and open on everybody else's. The marker makes the expensive search
+     * happen only on the handful of ticks where there is something to find.
+     */
+    public static final String PAID_FLAG = "$catchrelease_harpoonDamagesPaid";
+    public static final String REFUSED_FLAG = "$catchrelease_harpoonDamagesRefused";
+    public static final String ANSWERED_PENDING = "$catchrelease_damagesAnswered";
 
     /** Reason tag the hostility memory flags are set under. */
     public static final String REASON = "catchreleaseHarpoon";
@@ -78,10 +123,12 @@ public class HarpoonOffence {
         int hits = mem.getInt(HIT_COUNT_KEY) + 1;
         mem.set(HIT_COUNT_KEY, hits, MEMORY_DAYS);
 
-        if (hits >= HITS_BEFORE_HOSTILE) turnHostile(victim);
-
         remember(faction.getId());
         owe(faction.getId());
+
+        //after the debt is on the books, because the third one calls a patrol in about it and there
+        //has to be something for that patrol to have come about
+        escalate(victim, hits);
 
         //a fresh harpooning resets any patrol retry wait, so it isn't silently absorbed into the last one
         HarpoonPatrolResponse.clearRetryWait(faction.getId());
@@ -89,6 +136,184 @@ public class HarpoonOffence {
         applyRepLoss(faction.getId());
 
         return true;
+    }
+
+    /**
+     * What this crew does about it, which depends entirely on whether they are armed.
+     * <p>
+     * A patrol, a warfleet or a pirate answers the second one by turning on you, which is the oldest
+     * rule here. Everybody else is somebody with a route to fly and a hole in their hull, and the
+     * three things they do in turn are the whole of their side of this.
+     */
+    protected static void escalate(CampaignFleetAPI victim, int hits) {
+        if (isCombatCrew(victim)) {
+            if (hits >= HITS_BEFORE_HOSTILE) turnHostile(victim);
+            return;
+        }
+
+        if (hits >= HITS_BEFORE_FLIGHT) {
+            flee(victim);
+            return;
+        }
+
+        if (hits >= HITS_BEFORE_DEMAND) demand(victim);
+    }
+
+    /**
+     * Whether this crew fights for a living, off vanilla's own three markers.
+     * <p>
+     * Asked rather than inferred from strength: a heavily escorted convoy is still a convoy and a
+     * lone picket is still a picket. What decides how somebody answers being shot at is what they
+     * are for, not what they could win.
+     */
+    public static boolean isCombatCrew(CampaignFleetAPI fleet) {
+        if (fleet == null) return false;
+
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+
+        return mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)
+                || mem.getBoolean(MemFlags.MEMORY_KEY_WAR_FLEET)
+                || mem.getBoolean(MemFlags.MEMORY_KEY_PIRATE);
+    }
+
+    /**
+     * Comes after you for the repair bill, and for nothing else.
+     * <p>
+     * Pursuit without hostility, which is a state vanilla supports and uses for its own hasslers.
+     * The flag makes them intercept and open a conversation; the aggression it carries only decides
+     * how they behave in a fight the player would have to start. Nothing here arms them.
+     */
+    protected static void demand(CampaignFleetAPI victim) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, DEMAND_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
+                REASON, true, DEMAND_DAYS);
+
+        //an ordinary hauler would otherwise fly straight past somebody it has no business with
+        mem.set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, DEMAND_DAYS);
+
+        mem.set(DEMAND_FLAG, true, DEMAND_DAYS);
+        mem.set(DAMAGES_KEY, DAMAGES, DEMAND_DAYS);
+        mem.set(DAMAGES_TEXT_KEY, Misc.getWithDGS(DAMAGES), DEMAND_DAYS);
+
+        //a fresh hole reopens a bill that was already argued about once
+        mem.unset(DEMAND_DONE_KEY);
+    }
+
+    /**
+     * Stops trying to talk to you, starts getting out of the way, and puts it on the channel.
+     * <p>
+     * The pursuit is taken back explicitly rather than left to lapse: a crew both chasing you for a
+     * bill and running from you is doing neither, and the demand going with it is what takes the
+     * conversation off the table for good.
+     */
+    protected static void flee(CampaignFleetAPI victim) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, false, 0f);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
+                REASON, false, 0f);
+
+        mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
+        mem.unset(DEMAND_FLAG);
+        mem.unset(DAMAGES_KEY);
+        mem.unset(DAMAGES_TEXT_KEY);
+
+        //vanilla's own half-hearted avoidance rather than a scripted run - a freighter keeps flying
+        //its route, it just stops letting you get near it
+        mem.set(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY, true, FLIGHT_DAYS);
+        mem.set(FLEEING_FLAG, true, FLIGHT_DAYS);
+
+        HarpoonPatrolResponse.callForHelp(victim);
+    }
+
+    /** Whether this crew is running from you rather than talking about it. */
+    public static boolean isFleeing(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(FLEEING_FLAG);
+    }
+
+    /** Whether this crew is after you for the repair bill and has not been dealt with yet. */
+    public static boolean isDemanding(CampaignFleetAPI fleet) {
+        if (fleet == null) return false;
+
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+
+        return mem.getBoolean(DEMAND_FLAG) && !mem.getBoolean(DEMAND_DONE_KEY);
+    }
+
+    /**
+     * The crew has been paid for the damage, so the faction's own books close with it - the whole
+     * point of settling with the people you holed is that nobody else comes asking.
+     */
+    public static void settleWith(CampaignFleetAPI victim) {
+        if (victim == null) return;
+
+        stopChasing(victim);
+
+        FactionAPI faction = victim.getFaction();
+        if (faction != null) settle(faction.getId());
+    }
+
+    /**
+     * The crew was told no. Nothing is done to them and nothing is done to you here - a hauler has
+     * no enforcement behind it - but it goes in the report, which costs a few days later.
+     */
+    public static void refuse(CampaignFleetAPI victim) {
+        if (victim == null) return;
+
+        stopChasing(victim);
+
+        FactionAPI faction = getOffendedFaction(victim);
+        if (faction != null) noteEvasion(faction.getId());
+    }
+
+    /**
+     * Picks up whatever the sheet said about a bill, wherever that crew has got to.
+     * <p>
+     * Driven off the patrol script's own tick rather than a script of its own, the same way the
+     * evasion charges are - and gated on the global marker, so the usual answer is one boolean read
+     * rather than a walk of every fleet in the sector.
+     */
+    public static void resolveAnsweredDemands() {
+        MemoryAPI sector = Global.getSector().getMemoryWithoutUpdate();
+        if (!sector.getBoolean(ANSWERED_PENDING)) return;
+
+        sector.unset(ANSWERED_PENDING);
+
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            for (CampaignFleetAPI fleet : location.getFleets()) {
+                MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+
+                if (mem.getBoolean(PAID_FLAG)) {
+                    mem.unset(PAID_FLAG);
+                    settleWith(fleet);
+                } else if (mem.getBoolean(REFUSED_FLAG)) {
+                    mem.unset(REFUSED_FLAG);
+                    refuse(fleet);
+                }
+            }
+        }
+    }
+
+    /**
+     * Marks the bill as had out and lets the crew get on with their day.
+     * <p>
+     * The pursuit has to be taken back by hand: it was set for days, and a crew still flying at the
+     * player after the conversation that was the whole reason for it is a fleet that has forgotten
+     * what it wanted. The done flag runs on the incident's own clock rather than the pursuit's, so a
+     * crew cannot be talked to twice about the same hole.
+     */
+    protected static void stopChasing(CampaignFleetAPI victim) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        mem.set(DEMAND_DONE_KEY, true, MEMORY_DAYS);
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, false, 0f);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
+                REASON, false, 0f);
+
+        mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
     }
 
     /**
