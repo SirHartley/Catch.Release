@@ -74,7 +74,7 @@ public final class FishTooltips {
                         FishLocationSummary.describe(spec));
 
                 if (Global.getSettings().isDevMode() && !spec.hasHabitat()) {
-                    tooltip.addPara("No region data in the table.", Misc.getHighlightColor(), 8f);
+                    tooltip.addPara("No region data in the table.", Misc.getNegativeHighlightColor(), 8f);
                 }
 
                 String action = actionLine == null ? null : actionLine.get();
