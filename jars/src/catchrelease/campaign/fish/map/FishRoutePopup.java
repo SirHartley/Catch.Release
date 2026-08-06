@@ -1,14 +1,10 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -575,12 +571,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                     ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult), size, CARD_TEXT_WIDTH));
         }
 
-        String iconPath = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-        SpriteAPI portrait = SpriteLoader.loadSprite(iconPath);
-        float portraitSize = portrait == null ? 0f : CARD_PORTRAIT;
-
-        float height = CARD_PAD * 2f + portraitSize
-                + (portraitSize > 0f ? CARD_LINE_GAP : 0f);
+        float height = CARD_PAD * 2f + CARD_PORTRAIT + CARD_LINE_GAP;
         for (LazyFont.DrawableString line : body) height += line.getHeight() + CARD_LINE_GAP;
         height -= CARD_LINE_GAP;
 
@@ -598,15 +589,10 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         float textY = bottom + height - CARD_PAD;
 
-        if (portrait != null) {
-            portrait.setSize(CARD_PORTRAIT, CARD_PORTRAIT);
-            portrait.setColor(Color.WHITE);
-            portrait.setNormalBlend();
-            portrait.setAlphaMult(alphaMult);
-            portrait.renderAtCenter(Math.round(left + CARD_PAD + CARD_PORTRAIT * 0.5f),
-                    Math.round(textY - CARD_PORTRAIT * 0.5f));
-            textY -= CARD_PORTRAIT + CARD_LINE_GAP;
-        }
+        //the art once landed, its rimmed silhouette while only surveyed
+        FishIcons.draw(spec, left + CARD_PAD + CARD_PORTRAIT * 0.5f,
+                textY - CARD_PORTRAIT * 0.5f, CARD_PORTRAIT, alphaMult);
+        textY -= CARD_PORTRAIT + CARD_LINE_GAP;
 
         for (LazyFont.DrawableString line : body) {
             line.draw(Math.round(left + CARD_PAD), Math.round(textY));
@@ -716,19 +702,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                         Misc.getDarkPlayerColor(), 0.25f * alphaMult);
             }
 
-            //the art only once one has been landed - a survey knows the name, not the face
-            String iconPath = FishLog.isCaught(row.spec.id)
-                    ? FishCodex.getIcon(row.spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-            if (icon != null) {
-                icon.setSize(ICON, ICON);
-                icon.setColor(Color.WHITE);
-                icon.setNormalBlend();
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(Math.round(x + PAD + ICON * 0.5f),
-                        Math.round(rowBottom + ROW_HEIGHT * 0.5f));
-            }
+            //the art once landed, its rimmed silhouette while only surveyed
+            FishIcons.draw(row.spec, x + PAD + ICON * 0.5f,
+                    rowBottom + ROW_HEIGHT * 0.5f, ICON, alphaMult);
 
             //the shopping-list dot, bottom right of the icon, same corner as everywhere
             if (ShopMarks.isMarked(row.spec)) {
