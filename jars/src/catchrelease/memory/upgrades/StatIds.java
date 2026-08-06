@@ -42,16 +42,6 @@ public class StatIds {
             HARPOON_SPEED = "harpoon_speed",
             HARPOON_AIM_ASSIST = "harpoon_aim_assist";
 
-    //depth bombs
-    public static final String
-            BOMB_CHARGES = "bomb_charges",
-            BOMB_RECHARGE_TIME = "bomb_recharge_time",
-            BOMB_BLAST_RADIUS = "bomb_blast_radius",
-            BOMB_SPEED = "bomb_speed",
-            BOMB_SLOW = "bomb_slow",
-            BOMB_STUN = "bomb_stun",
-            BOMB_RUPTURE_TIME = "bomb_rupture_time";
-
     //the catch itself - these are the ones that need a slot
     public static final String
             FISHING_BAR_SIZE = "fishing_bar_size",
@@ -62,8 +52,7 @@ public class StatIds {
     public static final String
             LAMPS_ABILITY = "catchrelease_searchlights",
             ROD_ABILITY = "catchrelease_rod",
-            HARPOON_ABILITY = "catchrelease_harpoon",
-            BOMB_ABILITY = "catchrelease_depthbomb";
+            HARPOON_ABILITY = "catchrelease_harpoon";
 
     /**
      * Which ability a stat is a number on, or null for one that is not about an ability at all.
@@ -82,7 +71,6 @@ public class StatIds {
         for (String id : LAMPS) if (id.equals(statId)) return LAMPS_ABILITY;
         for (String id : ROD) if (id.equals(statId)) return ROD_ABILITY;
         for (String id : HARPOON) if (id.equals(statId)) return HARPOON_ABILITY;
-        for (String id : BOMB) if (id.equals(statId)) return BOMB_ABILITY;
 
         //the minigame stats belong to no ability - nothing is running to be interrupted
         return null;
@@ -101,10 +89,5 @@ public class StatIds {
 
     protected static final String[] HARPOON = {
             HARPOON_CHARGES, HARPOON_RECHARGE_TIME, HARPOON_SPEED, HARPOON_AIM_ASSIST,
-    };
-
-    protected static final String[] BOMB = {
-            BOMB_CHARGES, BOMB_RECHARGE_TIME, BOMB_BLAST_RADIUS, BOMB_SPEED, BOMB_SLOW,
-            BOMB_STUN, BOMB_RUPTURE_TIME,
     };
 }

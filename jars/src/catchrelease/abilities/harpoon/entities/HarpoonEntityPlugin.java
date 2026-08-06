@@ -735,9 +735,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * upgrade; the exposure itself is the unlock, renewed every time a beam passes over.
      * <p>
      * The strike unearths rather than hooking the buried entity, so nothing downstream of here has
-     * to know a mote arrived any differently to the ones that surfaced on their own. That also
-     * means the bomb is not made redundant: it opens a whole blast radius at once and this takes
-     * exactly one, at the end of a line, one shot at a time.
+     * to know a mote arrived any differently to the ones that surfaced on their own.
      */
     protected SectorEntityToken strikeBuried() {
         for (SectorEntityToken buried : entity.getContainingLocation()

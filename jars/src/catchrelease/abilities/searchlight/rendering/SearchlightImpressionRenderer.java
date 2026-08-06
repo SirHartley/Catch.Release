@@ -392,8 +392,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         }
 
         //the mote itself, where the reveal has traded the dent away - drawn exactly the way a
-        //pond mote draws itself, stack for stack, so what the window shows is what a bomb or a
-        //harpoon will actually let out. See FishEntityPlugin.externalRender
+        //pond mote draws itself, stack for stack, so what the window shows is what a harpoon
+        //will actually let out. See FishEntityPlugin.externalRender
         if (revealMult > 0f) {
             moteSprite.setColor(revealColor);
             moteSprite.setAdditiveBlend();
