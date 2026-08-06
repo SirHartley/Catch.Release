@@ -5,14 +5,11 @@ import catchrelease.helper.loading.FishSpecLoader;
 import org.lazywizard.lazylib.MathUtils;
 
 /**
- * One landed specimen, as opposed to the species it belongs to.
+ * One landed specimen, as opposed to the species it belongs to: how long, how heavy, how close to
+ * true to form. Value and grade derive from these three numbers plus the species row.
  * <p>
- * The species says what a thing of this kind is like; this says what <i>this one</i> was: how long,
- * how heavy, and how well it is holding to reality. Everything a caught fish is worth, graded or
- * described as is worked out from these three numbers and the row they came from.
- * <p>
- * Encoded to a string and back, because that is how a special item carries anything per-instance -
- * see {@link #encode()}. Keep the format stable, or fish already in a save stop being readable.
+ * Encoded to a string for a special item to carry (see {@link #encode()}) - keep the format
+ * backward compatible, or fish already in a save become unreadable.
  */
 public class FishCatch {
 
@@ -29,23 +26,14 @@ public class FishCatch {
     public float aberration;
 
     /**
-     * Which part of the sector this one came out of, or null for a specimen from before anyone was
-     * writing it down.
-     * <p>
-     * The species already says where its kind <i>can</i> be found, which is a different question and
-     * cannot answer this one: somebody asking for a crab from the Abyss is asking about the crab in
-     * front of them, not about crabs. Nothing could answer that before, because a landed fish
-     * carried its size and its coherence and no idea where it had been.
+     * Which part of the sector this specimen came from, or null for older saves. Distinct from the
+     * species' habitat range - this is where this specimen was caught, not where its kind lives.
      */
     public SectorRegion origin;
 
     /**
-     * How it was hooked, and what made it reachable.
-     * <p>
-     * Both are facts about the catch rather than about the fish, and both are things a buyer can
-     * reasonably care about - somebody who wants one taken on a harpoon out in the dark is asking a
-     * question the species could never answer. Null on a specimen landed before either was written
-     * down, which is not the same as a specimen that was taken some other way.
+     * How it was hooked and what made it reachable - facts about the catch, not the species. Null
+     * on specimens landed before these were tracked.
      */
     public FishLogEntry.Method method;
     public CatchImplement implement;
@@ -66,15 +54,9 @@ public class FishCatch {
     }
 
     /**
-     * Rolls a specimen of a species.
-     * <p>
-     * Both numbers are pulled towards the middle of the range rather than drawn flat across it - the
-     * average of two rolls, which is enough to make the ends of the range uncommon without making
-     * them rare. A specimen at the top of its species is then worth remarking on, which is the point
-     * of having a range at all.
-     * <p>
-     * Weight follows length rather than being rolled against it: a long specimen that came out light
-     * would read as a mistake. It keeps a little of its own, so two of the same length still differ.
+     * Rolls a specimen. Length and weight are each biased toward the middle of the species range
+     * (average of two uniform rolls) rather than flat; weight tracks length with some independent
+     * variance so two same-length specimens still differ.
      */
     public static FishCatch roll(FishSpec spec, float aberration) {
         return roll(spec, aberration, 0f, null);
@@ -85,16 +67,15 @@ public class FishCatch {
     }
 
     /**
-     * @param qualityBias how far up its own range the specimen is nudged, 0 to 1. Tackle that grades
-     *                    what it takes moves this rather than rerolling, so a good rig raises the
-     *                    floor without guaranteeing the ceiling
+     * @param qualityBias 0 to 1; nudges the roll toward the top of its range without rerolling, so
+     *                    better tackle raises the floor without guaranteeing the ceiling
      */
     public static FishCatch roll(FishSpec spec, float aberration, float qualityBias, SectorRegion origin) {
         if (spec == null) return null;
 
         float lengthFraction = centred();
 
-        //towards the top of the range rather than replacing the roll - the range still decides
+        // nudges toward the top, doesn't replace the roll
         if (qualityBias > 0f) {
             lengthFraction += (1f - lengthFraction) * MathUtils.clamp(qualityBias, 0f, 1f);
         }
@@ -125,8 +106,8 @@ public class FishCatch {
     }
 
     /**
-     * Where this specimen sits in its species' range, 0 to 1 - the average of its length and its
-     * weight. What grade and value are both worked out from.
+     * Where this specimen sits in its species' range, 0 to 1 (average of length and weight
+     * fraction); what grade and value are both derived from.
      */
     public float getSizeFraction() {
         FishSpec spec = getSpec();
@@ -141,12 +122,8 @@ public class FishCatch {
     }
 
     /**
-     * What one is worth: the species' base value, moved by where the specimen sits in its range and
-     * then by its grade.
-     * <p>
-     * The grade multiplier is applied on top of the size scaling rather than instead of it, so the
-     * step up to a better grade is felt rather than merely recorded - which is what makes a good
-     * specimen worth keeping instead of selling with the rest.
+     * Species base value scaled by size fraction, then by grade. Grade multiplies on top of size
+     * scaling (not instead of it), so a better grade is felt rather than just recorded.
      */
     public float getValue() {
         FishSpec spec = getSpec();
@@ -166,15 +143,9 @@ public class FishCatch {
     }
 
     /**
-     * The specimen as a string, for a special item to carry. Species first so a bundle can sort on
-     * it without decoding the rest.
-     */
-    /**
-     * Where it came from rides on the end, after the three numbers that were always there.
-     * <p>
-     * Appended rather than woven in, so a fish already sitting in somebody's hold still reads: the
-     * decoder wants at least four fields and takes a fifth if it is offered, which is exactly what
-     * an old specimen and a new one respectively hand it.
+     * Encodes the specimen as a string for a special item to carry. Species first so a bundle can
+     * sort without decoding the rest; origin/method/implement are an optional tail appended after,
+     * so old saves (4 fields) and new ones (up to 7) both decode.
      */
     public String encode() {
         StringBuilder encoded = new StringBuilder(speciesId)
@@ -182,9 +153,7 @@ public class FishCatch {
                 .append(SEPARATOR).append(round(weight))
                 .append(SEPARATOR).append(round(aberration));
 
-        //the optional tail, written only as far as it has anything to say. A blank field holds the
-        //place of one that does not - the fields are read by position, so a specimen with no origin
-        //but a known method cannot simply leave the origin out
+        // blank tail field marks "absent"; fields are positional, so origin can't be skipped if method is present
         String[] tail = {
                 origin == null ? "" : origin.name(),
                 method == null ? "" : method.name(),
@@ -209,8 +178,7 @@ public class FishCatch {
         if (parts.length < 4) return null;
 
         try {
-            //a fish caught before anyone recorded any of this simply has no answer, rather than a
-            //wrong one. Every field past the fourth is read if it is there and ignored if it is not
+            // missing tail fields simply come back null, not wrong values
             FishCatch entry = new FishCatch(parts[0], Float.parseFloat(parts[1]),
                     Float.parseFloat(parts[2]), Float.parseFloat(parts[3]),
                     SectorRegion.parse(field(parts, 4)));

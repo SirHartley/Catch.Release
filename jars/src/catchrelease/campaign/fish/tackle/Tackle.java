@@ -1,16 +1,11 @@
 package catchrelease.campaign.fish.tackle;
 
 /**
- * A module fitted to a rig, changing how the catch plays.
+ * A module fitted to a rig, changing how the catch plays. One slot each, so fitting one means not
+ * fitting another. Fields default to neutral, so a tackle only sets the one or two it changes.
  * <p>
- * One slot each, so fitting one means not fitting another - that is the whole design. Every field
- * here is neutral by default, so a tackle only has to name the one or two things it actually
- * changes and the rest carry on as they were.
- * <p>
- * Drones take the full set; the harpoon takes three. That is deliberate rather than unfinished: a
- * drone swarm is a rig you outfit, and a harpoon is one thing on the end of a line. Treasure hooks
- * are drone-only for the same reason - a drone can carry something back, and a harpoon has its hands
- * full holding what it speared.
+ * Drones take the full set, the harpoon takes three; treasure hooks are drone-only since only a
+ * drone can carry treasure back.
  */
 public enum Tackle {
 
@@ -121,13 +116,7 @@ public enum Tackle {
         SEARCHLIGHT,
         BOTH;
 
-        /**
-         * Whether this is a rig something bolts onto, rather than a way of saying more than one.
-         * <p>
-         * BOTH is the odd one out - it is a fit a piece of tackle can declare, never a slot the
-         * player has. Anything walking the rigs wants this, or it offers a shelf of tackle for a
-         * piece of equipment nobody owns.
-         */
+        /** False only for BOTH, which is a fit tackle can declare but never a slot the player owns. */
         public boolean isRig() {
             return this != BOTH;
         }
@@ -150,16 +139,9 @@ public enum Tackle {
     public boolean sonar = false;
 
     /**
-     * Whether the head reaches below the fabric, rather than only across the water.
-     * <p>
-     * Two things sit under there and neither can otherwise be taken with a line. A mote from epic
-     * upward dives on a beat and is not there to be hit while it is under - and the tool that used
-     * to answer that was the depth bomb, which is no longer in the game, so without this nothing
-     * answers it at all. And a buried mote inside a lamp's passive reach shows as a dent without
-     * ever being exposed by a beam: seen, named by its ring, and not shootable.
-     * <p>
-     * One flag for both because they are one capability. What the surface hides is a single kind of
-     * problem, and a head that can read the fabric does not care which side of it something is on.
+     * Whether the head reaches below the fabric, not just across the water. Covers two cases: a
+     * mote diving deep (the depth bomb used to handle this and no longer exists), and a mote buried
+     * within a lamp's passive reach, which shows as a dent but is never exposed by a beam.
      */
     public boolean deepStrike = false;
 
@@ -176,13 +158,9 @@ public enum Tackle {
     }
 
     /**
-     * BOTH means both of the rigs a catch is played on, which is the drones and the harpoon. Nothing
-     * is landed on a breach lamp, so a barbed head does not become a lamp fitting just
-     * because it said both.
-     * <p>
-     * Said as what BOTH covers rather than as which rigs are exempt from it. The old spelling named
-     * the searchlight as the exception, which meant every rig added afterwards silently inherited
-     * every piece of tackle that had ever said both.
+     * BOTH covers the drones and harpoon rigs a catch is actually played on, not the searchlight -
+     * phrased as what BOTH includes rather than what's exempt, since an exemption-based check would
+     * silently apply to every new rig added later.
      */
     public boolean fits(Fit rig) {
         if (this == NONE) return true;

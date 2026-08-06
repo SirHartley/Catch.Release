@@ -3,15 +3,13 @@ package catchrelease.campaign.fish.map;
 import catchrelease.reflection.ReflectionUtils;
 
 /**
- * The short walk from the running game to the screen the player is looking at. The class and
- * member names on this path - {@code AppDriver}, {@code CampaignState}, {@code getCore} - are
- * stable across game versions, but everything is still reached by name through reflection: the
- * types in those declarations are obfuscated, and a compiled mod that names them in a call
- * descriptor is a mod that dies on the next release. Names in strings survive; names in bytecode
- * do not.
+ * The short walk from the running game to the screen the player is looking at. Names on this path
+ * ({@code AppDriver}, {@code CampaignState}, {@code getCore}) are stable across versions, but
+ * reached via reflection since the declared types are obfuscated - a compiled call descriptor
+ * naming them breaks on the next release.
  * <p>
- * Everything here answers null rather than throwing: a failed crawl means "nothing to attach to
- * this frame", which the caller treats the same as the screen not being open.
+ * Everything here returns null rather than throwing; the caller treats a failed crawl the same as
+ * the screen not being open.
  */
 public final class CoreUiCrawler {
 
@@ -22,9 +20,8 @@ public final class CoreUiCrawler {
     }
 
     /**
-     * The core UI currently on screen - docked inside an encounter dialog if one is up, since the
-     * core lives in a different parent while docked, else the campaign's own. Null when there is
-     * no campaign, or no core UI to speak of.
+     * Core UI currently on screen - docked inside an encounter dialog if one is up (the core lives
+     * in a different parent while docked), else the campaign's own. Null if neither exists.
      */
     public static Object getCoreUi() {
         try {
@@ -45,10 +42,8 @@ public final class CoreUiCrawler {
     }
 
     /**
-     * The intel screen, if that is the tab the core UI is currently showing. Identified by
-     * capability rather than by class: {@code getEventsPanel} exists on exactly one class in the
-     * game, and it is this screen - the Command screen carries look-alike members, so anything
-     * less specific would wander over there.
+     * Intel screen, if that's the current tab. Identified by capability ({@code getEventsPanel},
+     * unique to this screen) rather than by class, since the Command screen has look-alike members.
      */
     public static Object getIntelScreen(Object core) {
         try {

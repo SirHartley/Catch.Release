@@ -17,9 +17,8 @@ public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
 
     /**
-     * Runs once after the codex has been built, which is the only moment the fish category can be
-     * added - the codex is generated at load and never rebuilt, so anything added later is invisible
-     * and anything added earlier has no ROOT to hang off.
+     * The only moment the fish codex category can be added - the codex is generated at load and
+     * never rebuilt, so earlier has no ROOT to hang off and later is invisible.
      */
     @Override
     public void onCodexDataGenerated() {
@@ -32,23 +31,23 @@ public class ModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         super.onGameLoad(newGame);
 
-        //Static fishing spots
+        // static fishing spots
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();
         ChargeManager.register();
 
-        //what happens when the fishing gear is pointed at somebody
+        // pointing fishing gear at a fleet
         CatchReleaseCampaignPlugin.register();
         HarpoonPatrolResponse.register();
 
-        //people out here who want fish and have something to trade for it
+        // jobs offering fish for trade
         FleetQuestSpawner.register();
 
-        //data
+        // data
         UpgradeManager.getInstance().updateBaseValues();
         SkillshotFramework.register();
 
-        //UI - transient, so a save never carries a screen-watcher in it
+        // transient - a save should never carry a screen-watcher
         Global.getSector().addTransientScript(new FishMapFilterScript());
 
         //Testing

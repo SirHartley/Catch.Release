@@ -21,36 +21,18 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Somebody in a bar who wants fish, and what they are offering for it.
+ * A bar NPC's fishing request: what they want ({@link FishRequirement}s) and what they pay
+ * ({@link FishReward}s), on top of vanilla's {@link HubMissionWithBarEvent}.
  * <p>
- * The shape every fishing job shares, so a job is written as what is wanted and what is paid rather
- * than as a state machine. Vanilla's hub mission underneath already knows how to be a multi-stage
- * thing with intel, a time limit, an abandon button and a reputation consequence, and there is no
- * version of that worth writing again - what it does not know is anything about fish.
- * <p>
- * So this adds the two halves that are ours. A job holds a list of {@link FishRequirement}s, which
- * is the same class the shop prices its gear in, so "three crabs, graded fine or better, taken in
- * the Abyss" is expressed once and understood everywhere. And it holds a list of
- * {@link FishReward}s, which hand themselves over without the job knowing what they are.
- * <p>
- * Nothing here says anything. Every word a job speaks lives in data/campaign/rules.csv, which is
- * where dialogue belongs: it can be read, edited and translated without a compiler, and a row is
- * the unit the engine already scores and picks between, so a job that wants to say something
- * different when a wager comes off writes a second row rather than a second branch.
- * <p>
- * What Java owns is the part a sheet cannot do - counting the hold, spending it, rolling the
- * payment, settling a bet. The two meet at a handful of memory tokens: this side writes what
- * happened, and the rows read it and do the talking.
+ * Dialogue text lives in data/campaign/rules.csv, not here. This class only tracks state
+ * (hold counting, spending, payment, wagers) and exposes it to the rows via memory tokens.
  */
 public abstract class FishJob extends HubMissionWithBarEvent {
 
     /**
-     * Where the job hangs itself on its giver, so the sheet can reach it without naming it.
-     * <p>
-     * One key for every fishing job rather than one per job, which is what lets ten jobs share six
-     * rules rows between them: a row saying {@code Call $catchrelease_jobRef turnIn} does not care
-     * whose job it is. The cost is that a person may only be running one fishing job at a time,
-     * which is a sentence nobody would argue with anyway.
+     * Memory key the job hangs itself under on its giver. Shared by every job (not per-job), so
+     * rules rows can say {@code Call $catchrelease_jobRef turnIn} without naming a specific job -
+     * at the cost that a person can only run one fishing job at a time.
      */
     public static final String REF_KEY = "$catchrelease_jobRef";
 
@@ -60,12 +42,7 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     /** Whether the hold covers the whole ask, refreshed every time the dialogue asks. */
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
 
-    /**
-     * What the rows say the job wants and pays, in words.
-     * <p>
-     * Written out rather than described in the sheet, because the ask is assembled from a
-     * requirement that can say six different things at once and no row wants to spell that out.
-     */
+    /** Human-readable ask/reward text for the rows, since a {@link FishRequirement} can combine several conditions. */
     public static final String ASK_KEY = "$catchreleaseAsk";
     public static final String ASK_CAP_KEY = "$catchreleaseAskCap";
     public static final String REWARD_KEY = "$catchreleaseReward";
@@ -77,7 +54,7 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     public static final String MORE_KEY = "$catchreleaseMore";
 
     public enum Stage {
-        /** Accepted, and the fish are not caught yet. Where a job spends nearly all of its life. */
+        /** Accepted, fish not yet caught. */
         WANTED,
 
         /** Handed over and paid for. */
@@ -89,41 +66,26 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         ABANDONED
     }
 
-    /**
-     * What is being asked for, in order.
-     * <p>
-     * A list rather than one, because several of these jobs want more than one thing at once - three
-     * kinds for a dish, a pair for a battle - and a job that could only ask for one would have to
-     * fake the rest with stages.
-     */
+    /** What's being asked for, in order; some jobs ask for more than one requirement at once. */
     protected List<FishRequirement> asks = new ArrayList<>();
 
-    /** What is on offer for it. Granted together, when the last ask is satisfied. */
+    /** What's on offer for it. Granted together, when the last ask is satisfied. */
     protected List<FishReward> rewards = new ArrayList<>();
 
-    /**
-     * Which faction's people ask for this, or null for anybody's.
-     * <p>
-     * Checked before the job is built rather than after, which is the hook vanilla gives for exactly
-     * this - a job that cannot be offered here should never have been made.
-     */
+    /** Faction required to see this job, or null for any. Checked before the job is built. */
     protected String factionId = null;
 
-    /** Days before the giver gives up, or zero for a job with no clock on it. */
+    /** Days before the giver gives up; 0 = no time limit. */
     protected float days = 0f;
 
     /**
-     * The mission-elapsed reading at which the clock runs out, or zero for a job without one.
-     * <p>
-     * Held as an absolute rather than as a countdown because vanilla's time limit is one too: it
-     * compares its figure against {@code elapsed}, which counts from when the job was taken and
-     * never restarts. Anything that wants to say how long is left has to subtract from the same
-     * number the failure is measured against, or the entry counts down to a moment that is not when
-     * it ends.
+     * Absolute elapsed-time deadline (not a countdown), or 0 if none. Vanilla's time limit
+     * compares against {@code elapsed}, which counts from acceptance and never resets, so this
+     * has to be measured on the same scale.
      */
     protected float deadline = 0f;
 
-    /** How many hand-overs this one has taken, for the jobs that ask twice. */
+    /** How many hand-overs this job has taken, for jobs that ask more than once. */
     protected int round = 0;
 
     protected void addAsk(FishRequirement ask) {
@@ -151,15 +113,10 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * Finds or invents the person asking, and hangs the job off them.
-     * <p>
-     * In the comm directory rather than out of it, which is not a cosmetic choice: an important
-     * person who is not listed cannot be talked to again, and a delivery job whose giver cannot be
-     * found once the fish are caught is a job that can only ever be abandoned.
+     * Finds or creates the person asking and hangs the job on them, via the comm directory
+     * (needed so they can be found and talked to again later).
      *
-     * @return false if this person is already running a fishing job, in which case the job is not
-     *         built - two people in one bar wanting fish is a coincidence, one person wanting fish
-     *         twice is a bug the player would notice
+     * @return false if this person already has a fishing job running, so this one isn't built
      */
     protected boolean setUpGiver(MarketAPI market) {
         if (market == null) return false;
@@ -173,8 +130,8 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * Sets up the spine every job shares. Call from a subclass's own create, after the asks and
-     * rewards are decided, and add any further stages afterwards.
+     * Sets up the stage spine shared by all jobs. Call from a subclass's create(), after asks and
+     * rewards are decided; add further stages afterwards.
      */
     protected void setUpSpine() {
         setStartingStage(Stage.WANTED);
@@ -184,20 +141,14 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
         setClock();
 
-        //while the fish are owed and no longer once they are not, which is the whole lifetime of the
-        //hand-over option - the flag going away is what takes the option away
+        // flag is set only while fish are owed - that's what controls the hand-over option
         markDeliverable();
     }
 
     /**
-     * Gives the job its full allowance of days, counted from now.
-     * <p>
-     * Called again whenever a job asks for something else instead of finishing. Vanilla's limit is
-     * measured against the mission's total elapsed time rather than the current stage's, and a job
-     * that adds a round does not change stage - so without this a two-round job gets one round's
-     * worth of time between them, and quietly fails somewhere in the second while the player is
-     * still out looking. What that looks like from the bar is a giver who has stopped offering to
-     * take the catch, with nothing on screen having said why.
+     * Grants a fresh full time allowance from now. Call again whenever a job takes another round
+     * instead of finishing: vanilla's time limit is measured against total elapsed time rather than
+     * the current stage, so without this a later round silently inherits a shorter deadline.
      */
     protected void setClock() {
         if (days <= 0f) return;
@@ -209,20 +160,15 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
     /** How long is left, against the same number the failure is measured against. */
     protected float getDaysLeft() {
-        //a job accepted before the deadline was recorded has vanilla's limit running against the
-        //plain allowance, so read that rather than reporting a job with no time left on it
+        // deadline may be unset for a job accepted before it was recorded; fall back to the plain allowance
         float ends = deadline > 0f ? deadline : days;
 
         return Math.max(0f, ends - elapsed);
     }
 
     /**
-     * Puts the flag that raises the hand-over options wherever the player will be standing when
-     * they bring the fish.
-     * <p>
-     * A person, for a job given across a counter. Not every job has one: a giver that is a hull in
-     * space has no person to flag and no market to flag them at, and asking vanilla to mark a null
-     * important throws rather than doing nothing. Those override this and flag what they do have.
+     * Flags the hand-over option at wherever the player will be when delivering. Only jobs with a
+     * person giver have one to flag; other givers override this (vanilla throws on a null important).
      */
     protected void markDeliverable() {
         PersonAPI person = getPerson();
@@ -232,33 +178,24 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * Which flag puts this job's hand-over options up.
-     * <p>
-     * The shared one for the jobs whose hand-over is "give them the fish". A job whose hand-over is
-     * a decision - which child gets the better specimen, whether to bet on a fight - answers with a
-     * flag of its own and brings its own rows, so the shared option never appears beside them.
+     * Flag that raises this job's hand-over option. Jobs whose hand-over is a decision rather than
+     * a plain give-them-the-fish use their own flag and rows instead.
      */
     protected String getDeliverFlag() {
         return DELIVER_FLAG;
     }
 
     /**
-     * Whose people ask for this, or null for anybody's.
-     * <p>
-     * A method rather than the field, because the question is put before {@link #create} has run -
-     * a job that assigned its own faction on the way to being built would be answering with whatever
-     * the last one happened to leave behind. Overriding this is the only way a faction gate works.
+     * Faction required, or null for any. A method rather than the field because it's asked before
+     * {@link #create} has run.
      */
     protected String getRequiredFactionId() {
         return factionId;
     }
 
     /**
-     * Only where the right people drink.
-     * <p>
-     * Asked before the job exists, so a Hegemony-only job on a pirate station costs nothing but the
-     * question. Subclasses that want more than a faction - a market size, a condition, a hostility -
-     * override this and call up to it.
+     * Faction gate, checked before the job exists. Subclasses adding more conditions (market size,
+     * condition, hostility) override this and call up to it.
      */
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
@@ -279,22 +216,16 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * The best thing aboard that would go towards the first ask, or null.
-     * <p>
-     * For the jobs that pay more for a better specimen. Read before anything is spent, since after
-     * the hand-over there is nothing left to measure.
+     * Best specimen aboard toward the first ask, or null. Read before anything is spent - after
+     * hand-over there's nothing left to measure.
      */
     public FishCatch getBestOffered() {
         return asks.isEmpty() ? null : FishCurrency.findBest(asks.get(0));
     }
 
     /**
-     * Takes the fish and pays for them, all of it or none of it.
-     * <p>
-     * Counted in full before anything is spent, because the alternative is a job that eats the first
-     * two asks, finds the third short, and leaves the player worse off than before they walked in.
-     * The spending itself is the shop's own, so a job turns fish in the same way a purchase spends
-     * them, bundles broken and all.
+     * Takes and pays for the asks atomically, so a short third ask can't leave earlier ones already
+     * spent. Spending goes through the shop, same as a purchase.
      *
      * @return whether the hand-over happened
      */
@@ -344,16 +275,9 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * The mechanics the sheet asks for by name. None of them says anything.
-     * <p>
-     * What a job says lives in rules.csv, which is where dialogue belongs - it can be read, edited
-     * and translated without a compiler, and a row is the unit the engine already scores and picks
-     * between. What Java owns is the part a sheet cannot do: counting the hold, spending it, rolling
-     * the payment, settling a wager. The two meet at a handful of memory tokens the rows read.
-     * <p>
-     * Note that returning false here is not a way to say no: vanilla throws on an unhandled action
-     * rather than treating it as a failed condition, so every verb answers true and reports what
-     * happened in a flag instead.
+     * Handles the {@code turnIn} action called from rules.csv. Every handled verb must return true -
+     * vanilla throws on an unhandled action rather than treating it as failed - so results are
+     * reported through memory flags instead.
      */
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
@@ -369,17 +293,13 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * The exchange itself, kept in one place because every job that adds a decision to it still ends
-     * here - the decision changes what is said and what is paid, not what is taken.
-     * <p>
-     * Every branch the prose needs to know about comes back out as a flag, so a row can ask whether
-     * the payment happened, whether an extra was earned, and whether the job is asking again.
+     * Runs the hand-over exchange. Kept in one place since subclass decisions change what's said
+     * and paid, not what's taken; results come back out as memory flags for the rows.
      */
     protected void handOver(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
 
-        //asked before anything is spent or paid, since a job that settles a wager afterwards has
-        //already handed over the stake it was wagering
+        // checked before any spending or payment
         if (!isSatisfied()) {
             token(mem, PAID_KEY, false);
             return;
@@ -397,31 +317,24 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         token(mem, PAID_KEY, true);
         token(mem, BONUS_KEY, payBonus(offered));
 
-        //a job that wants another round says so by setting itself a new ask, and stays where it is.
-        //Nothing else has to change: the flag is still set, the option is still there, and the
-        //intel entry reads as the same person wanting more, which is what a supply chain looks like
+        // another round just sets fresh asks/rewards on the job; stage and flag stay as-is
         boolean more = onDelivered();
 
-        //a fresh ask is a fresh errand, so it gets the full allowance again rather than whatever
-        //was left of the last one
+        // fresh ask gets the full time allowance again
         if (more) setClock();
 
         token(mem, MORE_KEY, more);
 
-        //re-read after a new round has been set, so the row describing what is wanted next describes
-        //what is wanted next rather than what was just handed over
+        // re-read after the round update so rows describe the new ask, not the one just handed over
         updateTokens(mem);
 
         if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
 
     /**
-     * A last chance to change what is about to be paid.
-     * <p>
-     * The hand-over is settled and cannot now fail, and nothing has been granted yet - which is the
-     * only moment a job can decide that the payment is double, or nothing at all.
+     * Last chance to alter the payment before it's granted - hand-over is already guaranteed to succeed.
      *
-     * @param offered the best specimen going towards the first ask, or null
+     * @param offered best specimen toward the first ask, or null
      */
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
     }
@@ -445,11 +358,8 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * The tokens the rows read, on top of the person and stage ones vanilla sets.
-     * <p>
-     * All of them expire the moment the game unpauses, which is what a conversation is. Capitalised
-     * twins are set alongside the plain ones because the engine does not capitalise a token for you
-     * and a sentence has to be able to start with one.
+     * Sets the memory tokens rows read, alongside vanilla's person/stage ones. All expire when the
+     * game unpauses. Capitalized twins exist because the engine won't capitalize a token for you.
      */
     protected void updateTokens(MemoryAPI mem) {
         if (mem == null) return;
@@ -483,12 +393,9 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     }
 
     /**
-     * A source of chance that still works after the job has been accepted.
-     * <p>
-     * The mission's own seeded random is the right one while the job is being built, since that is
-     * what makes a bar say the same thing twice. It is the wrong one for a coin flipped at the
-     * hand-over, which should be flipped then and not decided when the job was written - and it is
-     * not guaranteed to have survived the trip through a save, so this never returns null.
+     * Random usable after the job is accepted. The mission's seeded {@code genRandom} is right for
+     * building (makes a bar say the same thing twice) but wrong for a hand-over flip, and isn't
+     * guaranteed to survive a save - falls back to a fresh {@link Random} instead of returning null.
      */
     protected Random random() {
         return genRandom == null ? new Random() : genRandom;
@@ -507,22 +414,13 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
     //---- intel ----------------------------------------------------------------------------------
 
-    /**
-     * A job is a job rather than a mission, which is the word vanilla puts in the abandon prompt and
-     * the end-stage lines it writes for us.
-     */
+    /** "job" rather than vanilla's "mission", used in the abandon prompt and end-stage text. */
     @Override
     protected String getMissionTypeNoun() {
         return "job";
     }
 
-    /**
-     * The entry while the fish are owed.
-     * <p>
-     * Only this stage is written here: the base class already says the right thing about a job that
-     * was finished, failed or abandoned, and repeating it would be two entries disagreeing about a
-     * job that is over.
-     */
+    /** Entry text while fish are still owed; other stages are already handled by the base class. */
     @Override
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
         float opad = 10f;
@@ -541,15 +439,12 @@ public abstract class FishJob extends HubMissionWithBarEvent {
 
         bullet(info);
         for (FishRequirement ask : asks) {
-            //highlighted after the fact rather than through a format string, since the ask writes
-            //its own sentence and there is no %s in it to hang the count on
+            // highlighted after the fact - ask.describe() has no %s placeholder for the count
             LabelAPI line = info.addPara(Misc.ucFirst(ask.describe()), text, 0f);
             line.setHighlightColor(highlight);
             line.setHighlight(String.valueOf(ask.count));
         }
 
-        //the clock belongs with the ask rather than with the payment - it is a fact about how long
-        //there is to catch them, not about what is being handed over
         if (days > 0f) addDays(info, "remaining", getDaysLeft(), text);
         unindent(info);
 
@@ -573,20 +468,15 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         LabelAPI line = info.addPara(Misc.ucFirst(describeAsks()), text, pad);
         line.setHighlightColor(highlight);
 
-        //an empty highlight would ask the label to find nothing, which is not the same as finding
-        //nothing to highlight
+        // avoid highlighting on an empty asks list
         if (!asks.isEmpty()) line.setHighlight(String.valueOf(asks.get(0).count));
 
         if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
     }
 
     /**
-     * The one line under the entry's title, which is the only part most players read.
-     * <p>
-     * Deliberately not conditional on whether the hold already covers the ask. Answering that means
-     * decoding every specimen in every stack, and this is asked while a list is being drawn rather
-     * than while somebody is waiting for an answer - so it says both halves of the errand and stays
-     * cheap.
+     * One-line summary shown in the intel list. Always states both the ask and reward, regardless
+     * of whether the hold already covers the ask - stays cheap since this may run while a list draws.
      */
     @Override
     public String getNextStepText() {

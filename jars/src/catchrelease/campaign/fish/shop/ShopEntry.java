@@ -11,14 +11,10 @@ import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.util.Misc;
 
 /**
- * One thing the shop sells, whichever kind of thing it is.
+ * One thing the shop sells - an upgrade (a ladder) or a tackle (a slot) - wrapped so the list, rows,
+ * and detail pane are written once instead of once per kind.
  * <p>
- * An upgrade is a ladder and a tackle is a slot, but a shelf does not care: everything on it has a
- * name, a state, a price, and something that happens when it is paid for. Wrapping both here means
- * the list, the rows, and the detail pane are written once rather than once per kind.
- * <p>
- * Holds no state of its own beyond what it wraps - level, fit, and price are read fresh on every
- * ask, so a row on screen is always telling the truth without anyone rebuilding it.
+ * Holds no state of its own: level, fit, and price are read fresh from what it wraps on every call.
  */
 public class ShopEntry {
 
@@ -53,19 +49,14 @@ public class ShopEntry {
     public String getName() {
         if (kind == Kind.TACKLE) return tackle.name;
 
-        //the ids still say searchlight, because ids live in saves and renaming those is a
-        //migration; the rig was renamed to breach lamps, and the display follows without them
+        // ids stay "searchlight" (renaming ids needs a save migration); display follows the rig's new name "lamp"
         String id = stat.id.startsWith("searchlight")
                 ? stat.id.replaceFirst("^searchlight", "lamp") : stat.id;
 
         return Misc.ucFirst(id.replace('_', ' '));
     }
 
-    /**
-     * The name as the list says it, with the gear prefix cut off - the shelf already says which
-     * gear this is, and "Searchlight area" under a searchlight tab is the word searchlight three
-     * times. The detail pane keeps the full name, since it stands alone over there.
-     */
+    /** List name with the gear prefix cut, since the shelf tab already says which gear it is. Detail pane keeps the full name. */
     public String getListName() {
         if (kind == Kind.TACKLE) return tackle.name;
 
@@ -110,13 +101,7 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
     }
 
-    /**
-     * The next purchase's price. Null when it is free or there is nothing left to buy.
-     * <p>
-     * A module already owned is free, and that is the whole of the difference between buying one and
-     * putting one back on. The shop used to price the slot rather than the module, so a player who
-     * swapped to something else and changed their mind paid for the first one twice.
-     */
+    /** Next purchase's price, or null if free / nothing left to buy. An owned module is free to re-fit. */
     public ShopPricing.Price getPrice() {
         if (isOwned()) return null;
 
@@ -172,9 +157,8 @@ public class ShopEntry {
     }
 
     /**
-     * Dev mode's buy: the grant without the till. Skips the price and the affordability check
-     * entirely, but not {@link #isDone()} - a maxed ladder or a fitted tackle has nothing left to
-     * hand over, dev mode or not.
+     * Dev mode's buy: grant without paying. Skips price/affordability but not {@link #isDone()} -
+     * a maxed or fitted entry has nothing to hand over regardless.
      */
     public boolean devBuy() {
         if (isDone()) return false;
@@ -185,12 +169,8 @@ public class ShopEntry {
     }
 
     /**
-     * Hands the thing over, and stops whatever it changes.
-     * <p>
-     * An ability reads its numbers when it starts and keeps them - a running rig rebuilt from the
-     * sheet mid-sweep would be lamps changing size in the middle of a pass. So the ability is turned
-     * off rather than reconfigured, which is both cheaper and more honest: the player sees it stop,
-     * and what comes back on is built from what they just bought.
+     * Hands the thing over and stops whatever it changes. Abilities read their numbers once at
+     * activation, so a running rig has to be deactivated rather than reconfigured mid-flight.
      */
     protected void grant() {
         if (isUpgrade()) {
@@ -200,13 +180,11 @@ public class ShopEntry {
             return;
         }
 
-        //owned before fitted, since owning it is what was paid for - the slot is only where it is
-        //being kept, and it can be moved out and back again for nothing from here on
+        // own before fit - ownership is what was paid for; the slot can be swapped freely afterward
         TackleManager.own(tackle);
         TackleManager.fit(rig, tackle);
 
-        //a module is read at the same moment for the same reason, so a rig wearing a new one has to
-        //come back up as well
+        // same reason - deactivate so the rig picks up the new module
         stopAbility(getRigAbilityId());
     }
 
@@ -234,8 +212,8 @@ public class ShopEntry {
     }
 
     /**
-     * The stat's value as it would read at a given level, for the "now against next" line - the
-     * same arithmetic {@link UpgradeStat#getCurrentValue()} runs, at a level it is not at.
+     * Stat's value at a hypothetical level, for a "now vs next" display - same arithmetic as
+     * {@link UpgradeStat#getCurrentValue()}, at a level it isn't at.
      */
     public String getValueAt(int level) {
         if (!isUpgrade()) return "";
@@ -249,7 +227,7 @@ public class ShopEntry {
 
         if (stat.baseType == UpgradeStat.BaseType.INT) return String.valueOf(Math.round(value));
 
-        //two places, with the noise trimmed off - "8" rather than "8.00", "0.45" as it is
+        // trim trailing zeros: "8" not "8.00"
         String text = String.format("%.2f", value);
         if (text.contains(".")) text = text.replaceAll("0+$", "").replaceAll("\\.$", "");
 

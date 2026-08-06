@@ -29,44 +29,34 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Hosts the catch. Opening an interaction dialog pauses the campaign by itself, which is what holds
- * the drones still for the duration - no pausing of our own required.
+ * Hosts the catch minigame. Opening an interaction dialog pauses the campaign by itself, holding
+ * drones still with no pausing of our own; the dialog itself is just a frame around
+ * {@link FishingMinigamePanel} that reports the result back to the caller.
  * <p>
- * The dialog is only the frame: it names the fish, hands a {@link FishingMinigamePanel} the middle of
- * the screen, and reports the result back to whoever opened it.
- * <p>
- * Runs as a custom <i>visual</i> dialog rather than a custom dialog, because that is the one without
- * buttons. showCustomDialog always builds a confirm button - its delegate can rename it and can drop
- * the cancel button beside it, but cannot ask for neither - and it wires enter and space straight to
- * it. showCustomVisualDialog hands the panel the whole frame and leaves the keyboard alone, which is
- * how vanilla hosts its own minigame in
+ * Uses {@code showCustomVisualDialog} rather than {@code showCustomDialog}: the latter always wires
+ * a confirm button (plus enter/space) with no way to have neither. The former hands over the whole
+ * frame and leaves input alone, same as vanilla's
  * {@link com.fs.starfarer.api.impl.campaign.eventide.DuelDialogDelegate}.
  */
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     public interface Callback {
-        /**
-         * @param landed the specimen that was taken, or null if it got away. The same object the
-         *               readout showed, so what goes in the hold is what the player was told they
-         *               caught rather than a second roll of the same species.
-         */
+        /** @param landed specimen taken, or null if it got away - same object the readout showed */
         void onCatchResolved(FishCatch landed);
     }
 
     protected FishSpec fish;
     protected Callback callback;
 
-    /** Where this one was taken. Its aberration is read off it early, and the log reads it on a win. */
+    /** Where this catch was taken; source of aberration, and read by the log on a win. */
     protected SectorEntityToken anchor;
 
-    /** How it is being taken. Recorded in the log, since the three ways are not interchangeable. */
+    /** How it's being taken; recorded in the log, since the three methods aren't interchangeable. */
     protected FishLogEntry.Method method = FishLogEntry.Method.UNKNOWN;
 
     /**
-     * Rolled when the catch opens rather than when it is won.
-     * <p>
-     * The readout has to show the specimen while the dialog is still up, and the caller has to store
-     * that same specimen after it closes. One roll, held here, is the only way both can be true.
+     * Rolled when the catch opens, not when it's won - the readout shows this while the dialog is
+     * up, and the caller stores the same object after it closes.
      */
     protected FishCatch specimen;
 
@@ -81,9 +71,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     /**
      * Opens the catch on a fish, if the UI will have it.
      *
-     * @param anchor what to run the dialog against - the pond, so the visuals have something to sit on
-     * @return false if a dialog is already up or the UI is mid-transition, in which case the caller
-     *         should try again rather than treat the fish as lost
+     * @param anchor entity to run the dialog against (the pond)
+     * @return false if a dialog is already up or the UI is mid-transition; caller should retry
+     *         rather than treat the fish as lost
      */
     public static boolean open(SectorEntityToken anchor, FishSpec fish, FishLogEntry.Method method,
                                Callback callback) {
@@ -105,18 +95,15 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     @Override
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
-        //whatever is fitted to the rig this was hooked on. Read once, before anything is rolled -
-        //and handed to the catch on the way in, since it is what sizes the window and rolls the
-        //treasure rather than something the catch can be told about afterwards
+        // tackle sizes the window and rolls treasure; read once before anything is rolled
         Tackle tackle = TackleManager.get(method);
         this.minigame = new FishingMinigame(fish, tackle);
 
-        //how loosely it holds to reality comes from where it was taken, not from the fish
+        // aberration comes from where it was taken, not from the fish species
         this.specimen = FishCatch.roll(fish, Aberration.of(anchor), tackle.qualityBias,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
 
-        //how it was hooked and what made it reachable, both read off the thing being fished at
-        //before the catch resolves - afterwards the mote is gone and there is nothing left to ask
+        // must read off anchor before the catch resolves - the mote is gone afterward
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
 
@@ -133,15 +120,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     }
 
     /**
-     * Dev mode's fish swap. The fish cannot be changed under a running catch - it is fixed in three
-     * constructors with no setter - so the whole dialog is torn down and reopened on the picked
-     * spec, through the same entry point everything else opens it through.
-     * <p>
-     * Marked resolved before the teardown so the callback stays quiet about it: the caller is owed
-     * exactly one resolution, and the reopened catch - carrying the same callback - is what pays
-     * it. The reopen retries every frame because the UI refuses a new dialog while the old one is
-     * still on its way out; if it still refuses after a few seconds, the fish and its resolution
-     * are let go rather than retried forever.
+     * Dev mode's fish swap. The fish is fixed with no setter, so this tears down the dialog and
+     * reopens on the picked spec through {@link #open}. Marked resolved before teardown so the
+     * callback still fires exactly once, via the reopened dialog. Retries every frame since the UI
+     * refuses a new dialog while the old one is still closing; gives up after a few seconds.
      */
     protected void reopenWith(FishSpec pick) {
         if (pick == null || resolved) return;
@@ -183,23 +165,21 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (resolved) return;
         resolved = true;
 
-        //the panel first, then the dialog behind it - unless the panel closing is what got us here
+        // panel closes before the dialog, unless panel-close is what triggered this
         if (!dismissed && delegate != null) delegate.dismissPanel();
         if (dialog != null) dialog.dismiss();
         if (callback != null) callback.onCatchResolved(caught ? specimen : null);
     }
 
     /**
-     * Wraps the panel for the dialog. The catch ends itself, so there is nothing to press - except
-     * in dev mode, where a strip of cheat buttons hangs off the panel's edge. Those buttons live on
-     * child panels that name this delegate as their {@link CustomUIPanelPlugin}, which is the only
-     * reason this implements it: presses land in {@link #buttonPressed}, and the rest of the
-     * interface stays empty.
+     * Wraps the panel for the dialog. Nothing to press except dev mode's cheat strip, whose buttons
+     * live on child panels naming this delegate as their {@link CustomUIPanelPlugin} - presses land
+     * in {@link #buttonPressed}, and the rest of the interface stays empty.
      */
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
             FishingMinigamePanel.Listener {
 
-        /** Dev strip sizing. Sized to its labels, not to the layout - it is scaffolding. */
+        /** Dev strip sizing; sized to labels, not to layout. */
         protected static final float DEV_BUTTON_WIDTH = 150f;
         protected static final float DEV_BUTTON_HEIGHT = 24f;
         protected static final float DEV_LIST_WIDTH = 220f;
@@ -207,13 +187,13 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
 
-        /** The frame's own handle, and the only way to close the panel from in here. */
+        /** Frame handle; only way to close the panel from here. */
         protected DialogCallbacks callbacks;
 
-        /** The dialog's own panel, kept so the dev fish list can be put up and taken down again. */
+        /** Kept so the dev fish list can be added and removed again. */
         protected CustomPanelAPI framePanel;
 
-        /** The dev species list while it is up, by the reference that can take it off again. */
+        /** Dev species list panel, while shown. */
         protected CustomPanelAPI fishList;
 
         protected final Object devWinId = new Object();
@@ -230,23 +210,17 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         }
 
         /**
-         * Where the custom framing goes: titles, borders, portraits, anything that wants to be a real
-         * UI element rather than something drawn.
-         * <p>
-         * Deliberately empty - dev mode's cheat strip excepted - and deliberately separate. Elements
-         * added here take part in layout and mouse-over as normal; anything that has to line up with
-         * the track itself is better drawn in {@link FishingMinigamePanel#renderFrame}, which has the
-         * same layout the track uses.
+         * Custom framing (titles, borders, portraits) that should be real UI elements, not drawn.
+         * Empty apart from dev mode; anything that must line up with the track is drawn instead in
+         * {@link FishingMinigamePanel#renderFrame}, which shares its layout.
          */
         protected void addFramingElements(CustomPanelAPI panel) {
             if (Global.getSettings().isDevMode()) addDevControls(panel);
         }
 
         /**
-         * Dev mode's cheat strip, hung off the panel's left edge - the panel itself is cut to the
-         * playfield, so there is no room inside it, and children take input fine from outside their
-         * parent's rectangle since event dispatch never culls by bounds. The landed-fish cards can
-         * end up drawn over it, which is fine: by then the strip has done its job.
+         * Dev cheat strip off the panel's left edge - outside the panel's own rect, which works fine
+         * since input dispatch isn't culled by bounds. Landed-fish cards may draw over it later.
          */
         protected void addDevControls(CustomPanelAPI panel) {
             float height = (DEV_BUTTON_HEIGHT + 4f) * 4f + 4f;
@@ -266,10 +240,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             panel.addComponent(strip).inTL(-DEV_BUTTON_WIDTH - DEV_GAP, 0f);
         }
 
-        /**
-         * The species list, beside the strip: one button per row of the fish table, straight off
-         * the loader. The strip's button toggles it - pressed again, the list goes away unpicked.
-         */
+        /** Species list beside the strip, one button per fish spec; strip button toggles it. */
         protected void toggleFishList() {
             if (fishList != null) {
                 framePanel.removeComponent(fishList);
@@ -286,7 +257,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             TooltipMakerAPI element = fishList.createUIElement(DEV_LIST_WIDTH, height, true);
 
             for (FishSpec spec : specs) {
-                //the spec itself is the button's id, so a press says which fish with no second map
+                // spec itself is the button id
                 element.addButton(spec.name == null || spec.name.isEmpty() ? spec.id : spec.name,
                         spec, DEV_LIST_WIDTH - 25f, 22f, 3f);
             }
@@ -328,7 +299,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         public void advance(float amount) {
         }
 
-        /** The rest of {@link CustomUIPanelPlugin} - the dev strip draws and moves nothing itself. */
+        /** Rest of {@link CustomUIPanelPlugin} - dev strip draws and moves nothing itself. */
         @Override
         public void positionChanged(PositionAPI position) {
         }
@@ -351,13 +322,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         }
 
         /**
-         * The panel has gone, by whatever route - our own close, or the player pressing escape, or
-         * the frame deciding to dismiss itself.
-         * <p>
-         * The outcome is read off the catch rather than assumed, because the route here is not
-         * knowable from in here. A fish that was landed is landed however the panel came down; one
-         * that was still being played is lost. Getting this wrong either way leaves the drone or the
-         * line holding that mote waiting on a callback that never comes.
+         * The panel closed by whatever route (our own close, escape, frame dismiss). Outcome is read
+         * off the minigame state rather than assumed, since the route isn't knowable from here and
+         * the caller is waiting on exactly one callback.
          */
         @Override
         public void reportDismissed(int option) {

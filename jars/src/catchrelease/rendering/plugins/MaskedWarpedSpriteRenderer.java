@@ -46,10 +46,8 @@ public class MaskedWarpedSpriteRenderer {
     }
 
     /**
-     * Turns the eddy at the rim. Twist is radians at the strongest point of the band, fed per
-     * frame with any time modulation already folded in - the shader never accumulates it; edge
-     * is the radius the band starts at, as a fraction of the mask's radius, with the middle left
-     * alone below it.
+     * Twist: radians at the band's strongest point, with per-frame time modulation already
+     * folded in (the shader doesn't accumulate). Edge: band start radius, as a fraction of mask radius.
      */
     public void setSwirl(float twist, float edge) {
         this.swirl = twist;
@@ -57,10 +55,9 @@ public class MaskedWarpedSpriteRenderer {
     }
 
     /**
-     * Opens the funnel: a radial remap of the fill that reads as depth rather than as a lens.
-     * Depth blends the remap in, 0 flat to 1 full; gamma is the remap's exponent, under 1 so the
-     * fill compresses ever harder towards the centre the way a funnel wall does; dim is how dark
-     * the throat goes at full depth, 0 to leave the colour alone.
+     * Radial remap of the fill that reads as depth. Depth blends it in (0 flat, 1 full); gamma
+     * is the remap's exponent (under 1 compresses toward centre); dim darkens the throat at full
+     * depth (0 = no colour change).
      */
     public void setWell(float depth, float gamma, float dim) {
         this.well = depth;
@@ -120,8 +117,7 @@ public class MaskedWarpedSpriteRenderer {
         float fillUvPerWorldX = fillTW / fillSize;
         float fillUvPerWorldY = fillTH / fillSize;
 
-        //a whole mask-width of offset, said in fill texcoords - the swirl is computed in the
-        //mask's own round space and lands on the fill through this
+        // mask-width offset in fill texcoords; swirl is computed in mask space and mapped to fill via this
         if (uMaskToFill >= 0) {
             GL20.glUniform2f(uMaskToFill, maskSize * fillUvPerWorldX, maskSize * fillUvPerWorldY);
         }
@@ -139,9 +135,7 @@ public class MaskedWarpedSpriteRenderer {
             float fillTX1 = fillTW + uOff;
             float fillTY1 = fillTH + vOff;
 
-            // Mask UV in normalized 0..1 for a centered mask square of size maskSize inside fillSize
-            // For corners of the fill quad:
-            // x,y in [0, fillSize] -> maskUV = (pos - (fillSize-maskSize)/2) / maskSize (thx chatgpt)
+            // mask UV: fill-space pos mapped into a centered maskSize square via (pos - inset) / maskSize
             float inset = (fillSize - maskSize) * 0.5f;
 
             float mU0 = (0f - inset) / maskSize;
