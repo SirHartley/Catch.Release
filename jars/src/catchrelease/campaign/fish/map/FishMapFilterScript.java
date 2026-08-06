@@ -47,7 +47,8 @@ import java.util.Map;
  * fails soft - a surprise means the button simply is not there, and the sector map is exactly
  * as vanilla made it.
  */
-public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
+public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
+        FishRoutePopup.Host {
 
     public static final String MEMORY_KEY = "$catchrelease_map_fish_filter";
 
@@ -90,6 +91,14 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
     protected CustomPanelAPI panePanel;
     protected CustomPanelAPI overlayPanel;
     protected FishPresenceOverlay overlay;
+
+    protected FishRoutePopup popup;
+    protected CustomPanelAPI popupPanel;
+
+    /** The map's own arrow list and what this script put in it, for taking it back out. */
+    protected Object arrowList;
+    protected final List<Object> injectedArrows = new ArrayList<>();
+    protected Object lastRouteSeen;
 
     /** World-space meshes by species - the hosts never move during a session, so cut once. */
     protected final Map<String, FishPresenceField.Mesh> meshCache = new HashMap<>();
@@ -144,9 +153,144 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
             }
 
             if (applied && pendingSpeciesId != null) applyPendingSpecies();
+
+            syncRouteArrows();
         } catch (Throwable t) {
             fail(t);
         }
+    }
+
+    /**
+     * Keeps the map's own arrow list carrying the plotted route - the same list intel arrows
+     * ride, so the legs wear exactly the game's arrow style and show on the plain map too.
+     * <p>
+     * The list is found on the map's params object by shape: the one non-null {@code List}
+     * field. Two lists live there - arrows and markers - and only the arrows are built non-null,
+     * which is the whole of how they are told apart; if that ever stops being true, the arrows
+     * are quietly skipped and the route still shows as its badges. Re-run whenever the route
+     * object changes identity, and everything this script added is pulled back out first, so a
+     * closed route takes its arrows with it.
+     */
+    protected void syncRouteArrows() {
+        FishRoute.Saved route = FishRoute.get();
+        if (route == lastRouteSeen) return;
+
+        if (arrowList instanceof List) ((List<?>) arrowList).removeAll(injectedArrows);
+        injectedArrows.clear();
+        lastRouteSeen = route;
+
+        if (route == null || route.stops.isEmpty() || mapScreen == null) return;
+        if (Global.getSector().getPlayerFleet() == null) return;
+
+        try {
+            Object params = ReflectionUtils.invoke(mapScreen, "getParams");
+            if (params == null) return;
+
+            Object target = null;
+            for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
+                    params.getClass(), null, null, List.class, null, false)) {
+
+                Object value = field.get(params);
+                if (value == null) continue;
+
+                if (target != null) return; //two live lists - the shape no longer answers
+                target = value;
+            }
+            if (target == null) return;
+
+            @SuppressWarnings("unchecked")
+            List<Object> arrows = (List<Object>) target;
+
+            com.fs.starfarer.api.campaign.SectorEntityToken from =
+                    Global.getSector().getPlayerFleet();
+
+            for (FishRoute.Stop stop : route.stops) {
+                com.fs.starfarer.api.campaign.StarSystemAPI system = FishRoute.getSystem(stop);
+                if (system == null || system.getHyperspaceAnchor() == null) continue;
+
+                com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData arrow =
+                        new com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData(
+                                from, system.getHyperspaceAnchor());
+                arrow.color = Global.getSector().getPlayerFaction().getBaseUIColor();
+                arrow.alphaMult = 0.5f;
+
+                arrows.add(arrow);
+                injectedArrows.add(arrow);
+
+                from = system.getHyperspaceAnchor();
+            }
+
+            arrowList = arrows;
+        } catch (Throwable t) {
+            Global.getLogger(FishMapFilterScript.class)
+                    .warn("Could not put the fishing route's arrows on the map", t);
+        }
+    }
+
+    /** The planner floats over the middle of the map, sized to itself. */
+    @Override
+    public void onPlannerRequested() {
+        if (popupPanel != null || mapScreen == null) return;
+
+        try {
+            Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
+            PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
+            PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
+
+            float x = scrollerPos.getX() + (scrollerPos.getWidth() - FishRoutePopup.WIDTH) * 0.5f
+                    - screenPos.getX();
+            float y = (screenPos.getY() + screenPos.getHeight())
+                    - (scrollerPos.getY() + scrollerPos.getHeight())
+                    + (scrollerPos.getHeight() - FishRoutePopup.HEIGHT) * 0.5f;
+
+            popup = new FishRoutePopup(this);
+            popupPanel = Global.getSettings().createCustom(
+                    FishRoutePopup.WIDTH, FishRoutePopup.HEIGHT, popup);
+
+            ((UIPanelAPI) mapScreen).addComponent(popupPanel)
+                    .setSize(FishRoutePopup.WIDTH, FishRoutePopup.HEIGHT)
+                    .inTL(x, y);
+        } catch (Throwable t) {
+            fail(t);
+        }
+    }
+
+    @Override
+    public void onRoutePlotted(FishRoute.Saved route) {
+        closePlanner();
+
+        //the arrows and badges land this same frame through syncRouteArrows; the map is pointed
+        //at the first stop so the route reads from its beginning
+        try {
+            if (route != null && !route.stops.isEmpty()) {
+                com.fs.starfarer.api.campaign.StarSystemAPI first =
+                        FishRoute.getSystem(route.stops.get(0));
+
+                if (first != null && mapScreen != null) {
+                    ReflectionUtils.invoke(mapScreen, "centerOn", first.getLocation());
+                }
+            }
+        } catch (Throwable t) {
+            //pointing the map is a nicety
+        }
+    }
+
+    @Override
+    public void onPlannerClosed() {
+        closePlanner();
+    }
+
+    protected void closePlanner() {
+        if (popupPanel != null && mapScreen != null) {
+            try {
+                ((UIPanelAPI) mapScreen).removeComponent(popupPanel);
+            } catch (Throwable ignored) {
+                //the screen is already gone, and the panel with it
+            }
+        }
+
+        popup = null;
+        popupPanel = null;
     }
 
     /**
@@ -564,8 +708,16 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host {
         panePanel = null;
         overlayPanel = null;
         overlay = null;
+        popup = null;
+        popupPanel = null;
         applied = false;
         originalScrollerWidth = 0f;
+
+        //the arrow list belonged to the screen that just went - forget it, and force the next
+        //screen to re-inject by making the last-seen route compare unequal to any real one
+        arrowList = null;
+        injectedArrows.clear();
+        lastRouteSeen = new Object();
     }
 
     /**

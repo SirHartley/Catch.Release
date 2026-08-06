@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -91,6 +92,12 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float TIP_ROW_GAP = 3f;
     public static final float TIP_OFFSET = 16f;
 
+    /** The route badges: a ringed disc lifted off its system, growing with what it carries. */
+    public static final float ROUTE_BADGE_RADIUS = 14f;
+    public static final float ROUTE_BADGE_GROW = 7f;
+    public static final float ROUTE_BADGE_LIFT = 14f;
+    public static final float ROUTE_ICON = 16f;
+
     protected List<Blob> blobs = new ArrayList<>();
 
     /** The map's inner render widget - the thing that knows the camera. */
@@ -124,11 +131,43 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     @Override
     public void processInput(List<InputEventAPI> events) {
         for (InputEventAPI event : events) {
+            if (event.isConsumed()) continue;
+
             if (event.isMouseMoveEvent() || event.isMouseEvent()) {
                 mouseX = event.getX();
                 mouseY = event.getY();
             }
+
+            //the route's close label, top centre of the map - the one clickable thing out here
+            if (event.isLMBDownEvent() && FishRoute.get() != null
+                    && isInCloseLabel(event.getX(), event.getY())) {
+
+                FishRoute.clear();
+                event.consume();
+            }
         }
+    }
+
+    protected boolean isInCloseLabel(float x, float y) {
+        float[] bounds = getCloseLabelBounds();
+        if (bounds == null) return false;
+
+        return x >= bounds[0] && x <= bounds[0] + bounds[2]
+                && y >= bounds[1] && y <= bounds[1] + bounds[3];
+    }
+
+    /** The close label's rectangle as {x, y, width, height}, or null with nowhere to put it. */
+    protected float[] getCloseLabelBounds() {
+        if (panelPos == null) return null;
+
+        LazyFont small = ShopUi.getSmallFont();
+        float width = 160f;
+        float height = (small == null ? 14f : small.getBaseHeight()) + 10f;
+
+        return new float[]{
+                panelPos.getX() + (panelPos.getWidth() - width) * 0.5f,
+                panelPos.getY() + panelPos.getHeight() - height - 8f,
+                width, height};
     }
 
     @Override
@@ -168,7 +207,88 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glPopAttrib();
         }
 
+        renderRoute(factor, centerX, centerY, alphaMult);
         renderHoverTooltip(factor, centerX, centerY, alphaMult);
+    }
+
+    /**
+     * The plotted route's stops: a ringed badge above each system carrying the fish to take
+     * there, a stub down to the system itself, and the close label top centre. The arrows
+     * between the stops are not drawn here - they ride the map's own arrow list, the same one
+     * intel arrows use, so they wear exactly the game's arrow style.
+     */
+    protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
+        FishRoute.Saved route = FishRoute.get();
+        if (route == null || route.stops.isEmpty()) return;
+
+        Color player = Misc.getBasePlayerColor();
+
+        for (FishRoute.Stop stop : route.stops) {
+            StarSystemAPI system = FishRoute.getSystem(stop);
+            if (system == null || system.getLocation() == null) continue;
+
+            float sx = system.getLocation().x * factor + centerX;
+            float sy = system.getLocation().y * factor + centerY;
+
+            int count = Math.max(1, stop.fishIds.size());
+            float radius = ROUTE_BADGE_RADIUS + (count - 1) * ROUTE_BADGE_GROW;
+            float bx = sx;
+            float by = sy + ROUTE_BADGE_LIFT + radius;
+
+            //the stub that says which system the badge belongs to
+            ShopUi.drawQuad(sx - 0.5f, sy + 2f, 1f, by - radius - sy - 2f,
+                    player, 0.6f * alphaMult);
+
+            Disc.draw(bx, by, radius, Color.BLACK, 0.85f * alphaMult, 0.85f * alphaMult, false);
+            Disc.drawOutline(bx, by, radius, player, 0.9f * alphaMult, 1.5f);
+
+            //the fish, in a row across the badge
+            float iconX = bx - (stop.fishIds.size() - 1) * (ROUTE_ICON + 2f) * 0.5f;
+
+            for (String id : stop.fishIds) {
+                FishSpec spec = FishPresence.getSpec(id);
+                if (spec == null) continue;
+
+                String iconPath = FishLog.isCaught(id)
+                        ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
+
+                SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
+                if (icon != null) {
+                    icon.setSize(ROUTE_ICON, ROUTE_ICON);
+                    icon.setColor(Color.WHITE);
+                    icon.setNormalBlend();
+                    icon.setAlphaMult(alphaMult);
+                    icon.renderAtCenter(Math.round(iconX), Math.round(by));
+                }
+
+                iconX += ROUTE_ICON + 2f;
+            }
+        }
+
+        renderCloseLabel(alphaMult);
+    }
+
+    /** "X - CLOSE ROUTE", top centre of the map, the only way a route ever goes away. */
+    protected void renderCloseLabel(float alphaMult) {
+        float[] bounds = getCloseLabelBounds();
+        if (bounds == null) return;
+
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        boolean hovered = isInCloseLabel(mouseX, mouseY);
+        Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+        ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], bounds[3], Color.BLACK, 0.85f * alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], 1f, color, alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1] + bounds[3] - 1f, bounds[2], 1f, color, alphaMult);
+        ShopUi.drawQuad(bounds[0], bounds[1], 1f, bounds[3], color, alphaMult);
+        ShopUi.drawQuad(bounds[0] + bounds[2] - 1f, bounds[1], 1f, bounds[3], color, alphaMult);
+
+        LazyFont.DrawableString text = small.createText("X - CLOSE ROUTE", color,
+                small.getBaseHeight());
+        text.draw(Math.round(bounds[0] + (bounds[2] - text.getWidth()) * 0.5f),
+                Math.round(bounds[1] + (bounds[3] + text.getHeight()) * 0.5f));
     }
 
     /**

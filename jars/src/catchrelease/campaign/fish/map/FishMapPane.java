@@ -54,17 +54,21 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         /** A row was clicked - point the map at this species. */
         void onSpeciesFocused(FishSpec spec);
+
+        /** The planner button was pressed - float the planner over the map. */
+        void onPlannerRequested();
     }
 
     public static final float WIDTH = 250f;
 
     public static final float PAD = 10f;
+    public static final float PLANNER_HEIGHT = 22f;
     public static final float SEARCH_HEIGHT = 22f;
     public static final float CHIP_HEIGHT = 34f;
     public static final float CHIP_GAP = 4f;
     public static final float DESELECT_HEIGHT = 20f;
     public static final float HEADER_HEIGHT = 20f;
-    public static final float CONTROLS_HEIGHT = 124f;
+    public static final float CONTROLS_HEIGHT = 154f;
     public static final float ROW_HEIGHT = 24f;
 
     public static final String SEARCH_GHOST = "Search...";
@@ -213,12 +217,22 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The part that never rebuilds: search, the type chips, deselect, and the live list header. */
+    /** The part that never rebuilds: planner, search, the type chips, deselect, and the header. */
     protected void buildControls() {
         float innerWidth = width - PAD * 2f;
         TooltipMakerAPI controls = panel.createUIElement(innerWidth, CONTROLS_HEIGHT, false);
 
-        searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 4f);
+        //the planner sits over the search on purpose: planning is what the pane is for, and the
+        //search is only how a plan's species get found
+        CustomPanelAPI planner = panel.createCustomPanel(innerWidth, PLANNER_HEIGHT,
+                new PlannerButtonPlugin());
+        controls.addCustom(planner, 0f);
+        controls.addTooltipToPrevious(createSimpleTooltip(260f,
+                "Pick the fish you need - open jobs and upgrade asks are suggested - and plot"
+                        + " the shortest route through their waters."),
+                TooltipMakerAPI.TooltipLocation.BELOW);
+
+        searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(filter.search == null || filter.search.isEmpty()
                 ? SEARCH_GHOST : filter.search);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
@@ -549,6 +563,68 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     /** The way back to the survey: lit while there is anything to deselect, quiet otherwise. */
+    /** The planner's door: one drawn button, always live - a plan can be made from nothing. */
+    protected class PlannerButtonPlugin extends BaseCustomUIPanelPlugin {
+
+        protected PositionAPI buttonPos;
+
+        protected transient LazyFont.DrawableString text;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            buttonPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (buttonPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = buttonPos.getX();
+            float y = buttonPos.getY();
+            float w = buttonPos.getWidth();
+            float h = buttonPos.getHeight();
+
+            boolean hovered = ShopUi.contains(x, y, w, h,
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
+                    (hovered ? 0.45f : 0.32f) * alphaMult);
+
+            if (text == null) {
+                text = ShopUi.createText(small, "PLAN A ROUTE");
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+            text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+            text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
+                    Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+        }
+
+        @Override
+        public void processInput(List<InputEventAPI> events) {
+            if (buttonPos == null) return;
+
+            for (InputEventAPI event : events) {
+                if (event.isConsumed() || !event.isLMBDownEvent()) continue;
+                if (!ShopUi.contains(buttonPos.getX(), buttonPos.getY(), buttonPos.getWidth(),
+                        buttonPos.getHeight(), event.getX(), event.getY())) {
+                    continue;
+                }
+
+                event.consume();
+                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
+                host.onPlannerRequested();
+
+                return;
+            }
+        }
+    }
+
     protected class DeselectPlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI buttonPos;
