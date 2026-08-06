@@ -56,7 +56,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     public static final float WIDTH = 250f;
 
-    public static final float PAD = 10f;
+    public static final float PAD = 14f;
     public static final float PLANNER_HEIGHT = 22f;
     public static final float SEARCH_HEIGHT = 22f;
     public static final float CHIP_HEIGHT = 34f;
@@ -168,12 +168,13 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         //transparent black, the way the screen's own panels sit on it - no colour wash
         ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
-        //the border the map itself wears - dark player colour read as too dim beside it
+        //between the two rejected extremes: dark player colour read as too dim beside the map,
+        //full base colour as too bright - the base colour at half strength sits with the chrome
         Color border = Misc.getBasePlayerColor();
-        ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
-        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, alphaMult);
-        ShopUi.drawQuad(x, y, 1f, h, border, alphaMult);
-        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, alphaMult);
+        ShopUi.drawQuad(x, y, w, 1f, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x, y, 1f, h, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, 0.55f * alphaMult);
     }
 
     /** Text field has no change callback or placeholder, so both are worked by hand off
@@ -457,8 +458,10 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             Color color = on ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
             text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+
+            //held two pixels off the underline, which the label used to stand right on
             text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
-                    Math.round(y + 2f + text.getHeight()));
+                    Math.round(y + 4f + text.getHeight()));
         }
 
         protected SpriteAPI getIcon() {
