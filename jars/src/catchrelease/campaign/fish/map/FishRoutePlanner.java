@@ -11,6 +11,7 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -111,6 +112,7 @@ public class FishRoutePlanner {
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (system.getLocation() == null) continue;
+            if (!isPlannable(system)) continue;
 
             Set<String> hosted = null;
 
@@ -176,6 +178,22 @@ public class FishRoutePlanner {
         for (int index : order) route.stops.add(stops.get(index));
 
         return route;
+    }
+
+    /**
+     * Whether a system is somewhere a route should send anyone: proc-gen, reachable from
+     * hyperspace, not the abyss, nothing hand-made or hidden - the same standard everything
+     * else that points the player somewhere holds itself to. A stop the player cannot fly to
+     * is not a stop.
+     */
+    protected static boolean isPlannable(StarSystemAPI system) {
+        if (!system.isProcgen()) return false;
+        if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
+        if (system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
+        if (system.hasTag(Tags.THEME_SPECIAL)) return false;
+        if (system.hasTag(Tags.THEME_HIDDEN)) return false;
+
+        return true;
     }
 
     /** Every order tried, the cheapest kept. The chain starts wherever the player is standing. */

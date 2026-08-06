@@ -378,56 +378,11 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected TooltipMakerAPI.TooltipCreator createRowTooltip(FishSpec spec) {
-        return new BaseTooltipCreator() {
-            @Override
-            public float getTooltipWidth(Object tooltipParam) {
-                return 320f;
-            }
-
-            @Override
-            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                boolean caught = FishLog.isCaught(spec.id);
-                FishLogEntry logged = FishLog.get(spec.id);
-
-                //generic mark for anything nobody's seen - survey tells where it lives, not what it looks like
-                String icon = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-                if (icon != null && !icon.isEmpty()) {
-                    try {
-                        Global.getSettings().loadTexture(icon);
-                        tooltip.addImage(icon, 48f, 48f, 0f);
-                    } catch (Exception e) {
-                        //a tooltip without a portrait is still a tooltip
-                    }
-                }
-
-                tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);
-
-                //type persists whether or not caught - it's what the list sorts/filters by
-                tooltip.addPara(spec.getTypeName(), Misc.getGrayColor(), 2f);
-
-                if (caught && logged != null) {
-                    tooltip.addPara("Caught " + logged.caught + (logged.caught == 1
-                            ? " time." : " times."), 8f);
-                } else {
-                    tooltip.addPara("Known only from survey data.", Misc.getGrayColor(), 8f);
-                }
-
-                tooltip.addPara("%s", 8f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                        FishLocationSummary.describe(spec));
-
-                if (Global.getSettings().isDevMode() && !spec.hasHabitat()) {
-                    tooltip.addPara("No region data in the table.", Misc.getHighlightColor(), 8f);
-                }
-
-                if (!selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED) {
-                    tooltip.addPara("Three waters are already up - deselect one first.",
-                            Misc.getHighlightColor(), 8f);
-                } else {
-                    tooltip.addPara("Click to toggle its waters on the map. F2 opens the codex.",
-                            Misc.getGrayColor(), 8f);
-                }
-            }
-        };
+        //the shared species card, with this pane's own action line read live at hover time
+        return FishTooltips.create(spec, () ->
+                !selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED
+                        ? "Three waters are already up - deselect one first."
+                        : "Click to toggle its waters on the map. F2 opens the codex.");
     }
 
     // --- The drawn controls. ---

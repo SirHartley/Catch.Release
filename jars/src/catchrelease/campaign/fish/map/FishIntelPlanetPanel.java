@@ -2,12 +2,9 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
 import catchrelease.rendering.helper.Disc;
@@ -19,8 +16,7 @@ import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -28,6 +24,7 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
+import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -36,10 +33,13 @@ import java.util.List;
 /**
  * Puts a fish panel on the intel screen's Planets view, in the empty air to the right of the
  * planet detail card: which species can be caught in the viewed planet's system, as round
- * icon holders in the game's own boxed-and-headed panel style.
+ * icon holders in a boxed panel styled after the card it stands beside - the title bar runs
+ * border to border and matches the card's own header weight, and the box never grows taller
+ * than the card; a stock that will not fit scrolls inside instead.
  * <p>
  * The knowledge rules are the map's: a caught species wears its art, one known only from survey
- * data wears the generic mark - both with a proper tooltip - and a species the player has never
+ * data wears the generic mark - both ringed in their rarity's colour, with the same species
+ * tooltip the sidebar uses and the same F2-to-codex key - and a species the player has never
  * encountered shows as a bare question mark that answers nothing.
  * <p>
  * The crawl is by capability, like the sector map's: the planets view is the thing on the intel
@@ -54,6 +54,11 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
     public static final float ICON_SHARE = 0.66f;
+
+    /** The card's own header weight - half again the old heading, border to border. */
+    public static final float TITLE_HEIGHT = 30f;
+
+    public static final float INNER_PAD = 10f;
 
     /** The detail card this panel is currently standing beside. A new card means a rebuild. */
     protected Object detailCard;
@@ -172,32 +177,38 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         float width = panelPos.getWidth() - x - GAP;
         if (width < CELL + 30f) return; //no air to stand in on this resolution
 
-        float height = cardPos.getHeight();
+        //the card it stands beside is the ceiling: never taller, scroll instead
+        float maxHeight = cardPos.getHeight();
 
-        fishPanel = Global.getSettings().createCustom(width, height,
-                new BaseCustomUIPanelPlugin() {
-                });
+        float innerWidth = width - INNER_PAD * 2f;
+        int total = known.size() + unknown;
+        int perRow = Math.max(1, (int) ((innerWidth + CELL_GAP) / (CELL + CELL_GAP)));
+        int rows = (total + perRow - 1) / perRow;
 
-        buildContent(fishPanel, width, known, unknown);
+        float rowsNeeded = rows * CELL + (rows - 1) * CELL_GAP;
+        float contentBudget = maxHeight - TITLE_HEIGHT - INNER_PAD * 2f;
+
+        boolean scrolls = rowsNeeded > contentBudget;
+        float contentHeight = Math.min(rowsNeeded, contentBudget);
+
+        float height = TITLE_HEIGHT + INNER_PAD * 2f + contentHeight;
+
+        fishPanel = Global.getSettings().createCustom(width, height, new BoxPlugin());
+
+        buildContent(fishPanel, innerWidth, contentHeight, scrolls, perRow, known, unknown);
 
         ((UIPanelAPI) planetsPanel).addComponent(fishPanel)
                 .setSize(width, height)
                 .inTL(x, y);
     }
 
-    /** The boxed content: the game's own section heading over a grid of round holders. */
-    protected void buildContent(CustomPanelAPI panel, float width,
-                                List<FishSpec> known, int unknown) {
+    /** The cell grid, in its own element below the title bar - scrolling when the stock is deep. */
+    protected void buildContent(CustomPanelAPI panel, float innerWidth, float contentHeight,
+                                boolean scrolls, int perRow, List<FishSpec> known, int unknown) {
 
-        float innerWidth = width - 30f;
-        TooltipMakerAPI text = panel.createUIElement(innerWidth, 0, false);
-        text.setParaSmallInsignia();
-
-        text.addSectionHeading("Local catch", Misc.getBasePlayerColor(),
-                Misc.getDarkPlayerColor(), Alignment.MID, 0f);
+        TooltipMakerAPI content = panel.createUIElement(innerWidth, contentHeight, scrolls);
 
         int total = known.size() + unknown;
-        int perRow = Math.max(1, (int) ((innerWidth + CELL_GAP) / (CELL + CELL_GAP)));
         int rows = (total + perRow - 1) / perRow;
 
         int placed = 0;
@@ -215,21 +226,19 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 CustomPanelAPI cell = panel.createCustomPanel(CELL, CELL, new HolderPlugin(spec));
                 rowPanel.addComponent(cell).inTL(i * (CELL + CELL_GAP), 0f);
 
-                //a proper tooltip for anything with a name; the question marks stay questions
+                //the sidebar's own species card - the question marks stay questions
                 if (spec != null) {
-                    text.addTooltipTo(new FishTooltip(spec), cell,
+                    content.addTooltipTo(FishTooltips.create(spec), cell,
                             TooltipMakerAPI.TooltipLocation.BELOW);
                 }
             }
 
-            text.addCustom(rowPanel, row == 0 ? 8f : CELL_GAP);
+            content.addCustom(rowPanel, row == 0 ? 0f : CELL_GAP);
             placed += inThisRow;
         }
 
-        panel.updateUIElementSizeAndMakeItProcessInput(text);
-
-        UIPanelAPI box = panel.wrapTooltipWithBox(text);
-        panel.addComponent(box).inTL(0f, 0f);
+        panel.updateUIElementSizeAndMakeItProcessInput(content);
+        panel.addUIElement(content).inTL(INNER_PAD, TITLE_HEIGHT + INNER_PAD);
     }
 
     /** Known species catchable in the system, caught first so the art leads the row. */
@@ -237,7 +246,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         List<FishSpec> caught = new ArrayList<>();
         List<FishSpec> surveyed = new ArrayList<>();
 
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
             if (!FishPresence.livesIn(spec, system)) continue;
             if (!FishPresence.isKnown(spec)) continue;
@@ -255,7 +264,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     protected int getUnknownCount(StarSystemAPI system) {
         int count = 0;
 
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
             if (!FishPresence.livesIn(spec, system)) continue;
             if (FishPresence.isKnown(spec)) continue;
@@ -285,7 +294,50 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         failed = false;
     }
 
-    /** One round holder: dark disc, player ring, and the face - art, mark, or question. */
+    /** The box itself: dark field, one-pixel border, and the border-to-border title bar. */
+    protected static class BoxPlugin extends BaseCustomUIPanelPlugin {
+
+        protected PositionAPI pos;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void renderBelow(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            float x = pos.getX();
+            float y = pos.getY();
+            float w = pos.getWidth();
+            float h = pos.getHeight();
+
+            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.8f * alphaMult);
+            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), 0.07f * alphaMult);
+
+            //the title bar: flush with the borders on every side, the card's own header weight
+            ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
+                    Misc.getDarkPlayerColor(), 0.65f * alphaMult);
+
+            LazyFont body = ShopUi.getBodyFont();
+            if (body != null) {
+                LazyFont.DrawableString title = body.createText("LOCAL CATCH",
+                        ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult),
+                        body.getBaseHeight());
+                title.draw(Math.round(x + (w - title.getWidth()) * 0.5f),
+                        Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f));
+            }
+
+            Color border = Misc.getDarkPlayerColor();
+            ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
+            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, alphaMult);
+            ShopUi.drawQuad(x, y, 1f, h, border, alphaMult);
+            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, alphaMult);
+        }
+    }
+
+    /** One round holder: dark disc, the rarity's ring, and the face - art, mark, or question. */
     protected static class HolderPlugin extends BaseCustomUIPanelPlugin {
 
         protected final FishSpec spec;
@@ -308,8 +360,11 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
             float y = pos.getCenterY();
             float radius = pos.getWidth() * 0.5f;
 
+            //the ring wears the rarity; a species with no name yet wears no colour either
+            Color ring = spec == null ? Misc.getDarkPlayerColor() : spec.rarity.color;
+
             Disc.draw(x, y, radius, Color.BLACK, 0.8f * alphaMult, 0.8f * alphaMult, false);
-            Disc.drawOutline(x, y, radius, Misc.getDarkPlayerColor(), 0.9f * alphaMult, 1.2f);
+            Disc.drawOutline(x, y, radius, ring, 0.9f * alphaMult, 1.2f);
 
             if (spec == null) {
                 LazyFont small = ShopUi.getSmallFont();
@@ -335,27 +390,25 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 icon.renderAtCenter(Math.round(x), Math.round(y));
             }
         }
-    }
 
-    /** The hover card: name in the rarity's colour, status, and where else it can be found. */
-    protected static class FishTooltip extends BaseTooltipCreator {
-
-        protected final FishSpec spec;
-
-        public FishTooltip(FishSpec spec) {
-            this.spec = spec;
-        }
-
+        /** The codex key, the same one the sidebar's rows answer. */
         @Override
-        public float getTooltipWidth(Object tooltipParam) {
-            return 280f;
-        }
+        public void processInput(List<InputEventAPI> events) {
+            if (pos == null || spec == null) return;
 
-        @Override
-        public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-            tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 0f);
-            tooltip.addPara(Misc.ucFirst(FishPresence.getStatus(spec)), Misc.getGrayColor(), 4f);
-            tooltip.addPara(FishLocationSummary.describe(spec), Misc.getTextColor(), 8f);
+            for (InputEventAPI event : events) {
+                if (event.isConsumed()) continue;
+                if (!event.isKeyDownEvent() || event.getEventValue() != Keyboard.KEY_F2) continue;
+
+                if (!ShopUi.contains(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                        Global.getSettings().getMouseX(), Global.getSettings().getMouseY())) {
+                    continue;
+                }
+
+                event.consume();
+                FishCodex.show(spec.id);
+                return;
+            }
         }
     }
 }

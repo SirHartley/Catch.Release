@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 180 Java files across eight top-level packages, plus
+What is where, and which file to open first. 181 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -326,7 +326,8 @@ The sector-map fish filter.
 | `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges, the close-route label, the system view's fish strip (filter-gated, right edge) |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
-| `FishRoutePopup.java` | The planner in the sidebar's slot: pick up to five, plot |
+| `FishRoutePopup.java` | The planner in the sidebar's slot: search, type chips, pick up to five, plot |
+| `FishTooltips.java` | The one species tooltip every fish icon answers a hover with |
 | `FishIntelPlanetPanel.java` | The intel Planets view's fish panel, beside the planet card |
 | `FishType.java` | Filter categories with colour and icon |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
