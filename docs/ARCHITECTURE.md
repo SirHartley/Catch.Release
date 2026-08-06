@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 178 Java files across eight top-level packages, plus
+What is where, and which file to open first. 180 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -17,6 +17,7 @@ that is wrong is worse than no map, because it is believed.
 | The catch minigame's rules | `campaign/fish/minigame/FishingMinigame.java` (no rendering in it) |
 | The catch minigame's look or input | `campaign/fish/minigame/FishingMinigamePanel.java` |
 | What a fish *is* | `campaign/fish/data/FishSpec.java` + `data/campaign/fish.csv` |
+| Where a fish lives | `campaign/fish/data/FishHabitat.java` — one question, one answer |
 | A caught specimen's stats and grading | `campaign/fish/data/FishCatch.java` |
 | Bar jobs | `campaign/fish/jobs/` — `FishJob.java` is the spine |
 | Fleet-given jobs | `campaign/fish/jobs/fleet/` |
@@ -167,8 +168,10 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
 | `Aberration.java` | 0–1 "reality coherence" for a location, from abyss depth, hypershunt and slipstream |
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
+| `StarColour.java` | What a system's sun looks like, from its star's planet type |
+| `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached |
 | `CatchImplement.java` | What made a fish reachable — a pond or a breach lamp — read off the mote's own provenance |
-| `FishLocationSummary.java` | Builds the "where this swims" sentence from a spec's regions and tags |
+| `FishLocationSummary.java` | Builds the "where this swims" sentence from every habitat criterion a spec sets |
 
 ### `campaign/fish/jobs`
 Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
@@ -599,6 +602,26 @@ implement follow as an optional tail, written only as far as there is anything t
 read **by position**, so a blank holds the place of one that has no value — a specimen with no
 origin but a known method encodes as `bass|1.2|4.5|0.6||HARPOON`. Four- and five-field specimens
 already in saves still parse. Changing the format breaks fish already in saves.
+
+**Where a fish lives is one question, and everything asks it the same way.** `FishHabitat.of()`
+reads a place once — sun colour, system tags, region, constellation age, how well reality is holding
+— and `FishSpec.matches()` is the only thing that tests a species against it. They used to be
+several: the spawner tested star type, tags and region; the map, the route planner and the intel
+panel tested the region alone, so the map shaded systems under the wrong sun and said so beside a
+spawner that would never have offered the fish there. `FishPresence.livesIn()` is what every screen
+calls. Habitats are cached for the session because none of their inputs change during a game, and
+because `Aberration` walks every slipstream in hyperspace each time it is asked.
+
+**Blank means "anywhere" on every habitat criterion except the abyss.** `ABYSSAL` has to be named,
+because a species that says nothing about where it lives is one somebody could describe, and nothing
+describable lives down there — without the exception the deepest water in the game offered the same
+roach as a core world. It is the one asymmetry in the table and it is deliberate.
+
+**A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
+neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
+"wanted pond-caught" are one vocabulary rather than two that happen to agree. It is also a second
+way to write an unfillable ask: a named species that only comes up out of a rupture cannot be asked
+for through a breach lamp, which is why `FishJobAsks.pickImplement()` reads the species first.
 
 **How a fish was caught is two questions, and they are not independent.** The method is the tackle
 at the end of the line; the implement is what made the fish reachable. The drones are played against
