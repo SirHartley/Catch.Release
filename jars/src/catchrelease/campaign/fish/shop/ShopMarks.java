@@ -128,6 +128,108 @@ public class ShopMarks {
         return false;
     }
 
+    /** One marked ware with the name it goes by, for saying who is asking. */
+    public static class Ask {
+        public final String name;
+        public final FishRequirement requirement;
+
+        public Ask(String name, FishRequirement requirement) {
+            this.name = name;
+            this.requirement = requirement;
+        }
+    }
+
+    /** The marked asks with their wares' names attached, same resolution rules as the plain list. */
+    public static List<Ask> getMarkedAsks() {
+        List<Ask> out = new ArrayList<>();
+
+        for (String key : getMarkedKeys()) {
+            if (key.startsWith("stat:")) {
+                UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
+                if (stat == null || ShopPricing.isMaxed(stat)) continue;
+
+                ShopPricing.Price price = ShopPricing.getPrice(stat);
+                if (price != null && price.fish != null) {
+                    out.add(new Ask(ShopEntry.of(stat).getName(), price.fish));
+                }
+            } else if (key.startsWith("tackle:")) {
+                String[] parts = key.split(":", 3);
+                if (parts.length < 3) continue;
+
+                Tackle tackle;
+                try {
+                    tackle = Tackle.valueOf(parts[2]);
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+
+                if (TackleManager.isOwned(tackle)) continue;
+
+                ShopPricing.Price price = ShopPricing.getPrice(tackle);
+                if (price != null && price.fish != null) {
+                    out.add(new Ask(tackle.name, price.fish));
+                }
+            }
+        }
+
+        return out;
+    }
+
+    /**
+     * Everything asking for this species, by name: marked wares off the shopping list, and every
+     * open job whose ask a specimen of it could pay. What the tooltips' "Required by" line says.
+     */
+    public static List<String> getRequiredBy(FishSpec spec) {
+        List<String> out = new ArrayList<>();
+        if (spec == null) return out;
+
+        for (Ask ask : getMarkedAsks()) {
+            if (ask.requirement.couldBeSatisfiedBy(spec) && !out.contains(ask.name)) {
+                out.add(ask.name);
+            }
+        }
+
+        addAskingJobs(out, ask -> ask.couldBeSatisfiedBy(spec));
+
+        return out;
+    }
+
+    /** The same roll call for one particular specimen, tested against the actual asks. */
+    public static List<String> getRequiredBy(FishCatch entry) {
+        List<String> out = new ArrayList<>();
+        if (entry == null) return out;
+
+        for (Ask ask : getMarkedAsks()) {
+            if (ask.requirement.matches(entry) && !out.contains(ask.name)) {
+                out.add(ask.name);
+            }
+        }
+
+        addAskingJobs(out, ask -> ask.matches(entry));
+
+        return out;
+    }
+
+    /** Open jobs whose asks pass the test, each named once. */
+    protected static void addAskingJobs(List<String> out,
+                                        java.util.function.Predicate<FishRequirement> test) {
+        if (Global.getSector() == null) return;
+
+        for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
+                : Global.getSector().getIntelManager().getIntel()) {
+
+            if (!(intel instanceof catchrelease.campaign.fish.jobs.FishJob job)) continue;
+
+            for (FishRequirement ask : job.getAsks()) {
+                if (ask == null || !test.test(ask)) continue;
+
+                String name = job.getBaseName();
+                if (name != null && !out.contains(name)) out.add(name);
+                break;
+            }
+        }
+    }
+
     /** The quest-yellow dot, worn bottom right wherever a needed fish is shown. */
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
         //a dark seat under it, so the yellow reads on any icon
