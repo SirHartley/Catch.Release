@@ -86,12 +86,14 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         if (stowed.isEmpty()) return;
 
-        //bundle contents ARE its data, so growing it means replacing the stack, not appending
+        //bundle contents ARE its data, so growing it means replacing the stack, not appending.
+        //Exactly one crate is taken: identical crates stack, and taking the whole stack to put a
+        //single merged crate back would throw away the contents of every crate but one
         CargoStackAPI existing = FishItems.getBundleStack(stack.getCargo(), clicked.speciesId);
         if (existing != null) {
             SpecialItemData data = existing.getSpecialDataIfSpecial();
             stowed.addAll(FishItems.decodeBundle(data.getData()));
-            helper.removeFromAnyStack(CargoItemType.SPECIAL, data, (int) existing.getSize());
+            helper.removeFromAnyStack(CargoItemType.SPECIAL, data, 1);
         }
 
         helper.addItems(CargoItemType.SPECIAL, FishItems.toBundle(stowed), 1);

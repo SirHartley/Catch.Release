@@ -166,12 +166,17 @@ public class FishItems {
     }
 
     /**
-     * Puts a specimen away in its species' crate, making the crate if there is not one yet.
+     * Puts a specimen away wherever the hold says it should go.
      * <p>
-     * Where a landed fish goes. Loose specimens still exist - unpacking a crate makes them, and
-     * every buyer and every job spends them the same as before - but nothing produces one by
-     * default any more, because a good night's fishing produced forty of them and a hold with
-     * forty single-fish stacks in it is a hold nobody can read.
+     * Four cases, in order. A tidied hold has a pile, and everything lands in the pile. Otherwise a
+     * crate of the species takes it; otherwise a loose one of the species means this is the second,
+     * and the pair goes into a new crate along with any others; otherwise it stays loose.
+     * <p>
+     * The rule is company rather than count. A hold with forty single-fish stacks in it is a hold
+     * nobody can read, which is what crating is for - but the first of a species is not a stack of
+     * anything, and crating it puts one catch behind a click to look at it. Somebody who has tidied
+     * into a pile has already said which way they want it, and is not asking to be given loose fish
+     * back one at a time.
      * <p>
      * A crate's contents are its identity, so growing one means replacing the item rather than
      * adding to it.
@@ -179,15 +184,61 @@ public class FishItems {
     public static void stow(CargoAPI cargo, FishCatch catchData) {
         if (cargo == null || catchData == null) return;
 
+        CargoStackAPI pile = getPileStack(cargo);
+        if (pile != null) {
+            grow(cargo, pile, catchData, PILE);
+            return;
+        }
+
+        CargoStackAPI crate = getBundleStack(cargo, catchData.speciesId);
+        if (crate != null) {
+            grow(cargo, crate, catchData, BUNDLE);
+            return;
+        }
+
+        List<CargoStackAPI> loose = getFishStacks(cargo, catchData.speciesId);
+        if (!loose.isEmpty()) {
+            crate(cargo, loose, catchData);
+            return;
+        }
+
+        cargo.addSpecial(toItem(catchData), 1);
+    }
+
+    /**
+     * Drops one specimen into a list item that already exists, keeping it the kind it was.
+     * <p>
+     * Exactly one is taken off the stack. Identical crates stack together, and taking the whole
+     * stack off to put a single merged one back would throw away the contents of every crate but
+     * one. There is only ever one pile, so it makes no difference there.
+     */
+    protected static void grow(CargoAPI cargo, CargoStackAPI stack, FishCatch catchData, String id) {
+        SpecialItemData data = stack.getSpecialDataIfSpecial();
+
+        List<FishCatch> contents = new ArrayList<>();
+        contents.add(catchData);
+        contents.addAll(decodeBundle(data.getData()));
+
+        cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+        cargo.addSpecial(repack(id, contents), 1);
+    }
+
+    /** Sweeps every loose specimen of the species, plus the new one, into a crate of their own. */
+    protected static void crate(CargoAPI cargo, List<CargoStackAPI> loose, FishCatch catchData) {
         List<FishCatch> contents = new ArrayList<>();
         contents.add(catchData);
 
-        CargoStackAPI existing = getBundleStack(cargo, catchData.speciesId);
-        if (existing != null) {
-            SpecialItemData data = existing.getSpecialDataIfSpecial();
+        for (CargoStackAPI stack : loose) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
 
-            contents.addAll(decodeBundle(data.getData()));
-            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, existing.getSize());
+            FishCatch entry = FishCatch.decode(data.getData());
+            if (entry == null) continue;
+
+            //a stack is n identical specimens, and all n of them go in
+            int count = (int) stack.getSize();
+            for (int i = 0; i < count; i++) contents.add(entry);
+
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, count);
         }
 
         cargo.addSpecial(toBundle(contents), 1);
