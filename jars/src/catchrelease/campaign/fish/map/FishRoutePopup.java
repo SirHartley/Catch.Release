@@ -9,26 +9,34 @@ import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.TextFieldAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * The fishing planner: a card over the map that asks one question - which fish do you need? -
- * and turns the answer into a plotted route.
+ * The fishing planner: a card in the sidebar's slot that asks one question - which fish do you
+ * need? - and turns the answer into a plotted route.
  * <p>
- * Leads with what's already being asked for (open jobs and the shop's next rungs, each tagged
- * with who wants it), then every other known species below. Up to
- * {@link FishRoutePlanner#MAX_PICKS} picks; PLOT ROUTE hands them to the planner and closes.
- * Drawn by hand, like the pane's chips - the tooltip/button machinery belongs to the map screen
- * underneath - and every event inside the card is consumed so a click here never pans the map.
+ * Finding the fish works the way the sidebar itself works: a search field, one chip per type,
+ * and the species as rows - wanted ones (open jobs and the shop's next rungs, each tagged with
+ * who wants it) pinned first. Up to {@link FishRoutePlanner#MAX_PICKS} picks; the full-width
+ * PLOT ROUTE along the bottom hands them to the planner, and the X in the top corner is the
+ * way out. The list clips to its own viewport, so a half-scrolled row never sits on the button.
+ * <p>
+ * Drawn by hand like the pane's chips, except the search field, which is the game's own -
+ * mounted through {@link #mount} so the keyboard works.
  */
 public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
@@ -43,15 +51,32 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     public static final float ROW_HEIGHT = 24f;
     public static final float ICON = 18f;
     public static final float ICON_GAP = 8f;
-    public static final float HEADER_GAP = 6f;
     public static final float BUTTON_HEIGHT = 26f;
     public static final float SCROLL_STEP = 40f;
 
+    public static final float CLOSE_SIZE = 20f;
+
+    public static final float SEARCH_HEIGHT = 22f;
+    public static final float CHIP_HEIGHT = 22f;
+    public static final float CHIP_GAP = 4f;
+
+    /** Top of the search field, measured down from the card's top edge. */
+    public static final float SEARCH_TOP = 48f;
+
+    public static final String SEARCH_GHOST = "Search...";
+
     protected final Host host;
 
-    /** Everything shown, wanted species first - built once when the popup opens. */
+    /** Who is asking for a species, for the tag on its row - the pin order is the ask order. */
+    protected final Map<String, String> reasons = new LinkedHashMap<>();
+
+    /** What the current filter lets through, wanted species first. */
     protected final List<Row> rows = new ArrayList<>();
     protected final Set<String> selected = new LinkedHashSet<>();
+
+    protected final FishPresence.Filter filter = new FishPresence.Filter();
+
+    protected TextFieldAPI searchField;
 
     protected PositionAPI pos;
     protected float scroll = 0f;
@@ -67,26 +92,75 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     public FishRoutePopup(Host host) {
         this.host = host;
 
-        Set<String> suggested = new LinkedHashSet<>();
-
         for (FishRoutePlanner.Suggestion suggestion : FishRoutePlanner.getSuggestions()) {
-            FishSpec spec = FishPresence.getSpec(suggestion.speciesId);
-            if (spec == null || !suggested.add(spec.id)) continue;
+            reasons.putIfAbsent(suggestion.speciesId, suggestion.reason);
+        }
+
+        rebuildRows();
+    }
+
+    /** The one native control: the search field, added to the card's own panel. Call once. */
+    public void mount(CustomPanelAPI panel, float width) {
+        TooltipMakerAPI element = panel.createUIElement(width - PAD * 2f, SEARCH_HEIGHT, false);
+
+        searchField = element.addTextField(width - PAD * 2f, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 0f);
+        searchField.setText(SEARCH_GHOST);
+
+        panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
+    }
+
+    /** Same hand-worked ghost text as the sidebar's field - there is no change callback. */
+    @Override
+    public void advance(float amount) {
+        if (searchField == null) return;
+
+        String text = searchField.getText();
+        boolean focused = searchField.hasFocus();
+
+        if (focused && SEARCH_GHOST.equals(text)) {
+            searchField.deleteAll(false);
+            text = "";
+        } else if (!focused && (text == null || text.isEmpty())) {
+            searchField.setText(SEARCH_GHOST);
+            text = SEARCH_GHOST;
+        }
+
+        String effective = text == null || SEARCH_GHOST.equals(text) ? "" : text;
+        String current = filter.search == null ? "" : filter.search;
+
+        if (!effective.equals(current)) {
+            filter.search = effective;
+            rebuildRows();
+        }
+    }
+
+    /** Fresh rows for the current filter: pinned asks first, then the rest of what is known. */
+    protected void rebuildRows() {
+        rows.clear();
+
+        Set<String> pinned = new LinkedHashSet<>();
+
+        for (Map.Entry<String, String> ask : reasons.entrySet()) {
+            FishSpec spec = FishPresence.getSpec(ask.getKey());
+            if (spec == null || !FishPresence.isKnown(spec)) continue;
+            if (!filter.accepts(spec)) continue;
+            if (!pinned.add(spec.id)) continue;
 
             Row row = new Row();
             row.spec = spec;
-            row.reason = suggestion.reason;
+            row.reason = ask.getValue();
             rows.add(row);
         }
 
-        FishPresence.Filter everything = new FishPresence.Filter();
-        for (FishSpec spec : FishPresence.getShown(everything)) {
-            if (suggested.contains(spec.id)) continue;
+        for (FishSpec spec : FishPresence.getShown(filter)) {
+            if (pinned.contains(spec.id)) continue;
 
             Row row = new Row();
             row.spec = spec;
             rows.add(row);
         }
+
+        clampScroll();
     }
 
     @Override
@@ -111,6 +185,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
             if (!inside) continue;
 
+            //the search field is the game's own widget - its clicks have to reach it
+            if (isInSearch(mouseX, mouseY)) continue;
+
             if (event.isMouseScrollEvent()) {
                 scroll -= Math.signum(event.getEventValue()) * SCROLL_STEP;
                 clampScroll();
@@ -124,22 +201,40 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 continue;
             }
 
-            //everything else inside the card stays inside the card - the map must not pan under it
+            //everything else inside the card stays inside the card
             if (event.isMouseEvent()) event.consume();
         }
     }
 
-    protected void handleClick() {
-        //the two buttons along the bottom
-        float buttonsY = pos.getY() + PAD;
-        float half = (pos.getWidth() - PAD * 3f) / 2f;
+    protected boolean isInSearch(float x, float y) {
+        float top = pos.getY() + pos.getHeight() - SEARCH_TOP;
 
-        if (mouseY >= buttonsY && mouseY <= buttonsY + BUTTON_HEIGHT) {
-            if (mouseX <= pos.getX() + PAD + half) {
-                plot();
-            } else {
-                host.onPlannerClosed();
-            }
+        return x >= pos.getX() + PAD && x <= pos.getX() + pos.getWidth() - PAD
+                && y <= top && y >= top - SEARCH_HEIGHT;
+    }
+
+    protected void handleClick() {
+        //the way out, top right corner
+        if (isInClose(mouseX, mouseY)) {
+            host.onPlannerClosed();
+            return;
+        }
+
+        //the type chips
+        int chip = chipIndexAt(mouseX, mouseY);
+        if (chip >= 0) {
+            FishType type = FishType.values()[chip];
+            if (!filter.types.remove(type)) filter.types.add(type);
+            rebuildRows();
+            return;
+        }
+
+        //the one button along the bottom
+        float buttonsY = pos.getY() + PAD;
+        if (mouseY >= buttonsY && mouseY <= buttonsY + BUTTON_HEIGHT
+                && mouseX >= pos.getX() + PAD
+                && mouseX <= pos.getX() + pos.getWidth() - PAD) {
+            plot();
             return;
         }
 
@@ -155,6 +250,34 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
+    protected boolean isInClose(float x, float y) {
+        float left = pos.getX() + pos.getWidth() - PAD - CLOSE_SIZE;
+        float top = pos.getY() + pos.getHeight() - PAD * 0.5f;
+
+        return x >= left && x <= left + CLOSE_SIZE + PAD * 0.5f
+                && y <= top && y >= top - CLOSE_SIZE - PAD * 0.5f;
+    }
+
+    protected int chipIndexAt(float x, float y) {
+        float top = getChipTop();
+        if (y > top || y < top - CHIP_HEIGHT) return -1;
+
+        FishType[] types = FishType.values();
+        float innerWidth = pos.getWidth() - PAD * 2f;
+        float chipWidth = (innerWidth - CHIP_GAP * (types.length - 1)) / types.length;
+
+        float fromLeft = x - (pos.getX() + PAD);
+        if (fromLeft < 0f) return -1;
+
+        int index = (int) (fromLeft / (chipWidth + CHIP_GAP));
+        if (index >= types.length) return -1;
+
+        //the gap between chips belongs to nobody
+        if (fromLeft - index * (chipWidth + CHIP_GAP) > chipWidth) return -1;
+
+        return index;
+    }
+
     protected void plot() {
         if (selected.isEmpty()) return;
 
@@ -165,23 +288,17 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         host.onRoutePlotted(route);
     }
 
-    /** The list's viewport: below the title, above the buttons. */
+    protected float getChipTop() {
+        return pos.getY() + pos.getHeight() - SEARCH_TOP - SEARCH_HEIGHT - 6f;
+    }
+
+    /** The list's viewport: below the chips, above the button. */
     protected float getListTop() {
-        return pos.getY() + pos.getHeight() - PAD - getTitleHeight() - HEADER_GAP;
+        return getChipTop() - CHIP_HEIGHT - 8f;
     }
 
     protected float getListBottom() {
         return pos.getY() + PAD + BUTTON_HEIGHT + PAD;
-    }
-
-    protected float getTitleHeight() {
-        LazyFont body = ShopUi.getBodyFont();
-        LazyFont small = ShopUi.getSmallFont();
-
-        float bodyHeight = body == null ? 16f : body.getBaseHeight();
-        float smallHeight = small == null ? 13f : small.getBaseHeight();
-
-        return bodyHeight + 4f + smallHeight + 8f;
     }
 
     protected int rowIndexAt(float x, float y) {
@@ -193,6 +310,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected void clampScroll() {
+        if (pos == null) return;
+
         float visible = getListTop() - getListBottom();
         float content = rows.size() * ROW_HEIGHT;
 
@@ -221,13 +340,70 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 Misc.getBasePlayerColor(), body.getBaseHeight());
         title.draw(Math.round(x + PAD), Math.round(y + h - PAD));
 
+        renderClose(small, alphaMult);
+
         LazyFont.DrawableString hint = small.createText(
                 "Pick up to " + FishRoutePlanner.MAX_PICKS + " - wanted fish first",
                 Misc.getGrayColor(), small.getBaseHeight());
         hint.draw(Math.round(x + PAD), Math.round(y + h - PAD - title.getHeight() - 4f));
 
+        renderChips(small, alphaMult);
         renderRows(small, alphaMult);
-        renderButtons(small, alphaMult);
+        renderPlotButton(small, alphaMult);
+    }
+
+    /** The X, top right, drawn like the route's own close label wears it. */
+    protected void renderClose(LazyFont small, float alphaMult) {
+        float left = pos.getX() + pos.getWidth() - PAD - CLOSE_SIZE;
+        float bottom = pos.getY() + pos.getHeight() - PAD * 0.5f - CLOSE_SIZE;
+
+        boolean hovered = isInClose(mouseX, mouseY);
+        Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+        ShopUi.drawQuad(left, bottom, CLOSE_SIZE, CLOSE_SIZE, Misc.getDarkPlayerColor(),
+                (hovered ? 0.5f : 0.3f) * alphaMult);
+
+        LazyFont.DrawableString mark = small.createText("X", color, small.getBaseHeight());
+        mark.draw(Math.round(left + (CLOSE_SIZE - mark.getWidth()) * 0.5f),
+                Math.round(bottom + (CLOSE_SIZE + mark.getHeight()) * 0.5f));
+    }
+
+    /** The type chips, the sidebar's idea at row scale: lit while shown, dark while hidden. */
+    protected void renderChips(LazyFont small, float alphaMult) {
+        FishType[] types = FishType.values();
+
+        float innerWidth = pos.getWidth() - PAD * 2f;
+        float chipWidth = (innerWidth - CHIP_GAP * (types.length - 1)) / types.length;
+        float top = getChipTop();
+
+        for (int i = 0; i < types.length; i++) {
+            FishType type = types[i];
+
+            float left = pos.getX() + PAD + i * (chipWidth + CHIP_GAP);
+            float bottom = top - CHIP_HEIGHT;
+
+            //an empty set means everything shows - the chips only narrow once any are on
+            boolean on = filter.types.isEmpty() || filter.types.contains(type);
+            boolean lit = filter.types.contains(type);
+            boolean hovered = mouseX >= left && mouseX <= left + chipWidth
+                    && mouseY >= bottom && mouseY <= top;
+
+            if (lit) {
+                ShopUi.drawQuad(left, bottom, chipWidth, CHIP_HEIGHT, type.color,
+                        (hovered ? 0.5f : 0.35f) * alphaMult);
+            } else {
+                ShopUi.drawQuad(left, bottom, chipWidth, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
+                        (hovered ? 0.35f : 0.18f) * alphaMult);
+            }
+            ShopUi.drawQuad(left, bottom, chipWidth, 2f, type.color,
+                    (lit ? 0.95f : 0.35f) * alphaMult);
+
+            LazyFont.DrawableString label = small.createText(type.label,
+                    ShopUi.withAlpha(on ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(),
+                            alphaMult), small.getBaseHeight());
+            label.draw(Math.round(left + (chipWidth - label.getWidth()) * 0.5f),
+                    Math.round(bottom + (CHIP_HEIGHT + label.getHeight()) * 0.5f));
+        }
     }
 
     protected void renderRows(LazyFont small, float alphaMult) {
@@ -236,19 +412,24 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         float x = pos.getX();
         float w = pos.getWidth();
 
+        //the viewport is a hard edge: a half-scrolled row ends at it instead of lying on
+        //whatever is beyond it
+        ShopUi.startClip(x, bottom, w, top - bottom);
+
         float rowTop = top + scroll;
 
         for (Row row : rows) {
             float rowBottom = rowTop - ROW_HEIGHT;
 
-            if (rowTop < bottom || rowBottom > top) {
+            if (rowBottom > top || rowTop < bottom) {
                 rowTop = rowBottom;
                 continue;
             }
 
             boolean picked = selected.contains(row.spec.id);
             boolean hovered = mouseY <= rowTop && mouseY > rowBottom
-                    && mouseX >= x && mouseX <= x + w;
+                    && mouseX >= x && mouseX <= x + w
+                    && mouseY <= top && mouseY >= bottom;
 
             if (picked) {
                 ShopUi.drawQuad(x + PAD * 0.5f, rowBottom, w - PAD, ROW_HEIGHT,
@@ -286,23 +467,18 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
             rowTop = rowBottom;
         }
+
+        ShopUi.endClip();
     }
 
-    protected void renderButtons(LazyFont small, float alphaMult) {
-        float x = pos.getX();
+    /** One full-width button: plotting is the card's whole job, so it gets the whole row. */
+    protected void renderPlotButton(LazyFont small, float alphaMult) {
+        float x = pos.getX() + PAD;
         float y = pos.getY() + PAD;
-        float half = (pos.getWidth() - PAD * 3f) / 2f;
+        float width = pos.getWidth() - PAD * 2f;
 
         boolean canPlot = !selected.isEmpty();
-
-        drawButton(small, x + PAD, y, half, "PLOT ROUTE (" + selected.size() + ")",
-                canPlot ? Misc.getBasePlayerColor() : Misc.getGrayColor(), alphaMult);
-        drawButton(small, x + PAD * 2f + half, y, half, "CLOSE",
-                Misc.getBasePlayerColor(), alphaMult);
-    }
-
-    protected void drawButton(LazyFont small, float x, float y, float width,
-                              String label, Color color, float alphaMult) {
+        Color color = canPlot ? Misc.getBasePlayerColor() : Misc.getGrayColor();
 
         ShopUi.drawQuad(x, y, width, BUTTON_HEIGHT, Misc.getDarkPlayerColor(), 0.4f * alphaMult);
         ShopUi.drawQuad(x, y, width, 1f, color, alphaMult);
@@ -310,7 +486,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(x, y, 1f, BUTTON_HEIGHT, color, alphaMult);
         ShopUi.drawQuad(x + width - 1f, y, 1f, BUTTON_HEIGHT, color, alphaMult);
 
-        LazyFont.DrawableString text = small.createText(label, color, small.getBaseHeight());
+        LazyFont.DrawableString text = small.createText(
+                "PLOT ROUTE (" + selected.size() + ")", color, small.getBaseHeight());
         text.draw(Math.round(x + (width - text.getWidth()) * 0.5f),
                 Math.round(y + (BUTTON_HEIGHT + text.getHeight()) * 0.5f));
     }
