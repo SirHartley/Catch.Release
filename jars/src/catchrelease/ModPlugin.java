@@ -4,6 +4,7 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
 import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
@@ -43,6 +44,9 @@ public class ModPlugin extends BaseModPlugin {
 
         // jobs offering fish for trade
         FleetQuestSpawner.register();
+
+        // the wandering fisherman - transient watcher, the fleet itself is what persists
+        FishermanSpawner.register();
 
         // data
         UpgradeManager.getInstance().updateBaseValues();
