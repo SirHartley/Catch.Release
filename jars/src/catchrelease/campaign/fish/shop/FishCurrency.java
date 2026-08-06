@@ -141,7 +141,7 @@ public class FishCurrency {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (data == null) continue;
 
-            boolean isBundle = FishItems.BUNDLE.equals(data.getId());
+            boolean isBundle = FishItems.isContainer(data);
             if (isBundle != bundles) continue;
 
             if (!isBundle) {
@@ -168,7 +168,7 @@ public class FishCurrency {
             if (kept.size() == contents.size()) continue;
 
             cargo.removeItems(CargoItemType.SPECIAL, data, 1);
-            if (!kept.isEmpty()) cargo.addSpecial(FishItems.toBundle(kept), 1);
+            if (!kept.isEmpty()) cargo.addSpecial(FishItems.repack(data.getId(), kept), 1);
         }
 
         return amount;
@@ -207,7 +207,7 @@ public class FishCurrency {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (data == null) continue;
 
-            boolean isBundle = FishItems.BUNDLE.equals(data.getId());
+            boolean isBundle = FishItems.isContainer(data);
             if (isBundle != bundles) continue;
 
             List<FishCatch> contents = read(stack);
@@ -228,7 +228,7 @@ public class FishCurrency {
 
             List<FishCatch> left = new ArrayList<>(contents.subList(take, contents.size()));
             if (!left.isEmpty()) {
-                cargo.addSpecial(FishItems.toBundle(left), 1);
+                cargo.addSpecial(FishItems.repack(data.getId(), left), 1);
             }
         }
 
@@ -263,7 +263,7 @@ public class FishCurrency {
         SpecialItemData data = stack.getSpecialDataIfSpecial();
         if (data == null) return out;
 
-        if (FishItems.BUNDLE.equals(data.getId())) {
+        if (FishItems.isContainer(data)) {
             out.addAll(FishItems.decodeBundle(data.getData()));
             return out;
         }

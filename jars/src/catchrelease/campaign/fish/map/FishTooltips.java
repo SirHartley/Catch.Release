@@ -1,13 +1,14 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 
 /**
  * The one species tooltip, used everywhere a fish icon answers a hover - the sidebar's rows,
- * the intel Planets panel, anywhere else that grows one. Portrait (or the generic mark for a
+ * the intel Planets panel, anywhere else that grows one. Portrait (or the silhouette, for a
  * species nobody has landed), name in the rarity's colour, type, the catch record, where it
  * lives, and the codex key - so every corner of the UI tells the same story about the same
  * fish.
@@ -46,16 +47,35 @@ public final class FishTooltips {
                 boolean caught = FishLog.isCaught(spec.id);
                 FishLogEntry logged = FishLog.get(spec.id);
 
-                //generic mark for anything nobody's seen - survey tells where it lives, not
-                //what it looks like
-                String icon = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-                if (icon != null && !icon.isEmpty()) {
-                    try {
-                        Global.getSettings().loadTexture(icon);
-                        tooltip.addImage(icon, 48f, 48f, 0f);
-                    } catch (Exception e) {
-                        //a tooltip without a portrait is still a tooltip
+                //the silhouette for anything nobody's seen - survey tells where it lives, not
+                //what it looks like. addImage can't tint, so the uncaught case paints itself
+                if (caught) {
+                    String icon = FishCodex.getIcon(spec);
+                    if (icon != null && !icon.isEmpty()) {
+                        try {
+                            Global.getSettings().loadTexture(icon);
+                            tooltip.addImage(icon, 48f, 48f, 0f);
+                        } catch (Exception e) {
+                            //a tooltip without a portrait is still a tooltip
+                        }
                     }
+                } else {
+                    tooltip.addCustom(Global.getSettings().createCustom(48f, 48f,
+                            new BaseCustomUIPanelPlugin() {
+                                private PositionAPI pos;
+
+                                @Override
+                                public void positionChanged(PositionAPI position) {
+                                    pos = position;
+                                }
+
+                                @Override
+                                public void render(float alphaMult) {
+                                    if (pos == null) return;
+                                    FishIcons.draw(spec, pos.getCenterX(), pos.getCenterY(),
+                                            48f, alphaMult);
+                                }
+                            }), 0f);
                 }
 
                 tooltip.addPara(spec.getDisplayName(), spec.rarity.color, 8f);

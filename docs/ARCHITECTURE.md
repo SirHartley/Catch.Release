@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 184 Java files across eight top-level packages, plus
+What is where, and which file to open first. 189 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -202,7 +202,6 @@ Jobs hung on a hull that was already out there, which then has to still be there
 |---|---|
 | `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()` |
 | `FleetQuestSpawner.java` | Picks a civilian hull already in the player's system and hangs an offer on it. Spawns nothing |
-| `FleetQuestMarker.java` | The muted-cyan `!` while an offer is only an offer — vanilla's own sprite and geometry, a colour that is not vanilla's |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
 
@@ -226,7 +225,8 @@ trades while it does.
 |---|---|
 | `FishermanSpawner.java` | The daily roll: where the boat may spawn, and what leans the odds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
-| `FishermanDialog.java` | Talking to it: survey ladder, outfitter hand-off, fish buyer, rumors |
+| `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
+| `FishermanSurveyDialog.java` | The chart counter: this visit's rolled shelf as silhouette cards in the outfitter's dress |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
 | `FishermanConstants.java` | Every number the above read |
 
@@ -294,9 +294,10 @@ Fish in cargo.
 
 | File | What it does |
 |---|---|
-| `FishItems.java` | Ids and the encode/decode used by both item kinds |
+| `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes |
 | `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
-| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks |
+| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile |
+| `FishPileItemPlugin.java` | Every fish aboard on one line; right-click breaks it back into one crate per species |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
 
 ### `campaign/fish/crab`
@@ -327,6 +328,7 @@ The sector-map fish filter.
 | `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges and the close-route label |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
+| `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot: search, type chips, pick up to five, plot |
@@ -442,6 +444,7 @@ Shader and GL machinery.
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
 | `plugins/WarpedRectRenderer.java` | A sprite warped per-vertex by a grid, no shader |
+| `renderers/FleetMarkerRenderer.java` | A small icon off a fleet's corner, in vanilla's own geometry and whoever's colour — the quest offer's cyan `!`, the Fisherman's own icon |
 | `renderers/RippleRingRenderer.java` | One growing, fading ring, pinned to one location |
 | `renderers/SimpleRippleDataRunner.java` | Advances and expires a `RippleData` |
 | `helper/Stencil.java` | Depth-mask sprite masking. Stencil-buffer variants are deprecated |
@@ -674,6 +677,17 @@ until the specimen has finished being tallied, so `elapsed` is zero for the whol
 readout — a backdrop driven off it hung motionless over an open card. `advanceBackdrop()` runs from
 the moment the card exists and is what the coin rain reads; `advance()` stays the list's own.
 
+**A landed fish goes into a crate, not into the hold.** `FishItems.stow()` is the only landing
+path — a good night produced forty single-fish stacks and a hold nobody could read. Loose specimens
+still exist and every buyer and job still spends them; nothing *makes* one by default any more.
+
+**A crate and a pile are the same shape, and that is the whole reason the pile was cheap.**
+`FishItems.isContainer()` is the question everything spending, selling or counting fish is really
+asking — it used to be spelled `BUNDLE.equals(...)` at a dozen call sites, which is a line that has
+to be found again every time a container is added. Anything taking fish out of one must put the
+remainder back with `FishItems.repack(id, …)` rather than `toBundle`: a part-spent pile rebuilt as a
+crate would file every species in it under whichever happened to be first.
+
 **A hand-drawn control has no tooltip, and cannot grow one where it lives.** The shopping-list ring
 is painted by `ShopRowPlugin` inside the list's scissor box, so a card drawn there would be sliced
 off at the edge of the list — and it is not a `ButtonAPI`, so there is nothing to hang a stock
@@ -699,6 +713,13 @@ boolean with one colour, and setting it on somebody's trade fleet would also mak
 as story furniture. `FleetQuestMarker` copies vanilla's sprite, corner and zoom arithmetic exactly
 and changes only the tint. Once the offer is accepted the cyan comes off and vanilla's own takes
 over — at that point it is no longer passive.
+
+**The Fisherman is pinned visible while anybody is in the system to see him.** His lamps are drawn
+wherever the boat is, whether or not the hull carrying them can be made out — so a Fisherman at the
+edge of a sweep was two searchlights working the dark on their own. `keepVisible()` does both halves:
+a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrightness(1f)` every tick,
+which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
+re-applied each tick rather than set at spawn, so it heals a boat that predates it.
 
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a

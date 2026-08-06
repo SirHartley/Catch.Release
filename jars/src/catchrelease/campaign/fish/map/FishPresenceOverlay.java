@@ -1,17 +1,12 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.rendering.helper.Disc;
-import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
@@ -226,17 +221,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 FishSpec spec = FishPresence.getSpec(id);
                 if (spec == null) continue;
 
-                String iconPath = FishLog.isCaught(id)
-                        ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-                SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-                if (icon != null) {
-                    icon.setSize(ROUTE_ICON, ROUTE_ICON);
-                    icon.setColor(Color.WHITE);
-                    icon.setNormalBlend();
-                    icon.setAlphaMult(alphaMult);
-                    icon.renderAtCenter(Math.round(iconX), Math.round(by));
-                }
+                //the art once landed, its rimmed silhouette while only surveyed
+                FishIcons.draw(spec, iconX, by, ROUTE_ICON, alphaMult);
 
                 iconX += ROUTE_ICON + 2f;
             }

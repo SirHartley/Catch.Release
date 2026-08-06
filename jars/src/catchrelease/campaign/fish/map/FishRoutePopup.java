@@ -1,14 +1,10 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -66,7 +62,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
     /** Top of the search field, measured down from the card's top edge - the title block plus
      *  the same breathing room the field keeps to the chips below it. */
-    public static final float SEARCH_TOP = 34f;
+    public static final float SEARCH_TOP = 39f;
 
     /** The help mark beside the X, carrying the card's explanation as a hover. */
     public static final float HELP_SIZE = 20f;
@@ -126,6 +122,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         //fully opaque - a translucent face still vanished into the card's black
         searchField.setBgColor(ShopUi.withAlpha(Misc.getDarkPlayerColor(), 1f));
+
+        //the face reads light against the card - the type has to go the other way
+        searchField.setColor(Color.BLACK);
 
         searchSlot = panel.addUIElement(element).inTL(PAD, SEARCH_TOP);
     }
@@ -572,12 +571,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                     ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult), size, CARD_TEXT_WIDTH));
         }
 
-        String iconPath = caught ? FishCodex.getIcon(spec) : FishConstants.ITEM_ICON_FALLBACK;
-        SpriteAPI portrait = SpriteLoader.loadSprite(iconPath);
-        float portraitSize = portrait == null ? 0f : CARD_PORTRAIT;
-
-        float height = CARD_PAD * 2f + portraitSize
-                + (portraitSize > 0f ? CARD_LINE_GAP : 0f);
+        float height = CARD_PAD * 2f + CARD_PORTRAIT + CARD_LINE_GAP;
         for (LazyFont.DrawableString line : body) height += line.getHeight() + CARD_LINE_GAP;
         height -= CARD_LINE_GAP;
 
@@ -595,15 +589,10 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         float textY = bottom + height - CARD_PAD;
 
-        if (portrait != null) {
-            portrait.setSize(CARD_PORTRAIT, CARD_PORTRAIT);
-            portrait.setColor(Color.WHITE);
-            portrait.setNormalBlend();
-            portrait.setAlphaMult(alphaMult);
-            portrait.renderAtCenter(Math.round(left + CARD_PAD + CARD_PORTRAIT * 0.5f),
-                    Math.round(textY - CARD_PORTRAIT * 0.5f));
-            textY -= CARD_PORTRAIT + CARD_LINE_GAP;
-        }
+        //the art once landed, its rimmed silhouette while only surveyed
+        FishIcons.draw(spec, left + CARD_PAD + CARD_PORTRAIT * 0.5f,
+                textY - CARD_PORTRAIT * 0.5f, CARD_PORTRAIT, alphaMult);
+        textY -= CARD_PORTRAIT + CARD_LINE_GAP;
 
         for (LazyFont.DrawableString line : body) {
             line.draw(Math.round(left + CARD_PAD), Math.round(textY));
@@ -713,19 +702,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                         Misc.getDarkPlayerColor(), 0.25f * alphaMult);
             }
 
-            //the art only once one has been landed - a survey knows the name, not the face
-            String iconPath = FishLog.isCaught(row.spec.id)
-                    ? FishCodex.getIcon(row.spec) : FishConstants.ITEM_ICON_FALLBACK;
-
-            SpriteAPI icon = SpriteLoader.loadSprite(iconPath);
-            if (icon != null) {
-                icon.setSize(ICON, ICON);
-                icon.setColor(Color.WHITE);
-                icon.setNormalBlend();
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(Math.round(x + PAD + ICON * 0.5f),
-                        Math.round(rowBottom + ROW_HEIGHT * 0.5f));
-            }
+            //the art once landed, its rimmed silhouette while only surveyed
+            FishIcons.draw(row.spec, x + PAD + ICON * 0.5f,
+                    rowBottom + ROW_HEIGHT * 0.5f, ICON, alphaMult);
 
             //the shopping-list dot, bottom right of the icon, same corner as everywhere
             if (ShopMarks.isMarked(row.spec)) {
@@ -738,7 +717,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             name.draw(Math.round(x + PAD + ICON + ICON_GAP),
                     Math.round(rowBottom + (ROW_HEIGHT + name.getHeight()) * 0.5f));
 
-            if (row.reason != null) {
+            //the marked tag retired: the yellow dot on the icon already says it, and the word
+            //ran into long names. Only a job's ask still gets a written-out tag
+            if (row.reason != null && !"marked".equals(row.reason)) {
                 LazyFont.DrawableString reason = small.createText(row.reason,
                         Misc.getHighlightColor(), small.getBaseHeight());
                 reason.draw(Math.round(x + pos.getWidth() - PAD - reason.getWidth()),
