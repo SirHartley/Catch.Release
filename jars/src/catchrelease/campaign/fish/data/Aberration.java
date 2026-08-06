@@ -34,14 +34,25 @@ public class Aberration {
      * @param location   the system itself, for the abyssal tag its own terrain carries
      */
     public static float at(Vector2f locInHyper, LocationAPI location) {
+        //two specimens out of the same rupture should not read identically
+        return MathUtils.clamp(baseAt(locInHyper, location)
+                + MathUtils.getRandomNumberInRange(-FishConstants.ABERRATION_SPREAD,
+                        FishConstants.ABERRATION_SPREAD), 0f, 1f);
+    }
+
+    /**
+     * The place's own reading, with none of the per-catch jitter on it.
+     * <p>
+     * What a habitat is tested against, since a species that lives where reality is thin lives there
+     * whether or not this particular specimen rolled high - the spread is about the specimen, and
+     * putting it into the habitat would make a fish's range flicker between two spawns in one pond.
+     */
+    public static float baseAt(Vector2f locInHyper, LocationAPI location) {
         if (locInHyper == null) return 0f;
 
         float worst = getAbyssShare(locInHyper, location);
         worst = Math.max(worst, getHypershuntShare(locInHyper));
         worst = Math.max(worst, getSlipstreamShare(locInHyper));
-
-        //two specimens out of the same rupture should not read identically
-        worst += MathUtils.getRandomNumberInRange(-FishConstants.ABERRATION_SPREAD, FishConstants.ABERRATION_SPREAD);
 
         return MathUtils.clamp(worst, 0f, 1f);
     }

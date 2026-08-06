@@ -1,5 +1,6 @@
 package catchrelease.campaign.ponds.entities;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.loading.SpriteLoader;
@@ -142,7 +143,7 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
         Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle);
         Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, entity.getRadius(), angle - 180);
         SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation())));
+                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(entity.getContainingLocation(), CatchImplement.POND)));
         mote.setLocation(spawnLoc.x, spawnLoc.y);
     }
 

@@ -356,14 +356,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     /** How many species live here that the player has never heard of - counted, never named. */
     protected int getUnknownCount(StarSystemAPI system) {
-        SectorRegion at = SectorRegion.of(system);
-        if (at == null) return 0;
-
         int count = 0;
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
-            if (!spec.regions.contains(at)) continue;
+            if (!FishPresence.livesIn(spec, system)) continue;
             if (FishPresence.isKnown(spec)) continue;
 
             count++;
@@ -459,12 +456,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         if (cached != null) return cached;
 
         List<FishSpec> fish = new ArrayList<>();
-        SectorRegion at = SectorRegion.of(system);
 
-        if (at != null) {
+        {
             for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
                 if (spec == null || spec.id == null) continue;
-                if (!spec.regions.contains(at)) continue;
+                if (!FishPresence.livesIn(spec, system)) continue;
                 if (!FishPresence.isKnown(spec)) continue;
 
                 fish.add(spec);

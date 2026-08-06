@@ -1,11 +1,19 @@
 package catchrelease.campaign.fish.data;
 
+import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
  * One row of data/campaign/fish.csv. Every criterion is "blank means anything" - a row with only an
- * id can be caught anywhere; narrow it with star types, system tags, or {@link SectorRegion}s.
+ * id can be caught anywhere; narrow it with {@link SectorRegion}s, star colour, constellation age,
+ * a coherence band, system tags, or which gear can reach it at all.
+ * <p>
+ * The axes stack, and that is the point of having several: a row that names four regions and
+ * nothing else is a fish in half the sector, which is a fish with no home. Two narrow axes read as
+ * a place somebody could describe - "old constellations out on the western rim, where the fabric is
+ * thin" - where one wide one reads as noise.
  */
 public class FishSpec {
 
@@ -41,9 +49,28 @@ public class FishSpec {
     public float weightMax = 2f;
 
     //where it lives - all empty means "anywhere"
-    public Set<String> starTypes = new LinkedHashSet<>();
+    public Set<StarColour> starColours = new LinkedHashSet<>();
     public Set<String> systemTags = new LinkedHashSet<>();
     public Set<SectorRegion> regions = new LinkedHashSet<>();
+
+    /** Which ages of constellation it turns up in. Empty is any age, and so is a lone system. */
+    public Set<StarAge> constellationAges = new LinkedHashSet<>();
+
+    /**
+     * The band of {@link Aberration} it will live in, 0 to 1. The default is the whole range, so a
+     * row that says nothing is a fish that does not care how well reality is holding.
+     */
+    public float minAberration = 0f;
+    public float maxAberration = 1f;
+
+    /**
+     * Which gear can reach it at all, or empty for either.
+     * <p>
+     * The same axis a buyer asks about - a specimen records what made it reachable, so a species
+     * that only ever comes up out of a rupture and a buyer who only wants pond-caught are two halves
+     * of one vocabulary rather than two systems that happen to agree.
+     */
+    public Set<CatchImplement> reachedBy = new LinkedHashSet<>();
 
     /** Falls back to id if unnamed. */
     public String getDisplayName() {
@@ -60,22 +87,53 @@ public class FishSpec {
     }
 
     /**
-     * Whether this fish can turn up in the given system.
-     *
-     * @param starType   star's planet type id (e.g. "star_red"), null if none
-     * @param systemTags tags on the system
-     * @param region     part of the sector the system is in
+     * Whether the row says anything at all about where this lives. What "location data" means: a
+     * species with no criterion is everywhere, and there is nothing to sell, shade or write down.
      */
-    public boolean matches(String starType, Set<String> systemTags, SectorRegion region) {
-        if (!starTypes.isEmpty() && (starType == null || !starTypes.contains(starType))) return false;
-        if (!regions.isEmpty() && (region == null || !regions.contains(region))) return false;
+    public boolean hasHabitat() {
+        return !regions.isEmpty() || !starColours.isEmpty() || !constellationAges.isEmpty()
+                || !systemTags.isEmpty() || !reachedBy.isEmpty()
+                || minAberration > 0f || maxAberration < 1f;
+    }
 
-        if (!this.systemTags.isEmpty()) {
-            if (systemTags == null) return false;
+    /** Whether this fish lives here at all, leaving aside what is being fished with. */
+    public boolean matches(FishHabitat where) {
+        return matches(where, null);
+    }
+
+    /**
+     * Whether this fish can turn up here, on this gear.
+     * <p>
+     * One question with one answer, asked by the spawner deciding what a pond produces and by the
+     * map deciding what to shade. They used to be two: the map tested the region alone and shaded
+     * systems where the spawner would never have offered the fish.
+     *
+     * @param how what would be reaching it, or null to ignore the question - which is what the map
+     *            wants, since a species lives where it lives whether or not the right rig is fitted
+     */
+    public boolean matches(FishHabitat where, CatchImplement how) {
+        if (where == null) return false;
+
+        if (!regions.isEmpty() && (where.region == null || !regions.contains(where.region))) return false;
+        if (!starColours.isEmpty() && !starColours.contains(where.star)) return false;
+
+        //a system in no constellation has no age, which is not the same as being the wrong one -
+        //but a row that asked for an age is asking for something this place cannot answer
+        if (!constellationAges.isEmpty()
+                && (where.age == null || !constellationAges.contains(where.age))) {
+            return false;
+        }
+
+        if (where.aberration < minAberration || where.aberration > maxAberration) return false;
+
+        if (how != null && !reachedBy.isEmpty() && !reachedBy.contains(how)) return false;
+
+        if (!systemTags.isEmpty()) {
+            if (where.tags == null) return false;
 
             boolean found = false;
-            for (String tag : this.systemTags) {
-                if (systemTags.contains(tag)) {
+            for (String tag : systemTags) {
+                if (where.tags.contains(tag)) {
                     found = true;
                     break;
                 }

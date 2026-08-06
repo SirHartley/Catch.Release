@@ -186,7 +186,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         List<SurveyOffer> offers = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || spec.regions.isEmpty()) continue;
+            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
 
             SurveyOffer offer = new SurveyOffer();
