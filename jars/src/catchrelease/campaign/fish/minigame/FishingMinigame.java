@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
@@ -103,7 +104,8 @@ public class FishingMinigame {
     protected void rollTreasure() {
         takenTreasures.clear();
         treasureClock = 0f;
-        treasuresLeft = TreasureRoller.rollCount(tackle.treasureChanceMult);
+        treasuresLeft = TreasureRoller.rollCount(
+                tackle.treasureChanceMult * FishRumors.getLootMultForPlayer());
 
         treasure = spawnTreasure();
     }

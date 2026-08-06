@@ -67,9 +67,31 @@ public class FleetQuest extends FishJob {
 
         if (!quest.create(null, false)) return null;
 
-        quest.accept(null, null);
-
         return quest;
+    }
+
+    /**
+     * The player has agreed: the mission starts and the fleet settles down to wait for delivery.
+     * <p>
+     * Accepting is what raises the intel, so it is not done at spawn - a job nobody has agreed to
+     * has no business in the log, and one that is turned down should leave nothing behind at all.
+     * {@link FleetQuestEncounter} watches for {@link #TAKEN_FLAG} and calls this.
+     */
+    public void take() {
+        if (takenUp) return;
+        takenUp = true;
+
+        accept(null, null);
+
+        hold();
+    }
+
+    /** Whether {@link #take} has run, so a second look at the flag cannot start the job twice. */
+    protected boolean takenUp = false;
+
+    /** Gives up on an offer that was never taken, leaving the hull as it was found. */
+    public void abandon() {
+        release();
     }
 
     /** Whether this hull already has a job on it, so a second one is never stacked onto it. */
@@ -121,6 +143,19 @@ public class FleetQuest extends FishJob {
      * sidetrack flag against its own AI. Keyed to the job's stage, so ending the job lifts the pin.
      */
     protected void pin() {
+        mark();
+
+        // A fleet that is stuck where it is was stuck before the player arrived, so it holds from the
+        // start. One that came looking has to be able to fly - it is pinned when the job is taken.
+        if (!type.wandering) hold();
+    }
+
+    /**
+     * Marks the hull as carrying an offer: mission-important so despawn sweeps skip it and the
+     * exclamation shows, the memory the dialogue rows read, and the flags that stop its own AI
+     * picking a fight or wandering off after something else.
+     */
+    protected void mark() {
         // Must be Misc's overload, not the hub mission's - same signature, but the mission's second
         // argument is a $-prefixed memory key, while Misc's is a plain reason string; release() pairs
         // with Misc.makeUnimportant, which is also reason-based.
@@ -130,13 +165,23 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
         giver.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
         giver.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true);
+
+        giver.setNoFactionInName(true);
+        giver.setName(type.title);
+    }
+
+    /**
+     * Sits the fleet down where it is until the catch arrives: no jump, and a hold assignment long
+     * enough that it cannot run out - the assignment queue sends any fleet with no orders home, which
+     * is the exact failure this prevents.
+     */
+    protected void hold() {
+        if (giver == null || giver.isExpired()) return;
+
         giver.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_JUMP, true);
 
         giver.clearAssignments();
         giver.addAssignment(FleetAssignment.HOLD, null, HOLD_DAYS, type.actionText);
-
-        giver.setNoFactionInName(true);
-        giver.setName(type.title);
     }
 
     /** Flags the hull, not a person - the base class flags a person, but a fleet quest has none. */

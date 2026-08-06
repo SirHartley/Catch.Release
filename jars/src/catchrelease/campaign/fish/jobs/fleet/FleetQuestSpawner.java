@@ -1,11 +1,9 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
-import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -15,14 +13,18 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
- * Periodically spawns fleet quests: either adopts an existing wandering scavenger/trader fleet, or
- * arrives a stranded fleet near a pond (or the player, if none nearby). Deliberately rare and capped
- * (see {@link #CHANCE}, {@link #MAX_ACTIVE}) so it reads as an interruption rather than routine.
+ * Decides when somebody out there wants a fish, and which of the two ways they go about asking.
+ * <p>
+ * Nothing appears in front of the player any more. A fleet that cannot move sends a distress call
+ * from a system some way off and waits to be found - see {@link FleetDistressCall} - and a fleet
+ * that can move arrives from beyond sensor range under its own power and comes looking. Which of the
+ * two applies is the type's own {@link FleetQuestType#wandering} flag, since it is the same
+ * question: whether whatever is wrong with them leaves them able to fly.
+ * <p>
+ * Rare and capped on purpose - see {@link #CHANCE} and {@link #MAX_ACTIVE}.
  */
 public class FleetQuestSpawner implements EveryFrameScript {
 
@@ -36,14 +38,17 @@ public class FleetQuestSpawner implements EveryFrameScript {
     /** How many can be running at once, sector-wide. */
     public static final int MAX_ACTIVE = 2;
 
-    /** How close to the player a wandering hull has to be to be worth turning into a job. */
-    public static final float FIND_RANGE = 4000f;
-
-    /** How far from the player a placed fleet arrives, when there is no water to put it by. */
-    public static final float SPAWN_DISTANCE = 1200f;
-
-    /** How far off a rupture a stranded fleet is put, so it reads as near it rather than in it. */
-    public static final float POND_OFFSET = 900f;
+    /**
+     * How far out a wandering fleet arrives, as a multiple of the longest sensor range anything in
+     * the game can have.
+     * <p>
+     * Measured against sensor range rather than written down as a distance, because the requirement
+     * is that the player cannot watch it arrive - and how far they can see is a thing they upgrade.
+     * A fixed number that is safely over the horizon for a stock fleet is a fleet blinking into
+     * existence in plain sight for a fitted one.
+     */
+    public static final float ARRIVAL_SENSOR_MULT = 1.3f;
+    public static final float ARRIVAL_DISTANCE_MIN = 4000f;
 
     /** Kept on the sector so a reload cannot be used to re-roll a check that just said no. */
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
@@ -75,20 +80,25 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (!canSpawn()) return;
         if (random.nextFloat() > CHANCE) return;
 
-        //tries an existing wandering fleet before spawning a new one
-        if (adoptWanderer()) {
-            markSpawned();
-            return;
-        }
+        FleetQuestType type = FleetQuestType.rollAny(random);
+        if (type == null) return;
 
-        if (placeStranded()) markSpawned();
+        boolean spawned = type.wandering
+                ? sendWanderer(type)
+                : FleetDistressCall.raise(type, random) != null;
+
+        if (spawned) markSpawned();
     }
 
-    /** Whether the sector is in any state to be given one of these right now. */
+    /**
+     * Whether the sector is in any state to be given one of these.
+     * <p>
+     * Hyperspace is allowed. A distress call is a thing heard on the way somewhere, and refusing to
+     * raise one while the player is between systems ruled out the case it is for.
+     */
     protected boolean canSpawn() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null || player.isInHyperspace()) return false;
-        if (!(player.getContainingLocation() instanceof StarSystemAPI)) return false;
+        if (player == null) return false;
 
         if (Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) return false;
 
@@ -99,64 +109,64 @@ public class FleetQuestSpawner implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
     }
 
-    /** How many of these are running, counted off the intel rather than off a list of our own. */
+    /**
+     * How many of these the player already has on their plate.
+     * <p>
+     * Both halves are needed and they do not overlap. Intel only exists once a job has been agreed
+     * to, and an offer still waiting on an answer has none - counted off the intel alone, every
+     * un-answered fleet was invisible and the cap only ever limited jobs already taken.
+     */
     protected int countActive() {
-        return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size();
-    }
-
-    /** Picks a random adoptable fleet (scavenger/trader, non-hostile, no existing quest) and starts a quest on it. */
-    protected boolean adoptWanderer() {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-
-        List<CampaignFleetAPI> candidates = new ArrayList<>();
-
-        for (CampaignFleetAPI other : player.getContainingLocation().getFleets()) {
-            if (!isAdoptable(other, player)) continue;
-
-            candidates.add(other);
-        }
-
-        if (candidates.isEmpty()) return false;
-
-        CampaignFleetAPI pick = candidates.get(random.nextInt(candidates.size()));
-
-        return FleetQuest.startOn(pick, FleetQuestType.rollWandering(random)) != null;
-    }
-
-    protected boolean isAdoptable(CampaignFleetAPI other, CampaignFleetAPI player) {
-        if (other == null || other == player || other.isExpired()) return false;
-        if (other.isPlayerFleet() || other.getFaction() == null) return false;
-        if (other.getFaction().isPlayerFaction()) return false;
-        if (other.getFaction().isHostileTo(Global.getSector().getPlayerFaction())) return false;
-        if (FleetQuest.isQuestFleet(other)) return false;
-
-        //somebody already spoken for by another mission is not free to be given ours
-        if (other.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) return false;
-
-        //a hull with a job to do is not a hull that can sit still for us
-        if (other.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
-
-        if (Misc.getDistance(player.getLocation(), other.getLocation()) > FIND_RANGE) return false;
-
-        return other.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_SCAVENGER)
-                || other.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_TRADE_FLEET);
+        return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size()
+                + FleetQuestEncounter.countLive();
     }
 
     /**
-     * Spawns a stranded fleet near a pond if the system has one (so the quest doesn't send the
-     * player elsewhere), otherwise near the player.
+     * Sends a fleet in from beyond what the player can see, to come and find them.
+     * <p>
+     * Only into a real system: arriving out of nothing in open hyperspace is the same trick this was
+     * written to stop, and there is no horizon out there to come over.
      */
-    protected boolean placeStranded() {
+    protected boolean sendWanderer(FleetQuestType type) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         LocationAPI location = player.getContainingLocation();
 
-        SectorEntityToken pond = findPond(location);
-        Vector2f at = pond != null
-                ? Misc.getPointAtRadius(pond.getLocation(), POND_OFFSET)
-                : Misc.getPointAtRadius(player.getLocation(), SPAWN_DISTANCE);
+        if (!(location instanceof StarSystemAPI)) return false;
 
-        FleetQuestType type = FleetQuestType.STRANDED;
+        CampaignFleetAPI fleet = createFleet(player, type);
+        if (fleet == null) return false;
 
+        Vector2f at = Misc.getPointAtRadius(player.getLocation(), getArrivalDistance());
+
+        location.addEntity(fleet);
+        fleet.setLocation(at.x, at.y);
+
+        FleetQuest quest = FleetQuest.startOn(fleet, type);
+
+        //nothing took it, so nothing should be left flying about out there
+        if (quest == null) {
+            fleet.despawn();
+            return false;
+        }
+
+        FleetQuestEncounter.attach(fleet, quest);
+
+        return true;
+    }
+
+    /** Far enough out that nothing the player could have fitted would have seen it arrive. */
+    protected float getArrivalDistance() {
+        return Math.max(ARRIVAL_DISTANCE_MIN,
+                Global.getSettings().getSensorRangeMax() * ARRIVAL_SENSOR_MULT);
+    }
+
+    /**
+     * A hauler somebody would talk to rather than shoot at.
+     * <p>
+     * The two flags are what keep it coming: without them a fleet sent to find the player treats
+     * them as traffic to be given a wide berth, and edges away as they close.
+     */
+    protected CampaignFleetAPI createFleet(CampaignFleetAPI player, FleetQuestType type) {
         FleetParamsV3 params = new FleetParamsV3(
                 null,
                 player.getLocationInHyperspace(),
@@ -169,29 +179,13 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 0f, 0f, 0f, 0f);
 
         CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
-        if (fleet == null || fleet.isEmpty()) return false;
+        if (fleet == null || fleet.isEmpty()) return null;
 
         fleet.setTransponderOn(true);
 
-        location.addEntity(fleet);
-        fleet.setLocation(at.x, at.y);
-        Misc.fadeIn(fleet, 2f);
+        fleet.getMemoryWithoutUpdate().set(MemFlags.DO_NOT_TRY_TO_AVOID_NEARBY_FLEETS, true);
+        fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
 
-        if (FleetQuest.startOn(fleet, type) != null) return true;
-
-        //no quest took it; despawn rather than leave it standing idle
-        fleet.despawn();
-
-        return false;
-    }
-
-    /** A rupture in the system the player is standing in, if there is one. */
-    protected SectorEntityToken findPond(LocationAPI location) {
-        List<SectorEntityToken> ponds =
-                location.getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID);
-
-        if (ponds.isEmpty()) return null;
-
-        return ponds.get(random.nextInt(ponds.size()));
+        return fleet;
     }
 }

@@ -2,6 +2,8 @@ package catchrelease.campaign.fish.spawner;
 
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -49,6 +51,9 @@ public class PondFishSpawner {
         SectorRegion region = SectorRegion.of(location);
         Set<String> tags = location == null ? new HashSet<String>() : new HashSet<>(location.getTags());
 
+        //a rumor can lean the whole roll rarer in its one system
+        extraRarityBias += FishRumors.getRarityBias(location);
+
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
@@ -56,6 +61,13 @@ public class PondFishSpawner {
             if (!spec.matches(starType, tags, region)) continue;
 
             picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));
+        }
+
+        //a rumored stranger swims where it should not, competing at a fixed weight
+        String strangerId = FishRumors.getStrangerId(location);
+        if (strangerId != null) {
+            FishSpec stranger = FishSpecLoader.getFishSpec(strangerId);
+            if (stranger != null) picker.add(stranger, FishermanConstants.RUMOR_STRANGER_WEIGHT);
         }
 
         if (picker.isEmpty()) {

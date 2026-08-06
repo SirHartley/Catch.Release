@@ -76,9 +76,18 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         public final Vector2f from;
         public final Vector2f target;
 
+        /** Whose line this is; null is the player's. An owned line changes hands on nothing -
+         *  it homes on its owner, never hooks a fleet, and lands its catch without a minigame. */
+        public final CampaignFleetAPI owner;
+
         public Params(Vector2f from, Vector2f target) {
+            this(from, target, null);
+        }
+
+        public Params(Vector2f from, Vector2f target, CampaignFleetAPI owner) {
             this.from = from;
             this.target = target;
+            this.owner = owner;
         }
     }
 
@@ -115,6 +124,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     /** What was won, rolled by the catch itself so the hold gets the specimen the player was shown. */
     protected FishCatch caught;
 
+    /** Whose line this is; null means the player's. See {@link Params#owner}. */
+    protected CampaignFleetAPI owner;
+
     protected float trailId;
 
     transient protected SpriteAPI headSprite;
@@ -127,8 +139,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         trailId = MagicCampaignTrailPlugin.getUniqueID();
 
         if (p != null) heading = Vector2f.sub(p.target, p.from, null);
+        if (p != null) owner = p.owner;
         if (heading.lengthSquared() > 0f) heading.normalise(heading);
 
+    }
+
+    /** The fleet the line is anchored to: its owner, or the player for an unowned one. */
+    protected CampaignFleetAPI getHomeFleet() {
+        if (owner != null) return owner.isExpired() ? null : owner;
+
+        return Global.getSector().getPlayerFleet();
     }
 
     @Override
@@ -138,7 +158,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         stateTime += amount;
         age += amount;
 
-        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        CampaignFleetAPI fleet = getHomeFleet();
         if (fleet == null) {
             //through cutLine, not straight to expire, so an active haul releases its fleet flag
             if (state == State.HAULING) cutLine();
@@ -183,8 +203,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         if (hit != null) {
             //an explosive head never gets as far as the push: there is nothing to shove, nothing to
-            //play, and nothing to bring home
-            if (isExplosive()) {
+            //play, and nothing to bring home. isExplosive reads the player's tackle, so an owned
+            //line never asks - what is screwed onto the player's line is not on anyone else's
+            if (owner == null && isExplosive()) {
                 blastMote(hit);
                 return;
             }
@@ -388,6 +409,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (!(token.getCustomPlugin() instanceof HarpoonEntityPlugin)) continue;
 
             HarpoonEntityPlugin harpoon = (HarpoonEntityPlugin) token.getCustomPlugin();
+
+            //only the player's lines: this feeds the player's own cut, and an owned line is not
+            //theirs to let go of (not that one ever hauls - see findFleet)
+            if (harpoon.owner != null) continue;
+
             if (harpoon.isHauling()) hauling.add(harpoon);
         }
 
@@ -477,6 +503,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     /** Nearest fleet within catch radius of its own radius, not the flat radius a mote uses -
      *  a capital group is reticule-sized, not a speck. */
     protected CampaignFleetAPI findFleet() {
+        //an owned line never ties to a hull - the Fisherman throws at fish, and a rope between
+        //two NPC fleets is a physics problem nobody is playing
+        if (owner != null) return null;
+
         //line must clear the launcher before it can hit anything this big, or the head tests
         //hulls from inside the player's own fleet on its first frame
         if (distanceOut < HarpoonConstants.FLEET_ARM_DISTANCE) return null;
@@ -530,6 +560,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         if (stateTime < HarpoonConstants.TAUT_TIME || minigameOpened) return;
+
+        //an owned line plays no catch: the animation is the whole show, and it always lands.
+        //caught stays null on purpose, so landing adds nothing to anyone's cargo - the mote
+        //fading at the boat's side is the catch being taken aboard
+        if (owner != null) {
+            enter(State.REELING);
+            return;
+        }
 
         openMinigame();
     }
@@ -751,6 +789,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      *  expose / harpoon, so it is not gated behind any upgrade. Unearths the buried entity rather
      *  than hooking it directly, so nothing downstream has to treat it any differently. */
     protected SectorEntityToken strikeBuried() {
+        //what the player's lamps exposed is the player's to take
+        if (owner != null) return null;
+
         for (SectorEntityToken buried : entity.getContainingLocation()
                 .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
 
@@ -853,7 +894,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         super.render(layer, viewport);
 
-        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        CampaignFleetAPI fleet = getHomeFleet();
         if (fleet == null) return;
 
         float alpha = viewport.getAlphaMult() * getBlastFade();
