@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -11,16 +12,26 @@ import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.util.Misc;
 
 /**
- * One thing the shop sells - an upgrade (a ladder) or a tackle (a slot) - wrapped so the list, rows,
- * and detail pane are written once instead of once per kind.
+ * One thing on a shelf - an upgrade (a ladder), a tackle (a slot), or a curio (a switch) - wrapped
+ * so the list, rows, and detail pane are written once instead of once per kind.
  * <p>
- * Holds no state of its own: level, fit, and price are read fresh from what it wraps on every call.
+ * Holds no state of its own: level, fit, switch and price are read fresh from what it wraps on every
+ * call. A curio is the odd one out in that nothing about it is for sale - it was bought elsewhere,
+ * and what the shop offers is the only thing left to do with it, which is turn it off.
  */
 public class ShopEntry {
 
     public enum Kind {
-        UPGRADE,
-        TACKLE
+        UPGRADE("Upgrades"),
+        TACKLE("Modifiers"),
+        CURIO("Extras");
+
+        /** What the main tab row calls this. Held here so a fourth kind is one line, not two. */
+        public final String tabTitle;
+
+        Kind(String tabTitle) {
+            this.tabTitle = tabTitle;
+        }
     }
 
     public final Kind kind;
@@ -29,24 +40,32 @@ public class ShopEntry {
     public final UpgradeStat stat;
     public final Tackle tackle;
     public final Tackle.Fit rig;
+    public final CrabWares ware;
 
     public static ShopEntry of(UpgradeStat stat) {
-        return new ShopEntry(Kind.UPGRADE, ShopGroup.forStat(stat), stat, null, null);
+        return new ShopEntry(Kind.UPGRADE, ShopGroup.forStat(stat), stat, null, null, null);
     }
 
     public static ShopEntry of(Tackle tackle, Tackle.Fit rig) {
-        return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig);
+        return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig, null);
     }
 
-    protected ShopEntry(Kind kind, ShopGroup group, UpgradeStat stat, Tackle tackle, Tackle.Fit rig) {
+    public static ShopEntry of(CrabWares ware) {
+        return new ShopEntry(Kind.CURIO, ShopGroup.forWare(ware), null, null, null, ware);
+    }
+
+    protected ShopEntry(Kind kind, ShopGroup group, UpgradeStat stat, Tackle tackle, Tackle.Fit rig,
+                        CrabWares ware) {
         this.kind = kind;
         this.group = group;
         this.stat = stat;
         this.tackle = tackle;
         this.rig = rig;
+        this.ware = ware;
     }
 
     public String getName() {
+        if (kind == Kind.CURIO) return ware.name;
         if (kind == Kind.TACKLE) return tackle.name;
 
         // ids stay "searchlight" (renaming ids needs a save migration); display follows the rig's new name "lamp"
@@ -58,6 +77,7 @@ public class ShopEntry {
 
     /** List name with the gear prefix cut, since the shelf tab already says which gear it is. Detail pane keeps the full name. */
     public String getListName() {
+        if (kind == Kind.CURIO) return ware.name;
         if (kind == Kind.TACKLE) return tackle.name;
 
         String id = stat.id;
@@ -73,7 +93,20 @@ public class ShopEntry {
     }
 
     public String getDescription() {
-        return kind == Kind.TACKLE ? tackle.description : stat.description;
+        switch (kind) {
+            case CURIO: return ware.description;
+            case TACKLE: return tackle.description;
+            default: return stat.description;
+        }
+    }
+
+    public boolean isCurio() {
+        return kind == Kind.CURIO;
+    }
+
+    /** Whether a curio is switched on. Meaningless, and false, for anything else. */
+    public boolean isOn() {
+        return isCurio() && ware.isOn();
     }
 
     public boolean isUpgrade() {
@@ -105,6 +138,9 @@ public class ShopEntry {
     public ShopPricing.Price getPrice() {
         if (isOwned()) return null;
 
+        //a curio was paid for in a bar; the shop is only where the switch on it lives
+        if (isCurio()) return null;
+
         return isUpgrade() ? ShopPricing.getPrice(stat) : ShopPricing.getPrice(tackle);
     }
 
@@ -130,7 +166,10 @@ public class ShopEntry {
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get();
     }
 
-    /** Nothing left to sell here: an upgrade at its ceiling, or a tackle already in its slot. */
+    /**
+     * Nothing left to sell here: an upgrade at its ceiling, or a tackle already in its slot. Never a
+     * curio - its button is a switch, and a switch is never finished with.
+     */
     public boolean isDone() {
         return isMaxed() || isFitted();
     }
@@ -176,6 +215,13 @@ public class ShopEntry {
      * anything granting a module or a rung from outside the shop still has to come through it.
      */
     public void grant() {
+        //a curio is not handed over, it is flipped - it was already bought before the shop saw it
+        if (isCurio()) {
+            ware.setOn(!ware.isOn());
+
+            return;
+        }
+
         if (isUpgrade()) {
             UpgradeManager.getInstance().addLevels(stat.id, 1);
             stopAbility(StatIds.getAbilityId(stat.id));
@@ -239,6 +285,10 @@ public class ShopEntry {
 
     /** One string that survives a rebuild, for remembering what was selected. */
     public String getKey() {
-        return isUpgrade() ? "stat:" + stat.id : "tackle:" + rig.name() + ":" + tackle.name();
+        switch (kind) {
+            case CURIO: return "ware:" + ware.name();
+            case TACKLE: return "tackle:" + rig.name() + ":" + tackle.name();
+            default: return "stat:" + stat.id;
+        }
     }
 }

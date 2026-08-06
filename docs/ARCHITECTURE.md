@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 166 Java files across eight top-level packages, plus
+What is where, and which file to open first. 165 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -237,7 +237,7 @@ The outfitter: upgrades and tackle bought with fish.
 | File | What it does |
 |---|---|
 | `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy/store/retrieve/sell |
-| `ShopEntry.java` | Wraps one purchasable — upgrade or tackle — behind uniform price/state/buy |
+| `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
@@ -266,7 +266,7 @@ Crablobab, and the two things he sells. Not shop stock — see the note below.
 | File | What it does |
 |---|---|
 | `CrabSalesman.java` | The bar event: the stall, the prices, the exchange. Stops appearing once both are sold |
-| `CrabWares.java` | The two wares, what each costs in credits and crabs, and where each one's ownership lives |
+| `CrabWares.java` | The two wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.
@@ -418,7 +418,6 @@ Shader and GL machinery.
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once |
-| `helper/CatchReleaseSettings.java` | LunaLib menu toggles, with fallbacks |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |
@@ -518,6 +517,19 @@ after that, so anything that charges for tackle must ask `isOwned()` first — `
 returns null for one already owned, which is what makes fitting it free. Anything that *grants* a
 module must `own()` it as well as `fit()` it, or the player pays for their own gift the first time
 they take it off. Saves predating ownership seed the owned set from whatever is in a slot.
+
+**The shop has three kinds of thing on a shelf, and the third one is not for sale.** A `ShopEntry`
+is an upgrade (a ladder), a tackle (a slot), or a **curio** (a switch). A curio was bought from
+Crablobab; all the shop offers is the only thing left to do with it, which is turn it off. So its
+price is null, `isDone()` is never true — a switch is never finished with — and the buy button reads
+SWITCH ON/OFF. Both the main tab row and the shelves under it are derived from the entries that
+exist, so the Extras tab appears the moment the first curio is bought and not before.
+
+**The celebration is bought, not configured.** It had a LunaLib toggle; it now has no setting at all,
+and `CrabWares.CELEBRATION` answers three separate questions — bought (his business, never undone),
+owned (where it is kept), and switched on (the player's, through the shop). `FishingMinigamePanel`
+asks `isOn()` and simply does not build a `CatchCelebration`; nothing inside that class asks again.
+The mod ships no `LunaSettings.csv` any more, so it has no page in LunaLib's menu.
 
 **Stocking a module and owning one are a third question.** `Tackle.stocked` says whether the
 outfitter carries it, and `TackleManager.getOptions()` lists what it stocks *plus anything already

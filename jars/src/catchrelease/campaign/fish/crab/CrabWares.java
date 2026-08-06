@@ -7,7 +7,9 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import com.fs.starfarer.api.Global;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,19 +21,26 @@ import java.util.Set;
  * each by one man who is not in the equipment business, and neither of them makes anything better:
  * one is a novelty and the other takes the harpoon's whole purpose away and replaces it.
  * <p>
- * Each ware answers where its own ownership lives, because they do not agree. A module is the
- * tackle system's to remember; a novelty has nowhere else to be kept and gets a line in the save.
+ * Three questions, not one, and they are not the same question asked three ways. Bought is his
+ * business and never comes undone. Owned is where the thing is kept afterwards, which for a module
+ * is the tackle system's problem and for a novelty is a line in the save. Switched on is the
+ * player's, and only some wares have it - a module is switched off by taking it out of the slot,
+ * so the only thing that needs a switch is something with no slot to leave.
  */
 public enum CrabWares {
 
     /**
-     * The flourish over a landed fish. Bought rather than issued: the flash, the backlight and the
-     * word for it are the readout announcing itself, and this is the part that is purely for show.
+     * The whole flourish over a landed fish - flash, backlight, the specimen thrown up over its own
+     * box, confetti and the word for it. Bought rather than issued, and switchable afterwards
+     * because it is the one thing here somebody might want and then not want.
      */
-    CONFETTI("Celebration Charges", 15000, 3,
+    CELEBRATION("Celebration Charges", 15000, 3,
             "\"Little cartridges. You land something and they go off - paper, all colours, all over"
                     + " the readout. No, it does not help you catch anything. That is not what it"
-                    + " is for. You have caught the fish already, that is the whole point of it.\"") {
+                    + " is for. You have caught the fish already, that is the whole point of it.\"",
+            "Goes off over the catch card when something is landed: a flash behind it, the specimen"
+                    + " thrown up over its own box, paper everywhere, and the word for it at an"
+                    + " angle. Says nothing the readout beside it does not already say.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -40,6 +49,11 @@ public enum CrabWares {
         @Override
         public void grant() {
             markBought(name());
+        }
+
+        @Override
+        public boolean isSwitchable() {
+            return true;
         }
     },
 
@@ -50,7 +64,9 @@ public enum CrabWares {
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
             "\"This one I will not pretend about. It does not catch. It goes on the harpoon and then"
                     + " whatever the harpoon touches is gone, and so is the harpoon. People buy it."
-                    + " I have stopped asking them what for.\"") {
+                    + " I have stopped asking them what for.\"",
+            "A shaped charge behind the barb. Kept in the harpoon's own slot from here on, and taken"
+                    + " off there as well.") {
         @Override
         public boolean isOwned() {
             return TackleManager.isOwned(Tackle.EXPLOSIVE_HEAD);
@@ -65,22 +81,52 @@ public enum CrabWares {
     /** Everything bought that has nowhere else to be remembered, by constant name. */
     public static final String BOUGHT_KEY = "$catchrelease_crabWares";
 
-    /** What he calls it, what it costs, how many crabs go with that, and how he sells it. */
+    /**
+     * Everything switched off, by constant name. Held as the exception rather than as the state,
+     * so a ware that has only ever been bought is on - which is what buying a thing means.
+     */
+    public static final String OFF_KEY = "$catchrelease_crabWaresOff";
+
+    /** What he calls it, what it costs, how many crabs go with that, how he sells it, what it is. */
     public final String name;
     public final int credits;
     public final int crabs;
     public final String pitch;
+    public final String description;
 
-    CrabWares(String name, int credits, int crabs, String pitch) {
+    CrabWares(String name, int credits, int crabs, String pitch, String description) {
         this.name = name;
         this.credits = credits;
         this.crabs = crabs;
         this.pitch = pitch;
+        this.description = description;
     }
 
     public abstract boolean isOwned();
 
     public abstract void grant();
+
+    /**
+     * Whether this can be switched off once bought, as against only owned. False for anything kept
+     * in a slot: taking it out is the switch, and a second one beside it would be two answers.
+     */
+    public boolean isSwitchable() {
+        return false;
+    }
+
+    /** Bought and not switched off. Anything unswitchable is on for as long as it is owned. */
+    public boolean isOn() {
+        if (!isOwned()) return false;
+
+        return !isSwitchable() || !getFlags(OFF_KEY).contains(name());
+    }
+
+    public void setOn(boolean on) {
+        if (!isSwitchable()) return;
+
+        if (on) getFlags(OFF_KEY).remove(name());
+        else getFlags(OFF_KEY).add(name());
+    }
 
     /**
      * The crabs half of the price, as the same kind of ask the shop and the jobs are written in - so
@@ -142,29 +188,40 @@ public enum CrabWares {
         return false;
     }
 
+    /** Everything bought that has a switch on it, for the shop shelf that holds them. */
+    public static List<CrabWares> getSwitchable() {
+        List<CrabWares> out = new ArrayList<>();
+
+        for (CrabWares ware : values()) {
+            if (ware.isSwitchable() && ware.isOwned()) out.add(ware);
+        }
+
+        return out;
+    }
+
     protected static boolean isBought(String id) {
-        return getBought().contains(id);
+        return getFlags(BOUGHT_KEY).contains(id);
     }
 
     protected static void markBought(String id) {
-        getBought().add(id);
+        getFlags(BOUGHT_KEY).add(id);
     }
 
     /**
-     * The bought set, held as constant names rather than as enum constants - a name that no longer
-     * matches anything is a ware nobody owns, which is a failure this can afford, where an unreadable
-     * enum in a save takes the whole set with it.
+     * A named set in the save, created on first use. Constant names rather than enum constants - a
+     * name that no longer matches anything is a ware nobody owns, which is a failure this can
+     * afford, where an unreadable enum in a save takes the whole set with it.
      */
     @SuppressWarnings("unchecked")
-    protected static Set<String> getBought() {
+    protected static Set<String> getFlags(String key) {
         Map<String, Object> data = Global.getSector().getPersistentData();
 
-        Object stored = data.get(BOUGHT_KEY);
+        Object stored = data.get(key);
         if (stored instanceof Set) return (Set<String>) stored;
 
-        Set<String> bought = new LinkedHashSet<>();
-        data.put(BOUGHT_KEY, bought);
+        Set<String> flags = new LinkedHashSet<>();
+        data.put(key, flags);
 
-        return bought;
+        return flags;
     }
 }
