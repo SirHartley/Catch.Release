@@ -534,6 +534,16 @@ remainder. Never mutate in place.
 **`GL_LINE_STIPPLE` is useless here.** GL restarts the pattern at every segment of a `GL_LINES`
 batch, so anything shorter than one dash draws solid. Dashes are cut as geometry in `SkillshotUtils`.
 
+**The fan's breach window copies its light's shape, but not its colour.** `SearchlightFanBreachRenderer`
+reuses `SearchlightFanRenderer`'s `STEPS_ACROSS`/`STEPS_ALONG` and both falloff curves vertex for
+vertex, so the hole opens exactly where the light above it is bright. Changing the geometry or
+either alpha ramp in one and not the other pulls them apart — which is why the rim bands are a hue
+lean in rgb alone, and not the brighter edge that would have been the obvious way to draw them.
+
+**The three lamp renderers share one resting alpha on purpose.** Fan, glow and impression all read
+`0.12f - 0.04f * flicker.getBrightness()`. Fitting a module is meant to change the *shape* of the
+light, not how much of it there is, so any change to that figure belongs in all three at once.
+
 **`Stencil.startStencil` is deprecated — it breaks the campaign radar.** Use the depth-mask pair.
 
 **A camera snapped to a thing kills that thing's parallax.** `ParallaxUtil`'s camera term is the
