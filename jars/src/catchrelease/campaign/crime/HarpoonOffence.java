@@ -96,8 +96,11 @@ public class HarpoonOffence {
      * regardless") plus pursue-player. Deliberately not low-rep-impact: that flag downgrades the
      * fight to transponder-off reputation actions, which skip the {@code ensureAtBest} floor at
      * hostile and falsely promise no hostilities in the encounter tooltip.
+     * <p>
+     * Public because one caller skips the count entirely: an explosive head is not a rope in the
+     * side, and there's no version of that where the crew wants to talk first.
      */
-    protected static void turnHostile(CampaignFleetAPI victim) {
+    public static void turnHostile(CampaignFleetAPI victim) {
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
 
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_HOSTILE, REASON, true, HOSTILE_DAYS);

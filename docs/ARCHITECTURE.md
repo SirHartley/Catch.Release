@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 163 Java files across eight top-level packages, plus
+What is where, and which file to open first. 166 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -74,7 +74,9 @@ Classes the game instantiates by name. Grep the data file, not the call sites �
 | `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
-**`data/campaign/bar_events.csv`** — 11 jobs. **Three ids do not match their class name:**
+**`data/campaign/bar_events.csv`** — 11 jobs, plus `catchrelease_crablobab` →
+`campaign/fish/crab/CrabSalesman`, which is a vendor rather than a job and the one row here that is
+not a `FishJob`. **Three of the job ids do not match their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
@@ -203,7 +205,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, best-ever banner |
 | `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish |
-| `CatchCelebration.java` | Flash, backlight, confetti and flourish on a landed fish |
+| `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
 
 ### `campaign/fish/treasure`
 Optional loot found mid-catch.
@@ -259,6 +261,14 @@ Fish in cargo.
 | `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
 | `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
+
+### `campaign/fish/crab`
+Crablobab, and the two things he sells. Not shop stock — see the note below.
+
+| File | What it does |
+|---|---|
+| `CrabSalesman.java` | The bar event: the stall, the prices, the exchange. Stops appearing once both are sold |
+| `CrabWares.java` | The two wares, what each costs in credits and crabs, and where each one's ownership lives |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.
@@ -510,6 +520,23 @@ after that, so anything that charges for tackle must ask `isOwned()` first — `
 returns null for one already owned, which is what makes fitting it free. Anything that *grants* a
 module must `own()` it as well as `fit()` it, or the player pays for their own gift the first time
 they take it off. Saves predating ownership seed the owned set from whatever is in a slot.
+
+**Stocking a module and owning one are a third question.** `Tackle.stocked` says whether the
+outfitter carries it, and `TackleManager.getOptions()` lists what it stocks *plus anything already
+owned* — without the second half a module bought anywhere else could never be taken off and put back
+on. `Tackle.EXPLOSIVE_HEAD` is the only unstocked one; it comes out of Crablobab's coat.
+
+**Anything granted from outside the shop still goes through `ShopEntry.grant()`.** It is the only
+place that knows a running rig has to be stopped so it comes back up reading what it now has — see
+the note on abilities reading their numbers once. `CrabWares.EXPLOSIVE_HEAD` grants through it for
+exactly that reason, rather than calling `own()` and `fit()` itself.
+
+**An explosive head is a different ability, not a better harpoon.** It cannot land anything: the
+strike blows the mote up and throws the head off its own line, and `HarpoonEntityPlugin.BLASTED` is a
+terminal state that is not an arrival — nothing is reeled in and `land()` never runs. Against a hull
+it books the harpooning the ordinary way and then skips the crew's patience outright, which is the
+only caller of `HarpoonOffence.turnHostile()` that does not go through the hit count. The fireball is
+vanilla's `Entities.EXPLOSION`, which brings the shockwave, the sound and the fleet damage with it.
 
 **A null price means free, and there are two kinds of free.** `Tackle.NONE` never had a price;
 an owned module has already been paid for. The shop tells them apart explicitly, because one line

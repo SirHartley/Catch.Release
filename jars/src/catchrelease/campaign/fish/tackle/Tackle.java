@@ -91,6 +91,16 @@ public enum Tackle {
         }
     },
 
+    EXPLOSIVE_HEAD("Explosive Head", Fit.HARPOON,
+            "A shaped charge behind the barb. Whatever the head reaches goes up with it, and so does"
+                    + " the head - nothing is landed on this, and nothing was ever going to be. Put"
+                    + " one in a hull and the people in it will not be waiting to hear your side.") {
+        {
+            explosive = true;
+            stocked = false;
+        }
+    },
+
     //--- searchlights
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
             "A light that finds something breaks off its sweep and follows it for a few seconds"
@@ -144,6 +154,20 @@ public enum Tackle {
      * within a lamp's passive reach, which shows as a dent but is never exposed by a beam.
      */
     public boolean deepStrike = false;
+
+    /**
+     * Whether the barb carries a charge that goes off on whatever the head reaches. The one module
+     * here that takes a capability away rather than adding one - a line with this on the end can't
+     * land anything, because there's nothing left to land.
+     */
+    public boolean explosive = false;
+
+    /**
+     * Whether the outfitter stocks this, as opposed to it being sold somewhere else entirely.
+     * Stocking and owning are different questions, the same way owning and wearing are: one bought
+     * out of somebody's coat in a bar still comes off and goes back on for nothing afterwards.
+     */
+    public boolean stocked = true;
 
     /** Seconds a light holds on what it found before going back to its sweep. Zero never stops. */
     public float lockTime = 0f;

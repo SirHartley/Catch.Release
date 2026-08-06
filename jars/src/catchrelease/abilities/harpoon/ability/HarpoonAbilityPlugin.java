@@ -203,6 +203,14 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         tooltip.addPara("The head will go through the fabric for anything a breach lamp has"
                 + " exposed.", Misc.getGrayColor(), pad);
 
+        //what is fitted is player state rather than a fact about the ability, so the codex - which
+        //describes the rig to somebody who may not own one - does not get told about it
+        if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isExplosive()) {
+            tooltip.addPara("A charge is fitted. Nothing comes back on this line: whatever the head"
+                    + " reaches goes up with it, and a hull it reaches will not be waiting to hear"
+                    + " your side of it.", Misc.getNegativeHighlightColor(), pad);
+        }
+
         tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
 
         tooltip.addPara("Charges: %s of %s", 3f, highlight,
