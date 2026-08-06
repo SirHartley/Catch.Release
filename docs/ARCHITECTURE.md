@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 162 Java files across eight top-level packages, plus
+What is where, and which file to open first. 163 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -51,6 +51,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 7. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
 8. `SkillshotFramework.register()` — the aiming framework
 9. `FishMapFilterScript` as a transient script — the sector-map filter
+10. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -278,6 +279,7 @@ The sector-map fish filter.
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot: pick up to five, plot |
+| `FishIntelPlanetPanel.java` | The intel Planets view's fish panel, beside the planet card |
 | `FishType.java` | Filter categories with colour and icon |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
 
