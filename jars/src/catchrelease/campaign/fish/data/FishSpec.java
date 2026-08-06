@@ -114,7 +114,17 @@ public class FishSpec {
     public boolean matches(FishHabitat where, CatchImplement how) {
         if (where == null) return false;
 
-        if (!regions.isEmpty() && (where.region == null || !regions.contains(where.region))) return false;
+        //the abyss is the one place blank does not mean anything. Every other criterion left empty
+        //widens the range; this one has to be asked for, because a species that says nothing about
+        //where it lives is a species somebody could describe, and nothing anybody can describe
+        //lives down there. Without it the deepest water in the game offers the same roach as a
+        //core world does
+        if (where.region == SectorRegion.ABYSSAL) {
+            if (!regions.contains(SectorRegion.ABYSSAL)) return false;
+        } else if (!regions.isEmpty()
+                && (where.region == null || !regions.contains(where.region))) {
+            return false;
+        }
         if (!starColours.isEmpty() && !starColours.contains(where.star)) return false;
 
         //a system in no constellation has no age, which is not the same as being the wrong one -

@@ -85,11 +85,33 @@ public class FishJobAsks {
 
         if (!harpoon) return true;
 
-        if (random.nextFloat() > 0.45f) {
-            ask.implement = random.nextBoolean() ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
-        }
+        if (random.nextFloat() > 0.45f) ask.implement = pickImplement(random, ask.speciesId);
 
         return true;
+    }
+
+    /**
+     * An implement the named species can actually be taken on.
+     * <p>
+     * Some species only ever come up out of a rupture, and some only ever turn up loose in the dark
+     * - so asking for one of those the other way is an order that reads perfectly and can never be
+     * filled. The same trap as DRONE plus BREACH_LAMP, from the other direction.
+     *
+     * @return null when the species can be reached neither way, which leaves the ask unnarrowed
+     */
+    protected static CatchImplement pickImplement(Random random, String speciesId) {
+        FishSpec spec = speciesId == null ? null : FishSpecLoader.getFishSpec(speciesId);
+
+        boolean any = spec == null || spec.reachedBy.isEmpty();
+
+        boolean pond = any || spec.reachedBy.contains(CatchImplement.POND);
+        boolean lamp = any || spec.reachedBy.contains(CatchImplement.BREACH_LAMP);
+
+        if (pond && lamp) return random.nextBoolean() ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
+        if (pond) return CatchImplement.POND;
+        if (lamp) return CatchImplement.BREACH_LAMP;
+
+        return null;
     }
 
     /** Filtered pool, always excluding abyssal species - a bar job isn't an expedition. */
