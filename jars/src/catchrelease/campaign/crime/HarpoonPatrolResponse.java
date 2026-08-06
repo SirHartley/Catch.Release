@@ -169,7 +169,11 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
      */
     protected static boolean canBeSent(CampaignFleetAPI curr, FactionAPI faction,
                                        CampaignFleetAPI player) {
-        if (curr.getFaction() != faction) return false;
+        //anybody not at war with the offended party will take the report. Putting a line into a hull
+        //is an infraction in the space it happened in rather than an injury to one flag, and a
+        //patrol that only cared about its own would ignore a holed hauler flying alongside it
+        if (curr.getFaction() == null || curr.getFaction().isHostileTo(faction)) return false;
+
         if (curr.isStationMode()) return false;
 
         //already at war - nothing left to intercept the player about
@@ -198,17 +202,39 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
      * <p>
      * Anywhere in their own system rather than within the sweep's range of the player, because the
      * distance that matters is how far the call carries rather than how far the patrol is from
-     * whoever it is being sent after. The retry wait is cleared for the same reason a fresh
-     * harpooning clears it: somebody has just asked, and being asked is the point.
+     * whoever it is being sent after.
      *
      * @return whether anyone was in earshot
      */
     public static boolean callForHelp(CampaignFleetAPI victim) {
+        CampaignFleetAPI nearest = findNearbyPatrol(victim);
+        if (nearest == null || victim.getFaction() == null) return false;
+
+        String factionId = victim.getFaction().getId();
+
+        //cleared for the same reason a fresh harpooning clears it: somebody has just asked, and
+        //being asked is the point
+        clearRetryWait(factionId);
+        dispatch(nearest, factionId);
+
+        return true;
+    }
+
+    /**
+     * Somebody a holed crew could go and tell, for the ones that go rather than call.
+     * <p>
+     * The same search either way - what differs is whether the crew is in a position to fly to them.
+     * A crew that has given up and is running puts it on the channel from wherever it is; one still
+     * willing to make the trip goes, and can be stopped on the way.
+     *
+     * @return the nearest patrol that would take the report, or null if there is nobody
+     */
+    public static CampaignFleetAPI findNearbyPatrol(CampaignFleetAPI victim) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (victim == null || player == null) return false;
+        if (victim == null || player == null) return null;
 
         FactionAPI faction = victim.getFaction();
-        if (faction == null || victim.getContainingLocation() == null) return false;
+        if (faction == null || victim.getContainingLocation() == null) return null;
 
         CampaignFleetAPI nearest = null;
         float best = Float.MAX_VALUE;
@@ -224,12 +250,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             nearest = curr;
         }
 
-        if (nearest == null) return false;
-
-        clearRetryWait(faction.getId());
-        dispatch(nearest, faction.getId());
-
-        return true;
+        return nearest;
     }
 
     /** The nearest patrol of this faction that is in a position to be sent after anybody. */

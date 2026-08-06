@@ -371,8 +371,10 @@ What harpooning a fleet costs.
 
 | File | What it does |
 |---|---|
-| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the two escalation ladders — armed and unarmed |
-| `HarpoonPatrolResponse.java` | Sends one faction patrol at a time after the player |
+| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the two escalation ladders — armed and unarmed. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
+| `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
+| `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
+| `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a highlighted comm link |
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog - and the Fisherman its own - at the narrowest priority |
 
