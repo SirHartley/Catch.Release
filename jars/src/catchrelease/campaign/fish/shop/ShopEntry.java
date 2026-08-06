@@ -171,8 +171,11 @@ public class ShopEntry {
     /**
      * Hands the thing over and stops whatever it changes. Abilities read their numbers once at
      * activation, so a running rig has to be deactivated rather than reconfigured mid-flight.
+     * <p>
+     * Public because it is the only place that knows that, and not everything sold is sold here -
+     * anything granting a module or a rung from outside the shop still has to come through it.
      */
-    protected void grant() {
+    public void grant() {
         if (isUpgrade()) {
             UpgradeManager.getInstance().addLevels(stat.id, 1);
             stopAbility(StatIds.getAbilityId(stat.id));
