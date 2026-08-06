@@ -1,12 +1,15 @@
 package catchrelease.helper.loading;
 
 import catchrelease.ModPlugin;
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.data.StarColour;
 import catchrelease.memory.TransientMemory;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,9 +98,14 @@ public class FishSpecLoader {
         s.weightMin = optFloat(row, "weightMin", 0.5f);
         s.weightMax = optFloat(row, "weightMax", 2f);
 
-        s.starTypes = parseList(optString(row, "starTypes", ""));
         s.systemTags = parseList(optString(row, "systemTags", ""));
         s.regions = parseRegions(optString(row, "regions", ""));
+        s.starColours = parseStarColours(optString(row, "starColours", ""));
+        s.constellationAges = parseAges(optString(row, "constellationAges", ""));
+        s.reachedBy = parseReachedBy(optString(row, "reachedBy", ""));
+
+        s.minAberration = optFloat(row, "minAberration", 0f);
+        s.maxAberration = optFloat(row, "maxAberration", 1f);
 
         return s;
     }
@@ -110,6 +118,62 @@ public class FishSpecLoader {
         for (String part : value.split(",")) {
             String trimmed = part.trim();
             if (!trimmed.isEmpty()) out.add(trimmed);
+        }
+
+        return out;
+    }
+
+    /**
+     * The named-enum cells, each warning on a name it does not know rather than dropping it
+     * quietly - a typo that silently widened a species' range to the whole sector is exactly the
+     * thing these columns exist to stop.
+     */
+    private static Set<StarColour> parseStarColours(String value) {
+        Set<StarColour> out = new LinkedHashSet<>();
+
+        for (String name : parseList(value)) {
+            StarColour colour = StarColour.parse(name);
+
+            if (colour == null) {
+                Global.getLogger(FishSpecLoader.class).warn("Unknown star colour '" + name + "' in " + PATH);
+                continue;
+            }
+
+            out.add(colour);
+        }
+
+        return out;
+    }
+
+    private static Set<StarAge> parseAges(String value) {
+        Set<StarAge> out = new LinkedHashSet<>();
+
+        for (String name : parseList(value)) {
+            try {
+                StarAge age = StarAge.valueOf(name.trim().toUpperCase());
+
+                //ANY is vanilla's "undecided", not an age a fish can prefer
+                if (age != StarAge.ANY) out.add(age);
+            } catch (IllegalArgumentException e) {
+                Global.getLogger(FishSpecLoader.class).warn("Unknown star age '" + name + "' in " + PATH);
+            }
+        }
+
+        return out;
+    }
+
+    private static Set<CatchImplement> parseReachedBy(String value) {
+        Set<CatchImplement> out = new LinkedHashSet<>();
+
+        for (String name : parseList(value)) {
+            CatchImplement implement = CatchImplement.parse(name);
+
+            if (implement == null || implement == CatchImplement.UNKNOWN) {
+                Global.getLogger(FishSpecLoader.class).warn("Unknown implement '" + name + "' in " + PATH);
+                continue;
+            }
+
+            out.add(implement);
         }
 
         return out;

@@ -1,39 +1,24 @@
 package catchrelease.campaign.fish.data;
 
+import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Turns a species' region/star-type/system-tag id sets (the same ones the spawner reads) into a
- * readable sentence. A blank set means "anything", matching the spawner's own interpretation.
+ * Turns a species' habitat criteria - the same ones {@link FishSpec#matches} reads - into a readable
+ * sentence. A blank criterion means "anything", matching the spawner's own interpretation, and is
+ * left out of the sentence entirely rather than said as "under any sun".
+ * <p>
+ * Written in the order somebody would say it: where, then under what, then how old, then how well
+ * the place is holding together, then what it takes to reach one.
  */
 public class FishLocationSummary {
 
     /** The direction words, in the order a sentence wants them rather than the enum's. */
     protected static final String[] QUADRANTS = {"NE", "NW", "SE", "SW"};
-
-    /** Star id to readable name; ids don't decompose consistently, so most are spelled out by hand. */
-    public static String getStarName(String starType) {
-        if (starType == null) return null;
-
-        switch (starType.trim().toLowerCase()) {
-            case "star_blue_giant": return "a blue giant";
-            case "star_blue_supergiant": return "a blue supergiant";
-            case "star_white": return "a white star";
-            case "star_yellow": return "a yellow star";
-            case "star_orange": return "an orange star";
-            case "star_red_dwarf": return "a red dwarf";
-            case "star_red_giant": return "a red giant";
-            case "star_red_supergiant": return "a red supergiant";
-            case "star_browndwarf": return "a brown dwarf";
-            case "star_neutron": return "a neutron star";
-            case "black_hole": return "a black hole";
-            default: return "a " + starType.trim().toLowerCase()
-                    .replace("star_", "").replace('_', ' ');
-        }
-    }
 
     /** The one-line answer to where this swims. */
     public static String describe(FishSpec spec) {
@@ -44,14 +29,18 @@ public class FishLocationSummary {
         String where = describeRegions(spec.regions);
         clauses.add(where);
 
-        //omitted entirely when unconstrained, rather than saying "under any star"
-        String star = describeStars(spec.starTypes);
-        if (star != null) clauses.add(star);
-
-        String conditions = describeTags(spec.systemTags);
-        if (conditions != null) clauses.add(conditions);
+        //each omitted entirely when unconstrained, rather than saying "under any star"
+        addIfAny(clauses, describeStars(spec.starColours));
+        addIfAny(clauses, describeAges(spec.constellationAges));
+        addIfAny(clauses, describeCoherence(spec.minAberration, spec.maxAberration));
+        addIfAny(clauses, describeTags(spec.systemTags));
+        addIfAny(clauses, describeReach(spec.reachedBy));
 
         return join(clauses, ", ") + ".";
+    }
+
+    protected static void addIfAny(List<String> clauses, String clause) {
+        if (clause != null) clauses.add(clause);
     }
 
     /**
@@ -114,18 +103,60 @@ public class FishLocationSummary {
     }
 
     /** The sky half. Nothing listed means it does not care what it is swimming under. */
-    protected static String describeStars(Set<String> starTypes) {
-        if (starTypes == null || starTypes.isEmpty()) return null;
+    protected static String describeStars(Set<StarColour> starColours) {
+        if (starColours == null || starColours.isEmpty()) return null;
 
         List<String> names = new ArrayList<>();
-        for (String starType : starTypes) {
-            String name = getStarName(starType);
-            if (name != null) names.add(name);
+        for (StarColour colour : starColours) {
+            if (colour != null) names.add(colour.name);
         }
 
         if (names.isEmpty()) return null;
 
         return "under " + joinNatural(names, "or");
+    }
+
+    /** How old the constellation has to be. All three ages listed is no constraint worth saying. */
+    protected static String describeAges(Set<StarAge> ages) {
+        if (ages == null || ages.isEmpty() || ages.size() >= 3) return null;
+
+        List<String> names = new ArrayList<>();
+        for (StarAge age : ages) {
+            switch (age) {
+                case YOUNG: names.add("young"); break;
+                case OLD: names.add("old"); break;
+                default: names.add("middle-aged"); break;
+            }
+        }
+
+        return "in " + joinNatural(names, "or") + " constellations";
+    }
+
+    /**
+     * The coherence band, said the way the rest of the mod says it - as how well reality is holding,
+     * rather than as the number underneath, which counts the wrong way round and is nobody's word.
+     */
+    protected static String describeCoherence(float minAberration, float maxAberration) {
+        boolean floor = minAberration > 0f;
+        boolean ceiling = maxAberration < 1f;
+
+        if (!floor && !ceiling) return null;
+
+        if (floor && ceiling) return "where coherence is unsettled but not gone";
+        if (floor) return "only where coherence is failing";
+
+        return "only where coherence holds";
+    }
+
+    /** What it takes to reach one, for the species only one kind of gear ever brings up. */
+    protected static String describeReach(Set<CatchImplement> reachedBy) {
+        if (reachedBy == null || reachedBy.isEmpty() || reachedBy.size() > 1) return null;
+
+        CatchImplement only = reachedBy.iterator().next();
+
+        if (only == CatchImplement.POND) return "and only ever out of a rupture";
+
+        return "and only ever loose in the dark, under a breach lamp";
     }
 
     /** Unknown tags are tidied into words rather than dropped - dropping would understate constraints. */

@@ -2,8 +2,8 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
+import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -66,9 +66,20 @@ public class FishPresence {
         return FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id);
     }
 
+    /**
+     * Whether a species turns up in a system, on any gear.
+     * <p>
+     * The single answer every screen reads. The map used to test the region alone, so it shaded
+     * systems under the wrong sun, of the wrong age, and where the fabric was the wrong thickness -
+     * and said so beside a spawner that would never have offered the fish there.
+     */
+    public static boolean livesIn(FishSpec spec, StarSystemAPI system) {
+        return spec != null && system != null && spec.matches(FishHabitat.of(system));
+    }
+
     /** Whether this species' waters get drawn at all. */
     public static boolean showsRegions(FishSpec spec) {
-        if (spec == null || spec.regions.isEmpty()) return false;
+        if (spec == null || !spec.hasHabitat()) return false;
         if (Global.getSettings().isDevMode()) return true;
 
         //shading tracks isKnown() - catching a species also teaches its location, so there's no
@@ -77,8 +88,8 @@ public class FishPresence {
     }
 
     /**
-     * The systems a species is said to live in, as hyperspace positions - which systems a region
-     * means is asked of the region resolver itself, which is what keeps ABYSSAL working.
+     * The systems a species is said to live in, as hyperspace positions. Asked of the habitat
+     * itself rather than of the region alone, so what is shaded is what could actually be caught.
      */
     public static List<Vector2f> getHostLocations(FishSpec spec) {
         List<Vector2f> hosts = new ArrayList<>();
@@ -86,8 +97,7 @@ public class FishPresence {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (system.getLocation() == null) continue;
 
-            SectorRegion at = SectorRegion.of(system);
-            if (at != null && spec.regions.contains(at)) hosts.add(system.getLocation());
+            if (livesIn(spec, system)) hosts.add(system.getLocation());
         }
 
         return hosts;
@@ -135,7 +145,7 @@ public class FishPresence {
         if (FishLog.isCaught(spec.id)) return "landed";
 
         //missing region data is flagged only in dev mode
-        if (Global.getSettings().isDevMode() && spec.regions.isEmpty()) return "no data";
+        if (Global.getSettings().isDevMode() && !spec.hasHabitat()) return "no data";
 
         return "region data";
     }

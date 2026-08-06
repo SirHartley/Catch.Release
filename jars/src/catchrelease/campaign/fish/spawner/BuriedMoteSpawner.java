@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.spawner;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
@@ -123,7 +124,9 @@ public class BuriedMoteSpawner implements EveryFrameScript {
     /** Out past the light's reach, in a ring rather than a disc - one appearing inside the
      * searchlight would read as the light making it rather than finding it. */
     protected void spawn(LocationAPI location, Vector2f around) {
-        String fishId = PondFishSpawner.pickFishId(location, getRareChance());
+        //a buried mote is what the lights find, so only what the lights can find is offered
+        String fishId = PondFishSpawner.pickFishId(location, CatchImplement.BREACH_LAMP,
+                getRareChance());
         if (fishId == null) return;
 
         float angle = MathUtils.getRandomNumberInRange(0f, 360f);

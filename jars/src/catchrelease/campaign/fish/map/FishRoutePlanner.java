@@ -114,14 +114,11 @@ public class FishRoutePlanner {
             if (system.getLocation() == null) continue;
             if (!isPlannable(system)) continue;
 
-            SectorRegion at = SectorRegion.of(system);
-            if (at == null) continue;
-
             Set<String> hosted = null;
 
             for (String id : speciesIds) {
                 FishSpec spec = FishPresence.getSpec(id);
-                if (spec == null || !spec.regions.contains(at)) continue;
+                if (!FishPresence.livesIn(spec, system)) continue;
 
                 if (hosted == null) hosted = new LinkedHashSet<>();
                 hosted.add(id);

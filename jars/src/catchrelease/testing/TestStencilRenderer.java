@@ -1,5 +1,6 @@
 package catchrelease.testing;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.rendering.helper.Stencil;
@@ -54,7 +55,8 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
         Vector2f spawnLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle);
         Vector2f targetLoc = MathUtils.getPointOnCircumference(loc, SIZE, angle - 180);
         SectorEntityToken mote = Global.getSector().getPlayerFleet().getContainingLocation().addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(Global.getSector().getPlayerFleet().getContainingLocation())));
+                new FishEntityPlugin.Params(targetLoc, PondFishSpawner.pickFishId(Global.getSector().getPlayerFleet().getContainingLocation(),
+                        CatchImplement.POND)));
         mote.setLocation(spawnLoc.x, spawnLoc.y);
     }
 

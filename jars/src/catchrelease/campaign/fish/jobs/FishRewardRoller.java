@@ -115,7 +115,7 @@ public class FishRewardRoller {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
-            if (spec.regions.isEmpty()) continue;
+            if (!spec.hasHabitat()) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
 
             unknown.add(spec);

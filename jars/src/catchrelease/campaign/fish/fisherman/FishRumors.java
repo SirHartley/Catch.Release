@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -161,14 +162,15 @@ public class FishRumors {
 
     /** A species that could not normally turn up in the system - that being the whole rumor. */
     protected static String pickStranger(StarSystemAPI system) {
-        SectorRegion at = SectorRegion.of(system);
-        if (at == null) return null;
-
         List<FishSpec> strangers = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || spec.spawnWeight <= 0f) continue;
-            if (spec.regions.isEmpty() || spec.regions.contains(at)) continue;
+
+            //the whole rumor is that it should not be here, so anything at home anywhere is out -
+            //asked of the full habitat, since a fish that is merely under the wrong sun is as much
+            //a stranger as one from the far side of the sector
+            if (!spec.hasHabitat() || FishPresence.livesIn(spec, system)) continue;
 
             strangers.add(spec);
         }

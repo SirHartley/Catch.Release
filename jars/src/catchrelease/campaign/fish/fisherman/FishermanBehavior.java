@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
@@ -162,7 +163,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
         Lamp lamp = lamps.get((int) MathUtils.getRandomNumberInRange(0f, lamps.size() - 0.01f));
 
-        String fishId = PondFishSpawner.pickFishId(fleet.getContainingLocation());
+        String fishId = PondFishSpawner.pickFishId(fleet.getContainingLocation(), CatchImplement.POND);
         if (fishId == null) return;
 
         //born on one side of the beam's reach, swimming to the other, so it crosses the light

@@ -1,7 +1,8 @@
 package catchrelease.campaign.fish.spawner;
 
+import catchrelease.campaign.fish.data.CatchImplement;
+import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -9,47 +10,43 @@ import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.PlanetAPI;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- * Picks which fish a pond produces, from where the pond is.
+ * Picks which fish comes up here, from where here is and what is reaching for it.
  * <p>
- * A fish qualifies if the system's star type, tags and {@link SectorRegion} all satisfy whatever that
- * row asked for - and a row that asked for nothing qualifies everywhere. Between the qualifiers it is
- * a straight weighted roll on spawnWeight.
+ * A fish qualifies if it {@link FishSpec#matches} the place - region, star colour, constellation
+ * age, how well reality is holding, system tags - and if the gear asking is gear it can be taken on
+ * at all. A row that asked for nothing qualifies everywhere. Between the qualifiers it is a straight
+ * weighted roll on spawnWeight.
  */
 public class PondFishSpawner {
 
     /** The id to hand to a mote, or null if nothing at all can live here. */
-    public static String pickFishId(LocationAPI location) {
-        return pickFishId(location, 0f);
+    public static String pickFishId(LocationAPI location, CatchImplement how) {
+        return pickFishId(location, how, 0f);
     }
 
     /**
      * The same, for something that leans on what turns up over and above the drones.
      *
-     * @param extraRarityBias added to the drone bias, so nothing that reads it has to know the
-     *                        drones exist - zero means "whatever the pond would have produced"
+     * @param how              what is reaching for it - a rupture, or a light out in the dark. Some
+     *                         species answer to only one of the two
+     * @param extraRarityBias  added to the drone bias, so nothing that reads it has to know the
+     *                         drones exist - zero means "whatever the place would have produced"
      */
-    public static String pickFishId(LocationAPI location, float extraRarityBias) {
-        FishSpec spec = pickFish(location, extraRarityBias);
+    public static String pickFishId(LocationAPI location, CatchImplement how, float extraRarityBias) {
+        FishSpec spec = pickFish(location, how, extraRarityBias);
 
         return spec == null ? null : spec.id;
     }
 
-    public static FishSpec pickFish(LocationAPI location) {
-        return pickFish(location, 0f);
+    public static FishSpec pickFish(LocationAPI location, CatchImplement how) {
+        return pickFish(location, how, 0f);
     }
 
-    public static FishSpec pickFish(LocationAPI location, float extraRarityBias) {
-        String starType = getStarType(location);
-        SectorRegion region = SectorRegion.of(location);
-        Set<String> tags = location == null ? new HashSet<String>() : new HashSet<>(location.getTags());
+    public static FishSpec pickFish(LocationAPI location, CatchImplement how, float extraRarityBias) {
+        FishHabitat where = FishHabitat.of(location);
 
         //a rumor can lean the whole roll rarer in its one system
         extraRarityBias += FishRumors.getRarityBias(location);
@@ -58,7 +55,7 @@ public class PondFishSpawner {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec.spawnWeight <= 0f) continue;
-            if (!spec.matches(starType, tags, region)) continue;
+            if (!spec.matches(where, how)) continue;
 
             picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));
         }
@@ -71,12 +68,20 @@ public class PondFishSpawner {
         }
 
         if (picker.isEmpty()) {
-            Global.getLogger(PondFishSpawner.class).warn("No fish match star type " + starType
-                    + ", region " + region + " - check " + FishSpecLoader.PATH);
+            Global.getLogger(PondFishSpawner.class).warn("Nothing lives in " + describe(where)
+                    + " on " + how + " - check " + FishSpecLoader.PATH);
             return null;
         }
 
         return picker.pick();
+    }
+
+    /** For the warning above, which is the one place anybody reads a habitat back. */
+    protected static String describe(FishHabitat where) {
+        if (where == null) return "nowhere";
+
+        return where.region + " under " + where.star + ", " + where.age
+                + ", aberration " + String.format("%.2f", where.aberration);
     }
 
     /**
@@ -91,16 +96,4 @@ public class PondFishSpawner {
         return (float) Math.pow(bias, spec.rarity.ordinal());
     }
 
-    /**
-     * The star's planet type, e.g. "star_red" - null for anywhere without a star, which includes
-     * hyperspace and the odd nebula system.
-     */
-    public static String getStarType(LocationAPI location) {
-        if (!(location instanceof StarSystemAPI)) return null;
-
-        PlanetAPI star = ((StarSystemAPI) location).getStar();
-        if (star == null || star.getSpec() == null) return null;
-
-        return star.getSpec().getPlanetType();
-    }
 }
