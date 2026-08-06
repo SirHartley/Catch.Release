@@ -1,4 +1,4 @@
-package catchrelease.campaign.fish.jobs.fleet;
+package catchrelease.rendering.renderers;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -13,50 +13,54 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 /**
- * The mark on a hull that has something to ask, before anybody has agreed to anything.
+ * A small icon hung off the corner of a fleet, in whatever colour the thing hanging it means.
  * <p>
- * Vanilla's own mission indicator, drawn the way vanilla draws it - same sprite, same corner, same
- * size and the same growth when the camera pulls back so it stays a constant thing on screen - in a
- * muted cyan rather than the usual colour. The colour is the whole message: yellow is something the
- * player has taken on and is expected to go and do, and this is a fleet that would like a word if
- * anybody happens to be passing. Once the offer is accepted the mark comes off and vanilla's own
- * takes over, because at that point it is no longer passive.
+ * Vanilla's own mission indicator geometry - same corner, same size in world units, and the same
+ * growth as the camera pulls back so it stays a constant thing on screen - with the sprite and the
+ * colour left to the caller. Two things use it and they mean different things by it: a cyan mission
+ * indicator on a hull with something to ask, and the mod's own icon over the Fisherman.
  * <p>
  * Drawn rather than flagged because {@code $missionImportant} is one boolean with one colour, and
  * setting it would also make the game treat somebody's ordinary trade fleet as story furniture.
  */
-public class FleetQuestMarker implements LunaCampaignRenderingPlugin {
+public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
 
-    /** Muted on purpose: bright enough to find, dim enough not to read as an order. */
-    public static final Color COLOR = new Color(95, 200, 215);
-
-    /** Vanilla's own, so the shape is the one the player already reads as "somebody wants you". */
-    public static final String SPRITE_CATEGORY = "systemMap";
-    public static final String SPRITE_ID = "mission_indicator";
-
-    /** Vanilla's figures for the same mark: size in world units at 1x, and the diagonal offset. */
+    /** Vanilla's figures: size in world units at 1x, and the diagonal offset off the hull. */
     public static final float SIZE = 20f;
     public static final float OFFSET_DIVISOR = 1.41f;
 
-    /** A slow breath, so it reads as waiting rather than as part of the hull. */
+    /** A slow breath, so it reads as a mark rather than as part of the hull. */
     public static final float PULSE_RATE = 1.6f;
     public static final float PULSE_DEPTH = 0.25f;
 
     protected final CampaignFleetAPI fleet;
+    protected final String spriteCategory;
+    protected final String spriteId;
+    protected final Color color;
+    protected final float size;
+
     protected float elapsed = 0f;
     protected boolean expired = false;
 
     /** Puts one over a fleet, and hands it back so whoever asked can take it off again. */
-    public static FleetQuestMarker addTo(CampaignFleetAPI fleet) {
-        FleetQuestMarker marker = new FleetQuestMarker(fleet);
+    public static FleetMarkerRenderer addTo(CampaignFleetAPI fleet, String spriteCategory,
+                                            String spriteId, Color color, float size) {
+
+        FleetMarkerRenderer marker =
+                new FleetMarkerRenderer(fleet, spriteCategory, spriteId, color, size);
 
         LunaCampaignRenderer.addTransientRenderer(marker);
 
         return marker;
     }
 
-    public FleetQuestMarker(CampaignFleetAPI fleet) {
+    public FleetMarkerRenderer(CampaignFleetAPI fleet, String spriteCategory, String spriteId,
+                               Color color, float size) {
         this.fleet = fleet;
+        this.spriteCategory = spriteCategory;
+        this.spriteId = spriteId;
+        this.color = color;
+        this.size = size;
     }
 
     public void expire() {
@@ -89,21 +93,21 @@ public class FleetQuestMarker implements LunaCampaignRenderingPlugin {
         float alpha = viewport.getAlphaMult() * fleet.getSensorFaderBrightness();
         if (alpha <= 0f) return;
 
-        SpriteAPI sprite = Global.getSettings().getSprite(SPRITE_CATEGORY, SPRITE_ID);
+        SpriteAPI sprite = Global.getSettings().getSprite(spriteCategory, spriteId);
         if (sprite == null) return;
 
         //zoomFactor counts up as the camera pulls back, so growing with it is what keeps the mark
         //the same size on screen - which is vanilla's own arithmetic for this sprite
         float zoom = Math.max(1f, Global.getSector().getCampaignUI().getZoomFactor());
-        float size = SIZE * zoom;
+        float drawn = size * zoom;
 
-        float offset = (fleet.getRadius() + size * 0.5f) / OFFSET_DIVISOR;
+        float offset = (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
         Vector2f at = fleet.getLocation();
 
         float pulse = 1f - PULSE_DEPTH * (0.5f - 0.5f * (float) Math.cos(elapsed * PULSE_RATE));
 
-        sprite.setSize(size, size);
-        sprite.setColor(COLOR);
+        sprite.setSize(drawn, drawn);
+        sprite.setColor(color);
         sprite.setNormalBlend();
         sprite.setAlphaMult(alpha * pulse);
         sprite.renderAtCenter(at.x + offset, at.y + offset);
