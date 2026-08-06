@@ -330,7 +330,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * hand from this render pass, so the head would have dimmed out from under a full-strength line.
      */
     protected float getBlastFade() {
-        if (state != State.BLASTED) return 1f;
+        //keyed off the charge having gone off rather than off BLASTED, which the last frame of it
+        //leaves for DONE - a line already faded to nothing would otherwise come back at full
+        //strength for the length of the entity's own fade
+        if (blastThrow == null) return 1f;
 
         return MathUtils.clamp(1f - stateTime / HarpoonConstants.BLAST_FADE_TIME, 0f, 1f);
     }
