@@ -283,11 +283,11 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `FishShopAbilityPlugin.java` | The ability-bar button that opens it. Temporary until it lives on a market |
-| `ShopRowPlugin.java` | One clickable row |
+| `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
 | `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
-| `ShopUi.java` | Shared drawing helpers for the custom-drawn look |
+| `ShopUi.java` | Shared drawing helpers for the custom-drawn look, including the hover card's box and placement |
 
 ### `campaign/fish/items`
 Fish in cargo.
@@ -673,6 +673,14 @@ what keeps the sector-wide search off every other tick.
 until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first
 readout — a backdrop driven off it hung motionless over an open card. `advanceBackdrop()` runs from
 the moment the card exists and is what the coin rain reads; `advance()` stays the list's own.
+
+**A hand-drawn control has no tooltip, and cannot grow one where it lives.** The shopping-list ring
+is painted by `ShopRowPlugin` inside the list's scissor box, so a card drawn there would be sliced
+off at the edge of the list — and it is not a `ButtonAPI`, so there is nothing to hang a stock
+tooltip on. The row reports the hover to the pane, which draws the card from its own
+`CustomUIPanelPlugin.render()`; that runs *after* the panel's children, which is what puts it on top
+of everything. The card's `DrawableString`s are rebuilt only when the hovered ring or its marked
+state changes — each one is a display list.
 
 **A fleet quest never spawns a fleet, and until it is accepted it never touches one either.** The
 offer is two memory keys and a `FleetQuestMarker` hung on a civilian hull already in the player's
