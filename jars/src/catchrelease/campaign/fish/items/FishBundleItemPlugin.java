@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.ShopMarks;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
@@ -92,6 +93,14 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         FishSpec spec = contents.get(0).getSpec();
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
+
+        //the shopping-list dot: something in the crate would go towards a marked upgrade
+        for (FishCatch entry : contents) {
+            if (ShopMarks.isMarked(entry)) {
+                ShopMarks.drawDot(x + w - 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+                break;
+            }
+        }
     }
 
     /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */

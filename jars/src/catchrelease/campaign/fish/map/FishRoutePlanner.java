@@ -5,9 +5,8 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import catchrelease.campaign.fish.shop.ShopPricing;
-import catchrelease.memory.upgrades.UpgradeManager;
-import catchrelease.memory.upgrades.UpgradeStat;
+import catchrelease.campaign.fish.shop.ShopMarks;
+import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
@@ -75,13 +74,13 @@ public class FishRoutePlanner {
             }
         }
 
-        for (UpgradeStat.Category category : UpgradeStat.Category.values()) {
-            for (UpgradeStat stat : UpgradeManager.getInstance().getByCategory(category)) {
-                ShopPricing.Price price = ShopPricing.getPrice(stat);
+        //the shop side is the shopping list: only what the player has marked asks for fish
+        //here, and a broad ask (a tag, a rarity floor) suggests everything that could pay it
+        for (FishRequirement ask : ShopMarks.getMarkedRequirements()) {
+            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+                if (spec == null || spec.id == null) continue;
 
-                if (price != null && price.fish != null && price.fish.speciesId != null) {
-                    byId.putIfAbsent(price.fish.speciesId, "upgrade");
-                }
+                if (ask.couldBeSatisfiedBy(spec)) byId.putIfAbsent(spec.id, "marked");
             }
         }
 

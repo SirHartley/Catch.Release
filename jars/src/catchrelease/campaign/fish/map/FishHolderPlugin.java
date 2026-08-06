@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;
@@ -78,6 +79,12 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
             icon.setNormalBlend();
             icon.setAlphaMult(alphaMult);
             icon.renderAtCenter(Math.round(x), Math.round(y));
+        }
+
+        //the shopping-list dot, bottom right on the ring - a marked upgrade wants this species
+        if (ShopMarks.isMarked(spec)) {
+            float off = radius * 0.707f;
+            ShopMarks.drawDot(x + off, y - off, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
 

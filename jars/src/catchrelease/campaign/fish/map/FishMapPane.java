@@ -744,6 +744,13 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
             }
 
+            //the shopping-list dot, bottom right of the row, same corner as everywhere
+            if (catchrelease.campaign.fish.shop.ShopMarks.isMarked(spec)) {
+                catchrelease.campaign.fish.shop.ShopMarks.drawDot(
+                        x + w - 6f, y + 6f,
+                        catchrelease.campaign.fish.shop.ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
+            }
+
             ShopUi.endClip();
         }
 

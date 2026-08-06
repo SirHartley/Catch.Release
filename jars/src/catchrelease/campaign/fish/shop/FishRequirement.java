@@ -106,6 +106,31 @@ public class FishRequirement {
         return true;
     }
 
+    /**
+     * Whether a specimen of this species could ever satisfy the ask - the species-level echo of
+     * {@link #matches}, for screens that show species rather than catches. Only the axes a
+     * species decides are tested; grade, size, origin and coherence are the individual fish's
+     * business, except that abyssal species can never read as low coherence.
+     */
+    public boolean couldBeSatisfiedBy(FishSpec spec) {
+        if (spec == null) return false;
+
+        if (!anyOf.isEmpty()) {
+            for (FishRequirement alternative : anyOf) {
+                if (alternative.couldBeSatisfiedBy(spec)) return true;
+            }
+
+            return false;
+        }
+
+        if (speciesId != null) return speciesId.equals(spec.id);
+        if (tag != null && !spec.tags.contains(tag)) return false;
+        if (minRarity != null && spec.rarity.ordinal() < minRarity.ordinal()) return false;
+        if (lowCoherence && spec.tags.contains("abyssal")) return false;
+
+        return true;
+    }
+
     /** The colour the ask wears in the UI: the named species' own, else the rarity floor's. */
     public FishRarity getDisplayRarity() {
         if (speciesId != null) {

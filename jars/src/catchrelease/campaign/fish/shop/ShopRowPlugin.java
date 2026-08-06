@@ -88,6 +88,12 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         renderName(x, y, height, selected, alphaMult);
         renderState(x, y, width, height, alphaMult);
 
+        //the shopping-list dot, bottom right - the same corner it stands in everywhere else
+        if (ShopMarks.isMarked(entry.getKey())) {
+            ShopMarks.drawDot(x + width - ShopMarks.DOT_RADIUS - 2f,
+                    y + ShopMarks.DOT_RADIUS + 2f, ShopMarks.DOT_RADIUS, alphaMult);
+        }
+
         ShopUi.endClip();
     }
 
