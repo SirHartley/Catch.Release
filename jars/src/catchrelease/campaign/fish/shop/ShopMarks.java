@@ -2,6 +2,8 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.rendering.helper.Disc;
@@ -14,10 +16,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The player's shopping list: upgrades marked in the outfitter as the thing being saved for.
- * A mark follows the upgrade, not a rung - the asks it stands for are always the upgrade's
- * current price, so buying a rung moves the mark to the next one, and a finished upgrade's
- * mark expires on its own.
+ * The player's shopping list: wares - upgrades and tackle both - marked in the outfitter as
+ * the thing being saved for, via the ring on their list rows. A mark follows the ware, not a
+ * rung - the asks it stands for are always the current price, so buying a rung moves the mark
+ * to the next one, and a finished or owned ware's mark expires on its own.
  * <p>
  * What a mark does lives elsewhere and reads through the two questions here: the route planner
  * suggests every species that could satisfy a marked ask, and every screen that shows a fish
@@ -57,20 +59,47 @@ public class ShopMarks {
         if (!marked.remove(entryKey)) marked.add(entryKey);
     }
 
+    /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
+    public static boolean isMarkable(ShopEntry entry) {
+        if (entry == null) return false;
+
+        ShopPricing.Price price = entry.getPrice();
+
+        return price != null && price.fish != null;
+    }
+
     /**
-     * The marked upgrades' current asks, keys resolved against the live sheet each time so a
-     * bought rung is priced as its next and a finished or vanished upgrade contributes nothing.
+     * The marked wares' current asks - upgrades and tackle both - keys resolved against the
+     * live sheet each time, so a bought rung is priced as its next and a finished, owned, or
+     * vanished ware contributes nothing.
      */
     public static List<FishRequirement> getMarkedRequirements() {
         List<FishRequirement> out = new ArrayList<>();
 
         for (String key : getMarkedKeys()) {
-            if (!key.startsWith("stat:")) continue;
+            ShopPricing.Price price = null;
 
-            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
-            if (stat == null || ShopPricing.isMaxed(stat)) continue;
+            if (key.startsWith("stat:")) {
+                UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
+                if (stat == null || ShopPricing.isMaxed(stat)) continue;
 
-            ShopPricing.Price price = ShopPricing.getPrice(stat);
+                price = ShopPricing.getPrice(stat);
+            } else if (key.startsWith("tackle:")) {
+                String[] parts = key.split(":", 3);
+                if (parts.length < 3) continue;
+
+                Tackle tackle;
+                try {
+                    tackle = Tackle.valueOf(parts[2]);
+                } catch (IllegalArgumentException e) {
+                    continue; //a mark from a version that no longer makes this module
+                }
+
+                if (TackleManager.isOwned(tackle)) continue;
+
+                price = ShopPricing.getPrice(tackle);
+            }
+
             if (price != null && price.fish != null) out.add(price.fish);
         }
 
