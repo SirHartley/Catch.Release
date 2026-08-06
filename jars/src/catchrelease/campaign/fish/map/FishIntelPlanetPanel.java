@@ -293,8 +293,20 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 LazyFont.DrawableString title = body.createText("Patterns",
                         ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult),
                         body.getBaseHeight());
-                title.draw(Math.round(x + (w - title.getWidth()) * 0.5f),
-                        Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f));
+
+                int titleX = Math.round(x + (w - title.getWidth()) * 0.5f);
+                int titleY = Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f);
+
+                //the black rim the game's own UI text wears - drawn as four offset copies,
+                //since the font itself has no outline baked in
+                LazyFont.DrawableString rim = body.createText("Patterns",
+                        ShopUi.withAlpha(Color.BLACK, alphaMult), body.getBaseHeight());
+                rim.draw(titleX - 1, titleY);
+                rim.draw(titleX + 1, titleY);
+                rim.draw(titleX, titleY - 1);
+                rim.draw(titleX, titleY + 1);
+
+                title.draw(titleX, titleY);
             }
 
             //the border wears exactly the title bar's colour, so the bar reads as part of the frame

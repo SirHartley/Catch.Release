@@ -168,7 +168,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         //transparent black, the way the screen's own panels sit on it - no colour wash
         ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
-        Color border = Misc.getDarkPlayerColor();
+        //the border the map itself wears - dark player colour read as too dim beside it
+        Color border = Misc.getBasePlayerColor();
         ShopUi.drawQuad(x, y, w, 1f, border, alphaMult);
         ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, alphaMult);
         ShopUi.drawQuad(x, y, 1f, h, border, alphaMult);
@@ -204,7 +205,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     /** The part that never rebuilds: planner, search, the type chips, deselect, and the header. */
     protected void buildControls() {
-        float innerWidth = width - PAD * 2f;
+        //the same right edge as the list's rows below, which sit 6px in for their scroller
+        float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI controls = panel.createUIElement(innerWidth, CONTROLS_HEIGHT, false);
 
         //planner sits above search - planning is the point, search is just how species get found
