@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.constants;
 
+import com.fs.starfarer.api.util.Pair;
+
 import java.awt.Color;
 
 public class FishConstants {

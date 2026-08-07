@@ -17,8 +17,34 @@ qa_
 Fish
 - need five more legendaries - one for each quadrant
 
-Crabolabob
-- Should sell Breach Conservatory Industry BP (aquarium)
+Fisherman
+- Just had one spawn next to a sun. Should only spawn in outer rim in populated systems. No spawn distance requirements in unpopulated systems.
+- Ask about something else has a "cut commlink" option - remove that
+- Ask about something else has a "continue" option - should be "I've heard enough."
+- Fisherman fleet should have the ignore other fleets, ignored by other fleets flags
+
+Quests / tutorial
+- The tutorial "bring me X out of Y just stays blank because whatever it's trying to load isn't firing.
+- Quest stages don't complete on catching the required fish (no intel update, no removal of "Important" mark)
+
+Intel
+- All fishing & quest related intel entries are currently very low-information and "underdressed". Check how other quest-related intel entries do it and mirror their level of detail.
+
+ROD/LINE
+- LINE drones can catch invisible motes under searchlights, which they should never be able to do - the only upgrade for this is for the harpoon.
+
+Shop
+- Revert title to large font
+- List of options should be same width as header
+- needs a "leave" button in the bottom right
+
+Industry
+- Shutting the display off, then on again causes it to stay invisible until the panel is reloaded
+- remove fish tank buttons, can be managed through industry anyways
+- Add some more embellishments to the tank graphics, it's kinda cheap. Add suppor tfor a background png. Make the water more watery.
+
+Map
+- Stripes should be static in size and not change size when scrolling
 
 Codex
 - open map from codex still broken
@@ -26,6 +52,45 @@ Codex
 ---------------------
 
 handed off_
+
+Quests/tutorial
+- If the fisherman fleet that gave you the quest dies for any reason, the quest giver should move to another instance of the fisherman fleet in the core. It should respawn upon next entry to the system and have the quest re-attached.
+- Mark any specific ponds that are required by a quest with the classic golden ! (makeImportant vanilla) and make the intel point to it, like when there is a specific fish it wants you to catch (see: first fisherman tutorial quest).
+- Change the initial tutorial quest to accept any fish of common or better rarity.
+
+Crabolabob
+- Should sell Breach Conservatory Industry BP (aquarium). Check Planetary Shield BP on how to implement an industry BP.
+
+Fisherman
+- Should not spawn in every single system in the rim - only once a month after you last saw them. Timer resets when entering the a core system. He should have a medium-low chance to spawn upon entering the system to make sure you don't encounter him in the first system you enter...
+- Shows a "cut the comm link" option for no reason - get rid of that
+- should always move at burn 4 unless catching up to you during the tutorial quest, in which case he unlocks and runs burn 16.
+- Talking to, then leaving, then talking to the fisherman moves me into an active battle with him against me. Why?
+- Should not fire the harpoon
+- Give him a third searchlight (currently has 2)
+
+Fleet Quests
+- Fisherman can be chosen for random quests - he should be immune. Actually, ONLY pick scavengers for random quest fleet targets. If they are a questgiver, they should not flip into piracy mode.
+- Not every god damn fleet is supposed to be picked as a questgiver, the rate is way too high.
+- If a fleet is duplicated by an accepted quest, it doesn't seem like the old one correctly despawns. The original fleet should be moved to 0.0 on the coordinate grid, be assigned null as AI and be made Misc.fadeAndDespawn as noted in the initial prompt
+- Intel says "1 specimen" - one specimen of what exactly? Did it bug out and not specify a target?
+- the fish required do not display in the dialogue. You should be handling that by handing a pre-made text to the fleet via memory key, or by using a custom RuleCommandPlugin.
+- All fleet quest interactions end with "continue", then go into "leave them to it", and cycle back to "continue" - leaving you in a loop without exit.
+
+Cargo
+- Fish cargo icons always display as "blacked out" in cargo
+- Fish cargo icons do not show the "wanted" indicator in the lower left (neither do crates)
+
+Patrol Interactions
+- Lamp: Patrols that have caught you with the lamps on (and that you resolved by turning them off) will ignore you if you turn them back on later and not confront you. These patrols should still be able to confront you.
+- Harpoon: Patrol: Using a story point to resolve a situation causes the comms to be marked yellow after leaving - should be white.
+- Harpoon: Patrol: Second Time: You're throwing text up via script, but the "open comms" action is still there. It should be white, and not yield a response, like normal for combat encounters.
+- Harpoon: Patrol: Should continue counting, because if you disengage and do it again they will still say "second time" when it is in fact the third or more.
+- Harpoon: Civil: Request comms should not be yellow after initial dialogue has resolved
+- Harpoon: Civil: If civil fleet of a civilized faction (= not pirate / pather) is smaller than you in strength, it should start running away after being harpooned the first time (including e-burn & avoid fleet flag) and try to find a patrol fleet to tattle to.
+- Harpoon: Civil: If the civil fleet is of larger strength than you, it should work stage 1 as it currently is (ignore you).
+- Harpoon: Civil: If the civil fleet is of larger strength than you, it should run you down and demand compensation for stage 2, not continue on its way.
+- Harpoon: Civil: If the civil fleet is of larger strength than you, it should start running away (including e-burn & avoid flag) after the third time and try to notify a patrol fleet, which should respond with the harpoon interaction.
 
 Fisherman
 - Fleet should never run from you
@@ -230,8 +295,6 @@ xReward Qualifications
 - Add new possible requirement for quest: Catch modes: Harpoon or LINE Drones
 - Add new possible requirement for quest: Catch Implement: Pond or Breach Lamps
 - These should be combineable, so a medium-difficulty quest might read: "Bass of average quality and low coherence, caught with a harpoon through a breach lamp."
-
----------------------
 
 x Colony Aquarium
 - Add a structure: Breach Conservatory (as usual, use placeholder image).
