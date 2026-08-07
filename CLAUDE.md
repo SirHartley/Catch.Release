@@ -17,11 +17,14 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   end to end. The dependency mods are the exception to the rule above - the skill is vanilla
   only, so for GraphicsLib, LazyLib, LunaLib and MagicLib `lib/` is not the fallback, it is the
   only source there is.
-- **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The whole language -
-  triggers, memory containers and expiries, conditions and scoring, the option commands, the
-  token list - plus a symptom-to-cause table and an appendix of the traps this repo has
-  already hit. Read the part you are about to use before writing a row, not after the row
-  misbehaves.
+- **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
+  verified against decompiled engine source - triggers, memory scopes, the operator table, the
+  truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
+  already paid for. Two deeper references sit beside it and are quoted verbatim from the modder
+  who wrote them: [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) for the
+  engine end to end, and [`docs/rules/command_table.md`](docs/rules/command_table.md) for the
+  command vocabulary. Read the part you are about to use before writing a row, not after the
+  row misbehaves.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
 - **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
