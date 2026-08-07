@@ -393,11 +393,11 @@ Fish in cargo.
 
 ### `campaign/fish/crab`
 `rules.csv` (`catchrelease_crabBarAdd` and the rows under it); only the wares are Java.
-Crablobab's two wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
+Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
 
 | File | What it does |
 |---|---|
-| `CrabWares.java` | The two wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch |
+| `CrabWares.java` | The three wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.
@@ -796,6 +796,8 @@ written to that claim.
 **A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
 
 **The camp job polls rather than being told.** Being killed, bought off, talked off and quietly wandering away do not share a hook, and only two of the four happen inside a conversation. So `CampedSpotJob.advanceImpl` asks one question on the mission's own tick instead of four rules rows each reporting a different way.
+
+**An industry blueprint is one item, not one per industry.** `industry_bp` is a single special item whose *data* field carries the industry id, which is what vanilla's own `AddRemoveAnyItem SPECIAL industry_bp <id>` is doing. So selling the plans for the conservatory needs no new item row anywhere - a `SpecialItemData(Items.INDUSTRY_BP, BreachConservatory.ID)` in the hold is the whole of it, and the game names it, describes it and teaches the faction from the industry spec.
 
 **`despawn()` files the paperwork; it does not clear the board.** Accepting a fleet quest copies the giver into a hull of the mod's own and retires the original, and calling `despawn(reason, null)` tells whatever was managing that fleet it is gone - but leaves the hull sitting in the system beside its copy, still steered by its own AI, visibly two fleets. The disposal is `setAI(null)`, move to the origin, then `Misc.fadeAndExpire` (note the name - there is no `fadeAndDespawn`).
 
