@@ -38,7 +38,7 @@ public class Castaway extends BaseCustomEntityPlugin {
         @Override
         public void reportPlayerSurveyedPlanet(PlanetAPI planet) {
             if (isPlaced()) return;
-            if (FishingIntro.isAtLeast(FishingIntro.TAUGHT)) return;
+            if (FishingIntro.isAtLeast(FishingIntro.RODDED)) return;
 
             if (planet == null || planet.getStarSystem() == null) return;
 

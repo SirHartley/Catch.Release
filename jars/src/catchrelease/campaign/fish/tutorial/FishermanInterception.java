@@ -55,7 +55,7 @@ public class FishermanInterception implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (FishingIntro.isAtLeast(FishingIntro.TAUGHT)) return;
+        if (FishingIntro.isAtLeast(FishingIntro.RODDED)) return;
 
         interval.advance(amount);
         if (!interval.intervalElapsed()) return;

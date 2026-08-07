@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 208 Java files across eight top-level packages, plus
+What is where, and which file to open first. 206 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -22,6 +22,8 @@ that is wrong is worse than no map, because it is believed.
 | Bar jobs | `campaign/fish/jobs/` — `FishJob.java` is the spine |
 | Fleet-given jobs | `campaign/fish/jobs/fleet/` |
 | The shop | `campaign/fish/shop/FishShopDialog.java` |
+| Anything anybody **says** | `data/campaign/rules.csv` — all of it, without exception |
+| What the sheet can *do* | `dialogue/rules/CatchReleaseCMD.java` |
 | Upgrades | `memory/upgrades/` + `data/config/UpgradeData.csv` |
 | Tackle modules | `campaign/fish/tackle/Tackle.java` |
 | An ability's behaviour | `abilities/<name>/ability/` |
@@ -50,21 +52,23 @@ Everything game-facing is wired from `ModPlugin.java`.
 1. `OnJumpPondSpawner.register()` — ponds appear as the player jumps into systems
 2. `BuriedMoteSpawner.register()` — maintains the buried-mote population near the player
 3. `ChargeManager.register()` — regenerating charge pools for the charged abilities
-4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets and the Fisherman their
-   custom encounter dialogs
+4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets their custom encounter screen,
+   the one conversation still written in Java
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
 8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
-9. `TutorialWreck.Watcher.register()`, `Castaway.Watcher.register()`,
-   `FishermanInterception.register()` — the introduction's three hooks
-10. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
-11. `AquariumTankScript.register()` — the aquarium on the colony's main menu
-12. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-13. `SkillshotFramework.register()` — the aiming framework
-14. `FishMapFilterScript` as a transient script — the sector-map filter
-15. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-16. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+9. `FishermanQuest.Keeper.register()` — keeps a chart request's specimen in the water
+10. `TutorialWreck.Watcher.register()`, `Castaway.Watcher.register()`,
+   `RatingBarEvent.VisitCounter.register()`, `FishermanInterception.register()`,
+   `FishingIntro.Keeper.register()` — the introduction's hooks and its errand keeper
+11. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
+12. `AquariumTankScript.register()` — the aquarium on the colony's main menu
+13. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
+14. `SkillshotFramework.register()` — the aiming framework
+15. `FishMapFilterScript` as a transient script — the sector-map filter
+16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -87,6 +91,10 @@ they are granted by `FishingIntro`, not by character creation.
 | `catchrelease_harpoon` | `abilities/harpoon/ability/HarpoonAbilityPlugin` |
 | `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
+
+**`data/config/settings.json`** — `ruleCommandPackages`, listing vanilla's five packages **plus**
+`catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
+merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
 
 **`data/campaign/bar_events.csv`** — 11 jobs, plus `catchrelease_crablobab` →
 `campaign/fish/crab/CrabSalesman`, a vendor rather than a job and the one row here that is not a
@@ -126,7 +134,12 @@ named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 ## The rules.csv contract
 
-Every word a job speaks is in the sheet. Java owns only what a sheet cannot do — counting the hold,
+**Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
+Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
+`tokens` writes the booleans and strings the rows branch on and always returns true, so it never
+changes whether a row matches; in *script*, a verb does the thing and returns whether it worked. The
+machinery panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is not
+something a sheet has anything to say about. Java owns only what a sheet cannot do — counting the hold,
 spending it, rolling the payment, settling a bet — and writes the outcome into memory for the rows
 to read. A job that says something different when a wager comes off is **a second row**, not a
 second branch in Java.
@@ -250,20 +263,25 @@ explains how.
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
 | `FishermanConstants.java` | Every number the above read |
 
-### `campaign/fish/tutorial`
-How somebody stops being a person who has never heard of this. **Entirely detached from the ordinary
-loop** — the trade runs whether or not any of it has happened. Three ways in, none required, all
-leading to the same conversation with the Fisherman; the abilities are the gate, `unlockedAtStart`
-**off** for all four in `abilities.csv`.
+### `dialogue/rules`
+The one rule command the mod ships, and the only place the sheet reaches into Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The three stages, the ability grant, the carried harpoon, and the intel note |
-| `FishingIntroDialog.java` | The Fisherman explaining breach fishing, and taking the harpoon back |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder |
+| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic |
+
+### `campaign/fish/tutorial`
+Learning to fish, in six lessons and one shortcut. **Entirely detached from the ordinary loop** — the
+trade runs whether or not any of it has happened. What it gates is *equipment*, and through that
+everything downstream. Not a word of what it says is in Java.
+
+| File | What it does |
+|---|---|
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, the intel note |
 | `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
-| `TutorialWreckDialog.java` | Boarding it, finding nobody, and cutting the head out |
-| `Castaway.java` | The crewman put off the boat for looking, found on a survey |
-| `CastawayDialog.java` | Answering the beacon, and the one useful sentence he has |
+| `Castaway.java` | The rating put off a boat for looking, found on a survey |
+| `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
 | `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped |
 | `TutorialConstants.java` | Every number the above read |
 
@@ -780,6 +798,20 @@ than a fleet readout — a thing a hull list cannot say. What changes is how wel
 figure, not a specimen's jittered one), and the boat's name, the greeting, and the line under it all
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
+
+**All dialogue is in the sheet — all of it.** The Fisherman's whole conversation, the introduction's
+six lessons, the hulk, the castaway and the bar rating are rows in `rules.csv`. Java is reached only
+through `CatchReleaseCMD <verb>`: in a row's *conditions* `tokens` writes the dozen booleans the rows
+branch on and always returns true, and in a row's *script* a verb does the thing and returns whether
+it worked. The panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is
+machinery and there is nothing for a sheet to say about it.
+
+**The ladder gates equipment, and equipment gates the world.** `unlockedAtStart` is off for all four
+abilities. The shop only shelves a rig you have been handed (`ShopGroup.isOwned`), so the harpoon and
+lamp shelves are not there to be read before you own them. No bar job and no fleet job is offered at
+all until the first errand is behind you (`FishingIntro.isOpenForWork`), and while the ladder runs an
+ask never names gear you have not got — `FishJobAsks.rollCatchTerms` narrows to what is in your
+hands, because an order you cannot act on is not an order.
 
 **Three ways into the introduction, none required, and each fitted to where the player already is.**
 Out where nobody lives, the first rupture they come within sight of gets a holed cruiser next to it —

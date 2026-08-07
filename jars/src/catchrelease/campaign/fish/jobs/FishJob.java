@@ -201,6 +201,10 @@ public abstract class FishJob extends HubMissionWithBarEvent {
     public boolean shouldShowAtMarket(MarketAPI market) {
         if (market == null) return false;
 
+        //nobody hires a fisher who has not been handed a rod. A player three minutes into the
+        //introduction being asked for legendaries out of the abyss has been handed the wrong game
+        if (!catchrelease.campaign.fish.tutorial.FishingIntro.isOpenForWork()) return false;
+
         String required = getRequiredFactionId();
 
         return required == null || required.equals(market.getFactionId());
