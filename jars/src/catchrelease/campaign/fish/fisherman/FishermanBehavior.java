@@ -175,6 +175,14 @@ public class FishermanBehavior implements EveryFrameScript {
 
         keepNamed();
 
+        //a boat out there since before the trade had two kinds of boat in it. Written once, and
+        //only because without it the dialog would take him for one of the core's trawlers
+        if (isVisiting()
+                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.WANDERER_FLAG)) {
+
+            fleet.getMemoryWithoutUpdate().set(FishermanConstants.WANDERER_FLAG, true);
+        }
+
         if (marker == null || marker.getContainingLocation() != fleet.getContainingLocation()) {
             marker = FishermanMapIcon.addTo(fleet);
         }
