@@ -40,7 +40,7 @@ The short version:
 |---|---|
 | `jars/src/catchrelease/campaign/ponds/` | The pond. **Terrain**, not a custom entity - registered in `data/campaign/terrain.json`, plugin under `terrain/`. |
 | `jars/src/catchrelease/campaign/fish/` | Most of the mod: specs, motes, spawning, the catch minigame, jobs, the shop, the map filter, the codex. |
-| `jars/src/catchrelease/campaign/crime/` | What harpooning a fleet costs you. |
+| `jars/src/catchrelease/campaign/crime/` | What harpooning a fleet costs you, and what running the breach lamps over an inhabited world costs you. |
 | `jars/src/catchrelease/abilities/` | The four rigs - searchlight, R.O.D., harpoon, depth bomb. |
 | `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire ability framework; see its README. |
 | `jars/src/catchrelease/rendering/` | Shader and sprite renderers, stencils, warp grids. |

@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 206 Java files across eight top-level packages, plus
+What is where, and which file to open first. 208 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -35,7 +35,7 @@ that is wrong is worse than no map, because it is believed.
 | The fishing boats, standing and visiting | `campaign/fish/fisherman/` |
 | How anybody starts fishing | `campaign/fish/tutorial/` |
 | The colony structure and its aquarium | `campaign/fish/colony/` |
-| Consequences of harpooning a fleet | `campaign/crime/` |
+| Consequences of harpooning a fleet, or of running the lamps over one | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
 
 ---
@@ -432,10 +432,12 @@ The pond, as terrain.
 | `entities/StenciledFishingPondEntityPlugin.java` | **Dead.** The old custom-entity pond |
 
 ### `campaign/crime`
-What harpooning a fleet costs.
+What harpooning a fleet costs, and what running the breach lamps over somebody's head costs.
 
 | File | What it does |
 |---|---|
+| `LampOffence.java` | Where the lamps may be run and what a stop costs. System-bound like the transponder law — a flag polices systems it holds something in; inside those, everybody objects near an inhabited world and the Church and the Path object anywhere. Four rungs: warning, fine, inspection, guns, the last only reached by doing it again inside a month |
+| `LampPatrolResponse.java` | Patrols coming over about the lit lamps. Nothing is booked and nothing is dispatched — the sweep asks only whether they are burning, whether this is somebody's space, and whether anybody is looking, so putting them out before the patrol arrives ends it |
 | `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the two escalation ladders — armed and unarmed. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
 | `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
@@ -731,11 +733,18 @@ heavily escorted convoy is still a convoy.
 
 **A rules row can take credits but cannot close a faction's books.** Both the patrol's fine and a
 holed crew's repair bill hand the outcome back through memory flags that the crime script reads on
-its next tick — there is no rule command, and adding one would mean overriding vanilla's
-`ruleCommandPackages` array in `settings.json`, which replaces rather than merges and would drop
-every other mod's commands. The bill adds a **global** marker beside the per-fleet flags, because the
-crew that was talked to need not still be near the player when anything reads it back; the marker is
-what keeps the sector-wide search off every other tick.
+its next tick, rather than through `CatchReleaseCMD` — the handoff predates the command and there is
+no reason to move it. The bill adds a **global** marker beside the per-fleet flags, because the crew
+that was talked to need not still be near the player when anything reads it back; the marker is what
+keeps the sector-wide search off every other tick.
+
+**The lamp response is the transponder's shape, not the harpoon patrol's.** A harpooning is an
+incident on a faction's books that a patrol is sent about days later; lit lamps are something the
+player is doing right now that anybody in line of sight can see. So `LampPatrolResponse` books
+nothing and remembers nothing — it re-asks the three questions every tick and calls the stop off the
+moment any of them turns false, which is why turning the lamps out makes the whole thing go away.
+The two things that do persist are the sector-wide rung count and a 30-day marker on each crew that
+has already had the conversation, so one system cannot produce a queue of identical stops.
 
 **The loot card has two clocks, and only one of them is the readout's.** Its list is held back
 until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first

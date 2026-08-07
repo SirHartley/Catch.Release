@@ -1,5 +1,8 @@
 package catchrelease.dialogue.rules;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.crime.LampOffence;
+import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
@@ -7,14 +10,18 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
+import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.rulecmd.BaseCommandPlugin;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Misc.Token;
@@ -80,6 +87,22 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
+
+    /**
+     * A patrol stopping the player about the lamps: which rung, what it wants, and what it is
+     * objecting to.
+     * <p>
+     * Written onto the patrol's own memory rather than into local, because the stop begins at
+     * {@code BeginFleetEncounter} and is spoken at {@code OpenCommLink} - two triggers with two
+     * different local scopes, and only the fleet is the same thing at both. The rows read them as
+     * {@code $entity.} once the link is open.
+     */
+    public static final String LAMP_CONV = "$catchrelease_lampConv";
+    public static final String LAMP_RUNG = "$catchrelease_lampRung";
+    public static final String LAMP_FINE = "$catchrelease_lampFine";
+    public static final String LAMP_FINE_TEXT = "$catchrelease_lampFineDGS";
+    public static final String LAMP_WHERE = "$catchrelease_lampWhere";
+    public static final String LAMP_HAUL = "$catchrelease_lampHaul";
 
     @Override
     public boolean execute(String ruleId, InteractionDialogAPI dialog, List<Token> params,
@@ -152,6 +175,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "rumor":
                 return FishRumors.isAvailable() && FishRumors.create() != null;
 
+            //---- the lamps, and who objects to them
+            case "lampStop":
+                return openLampStop(dialog);
+            case "lampsOff":
+                return putLampsOut();
+            case "lampRefused":
+                return chargeLampStanding(dialog, true);
+            case "seizeFish":
+                return seizeFish(dialog);
+
             //---- the man with the crate
             case "crabBuy":
                 return buyCrabWare(arg);
@@ -174,6 +207,108 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     protected com.fs.starfarer.api.campaign.TextPanelAPI text(InteractionDialogAPI dialog) {
         return dialog == null ? null : dialog.getTextPanel();
+    }
+
+    //---------------------------------------------------------------- the lamps
+
+    /**
+     * Opens a patrol's stop about the lamps: books it, and lays out what the rows need to say it.
+     * <p>
+     * All of it onto the patrol's memory, since this runs at {@code BeginFleetEncounter} and the
+     * conversation happens at {@code OpenCommLink} - the fleet is the only scope both triggers agree
+     * on. A day's life on the values, which is what vanilla gives the same handoff in the cargo
+     * scan and comfortably longer than any conversation.
+     * <p>
+     * The standing cost is charged here rather than from the rows, because there are nine rows per
+     * rung and a charge repeated in thirty-six places is a charge that will eventually be missing
+     * from one of them. Vanilla charges the transponder stop at the moment the link opens; this is
+     * the same moment, one trigger earlier.
+     */
+    protected boolean openLampStop(InteractionDialogAPI dialog) {
+        CampaignFleetAPI patrol = getOtherFleet(dialog);
+        if (patrol == null) return false;
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        MemoryAPI mem = patrol.getMemoryWithoutUpdate();
+
+        String factionId = mem.getString(LampPatrolResponse.FACTION_KEY);
+        if (factionId == null && patrol.getFaction() != null) factionId = patrol.getFaction().getId();
+
+        //read before record(), which is what moves the ladder on
+        int rung = LampOffence.getRung();
+        LampOffence.record();
+
+        mem.set(LAMP_CONV, true, 0);
+        mem.set(LAMP_RUNG, rung, 1f);
+        mem.set(LAMP_FINE, LampOffence.FINE, 1f);
+        mem.set(LAMP_FINE_TEXT, Misc.getWithDGS(LampOffence.FINE), 1f);
+        mem.set(LAMP_WHERE, LampOffence.getClosestInhabitedName(player), 1f);
+        mem.set(LAMP_HAUL, FishBuyer.hasAnything(), 1f);
+
+        if (factionId != null) {
+            LampOffence.applyRepLoss(factionId, LampOffence.REP_LOSS, text(dialog));
+        }
+
+        return true;
+    }
+
+    /**
+     * The player putting the lamps out, which is the only thing any of this was ever about.
+     * <p>
+     * Straight at the ability rather than through the button, because the button is a UI press with
+     * a spool-up behind it and this is somebody killing the power.
+     */
+    protected boolean putLampsOut() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return false;
+
+        AbilityPlugin lamps = player.getAbility(SearchlightAbilityPlugin.ABILITY_ID);
+        if (lamps == null || !lamps.isActiveOrInProgress()) return false;
+
+        lamps.deactivate();
+
+        return true;
+    }
+
+    /** What the stop costs in standing, printed into the conversation it happened in. */
+    protected boolean chargeLampStanding(InteractionDialogAPI dialog, boolean refused) {
+        CampaignFleetAPI patrol = getOtherFleet(dialog);
+        if (patrol == null || patrol.getFaction() == null) return false;
+
+        LampOffence.applyRepLoss(patrol.getFaction().getId(),
+                refused ? LampOffence.REP_REFUSE : LampOffence.REP_LOSS, text(dialog));
+
+        return true;
+    }
+
+    /**
+     * The inspection, which is the one thing a patrol can do about the lamps that hurts.
+     * <p>
+     * Vanilla's own {@code CargoScan} is no use here - it looks for illegal <i>commodities</i> and
+     * the hold is full of special items - so the taking is done by hand and reported the way vanilla
+     * reports a confiscation, in the small font and in the negative colour.
+     */
+    protected boolean seizeFish(InteractionDialogAPI dialog) {
+        int taken = FishCurrency.seizeAll();
+        if (taken <= 0) return false;
+
+        com.fs.starfarer.api.campaign.TextPanelAPI panel = text(dialog);
+        if (panel == null) return true;
+
+        panel.setFontSmallInsignia();
+        panel.addPara("Lost " + taken + Strings.X + " specimen" + (taken == 1 ? "" : "s"),
+                Misc.getNegativeHighlightColor());
+        panel.highlightLastInLastPara(taken + Strings.X, Misc.getHighlightColor());
+        panel.setFontInsignia();
+
+        return true;
+    }
+
+    /** The fleet on the other side of the link, when there is one. */
+    protected CampaignFleetAPI getOtherFleet(InteractionDialogAPI dialog) {
+        SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
+
+        return target instanceof CampaignFleetAPI ? (CampaignFleetAPI) target : null;
     }
 
     //---------------------------------------------------------------- the tokens

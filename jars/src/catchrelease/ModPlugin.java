@@ -3,6 +3,7 @@ package catchrelease;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
+import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
@@ -51,6 +52,7 @@ public class ModPlugin extends BaseModPlugin {
         // pointing fishing gear at a fleet
         CatchReleaseCampaignPlugin.register();
         HarpoonPatrolResponse.register();
+        LampPatrolResponse.register();
 
         // jobs offering fish for trade
         FleetQuestSpawner.register();
