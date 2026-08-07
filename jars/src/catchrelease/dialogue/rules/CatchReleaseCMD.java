@@ -182,6 +182,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return putLampsOut();
             case "lampRefused":
                 return chargeLampStanding(dialog, true);
+            case "lampForgive":
+                LampOffence.forgive();
+                return true;
             case "seizeFish":
                 return seizeFish(dialog);
 

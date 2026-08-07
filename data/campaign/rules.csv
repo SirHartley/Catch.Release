@@ -1,7 +1,7 @@
 id,trigger,conditions,script,text,options,notes
 catchrelease_harpoonedComms,OpenCommLink,"$entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""The link opens onto an argument already in progress. Someone reads your transponder code aloud, and someone else asks - twice, and not calmly - what exactly you thought you were fishing for.""
+!$entity.isHostile","AddText ""The link opens onto an argument already in progress. Somebody reads your transponder code aloud, somebody else asks - twice, and not calmly - what exactly you thought you were fishing for, and your comms officer sits through all of it with the expression of a person who would rather be doing anything else.""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsHeg,OpenCommLink,"$faction.id == hegemony
@@ -54,7 +54,7 @@ $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""They accept the link, listen to nothing, and close it. Whatever was going to be said about the first harpoon is not going to be said about the second.""
+AddText ""They accept the link, listen to nothing, and close it before your comms officer has finished saying your name. Whatever was going to be said about the first harpoon is not going to be said about the second.""
 EndConversation NO_CONTINUE",,,
 catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_harpooned score:1210
@@ -97,9 +97,11 @@ OpenComms",,,"The patrol sent about a harpooning, arriving. Unprefixed keys beca
 catchrelease_fineDemand,OpenCommLink,"$entity.catchrelease_fineConv score:1300
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""We have a report of a $faction hull holed by - "" $PersonRank $personName stops, checks the screen again, and continues in the voice of someone who has decided not to editorialise. "" - by a fishing implement.""
+FireAll CatchReleaseFineOptions","""We have a report of a $faction hull holed by - "" $PersonRank $personName stops, checks the screen again, and continues in the voice of somebody who has decided not to editorialise. "" - by a fishing implement.""
 
-""Damage to fleet property, discharge of a projectile weapon inside a patrolled lane, and whatever the tribunal decides to call the rest of it. Settle it here for $entity.catchrelease_harpoonFineDGS credits and it goes in the file as an accident.""",,
+""Damage to fleet property, discharge of a projectile weapon inside a patrolled lane, and whatever the tribunal decides to call the rest of it. Settle it here for $entity.catchrelease_harpoonFineDGS credits and it goes in the file as an accident.""
+
+Your ops chief, who has the figure up on a slate before you have asked for it, holds it where only you can see it.",,
 catchrelease_fineDemandHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
@@ -108,14 +110,14 @@ FireAll CatchReleaseFineOptions","""Hegemony Navy. Heave to.""
 
 $PersonRank $personName works through it without looking up. ""Discharge of an unregistered device, damage to a registered hull, and an entry under 'munition, description of' that I have had to write out by hand. The schedule for all three comes to $entity.catchrelease_harpoonFineDGS credits.""
 
-$HeOrShe finally looks up. ""Pay it and the file says accident. Don't, and it says something else, and then it stops being mine.""",,
+$HeOrShe finally looks up, and looks at your ship rather than at you. ""Pay it and the file says accident. Don't, and it says something else, and then it stops being mine.""",,
 catchrelease_fineDemandTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""Tri-Tachyon corporate security. This is a billing matter.""
+FireAll CatchReleaseFineOptions","""Tri-Tachyon corporate security. This is a billing matter, and I would ask you to treat it as one.""
 
-$PersonRank $personName has the figure ready. ""Hull damage, survey time, and the recovery of a foreign object from a company vessel. $entity.catchrelease_harpoonFineDGS credits, settled now, at the pre-litigation rate.""
+$PersonRank $personName has the figure ready before your comms officer has finished opening the channel. ""Hull damage, survey time, and the recovery of a foreign object from a company vessel. $entity.catchrelease_harpoonFineDGS credits, settled now, at the pre-litigation rate.""
 
 ""The post-litigation rate is not a number I am authorised to say out loud.""",,
 catchrelease_fineDemandLC,OpenCommLink,"$faction.id == luddic_church
@@ -124,7 +126,7 @@ $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Peace be with you. Cut your engines.""
 
-$PersonRank $personName looks tired rather than angry. ""A crew of ours has a hole in their ship and a story nobody believes. The Church is not interested in punishing curiosity. It is interested in the repair, which comes to $entity.catchrelease_harpoonFineDGS credits.""
+$PersonRank $personName looks tired rather than angry, and looks at your fleet the way somebody looks at weather. ""A crew of ours has a hole in their ship and a story nobody believes. The Church is not interested in punishing curiosity. It is interested in the repair, which comes to $entity.catchrelease_harpoonFineDGS credits.""
 
 ""Pay it, and we will both call this a lesson.""",,
 catchrelease_fineDemandLP,OpenCommLink,"$faction.id == luddic_path
@@ -135,14 +137,14 @@ FireAll CatchReleaseFineOptions","""Stop. Stop there.""
 
 The voice is young and delighted. ""You are the one with the machine that grabs. Everyone has heard. We are not supposed to want to see it.""
 
-A cough off-screen, and the delight is packed away. ""Tribute for the ship you holed. $entity.catchrelease_harpoonFineDGS credits. Then we look at your gear, and then we decide what it is.""",,
+A cough off-screen, and the delight is packed away. ""Tribute for the ship you holed. $entity.catchrelease_harpoonFineDGS credits. Then we look at your gear, and then we decide what it is."" Your ops chief does not react to that at all, which is its own kind of reaction.",,
 catchrelease_fineDemandPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Hold position, friend.""
 
-$PersonName is grinning. ""Word is you put a hook in a hull. Not shot it - hooked it. Half of us want to buy you a drink and the other half want the rig.""
+$PersonName is grinning at you through a channel your comms officer has already flagged as unencrypted. ""Word is you put a hook in a hull. Not shot it - hooked it. Half of us want to buy you a drink and the other half want the rig off your ship.""
 
 ""Neither's happening. What is happening is $entity.catchrelease_harpoonFineDGS credits, and then nobody has to find out how the rest of it goes.""",,
 catchrelease_fineDemandDiktat,OpenCommLink,"$faction.id == sindrian_diktat
@@ -151,7 +153,7 @@ $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Heave to for the Sindrian Diktat.""
 
-$PersonRank $personName reads the charge as though it were a sentence. ""Discharge of an unregistered device within Diktat space, against a Diktat hull. The administrative penalty is $entity.catchrelease_harpoonFineDGS credits.""
+$PersonRank $personName reads the charge as though it were a sentence already handed down. ""Discharge of an unregistered device within Diktat space, against a Diktat hull. The administrative penalty is $entity.catchrelease_harpoonFineDGS credits.""
 
 ""The administrative penalty is the favourable outcome. I would take it.""",,
 catchrelease_fineDemandLeague,OpenCommLink,"$faction.id == persean_league
@@ -160,16 +162,16 @@ $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Persean League patrol. Cut your drive.""
 
-$PersonRank $personName has clearly been reading up. ""There is no statute for this. There is a statute for discharging a weapon at a member-state hull, and a separate one for damage caused by recovery equipment, and I have decided to apply both.""
+$PersonRank $personName has clearly been reading up on the way out to you. ""There is no statute for this. There is a statute for discharging a weapon at a member-state hull, and a separate one for damage caused by recovery equipment, and I have decided to apply both.""
 
-""$entity.catchrelease_harpoonFineDGS credits. Argue it with a committee if you like, but not with me.""",,
+""$entity.catchrelease_harpoonFineDGS credits. Argue it with a committee if you like, but not with me, and not from where your ship is currently sitting.""",,
 catchrelease_fineDemandIndie,OpenCommLink,"$faction.id == independent
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Independent patrol. Ease off.""
 
-$PersonName sounds like somebody who took this contract for the fuel allowance. ""Somebody you hooked filed with us, and filing means I have to fly out here and say a number at you. The number is $entity.catchrelease_harpoonFineDGS credits.""
+$PersonName sounds like somebody who took this contract for the fuel allowance and is still working out whether it was worth it. ""Somebody you hooked filed with us, and filing means I have to fly all the way out here and say a number at you. The number is $entity.catchrelease_harpoonFineDGS credits.""
 
 ""Say yes and we can both go back to what we were doing.""",,
 catchrelease_fineDemandRepeat,OpenCommLink,"$entity.catchrelease_fineConv score:1400
@@ -180,11 +182,11 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything.
+EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything this time.
 
 ""Second one this month. There was a number attached to the first, and you will notice nobody is quoting you one now.""
 
-The link closes. Weapons come up across the formation.",,
+The link closes. Your sensors officer reports the formation spreading before you have finished turning to ask.",,
 catchrelease_fineDemandRepeatHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
@@ -248,15 +250,16 @@ EndConversation NO_CONTINUE","""You were told the penalty was the favourable out
 catchrelease_patrolPaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1240
 $entity.catchrelease_harpoonFineSettled
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","$PersonRank $personName checks a reference before answering properly. ""Paid and filed. You are the fishing one.""
+FireAll PopulateOptions","$PersonRank $personName checks a reference before answering you properly. ""Paid and filed. You are the fishing one.""
 
-It is not clear whether that is better or worse than the alternative.",,"Paid, and still on speaking terms - so this adds a line and hands the screen to the ordinary conversation menu rather than closing it. Keyed on a second flag from the paying rule rather than the one the script reads, because that one is consumed the moment it is read and this line has to keep working afterwards."
+It is not clear whether that is better or worse than the alternative, and your comms officer very carefully does not offer an opinion.",,"Paid, and still on speaking terms - so this adds a line and hands the screen to the ordinary conversation menu rather than closing it. Keyed on a second flag from the paying rule rather than the one the script reads, because that one is consumed the moment it is read and this line has to keep working afterwards."
 catchrelease_patrolUnpaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1250
 !$entity.catchrelease_harpoonFineSettled
 $entity.isHostile","ShowDefaultVisual
 EndConversation NO_CONTINUE","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,"Refused, and still angry about it. Gated on their hostility rather than on the conversation having happened, so this cannot go on refusing to talk to the player for a month after everyone involved has calmed down."
 catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),"The affordability check greys the option out and explains why, which is vanilla's own handling and better than hiding it - a player who cannot pay should still see what they could not pay. Safe in the script column because options from every matching rule are added before any of their scripts run."
-catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,"10:catchrelease_refuseFine:""We were fishing.""",
+catchrelease_fineOptTalk,CatchReleaseFineOptions,,"SetStoryOption catchrelease_talkFine 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_talkFine:Talk your way out of it,"Vanilla puts one of these on every patrol stop it writes - the transponder check and the smuggling scan both offer it in exactly this shape, and reusing avoidCargoScan for the bonus XP is deliberate: this is the same kind of thing being talked out of. The option has to exist before SetStoryOption can convert it, which it does, because every matching rule adds its options before any of their scripts run."
+catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,10:catchrelease_refuseFine:Refuse and cut the comm link,
 catchrelease_finePaySel,DialogOptionSelected,$option == catchrelease_payFine,"AddRemoveCommodity credits -$entity.catchrelease_harpoonFine true
 $entity.catchrelease_harpoonFinePaid = true 1
 $entity.catchrelease_harpoonFineSettled = true 30
@@ -264,7 +267,18 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 MakeOtherFleetPreventDisengage catchreleasePatrol false
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation","""Filed and closed."" $PersonRank $personName is already looking at something else. ""Fish somewhere else.""",,"The paid flag is given a day rather than the dialog, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. A day is what vanilla gives the same handoff in the cargo scan."
+EndConversation","""Filed and closed."" $PersonRank $personName is already looking at something else. ""Fish somewhere else.""
+
+Your ops chief books the transfer without being asked and goes back to whatever the morning was supposed to be.",,"The paid flag is given a day rather than the dialog, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. A day is what vanilla gives the same handoff in the cargo scan."
+catchrelease_fineTalkSel,DialogOptionSelected,$option == catchrelease_talkFine,"$entity.catchrelease_harpoonFinePaid = true 1
+$entity.catchrelease_harpoonFineSettled = true 30
+$entity.catchrelease_harpoonPatrolDone = true 30
+MakeOtherFleetPreventDisengage catchreleasePatrol false
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation","You talk. It takes a while, and most of it is about the difference between a weapon and a winch, and by the end of it $PersonRank $personName has stopped writing.
+
+""Recovery equipment, improperly stowed,"" $heOrShe says, to nobody in particular, and files it under that. ""Stow it properly.""",,"The same handoff paying uses, minus the credits: the paid flag is what stops the script filing this as an evasion, and it is given a day rather than a zero because a rules assignment with a zero on it expires on the first unpaused frame, before the script that reads it back has run."
 catchrelease_fineRefuseSel,DialogOptionSelected,$option == catchrelease_refuseFine,"MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
@@ -272,7 +286,7 @@ unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
-Across the formation, gun ports open.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
+Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
 catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"FireBest catchreleaseJobAccepted
 BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
@@ -578,21 +592,32 @@ catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:
 !$isHostile","$catchrelease_harpoonDemandDone = true 1
 unset $ignorePlayerCommRequests
 $catchrelease_damagesConv = true 0
-AddText ""The $faction $otherShipOrFleet comes alongside without hurrying, and hails you."" $faction.baseColor
+AddText ""Your sensors officer calls the $faction $otherShipOrFleet long before it is close enough to matter, and watches it come alongside without hurrying. It hails you."" $faction.baseColor
 OpenComms",,,"A holed crew that has come to be paid rather than to fight. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. The done flag is a day rather than the patrol's thirty: this is not enforcement, so a player who breaks off is hailed again next time rather than never again - the day is only there to stop the encounter reopening the comm the instant it is closed. Paying or refusing sets the long one through the command."
 catchrelease_damagesDemand,OpenCommLink,$entity.catchrelease_damagesConv score:1300,"SetTextHighlights $entity.catchrelease_harpoonDamagesDGS
 FireAll CatchReleaseDamagesOptions","""You are the one with the rope."" It is not a question, and $PersonRank $personName does not sound angry so much as tired of the whole shift.
 
-""We are not the navy and we are not going to stand here pretending that we are. There is a hole in a hull that was surveyed clean this morning, and somebody has to pay a yard to close it again. $entity.catchrelease_harpoonDamagesDGS credits, and we log the whole thing as debris and your name never appears on it.""",,
+""We are not the navy and we are not going to stand here pretending that we are. There is a hole in a hull that was surveyed clean this morning, and somebody has to pay a yard to close it again. $entity.catchrelease_harpoonDamagesDGS credits, and we log the whole thing as debris and your name never appears on it.""
+
+Behind $himOrHer, somebody is still working on the hole.",,
 catchrelease_damagesOptPay,CatchReleaseDamagesOptions,,DoCanAffordCheck $entity.catchrelease_harpoonDamages catchrelease_payDamages,,0:catchrelease_payDamages:Pay for the repair ($entity.catchrelease_harpoonDamagesDGS credits),"Same affordability handling as the patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
-catchrelease_damagesOptRefuse,CatchReleaseDamagesOptions,,,,"10:catchrelease_refuseDamages:""Take it up with your insurer.""",
+catchrelease_damagesOptTalk,CatchReleaseDamagesOptions,,"SetStoryOption catchrelease_talkDamages 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a repair bill""",,5:catchrelease_talkDamages:Talk your way out of it,"The same escape the patrol's fine offers. A hauler has no enforcement behind it, so this is the one place in the tree where talking your way out is the likeliest thing to work and the least likely to be worth a point."
+catchrelease_damagesOptRefuse,CatchReleaseDamagesOptions,,,,10:catchrelease_refuseDamages:Refuse and cut the comm link,
 catchrelease_damagesPaySel,DialogOptionSelected,$option == catchrelease_payDamages,"AddRemoveCommodity credits -$entity.catchrelease_harpoonDamages true
 $entity.catchrelease_harpoonDamagesPaid = true 1
 $entity.catchrelease_harpoonDemandDone = true 30
 $global.catchrelease_damagesAnswered = true 1
 unset $entity.catchrelease_damagesConv
 ShowDefaultVisual
-EndConversation","""Right."" $PersonRank $personName reads something off a screen, nods at it, and cuts the link without another word. The $otherShipOrFleet peels away and goes back to its heading.",,"Paying the people you holed closes the faction's books as well, which is the whole point of settling with them - nobody else comes asking about a hole already paid for. The flags are given a day rather than a zero, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. The global one is what tells that script to go looking at all."
+EndConversation","""Right."" $PersonRank $personName reads something off a screen, nods at it, and cuts the link without another word. The $otherShipOrFleet peels away and goes back to its heading, and your ops chief watches it all the way out.",,"Paying the people you holed closes the faction's books as well, which is the whole point of settling with them - nobody else comes asking about a hole already paid for. The flags are given a day rather than a zero, because a rules assignment with a zero on it expires on the first unpaused frame and the script that reads it back does not run until then. The global one is what tells that script to go looking at all."
+catchrelease_damagesTalkSel,DialogOptionSelected,$option == catchrelease_talkDamages,"$entity.catchrelease_harpoonDamagesPaid = true 1
+$entity.catchrelease_harpoonDemandDone = true 30
+$global.catchrelease_damagesAnswered = true 1
+unset $entity.catchrelease_damagesConv
+ShowDefaultVisual
+EndConversation","You keep them on the channel long enough to establish that nobody aboard either ship knows what the thing in their hull actually is, that your gear is survey equipment, and that survey equipment is covered.
+
+""Covered,"" $PersonRank $personName repeats, in the voice of somebody deciding to go home. The link closes.",,"Settled rather than refused: the paid flag is what closes the faction's books alongside the crew's, which is the whole point of settling with the people you holed."
 catchrelease_damagesRefuseSel,DialogOptionSelected,$option == catchrelease_refuseDamages,"$entity.catchrelease_harpoonDamagesRefused = true 1
 $entity.catchrelease_harpoonDemandDone = true 30
 $global.catchrelease_damagesAnswered = true 1
@@ -600,7 +625,7 @@ unset $entity.catchrelease_damagesConv
 ShowDefaultVisual
 EndConversation","There is a pause on the other end that goes on slightly too long.
 
-""Noted,"" $PersonRank $personName says, and writes something down. The link closes and the $otherShipOrFleet holds its heading, which is somehow worse than if it had not.",,"Nothing happens to the player here and nothing happens to the crew - a hauler has no enforcement behind it. It goes in the report instead, which is filed as an evasion and charged in reputation a few days later, out of sight of the conversation."
+""Noted,"" $PersonRank $personName says, and writes something down. The link closes, and the $otherShipOrFleet holds its heading rather than turning away, which your sensors officer points out and which is somehow worse than if it had not.",,"Nothing happens to the player here and nothing happens to the crew - a hauler has no enforcement behind it. It goes in the report instead, which is filed as an evasion and charged in reputation a few days later, out of sight of the conversation."
 catchrelease_harpoonedCommsFleeing,OpenCommLink,"$entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
@@ -776,9 +801,9 @@ He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplo
 catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,BarCMD returnFromEvent false,"He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
-catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer.",,
-catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,"There is a hole in their hull the shape of your fishing gear, and $otherFleetFactionArticle would like it noted.",,
-catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,"$otherFleetFactionArticleCap has your transponder code, the puncture, and a great deal to say about both.",,
+catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer to it.",,
+catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,"There is a hole in their hull the shape of your fishing gear, and $otherFleetFactionArticle would like you to know that it has been noted.",,
+catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,"$otherFleetFactionArticleCap has your transponder code, the puncture, and a great deal to say about the relationship between the two.",,
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,"Whatever $otherFleetFactionArticle expected to be shot at with today, it was not a rope.",,
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
@@ -1293,8 +1318,10 @@ EndConversation NO_CONTINUE","$PersonRank $personName does not look sorry this t
 catchrelease_lampWarnOptOut,CatchReleaseLampWarnOptions,,,,0:catchrelease_lampsOut:Cut power to the lamps,
 catchrelease_lampWarnOptRefuse,CatchReleaseLampWarnOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
 catchrelease_lampFineOptPay,CatchReleaseLampFineOptions,,DoCanAffordCheck $entity.catchrelease_lampFine catchrelease_lampPayFine,,0:catchrelease_lampPayFine:Pay the fine and cut the lamps ($entity.catchrelease_lampFineDGS credits),"Same affordability handling as the harpoon patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
+catchrelease_lampFineOptTalk,CatchReleaseLampFineOptions,,"SetStoryOption catchrelease_lampTalk 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_lampTalk:Talk your way out of it,"The same escape vanilla puts on the transponder stop and the smuggling scan, on the two rungs where there is something to be talked out of. The warning does not get one: putting the lamps out is already free, and a point spent to avoid doing something free is not an option, it is a trap."
 catchrelease_lampFineOptRefuse,CatchReleaseLampFineOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
 catchrelease_lampScanOptSubmit,CatchReleaseLampScanOptions,,,,0:catchrelease_lampInspect:Cut the lamps and submit to the inspection,
+catchrelease_lampScanOptTalk,CatchReleaseLampScanOptions,,"SetStoryOption catchrelease_lampTalk 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of an inspection""",,5:catchrelease_lampTalk:Talk your way out of it,
 catchrelease_lampScanOptRefuse,CatchReleaseLampScanOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
 catchrelease_lampsOutSel,DialogOptionSelected,$option == catchrelease_lampsOut,"CatchReleaseCMD lampsOff
 MakeOtherFleetPreventDisengage catchreleaseLamps false
@@ -1311,6 +1338,14 @@ ShowDefaultVisual
 EndConversation","The credits go across, and then the lamps go out, in that order. $PersonRank $personName appears to notice the order.
 
 ""Filed."" The link closes without ceremony.",,
+catchrelease_lampTalkSel,DialogOptionSelected,$option == catchrelease_lampTalk,"CatchReleaseCMD lampsOff
+CatchReleaseCMD lampForgive
+MakeOtherFleetPreventDisengage catchreleaseLamps false
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation","You put the lamps out while you are still talking, which does most of the work, and spend the rest of it on survey grids and aperture tolerances and a licence number that $PersonRank $personName does not write down.
+
+""Survey gear,"" $heOrShe says eventually, to the officer beside $himOrHer rather than to you, and closes the channel without filing anything.",,"The lamps still go out - that was never negotiable, and it is what they came for. What the point buys is the stop not being written down, which is why this is the one ending that takes the rung back off the ladder."
 catchrelease_lampInspectSel,DialogOptionSelected,$option == catchrelease_lampInspect,"CatchReleaseCMD lampsOff
 MakeOtherFleetPreventDisengage catchreleaseLamps false
 unset $entity.catchrelease_lampConv","Your lamps go dark. A shuttle crosses, and for the better part of an hour there are strangers in the hold with lists.",0:catchrelease_lampSeized:Continue,"Two beats rather than one, which is the rhythm vanilla's own inspection uses: the narration here, then the losses, then the closing line. Splitting them is not cosmetic - a row's text is added after its script has run, so seizing in this row would print the losses above the paragraph describing the boarding."
@@ -1333,3 +1368,120 @@ ShowDefaultVisual
 EndConversation","You cut the link. The lamps keep burning, which is the only answer anybody aboard the other ship was waiting for.
 
 Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."
+catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,"A man with a fisher's tan and no boat to show for it has been nursing the same drink since before you came in, and keeps checking a slate that is not telling him anything new.",,
+catchrelease_campPirate_blurbBarHegemony,catchrelease_campPirate_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits with her registration papers squared on the table in front of her, which is what people do when the licence is the only part of the operation still working.",,
+catchrelease_campPirate_blurbBarChurch,catchrelease_campPirate_blurbBar,$faction.id == luddic_church score:10,,A fisher in a plain coat is eating nothing and saying grace over it anyway. Two of the people at his table are wearing the same coat and look considerably younger.,,
+catchrelease_campPirate_blurbBarIndependent,catchrelease_campPirate_blurbBar,$faction.id == independent score:10,,"A woman with a fisher's hands is going through a ledger backwards, which is how you read one when you are looking for the last month that made money.",,
+catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask him what the slate is telling him.,
+catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,"A fisher is explaining something to a bored-looking clerk, quietly and for what is clearly not the first time, and the clerk is not writing any of it down.",,
+catchrelease_campMerc_blurbBarHegemony,catchrelease_campMerc_blurbBar,$faction.id == hegemony score:10,,A fisher in a patched flight jacket has a Navy grievance form in front of her and has filled in perhaps a third of it. The third she has filled in has been crossed out twice.,,
+catchrelease_campMerc_blurbBarChurch,catchrelease_campMerc_blurbBar,$faction.id == luddic_church score:10,,"A fisher sits alone with his hands flat on the table, in the posture of somebody who has decided that losing his temper here would not help anybody.",,
+catchrelease_campMerc_blurbBarIndependent,catchrelease_campMerc_blurbBar,$faction.id == independent score:10,,"A man who has plainly not been paid this month is buying a round anyway, which is either optimism or the last of it.",,
+catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask what the clerk is not writing down.,
+catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,"A fisher is sitting well away from the door with her back to the wall, and has chosen the seat rather than fallen into it.",,
+catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket is sitting very still, and every time the door opens he looks at it and then makes himself stop looking at it.",,
+catchrelease_campPath_blurbBarChurch,catchrelease_campPath_blurbBar,$faction.id == luddic_church score:10,,"A fisher is in a corner with a chaplain, and whatever the chaplain is saying is not landing. The fisher keeps shaking her head, slowly, at something she has clearly already decided about.",,
+catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
+catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why she picked that seat.,
+catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one piece of water properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""
+
+""$catchreleaseCampManyCap. In $catchreleaseCampWhere. Flying dark and not going anywhere.""
+
+He turns the slate around. It is a fuel invoice, and the number on it is not one he can pay twice. ""I do not care how. Kill them, buy them off, tell them a story - I have stopped having a preference. Just bring me $catchreleaseAsk out of that water afterwards, so I know it was that water.""
+
+""$catchreleaseRewardCap, and it is most of what I have left.""","catchrelease_jobAccept:Agree to clear the spot.
+catchrelease_jobDecline:""Find other water.""",
+catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"The clerk leaves without looking back. The fisher does not watch.
+
+""They are not pirates,"" she says. ""That is the whole problem. Pirates you can report. These ones have a contract, and a contract means somebody who is not out there gets to decide what happens to my water, and nobody will tell me who.""
+
+""$catchreleaseCampManyCap, sitting on a rupture in $catchreleaseCampWhere, perfectly polite about it. They told me to come back in a year.""
+
+She looks at you properly for the first time. ""I do not need them arrested. I need them gone, and I am not going to ask how. Bring me $catchreleaseAsk out of it when it is done - that is how I will know. $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to move them off.
+catchrelease_jobDecline:""Somebody is paying them. Somebody will pay the next lot too.""",
+catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Because I want to see the door,"" she says. ""You asked.""
+
+She does not lower her voice, which somehow makes it worse. ""There is a cell sitting on my rupture in $catchreleaseCampWhere. $catchreleaseCampManyCap. They are not robbing anybody. They are there because they have decided the water is an offence, and that anything that comes out of it is an offence, and that people who go in after it are the same.""
+
+""They let me leave. They were very clear that it was a decision they made.""
+
+""I want my water back. However that happens. And I want $catchreleaseAsk out of it in my hands afterwards, because I would like to hold the thing they said should not exist. $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to go and see them.
+catchrelease_jobDecline:""Not against the Path.""",
+catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Nine years,"" he says again, to himself, and goes back to the invoice.",,
+catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,He turns the slate back around without any particular bitterness. It is not the first no.,,
+catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
+!$catchreleaseCampCleared",,"""Still sitting there?"" He does not sound surprised. ""They would be. It is a nice quiet spot to park.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Water is clear, then."" He almost smiles. ""Bring me $catchreleaseAsk out of it and I will believe it properly.""",,
+catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He takes the crate with both hands, opens it on the table in front of everybody, and looks at what is inside for long enough that the noise around the table stops.
+
+""That is my water,"" he says, and pays you $catchreleaseReward without counting it.",,
+catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""They will be polite to you as well,"" she says. ""Do not let that do anything to you.""",,
+catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,"""No,"" she agrees. ""Probably not."" She goes back to the form.",,
+catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
+!$catchreleaseCampCleared",,"""They are still there,"" she says. It is not a question and she does not wait for an answer.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Gone."" She sits with that for a second. ""Then bring me $catchreleaseAsk out of it, and I will go back out.""",,
+catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She does not open the crate in the bar. She signs for it, pays you $catchreleaseReward, and carries it out herself, and through the window you can see her stop halfway across the dock and open it there instead.",,
+catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Do not talk to them about it,"" she says. ""Whatever you decide to do. Do not get into it with them about the water.""",,
+catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"She nods, as though you have confirmed something. ""No. Nobody is.""",,
+catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
+!$catchreleaseCampCleared",,"""They are still on it,"" she says, and looks at the door.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my water."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
+catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She opens the crate herself, in the middle of the bar, with the door in plain sight and no apparent interest in it any more.
+
+She looks at the specimen for a long time. Then she closes the lid, pays you $catchreleaseReward, and says: ""It is just a fish.""",,
+catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
+!$catchrelease_campCleared","FleetDesc
+HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."
+catchrelease_campHail,OpenCommLink,$entity.catchrelease_campFleet score:1000,"Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","Whoever answers does not introduce themselves.
+
+""You are the second fleet out here this month and the first one did not stay either. This is ours now. It was not, and then nobody came, and now it is.""
+
+""$entity.catchrelease_campBribeDGS credits and we will find somewhere else to not be bothered.""",,
+catchrelease_campHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
+$entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""Well, look at this."" The man on the screen has his boots up on something that was not designed for boots. ""Somebody has actually come out. We had a bet.""
+
+""Here is where we are. There is a hole in space out here that nobody owns, nobody patrols, and nobody comes looking in. Do you know what that is worth? Because it is not worth what is in the water. It is worth being somewhere nobody looks.""
+
+$HeOrShe takes the boots down. ""$entity.catchrelease_campBribeDGS credits buys us a different nowhere. That is the whole offer, and I would take it, because the other thing we are good at is this.""",,
+catchrelease_campHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
+$entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""Contracted denial of the site. You are welcome to the file number, I am not permitted to give you the client.""
+
+$PersonRank $personName is unhurried and entirely professional about it, which is the worst part. ""Nobody is being robbed. Nobody is being shot at. We are here, and while we are here nobody fishes it, and that is the whole of the service.""
+
+""There is a figure at which the contract stops being worth more than the alternative, and it is $entity.catchrelease_campBribeDGS credits. I am telling you that because it is not a secret and because I would rather be paid than shot at. Either is survivable.""",,
+catchrelease_campHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
+$entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","The woman on the screen is not armed and is standing in front of somebody who is.
+
+""You have come for the water,"" she says. ""Everyone does. It opens up out of nothing, and there are things living in it that were never born, and every single one of you decides the correct response is a net.""
+
+""We are not stopping you fishing. We are stopping this. This hole, this water, these things. Somebody has to sit in front of it.""
+
+She says the next part like a formality, and like she already knows the answer. ""You will offer us money. People do. $entity.catchrelease_campBribeDGS credits, or whatever the figure is. Offer it if you like.""",,
+catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),"Greyed out with a reason rather than hidden, the way vanilla handles a bribe the player cannot cover."
+catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them the water is not worth it,"The third way through, for a fleet that can neither win the fight nor cover the bribe. Same bonus XP key the enforcement stops use - it is the same kind of thing being talked out of."
+catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLink:Cut the comm link,"Vanilla's own option and vanilla's own handler. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
+catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
+$entity.catchrelease_campCleared = true
+MakeOtherFleetGoAway true
+ShowDefaultVisual
+EndConversation NO_CONTINUE","The transfer clears while the link is still open, and whoever is on the other end watches it land before saying anything else.
+
+""Pleasure."" The formation is already coming about.",,"No handoff to the job beyond the flag: the mission polls whether the water is quiet on its own tick, because being killed, bought off, talked off and quietly leaving do not share a hook and only one of them happens inside a conversation."
+catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
+MakeOtherFleetGoAway true
+ShowDefaultVisual
+EndConversation NO_CONTINUE","You do not argue about the water. You talk about the rupture instead - what it is, how long the ones like it stay open, and what has been recorded coming out of the ones that stayed open longest.
+
+None of it is a threat and all of it is true, which is what makes it work. Somewhere in the middle the person on the screen stops interrupting, and by the end they are looking past you at the water rather than at you.
+
+""We were going to move on anyway,"" they say, to nobody, and the formation begins to come about.",,

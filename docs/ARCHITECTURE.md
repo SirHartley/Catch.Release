@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 209 Java files across eight top-level packages, plus
+What is where, and which file to open first. 216 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -218,6 +218,17 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
 | `StartupJob.java` | Three rounds of growing quantity, no time limit |
 | `TuberJob.java` | Two rounds: a fine rare first, then a low-coherence one "for content" |
+
+### `campaign/fish/jobs/camp`
+A fisher whose one good rupture has somebody parked on it. Three bar events, three ways through.
+
+| File | What it does |
+|---|---|
+| `CampedSpotJob.java` | The shared job. Two conditions rather than one — clearing the camp is the work, the specimen is only the receipt. Asks `CampedSpot.isGone` and nothing more specific, so it never has an opinion about how the player did it |
+| `CampType.java` | Who is out there: pirates (there for money, will take money), mercenaries (paid to be there, and say so), pathers (not selling anything, and the bribe does the least good). Mercenary rather than independent deliberately — see the note in the file |
+| `CampSize.java` | Small, medium, large, and the words the fisher uses for each. The estimate is honest; it is the only warning the player gets |
+| `CampedSpot.java` | Spawns the camper on the rupture and holds it there. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
+| `PirateCampJob.java` · `MercCampJob.java` · `PatherCampJob.java` | One per bar event, so each fisher gets their own pitch |
 
 ### `campaign/fish/jobs/fleet`
 Jobs hung on a hull that was already out there, which then has to still be there when you return.
@@ -738,6 +749,10 @@ its next tick, rather than through `CatchReleaseCMD` — the handoff predates th
 no reason to move it. The bill adds a **global** marker beside the per-fleet flags, because the crew
 that was talked to need not still be near the player when anything reads it back; the marker is what
 keeps the sector-wide search off every other tick.
+
+**A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
+
+**The camp job polls rather than being told.** Being killed, bought off, talked off and quietly wandering away do not share a hook, and only two of the four happen inside a conversation. So `CampedSpotJob.advanceImpl` asks one question on the mission's own tick instead of four rules rows each reporting a different way.
 
 **The lamp response is the transponder's shape, not the harpoon patrol's.** A harpooning is an
 incident on a faction's books that a patrol is sent about days later; lit lamps are something the

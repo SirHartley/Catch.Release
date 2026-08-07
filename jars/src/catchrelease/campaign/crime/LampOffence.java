@@ -218,6 +218,18 @@ public class LampOffence {
     }
 
     /**
+     * Takes this stop back off the ladder, for a player who talked their way out of it being
+     * written down at all.
+     * <p>
+     * The stop is booked when the encounter opens, because by then it has happened. A story point
+     * does not undo the encounter - the lamps still go out - but it does buy the crew deciding not
+     * to file it, and a rung that stayed climbed after that would make the point worthless.
+     */
+    public static void forgive() {
+        Global.getSector().getMemoryWithoutUpdate().set(COUNT_KEY, Math.max(0, getCount() - 1));
+    }
+
+    /**
      * The standing cost of being stopped, printed into the conversation it happened in.
      * <p>
      * A custom impact rather than one of vanilla's named actions, floored at hostile so a player
