@@ -48,6 +48,9 @@ public class FishermanDialog implements InteractionDialogPlugin {
         SELL,
         SELL_PICK,
         RUMOR,
+        WORK,
+        WORK_TAKE,
+        WORK_TURN_IN,
         INTRO,
         LEAVE
     }
@@ -112,6 +115,10 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
         dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
 
+        //coloured when there is something to collect - a job going begging, or one finished
+        dialog.getOptionPanel().addOption("Ask about work", Option.WORK,
+                hasWorkPending() ? Misc.getHighlightColor() : null, null);
+
         //coloured while the introduction is still owed, which is the only time it matters
         dialog.getOptionPanel().addOption(FishingIntro.isAtLeast(FishingIntro.TAUGHT)
                         ? "Ask about the water" : "Ask what any of this is", Option.INTRO,
@@ -153,6 +160,15 @@ public class FishermanDialog implements InteractionDialogPlugin {
             case RUMOR:
                 askRumor();
                 break;
+            case WORK:
+                showWork();
+                break;
+            case WORK_TAKE:
+                takeWork();
+                break;
+            case WORK_TURN_IN:
+                turnInWork();
+                break;
             case INTRO:
                 openIntro();
                 break;
@@ -187,6 +203,105 @@ public class FishermanDialog implements InteractionDialogPlugin {
         FishermanSurveyDialog counter = new FishermanSurveyDialog(this::resume);
         dialog.setPlugin(counter);
         counter.init(dialog);
+    }
+
+    //---------------------------------------------------------------- chart requests
+
+    /** Whether the work option has anything behind it worth colouring for. */
+    protected boolean hasWorkPending() {
+        return FishermanQuest.getActive() == null || FishermanQuest.isSatisfied();
+    }
+
+    /** The one job at a time: on offer, outstanding, or ready to be handed over. */
+    protected void showWork() {
+        dialog.getOptionPanel().clearOptions();
+
+        FishermanQuest.Saved active = FishermanQuest.getActive();
+
+        if (active == null) {
+            offerWork();
+            return;
+        }
+
+        FishSpec spec = FishSpecLoader.getFishSpec(active.speciesId);
+        String what = spec == null ? "the specimen" : spec.getDisplayName();
+
+        if (FishermanQuest.isSatisfied()) {
+            dialog.getTextPanel().addPara("The %s goes on the table without being asked for.",
+                    Misc.getTextColor(), Misc.getHighlightColor(), what);
+
+            dialog.getOptionPanel().addOption("Hand it over", Option.WORK_TURN_IN,
+                    Misc.getHighlightColor(), null);
+        } else {
+            dialog.getTextPanel().addPara("\"Still want the %s out of %s. It is in there. It will"
+                            + " keep being in there.\"", Misc.getTextColor(),
+                    Misc.getHighlightColor(), what, active.systemName);
+        }
+
+        dialog.getOptionPanel().addOption("Back", Option.MAIN);
+    }
+
+    /** The pitch. Rolled fresh each time it is asked for, and only kept once it is taken. */
+    protected void offerWork() {
+        pendingWork = FishermanQuest.roll();
+
+        if (pendingWork == null) {
+            dialog.getTextPanel().addPara("\"Nothing wanted this season. The water is doing what"
+                    + " it usually does.\"", Misc.getGrayColor());
+
+            dialog.getOptionPanel().addOption("Back", Option.MAIN);
+            return;
+        }
+
+        FishSpec spec = FishSpecLoader.getFishSpec(pendingWork.speciesId);
+
+        dialog.getTextPanel().addPara("\"There is a reading I want and cannot go and take. One %s,"
+                        + " out of %s. Whatever you land there will be barely holding - that is the"
+                        + " point of it, not the animal.\"", Misc.getTextColor(),
+                Misc.getHighlightColor(),
+                spec == null ? "specimen" : spec.getDisplayName(), pendingWork.systemName);
+
+        dialog.getTextPanel().addPara(pendingWork.atPond
+                        ? "\"There is a rupture out there. Drop a rod down it.\""
+                        : "\"Open water. Nothing will show it but your lamps.\"",
+                Misc.getGrayColor());
+
+        dialog.getTextPanel().addPara("\"%s, and I will carry one more chart from then on. That"
+                        + " part does not go away.\"", Misc.getTextColor(),
+                Misc.getHighlightColor(), Misc.getDGSCredits(pendingWork.credits));
+
+        dialog.getOptionPanel().addOption("Take it", Option.WORK_TAKE, Misc.getHighlightColor(),
+                null);
+        dialog.getOptionPanel().addOption("Not this time", Option.MAIN);
+    }
+
+    /** Held only between the pitch and the answer - a declined job is not kept anywhere. */
+    protected FishermanQuest.Saved pendingWork;
+
+    protected void takeWork() {
+        if (pendingWork == null) {
+            showWork();
+            return;
+        }
+
+        FishermanQuest.accept(pendingWork);
+        pendingWork = null;
+
+        dialog.getTextPanel().addPara("An intel note marks the system.", Misc.getGrayColor());
+
+        showMain();
+    }
+
+    protected void turnInWork() {
+        if (!FishermanQuest.turnIn(dialog.getTextPanel())) {
+            showWork();
+            return;
+        }
+
+        dialog.getTextPanel().addPara("It is held up to the light for a long moment and then put"
+                + " away without comment.");
+
+        showMain();
     }
 
     //---------------------------------------------------------------- the introduction

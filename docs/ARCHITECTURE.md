@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 207 Java files across eight top-level packages, plus
+What is where, and which file to open first. 208 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -242,7 +242,8 @@ explains how.
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
-| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, a visiting boat's own, and the pool that keeps them apart |
+| `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
@@ -788,6 +789,22 @@ at the catch. In an inhabited system there is already a boat posted, so it simpl
 else the next time anybody looks — `FishermanInterception` teleports it in outside the viewport and
 nobody aboard remarks on it, which is the cheapest way to say what the Fisherman is. And hailing a
 boat works on its own. All of them call `FishingIntro.point()`, which is idempotent.
+
+**The shelf restocks off the sale, not off a calendar.** A monthly tick pays out to whoever happens
+to ask just after it, which rewards standing still. Every purchase books a replacement due 30 days
+later and asking is what redeems the ones that have come due, so the wait is the same wait for
+everybody and starts when the player caused it. The shelf is two charts wide to begin with;
+`FishermanShelf.widen()` is what a chart request pays out in, on top of the money, and it is the only
+thing that ever raises it.
+
+**A chart request puts the fish there and keeps it there.** A quest that names a system and then
+leaves it to the spawn tables can be arrived at correctly and fail for an hour. `FishermanQuest.Keeper`
+replants the specimen whenever the player is in the target system and it is missing — only then,
+because a mote is an entity with a plugin on it and keeping one alive in a system nobody is standing
+in is upkeep bought for nothing. In open water it is spawned on one side of the marked patch aiming
+at the other, because a mote swims to its target and expires there; one spawned on top of its own
+destination blinks out immediately. It always reads **barely holding**, forced in the minigame's
+roll — the request is a question about the water, not about the animal.
 
 **A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
 system and will cut straight across an inhabited orbit getting anywhere, so the standing boats

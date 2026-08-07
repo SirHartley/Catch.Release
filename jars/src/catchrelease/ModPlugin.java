@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
@@ -55,6 +56,7 @@ public class ModPlugin extends BaseModPlugin {
         // the fishing trade - transient watchers, the fleets themselves are what persist
         FishermanSpawner.register();
         CoreFisherSpawner.register();
+        FishermanQuest.Keeper.register();
 
         // how anybody comes to be fishing at all - three hooks, none of them required
         TutorialWreck.Watcher.register();
