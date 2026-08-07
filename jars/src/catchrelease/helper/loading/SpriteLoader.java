@@ -4,6 +4,7 @@ import catchrelease.ModPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,12 +61,25 @@ public class SpriteLoader {
         return sprite;
     }
 
-    /** Undoes whatever the last caller resized this one to. */
+    /**
+     * Undoes whatever the last caller left on this one.
+     * <p>
+     * Size was the first thing to leak and is not the only one. A {@link SpriteAPI} carries colour,
+     * alpha and blend mode as well, all of them sticky, and one object is shared by every caller
+     * that asks for the path - so the sector map drawing an undiscovered species as a black
+     * silhouette ({@code FishIcons}) left every later draw of that fish black, the cargo hold
+     * included. Handing the sprite back neutral is what makes a shared object safe to share:
+     * a caller that wants it tinted says so, and a caller that says nothing gets the image.
+     */
     protected static SpriteAPI atNativeSize(String path, SpriteAPI sprite) {
         if (sprite == null) return null;
 
         float[] size = NATIVE_BY_PATH.get(path);
         if (size != null) sprite.setSize(size[0], size[1]);
+
+        sprite.setColor(Color.WHITE);
+        sprite.setAlphaMult(1f);
+        sprite.setNormalBlend();
 
         return sprite;
     }
