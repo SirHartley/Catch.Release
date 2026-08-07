@@ -77,6 +77,16 @@ public class QuestPond {
      * @return the mote, or null if the pond could not take one
      */
     public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId) {
+        return placeMote(pond, speciesId, false);
+    }
+
+    /**
+     * @param holds whether it should stay in this pond rather than cross it once and go. An errand
+     *              that expects the player to turn up and find the thing wants this; one where the
+     *              specimen being hard to pin down is the point does not.
+     */
+    public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId,
+                                              boolean holds) {
         if (pond == null || speciesId == null) return null;
         if (!isPond(pond)) return null;
 
@@ -86,14 +96,22 @@ public class QuestPond {
         //placed inside the mask, not on the rim - the rim is where transient motes appear
         float radius = pond.getRadius() * 0.5f;
 
-        Vector2f at = MathUtils.getPointOnCircumference(pond.getLocation(),
-                MathUtils.getRandomNumberInRange(0f, radius),
-                MathUtils.getRandomNumberInRange(0f, 360f));
+        //born on one side of the water and swimming to the other. Handing a mote its own spawn
+        //point as a destination, which this used to do, means it arrives on the first frame it
+        //advances and expires there - and every keeper that replants a missing specimen then puts
+        //it somewhere else, over and over, which is what teleporting looked like
+        float across = MathUtils.getRandomNumberInRange(0f, 360f);
+        float reach = MathUtils.getRandomNumberInRange(radius * 0.5f, radius);
+
+        Vector2f at = MathUtils.getPointOnCircumference(pond.getLocation(), reach, across);
+        Vector2f to = MathUtils.getPointOnCircumference(pond.getLocation(), reach, across + 180f);
 
         SectorEntityToken mote = location.addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote",
-                null, new FishEntityPlugin.Params(new Vector2f(at), speciesId, pond));
+                null, new FishEntityPlugin.Params(to, speciesId, pond));
 
         mote.setLocation(at.x, at.y);
+
+        if (holds) mote.getMemoryWithoutUpdate().set(FishEntityPlugin.HOLDS_KEY, true);
 
         //flag set, then color refreshed - color is decided at construction, before the flag exists
         mote.getMemoryWithoutUpdate().set(QUEST_MOTE_FLAG, true);
