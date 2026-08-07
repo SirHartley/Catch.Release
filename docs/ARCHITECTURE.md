@@ -56,9 +56,10 @@ Everything game-facing is wired from `ModPlugin.java`.
 1. `OnJumpPondSpawner.register()` — ponds appear as the player jumps into systems
 2. `BuriedMoteSpawner.register()` — maintains the buried-mote population near the player
 3. `ChargeManager.register()` — regenerating charge pools for the charged abilities
-4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets and fishing boats their custom
-   encounter screens
-5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
+4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets their custom encounter screen;
+   the fishing boats' conversations are rules rows and need no plugin
+5. `HarpoonPatrolResponse.register()` and `LampPatrolResponse.register()` — the crime responses: a
+   patrol after an outstanding harpooning, and the stop over lit lamps
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
 8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
@@ -279,7 +280,7 @@ explains how.
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
-| `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
+| `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
@@ -351,7 +352,7 @@ The outfitter: upgrades and tackle bought with fish.
 
 | File | What it does |
 |---|---|
-| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy/store/retrieve/sell |
+| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone |
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
@@ -364,7 +365,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
 | `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
-| `ShopUi.java` | Shared drawing helpers for the custom-drawn look, including the hover card's box and placement |
+| `ShopUi.java` | Shared drawing helpers: fonts, quads, clipping, card placement, and `drawPanel` - the sidebar dressing every panel wears |
 
 ### `campaign/fish/items`
 Fish in cargo.
@@ -378,8 +379,8 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
 
 ### `campaign/fish/crab`
-Crablobab, and the two things he sells. Not shop stock — see the note below. The stall itself is
 `rules.csv` (`catchrelease_crabBarAdd` and the rows under it); only the wares are Java.
+Crablobab's two wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
 
 | File | What it does |
 |---|---|
@@ -466,7 +467,7 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
 | `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a highlighted comm link |
-| `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog - and the Fisherman its own - at the narrowest priority |
+| `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog at the narrowest priority - the one custom encounter screen left |
 
 ### `abilities`
 Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `entities/`.
