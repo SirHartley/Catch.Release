@@ -1,20 +1,18 @@
 package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.data.SectorRegion;
-import catchrelease.campaign.fish.shop.FishCurrency;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
-import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-import java.util.Map;
 
 /**
  * Puts the Fisherman in the sky: a wandering independent boat that fishes the player's system
@@ -29,10 +27,6 @@ import java.util.Map;
  * middle. One boat at a time, sector-wide, and always the same one - see {@link FishermanIdentity}.
  */
 public class FishermanSpawner implements EveryFrameScript {
-
-    protected final IntervalUtil interval =
-            new IntervalUtil(FishermanConstants.SPAWN_CHECK_DAYS * 0.8f,
-                    FishermanConstants.SPAWN_CHECK_DAYS * 1.2f);
 
     /** Registered every load; transient, so a save never carries the watcher. */
     public static void register() {
@@ -51,22 +45,61 @@ public class FishermanSpawner implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        interval.advance(Global.getSector().getClock().convertToDays(amount));
-        if (!interval.intervalElapsed()) return;
-
-        if (getLiveFleet() != null) return;
-
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return;
 
-        if (!(player.getContainingLocation() instanceof StarSystemAPI)) return;
-        StarSystemAPI system = (StarSystemAPI) player.getContainingLocation();
+        LocationAPI where = player.getContainingLocation();
 
+        //the first tick of a load is not an arrival - it is wherever the save was left
+        if (!placed) {
+            placed = true;
+            lastLocation = where;
+            return;
+        }
+
+        if (where == lastLocation) return;
+        lastLocation = where;
+
+        if (!(where instanceof StarSystemAPI)) return;
+        StarSystemAPI system = (StarSystemAPI) where;
+
+        //going back to the core is going back to where he is not: the month starts again, so a
+        //player who resupplies mid-search does not walk straight back out into him
+        SectorRegion at = SectorRegion.of(system);
+        if (at != null && at.isCore()) {
+            stamp();
+            return;
+        }
+
+        if (getLiveFleet() != null) return;
         if (!isEligible(system)) return;
+        if (!isOverdue()) return;
 
-        if (MathUtils.getRandomNumberInRange(0f, 1f) > getChance(system)) return;
+        if (MathUtils.getRandomNumberInRange(0f, 1f) > FishermanConstants.SPAWN_ENTRY_CHANCE) return;
 
         spawn(system, player.getLocation());
+    }
+
+    /** Where the player was last time this looked, so an arrival can be told from standing still. */
+    protected transient LocationAPI lastLocation;
+    protected transient boolean placed = false;
+
+    /** Whether the month since he was last seen is up. Never seen at all counts as up. */
+    protected boolean isOverdue() {
+        Object last = Global.getSector().getMemoryWithoutUpdate()
+                .get(FishermanConstants.LAST_SEEN_KEY);
+
+        if (!(last instanceof Long)) return true;
+
+        return Global.getSector().getClock().getElapsedDaysSince((Long) last)
+                >= FishermanConstants.SPAWN_COOLDOWN_DAYS;
+    }
+
+    /** Restarts the month. Written on arrival as well as departure - meeting him counts as seeing
+     *  him, and without this the same arrival could be rolled again the moment he left. */
+    protected void stamp() {
+        Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
+                Global.getSector().getClock().getTimestamp());
     }
 
     /** The live boat if there is one anywhere, cleaned out of memory the moment it is not. */
@@ -98,31 +131,6 @@ public class FishermanSpawner implements EveryFrameScript {
         return true;
     }
 
-    /** The daily roll: small, until the hold is heavy or the absence long. */
-    protected float getChance(StarSystemAPI system) {
-        float chance = FishermanConstants.SPAWN_BASE_CHANCE;
-
-        int aboard = 0;
-        for (Map.Entry<catchrelease.campaign.fish.data.FishRarity, Integer> entry
-                : FishCurrency.count().entrySet()) {
-            aboard += entry.getValue();
-        }
-        if (aboard >= FishermanConstants.CARGO_FISH_THRESHOLD) {
-            chance *= FishermanConstants.CARGO_FULL_MULT;
-        }
-
-        Object last = Global.getSector().getMemoryWithoutUpdate()
-                .get(FishermanConstants.LAST_SEEN_KEY);
-        boolean overdue = !(last instanceof Long)
-                || Global.getSector().getClock().getElapsedDaysSince((Long) last)
-                >= FishermanConstants.OVERDUE_DAYS;
-        if (overdue) chance *= FishermanConstants.OVERDUE_MULT;
-
-        SectorRegion at = SectorRegion.of(system);
-        if (at != null && at.isCore()) chance *= FishermanConstants.CORE_SPAWN_MULT;
-
-        return Math.min(1f, chance);
-    }
 
     /** The boat itself: one cruiser, a few logistics hulls, lamps and manners fitted by script. */
     protected void spawn(StarSystemAPI system, Vector2f near) {
@@ -161,6 +169,8 @@ public class FishermanSpawner implements EveryFrameScript {
         fleet.addScript(new FishermanBehavior(fleet));
 
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, fleet);
+
+        stamp();
     }
 
     /** Whether a fleet is one of the trade's boats at all, for anything that routes on it. */

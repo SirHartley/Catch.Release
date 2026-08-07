@@ -36,6 +36,12 @@ public class FishermanInterception implements EveryFrameScript {
     /** Set on a boat that has moved itself to cut somebody off, so it is only ever done once. */
     public static final String INTERCEPTED_KEY = "$catchrelease_intercepted";
 
+    /** Set only while the boat is actually closing, so the burn override lapses with the chase. */
+    public static final String CHASING_KEY = "$catchrelease_fisherClosing";
+
+    /** Days the catch-up lasts - the same clock the INTERCEPT assignment runs on. */
+    public static final float CHASE_DAYS = 3f;
+
     protected final IntervalUtil interval = new IntervalUtil(
             TutorialConstants.INTERCEPT_CHECK_SECONDS, TutorialConstants.INTERCEPT_CHECK_SECONDS);
 
@@ -109,6 +115,9 @@ public class FishermanInterception implements EveryFrameScript {
         boat.clearAssignments();
         boat.addAssignment(FleetAssignment.INTERCEPT, player, 3f, "closing on your fleet");
 
+        //the one thing that lets it off the trawler's pace, and it expires with the assignment
+        boat.getMemoryWithoutUpdate().set(CHASING_KEY, true, CHASE_DAYS);
+
         //it wants to be talked to, and it does not lose interest halfway there
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PURSUE_PLAYER, true, 3f);
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true, 3f);
@@ -116,6 +125,11 @@ public class FishermanInterception implements EveryFrameScript {
 
         Global.getSector().getCampaignUI().addMessage(boat.getName()
                 + " is closing on your position.", Misc.getHighlightColor());
+    }
+
+    /** Whether this boat is closing on the player right now - what unlocks its burn. */
+    public static boolean isClosing(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CHASING_KEY);
     }
 
     /** Whether this boat is the one that came to head somebody off - for what it says first. */
