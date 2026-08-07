@@ -764,7 +764,16 @@ keeps the sector-wide search off every other tick.
 
 **Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed, and the mod had one that could not have worked.
 
-**`PopulateOptions` is not fired for you.** The engine fires it automatically after a `DialogOptionSelected` row, and *not* after `OpenCommLink` - so a comm row that sets `$menuState` and stops produces a conversation with no options under it. Every row in the mod that opens a menu from a comm link calls `FireAll PopulateOptions` itself.
+**`PopulateOptions` is never fired for you - not after `OpenCommLink`, and not after
+`DialogOptionSelected` either.** The engine's whole contribution is what `FireBest`/`FireAll` do
+with the fired rows' own options columns: the panel is cleared and rebuilt *only when a fired row
+carries options*, and left standing untouched when none does. So a handler that only sets
+`$menuState` visibly does nothing - the old menu stays up and the new one never appears - and a
+handler whose options column holds a submenu works without any firing at all, because `FireBest`
+rebuilds the panel from that column. Every row that *switches* menus must do both halves itself:
+`$menuState = <state> 0` and `FireAll PopulateOptions`. This map used to claim the engine fires it
+after option selections; it does not, and the fisherman's whole menu tree was broken by rows
+written to that claim.
 
 **The Church and the Path are against the water, not against fish.** A rupture is a hole opened between here and hyperspace and everything pulled through it came from the wrong side of that hole, so the whole trade is people making a living off a wound in creation. Neither flag therefore produces a fisher, a buyer, a broker, or anybody in a bar with a favour to ask - no bar job at a Church or Path port, no trawler working a system either of them runs, no fishing offer on one of their hulls. What they do produce is everything in `campaign/crime`, plus the cells in `jobs/camp` that sit on ruptures so nobody can work them, and that is the only shape a Luddic interaction with this mod takes. `campaign/fish/FishingTaboo.java` is the one list; nothing hardcodes the two faction ids anywhere else.
 
