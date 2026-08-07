@@ -440,6 +440,20 @@ public class FishConstants {
     public static final float ABERRATION_SPREAD = 0.05f;
 
     /**
+     * The low-coherence overlay: a full-screen warp and purple lean while a rig runs somewhere
+     * thin. FLOOR/CEIL map the place's steady aberration onto overlay level 0-1 - nothing at
+     * "stable", full by "barely holding", the same cuts the coherence labels use. FLOOR doubles
+     * as the least share worth blaming on a named source in the terrain bar. EASE_* are seconds
+     * to fade in and out; the whisper loop's volume rides the level.
+     */
+    public static final float COHERENCE_OVERLAY_FLOOR = 0.12f;
+    public static final float COHERENCE_OVERLAY_CEIL = 0.8f;
+    public static final float COHERENCE_OVERLAY_EASE_IN = 2f;
+    public static final float COHERENCE_OVERLAY_EASE_OUT = 1.5f;
+    public static final String SOUND_COHERENCE_WHISPERS = "catchrelease_coherence_whispers";
+    public static final float COHERENCE_WHISPER_VOLUME = 0.7f;
+
+    /**
      * Track's hyperspace backing and its warp grid. The grid border doesn't move, so the swim
      * stays inside the bar. CELLS is vertices per side; the radii are screen pixels (small - the
      * bar is 52 wide).

@@ -1,8 +1,10 @@
 package catchrelease.campaign.ponds.terrain;
 
+import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.renderer.PondDepthField;
@@ -25,6 +27,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.BaseTerrain;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.dark.shaders.distortion.RippleDistortion;
@@ -188,6 +191,41 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     @Override
     public boolean hasMapIcon() {
         return !visualOnly;
+    }
+
+    /** The terrain bar readout. Skipped for look-only ponds, which are not meant to be noticed. */
+    @Override
+    public boolean hasTooltip() {
+        return !visualOnly;
+    }
+
+    @Override
+    public void createTooltip(TooltipMakerAPI tooltip, boolean expanded) {
+        float pad = 10f;
+
+        tooltip.addTitle(NAME);
+
+        tooltip.addPara("A worn patch of the fabric, thin enough to fish through.", pad);
+
+        //the place's steady reading, jitter-free - the same number the overlay runs on
+        float aberration = Aberration.baseAt(entity.getLocationInHyperspace(),
+                entity.getContainingLocation());
+
+        tooltip.addPara("Local coherence: %s", pad, Misc.getGrayColor(),
+                FishItemPlugin.getAberrationColor(aberration),
+                FishItemPlugin.getAberrationLabel(aberration));
+
+        String source = Aberration.dominantSourceAt(entity.getLocationInHyperspace(),
+                entity.getContainingLocation());
+        if (source != null) {
+            tooltip.addPara("Thinned by %s.", 3f, Misc.getGrayColor(),
+                    Misc.getHighlightColor(), source);
+        }
+    }
+
+    @Override
+    public boolean isTooltipExpandable() {
+        return false;
     }
 
     @Override

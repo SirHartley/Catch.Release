@@ -396,6 +396,22 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return !getHauling().isEmpty();
     }
 
+    /** Whether any of the player's lines is out at all - flight, haul and return included. The
+     *  looser cousin of {@link #isAnyHauling()}, for anything reacting to the rig being in use
+     *  rather than to something being on the line. */
+    public static boolean isAnyLineOut() {
+        LocationAPI location = Global.getSector().getCurrentLocation();
+        if (location == null) return false;
+
+        for (SectorEntityToken token : location.getCustomEntitiesWithTag(HarpoonConstants.TAG)) {
+            if (!(token.getCustomPlugin() instanceof HarpoonEntityPlugin harpoon)) continue;
+
+            if (harpoon.owner == null && !token.isExpired()) return true;
+        }
+
+        return false;
+    }
+
     /** Every line currently hauling, found by tag rather than by walking the location - this is
      *  asked from {@code isUsable}, which polls twice a frame, and the full entity list can run
      *  to thousands of asteroids. The tagged list is normally empty and always tiny. */
