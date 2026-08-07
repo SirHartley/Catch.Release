@@ -59,6 +59,33 @@ public class Aberration {
     }
 
     /**
+     * Names the strongest source at a place - "the abyss", "a collapsed star", "a hypershunt",
+     * "a slipstream" - or null when nothing there is worth blaming. The cut is the same one below
+     * which the coherence labels read "stable", so a named source and a bad reading always arrive
+     * together.
+     */
+    public static String dominantSourceAt(Vector2f locInHyper, LocationAPI location) {
+        if (locInHyper == null) return null;
+
+        float best = FishConstants.COHERENCE_OVERLAY_FLOOR;
+        String name = null;
+
+        float share = getAbyssShare(locInHyper, location);
+        if (share > best) { best = share; name = "the abyss"; }
+
+        share = getBlackHoleShare(locInHyper);
+        if (share > best) { best = share; name = "a collapsed star"; }
+
+        share = getHypershuntShare(locInHyper);
+        if (share > best) { best = share; name = "a hypershunt"; }
+
+        share = getSlipstreamShare(locInHyper);
+        if (share > best) { best = share; name = "a slipstream"; }
+
+        return name;
+    }
+
+    /**
      * A collapsed star bends what is around it, so what comes out of the water near one is bent too.
      * <p>
      * Measured to the system rather than to the star itself: at this scale they are the same point,
