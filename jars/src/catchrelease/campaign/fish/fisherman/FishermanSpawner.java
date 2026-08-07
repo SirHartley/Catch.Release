@@ -23,9 +23,10 @@ import java.util.Map;
  * <p>
  * Spawning is a daily roll in whatever system the player is standing in, leaned on by a hold
  * full of fish and by the boat not having come by in a couple of months. It never spawns in
- * hyperspace, in systems cut off from it, in the abyss, in special or hand-made systems - and
- * it would rather work the frontier than the core, though the core still gets the odd visit.
- * One boat at a time, sector-wide.
+ * hyperspace, in systems cut off from it, in the abyss, or in special or hand-made systems - and
+ * never in an inhabited one, which has a trawler posted to it already (see
+ * {@link CoreFisherSpawner}). Of what is left it would rather work the rim than the sector's
+ * middle. One boat at a time, sector-wide, and always the same one - see {@link FishermanIdentity}.
  */
 public class FishermanSpawner implements EveryFrameScript {
 
@@ -90,6 +91,10 @@ public class FishermanSpawner implements EveryFrameScript {
         if (system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
 
+        //an inhabited system already has a boat posted to it, and two sellers in one place would
+        //make his turning up nothing - the point of him is being the only one out here
+        if (OuterReaches.isPopulated(system)) return false;
+
         return true;
     }
 
@@ -133,6 +138,10 @@ public class FishermanSpawner implements EveryFrameScript {
         fleet.forceSync();
         fleet.setTransponderOn(true);
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.FLEET_FLAG, true);
+        fleet.getMemoryWithoutUpdate().set(FishermanConstants.WANDERER_FLAG, true);
+
+        //the same man at the wheel every time - see FishermanIdentity
+        FishermanIdentity.crew(fleet);
 
         //beyond anything's sensors, same as the quest fleets: it arrives, it does not appear
         float distance = Math.max(FishermanConstants.SPAWN_DISTANCE_MIN,
@@ -154,9 +163,15 @@ public class FishermanSpawner implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, fleet);
     }
 
-    /** Whether a fleet is the Fisherman, for anything that routes on it. */
+    /** Whether a fleet is one of the trade's boats at all, for anything that routes on it. */
     public static boolean isFisherman(CampaignFleetAPI fleet) {
         return fleet != null
                 && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.FLEET_FLAG);
+    }
+
+    /** Whether it is <i>him</i>, rather than one of the core's standing trawlers. */
+    public static boolean isWanderer(CampaignFleetAPI fleet) {
+        return fleet != null
+                && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.WANDERER_FLAG);
     }
 }

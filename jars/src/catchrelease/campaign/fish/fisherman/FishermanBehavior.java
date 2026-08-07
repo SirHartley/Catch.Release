@@ -7,7 +7,6 @@ import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.helper.math.CircularArc;
-import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -59,8 +58,8 @@ public class FishermanBehavior implements EveryFrameScript {
      *  a load, which also quietly replays the light-up. */
     protected transient List<Lamp> lamps;
 
-    /** The mark over the boat. Transient for the same reason, and re-hung by {@link #keepVisible}. */
-    protected transient FleetMarkerRenderer marker;
+    /** The boat's mark on the system map. A real entity, so unlike the lamps it survives a save. */
+    protected SectorEntityToken marker;
     protected transient boolean litSoundPlayed = false;
 
     public FishermanBehavior(CampaignFleetAPI fleet) {
@@ -84,6 +83,7 @@ public class FishermanBehavior implements EveryFrameScript {
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()) {
             expireLamps(0f);
             dropMarker();
+            dropShelf();
             done = true;
             return;
         }
@@ -95,7 +95,7 @@ public class FishermanBehavior implements EveryFrameScript {
         //the stay is counted in days the player was not here for. A boat that vanishes while
         //somebody is standing next to it was never really there, and a fortnight spent fishing
         //alongside it is a fortnight of the visit the player gets none of
-        if (!watched) daysOut += Global.getSector().getClock().convertToDays(amount);
+        if (!watched && isVisiting()) daysOut += Global.getSector().getClock().convertToDays(amount);
 
         keepWorking();
 
@@ -109,9 +109,8 @@ public class FishermanBehavior implements EveryFrameScript {
         //clock and the leaving carry on
         if (!watched) {
             expireLamps(0f);
-            dropMarker();
 
-            if (daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
+            if (isVisiting() && daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
             return;
         }
 
@@ -124,6 +123,18 @@ public class FishermanBehavior implements EveryFrameScript {
 
         harpoonInterval.advance(amount);
         if (harpoonInterval.intervalElapsed()) throwHarpoon();
+    }
+
+    /**
+     * Whether this boat is passing through.
+     * <p>
+     * The wanderer is; the core's standing trawlers are not, and for them the visit clock and
+     * everything downstream of it - the wind-down, the despawn, the last-seen stamp - is simply not
+     * a thing that happens. Kept as a question rather than a flag so a subclass that lives somewhere
+     * answers it once and inherits the rest of the rig unchanged.
+     */
+    protected boolean isVisiting() {
+        return true;
     }
 
     /** Lights out, the one departure sound, and a short grace for the fade before the boat goes. */
@@ -148,26 +159,51 @@ public class FishermanBehavior implements EveryFrameScript {
      * Two halves of one problem. The detectability modifier means it is never a blip at the edge of
      * a sweep, and the fader is pinned bright because a fleet fading with distance takes its hull
      * with it and leaves the lamps - which are drawn wherever the boat is, regardless - sweeping the
-     * dark on their own. The mark is so it can be picked out of a busy system at all.
+     * dark on their own.
      * <p>
      * Applied every tick rather than at spawn: the modifier is keyed, so re-applying it is free and
-     * it heals a boat that was already out there before any of this existed. Renderers do not
-     * survive a save, so the mark has to be something that can be re-hung.
+     * it heals a boat that was already out there before any of this existed.
+     * <p>
+     * The map mark is hung whether or not anybody is watching, and is the one thing here that is not
+     * about being seen in space - see {@link FishermanMapIcon}. It costs one entity and being
+     * already up is the difference between arriving to a marked system and arriving to an unmarked
+     * one that marks itself a frame later.
      */
     protected void keepVisible(boolean watched) {
         fleet.getStats().getDetectedRangeMod().modifyFlat(FishermanConstants.VISIBILITY_ID,
                 FishermanConstants.DETECTED_RANGE);
 
+        keepNamed();
+
+        //a boat out there since before the trade had two kinds of boat in it. Written once, and
+        //only because without it the dialog would take him for one of the core's trawlers
+        if (isVisiting()
+                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.WANDERER_FLAG)) {
+
+            fleet.getMemoryWithoutUpdate().set(FishermanConstants.WANDERER_FLAG, true);
+        }
+
+        if (marker == null || marker.getContainingLocation() != fleet.getContainingLocation()) {
+            marker = FishermanMapIcon.addTo(fleet);
+        }
+
         if (!watched) return;
 
         //a per-frame override rather than a setting, which is how vanilla's own faders are driven
         fleet.forceSensorFaderBrightness(1f);
+    }
 
-        if (marker == null || marker.isExpired()) {
-            marker = FleetMarkerRenderer.addTo(fleet,
-                    FishermanConstants.MARKER_SPRITE_CATEGORY, FishermanConstants.MARKER_SPRITE,
-                    FishermanConstants.LIGHT_COLOR, FishermanConstants.MARKER_SIZE);
-        }
+    /**
+     * The boat wears the name the local water lets it wear.
+     * <p>
+     * Written only when it has actually changed - a name is a string on the fleet, and rewriting it
+     * sixty times a second to the same value is churn nothing asked for. The drift is a property of
+     * the system, so in practice this fires once on arrival.
+     */
+    protected void keepNamed() {
+        String name = FishermanIdentity.getDisplayName(FishermanIdentity.getDrift(fleet));
+
+        if (!name.equals(fleet.getName())) fleet.setName(name);
     }
 
     /** Whether the player is in the same place as the boat, which is what holds the clock. */
@@ -210,6 +246,7 @@ public class FishermanBehavior implements EveryFrameScript {
         done = true;
 
         dropMarker();
+        dropShelf();
 
         Global.getSector().getMemoryWithoutUpdate().unset(FishermanConstants.ACTIVE_KEY);
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
@@ -250,9 +287,22 @@ public class FishermanBehavior implements EveryFrameScript {
 
     /** Takes the mark down, for a boat that is leaving or gone. */
     protected void dropMarker() {
-        if (marker != null) marker.expire();
+        if (marker != null && marker.getContainingLocation() != null) {
+            marker.getContainingLocation().removeEntity(marker);
+        }
 
         marker = null;
+    }
+
+    /**
+     * Gives whatever the boat did not sell back to the pool.
+     * <p>
+     * The pool is what stops two boats putting the same chart up, so a shelf that left with the
+     * fleet still holding its ids would take those species out of circulation for good - nothing
+     * else could ever be offered them again.
+     */
+    protected void dropShelf() {
+        FishermanShelf.releaseFor(fleet);
     }
 
     /**
