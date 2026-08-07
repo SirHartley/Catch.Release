@@ -21,10 +21,12 @@ import java.util.Set;
  * rung - the asks it stands for are always the current price, so buying a rung moves the mark
  * to the next one, and a finished or owned ware's mark expires on its own.
  * <p>
- * What a mark does lives elsewhere and reads through the two questions here: the route planner
- * suggests every species that could satisfy a marked ask, and every screen that shows a fish
- * asks {@link #isMarked} to know whether to hang the quest-yellow dot on it -
- * {@link #drawDot}, bottom right, the same corner everywhere.
+ * What a mark does lives elsewhere and reads through the questions here: the route planner
+ * suggests every species that could satisfy a marked ask, the map screens hang the quest-yellow
+ * dot off {@link #isMarked}, and the cargo icons hang it off {@link #isWanted}, which counts
+ * the open jobs too. {@link #drawDot} draws it where the caller puts it: bottom left on cargo
+ * icons, on the ring's lower right for the map holder, at the row's right end on the map pane
+ * and route popup.
  */
 public class ShopMarks {
 
@@ -122,6 +124,66 @@ public class ShopMarks {
         if (spec == null) return false;
 
         for (FishRequirement ask : getMarkedRequirements()) {
+            if (ask.couldBeSatisfiedBy(spec)) return true;
+        }
+
+        return false;
+    }
+
+    /** How long the wanted-ask cache is trusted before {@link #getWantedAsks} rebuilds it. */
+    protected static final long WANTED_CACHE_MS = 250L;
+
+    protected static List<FishRequirement> wantedAskCache;
+    protected static long wantedAskCacheTime;
+
+    /**
+     * Every current ask - marked wares and open jobs both - the same data
+     * {@link #getRequiredBy} reads, minus the names. Cached for {@link #WANTED_CACHE_MS}:
+     * {@link #isWanted} is asked per cargo cell per frame, and collecting the jobs' asks walks
+     * the whole intel manager, which a full hold would otherwise do dozens of times a frame.
+     */
+    protected static List<FishRequirement> getWantedAsks() {
+        long now = System.currentTimeMillis();
+        if (wantedAskCache != null && now - wantedAskCacheTime < WANTED_CACHE_MS) {
+            return wantedAskCache;
+        }
+
+        List<FishRequirement> out = new ArrayList<>(getMarkedRequirements());
+
+        if (Global.getSector() != null) {
+            for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
+                    : Global.getSector().getIntelManager().getIntel()) {
+
+                if (!(intel instanceof catchrelease.campaign.fish.jobs.FishJob job)) continue;
+
+                for (FishRequirement ask : job.getAsks()) {
+                    if (ask != null) out.add(ask);
+                }
+            }
+        }
+
+        wantedAskCache = out;
+        wantedAskCacheTime = now;
+
+        return out;
+    }
+
+    /** Whether anything at all - a marked ware or an open job - would take this specimen. */
+    public static boolean isWanted(FishCatch entry) {
+        if (entry == null) return false;
+
+        for (FishRequirement ask : getWantedAsks()) {
+            if (ask.matches(entry)) return true;
+        }
+
+        return false;
+    }
+
+    /** Whether anything at all - a marked ware or an open job - asks for this species. */
+    public static boolean isWanted(FishSpec spec) {
+        if (spec == null) return false;
+
+        for (FishRequirement ask : getWantedAsks()) {
             if (ask.couldBeSatisfiedBy(spec)) return true;
         }
 
@@ -230,7 +292,8 @@ public class ShopMarks {
         }
     }
 
-    /** The quest-yellow dot, worn bottom right wherever a needed fish is shown. */
+    /** The quest-yellow dot a needed fish wears - bottom left on cargo icons, placed to fit the
+     *  layout on the map screens. */
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
         //a dark seat under it, so the yellow reads on any icon
         Disc.draw(centerX, centerY, radius + 1.2f, java.awt.Color.BLACK,

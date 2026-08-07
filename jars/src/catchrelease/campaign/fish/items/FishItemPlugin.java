@@ -114,9 +114,9 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishItemRenderer.render(x, y, w, h, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
 
-        //the shopping-list dot: this specimen would go towards a marked upgrade
-        if (ShopMarks.isMarked(entry)) {
-            ShopMarks.drawDot(x + w - 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+        //the wanted dot: a marked ware or an open job would take this specimen
+        if (ShopMarks.isWanted(entry)) {
+            ShopMarks.drawDot(x + 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
 
