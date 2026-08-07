@@ -43,7 +43,7 @@ public class FishermanConstants {
 
     /** The lamps: the old yellow light, thrown as fans - no upgrades, no breach. */
     public static final Color LIGHT_COLOR = new Color(255, 180, 50, 255);
-    public static final int LIGHTS = 2;
+    public static final int LIGHTS = 3;
     public static final float SWEEP_DEGREES_PER_SECOND = 30f;
 
     /** The one sound either end of the visit makes. */
@@ -62,16 +62,22 @@ public class FishermanConstants {
     /** The least lit a mote has to be before the Fisherman bothers throwing at it. */
     public static final float HARPOON_MIN_LIT = 0.15f;
 
-    /** Spawn pressure: a small daily roll, leaned on hard by a full hold or a long absence. */
-    public static final float SPAWN_CHECK_DAYS = 1f;
-    public static final float SPAWN_BASE_CHANCE = 0.06f;
-    public static final int CARGO_FISH_THRESHOLD = 15;
-    public static final float CARGO_FULL_MULT = 4f;
-    public static final float OVERDUE_DAYS = 60f;
-    public static final float OVERDUE_MULT = 6f;
+    /**
+     * Spawn pressure: one roll when the player arrives somewhere, not a roll a day.
+     * <p>
+     * A daily roll in every rim system meant a boat behind every jump. The month is the real gate -
+     * he is one man working an enormous volume, and running into him twice in a week says otherwise -
+     * and the chance on top is what stops the first uninhabited system a campaign visits being the
+     * one he is standing in.
+     */
+    public static final float SPAWN_COOLDOWN_DAYS = 30f;
+    public static final float SPAWN_ENTRY_CHANCE = 0.25f;
 
-    /** Core systems still get visits, just fewer - the frontier is where the fishing is. */
-    public static final float CORE_SPAWN_MULT = 0.3f;
+    /** The boat works at a trawler's pace, and only breaks it to head somebody off. */
+    public static final String BURN_ID = "catchrelease_fisherman_burn";
+    public static final float BURN_WORKING = 4f;
+    public static final float BURN_CHASING = 16f;
+
 
     /** Arrival: past the longest sensor range in the game, plus a little scatter on top. */
     public static final float SPAWN_DISTANCE_MIN = 4000f;

@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Everything the Fisherman does between arriving and leaving: sweeps a pair of yellow fan lamps,
- * stages fish under them, harpoons what it stages, and packs up once the visit is spent.
+ * Everything the Fisherman does between arriving and leaving: sweeps its yellow fan lamps,
+ * stages fish under them, and packs up once the visit is spent.
  * <p>
  * The visit is spent in days the player was not there for. The boat never disappears in front of
  * anybody, and a player who stays and fishes alongside it keeps it for as long as they like.
@@ -38,10 +38,10 @@ import java.util.List;
  * of {@link Searchlight}'s: the same arc-and-sine ride, none of the lock-on, none of the sounds
  * bar one at light-up and one at wind-down.
  * <p>
- * The catch is staged: there are no wild motes to find in open water, so the script seeds one
- * under a fan every so often and later throws a real harpoon at whatever its lights are on. The
- * harpoon entity runs its whole animation with the Fisherman as its home end and no minigame -
- * an NPC's catch always lands.
+ * The catch is staged: there are no wild motes to find in open water, so the script seeds one under
+ * a fan every so often. It does not throw at them - a harpoon in flight out here reads as a weapon
+ * being fired, and the one hull in the sector that must never look like it is shooting at you is
+ * this one.
  */
 public class FishermanBehavior implements EveryFrameScript {
 
@@ -54,8 +54,6 @@ public class FishermanBehavior implements EveryFrameScript {
 
     protected final IntervalUtil moteInterval = new IntervalUtil(
             FishermanConstants.MOTE_INTERVAL_MIN, FishermanConstants.MOTE_INTERVAL_MAX);
-    protected final IntervalUtil harpoonInterval = new IntervalUtil(
-            FishermanConstants.HARPOON_INTERVAL_MIN, FishermanConstants.HARPOON_INTERVAL_MAX);
 
     /** The lamps. Transient like every renderer-holding thing: rebuilt on the first frame after
      *  a load, which also quietly replays the light-up. */
@@ -123,9 +121,6 @@ public class FishermanBehavior implements EveryFrameScript {
 
         moteInterval.advance(amount);
         if (moteInterval.intervalElapsed()) seedMote();
-
-        harpoonInterval.advance(amount);
-        if (harpoonInterval.intervalElapsed()) throwHarpoon();
     }
 
     /**
@@ -178,6 +173,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
         keepNamed();
         keepStanding();
+        keepPace();
 
         //a boat out there since before there were two kinds of schedule. Written once, and only
         //because the shelf and the spawner both ask which kind of boat this is
@@ -195,6 +191,31 @@ public class FishermanBehavior implements EveryFrameScript {
 
         //a per-frame override rather than a setting, which is how vanilla's own faders are driven
         fleet.forceSensorFaderBrightness(1f);
+    }
+
+    /**
+     * A trawler's pace, held against whatever its hulls could actually do.
+     * <p>
+     * The rig is fitted to hulls that would otherwise cruise like freighters, and a fishing boat
+     * crossing a system faster than the player reads as a courier. The one exception is the
+     * introduction's catch-up, where it has to close on somebody who is already moving - see
+     * {@link FishermanInterception}.
+     * <p>
+     * Set as a flat delta against the fleet's natural burn rather than a cap, because vanilla has
+     * no cap: the modifier is removed before the natural figure is read, or it would compound with
+     * itself every frame.
+     */
+    protected void keepPace() {
+        float target = catchrelease.campaign.fish.tutorial.FishermanInterception.isClosing(fleet)
+                ? FishermanConstants.BURN_CHASING : FishermanConstants.BURN_WORKING;
+
+        fleet.getStats().getFleetwideMaxBurnMod().unmodifyFlat(FishermanConstants.BURN_ID);
+
+        float natural = fleet.getFleetData().getMinBurnLevel();
+        if (natural != target) {
+            fleet.getStats().getFleetwideMaxBurnMod()
+                    .modifyFlat(FishermanConstants.BURN_ID, target - natural);
+        }
     }
 
     /**
@@ -393,39 +414,6 @@ public class FishermanBehavior implements EveryFrameScript {
         mote.setLocation(spawn.x, spawn.y);
     }
 
-    /** A line at whatever the lamps are on. The harpoon runs its own show from here. */
-    protected void throwHarpoon() {
-        if (lamps == null) return;
-
-        SectorEntityToken best = null;
-        float bestLit = FishermanConstants.HARPOON_MIN_LIT;
-
-        for (SectorEntityToken mote : fleet.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-
-            if (!FishEntityPlugin.isAvailable(mote)) continue;
-
-            float lit = 0f;
-            for (Lamp lamp : lamps) lit = Math.max(lit, lamp.litStrength(mote.getLocation()));
-
-            if (lit > bestLit) {
-                bestLit = lit;
-                best = mote;
-            }
-        }
-
-        if (best == null) return;
-
-        Vector2f from = new Vector2f(fleet.getLocation());
-
-        SectorEntityToken harpoon = fleet.getContainingLocation().addCustomEntity(
-                Misc.genUID(), null, catchrelease.abilities.harpoon.constants
-                        .HarpoonConstants.ENTITY_ID, null,
-                new HarpoonEntityPlugin.Params(from, new Vector2f(best.getLocation()), fleet));
-
-        harpoon.setLocation(from.x, from.y);
-        harpoon.setFacing(Misc.getAngleInDegrees(from, best.getLocation()));
-    }
 
     /**
      * One lamp: the sweep without the fisherman's finer habits. The arc holds the fleet's own

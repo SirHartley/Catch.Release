@@ -777,7 +777,8 @@ $catchreleaseStage >= 4",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
-catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
+catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
+SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,DismissDialog,,,
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,

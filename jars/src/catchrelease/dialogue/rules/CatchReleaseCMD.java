@@ -131,6 +131,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 writeTokens(dialog, memoryMap);
                 return true;
 
+            case "dropCutComm":
+                return dropCutComm(dialog);
+
             //---- panels. Machinery rather than dialogue, and the one thing not in the sheet
             case "openShop":
                 return openPanel(dialog, new FishShopDialog(this::resume));
@@ -410,6 +413,31 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      * Options are cleared first - they would otherwise stand under the panel, and the hidden text
      * panel drags them sideways with it.
      */
+    /**
+     * Takes vanilla's "Cut the comm link" back off the list.
+     * <p>
+     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter
+     * - {@code catchrelease_fisherEncounter} sends it straight to comms - and it carries its own
+     * Leave on ESCAPE. Vanilla's cut-link option sits beside it offering the same thing by a
+     * different name, and worse, lands the player back on the engage/disengage screen of a boat
+     * nobody is fighting.
+     * <p>
+     * Removed rather than suppressed: the option is added by whatever fired before this, and the
+     * option panel is the one place both can be seen. {@code OptionId} is public on vanilla's
+     * plugin, so the same enum value it was added under is the one taken away.
+     */
+    protected boolean dropCutComm(InteractionDialogAPI dialog) {
+        if (dialog == null || dialog.getOptionPanel() == null) return false;
+
+        dialog.getOptionPanel().removeOption(
+                com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.OptionId.CUT_COMM);
+
+        //the string form, for the sheet's own rows - vanilla answers to both
+        dialog.getOptionPanel().removeOption("cutCommLink");
+
+        return true;
+    }
+
     protected boolean openPanel(InteractionDialogAPI dialog, Object panel) {
         if (dialog == null) return false;
 
