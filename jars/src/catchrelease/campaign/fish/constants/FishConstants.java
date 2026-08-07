@@ -437,6 +437,24 @@ public class FishConstants {
     public static final float ABERRATION_BLACKHOLE_LY = 5f;
     public static final float ABERRATION_HYPERSHUNT_LY = 12f;
     public static final float ABERRATION_SLIPSTREAM_LY = 6f;
+    /**
+     * A gate, which reads as two different things depending on whether anything is coming through
+     * it. Dormant it is a hole with the lid on - close range, and not much. Lit, it is an opening
+     * between here and somewhere else that is being held open on purpose, which is the strongest
+     * thing in the sector short of the abyss itself.
+     */
+    public static final float ABERRATION_GATE_WEIGHT = 0.3f;
+    public static final float ABERRATION_GATE_LY = 3f;
+    public static final float ABERRATION_GATE_ACTIVE_WEIGHT = 0.85f;
+    public static final float ABERRATION_GATE_ACTIVE_LY = 6f;
+
+    /**
+     * Something big enough to bend a planet, which bends rather less than a gate and only right on
+     * top of it. Nothing in vanilla is this - see {@code Aberration}'s foreign tag list.
+     */
+    public static final float ABERRATION_ENGINE_WEIGHT = 0.3f;
+    public static final float ABERRATION_ENGINE_LY = 1f;
+
     public static final float ABERRATION_SPREAD = 0.05f;
 
     /**
