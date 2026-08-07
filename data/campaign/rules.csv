@@ -778,12 +778,6 @@ A second crate. Lamps, a harpoon, and a ledger.
 ""Lamps burn a window through where there is no rupture. The line takes what the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here.""
 
 ""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question.""",100:catchrelease_fisherBack:Back,
-catchrelease_introWaiting3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
-CatchReleaseCMD tokens
-$catchreleaseStage == 3
-!$catchreleaseTargetMet",,"""Not yet.""
-
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",100:catchrelease_fisherBack:Back,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
@@ -852,3 +846,43 @@ catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBa
 
 ""They keep one in every system anybody lives in. Out past the last colony, where nothing is in the way. Hail it, and do not ask what is under the tarp."" An intel note tracks the nearest.",catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
+catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
+$catchreleaseCrabAny","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
+catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible,"" he says, without being asked twice. ""Crablobab. That is me, and that is the crabs as well, it saves time."" One of the crate's occupants has got a claw through the mesh and is working on the rest of itself.
+
+He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",
+catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall
+CatchReleaseCMD tokens",,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
+10:catchrelease_crabWareExplosive_head:Explosive Head
+100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabCelebrationAfford",,"""Little cartridges. You land something and they go off - paper, all colours, all over the readout. No, it does not help you catch anything. That is not what it is for. You have caught the fish already, that is the whole point of it.""
+
+He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.","0:catchrelease_crabBuyCelebration:Pay him
+10:catchrelease_crabStall:Ask what else is in the coat",
+catchrelease_crabWareCelebrationShort,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabCelebrationAfford",,"""Little cartridges. You land something and they go off - paper, all colours, all over the readout. No, it does not help you catch anything. That is not what it is for. You have caught the fish already, that is the whole point of it.""
+
+He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Ask what else is in the coat,
+catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Ask what else is in the coat
+100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabExplosive_headAfford",,"""This one I will not pretend about. It does not catch. It goes on the harpoon and then whatever the harpoon touches is gone, and so is the harpoon. People buy it. I have stopped asking them what for.""
+
+He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.","0:catchrelease_crabBuyExplosive_head:Pay him
+10:catchrelease_crabStall:Ask what else is in the coat",
+catchrelease_crabWareExplosive_headShort,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabExplosive_headAfford",,"""This one I will not pretend about. It does not catch. It goes on the harpoon and then whatever the harpoon touches is gone, and so is the harpoon. People buy it. I have stopped asking them what for.""
+
+He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Ask what else is in the coat,
+catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Ask what else is in the coat
+100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,BarCMD returnFromEvent false,"He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
+catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer.",,
+catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,"There is a hole in their hull the shape of your fishing gear, and $otherFleetFactionArticle would like it noted.",,
+catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,"$otherFleetFactionArticleCap has your transponder code, the puncture, and a great deal to say about both.",,
+catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,"Whatever $otherFleetFactionArticle expected to be shot at with today, it was not a rope.",,

@@ -96,9 +96,9 @@ they are granted by `FishingIntro`, not by character creation.
 `catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
 merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
 
-**`data/campaign/bar_events.csv`** — 11 jobs, plus `catchrelease_crablobab` →
-`campaign/fish/crab/CrabSalesman`, a vendor rather than a job and the one row here that is not a
-`FishJob`. **Three of the job ids do not match their class name:**
+**`data/campaign/bar_events.csv`** — 11 jobs, all `FishJob`s. The two bar encounters that are *not*
+jobs — Crablobab and the rating — are `AddBarEvents` rows in `rules.csv` instead, with no Java at
+all. **Three of the job ids do not match their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
@@ -807,8 +807,11 @@ it worked. The panels — shop, chart counter, cargo picker — stay Java, becau
 machinery and there is nothing for a sheet to say about it.
 
 **The ladder gates equipment, and equipment gates the world.** `unlockedAtStart` is off for all four
-abilities. The shop only shelves a rig you have been handed (`ShopGroup.isOwned`), so the harpoon and
-lamp shelves are not there to be read before you own them. No bar job and no fleet job is offered at
+abilities. A shelf needs two things before it is on the floor (`ShopGroup.isUnlocked`): the rig in
+your hands, **and** the introduction's blessing. The lamp and harpoon shelves stay shut for one rung
+*after* that gear arrives, because the gear and the errand to use it in are handed over in the same
+breath and the upgrades for it are what finishing that errand buys — opening them together would make
+the errand a formality. No bar job and no fleet job is offered at
 all until the first errand is behind you (`FishingIntro.isOpenForWork`), and while the ladder runs an
 ask never names gear you have not got — `FishJobAsks.rollCatchTerms` narrows to what is in your
 hands, because an order you cannot act on is not an order.

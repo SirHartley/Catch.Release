@@ -24,8 +24,12 @@ import org.lwjgl.util.vector.Vector2f;
  * <p>
  * What changes is how well they are holding. {@link #getDrift} reads the local instability the same
  * way a specimen taken there would - {@link Aberration}'s own figure for the system - and the boat's
- * name, their own, and the way they talk all come apart by degrees as it climbs. Nothing is actually
- * replaced: it is the same person, read through worse and worse water.
+ * name comes apart by degrees as it climbs. Nothing is actually replaced: it is the same person,
+ * read through worse and worse water.
+ * <p>
+ * How they <i>sound</i> at each band is not here. {@link #getBand} is handed to the sheet as
+ * {@code $catchreleaseDrift} and {@code rules.csv} carries a greeting per band, like every other
+ * word in the mod.
  */
 public class FishermanIdentity {
 
@@ -145,45 +149,4 @@ public class FishermanIdentity {
         return out.toString();
     }
 
-    /**
-     * The line under the greeting: what is wrong here, or nothing at all where the water is calm.
-     * Said about the comm rather than about the person - nobody aboard would claim to know what is
-     * happening to them, only that the picture will not sit still.
-     */
-    public static String describe(float drift) {
-        switch (getBand(drift)) {
-            case 3:
-                return "The picture will not hold. There is somebody on the other end of it and they"
-                        + " are answering, and the crew behind them are the crew from a boat that is"
-                        + " not this one. Somebody aboard says they have met them before. Somebody"
-                        + " else says they have never seen them.";
-            case 2:
-                return "Their voice arrives a moment before the channel opens, and the lights behind"
-                        + " them sweep out of time with the ones outside the window.";
-            case 1:
-                return "The comm image sits a half-second behind them, the way a bad relay does -"
-                        + " except there is no relay out here.";
-            default:
-                return null;
-        }
-    }
-
-    /** The greeting: the same person saying roughly the same thing through worse and worse water. */
-    public static String getGreeting(float drift) {
-        switch (getBand(drift)) {
-            case 3:
-                return "The trawler's comm opens on a face that is already mid-sentence. \"- good"
-                        + " tonight, lights are good tonight, lights are - evening. Buying, or"
-                        + " selling, or just drifting?\"";
-            case 2:
-                return "The trawler's comm crackles, twice, out of order. \"Evening. Lights are"
-                        + " good tonight - were good tonight. Buying, selling, or just drifting?\"";
-            case 1:
-                return "The trawler's comm crackles. \"Evening. Lights are holding, near enough."
-                        + " Buying, selling, or just drifting?\"";
-            default:
-                return "The trawler's comm crackles. \"Evening. Lights are good tonight. Buying,"
-                        + " selling, or just drifting?\"";
-        }
-    }
 }

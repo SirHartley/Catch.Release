@@ -99,6 +99,25 @@ public class FishingIntro {
         return isAtLeast(FISH_ONE);
     }
 
+    /**
+     * Whether the introduction has opened a given shelf of the shop yet.
+     * <p>
+     * The rod's shelves come with the shop itself. The lamp and harpoon shelves are held back one
+     * further rung: the gear and the errand to use it in arrive together, and the upgrades for it
+     * are what finishing that errand buys - see {@code ShopGroup.isUnlocked}. Anything past the
+     * ladder is open, which is every campaign that skipped and every one that finished.
+     */
+    public static boolean isShelfOpen(catchrelease.campaign.fish.shop.ShopGroup shelf) {
+        if (shelf == null) return true;
+
+        boolean deep = shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHTS
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHT_RIG
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON_TIPS;
+
+        return !deep || isAtLeast(FISH_THREE);
+    }
+
     /** Whether a rig is in the player's hands, for anything that gates on owning it. */
     public static boolean hasGear(String abilityId) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();

@@ -35,9 +35,6 @@ public enum CrabWares {
      * because it is the one thing here somebody might want and then not want.
      */
     CELEBRATION("Celebration Charges", 15000, 3,
-            "\"Little cartridges. You land something and they go off - paper, all colours, all over"
-                    + " the readout. No, it does not help you catch anything. That is not what it"
-                    + " is for. You have caught the fish already, that is the whole point of it.\"",
             "Goes off over the catch card when something is landed: a flash behind it, the specimen"
                     + " thrown up over its own box, paper everywhere, and the word for it at an"
                     + " angle. Says nothing the readout beside it does not already say.") {
@@ -62,9 +59,6 @@ public enum CrabWares {
      * knows a running rig has to be stopped so it comes back up reading the module it now has.
      */
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
-            "\"This one I will not pretend about. It does not catch. It goes on the harpoon and then"
-                    + " whatever the harpoon touches is gone, and so is the harpoon. People buy it."
-                    + " I have stopped asking them what for.\"",
             "A shaped charge behind the barb. Kept in the harpoon's own slot from here on, and taken"
                     + " off there as well.") {
         @Override
@@ -87,18 +81,21 @@ public enum CrabWares {
      */
     public static final String OFF_KEY = "$catchrelease_crabWaresOff";
 
-    /** What he calls it, what it costs, how many crabs go with that, how he sells it, what it is. */
+    /**
+     * What he calls it, what it costs, how many crabs go with that, and what it is.
+     * <p>
+     * How he <i>sells</i> it is not here - the pitch is dialogue and lives in {@code rules.csv}
+     * under {@code catchrelease_crabWare<Name>}. The description is a tooltip, which is furniture.
+     */
     public final String name;
     public final int credits;
     public final int crabs;
-    public final String pitch;
     public final String description;
 
-    CrabWares(String name, int credits, int crabs, String pitch, String description) {
+    CrabWares(String name, int credits, int crabs, String description) {
         this.name = name;
         this.credits = credits;
         this.crabs = crabs;
-        this.pitch = pitch;
         this.description = description;
     }
 

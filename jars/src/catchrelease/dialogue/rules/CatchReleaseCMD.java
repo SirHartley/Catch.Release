@@ -1,5 +1,6 @@
 package catchrelease.dialogue.rules;
 
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
@@ -77,6 +78,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** Whether a rumor is going spare. */
     public static final String RUMOR = "$catchreleaseRumor";
 
+    /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
+    public static final String CRAB_ANY = "$catchreleaseCrabAny";
+
     @Override
     public boolean execute(String ruleId, InteractionDialogAPI dialog, List<Token> params,
                            Map<String, MemoryAPI> memoryMap) {
@@ -148,8 +152,23 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "rumor":
                 return FishRumors.isAvailable() && FishRumors.create() != null;
 
+            //---- the man with the crate
+            case "crabBuy":
+                return buyCrabWare(arg);
+
             default:
                 return false;
+        }
+    }
+
+    /** Crablobab's stock changing hands. The sheet says what he says; this counts the crabs. */
+    protected boolean buyCrabWare(String wareName) {
+        if (wareName == null) return false;
+
+        try {
+            return CrabWares.valueOf(wareName.trim().toUpperCase()).buy();
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
@@ -193,6 +212,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR, FishRumors.isAvailable(), 0);
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
+
+        local.set(CRAB_ANY, CrabWares.isAnythingLeft(), 0);
+
+        for (CrabWares ware : CrabWares.values()) {
+            String key = "$catchreleaseCrab" + Misc.ucFirst(ware.name().toLowerCase());
+
+            local.set(key + "Owned", ware.isOwned(), 0);
+            local.set(key + "Afford", ware.canAfford(), 0);
+            local.set(key + "Price", Misc.getDGSCredits(ware.credits), 0);
+            local.set(key + "Crabs", ware.crabs, 0);
+        }
 
         FishermanQuest.Saved work = FishermanQuest.getActive();
 
