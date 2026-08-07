@@ -14,20 +14,31 @@ scrapped
 ---------------------
 qa_
 
-Coherence
-- Add an overlay to denote low coherence while fishing abilities are active. 
-    - This overlay should work exactly like the radiation overlay in IndEvo, but instead be purple and have a warping shader effect applied to whatever is below it.
-    - Warp intensity depending on coherence level
-    - Show coherence in terrain bar and explain the source (if found)
-    - The SFX is going to be a low whispering effect
-
-
 Codex
 - open map from codex still broken
 
 ---------------------
 
 handed off_
+
+Fisherman
+- Fleet should never run from you
+
+Bar Encounters
+- Crabolabob (or whatever the name) should not spawn until the tutorial is done
+- Tutorial bar encounter should colour yellow in the list
+
+Fisherman
+- Survey data seller text runs out of boy
+- survey data seller needs a "return" button to the lower left
+- survey data seller needs sales feedback: "bought survey data
+
+Coherence
+- Add an overlay to denote low coherence while fishing abilities are active.
+    - This overlay should work exactly like the radiation overlay in IndEvo, but instead be purple and have a warping shader effect applied to whatever is below it.
+    - Warp intensity depending on coherence level
+    - Show coherence in terrain bar and explain the source (if found)
+    - The SFX is going to be a low whispering effect
 
 x Fishing planner
   - Search field text now invisible, should render black
