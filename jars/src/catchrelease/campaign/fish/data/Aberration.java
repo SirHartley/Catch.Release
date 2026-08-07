@@ -6,21 +6,55 @@ import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.impl.campaign.GateEntityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * How badly a specimen holds to reality, from where it was taken - the inverse of the coherence the
  * player is shown on it.
  * <p>
- * Four things thin the local fabric, taken at their strongest rather than summed. Abyss reads
- * directly off depth; black hole, hypershunt and slipstream fall off with distance in light-years
- * from the system (not world units), since what matters is which part of the sector this is.
+ * Several things thin the local fabric, taken at their strongest rather than summed. Abyss reads
+ * directly off depth; everything else falls off with distance in light-years from the system (not
+ * world units), since what matters is which part of the sector this is.
+ * <p>
+ * A gate counts twice over, because it is two different objects. Dormant it is a hole with the lid
+ * on - three light-years and not much of it. Lit, something is being held open between here and
+ * somewhere else, and it reads harder than anything but the abyss. Which is why gates cannot go
+ * through {@link #getNearestLY} like the rest: the nearest gate is not necessarily the worst one,
+ * and a dormant gate overhead can matter less than a live one two systems away.
+ * <p>
+ * <b>Foreign tags.</b> Other mods put things in the sector that belong on this list, and the list
+ * names them by tag - see {@link #FOREIGN_GATES} and below. Nothing here depends on any of those
+ * mods being installed: a tag nobody has registered simply matches nothing, so the lookup costs an
+ * empty list and the reading is unchanged.
  */
 public class Aberration {
+
+    /**
+     * Somebody else's gates, treated as gates.
+     * <p>
+     * A second network of doors between here and elsewhere is the same fact about the fabric as the
+     * first one, whoever built it.
+     */
+    public static final String[] FOREIGN_GATES = {"bifrost"};
+
+    /** Somebody else's hypershunt, treated as a hypershunt, for the same reason. */
+    public static final String[] FOREIGN_HYPERSHUNTS = {"aotd_hypershunt_receiver"};
+
+    /**
+     * Machines large enough to work on a planet rather than on a ship.
+     * <p>
+     * Not a hole in anything - a mining station with a laser that cuts worlds is only leaning on
+     * local space very hard, so it reads short and shallow next to the doors.
+     */
+    public static final String[] FOREIGN_ENGINES = {"aotd_pluto_station"};
 
     /** For a pond, or anything else that was taken somewhere. */
     public static float of(SectorEntityToken where) {
@@ -54,6 +88,8 @@ public class Aberration {
         worst = Math.max(worst, getBlackHoleShare(locInHyper));
         worst = Math.max(worst, getHypershuntShare(locInHyper));
         worst = Math.max(worst, getSlipstreamShare(locInHyper));
+        worst = Math.max(worst, getGateShare(locInHyper, false));
+        worst = Math.max(worst, getEngineShare(locInHyper));
 
         return MathUtils.clamp(worst, 0f, 1f);
     }
@@ -81,6 +117,12 @@ public class Aberration {
 
         share = getSlipstreamShare(locInHyper);
         if (share > best) { best = share; name = "a slipstream"; }
+
+        share = getGateShare(locInHyper, false);
+        if (share > best) { best = share; name = "a gate"; }
+
+        share = getEngineShare(locInHyper);
+        if (share > best) { best = share; name = "something built too large"; }
 
         return name;
     }
@@ -116,11 +158,102 @@ public class Aberration {
     }
 
     protected static float getHypershuntShare(Vector2f locInHyper) {
+        return getHypershuntShare(locInHyper, false);
+    }
+
+    protected static float getHypershuntShare(Vector2f locInHyper, boolean foundOnly) {
         float nearest = getNearestLY(locInHyper,
-                Global.getSector().getCustomEntitiesWithTag(Tags.CORONAL_TAP));
+                taggedWith(Tags.CORONAL_TAP, FOREIGN_HYPERSHUNTS), foundOnly);
 
         return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
                 * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
+    }
+
+    /**
+     * Whether the player has actually found this, for the readings that are only allowed to know
+     * what the player knows.
+     * <p>
+     * The rule is the same for everything that sits inside a system, and it is one rule rather than
+     * a judgement per source: hidden until somebody has been there and looked. Exactly two things
+     * are exempt, and neither of them is an object you find - a star, because a system's own sun is
+     * drawn on the sector map from the first day and a black hole with it, and a slipstream, which
+     * is visible the moment it runs. Everything else is a survey result.
+     */
+    protected static boolean isFound(SectorEntityToken entity) {
+        return entity != null && !entity.isDiscoverable();
+    }
+
+    /**
+     * The doors, each read on its own terms.
+     * <p>
+     * Per-gate rather than nearest-gate, because a live one and a dormant one are not the same
+     * source measured from different distances - they have different reaches and different depths,
+     * so the nearest is not reliably the worst.
+     *
+     * @param foundOnly for the route planner, which may only reason about what the player has
+     *                  actually surveyed - see {@link #isFound}
+     */
+    protected static float getGateShare(Vector2f locInHyper, boolean foundOnly) {
+        float worst = 0f;
+
+        for (SectorEntityToken gate : taggedWith(Tags.GATE, FOREIGN_GATES)) {
+            if (foundOnly && !isFound(gate)) continue;
+
+            boolean active = isGateActive(gate);
+
+            float share = falloff(
+                    Misc.getDistanceLY(locInHyper, gate.getLocationInHyperspace()),
+                    active ? FishConstants.ABERRATION_GATE_ACTIVE_LY
+                            : FishConstants.ABERRATION_GATE_LY)
+                    * (active ? FishConstants.ABERRATION_GATE_ACTIVE_WEIGHT
+                            : FishConstants.ABERRATION_GATE_WEIGHT);
+
+            worst = Math.max(worst, share);
+        }
+
+        return worst;
+    }
+
+    /**
+     * Whether anything is coming through this one.
+     * <p>
+     * Vanilla's own plugin is asked where there is one. A foreign gate is not that class and asking
+     * it directly would throw, so it is read off the sector-wide switch instead - which is the same
+     * question one step out, and the best answer available without knowing whose gate it is.
+     */
+    protected static boolean isGateActive(SectorEntityToken gate) {
+        if (gate.getCustomPlugin() instanceof GateEntityPlugin plugin) return plugin.isActive();
+
+        return GateEntityPlugin.areGatesActive();
+    }
+
+    /** Machines big enough to lean on local space, which is not the same as opening it. */
+    protected static float getEngineShare(Vector2f locInHyper) {
+        return getEngineShare(locInHyper, false);
+    }
+
+    protected static float getEngineShare(Vector2f locInHyper, boolean foundOnly) {
+        float nearest = getNearestLY(locInHyper, taggedWith(null, FOREIGN_ENGINES), foundOnly);
+
+        return falloff(nearest, FishConstants.ABERRATION_ENGINE_LY)
+                * FishConstants.ABERRATION_ENGINE_WEIGHT;
+    }
+
+    /**
+     * Everything carrying any of these tags, vanilla's and other mods' alike.
+     * <p>
+     * {@code getEntitiesWithTag} rather than the custom-entity version, because a foreign mod is
+     * free to have built its gate out of something other than a custom entity, and an absent tag
+     * returns nothing rather than failing - which is what keeps all of this optional.
+     */
+    protected static List<SectorEntityToken> taggedWith(String vanilla, String[] foreign) {
+        List<SectorEntityToken> out = new ArrayList<>();
+
+        if (vanilla != null) out.addAll(Global.getSector().getEntitiesWithTag(vanilla));
+
+        for (String tag : foreign) out.addAll(Global.getSector().getEntitiesWithTag(tag));
+
+        return out;
     }
 
     /**
@@ -135,11 +268,16 @@ public class Aberration {
 
         float worst = getSlipstreamShare(loc);
 
-        //no discovery check on this one: a system's star is drawn on the sector map from the start,
-        //so a black hole is a thing the player can already see and route around
+        //one of the two exemptions: a system's star is drawn on the sector map from the start, so a
+        //black hole is a thing the player can already see and route around. The other is the
+        //slipstream above, visible the moment it runs. Everything else waits to be surveyed
         worst = Math.max(worst, getBlackHoleShare(loc));
 
-        worst = Math.max(worst, getDiscoveredHypershuntShare(loc));
+        //every in-system object goes through the same gate - nothing the player has not surveyed
+        //can steer a plan they are meant to be able to reason about, whatever kind of object it is
+        worst = Math.max(worst, getHypershuntShare(loc, true));
+        worst = Math.max(worst, getGateShare(loc, true));
+        worst = Math.max(worst, getEngineShare(loc, true));
 
         if (hasEnteredAbyss()) worst = Math.max(worst, getAbyssShare(loc, system));
 
@@ -153,20 +291,6 @@ public class Aberration {
         }
 
         return false;
-    }
-
-    /** The hypershunt share counting only taps the player has actually laid eyes on. */
-    protected static float getDiscoveredHypershuntShare(Vector2f locInHyper) {
-        float nearest = Float.MAX_VALUE;
-
-        for (SectorEntityToken tap : Global.getSector().getCustomEntitiesWithTag(Tags.CORONAL_TAP)) {
-            if (tap.isDiscoverable()) continue;
-
-            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, tap.getLocationInHyperspace()));
-        }
-
-        return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
-                * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
     }
 
     /** Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes
@@ -185,10 +309,14 @@ public class Aberration {
                 * FishConstants.ABERRATION_SLIPSTREAM_WEIGHT;
     }
 
-    protected static float getNearestLY(Vector2f locInHyper, Iterable<SectorEntityToken> entities) {
+    /** @param foundOnly whether to skip anything the player has not surveyed - see {@link #isFound} */
+    protected static float getNearestLY(Vector2f locInHyper, Iterable<SectorEntityToken> entities,
+                                        boolean foundOnly) {
         float nearest = Float.MAX_VALUE;
 
         for (SectorEntityToken entity : entities) {
+            if (foundOnly && !isFound(entity)) continue;
+
             nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, entity.getLocationInHyperspace()));
         }
 
