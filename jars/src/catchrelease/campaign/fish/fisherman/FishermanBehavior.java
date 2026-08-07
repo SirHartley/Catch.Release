@@ -160,6 +160,8 @@ public class FishermanBehavior implements EveryFrameScript {
         fleet.getStats().getDetectedRangeMod().modifyFlat(FishermanConstants.VISIBILITY_ID,
                 FishermanConstants.DETECTED_RANGE);
 
+        keepNamed();
+
         if (marker == null || marker.getContainingLocation() != fleet.getContainingLocation()) {
             marker = FishermanMapIcon.addTo(fleet);
         }
@@ -168,6 +170,19 @@ public class FishermanBehavior implements EveryFrameScript {
 
         //a per-frame override rather than a setting, which is how vanilla's own faders are driven
         fleet.forceSensorFaderBrightness(1f);
+    }
+
+    /**
+     * The boat wears the name the local water lets it wear.
+     * <p>
+     * Written only when it has actually changed - a name is a string on the fleet, and rewriting it
+     * sixty times a second to the same value is churn nothing asked for. The drift is a property of
+     * the system, so in practice this fires once on arrival.
+     */
+    protected void keepNamed() {
+        String name = FishermanIdentity.getDisplayName(FishermanIdentity.getDrift(fleet));
+
+        if (!name.equals(fleet.getName())) fleet.setName(name);
     }
 
     /** Whether the player is in the same place as the boat, which is what holds the clock. */

@@ -53,14 +53,32 @@ public class FishermanDialog implements InteractionDialogPlugin {
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
 
-        dialog.getVisualPanel().showFleetInfo(FishermanConstants.FLEET_NAME,
-                (com.fs.starfarer.api.campaign.CampaignFleetAPI) dialog.getInteractionTarget(),
-                null, null);
+        showFace();
 
-        dialog.getTextPanel().addPara("The trawler's comm crackles. \"Evening. Lights are good"
-                + " tonight. Buying, selling, or just drifting?\"");
+        float drift = FishermanIdentity.getDrift(dialog.getInteractionTarget()
+                .getContainingLocation());
+
+        dialog.getTextPanel().addPara(FishermanIdentity.getGreeting(drift));
+
+        //what is wrong with him here, where anything is - said in the colour the mod already
+        //reads a failing coherence in, so it lands as the same fact about the same water
+        String wrong = FishermanIdentity.describe(drift);
+        if (wrong != null) {
+            dialog.getTextPanel().addPara(wrong,
+                    catchrelease.campaign.fish.items.FishItemPlugin.getAberrationColor(drift));
+        }
 
         showMain();
+    }
+
+    /**
+     * The man rather than the hulls.
+     * <p>
+     * He is the point of the encounter - the same face, campaign after campaign, which is a thing
+     * a fleet readout cannot say and a portrait says without a word.
+     */
+    protected void showFace() {
+        dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
     }
 
     protected void showMain() {
@@ -173,9 +191,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.showTextPanel();
         dialog.showVisualPanel();
 
-        dialog.getVisualPanel().showFleetInfo(FishermanConstants.FLEET_NAME,
-                (com.fs.starfarer.api.campaign.CampaignFleetAPI) dialog.getInteractionTarget(),
-                null, null);
+        showFace();
 
         showMain();
     }
@@ -418,7 +434,8 @@ public class FishermanDialog implements InteractionDialogPlugin {
                         float total = valueOf(combined);
 
                         panel.setParaFontOrbitron();
-                        panel.addPara(FishermanConstants.FLEET_NAME, Misc.getBasePlayerColor(), 0f);
+                        panel.addPara(dialog.getInteractionTarget().getName(),
+                                Misc.getBasePlayerColor(), 0f);
                         panel.setParaFontDefault();
 
                         panel.addPara("Sold at market price - what each specimen would fetch"

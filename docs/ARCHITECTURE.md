@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 190 Java files across eight top-level packages, plus
+What is where, and which file to open first. 191 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -103,8 +103,8 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
 
-**`data/config/custom_entities.json`** — the motes, harpoon and drone. The pond is
-**not** here any more.
+**`data/config/custom_entities.json`** — the motes, harpoon, drone, and the fishing boats' map
+mark (`catchrelease_FisherMapIcon` → `FishermanMapIcon`). The pond is **not** here any more.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
 
@@ -228,6 +228,7 @@ trades while it does.
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
 | `FishermanSurveyDialog.java` | The chart counter: this visit's rolled shelf as silhouette cards in the outfitter's dress |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
+| `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
 | `FishermanConstants.java` | Every number the above read |
 
@@ -721,6 +722,16 @@ edge of a sweep was two searchlights working the dark on their own. `keepVisible
 a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrightness(1f)` every tick,
 which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
 re-applied each tick rather than set at spawn, so it heals a boat that predates it.
+
+**The Fisherman is one person, made once.** Every other fleet in the game is fresh hulls under a
+fresh officer with a fresh name; he deliberately is not, because the same face turning up four jumps
+and eight months later is the point of him. `FishermanIdentity` keeps the `PersonAPI` in sector
+memory and hands the same object back at every spawn, and the encounter shows the portrait rather
+than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
+`getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
+figure, not a specimen's jittered one), and the boat's name, the greeting, and the line under it all
+come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
+wrong the same way every time — the degradation is a fact about the water, not an animation.
 
 **Finding a fishing boat is a map problem, not a space problem.** Nothing is painted over the hull —
 out in space the boat is already lit, and a mark there says nothing the lamps did not. The map is the

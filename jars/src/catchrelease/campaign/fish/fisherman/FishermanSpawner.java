@@ -134,6 +134,9 @@ public class FishermanSpawner implements EveryFrameScript {
         fleet.setTransponderOn(true);
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.FLEET_FLAG, true);
 
+        //the same man at the wheel every time - see FishermanIdentity
+        FishermanIdentity.crew(fleet);
+
         //beyond anything's sensors, same as the quest fleets: it arrives, it does not appear
         float distance = Math.max(FishermanConstants.SPAWN_DISTANCE_MIN,
                 Global.getSettings().getSensorRangeMax() * 1.3f)
