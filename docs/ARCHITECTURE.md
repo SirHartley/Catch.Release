@@ -471,13 +471,13 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 
 | File | What it does |
 |---|---|
-| `LampOffence.java` | Where the lamps may be run and what a stop costs. System-bound like the transponder law — a flag polices systems it holds something in; inside those, everybody objects near an inhabited world and the Church and the Path object anywhere. Four rungs: warning, fine, inspection, guns, the last only reached by doing it again inside a month |
+| `LampOffence.java` | Where the lamps may be run and what a stop costs, plus the burn counter — a stop settles the burn it was about, so putting the lamps out and lighting them again is a fresh offence rather than a continuation of the settled one. System-bound like the transponder law — a flag polices systems it holds something in; inside those, everybody objects near an inhabited world and the Church and the Path object anywhere. Four rungs: warning, fine, inspection, guns, the last only reached by doing it again inside a month |
 | `LampPatrolResponse.java` | Patrols coming over about the lit lamps. Nothing is booked and nothing is dispatched — the sweep asks only whether they are burning, whether this is somebody's space, and whether anybody is looking, so putting them out before the patrol arrives ends it |
-| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the two escalation ladders — armed and unarmed. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
+| `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the escalation ladders. Armed crews turn on you at the second hit; unarmed ones are split by strength — a crew that is plainly outmatched (`isOutmatched`, vanilla's own 1.25× engage threshold) and has somebody to tell (`isCivilised`) runs on the *first* hole with an emergency burn and fetches a patrol, and everyone else works ignore → run you down for the bill → run and tell. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
 | `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
 | `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder |
-| `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a highlighted comm link |
+| `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a comm link highlighted only while the crew is actually owed something — `wasHarpooned` stays true for a month and colouring on it alone left a settled bill looking unsettled for weeks |
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog at the narrowest priority - the one custom encounter screen left |
 
 ### `abilities`
@@ -792,6 +792,12 @@ written to that claim.
 **A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
 
 **The camp job polls rather than being told.** Being killed, bought off, talked off and quietly wandering away do not share a hook, and only two of the four happen inside a conversation. So `CampedSpotJob.advanceImpl` asks one question on the mission's own tick instead of four rules rows each reporting a different way.
+
+**Two flags are the only things that colour a comm link, and both erase themselves.** `$hailing` and `$highlightComms` are read and `unset` by `FleetInteractionDialogPluginImpl` as it builds the option, so a highlight is a one-shot that has to be re-set for every encounter it should appear in. Which means the bug is never a highlight that fails to clear - it is something re-setting the flag on a condition that outlived the reason for it.
+
+**A memory flag makes a fleet willing to chase; an assignment makes it chase.** `MEMORY_KEY_PURSUE_PLAYER` and friends are read when a fleet already has the player as a target, so a freighter told to come and collect a repair bill went on flying its trade route instead. `MEMORY_KEY_MAKE_ALWAYS_PURSUE` plus an explicit `FleetAssignment.INTERCEPT` is what turns the willingness into a course change - see `HarpoonOffence.demand`.
+
+**There is no `FleetAssignment` for running away.** `MEMORY_KEY_AVOID_PLAYER_SLOWLY` is the whole of vanilla's civilian evasion and it does what it says - it biases steering and shortens committed headings, which against anything faster is dawdling in the right direction. A crew that is meant to read as fleeing needs the emergency burn (`Abilities.EMERGENCY_BURN`, asked for with `isUsable()` and never forced) on top of it.
 
 **The lamp response is the transponder's shape, not the harpoon patrol's.** A harpooning is an
 incident on a faction's books that a patrol is sent about days later; lit lamps are something the

@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.RepLevel;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -43,6 +44,19 @@ public class LampOffence {
 
     /** Set once a patrol has had the conversation, so one stop is one stop. */
     public static final String STOPPED_KEY = "$catchrelease_lampStopped";
+
+    /**
+     * Which burn of the lamps a given crew has already had the conversation about.
+     * <p>
+     * The stopped flag on its own said "this crew has dealt with you", full stop, and a crew that
+     * had once watched the player put the lamps out would then watch them relight and say nothing
+     * for a month. That is the wrong unit. What a stop settles is <i>that</i> burn - the player
+     * agreed to stop doing the thing - and lighting them again is a new offence, not a continuation
+     * of the settled one. So the run is counted and the crew remembers a number rather than a
+     * boolean; when the numbers differ they have not been told about this one yet.
+     */
+    public static final String RUN_KEY = "$catchrelease_lampRun";
+    public static final String STOPPED_RUN_KEY = "$catchrelease_lampStoppedRun";
 
     /** How close to somewhere inhabited counts as over it. */
     public static final float PLANET_RANGE = 3000f;
@@ -216,6 +230,29 @@ public class LampOffence {
         Global.getSector().getMemoryWithoutUpdate().set(COUNT_KEY, next);
         Global.getSector().getMemoryWithoutUpdate().set(LAST_KEY,
                 Global.getSector().getClock().getTimestamp());
+    }
+
+    /**
+     * Which burn of the lamps this is. Starts at one, so a crew that has never been stopped - and
+     * therefore has no stored number at all, which reads as zero - never matches the current run.
+     */
+    public static int getRun() {
+        return Math.max(1, Global.getSector().getMemoryWithoutUpdate().getInt(RUN_KEY));
+    }
+
+    /** Called when the lamps come on somewhere they should not be, which starts a fresh offence. */
+    public static void beginRun() {
+        Global.getSector().getMemoryWithoutUpdate().set(RUN_KEY, getRun() + 1);
+    }
+
+    /** Whether this crew has already had the conversation about the burn currently in progress. */
+    public static boolean hasBeenTold(MemoryAPI mem) {
+        return mem != null && mem.getInt(STOPPED_RUN_KEY) == getRun();
+    }
+
+    /** Books this crew as having said their piece about this burn and no other. */
+    public static void markTold(MemoryAPI mem) {
+        if (mem != null) mem.set(STOPPED_RUN_KEY, getRun());
     }
 
     /**

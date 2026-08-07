@@ -68,6 +68,16 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     /** Set when there is nothing to negotiate because this isn't the first offence. */
     public static final String REPEAT_KEY = "$catchrelease_harpoonRepeat";
 
+    /**
+     * How many holes this faction has on its books right now, as a number the sheet can branch on.
+     * <p>
+     * {@link #REPEAT_KEY} only ever answered "more than one", so the row that fires on it said
+     * "second one this month" whether it was the second or the fifth - break off, do it again, and
+     * be told it was the second again. The count is the same figure the rest of the class already
+     * works from; it simply had never been handed over.
+     */
+    public static final String COUNT_KEY = "$catchrelease_harpoonCount";
+
     /** Per-faction wait between chases, kept in memory so it survives a reload. */
     public static final String RETRY_KEY = "$catchrelease_harpoonPatrolWait";
 
@@ -316,6 +326,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         mem.set(FINE_KEY, FINE, CHASE_DAYS);
         mem.set(FINE_TEXT_KEY, Misc.getWithDGS(FINE), CHASE_DAYS);
         mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
+        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId), CHASE_DAYS);
     }
 
     /** Ends the chase on death, hostility, expiry, hyperspace, location split, or a settled conversation. */
@@ -362,6 +373,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         //re-harpooned while this patrol was still en route, which changes what it's come to say
         mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
+        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId), CHASE_DAYS);
 
         if (chasing.isHostileTo(player)) {
             endChase();

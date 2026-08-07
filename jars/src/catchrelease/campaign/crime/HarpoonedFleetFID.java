@@ -54,6 +54,13 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
         CampaignFleetAPI other = (CampaignFleetAPI) dialog.getInteractionTarget();
         if (!HarpoonOffence.wasHarpooned(other)) return;
 
+        //and only while there is something outstanding. wasHarpooned stays true for a month, so
+        //highlighting on it alone left the link yellow for weeks after the bill had been paid,
+        //talked out of, or refused - a standing invitation to reopen a settled conversation.
+        //A crew coming after you for the repair is the one case where the player is being asked for
+        //something, and the only one worth colouring
+        if (!HarpoonOffence.isDemanding(other)) return;
+
         other.getMemoryWithoutUpdate().set(HIGHLIGHT_COMMS, true, 0f);
     }
 

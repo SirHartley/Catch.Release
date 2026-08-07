@@ -62,6 +62,9 @@ public class LampPatrolResponse implements EveryFrameScript {
 
     protected CampaignFleetAPI stopping = null;
 
+    /** Whether the lamps were burning last time this looked, so the moment they light is catchable. */
+    protected transient boolean lit = false;
+
     public static void register() {
         Global.getSector().addTransientScript(new LampPatrolResponse());
     }
@@ -100,7 +103,17 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (player == null || !player.isAlive()) return;
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;
 
-        if (!SearchlightAbilityPlugin.isBreaching()) return;
+        if (!SearchlightAbilityPlugin.isBreaching()) {
+            lit = false;
+            return;
+        }
+
+        //the lamps coming on is what starts an offence, so the transition is what is watched rather
+        //than the state - staying lit for a week is one burn, not a week of them
+        if (!lit) {
+            lit = true;
+            LampOffence.beginRun();
+        }
 
         CampaignFleetAPI closest = null;
         float best = Float.MAX_VALUE;
@@ -142,7 +155,10 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         MemoryAPI mem = curr.getMemoryWithoutUpdate();
         if (mem.getBoolean(LampOffence.SAW_KEY)) return false;
-        if (mem.getBoolean(LampOffence.STOPPED_KEY)) return false;
+
+        //not "have they ever stopped you" but "have they stopped you about this burn" - see
+        //LampOffence.RUN_KEY. Putting the lamps out settles a burn; lighting them again starts one
+        if (LampOffence.hasBeenTold(mem)) return false;
         if (!mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
 
         if (Global.getSector().getMemoryWithoutUpdate()
@@ -191,6 +207,10 @@ public class LampPatrolResponse implements EveryFrameScript {
         //first, before isAlive(): refusing turns them hostile and the fight happens inside the same
         //paused dialog, so by the time the script looks again the crew may already be dead
         if (mem.getBoolean(LampOffence.STOPPED_KEY)) {
+            //the sheet says the conversation happened; which burn it was about is this side's to
+            //record, since the sheet has no idea one is being counted
+            LampOffence.markTold(mem);
+
             end();
             return;
         }

@@ -4,9 +4,13 @@ import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
+import com.fs.starfarer.api.impl.campaign.ids.Abilities;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.CustomRepImpact;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActionEnvelope;
@@ -103,6 +107,12 @@ public class HarpoonOffence {
     /** Rep loss per harpooning, floored at {@link RepLevel#HOSTILE} so it can't tank a faction relationship. */
     public static final float REP_LOSS = 0.05f;
 
+    /**
+     * How far ahead the player has to be before a crew reads itself as outmatched. Vanilla's own
+     * engage threshold - see {@link #isOutmatched}.
+     */
+    public static final float OUTMATCHED_MULT = 1.25f;
+
     /** Days a harpooning stays on the books; also the window for counting repeats. */
     public static final float MEMORY_DAYS = 30f;
 
@@ -178,11 +188,15 @@ public class HarpoonOffence {
     }
 
     /**
-     * What this crew does about it, which depends entirely on whether they are armed.
+     * What this crew does about it, which depends on whether they are armed and then on whether
+     * they could take you.
      * <p>
      * A patrol, a warfleet or a pirate answers the second one by turning on you, which is the oldest
-     * rule here. Everybody else is somebody with a route to fly and a hole in their hull, and the
-     * three things they do in turn are the whole of their side of this.
+     * rule here. Everybody else is somebody with a route to fly and a hole in their hull, and what
+     * they do about that is decided by the same arithmetic the fleet AI uses on the same two fleets:
+     * a crew that is plainly outmatched runs on the first hole and goes looking for a patrol, and a
+     * crew that is not works the ladder - ignore, then run you down for the bill, then give up on
+     * talking and go and tell somebody.
      */
     protected static void escalate(CampaignFleetAPI victim, int hits) {
         //the trade's own boats stop at the bill. There is one man on that wheel, he is the shop,
@@ -198,12 +212,53 @@ public class HarpoonOffence {
             return;
         }
 
+        //a crew that can see it cannot take you does not wait to be hit a second time to find out.
+        //It runs on the first one and goes to find somebody whose job this is - which is only a
+        //plan for a flag that has somebody, hence isCivilised
+        if (isOutmatched(victim) && isCivilised(victim)) {
+            flee(victim);
+            return;
+        }
+
+        //bigger than you, or with nobody to tell: the old ladder, where being holed once is beneath
+        //comment, twice is worth turning round for, and three times is not worth the conversation
         if (hits >= HITS_BEFORE_FLIGHT) {
             flee(victim);
             return;
         }
 
         if (hits >= HITS_BEFORE_DEMAND) demand(victim);
+    }
+
+    /**
+     * Whether the player could plainly take them.
+     * <p>
+     * Vanilla's own threshold, lifted from {@code CampaignFleetAI.pickEncounterOption}: a side that
+     * outweighs the other by a quarter is the side that engages, and everything below that is a
+     * fleet that has to think about it. Using the same number means a crew's read of the player
+     * matches what the fleet AI would have decided about the same two fleets.
+     */
+    public static boolean isOutmatched(CampaignFleetAPI victim) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || victim == null) return false;
+
+        return player.getEffectiveStrength() > victim.getEffectiveStrength() * OUTMATCHED_MULT;
+    }
+
+    /**
+     * Whether this crew has anybody to tell.
+     * <p>
+     * Not a judgement about the flag - it is a question about whether running to a patrol is a plan.
+     * A pirate hauler and a Pather freighter both have the same problem with the idea, which is that
+     * the nearest patrol would be at least as interested in them. Everybody else has somebody to
+     * complain to, and complaining is the whole of what an unarmed crew can actually do.
+     */
+    public static boolean isCivilised(CampaignFleetAPI fleet) {
+        FactionAPI faction = fleet == null ? null : fleet.getFaction();
+        if (faction == null) return false;
+
+        return !Factions.PIRATES.equals(faction.getId())
+                && !Factions.LUDDIC_PATH.equals(faction.getId());
     }
 
     /**
@@ -227,8 +282,9 @@ public class HarpoonOffence {
      * Comes after you for the repair bill, and for nothing else.
      * <p>
      * Pursuit without hostility, which is a state vanilla supports and uses for its own hasslers.
-     * The flag makes them intercept and open a conversation; the aggression it carries only decides
-     * how they behave in a fight the player would have to start. Nothing here arms them.
+     * Nothing here arms them - what it does is make them actually come. The memory flags alone were
+     * not enough: they mark a fleet as willing to chase, and a freighter with a route still flew the
+     * route. The intercept order is what turns the willingness into a course change.
      */
     protected static void demand(CampaignFleetAPI victim) {
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
@@ -239,6 +295,20 @@ public class HarpoonOffence {
 
         //an ordinary hauler would otherwise fly straight past somebody it has no business with
         mem.set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, DEMAND_DAYS);
+
+        //and would otherwise keep flying its route while nominally pursuing. PURSUE_PLAYER is read
+        //when a fleet already has the player as a target; ALWAYS_PURSUE plus an intercept order is
+        //what makes one break off what it was doing and come and get you
+        mem.set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, DEMAND_DAYS);
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player != null) {
+            victim.clearAssignments();
+            victim.addAssignment(FleetAssignment.INTERCEPT, player, DEMAND_DAYS,
+                    "coming alongside about the damage");
+
+            burn(victim);
+        }
 
         mem.set(DEMAND_FLAG, true, DEMAND_DAYS);
         mem.set(DAMAGES_KEY, DAMAGES, DEMAND_DAYS);
@@ -272,7 +342,24 @@ public class HarpoonOffence {
         mem.set(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY, true, FLIGHT_DAYS);
         mem.set(FLEEING_FLAG, true, FLIGHT_DAYS);
 
+        burn(victim);
+
         HarpoonPatrolResponse.callForHelp(victim);
+    }
+
+    /**
+     * The one thing a freighter can do about a faster ship, used the moment it decides to run.
+     * <p>
+     * {@code AVOID_PLAYER_SLOWLY} is exactly what its name says - it biases the crew's steering away
+     * and shortens how far they commit to a heading, and against anything quicker than them that is
+     * not escape, it is dawdling in the right direction. The burn is what makes the run read as a
+     * run. Asked rather than forced: a fleet with the ability spent or on cooldown simply does its
+     * best without it.
+     */
+    protected static void burn(CampaignFleetAPI victim) {
+        AbilityPlugin burn = victim.getAbility(Abilities.EMERGENCY_BURN);
+
+        if (burn != null && burn.isUsable()) burn.activate();
     }
 
     /** Whether this crew is running from you rather than talking about it. */
