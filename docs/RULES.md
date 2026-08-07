@@ -240,3 +240,14 @@ defaults to **0**, not 1, and a rule's score is the sum of its conditions' expli
 point, which would mean "more conditions wins" for free. It does not. Rows in this repo
 that rely on being outscored — the harpooned-comms ladder, the fisher greetings — carry
 explicit scores for exactly that reason, and a new row without one scores zero.
+
+The practical failure mode is not a tie inside one family - those are usually kept apart by
+opposed conditions (`$catchreleaseMore` against `!$catchreleaseMore`). It is two *different*
+families both matching the same hull. A fishing boat the player had harpooned carried
+`$catchrelease_harpooned`, so the harpooned-crew greetings applied to it; the Independent
+variant scores 1110 and the boat's own greetings top out at 1100, so one harpoon silently
+replaced the shop, the charts, the buyer and the whole introduction with a crew complaining
+about a hole, for the thirty days the flag lives. Nothing was wrong with either family on its
+own. When adding a family keyed on a flag any hull can carry, check what else can be true of
+that hull at the same time - the harpooned rows now all lead with
+`!$entity.catchrelease_fisherman`.
