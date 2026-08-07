@@ -476,10 +476,21 @@ public class FishermanQuest {
             return tags;
         }
 
+        /** The marked rupture where there is one - it wears the mission marker, so the note should
+         *  point at it rather than at the system around it. */
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-                if (system.getId().equals(quest.systemId)) return system.getHyperspaceAnchor();
+                if (!system.getId().equals(quest.systemId)) continue;
+
+                if (quest.atPond) {
+                    SectorEntityToken pond = QuestPond.findPondAt(system, quest.x, quest.y,
+                            SPOT_SPREAD);
+
+                    if (pond != null) return pond;
+                }
+
+                return system.getHyperspaceAnchor();
             }
 
             return null;

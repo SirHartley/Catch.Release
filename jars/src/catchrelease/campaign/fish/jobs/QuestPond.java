@@ -30,7 +30,15 @@ public class QuestPond {
     /** Set on a mote a job placed, which is what makes it look like one. */
     public static final String QUEST_MOTE_FLAG = "$catchrelease_questMote";
 
-    /** Marks a pond as needed by this job; named so only the claiming job can later release it. */
+    /**
+     * Marks a pond as needed by this job; named so only the claiming job can later release it.
+     * <p>
+     * Also hangs vanilla's own mission marker on it - the gold ring and exclamation every other
+     * quest objective in the game wears. A rupture is terrain, but terrain is an ordinary entity in
+     * the location's list, and the indicator pass draws off {@code $missionImportant} without
+     * caring what kind of thing it is on. The reason is the job id, and the flag is reason-counted,
+     * so two jobs on one pond do not clear each other's mark.
+     */
     public static boolean claim(SectorEntityToken pond, String jobId) {
         if (pond == null || jobId == null) return false;
         if (!isPond(pond)) return false;
@@ -38,16 +46,20 @@ public class QuestPond {
         pond.getMemoryWithoutUpdate().set(IMPORTANT_FLAG, true);
         pond.getMemoryWithoutUpdate().set(CLAIMED_BY_KEY, jobId);
 
+        Misc.makeImportant(pond, jobId);
+
         return true;
     }
 
-    /** Lets a pond go, if this job is the one holding it. */
+    /** Lets a pond go, if this job is the one holding it. Takes its own marker off, not anyone's. */
     public static void release(SectorEntityToken pond, String jobId) {
         if (pond == null || jobId == null) return;
         if (!jobId.equals(getClaim(pond))) return;
 
         pond.getMemoryWithoutUpdate().unset(IMPORTANT_FLAG);
         pond.getMemoryWithoutUpdate().unset(CLAIMED_BY_KEY);
+
+        Misc.makeUnimportant(pond, jobId);
     }
 
     public static boolean isImportant(SectorEntityToken pond) {
@@ -108,6 +120,20 @@ public class QuestPond {
         }
 
         return ponds;
+    }
+
+    /**
+     * The pond a job marked at these coordinates, for anything that has to point at it rather than
+     * at the system - the intel map location, in practice. Null when the errand is open water.
+     */
+    public static SectorEntityToken findPondAt(LocationAPI location, float x, float y, float spread) {
+        Vector2f mark = new Vector2f(x, y);
+
+        for (SectorEntityToken pond : getPonds(location)) {
+            if (Misc.getDistance(pond.getLocation(), mark) <= spread) return pond;
+        }
+
+        return null;
     }
 
     /** One that nobody else is using, or null if every pond here is already spoken for. */
