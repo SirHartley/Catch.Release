@@ -608,21 +608,26 @@ FleetDesc
 HailPlayer",,,They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger.
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
-!$entity.isHostile",,"""$entity.catchrelease_fleetQuestPitch""","0:catchrelease_fqAccept:""We can find you one.""
-10:catchrelease_fqDecline:Decline",The pitch is read off the fleet's own memory so one row serves every kind of trouble it could be in.
+!$entity.isHostile",SetTextHighlights $entity.catchrelease_fleetQuestAsk,"""$entity.catchrelease_fleetQuestPitch""
+
+What they are asking for, when it is finally put plainly, is $entity.catchrelease_fleetQuestAsk.","0:catchrelease_fqAccept:""We can find you one.""
+10:catchrelease_fqDecline:Decline","The pitch and the ask are both read off the fleet's own memory, so one row serves every kind of trouble it could be in. The ask has to come from there rather than from the job's own tokens: those are written by updateData, which needs an accepted mission, and at the pitch there is not one yet."
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-EndConversation",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,EndConversation,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
+DismissDialog",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,DismissDialog,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
-!$entity.isHostile",FireAll CatchReleaseFleetQuestTurnIn,They are exactly where you left them and they have not stopped watching the water.,,
+!$entity.isHostile","SetTextHighlights $entity.catchrelease_fleetQuestAsk
+FireAll CatchReleaseFleetQuestTurnIn","They are exactly where you left them and they have not stopped watching the water.
+
+They are still waiting on $entity.catchrelease_fleetQuestAsk.",,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn
-EndConversation",The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.,,
-catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,EndConversation,The link closes. They go back to waiting.,,
+DismissDialog",The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.,,
+catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,DismissDialog,The link closes. They go back to waiting.,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
 !$isHostile","$catchrelease_harpoonDemandDone = true 1
