@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.shop.FishCurrency;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -12,6 +13,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.util.Map;
 
 
 /**
@@ -63,19 +66,15 @@ public class FishermanSpawner implements EveryFrameScript {
         if (!(where instanceof StarSystemAPI)) return;
         StarSystemAPI system = (StarSystemAPI) where;
 
-        //going back to the core is going back to where he is not: the month starts again, so a
-        //player who resupplies mid-search does not walk straight back out into him
-        SectorRegion at = SectorRegion.of(system);
-        if (at != null && at.isCore()) {
-            stamp();
-            return;
-        }
-
+        //asked before the lock is spent: one boat at a time is a sector-wide rule, and a system
+        //passed over because he is already out somewhere else has not had its question answered
         if (getLiveFleet() != null) return;
         if (!isEligible(system)) return;
-        if (!isOverdue()) return;
 
-        if (MathUtils.getRandomNumberInRange(0f, 1f) > FishermanConstants.SPAWN_ENTRY_CHANCE) return;
+        if (isLocked(system)) return;
+        lock(system);
+
+        if (MathUtils.getRandomNumberInRange(0f, 1f) > getChance(system)) return;
 
         spawn(system, player.getLocation());
     }
@@ -84,19 +83,54 @@ public class FishermanSpawner implements EveryFrameScript {
     protected transient LocationAPI lastLocation;
     protected transient boolean placed = false;
 
-    /** Whether the month since he was last seen is up. Never seen at all counts as up. */
-    protected boolean isOverdue() {
-        Object last = Global.getSector().getMemoryWithoutUpdate()
-                .get(FishermanConstants.LAST_SEEN_KEY);
-
-        if (!(last instanceof Long)) return true;
-
-        return Global.getSector().getClock().getElapsedDaysSince((Long) last)
-                >= FishermanConstants.SPAWN_COOLDOWN_DAYS;
+    /**
+     * Whether this system has already been asked recently.
+     * <p>
+     * Kept on the system rather than in a table of our own, with the month as the memory key's own
+     * expiry - so the lock ages out by itself and nothing has to sweep for stale entries.
+     */
+    protected boolean isLocked(StarSystemAPI system) {
+        return system.getMemoryWithoutUpdate().getBoolean(FishermanConstants.SPAWN_LOCK_KEY);
     }
 
-    /** Restarts the month. Written on arrival as well as departure - meeting him counts as seeing
-     *  him, and without this the same arrival could be rolled again the moment he left. */
+    /** Spent on the roll, not on the result: a system that said no is answered for the month too,
+     *  which is the whole point - jumping out and back must not be a re-roll. */
+    protected void lock(StarSystemAPI system) {
+        system.getMemoryWithoutUpdate().set(FishermanConstants.SPAWN_LOCK_KEY, true,
+                FishermanConstants.SPAWN_LOCK_DAYS);
+    }
+
+    /**
+     * The odds for one arrival: a small base, leaned on by a hold worth selling and by not having
+     * seen him in a long while, and eased off inside the core where the fishing is not.
+     */
+    protected float getChance(StarSystemAPI system) {
+        float chance = FishermanConstants.SPAWN_BASE_CHANCE;
+
+        int aboard = 0;
+        for (Map.Entry<catchrelease.campaign.fish.data.FishRarity, Integer> entry
+                : FishCurrency.count().entrySet()) {
+            aboard += entry.getValue();
+        }
+        if (aboard >= FishermanConstants.CARGO_FISH_THRESHOLD) {
+            chance *= FishermanConstants.CARGO_FULL_MULT;
+        }
+
+        Object last = Global.getSector().getMemoryWithoutUpdate()
+                .get(FishermanConstants.LAST_SEEN_KEY);
+        boolean overdue = !(last instanceof Long)
+                || Global.getSector().getClock().getElapsedDaysSince((Long) last)
+                >= FishermanConstants.OVERDUE_DAYS;
+        if (overdue) chance *= FishermanConstants.OVERDUE_MULT;
+
+        SectorRegion at = SectorRegion.of(system);
+        if (at != null && at.isCore()) chance *= FishermanConstants.CORE_SPAWN_MULT;
+
+        return Math.min(1f, chance);
+    }
+
+    /** Restarts the "last seen" clock the overdue multiplier reads. Written on arrival as well as
+     *  departure - meeting him counts as seeing him. */
     protected void stamp() {
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
                 Global.getSector().getClock().getTimestamp());

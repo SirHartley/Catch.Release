@@ -281,7 +281,7 @@ explains how.
 
 | File | What it does |
 |---|---|
-| `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system, behind a month's cooldown since he was last seen. Entering the core restarts the month |
+| `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system - a small base leaned on by a full hold and a long absence - after which the system is locked for a month so re-entry is not a re-roll |
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
