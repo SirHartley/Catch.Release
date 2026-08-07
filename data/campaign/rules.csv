@@ -886,3 +886,82 @@ catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,"There is a hole in their hull the shape of your fishing gear, and $otherFleetFactionArticle would like it noted.",,
 catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,"$otherFleetFactionArticleCap has your transponder code, the puncture, and a great deal to say about both.",,
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,"Whatever $otherFleetFactionArticle expected to be shot at with today, it was not a rope.",,
+catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage >= 1",,,60:catchrelease_fisherAsk:Ask about something else,
+catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,$menuState = catchreleaseFisherAsk,"They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
+catchrelease_fisherAskBack,DialogOptionSelected,$option == catchrelease_fisherAskBack,$menuState = catchreleaseFisherAsk,,,
+catchrelease_fisherOptAsk_howLong,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 1",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,,"""A while."" A pause that goes on slightly too long to be a pause. ""The boats are newer than the work. That is usually the way of it.""
+
+You do not get a number, and it does not occur to you until later that you did not get a number.","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""They call you Baha, in the registry.""",
+catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"Nothing moves in the face for a moment.
+
+""He signed for the first boat. The paperwork has never caught up and I have never asked it to.""
+
+The winch stops. It starts again.","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_why0ut,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 1",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
+catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Nothing to catch in there. The fabric is thick where people are - all that living presses it down flat."" A shrug. ""And they do not like the lamps. Nobody ever says why.""","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 2",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
+catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,,"""They look at it.""
+
+That appears to be the whole answer. Then, after a while:
+
+""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not water.""","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Habits, mostly. Something on the other side did a thing so many times that the shape of the doing survived the doer."" A hand turns over. ""Then it drifts in here, and here has rules about having a body, so it grows one.""
+
+""That is why they come apart when the water is bad. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""It is not worse. It is thinner. You can see further through it and there is more on the other side to see.""
+
+""People say worse because of what it does to them, which is a different subject and not one the water is interested in.""","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 5",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,,"The answer takes long enough that you assume the channel has dropped.
+
+""Not the way you mean.""
+
+The lights outside the window sweep past, and for the length of that sweep the crew behind them are standing in a different order.","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAsk_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""Nothing I brought aboard."" They say it as though answering a different question. ""You do not land the big ones. You get a reading off them and you cut the line, and if you are quick about it they do not follow the line back.""","0:catchrelease_fisherAskBack:Ask something else
+100:catchrelease_fisherBack:Back",
+catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Let it go,
+catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage >= 2
+$catchreleaseStage < 6
+!$catchreleaseTargetMet",,,55:catchrelease_askTarget:Ask about the fish they want,
+catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
+CatchReleaseCMD tokens
+$catchreleaseTargetPond",,"""$catchreleaseTarget. There is a rupture open in $catchreleaseTargetWhere and it is sitting in it.""
+
+""It will keep sitting in it. They do not wander, the ones I ask for - they are already where they were going.""",100:catchrelease_fisherBack:Back,
+catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:5
+CatchReleaseCMD tokens
+!$catchreleaseTargetPond",,"""$catchreleaseTarget. Open water, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
+
+""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Back,
