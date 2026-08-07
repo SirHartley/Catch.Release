@@ -2,8 +2,10 @@ package catchrelease.campaign.crime;
 
 import catchrelease.campaign.fish.fisherman.FishermanDialog;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
-import catchrelease.campaign.fish.tutorial.LostHarpoon;
-import catchrelease.campaign.fish.tutorial.LostHarpoonDialog;
+import catchrelease.campaign.fish.tutorial.Castaway;
+import catchrelease.campaign.fish.tutorial.CastawayDialog;
+import catchrelease.campaign.fish.tutorial.TutorialWreck;
+import catchrelease.campaign.fish.tutorial.TutorialWreckDialog;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.PluginPick;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -14,8 +16,8 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
  * Hands the game our own encounter screens - the fleets we have wronged, the fleets that want to
- * talk shop, and the wreck that starts the whole thing off. Keyed on flags on the target, at the
- * narrowest priority, so other mods overriding encounters still can.
+ * talk shop, and the two pieces of scenery the introduction is built out of. Keyed on flags on the
+ * target, at the narrowest priority, so other mods overriding encounters still can.
  */
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
@@ -37,10 +39,16 @@ public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
     @Override
     public PluginPick<InteractionDialogPlugin> pickInteractionDialogPlugin(SectorEntityToken target) {
-        //the one thing here that is not a fleet: somebody's harpoon, still transmitting
-        if (LostHarpoon.isLostHarpoon(target)) {
+        //the two things here that are not fleets: the hulk with the line in it, and the man who
+        //was put off a boat for looking at what came out of the water
+        if (TutorialWreck.isWreck(target)) {
             return new PluginPick<InteractionDialogPlugin>(
-                    new LostHarpoonDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+                    new TutorialWreckDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+        }
+
+        if (Castaway.isCastaway(target)) {
+            return new PluginPick<InteractionDialogPlugin>(
+                    new CastawayDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
         }
 
         if (!(target instanceof CampaignFleetAPI)) return null;

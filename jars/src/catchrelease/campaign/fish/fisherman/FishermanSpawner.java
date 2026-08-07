@@ -92,7 +92,7 @@ public class FishermanSpawner implements EveryFrameScript {
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
 
         //an inhabited system already has a boat posted to it, and two sellers in one place would
-        //make his turning up nothing - the point of him is being the only one out here
+        //make the arrival nothing - the point of it is being the only one out here
         if (OuterReaches.isPopulated(system)) return false;
 
         return true;
@@ -172,7 +172,7 @@ public class FishermanSpawner implements EveryFrameScript {
     /**
      * Whether this boat is only passing through, rather than one of the standing ones.
      * <p>
-     * A question about the schedule and nothing else. Every one of them is him.
+     * A question about the schedule and nothing else. It is the same person on every one.
      */
     public static boolean isVisiting(CampaignFleetAPI fleet) {
         return fleet != null

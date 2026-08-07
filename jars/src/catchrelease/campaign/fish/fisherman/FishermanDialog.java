@@ -7,10 +7,12 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
-import catchrelease.campaign.fish.tutorial.BahaDialog;
+import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.FishingIntroDialog;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
@@ -46,7 +48,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         SELL,
         SELL_PICK,
         RUMOR,
-        BAHA,
+        INTRO,
         LEAVE
     }
 
@@ -63,12 +65,23 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         dialog.getTextPanel().addPara(FishermanIdentity.getGreeting(drift));
 
-        //hailing a boat is the third way into the introduction, and the only one that needs
-        //nothing to have happened first - so the greeting is also where the player learns there
-        //is somebody aboard who explains things
+        //hailing a boat is a way into the introduction all by itself, and the only one that needs
+        //nothing to have happened first
         FishingIntro.point();
 
-        //what is wrong with him here, where anything is - said in the colour the mod already
+        //a boat that moved itself across a system to get in front of somebody says so before
+        //anything else, because the alternative is the player wondering whether that was a bug
+        if (dialog.getInteractionTarget() instanceof CampaignFleetAPI
+                && FishermanInterception.hasIntercepted(
+                        (CampaignFleetAPI) dialog.getInteractionTarget())
+                && !FishingIntro.isAtLeast(FishingIntro.TAUGHT)) {
+
+            dialog.getTextPanel().addPara("\"You were about to put a hand in that. You are not"
+                    + " equipped for it, and I would rather not fish you out afterwards.\"",
+                    Misc.getHighlightColor());
+        }
+
+        //what is wrong here, where anything is - said in the colour the mod already
         //reads a failing coherence in, so it lands as the same fact about the same water
         String wrong = FishermanIdentity.describe(drift);
         if (wrong != null) {
@@ -83,7 +96,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
      * The man rather than the hulls.
      * <p>
      * Every boat in the trade answers with the same face - that is the plot point, and it only
-     * lands if the screen says it without comment. A fleet readout cannot say "him again"; a
+     * lands if the screen says it without comment. A fleet readout cannot say "them again"; a
      * portrait says it without a word, and says it identically on a boat four jumps from the last
      * one. See {@link FishermanIdentity}.
      */
@@ -99,10 +112,10 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
         dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
 
-        //coloured while there is something to collect - the introduction, or a first catch that
-        //has not been shown to anybody yet
-        dialog.getOptionPanel().addOption("Ask to speak to the science end", Option.BAHA,
-                BahaDialog.hasBusiness() ? Misc.getHighlightColor() : null, null);
+        //coloured while the introduction is still owed, which is the only time it matters
+        dialog.getOptionPanel().addOption(FishingIntro.isAtLeast(FishingIntro.TAUGHT)
+                        ? "Ask about the water" : "Ask what any of this is", Option.INTRO,
+                FishingIntroDialog.hasBusiness() ? Misc.getHighlightColor() : null, null);
 
         dialog.getOptionPanel().addOption("Leave", Option.LEAVE);
 
@@ -140,8 +153,8 @@ public class FishermanDialog implements InteractionDialogPlugin {
             case RUMOR:
                 askRumor();
                 break;
-            case BAHA:
-                openBaha();
+            case INTRO:
+                openIntro();
                 break;
             case MAIN:
                 showMain();
@@ -176,21 +189,22 @@ public class FishermanDialog implements InteractionDialogPlugin {
         counter.init(dialog);
     }
 
-    //---------------------------------------------------------------- Baha
+    //---------------------------------------------------------------- the introduction
 
     /**
-     * The scientist, in the same frame and handed back the same way as the shop.
+     * Being told what any of this is, in the same frame and handed back the same way as the shop.
      * <p>
-     * A separate plugin rather than more states in this one: the Fisherman sells things and Baha
-     * explains them, and mixing the two would put the tutorial's stages into the middle of a shop.
+     * A separate plugin rather than more states in this one: the shop sells things and the
+     * introduction explains them, and mixing the two would put the tutorial's stages into the
+     * middle of a shelf.
      */
-    protected void openBaha() {
+    protected void openIntro() {
         dialog.getOptionPanel().clearOptions();
 
-        BahaDialog baha = new BahaDialog(this::resume);
+        FishingIntroDialog intro = new FishingIntroDialog(this::resume);
 
-        dialog.setPlugin(baha);
-        baha.init(dialog);
+        dialog.setPlugin(intro);
+        intro.init(dialog);
     }
 
     //---------------------------------------------------------------- outfitter
@@ -214,7 +228,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
      * Back to the boat, with the frame put back the way the shop found it.
      * <p>
      * Not {@link #init}: the greeting is a greeting, and hearing it again on the way out of the
-     * outfitter would read as having walked up to him twice. The panels and the dim are restored by
+     * outfitter would read as having walked up to them twice. The panels and the dim are restored by
      * hand because the shop hid and dimmed them and nothing reads back what they were - the dim is
      * the figure vanilla uses for its own comm screens, which is the screen this is.
      */

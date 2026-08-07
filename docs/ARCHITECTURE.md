@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 205 Java files across eight top-level packages, plus
+What is where, and which file to open first. 207 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -56,8 +56,8 @@ Everything game-facing is wired from `ModPlugin.java`.
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
 8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
-9. `FishingIntro.healOldSave()`, `LostHarpoon.place()`, `FishingRating.VisitCounter.register()` —
-   the introduction: the wreck that starts it, and the counter the bar hook waits on
+9. `TutorialWreck.Watcher.register()`, `Castaway.Watcher.register()`,
+   `FishermanInterception.register()` — the introduction's three hooks
 10. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
 11. `AquariumTankScript.register()` — the aquarium on the colony's main menu
 12. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
@@ -88,10 +88,9 @@ they are granted by `FishingIntro`, not by character creation.
 | `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
-**`data/campaign/bar_events.csv`** — 11 jobs, plus two rows that are not `FishJob`s:
-`catchrelease_crablobab` → `campaign/fish/crab/CrabSalesman` (a vendor) and `catchrelease_rating` →
-`campaign/fish/tutorial/FishingRating` (the introduction's bar hook). **Three of the job ids do not
-match their class name:**
+**`data/campaign/bar_events.csv`** — 11 jobs, plus `catchrelease_crablobab` →
+`campaign/fish/crab/CrabSalesman`, a vendor rather than a job and the one row here that is not a
+`FishJob`. **Three of the job ids do not match their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
@@ -114,8 +113,9 @@ does **not** add for you and which anything looking a terrain up by tag depends 
 the colony structure that opens the fishing trade and keeps the aquarium.
 
 **`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
-(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's wreck
-(`catchrelease_LostHarpoon` → `LostHarpoon`). The pond is **not** here any more.
+(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's two props
+(`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
+**not** here any more.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
 
@@ -250,17 +250,20 @@ explains how.
 | `FishermanConstants.java` | Every number the above read |
 
 ### `campaign/fish/tutorial`
-How somebody comes to be fishing at all. Three ways in, one state machine, and the abilities held
-behind it — `unlockedAtStart` is **off** for all four in `abilities.csv`, so a new campaign has no
-fishing gear until Baha puts it in your hands.
+How somebody stops being a person who has never heard of this. **Entirely detached from the ordinary
+loop** — the trade runs whether or not any of it has happened. Three ways in, none required, all
+leading to the same conversation with the Fisherman; the abilities are the gate, `unlockedAtStart`
+**off** for all four in `abilities.csv`.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The four stages, Baha the person, the ability grant, and the intel note |
-| `BahaDialog.java` | The scientist aboard: the introduction, the rig, and taking the first catch |
-| `LostHarpoon.java` | Somebody else's harpoon on a dead world, in a pond — the find that starts it |
-| `LostHarpoonDialog.java` | Standing over it, and tracing the transponder |
-| `FishingRating.java` | The bar hook: a rating with a story, after the second market |
+| `FishingIntro.java` | The three stages, the ability grant, the carried harpoon, and the intel note |
+| `FishingIntroDialog.java` | The Fisherman explaining breach fishing, and taking the harpoon back |
+| `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
+| `TutorialWreckDialog.java` | Boarding it, finding nobody, and cutting the head out |
+| `Castaway.java` | The crewman put off the boat for looking, found on a survey |
+| `CastawayDialog.java` | Answering the beacon, and the one useful sentence he has |
+| `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped |
 | `TutorialConstants.java` | Every number the above read |
 
 ### `campaign/fish/minigame`
@@ -777,20 +780,14 @@ figure, not a specimen's jittered one), and the boat's name, the greeting, and t
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
 
-**Three ways into the introduction, and none of them is required.** A wreck to stumble over, a
-rating in a bar after the second market, and simply hailing a fishing boat all call
-`FishingIntro.point()`, which is idempotent — a player who trips two of them gets one intel note, not
-two. That is the only thing the first two hooks do; everything after it happens aboard, with Baha.
-The abilities are the gate: `unlockedAtStart` is off for all four, so a new campaign cannot fish
-until somebody hands over the rig, which is the only version of a tutorial that is not a page of text
-you can close. `FishingIntro.healOldSave()` reads all four abilities present as proof the campaign
-was fishing before any of this existed — a tell a fresh campaign cannot produce, because the
-outfitter is only ever handed over at the end.
-
-**`FishCurrency` counts and spends by exact rarity, not "at most".** `count(COMMON)` is the number of
-*commons* aboard, so Baha's "a common will do" cannot be written as `spend(COMMON, 1)` — somebody
-whose first catch came up uncommon would stand there holding a fish being told the hold is empty.
-`BahaDialog.cheapestAboard()` walks the rungs and spends the lowest one actually held.
+**Three ways into the introduction, none required, and each fitted to where the player already is.**
+Out where nobody lives, the first rupture they come within sight of gets a holed cruiser next to it —
+sited *then*, not at sector generation, so it is always this rupture and never a thing already on the
+map. Surveying a world out there instead turns up the one crewman who was put off a boat for looking
+at the catch. In an inhabited system there is already a boat posted, so it simply *is* somewhere
+else the next time anybody looks — `FishermanInterception` teleports it in outside the viewport and
+nobody aboard remarks on it, which is the cheapest way to say what the Fisherman is. And hailing a
+boat works on its own. All of them call `FishingIntro.point()`, which is idempotent.
 
 **A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
 system and will cut straight across an inhabited orbit getting anywhere, so the standing boats

@@ -10,7 +10,7 @@ import org.lwjgl.util.vector.Vector2f;
  * A standing boat's working day: the same rig as the visiting one's, on a boat that never leaves.
  * <p>
  * Everything else is inherited - the sweep, the staged motes, the throws, the map mark, the pinned
- * visibility and his name in whatever state the local water leaves it. It is the same trade and the
+ * visibility and the name in whatever state the local water leaves it. It is the same trade and the
  * same man; only the schedule and the route are the boat's own.
  * <p>
  * Two things differ, and they are the two hooks overridden here. It is not visiting, so the

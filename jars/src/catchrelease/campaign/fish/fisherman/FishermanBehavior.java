@@ -26,8 +26,8 @@ import java.util.List;
  * Everything the Fisherman does between arriving and leaving: sweeps a pair of yellow fan lamps,
  * stages fish under them, harpoons what it stages, and packs up once the visit is spent.
  * <p>
- * The visit is spent in days the player was not there for. He never disappears in front of
- * anybody, and a player who stays and fishes alongside him keeps him for as long as they like.
+ * The visit is spent in days the player was not there for. The boat never disappears in front of
+ * anybody, and a player who stays and fishes alongside it keeps it for as long as they like.
  * <p>
  * The lamps are deliberately the old look - {@link SearchlightFanRenderer} in the original
  * yellow, no breach window, no upgrades read from anywhere - because this is somebody else's rig,
@@ -218,8 +218,8 @@ public class FishermanBehavior implements EveryFrameScript {
      * Keeps the boat working, however long the visit turns out to be.
      * <p>
      * The orders are topped up rather than given once at the length of the stay, because the stay is
-     * no longer a fixed number of days - a player who never leaves keeps him here indefinitely, and
-     * an assignment cut to fit two weeks would run out under him and leave him drifting.
+     * no longer a fixed number of days - a player who never leaves keeps the boat here indefinitely,
+     * and an assignment cut to fit two weeks would run out under it and leave it drifting.
      */
     protected void keepWorking() {
         if (fleet.getCurrentAssignment() != null) return;

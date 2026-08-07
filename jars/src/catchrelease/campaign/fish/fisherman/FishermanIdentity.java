@@ -9,7 +9,7 @@ import com.fs.starfarer.api.characters.PersonAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * The man himself: one person, made once, kept for the whole campaign.
+ * The Fisherman: one person, made once, kept for the whole campaign.
  * <p>
  * The point of this class is that there is no roll in it. Every other fleet in the game is a fresh
  * set of hulls under a fresh officer with a fresh name, and the Fisherman deliberately is not - the
@@ -17,24 +17,32 @@ import org.lwjgl.util.vector.Vector2f;
  * the player is meant to notice. So the {@code PersonAPI} lives in sector memory rather than being
  * rebuilt at each spawn, and every visit hands the same object back.
  * <p>
- * What does change is how well he is holding. {@link #getDrift} reads the local instability the same
+ * Old paperwork calls them Captain Baha, and a few people still do. That was a man, and a long time
+ * ago; whatever has been standing at that wheel since is not one, does not answer to it, and is
+ * <b>they</b> in every line of text the mod writes. The name survives only where somebody has not
+ * caught up - {@link #FORMER_NAME}.
+ * <p>
+ * What changes is how well they are holding. {@link #getDrift} reads the local instability the same
  * way a specimen taken there would - {@link Aberration}'s own figure for the system - and the boat's
- * name, his own, and the way he talks all come apart by degrees as it climbs. Nothing about him is
- * actually replaced: it is the same person, read through worse and worse water.
+ * name, their own, and the way they talk all come apart by degrees as it climbs. Nothing is actually
+ * replaced: it is the same person, read through worse and worse water.
  */
 public class FishermanIdentity {
 
-    /** Where the one person is parked, so a campaign only ever makes him once. */
+    /** Where the one person is parked, so a campaign only ever makes them once. */
     public static final String PERSON_KEY = "$catchrelease_fisherman_person";
 
     public static final String FIRST_NAME = "The";
     public static final String LAST_NAME = "Fisherman";
 
+    /** What the registry still has them down as, from before. Nobody aboard uses it. */
+    public static final String FORMER_NAME = "Baha";
+
     /** Fixed, because a portrait that rerolled would undo the whole point of the class. */
     public static final String PORTRAIT = "graphics/portraits/portrait_mercenary08.png";
 
     /**
-     * How badly reality is holding where he is, in the bands the rest of the mod already reads a
+     * How badly reality is holding where they are, in the bands the rest of the mod already reads a
      * specimen's coherence in - see {@code FishItemPlugin.getAberrationLabel}.
      */
     public static final float DRIFT_SLIPPING = 0.3f;
@@ -44,7 +52,7 @@ public class FishermanIdentity {
     /** What the letters of a name go to as it comes apart. */
     public static final char[] STATIC_GLYPHS = {'#', '/', '\\', '~', '=', '*', '+', '-'};
 
-    /** The one person, made on first ask and never again. */
+    /** The one person, made on first ask and never again. Ungendered - see the class note. */
     public static PersonAPI get() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
         if (stored instanceof PersonAPI) return (PersonAPI) stored;
@@ -52,8 +60,8 @@ public class FishermanIdentity {
         PersonAPI person = Global.getFactory().createPerson();
 
         person.setFaction(FishermanConstants.FACTION);
-        person.setGender(FullName.Gender.MALE);
-        person.setName(new FullName(FIRST_NAME, LAST_NAME, FullName.Gender.MALE));
+        person.setGender(FullName.Gender.ANY);
+        person.setName(new FullName(FIRST_NAME, LAST_NAME, FullName.Gender.ANY));
         person.setPortraitSprite(PORTRAIT);
         person.setRankId(null);
         person.setPostId(null);
@@ -63,7 +71,7 @@ public class FishermanIdentity {
         return person;
     }
 
-    /** Puts him at the wheel of a boat, which is how the encounter screen finds him. */
+    /** Puts them at the wheel of a boat, which is how the encounter screen finds them. */
     public static void crew(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
@@ -77,11 +85,11 @@ public class FishermanIdentity {
     //---------------------------------------------------------------- the drift
 
     /**
-     * How thin the fabric is where he currently is, 0 to 1.
+     * How thin the fabric is where they currently are, 0 to 1.
      * <p>
      * The deterministic reading rather than a specimen's - {@link Aberration#baseAt} without the
      * per-catch jitter, because this is a property of the water and not of anything pulled out of
-     * it, and a man who flickered between two states while standing still would read as a bug.
+     * it, and somebody flickering between two states while standing still would read as a bug.
      */
     public static float getDrift(LocationAPI where) {
         if (where == null) return 0f;
@@ -106,9 +114,9 @@ public class FishermanIdentity {
     }
 
     /**
-     * His name as it arrives, which is not always the whole of it.
+     * The name as it arrives, which is not always the whole of it.
      * <p>
-     * Letters are taken out by position rather than at random, so the same system spells him wrong
+     * Letters are taken out by position rather than at random, so the same system spells it wrong
      * the same way every time - the degradation is a property of the place, and a name that
      * scrambled itself anew each frame would read as an effect rather than as a fact about where
      * the player is standing.
@@ -120,7 +128,7 @@ public class FishermanIdentity {
         return corrupt(FishermanConstants.FLEET_NAME, band);
     }
 
-    /** Every {@code step}th letter replaced, harder the further gone he is. */
+    /** Every {@code step}th letter replaced, harder the further gone they are. */
     public static String corrupt(String text, int band) {
         if (text == null || band <= 0) return text;
 
@@ -138,29 +146,29 @@ public class FishermanIdentity {
     }
 
     /**
-     * The line under the greeting: what is wrong with him here, or nothing at all where the water
-     * is calm. Said about the comm rather than about the man - nobody aboard would claim to know
-     * what is happening to him, only that the picture will not sit still.
+     * The line under the greeting: what is wrong here, or nothing at all where the water is calm.
+     * Said about the comm rather than about the person - nobody aboard would claim to know what is
+     * happening to them, only that the picture will not sit still.
      */
     public static String describe(float drift) {
         switch (getBand(drift)) {
             case 3:
-                return "The picture will not hold. There is a man on the other end of it and he is"
-                        + " answering, and the crew behind him are the crew from a boat that is not"
-                        + " this one. Somebody aboard says they have met him before. Somebody else"
-                        + " says they have never seen him.";
+                return "The picture will not hold. There is somebody on the other end of it and they"
+                        + " are answering, and the crew behind them are the crew from a boat that is"
+                        + " not this one. Somebody aboard says they have met them before. Somebody"
+                        + " else says they have never seen them.";
             case 2:
-                return "His voice arrives a moment before the channel opens, and the lights behind"
-                        + " him sweep out of time with the ones outside the window.";
+                return "Their voice arrives a moment before the channel opens, and the lights behind"
+                        + " them sweep out of time with the ones outside the window.";
             case 1:
-                return "The comm image sits a half-second behind him, the way a bad relay does -"
+                return "The comm image sits a half-second behind them, the way a bad relay does -"
                         + " except there is no relay out here.";
             default:
                 return null;
         }
     }
 
-    /** The greeting itself, which is the same man saying roughly the same thing through worse water. */
+    /** The greeting: the same person saying roughly the same thing through worse and worse water. */
     public static String getGreeting(float drift) {
         switch (getBand(drift)) {
             case 3:
