@@ -84,7 +84,12 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
             art.renderAtCenter(x + BOX_SIZE * 0.5f, y + BOX_SIZE * 0.5f);
         }
 
-        ShopUi.dress(x, y, BOX_SIZE, BOX_SIZE, alphaMult);
+        //the panes' square one-pixel border rather than the minigame's rounded dress
+        Color border = Misc.getBasePlayerColor();
+        ShopUi.drawQuad(x, y, BOX_SIZE, 1f, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x, y + BOX_SIZE - 1f, BOX_SIZE, 1f, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x, y, 1f, BOX_SIZE, border, 0.55f * alphaMult);
+        ShopUi.drawQuad(x + BOX_SIZE - 1f, y, 1f, BOX_SIZE, border, 0.55f * alphaMult);
     }
 
     protected void renderText(float x, float y, float height, float alphaMult) {

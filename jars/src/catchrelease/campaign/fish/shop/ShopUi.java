@@ -90,6 +90,21 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
+    /**
+     * The sidebar's dressing, the mod's one panel face: transparent black under a one-pixel
+     * player-colour border at half strength, corners square.
+     */
+    public static void drawPanel(float x, float y, float width, float height,
+                                 float bgAlpha, float alphaMult) {
+        drawQuad(x, y, width, height, Color.BLACK, bgAlpha * alphaMult);
+
+        Color border = Misc.getBasePlayerColor();
+        drawQuad(x, y, width, 1f, border, 0.55f * alphaMult);
+        drawQuad(x, y + height - 1f, width, 1f, border, 0.55f * alphaMult);
+        drawQuad(x, y, 1f, height, border, 0.55f * alphaMult);
+        drawQuad(x + width - 1f, y, 1f, height, border, 0.55f * alphaMult);
+    }
+
     /** The bright outline just off a box and the dimmer one outside it, as the catch's panels have. */
     public static void dress(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
