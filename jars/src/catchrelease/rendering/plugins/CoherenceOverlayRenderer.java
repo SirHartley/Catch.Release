@@ -56,6 +56,11 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
         get().level = MathUtils.clamp(level, 0f, 1f);
     }
 
+    /** What is on screen right now, for anything that has to agree with it rather than guess. */
+    public static float getLevel() {
+        return instance == null ? 0f : instance.level;
+    }
+
     /** Same instance-outlives-loads dance as the campaign distortion renderer: Luna's registration
      *  dies with the game, the GL program does not, so every ask re-registers if needed. */
     protected static CoherenceOverlayRenderer get() {

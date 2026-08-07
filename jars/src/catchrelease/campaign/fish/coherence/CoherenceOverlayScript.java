@@ -25,6 +25,18 @@ public class CoherenceOverlayScript implements EveryFrameScript {
 
     protected float level = 0f;
 
+    /**
+     * The eased level the overlay is currently at, for anything that has to agree with the screen.
+     * <p>
+     * Read off the renderer rather than kept here: the renderer is the one thing that survives
+     * being asked from anywhere, and a second copy on a transient script is a second copy to get
+     * out of step. {@link CoherenceTerrain} is what asks - it is inside the fabric exactly when the
+     * screen says it is.
+     */
+    public static float getLevel() {
+        return CoherenceOverlayRenderer.getLevel();
+    }
+
     /** The place's steady reading ({@link Aberration#baseAt} - no per-catch jitter). Cached on an
      *  interval: the read walks every system and slipstream, and the answer only moves when the
      *  fleet does - in light-years. */
@@ -53,6 +65,10 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         }
 
         CoherenceOverlayRenderer.setLevel(level);
+
+        //the terrain bar is built from terrain the fleet is standing in, so the readout needs
+        //something to stand in wherever the rigs are being run. It takes itself away again
+        if (level > 0f) CoherenceTerrain.ensureIn(fleet.getContainingLocation());
 
         //refreshed every frame or the engine fades it out itself; volume rides the level, so the
         //whispers arrive and leave with the warp

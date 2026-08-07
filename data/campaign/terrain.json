@@ -5,4 +5,11 @@
 	"catchrelease_StaticPond":{
 		"plugin":"catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin",
 	},
+
+	# The coherence readout. Invisible terrain covering a whole location, added on demand and
+	# expiring on its own - it exists to put a line in the terrain bar, since that bar is built
+	# from the terrain the fleet is in and thin reality is not a place you can stand in.
+	"catchrelease_coherence_field":{
+		"plugin":"catchrelease.campaign.fish.coherence.CoherenceTerrain",
+	},
 }

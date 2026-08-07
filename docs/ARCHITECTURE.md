@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 204 Java files across eight top-level packages, plus
+What is where, and which file to open first. 205 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -102,8 +102,10 @@ match their class name:**
 | `catchrelease_curator` | `CuratorJob` | | `catchrelease_tuber` | `TuberJob` |
 | `catchrelease_cult` | `CultJob` | | | |
 
-**`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`.
-Carries the plugin class only; name, radius, layers and tags all come from the plugin.
+**`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`,
+`catchrelease_coherence_field` → `CoherenceTerrain`. Carries the plugin class only; name, radius,
+layers and tags all come from the plugin — including the terrain id as a tag, which `BaseTerrain`
+does **not** add for you and which anything looking a terrain up by tag depends on.
 
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
 `catchrelease_fish_bundle` → `FishBundleItemPlugin`.
@@ -175,7 +177,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
 | `FishLog.java` | Sector-persistent per-species record; unlocks location data for codex and map |
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
-| `Aberration.java` | 0–1 "reality coherence" for a location, from abyss depth, hypershunt and slipstream |
+| `Aberration.java` | 0–1 aberration for a location — the inverse of coherence — from abyss depth, black hole, hypershunt and slipstream, strongest wins. Names the source via `dominantSourceAt` |
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
 | `StarColour.java` | What a system's sun looks like, from its star's planet type |
 | `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached |
@@ -382,6 +384,7 @@ The low-coherence overlay: the screen warps purple while a rig runs somewhere th
 | File | What it does |
 |---|---|
 | `CoherenceOverlayScript.java` | The rules: when it shows, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+| `CoherenceTerrain.java` | The terrain-bar line. Invisible terrain covering a whole location whose `containsEntity` is "is the overlay up" rather than a distance — IndEvo's trick, so nothing has to be moved under the fleet |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
 
