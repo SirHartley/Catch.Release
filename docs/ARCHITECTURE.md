@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 217 Java files across eight top-level packages, plus
+What is where, and which file to open first. 218 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -74,6 +74,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 15. `FishMapFilterScript` as a transient script — the sector-map filter
 16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+18. `DevShortcut.register()` — the Ü key, inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -569,6 +570,7 @@ Shader and GL machinery.
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |
 | `helper/animation/ArchedTrajectoryFollowingMote.java` | A glowing mote drawn along that arc |
 | `reflection/ReflectionUtils.java` | Reflection via `MethodHandle`, to dodge the classloader ban |
+| `testing/DevShortcut.java` | The Ü key: skips the introduction, grants every rig and the shop, issues charts of every rung. Dev mode only, and registered unconditionally because the gate is checked per frame rather than at boot |
 | `testing/TestStencilRenderer.java` | Dev renderer. Commented out of `ModPlugin` |
 
 ---
@@ -956,5 +958,6 @@ do nothing.
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. The pond is terrain now |
 | `campaign/fish/intel/FishMapIntel` | Dead husk, kept so old saves can delete it. Removable once no save predates the map filter |
 | `campaign/fish/shop/ShopStorage` | The store/retrieve/sell counter is gone. Kept only to hand back fish a save is still holding in it, once, on the next shop open |
+| `testing/DevShortcut` | Registered from `ModPlugin`; does nothing unless dev mode is on |
 | `testing/TestStencilRenderer` | Commented out of `ModPlugin` |
 | The pond's shader swirl | Dormant behind `PondConstants.POND_HOLE_LOOK`, which currently selects the stencil hole renderer |
