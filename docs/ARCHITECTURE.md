@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 201 Java files across eight top-level packages, plus
+What is where, and which file to open first. 204 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -29,6 +29,7 @@ that is wrong is worse than no map, because it is believed.
 | Aiming and reticules | `skillshot/` (has its own README) |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
+| The low-coherence screen overlay | `campaign/fish/coherence/CoherenceOverlayScript.java` |
 | The fishing boats, standing and visiting | `campaign/fish/fisherman/` |
 | How anybody starts fishing | `campaign/fish/tutorial/` |
 | The colony structure and its aquarium | `campaign/fish/colony/` |
@@ -63,6 +64,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 13. `SkillshotFramework.register()` — the aiming framework
 14. `FishMapFilterScript` as a transient script — the sector-map filter
 15. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+16. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -115,7 +117,7 @@ the colony structure that opens the fishing trade and keeps the aquarium.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
 
-**`data/config/sounds.json`** — 5 ids of our own, merged into vanilla's ~600. Ability sounds are
+**`data/config/sounds.json`** — 6 ids of our own, merged into vanilla's ~600. Ability sounds are
 named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 ---
@@ -374,6 +376,13 @@ Codex pages for species.
 | `FishCodex.java` | Installs the category and per-species entries; opens the codex on a species |
 | `FishCodexEntry.java` | One page: description, catch data, record, location, art, and the jump to the sector map |
 
+### `campaign/fish/coherence`
+The low-coherence overlay: the screen warps purple while a rig runs somewhere thin.
+
+| File | What it does |
+|---|---|
+| `CoherenceOverlayScript.java` | The rules: when it shows, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+
 ### `campaign/fish/constants` · `campaign/fish/intel`
 
 | File | What it does |
@@ -414,6 +423,7 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 
 | File | What it does |
 |---|---|
+| `FishingRigs.java` | One answer to "is any rig running" - lamps lit, swarm out, or a line in the water |
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
 | `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
@@ -469,6 +479,7 @@ Shader and GL machinery.
 |---|---|
 | `distortion/CampaignDistortionRenderer.java` | GraphicsLib's distortion pass, rebuilt to run on the campaign map |
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
+| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
@@ -779,7 +790,7 @@ whose first catch came up uncommon would stand there holding a fish being told t
 `BahaDialog.cheapestAboard()` walks the rungs and spends the lowest one actually held.
 
 **A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
-system and will cut straight across an inhabited orbit getting anywhere, so the standing trawlers
+system and will cut straight across an inhabited orbit getting anywhere, so the standing boats
 route themselves: `OuterReaches` defines a band from past the outermost inhabited world out to a
 little beyond the furthest thing in orbit — the far-flung planets are on the route, the populated
 inner system is not — and `pick()` rejects a destination *and* the leg to it, since a fleet flies its
