@@ -832,6 +832,17 @@ still matches puts a **Continue** button up that walks the player straight back 
 the conversation. To actually leave a fleet encounter from a row, use `DismissDialog`,
 which calls `dialog.dismiss()`. See `catchrelease_fisherLeave`.
 
+**`DismissDialog` is not enough to leave a fleet encounter.**
+`FleetInteractionDialogPluginImpl.init` builds a real `BattleAPI` between the player and the
+other fleet on *every* encounter, fight or no fight, and vanilla only takes it apart in its own
+`LEAVE` handler, which calls `cleanUpBattle()` *before* dismissing. Close the window without
+that and the battle stays attached to both hulls, so the next approach finds
+`otherFleet.getBattle() != null`, decides an engagement is already under way, and opens on the
+join-battle screen instead of a conversation. Any row that leaves a *fleet* dialog must call
+`CatchReleaseCMD leaveEncounter`, which runs vanilla's teardown and then dismisses. Rows that
+leave a market, person or custom-entity dialog are unaffected - there is no encounter and no
+battle - and the verb checks the plugin type, so it is safe everywhere.
+
 **`PopulateOptions` is not fired for you after `OpenCommLink`.** The guide says it
 fires "by convention, at the end of nearly every rule". The engine does fire it after
 a `DialogOptionSelected` row, but *not* after `OpenCommLink` — a comm row that sets

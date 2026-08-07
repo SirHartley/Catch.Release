@@ -304,7 +304,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic |
 
 ### `campaign/fish/tutorial`

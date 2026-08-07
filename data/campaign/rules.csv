@@ -613,8 +613,8 @@ catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score
 What they are asking for, when it is finally put plainly, is $entity.catchrelease_fleetQuestAsk.","0:catchrelease_fqAccept:""We can find you one.""
 10:catchrelease_fqDecline:Decline","The pitch and the ask are both read off the fleet's own memory, so one row serves every kind of trouble it could be in. The ask has to come from there rather than from the job's own tokens: those are written by updateData, which needs an accepted mission, and at the pitch there is not one yet."
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-DismissDialog",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,DismissDialog,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
+CatchReleaseCMD leaveEncounter",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,CatchReleaseCMD leaveEncounter,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","SetTextHighlights $entity.catchrelease_fleetQuestAsk
@@ -626,8 +626,8 @@ Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn
-DismissDialog",The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.,,
-catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,DismissDialog,The link closes. They go back to waiting.,,
+CatchReleaseCMD leaveEncounter",The crates go across without ceremony. Somebody aboard says something that does not come through cleanly and several other people laugh at it.,,
+catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
 !$isHostile","$catchrelease_harpoonDemandDone = true 1
@@ -779,7 +779,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
-catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,DismissDialog,,,
+catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
