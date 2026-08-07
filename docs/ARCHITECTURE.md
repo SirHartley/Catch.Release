@@ -365,7 +365,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
-| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them |
+| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts the open jobs too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
@@ -566,7 +566,7 @@ Shader and GL machinery.
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
-| `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once |
+| `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once. One object per path is shared by every caller, so it is handed back neutral - native size, white, full alpha, normal blend - and a caller that wants it otherwise says so |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |

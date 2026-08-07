@@ -110,10 +110,10 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
 
-        //the shopping-list dot: something in the crate would go towards a marked upgrade
+        //the wanted dot: a marked ware or an open job would take something in the crate
         for (FishCatch entry : contents) {
-            if (ShopMarks.isMarked(entry)) {
-                ShopMarks.drawDot(x + w - 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+            if (ShopMarks.isWanted(entry)) {
+                ShopMarks.drawDot(x + 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
                 break;
             }
         }

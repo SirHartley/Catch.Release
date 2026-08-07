@@ -138,9 +138,10 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         //no grade pip: a pile is not a specimen and has no single quality to report
         FishItemRenderer.render(x, y, w, h, alphaMult, best, null);
 
+        //the wanted dot: a marked ware or an open job would take something in the pile
         for (FishCatch entry : contents) {
-            if (ShopMarks.isMarked(entry)) {
-                ShopMarks.drawDot(x + w - 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+            if (ShopMarks.isWanted(entry)) {
+                ShopMarks.drawDot(x + 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
                 break;
             }
         }
