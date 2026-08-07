@@ -396,11 +396,11 @@ $catchreleaseOtherCap declares this unfair. The declaration is noted and ignored
 Between them they produce $catchreleaseReward, which they clearly consider a fortune, and which they are not wrong about.",,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
-$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"You hand the better of the two to $catchreleaseKid. There is a silence of the kind that precedes either delight or a formal complaint.
+$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"You hand the better of the two to $catchreleaseKid. There is a silence of the kind that precedes either delight or a formal complaint, and your ops chief takes a step back from the table to be out of the way of either.
 
-It is a serious fish. Both of them go very quiet, and then $catchreleaseOther empties a pocket onto the table without being asked.
+It is a serious fish. Both of them go very quiet looking at it, and then $catchreleaseOther empties a pocket onto the table without being asked to.
 
-Between them they produce $catchreleaseReward, which they clearly consider a fortune, and which they are not wrong about.",,
+Between them they produce $catchreleaseReward, which they clearly consider to be a fortune, and about which they are not entirely wrong.",,
 catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
@@ -443,11 +443,11 @@ $catchreleaseWager's fish is still moving. Yours was on it. You are paid $catchr
 catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid
 $catchreleaseHasWager score:100
-!$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The tank goes in. Something is added to the water from an unlabelled ampoule. Nobody explains what, and the room leans in.
+!$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The tank goes in. Something is added to the water from an unlabelled ampoule, nobody explains what it was, and the whole room leans in at once.
 
-It is over quickly and it is not your side that it is over for. $catchreleaseFoe shrugs. ""You picked. That is the whole of it.""
+It is over quickly, and it is not your side that it is over for. $catchreleaseFoe shrugs at you from across the table. ""You picked. That is the whole of it.""
 
-You walk out with nothing, which you agreed to on the way in.",,
+You walk your crew out with nothing, which is exactly what you agreed to on the way in.",,
 catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
@@ -524,11 +524,11 @@ catchrelease_tuber_paid,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,He films it from four angles and pays you $catchreleaseReward out of a box of things people have sent him.,,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He films it for a long time and then goes quiet in a way you recognise from people looking at a number that has not moved.
+$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He films the specimen for a long time, and then goes quiet in the way you recognise from people looking at a number that has not moved since yesterday.
 
-""It did fine,"" he says. ""Fine is the worst thing. Nobody stops for a healthy fish."" He looks up. ""Can you get me a bad one? On purpose?""
+""It did fine,"" he says eventually. ""Fine is the worst thing that can happen to you. Nobody stops scrolling for a healthy fish."" He looks up at you, and at your hold behind you, with an idea already fully formed.
 
-""$catchreleaseAskCap. Something that looks like it is arguing with being alive. $catchreleaseRewardCap, and I will credit you, which I appreciate is not payment.""",,
+""Can you get me a bad one? On purpose? $catchreleaseAskCap - something that looks like it is arguing with being alive. $catchreleaseRewardCap, and I will credit your ship by name, which I appreciate is not the same as paying you more.""",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
 !$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""That,"" he says, watching the playback, ""is the thumbnail. That is the whole video and I have not shot the video.""
@@ -581,9 +581,9 @@ $catchrelease_damagesConv = true 0
 AddText ""The $faction $otherShipOrFleet comes alongside without hurrying, and hails you."" $faction.baseColor
 OpenComms",,,"A holed crew that has come to be paid rather than to fight. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. The done flag is a day rather than the patrol's thirty: this is not enforcement, so a player who breaks off is hailed again next time rather than never again - the day is only there to stop the encounter reopening the comm the instant it is closed. Paying or refusing sets the long one through the command."
 catchrelease_damagesDemand,OpenCommLink,$entity.catchrelease_damagesConv score:1300,"SetTextHighlights $entity.catchrelease_harpoonDamagesDGS
-FireAll CatchReleaseDamagesOptions","""You are the one with the rope."" It is not a question, and $PersonRank $personName does not sound angry so much as tired of the shift.
+FireAll CatchReleaseDamagesOptions","""You are the one with the rope."" It is not a question, and $PersonRank $personName does not sound angry so much as tired of the whole shift.
 
-""We are not the navy and we are not going to pretend we are. There is a hole in a hull that was surveyed clean this morning, and somebody has to pay a yard to close it. $entity.catchrelease_harpoonDamagesDGS credits and we log it as debris.""",,
+""We are not the navy and we are not going to stand here pretending that we are. There is a hole in a hull that was surveyed clean this morning, and somebody has to pay a yard to close it again. $entity.catchrelease_harpoonDamagesDGS credits, and we log the whole thing as debris and your name never appears on it.""",,
 catchrelease_damagesOptPay,CatchReleaseDamagesOptions,,DoCanAffordCheck $entity.catchrelease_harpoonDamages catchrelease_payDamages,,0:catchrelease_payDamages:Pay for the repair ($entity.catchrelease_harpoonDamagesDGS credits),"Same affordability handling as the patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
 catchrelease_damagesOptRefuse,CatchReleaseDamagesOptions,,,,"10:catchrelease_refuseDamages:""Take it up with your insurer.""",
 catchrelease_damagesPaySel,DialogOptionSelected,$option == catchrelease_payDamages,"AddRemoveCommodity credits -$entity.catchrelease_harpoonDamages true
@@ -607,37 +607,38 @@ AddText ""The link opens on an empty chair, a channel already recording, and som
 EndConversation NO_CONTINUE",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
 catchrelease_wreckOpen,OpenInteractionDialog,"$entity.tag:catchrelease_tutorial_wreck score:1000
 CatchReleaseCMD tokens","ShowDefaultVisual
-SetShortcut catchrelease_wreckLeave ""ESCAPE""","A cruiser, cold for a long time. The transponder is dead and the registry plate has been ground off, but the hull is a $catchreleaseWreckHull and nobody builds those by accident.
+SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks the hull out of the clutter well before you are close enough to see it, and does not sound pleased about the reading. ""Cruiser, $catchreleaseWreckHull, cold all the way through. No transponder. The registry plate has been ground off, which people do not generally do by accident.""
 
-There is a hole in the dorsal plating with half a kilometre of line still through it. The head went in from outside. The plating around it is bent the other way.","catchrelease_wreckLook:Look for the crew
+There is a hole in the dorsal plating with half a kilometre of line still through it. Your ops chief puts a light on it as you come alongside. The head went in from outside. The plating around it is bent the other way.","catchrelease_wreckLook:Look for the crew
 catchrelease_wreckTake:Cut the head out and take it
 catchrelease_wreckLeave:Leave it where it lies",
 catchrelease_wreckHideTake,PopulateOptions,"$entity.tag:catchrelease_tutorial_wreck
 CatchReleaseCMD tokens
 $catchreleaseCarrying",RemoveOption catchrelease_wreckTake,,,
-catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The berths are made up. The galley is stocked. There is a half-finished meal on the mess table that has not rotted, because nothing here has, and the boarding party stop talking after the second compartment.
+catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The boarding party report back in the flat voice people use when they would rather not be saying any of it. The berths are made up. The galley is stocked. There is a half-finished meal on the mess table that has not rotted, because nothing in here has.
 
-Nobody is aboard. Nobody has been for a very long time, and nobody left in a hurry.",catchrelease_wreckLook2:Continue,
+""Nobody aboard, $playerSirOrMadam,"" your ops chief says. ""Nobody for a long while. And nobody left in a hurry.""",catchrelease_wreckLook2:Continue,
 catchrelease_wreckLook2,DialogOptionSelected,"$option == catchrelease_wreckLook2
 CatchReleaseCMD tokens",,,"catchrelease_wreckTake:Cut the head out and take it
 catchrelease_wreckLeave:Leave it where it lies",
-catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,CatchReleaseCMD carryHarpoon,"It comes out of the plating cleanly, which it should not. Forty tonnes of barbed alloy, and it lifts like it wants to go.
+catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,"CatchReleaseCMD carryHarpoon
+AddTextSmall ""Acquired harpoon head, unregistered"" highlight","It comes out of the plating clean, which your ops chief says twice and does not explain either time. Forty tonnes of barbed alloy, and it lifts like it wants to go.
 
-The shaft carries a maintenance mark: a fisheries outfit, which is not a category that has meant anything for two hundred years, and which is still filing. An intel note tracks their nearest boat.",catchrelease_wreckLeave:Leave,
+Your comms officer finds a maintenance mark on the shaft: a fisheries concern, still filing paperwork, which is not a category that has meant anything for two hundred years.",catchrelease_wreckLeave:Leave,
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
 catchrelease_castawayOpen,OpenInteractionDialog,$entity.tag:catchrelease_castaway score:1000,"ShowDefaultVisual
-SetShortcut catchrelease_ratingLeave ""ESCAPE""","The beacon is personal-issue and has been running for years. Under it, dug into the regolith, is a smuggler's cache somebody stopped coming back for, and a rating who has been living inside it.
+SetShortcut catchrelease_ratingLeave ""ESCAPE""","Your comms officer catches it on the way past - a personal-issue beacon, on a loop, running down. It has been transmitting for years.
 
-He is upright, which is generous. The cache was three quarters rum and he has made serious progress on the rest of it.","catchrelease_ratingAsk:Ask how he got here
+Underneath it, dug into the regolith, is a smuggler's cache that somebody stopped coming back for, and a man who has been living inside it. He is upright, which is generous of him. Your medical officer takes one look at the empties and declines to estimate how long that will last.","catchrelease_ratingAsk:Ask how he got here
 catchrelease_ratingOffer:Offer him passage off the rock
 catchrelease_ratingLeave:Leave",
 catchrelease_ratingAsk,DialogOptionSelected,$option == catchrelease_ratingAsk,CatchReleaseCMD point,"""Put off,"" he says, like it is a place. ""Put off. I looked in the tank. That is all. They land the thing and they cover it and you do not look, and I looked.""
 
 He does not say what was in it. He starts to, twice.","catchrelease_ratingWho:""Who is 'they'?""
 catchrelease_ratingLeave:Leave",
-catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,CatchReleaseCMD point,"""The Fisherman."" He says it the way you say a place you are not going back to. ""Go and look at it yourself, if you are the looking sort. Everybody is, the first time.""
+catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,CatchReleaseCMD point,"""The Fisherman."" He says it the way you would say the name of a place you are not going back to. ""Go and look at it yourself, if you are the looking sort. Everybody is, the first time.""
 
-""They keep boats where people are. Out past the last colony, where nothing is in the way."" An intel note tracks the nearest one.",catchrelease_ratingLeave:Leave,
+""They keep boats where people are - out past the last colony, where nothing is in the way."" He watches your comms officer write the bearing down and does not offer to repeat it.",catchrelease_ratingLeave:Leave,
 catchrelease_ratingOffer,DialogOptionSelected,$option == catchrelease_ratingOffer,CatchReleaseCMD point,"He looks at your ship for a while and then at the ground. ""No,"" he says. ""Thank you. No.""
 
 He does not explain that either, and it is somehow the most informative thing he has said.","catchrelease_ratingWho:""Who put you here?""
@@ -733,9 +734,11 @@ $catchreleaseWork
 !$catchreleaseWorkMet",,"""Still want the $catchreleaseWorkFish out of $catchreleaseWorkWhere. It is in there. It will keep being in there.""",100:catchrelease_fisherBack:Continue,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it.""",,,
-catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not. Everyone who does has that look."" They turn the glass around. ""I crewed a boat that went further. Two seasons. It is the water that gets you, not the catch - nothing out there sits still enough to look at twice.""
+catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not."" They look at your crew rather than at you, and seem to find whatever they were looking for. ""Everyone who does has that look about them.""
 
-""They keep one in every system anybody lives in. Out past the last colony, where nothing is in the way. Hail it, and do not ask what is under the tarp."" An intel note tracks the nearest.",catchrelease_ratingBarBack:Go back to the bar,
+They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the water that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
+
+""They keep one in every system anybody lives in, out past the last colony where nothing is in the way. Hail it. And do not ask what is in the tank.""",catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
@@ -858,28 +861,29 @@ CatchReleaseCMD tokens
 ""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Continue,
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
 CatchReleaseCMD tokens
-$catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from.
+$catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from, and your ops chief notices that and says nothing about it either.
 
 It is turned over once. ""They intruded on what they should not have intruded upon.""
 
-Nothing further is offered, and the silence afterwards is not the kind you fill.","catchrelease_intro_listen:""What is out here?""
+Nothing further is offered. The silence afterwards is not the kind you fill.","catchrelease_intro_listen:""What is out here?""
 catchrelease_intro_brief:""Skip the speech. What is it you need?""",
 catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
-!$catchreleaseCarrying",,"""You have questions. Everybody who gets this far has the same three, so I will save you two of them.""","catchrelease_intro_listen:""What is out here?""
+!$catchreleaseCarrying",,"""You have questions,"" they say, before your comms officer has finished the hail. ""Everybody who gets this far has the same three, $playerName, so I will save you two of them.""","catchrelease_intro_listen:""What is out here?""
 catchrelease_intro_brief:""Skip the speech. What is it you need?""",
-catchrelease_intro_listen,DialogOptionSelected,$option == catchrelease_intro_listen,,"""The fabric is thin in places. Has been since the gates went. Where it is thinnest, things come through - alive, mostly, and they do not hold together well on this side.""
+catchrelease_intro_listen,DialogOptionSelected,$option == catchrelease_intro_listen,,"""The fabric is thin in places, and has been since the gates went. Where it is thinnest, things come through it - alive, mostly, and they do not hold together well on this side.""
 
 ""We call them fish. It is not accurate. It stuck.""
 
-""The second question is whether it is safe. It is not. The third one you will not ask until later.""",catchrelease_intro_rod:Continue,
+""The second question is whether it is safe, and it is not. The third one you will not think to ask until considerably later.""",catchrelease_intro_rod:Continue,
 catchrelease_intro_brief,DialogOptionSelected,$option == catchrelease_intro_brief,"$option = catchrelease_intro_rod 0
 FireBest DialogOptionSelected","They do not appear to mind being cut off, which is its own kind of answer.",,
 catchrelease_intro_rod,DialogOptionSelected,$option == catchrelease_intro_rod,"CatchReleaseCMD giveRod
-CatchReleaseCMD tokens","A crate comes up onto the deck before the sentence is finished. One rod, secondhand, working.
+CatchReleaseCMD tokens
+Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","A crate comes up onto the deck before the sentence is finished, and your ops chief signs for it without being asked to. One rod, secondhand, working.
 
-""Near a rupture it opens the thing. Over an open one it puts drones down. It reads the situation - you do not have to.""
+""Near a rupture it opens the thing. Over an open one it puts drones down. It reads the situation, so you do not have to.""
 
 ""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. There is a rupture there with your name on it.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
@@ -887,85 +891,92 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 2
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD sendOut
-CatchReleaseCMD tokens","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
+CatchReleaseCMD tokens
+Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
 
-""The drones are the same rod. Over open water they hunt, under lamps they search. One tool, three moods.""
+""The drones are the same rod you already have. Over open water they hunt; under lamps they search. One tool, three moods, and it picks the mood itself.""
 
-""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking. That is why they come apart when you land them, and why the water they came out of matters more than they do.""
+""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking at them. That is why they come apart when you land them, and why the water they came out of matters a great deal more than they do.""
 
-""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere - the water there is thinner. See what that does to it.""","catchrelease_intro_ghosts:""Ghosts.""
+""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere. The water there is thinner. See what that does to it.""","catchrelease_intro_ghosts:""Ghosts.""
 catchrelease_fisherBack:Continue",
-catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Call them whatever holds still in your head."" They are already looking past you at the window. ""They do not answer to either of us.""",catchrelease_fisherBack:Continue,
+catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Call them whatever holds still in your head."" They are already looking past you at the window. ""They do not answer to either of us, and they have never once answered to me.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveDeepGear
-CatchReleaseCMD tokens","They hold it up, and do not say what they are looking for.
+CatchReleaseCMD tokens
+Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","They hold it up to the light for a while and do not say what they are looking for. Your science officer, watching over your shoulder, quietly stops taking notes.
 
 ""Thinner water, worse coherence, same animal. You have seen it now.""
 
-A second crate. Lamps, a harpoon, and a ledger.
+A second crate comes up. Lamps, a harpoon, and a ledger.
 
-""Lamps burn a window through where there is no rupture. The line takes what the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here.""
+""The lamps burn a window through where there is no rupture to use. The line takes whatever the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here, whatever they told you inside the picket.""
 
-""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question.""",catchrelease_fisherBack:Continue,
+""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question I am asking.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
-CatchReleaseCMD tokens","It goes into a case rather than onto the table.
+CatchReleaseCMD tokens
+Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","It goes into a case rather than onto the table, and the case is closed before your science officer can get a reading off it.
 
-""That is the whole trade. Everything after it is doing it better.""
+""That is the whole trade. Everything after this is doing it better.""
 
-""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself instead of sweeping until you are out of fuel. Two of them, on the house.""
+""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself, instead of sweeping until you are out of fuel and patience. Two of them, on the house.""
 
-""Bring me both. And use the planner on your map before you go - it will run the route for you, because there are two of them now and doing that by eye is how people end up in the abyss.""",catchrelease_fisherBack:Continue,
+""Bring me both. And use the planner on your map before you go. There are two of them now, and doing that by eye is how people end up in the abyss.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
-CatchReleaseCMD tokens","Both of them are looked at properly, which has not happened before.
+CatchReleaseCMD tokens
+AddTextSmall ""Survey counter opened"" highlight","Both of them are looked at properly, which has not happened before.
 
-""Then you can read the water. The counter is open to you - charts for charts, and I will carry what I can.""
+""Then you can read the water. The counter is open to you, $playerName - charts for charts, and I will carry what I can.""
 
 Four more go across the table unasked: two common, one uncommon, and one they do not name.",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
-!$catchreleaseTargetMet",,"""Still out there?""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Still out there, then."" They do not sound surprised, or impatient, or much of anything.
 
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there, and it will keep being in there.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
-!$catchreleaseTargetMet",,"""Take your time.""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Take your time. The water is not going anywhere and neither, apparently, are you.""
 
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+""$catchreleaseTarget. $catchreleaseTargetWhere.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
-!$catchreleaseTargetMet",,"""Both of them. I did say.""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Both of them, I did say."" A pause. ""Your navigator will thank you for using the planner.""
 
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+""$catchreleaseTarget. $catchreleaseTargetWhere.""",catchrelease_fisherBack:Continue,
 catchrelease_introNoExplain,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
-!$catchreleaseTargetMet",,"""Not yet.""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Not yet.""
 
 ""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""","catchrelease_intro_fourJumps:""I left you four jumps back.""
 catchrelease_fisherBack:Continue",
-catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,,"""You left a boat four jumps back."" They go back to the window, and the winch runs on.",catchrelease_fisherBack:Continue,
+catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,,"""You left a boat four jumps back,"" they say, and go back to the window.
+
+Your comms officer checks the transponder twice, then stops checking it.",catchrelease_fisherBack:Continue,
 catchrelease_introDone,DialogOptionSelected,"$option == catchrelease_fisherIntro score:20
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,"""Still at it. Good. The charts are what I sell and the water is what I know - between the two that is most of a map.""",catchrelease_fisherBack:Continue,
 catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseCanSkip",,,"5:catchrelease_introSkip:""I have done this before. The breach calls me.""",
-catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"They look at you for slightly too long, and then not at all.
+catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,"CatchReleaseCMD skipIntro
+AddTextSmall ""Acquired full fishing rig and six charts"" highlight","They look at you for slightly too long, and then not at all.
 
 ""Then you will not want the speech.""
 
-The crate is already on the deck. Lamps, a rod, a line, a ledger, and six charts on top of it. No money changes hands in either direction.",catchrelease_fisherBack:Continue,
+The crate is already on the deck. Lamps, a rod, a line, a ledger, and six charts on top of it. Your ops chief signs for it and does not ask why nobody wanted paying.",catchrelease_fisherBack:Continue,
