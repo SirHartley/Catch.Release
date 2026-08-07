@@ -14,6 +14,10 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   API changes between versions.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
+- **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
+  package gains or loses a file - any change that moves what a file does, what registers it,
+  or how the pieces fit lands in the map in the same commit. A change is not done while the
+  map still describes the old shape.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
   sitting on the branch.
 
@@ -53,7 +57,8 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 
 **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the full map** - every package, every file, one
 line each, plus the boot order and the index of what is registered by data rather than by code. Read
-it before going looking for something. Update it when a package gains or loses a file.
+it before going looking for something, and update it with every change - see the workflow rule
+above.
 
 The short version:
 
