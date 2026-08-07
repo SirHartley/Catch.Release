@@ -448,6 +448,11 @@ public class FishConstants {
      */
     public static final float COHERENCE_OVERLAY_FLOOR = 0.12f;
     public static final float COHERENCE_OVERLAY_CEIL = 0.8f;
+
+    /** Centre-distance the overlay may creep in to at full level (0 centre, 1 mid-edge), never
+     *  past - the middle of the screen stays readable however bad the water gets. */
+    public static final float COHERENCE_OVERLAY_INNER_CLEAR = 0.4f;
+
     public static final float COHERENCE_OVERLAY_EASE_IN = 2f;
     public static final float COHERENCE_OVERLAY_EASE_OUT = 1.5f;
     public static final String SOUND_COHERENCE_WHISPERS = "catchrelease_coherence_whispers";
