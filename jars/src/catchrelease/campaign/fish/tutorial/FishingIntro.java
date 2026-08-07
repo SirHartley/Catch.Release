@@ -250,6 +250,15 @@ public class FishingIntro {
 
         /** Set on the last rung that cares: it has to come up through a lamp, on a line. */
         public boolean needsDeepGear;
+
+        /**
+         * Set on the first rung: any fish answers it, whatever species came up.
+         * <p>
+         * A specimen is still planted at the mark so there is guaranteed to be something down
+         * there, but somebody thirty seconds into owning a rod should not be able to fail their
+         * first cast by landing the wrong animal.
+         */
+        public boolean anySpecies;
     }
 
     public static Target getTarget() {
@@ -296,6 +305,7 @@ public class FishingIntro {
         target.systemId = system.getId();
         target.systemName = system.getName();
         target.needsDeepGear = stage == FISH_TWO;
+        target.anySpecies = stage == RODDED;
 
         FishSpec spec = pickSpecies(stage);
         if (spec == null) return null;
@@ -382,6 +392,8 @@ public class FishingIntro {
         Target target = getTarget();
         if (target == null) return false;
 
+        if (target.anySpecies) return findAny(target.needsDeepGear) != null;
+
         for (String speciesId : target.speciesIds) {
             if (find(speciesId, target.needsDeepGear) == null) return false;
         }
@@ -389,6 +401,12 @@ public class FishingIntro {
         return true;
     }
 
+    /** The first thing aboard that answers, whatever it is - see {@link Target#anySpecies}. */
+    protected static FishCatch findAny(boolean deepGear) {
+        return find(null, deepGear);
+    }
+
+    /** A named species, or any at all when {@code speciesId} is null. */
     protected static FishCatch find(String speciesId, boolean deepGear) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
@@ -398,7 +416,7 @@ public class FishingIntro {
             if (!FishItems.isCatch(data)) continue;
 
             for (FishCatch entry : FishItems.read(data)) {
-                if (!speciesId.equals(entry.speciesId)) continue;
+                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
 
                 if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
                         || entry.method != FishLogEntry.Method.HARPOON)) {
@@ -418,7 +436,12 @@ public class FishingIntro {
         Target target = getTarget();
         if (target == null || !isTargetMet()) return false;
 
-        for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
+        if (target.anySpecies) {
+            FishCatch any = findAny(target.needsDeepGear);
+            if (any != null) spend(any.speciesId, target.needsDeepGear);
+        } else {
+            for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
+        }
 
         clearTarget();
 
@@ -440,7 +463,7 @@ public class FishingIntro {
             int found = -1;
             for (int i = 0; i < contents.size(); i++) {
                 FishCatch entry = contents.get(i);
-                if (!speciesId.equals(entry.speciesId)) continue;
+                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
 
                 if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
                         || entry.method != FishLogEntry.Method.HARPOON)) {
@@ -600,6 +623,8 @@ public class FishingIntro {
     public static String describeTarget() {
         Target target = getTarget();
         if (target == null) return "";
+
+        if (target.anySpecies) return "anything you can land";
 
         List<String> names = new ArrayList<>();
         for (String id : target.speciesIds) {
@@ -800,14 +825,27 @@ public class FishingIntro {
             return tags;
         }
 
-        /** The errand's system while there is one, else whichever boat is nearest. */
+        /**
+         * The rupture itself while the errand is at one, so the note points at the thing wearing
+         * the marker rather than at the system containing it; the system otherwise, and whichever
+         * boat is nearest when there is no errand at all.
+         */
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
             Target target = getTarget();
 
             if (target != null) {
                 for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-                    if (system.getId().equals(target.systemId)) return system.getHyperspaceAnchor();
+                    if (!system.getId().equals(target.systemId)) continue;
+
+                    if (target.atPond) {
+                        SectorEntityToken pond = QuestPond.findPondAt(system, target.x, target.y,
+                                TutorialConstants.SPOT_SPREAD);
+
+                        if (pond != null) return pond;
+                    }
+
+                    return system.getHyperspaceAnchor();
                 }
             }
 

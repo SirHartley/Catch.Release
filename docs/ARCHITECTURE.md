@@ -231,7 +231,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Blueprint, Commodity |
 | `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
-| `QuestPond.java` | Claims and releases a pond for a job, and seeds a flagged quest mote into it |
+| `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |
@@ -286,7 +286,7 @@ explains how.
 | File | What it does |
 |---|---|
 | `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system - a small base leaned on by a full hold and a long absence - after which the system is locked for a month so re-entry is not a re-roll |
-| `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
+| `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost - weekly, and again the moment the player arrives, so a destroyed boat is back by the time anybody looks |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing; `keepPace()` holds it to burn 4 unless it is closing on somebody |

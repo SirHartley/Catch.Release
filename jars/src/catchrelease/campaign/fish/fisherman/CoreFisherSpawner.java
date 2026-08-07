@@ -45,11 +45,22 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return false;
     }
 
-    /** Swept on the first tick after a load as well as weekly, so a new campaign posts them at once. */
+    /**
+     * Swept on the first tick after a load as well as weekly, so a new campaign posts them at once -
+     * and again the moment the player arrives somewhere, which is the case the weekly sweep is too
+     * slow for.
+     * <p>
+     * A boat can be destroyed, and everything the trade offers in that system goes with it: the
+     * outfitter, the chart counter, the hand-in for whatever errand is open. Waiting up to a week
+     * for the sweep to notice reads as the trade having abandoned the system. Arriving to find one
+     * back at its work reads as it never having been gone, which is the truer of the two.
+     */
     @Override
     public void advance(float amount) {
+        boolean arrived = hasJustArrived();
+
         interval.advance(Global.getSector().getClock().convertToDays(amount));
-        if (!interval.intervalElapsed() && swept) return;
+        if (!interval.intervalElapsed() && swept && !arrived) return;
 
         swept = true;
 
@@ -67,6 +78,35 @@ public class CoreFisherSpawner implements EveryFrameScript {
     }
 
     protected transient boolean swept = false;
+
+    /** Where the player was last look, so arriving somewhere can be told from sitting in it. */
+    protected transient com.fs.starfarer.api.campaign.LocationAPI lastLocation;
+    protected transient boolean placed = false;
+
+    /**
+     * Whether the player has just changed system.
+     * <p>
+     * The first tick after a load is not an arrival - it is wherever the save was left - but that
+     * tick is swept anyway by {@link #swept}, so nothing is missed by sitting it out.
+     */
+    protected boolean hasJustArrived() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return false;
+
+        com.fs.starfarer.api.campaign.LocationAPI where = player.getContainingLocation();
+
+        if (!placed) {
+            placed = true;
+            lastLocation = where;
+            return false;
+        }
+
+        if (where == lastLocation) return false;
+
+        lastLocation = where;
+
+        return true;
+    }
 
     /** The system's own trawler, if it still has one. */
     public static CampaignFleetAPI getBoat(StarSystemAPI system) {
