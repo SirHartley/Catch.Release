@@ -223,7 +223,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
 | `FishLog.java` | Sector-persistent per-species record; unlocks location data for codex and map |
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
-| `Aberration.java` | 0–1 aberration for a location — the inverse of coherence — from abyss depth, black hole, hypershunt and slipstream, strongest wins. Names the source via `dominantSourceAt` |
+| `Aberration.java` | 0–1 aberration for a location — the inverse of coherence — from abyss depth, black hole, hypershunt, slipstream, **gates** and **planet-scale machinery**, strongest wins. Names the source via `dominantSourceAt`. Carries the foreign-tag lists (`FOREIGN_GATES`, `FOREIGN_HYPERSHUNTS`, `FOREIGN_ENGINES`) that fold other mods' equivalents into the same sources |
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
 | `StarColour.java` | What a system's sun looks like, from its star's planet type |
 | `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached |
@@ -804,6 +804,10 @@ written to that claim.
 **A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
 
 **The camp job polls rather than being told.** Being killed, bought off, talked off and quietly wandering away do not share a hook, and only two of the four happen inside a conversation. So `CampedSpotJob.advanceImpl` asks one question on the mission's own tick instead of four rules rows each reporting a different way.
+
+**A gate is two sources, not one, so it cannot go through the nearest-of helper.** Dormant it reaches 3 ly at 0.3; lit it reaches 6 ly at 0.85. Different reach *and* different depth means the nearest gate is not reliably the worst one - a dormant gate overhead can matter less than a live one two systems away - so `getGateShare` walks them and takes the strongest reading rather than the shortest distance. `GateEntityPlugin.isActive` casts the custom plugin, so it is only safe on a vanilla gate; a foreign one falls back to the sector-wide `areGatesActive`.
+
+**Other mods' equivalents are named by tag and cost nothing when absent.** `Global.getSector().getEntitiesWithTag` on an unregistered tag returns an empty list, so the foreign-tag arrays in `Aberration` are a hard dependency on nothing - `bifrost` reads as a gate, `aotd_hypershunt_receiver` as a hypershunt, `aotd_pluto_station` as planet-scale machinery. Adding another mod's object to the model is one string in one array.
 
 **A mote handed its own spawn point as a destination dies on the first frame.** `FishEntityPlugin` swims toward its target and expires on arrival, so spawn and target must be different points - `QuestPond.placeMote` used to pass one point as both, and the keepers that replant a missing specimen then put it somewhere else in the pond, over and over. That is what "the quest mote teleports" was: not movement, a fade and a replant. The open-water planting in `FishermanQuest` had always spawned on one side and aimed at the other for exactly this reason; the pond path never got the same treatment.
 
