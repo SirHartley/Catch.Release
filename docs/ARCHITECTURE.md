@@ -148,6 +148,10 @@ named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 ## The rules.csv contract
 
+The language itself - triggers, memory containers, scoring, the option commands, and the
+traps this repo has hit - is in [`RULES.md`](RULES.md). What follows is only what this mod
+does on top of it.
+
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
 `tokens` writes the booleans and strings the rows branch on and always returns true, so it never
