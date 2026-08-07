@@ -837,6 +837,7 @@ He looks you over - the coat, the boots, whatever it is you have been doing to y
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall
 CatchReleaseCMD tokens",,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
 10:catchrelease_crabWareExplosive_head:Explosive Head
+20:catchrelease_crabWareConservatory:Breach Conservatory Plans
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
 catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:10
 CatchReleaseCMD tokens
@@ -863,6 +864,31 @@ CatchReleaseCMD tokens
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Continue,
 catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Continue
+100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabWareConservatory,DialogOptionSelected,"$option == catchrelease_crabWareConservatory score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this one is not mine."" He says it as though the other two were. ""Somebody built a hall for it, once - glass thick as your arm, water behind it, and the whole town in on a Sunday looking at things nobody has a name for. The plans got out. This is them.""
+
+He turns the chip over. It is genuinely a blueprint chip, and he is genuinely not looking at you while you decide.
+
+""You put it on a world and the world is in the trade. That is all it does. It is the only way in that I know of.""
+
+He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.","0:catchrelease_crabBuyConservatory:Pay him
+10:catchrelease_crabStall:Continue",
+catchrelease_crabWareConservatoryShort,DialogOptionSelected,"$option == catchrelease_crabWareConservatory score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this one is not mine."" He says it as though the other two were. ""Somebody built a hall for it, once - glass thick as your arm, water behind it, and the whole town in on a Sunday looking at things nobody has a name for. The plans got out. This is them.""
+
+He turns the chip over. It is genuinely a blueprint chip, and he is genuinely not looking at you while you decide.
+
+""You put it on a world and the world is in the trade. That is all it does. It is the only way in that I know of.""
+
+He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.
+
+You are short, and he has already put it back in the coat.",10:catchrelease_crabStall:Continue,
+catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The chip changes hands and he does not watch it go, which after the speech is its own kind of answer.
+
+Your ops chief signs it into the hold under a heading that did not exist this morning.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,BarCMD returnFromEvent false,"He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
 catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer to it.",,

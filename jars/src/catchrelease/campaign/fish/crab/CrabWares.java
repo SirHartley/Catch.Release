@@ -1,11 +1,14 @@
 package catchrelease.campaign.fish.crab;
 
+import catchrelease.campaign.fish.colony.BreachConservatory;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.impl.campaign.ids.Items;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -17,9 +20,9 @@ import java.util.Set;
  * What Crablobab has in the coat, and what he wants for it.
  * <p>
  * Deliberately not shop stock. The outfitter sells the rig - things that make the gear better at
- * what the gear is for, priced off a ladder, restocked forever. These are two objects, sold once
- * each by one man who is not in the equipment business, and neither of them makes anything better:
- * one is a novelty and the other takes the harpoon's whole purpose away and replaces it.
+ * what the gear is for, priced off a ladder, restocked forever. These are objects sold once each by
+ * one man who is not in the equipment business, and none of them makes the rig better: a novelty, a
+ * charge that takes the harpoon's whole purpose away and replaces it, and the plans for a building.
  * <p>
  * Three questions, not one, and they are not the same question asked three ways. Bought is his
  * business and never comes undone. Owned is where the thing is kept afterwards, which for a module
@@ -69,6 +72,37 @@ public enum CrabWares {
         @Override
         public void grant() {
             ShopEntry.of(Tackle.EXPLOSIVE_HEAD, Tackle.Fit.HARPOON).grant();
+        }
+    },
+
+    /**
+     * The plans for the conservatory, as a blueprint chip rather than as a thing switched on.
+     * <p>
+     * Vanilla's own industry blueprint: one item id with the industry written into its data, which
+     * the game's plugin reads to name itself and to teach the faction when it is used. So nothing
+     * here has to know what a blueprint screen looks like - the chip goes into the hold and the rest
+     * is the game's.
+     * <p>
+     * Owned is asked two ways because it can become true two ways. He stops selling it once he has
+     * sold it, and also once the faction knows the industry by any other route - a chip found in a
+     * hulk teaches the same thing his does, and a man offering to sell what you already have is a
+     * man who has not looked.
+     */
+    CONSERVATORY("Breach Conservatory Plans", 60000, 8,
+            "A blueprint chip for a hall of pressure glass and dim water. Half fish market, half"
+                    + " public aquarium, and the only way a colony gets into the trade at all.") {
+        @Override
+        public boolean isOwned() {
+            return isBought(name())
+                    || Global.getSector().getPlayerFaction().knowsIndustry(BreachConservatory.ID);
+        }
+
+        @Override
+        public void grant() {
+            markBought(name());
+
+            Global.getSector().getPlayerFleet().getCargo().addSpecial(
+                    new SpecialItemData(Items.INDUSTRY_BP, BreachConservatory.ID), 1);
         }
     };
 
