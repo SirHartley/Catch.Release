@@ -63,15 +63,27 @@ public class FishermanConstants {
     public static final float HARPOON_MIN_LIT = 0.15f;
 
     /**
-     * Spawn pressure: one roll when the player arrives somewhere, not a roll a day.
+     * Spawn pressure: the odds are the old ones, asked once when the player arrives somewhere.
      * <p>
-     * A daily roll in every rim system meant a boat behind every jump. The month is the real gate -
-     * he is one man working an enormous volume, and running into him twice in a week says otherwise -
-     * and the chance on top is what stops the first uninhabited system a campaign visits being the
-     * one he is standing in.
+     * A small base leaned on hard by a full hold and by a long absence, which is a good curve - it
+     * was the *frequency* that was wrong. Rolled per arrival rather than per day, and the system is
+     * then locked for a month, so jumping out and back is not a re-roll and a rim run is not a boat
+     * behind every jump.
      */
-    public static final float SPAWN_COOLDOWN_DAYS = 30f;
-    public static final float SPAWN_ENTRY_CHANCE = 0.25f;
+    public static final float SPAWN_BASE_CHANCE = 0.06f;
+    public static final int CARGO_FISH_THRESHOLD = 15;
+    public static final float CARGO_FULL_MULT = 4f;
+    public static final float OVERDUE_DAYS = 60f;
+    public static final float OVERDUE_MULT = 6f;
+
+    /** Core systems still get visits, just fewer - the frontier is where the fishing is. */
+    public static final float CORE_SPAWN_MULT = 0.3f;
+
+    /** How long a system stays answered for once it has been rolled. */
+    public static final float SPAWN_LOCK_DAYS = 30f;
+
+    /** Set on the system itself, with the month as its own expiry. */
+    public static final String SPAWN_LOCK_KEY = "$catchrelease_fisherRolled";
 
     /** The boat works at a trawler's pace, and only breaks it to head somebody off. */
     public static final String BURN_ID = "catchrelease_fisherman_burn";
