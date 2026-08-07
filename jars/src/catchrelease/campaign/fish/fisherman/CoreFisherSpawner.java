@@ -55,6 +55,11 @@ public class CoreFisherSpawner implements EveryFrameScript {
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (!OuterReaches.isPopulated(system)) continue;
+
+            //a boat in a system the Church or the Path runs has nowhere to land a catch and nobody
+            //to sell it to, so there is no boat
+            if (catchrelease.campaign.fish.FishingTaboo.holds(system)) continue;
+
             if (getBoat(system) != null) continue;
 
             post(system);

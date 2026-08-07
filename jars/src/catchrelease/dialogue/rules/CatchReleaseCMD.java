@@ -3,6 +3,7 @@ package catchrelease.dialogue.rules;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.LampOffence;
 import catchrelease.campaign.crime.LampPatrolResponse;
+import catchrelease.campaign.fish.FishingTaboo;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
@@ -19,6 +20,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
@@ -87,6 +89,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
+
+    /**
+     * Whether this is a port where anybody would admit to fishing.
+     * <p>
+     * False in Church and Path space, which is what keeps the bar events that are <i>about</i> the
+     * trade - the rating with a boat behind them, the man selling gear out of a coat - out of ports
+     * where the trade is the objection. See {@code FishingTaboo}.
+     */
+    public static final String FISH_WELCOME = "$catchreleaseFishWelcome";
 
     /**
      * A patrol stopping the player about the lamps: which rung, what it wants, and what it is
@@ -307,6 +318,18 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
+    /**
+     * The market the conversation is happening at, when there is one.
+     * <p>
+     * Off the interaction target rather than off {@code $market}, because the bar triggers this is
+     * read at run before a market scope is put in the memory map and the target is the port itself.
+     */
+    protected MarketAPI getMarket(InteractionDialogAPI dialog) {
+        SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
+
+        return target == null ? null : target.getMarket();
+    }
+
     /** The fleet on the other side of the link, when there is one. */
     protected CampaignFleetAPI getOtherFleet(InteractionDialogAPI dialog) {
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
@@ -352,6 +375,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft(), 0);
+        local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
 
         for (CrabWares ware : CrabWares.values()) {
             String key = "$catchreleaseCrab" + Misc.ucFirst(ware.name().toLowerCase());

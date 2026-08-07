@@ -26,6 +26,7 @@ public class AcademyJob extends FishJob {
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
         if (market == null) return false;
+        if (catchrelease.campaign.fish.FishingTaboo.isTaboo(market)) return false;
         if (HOME.equals(market.getId())) return true;
 
         return Factions.INDEPENDENT.equals(market.getFactionId()) && market.getSize() >= MIN_SIZE;

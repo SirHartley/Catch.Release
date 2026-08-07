@@ -1,5 +1,7 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.campaign.fish.FishingTaboo;
+
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -11,7 +13,6 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.CustomRepImpact;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActionEnvelope;
 import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
-import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -71,7 +72,7 @@ public class LampOffence {
      * anywhere they hold, which is the difference between a regulation and a doctrine.
      */
     public static boolean hatesLampsAnywhere(String factionId) {
-        return Factions.LUDDIC_CHURCH.equals(factionId) || Factions.LUDDIC_PATH.equals(factionId);
+        return FishingTaboo.isTaboo(factionId);
     }
 
     //---------------------------------------------------------------- where it is illegal

@@ -169,6 +169,10 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (fleet.getFaction() == null || fleet.getFaction().isPlayerFaction()) return false;
         if (fleet.isHostileTo(player)) return false;
 
+        //a Church or Path hull does not stop a passing stranger to ask for a fish, whatever else it
+        //might stop them for - see FishingTaboo
+        if (catchrelease.campaign.fish.FishingTaboo.isTaboo(fleet.getFaction().getId())) return false;
+
         if (fleet.getCommander() == null) return false;
 
         //the same question the harpooned crews ask about themselves, and there is only one answer

@@ -49,6 +49,10 @@ The short version:
 
 ## Gotchas
 
+- **The Church and the Path never like fishing.** A rupture is a hole into hyperspace and the
+  catch comes from the wrong side of it, so neither flag has fishers, buyers or bar jobs - only
+  patrols that stop you and cells that sit on the water. `campaign/fish/FishingTaboo.java` is the
+  one list; do not hardcode the faction ids anywhere else.
 - **Terrain differs from custom entities.** `getPlugin()` rather than `getCustomPlugin()`,
   radius only settable through `CampaignTerrainAPI`, `getActiveLayers()` and
   `getRenderRange()` throw unless overridden, and `BaseTerrain.advance` sweeps local fleets
