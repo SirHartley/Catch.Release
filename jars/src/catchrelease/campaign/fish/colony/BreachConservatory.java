@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.colony;
 
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.impl.campaign.econ.impl.BaseIndustry;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -23,6 +24,38 @@ import java.util.List;
 public class BreachConservatory extends BaseIndustry {
 
     public static final String ID = "catchrelease_conservatory";
+
+    /**
+     * Not buildable until the plans have been read, which is the whole reason the plans exist.
+     * <p>
+     * Blueprint gating is not something an industry gets for being in a blueprint - nothing in the
+     * game asks {@code knowsIndustry} on an industry's behalf, and {@link BaseIndustry} answers this
+     * with "yes, if the market has people on it". So an industry that is meant to be learned has to
+     * say so itself, which is what vanilla's own {@code PlanetaryShield} does and the only reason
+     * its blueprint means anything. Without this the chip Crablobab sells teaches a faction
+     * something it could already build.
+     * <p>
+     * Calls up rather than replacing: the population and no-industries checks still apply, and this
+     * is one more reason on top of them rather than a different set.
+     */
+    @Override
+    public boolean isAvailableToBuild() {
+        if (!Global.getSector().getPlayerFaction().knowsIndustry(getId())) return false;
+
+        return super.isAvailableToBuild();
+    }
+
+    /**
+     * And hidden entirely until then, rather than listed greyed out.
+     * <p>
+     * The two go together - an industry that refuses to build but still advertises itself on every
+     * colony screen is an industry telling the player about a thing it will not let them have. Once
+     * the plans are read it appears and behaves like anything else, unavailable reasons included.
+     */
+    @Override
+    public boolean showWhenUnavailable() {
+        return Global.getSector().getPlayerFaction().knowsIndustry(getId());
+    }
 
     /** The tank's stock, as encoded {@link catchrelease.campaign.fish.data.FishCatch} strings. */
     protected List<String> aquariumFish = new ArrayList<>();
