@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 198 Java files across eight top-level packages, plus
+What is where, and which file to open first. 204 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -30,7 +30,8 @@ that is wrong is worse than no map, because it is believed.
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
 | The low-coherence screen overlay | `campaign/fish/coherence/CoherenceOverlayScript.java` |
-| The fishing boats — wanderer and trawlers | `campaign/fish/fisherman/` |
+| The fishing boats, standing and visiting | `campaign/fish/fisherman/` |
+| How anybody starts fishing | `campaign/fish/tutorial/` |
 | The colony structure and its aquarium | `campaign/fish/colony/` |
 | Consequences of harpooning a fleet | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
@@ -53,15 +54,17 @@ Everything game-facing is wired from `ModPlugin.java`.
    custom encounter dialogs
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
-7. `FishermanSpawner.register()` — the daily roll for the wandering Fisherman
-8. `CoreFisherSpawner.register()` — one standing trawler to every inhabited system
-9. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
-10. `AquariumTankScript.register()` — the aquarium on the colony's main menu
-11. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-12. `SkillshotFramework.register()` — the aiming framework
-13. `FishMapFilterScript` as a transient script — the sector-map filter
-14. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-15. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
+8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
+9. `FishingIntro.healOldSave()`, `LostHarpoon.place()`, `FishingRating.VisitCounter.register()` —
+   the introduction: the wreck that starts it, and the counter the bar hook waits on
+10. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
+11. `AquariumTankScript.register()` — the aquarium on the colony's main menu
+12. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
+13. `SkillshotFramework.register()` — the aiming framework
+14. `FishMapFilterScript` as a transient script — the sector-map filter
+15. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+16. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -74,7 +77,8 @@ are rebuilt every load because their state lives in sector memory rather than in
 
 Classes the game instantiates by name. Grep the data file, not the call sites — there aren't any.
 
-**`data/campaign/abilities.csv`** — 5 abilities
+**`data/campaign/abilities.csv`** — 5 abilities. The four of ours are `unlockedAtStart=FALSE`:
+they are granted by `FishingIntro`, not by character creation.
 
 | Id | Class |
 |---|---|
@@ -84,9 +88,10 @@ Classes the game instantiates by name. Grep the data file, not the call sites �
 | `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
-**`data/campaign/bar_events.csv`** — 11 jobs, plus `catchrelease_crablobab` →
-`campaign/fish/crab/CrabSalesman`, which is a vendor rather than a job and the one row here that is
-not a `FishJob`. **Three of the job ids do not match their class name:**
+**`data/campaign/bar_events.csv`** — 11 jobs, plus two rows that are not `FishJob`s:
+`catchrelease_crablobab` → `campaign/fish/crab/CrabSalesman` (a vendor) and `catchrelease_rating` →
+`campaign/fish/tutorial/FishingRating` (the introduction's bar hook). **Three of the job ids do not
+match their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
@@ -106,8 +111,9 @@ Carries the plugin class only; name, radius, layers and tags all come from the p
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
 
-**`data/config/custom_entities.json`** — the motes, harpoon, drone, and the fishing boats' map
-mark (`catchrelease_FisherMapIcon` → `FishermanMapIcon`). The pond is **not** here any more.
+**`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
+(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's wreck
+(`catchrelease_LostHarpoon` → `LostHarpoon`). The pond is **not** here any more.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below.
 
@@ -221,24 +227,39 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
-The fishing trade. Two kinds of boat: the wandering Fisherman, who turns up in uninhabited water for
-a fortnight and is always the same man, and a standing trawler posted to every inhabited system,
-working the outer reaches off one shared shelf.
+The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
+outer reaches off one shared shelf, and a visiting one that turns up in uninhabited water for a
+fortnight with a shelf of its own. Every one of them answers with the same face, and none of them
+explains how.
 
 | File | What it does |
 |---|---|
-| `FishermanSpawner.java` | The daily roll for the wanderer: where he may turn up, and what leans the odds |
-| `CoreFisherSpawner.java` | One trawler to every inhabited system, re-posted if it is lost |
-| `CoreFisherBehavior.java` | The standing boat: the same rig, no visit clock, and the outer-reaches route |
+| `FishermanSpawner.java` | The daily roll for the visiting boat: where it may turn up, and what leans the odds |
+| `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
+| `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
-| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, the wanderer's own, and the pool that keeps them apart |
+| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, a visiting boat's own, and the pool that keeps them apart |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
 | `FishermanConstants.java` | Every number the above read |
+
+### `campaign/fish/tutorial`
+How somebody comes to be fishing at all. Three ways in, one state machine, and the abilities held
+behind it — `unlockedAtStart` is **off** for all four in `abilities.csv`, so a new campaign has no
+fishing gear until Baha puts it in your hands.
+
+| File | What it does |
+|---|---|
+| `FishingIntro.java` | The four stages, Baha the person, the ability grant, and the intel note |
+| `BahaDialog.java` | The scientist aboard: the introduction, the rig, and taking the first catch |
+| `LostHarpoon.java` | Somebody else's harpoon on a dead world, in a pond — the find that starts it |
+| `LostHarpoonDialog.java` | Standing over it, and tracing the transponder |
+| `FishingRating.java` | The bar hook: a rating with a story, after the second market |
+| `TutorialConstants.java` | Every number the above read |
 
 ### `campaign/fish/minigame`
 The catch itself. Rules are separated from rendering on purpose.
@@ -740,9 +761,12 @@ a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrigh
 which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
 re-applied each tick rather than set at spawn, so it heals a boat that predates it.
 
-**The Fisherman is one person, made once.** Every other fleet in the game is fresh hulls under a
-fresh officer with a fresh name; he deliberately is not, because the same face turning up four jumps
-and eight months later is the point of him. `FishermanIdentity` keeps the `PersonAPI` in sector
+**The Fisherman is one person, made once — and he is on every boat.** Every other fleet in the game
+is fresh hulls under a fresh officer with a fresh name; he deliberately is not, because the same face
+turning up four jumps and eight months later is the point of him. Standing boat or visiting one, the
+encounter shows the same portrait and says nothing about it. The flag that separates the two is
+`$catchrelease_fisherman_visiting`, and it is about the *schedule* — nothing about who the player is
+talking to hangs off it. `FishermanIdentity` keeps the `PersonAPI` in sector
 memory and hands the same object back at every spawn, and the encounter shows the portrait rather
 than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
 `getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
@@ -750,8 +774,23 @@ figure, not a specimen's jittered one), and the boat's name, the greeting, and t
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
 
+**Three ways into the introduction, and none of them is required.** A wreck to stumble over, a
+rating in a bar after the second market, and simply hailing a fishing boat all call
+`FishingIntro.point()`, which is idempotent — a player who trips two of them gets one intel note, not
+two. That is the only thing the first two hooks do; everything after it happens aboard, with Baha.
+The abilities are the gate: `unlockedAtStart` is off for all four, so a new campaign cannot fish
+until somebody hands over the rig, which is the only version of a tutorial that is not a page of text
+you can close. `FishingIntro.healOldSave()` reads all four abilities present as proof the campaign
+was fishing before any of this existed — a tell a fresh campaign cannot produce, because the
+outfitter is only ever handed over at the end.
+
+**`FishCurrency` counts and spends by exact rarity, not "at most".** `count(COMMON)` is the number of
+*commons* aboard, so Baha's "a common will do" cannot be written as `spend(COMMON, 1)` — somebody
+whose first catch came up uncommon would stand there holding a fish being told the hold is empty.
+`BahaDialog.cheapestAboard()` walks the rungs and spends the lowest one actually held.
+
 **A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
-system and will cut straight across an inhabited orbit getting anywhere, so the standing trawlers
+system and will cut straight across an inhabited orbit getting anywhere, so the standing boats
 route themselves: `OuterReaches` defines a band from past the outermost inhabited world out to a
 little beyond the furthest thing in orbit — the far-flung planets are on the route, the populated
 inner system is not — and `pick()` rejects a destination *and* the leg to it, since a fleet flies its

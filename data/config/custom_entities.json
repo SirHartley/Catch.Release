@@ -49,6 +49,36 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
+	# somebody else's harpoon, still transmitting, stuck in a world nobody lives on - the find that
+	# opens the fishing trade. Domain-era probe art stands in until there is a head sprite for it
+	"catchrelease_LostHarpoon":{
+		"defaultName":"Transponder Signal",
+		"nameInText":"transponder signal",
+		"shortName":"signal",
+		"aOrAn":"a",
+		"isOrAre":"is",
+		"defaultRadius":30,
+		"interactionImage":"graphics/illustrations/space_wreckage.jpg",
+		"icon":"graphics/icons/derelict.png",
+		"iconWidth":22,
+		"iconHeight":22,
+		"sprite":"graphics/stations/survey_probe.png",
+		"spriteWidth":40,
+		"spriteHeight":40,
+		"renderShadow":true,
+		"useLightColor":true,
+		"showInCampaign":true,
+		"showIconOnMap":true,
+		"showNameOnMap":false,
+		"scaleNameWithZoom":false,
+		"scaleIconWithZoom":true,
+		"renderCircleIndicator":true,
+		"renderCircleIndicatorSelectionFlash":true,
+		"layers":[STATIONS],
+		"tags":["has_interaction_dialog", "catchrelease_lost_harpoon"],
+		"pluginClass":"catchrelease.campaign.fish.tutorial.LostHarpoon"
+	},
+
 	# the fishing boats' mark on the system map - drawn there and nowhere else, so the boat can be
 	# found among the blips without anything being painted over its hull out in space
 	"catchrelease_FisherMapIcon":{

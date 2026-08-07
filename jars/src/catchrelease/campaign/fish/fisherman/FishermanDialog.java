@@ -7,9 +7,10 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
+import catchrelease.campaign.fish.tutorial.BahaDialog;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
@@ -45,6 +46,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         SELL,
         SELL_PICK,
         RUMOR,
+        BAHA,
         LEAVE
     }
 
@@ -56,18 +58,15 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         showFace();
 
-        if (!isHim()) {
-            dialog.getTextPanel().addPara("The trawler answers on the second hail. \"Working the"
-                    + " deep end. Charts, gear, or are you selling?\"");
-
-            showMain();
-            return;
-        }
-
         float drift = FishermanIdentity.getDrift(dialog.getInteractionTarget()
                 .getContainingLocation());
 
         dialog.getTextPanel().addPara(FishermanIdentity.getGreeting(drift));
+
+        //hailing a boat is the third way into the introduction, and the only one that needs
+        //nothing to have happened first - so the greeting is also where the player learns there
+        //is somebody aboard who explains things
+        FishingIntro.point();
 
         //what is wrong with him here, where anything is - said in the colour the mod already
         //reads a failing coherence in, so it lands as the same fact about the same water
@@ -80,27 +79,16 @@ public class FishermanDialog implements InteractionDialogPlugin {
         showMain();
     }
 
-    /** Whether this is the wanderer, rather than one of the core's standing trawlers. */
-    protected boolean isHim() {
-        return dialog.getInteractionTarget() instanceof CampaignFleetAPI
-                && FishermanSpawner.isWanderer((CampaignFleetAPI) dialog.getInteractionTarget());
-    }
-
     /**
-     * The man rather than the hulls, for the one boat where that is the point.
+     * The man rather than the hulls.
      * <p>
-     * The same face campaign after campaign is a thing a fleet readout cannot say and a portrait
-     * says without a word. A trawler has no such claim on anybody's attention and gets the hulls,
-     * which is what it is.
+     * Every boat in the trade answers with the same face - that is the plot point, and it only
+     * lands if the screen says it without comment. A fleet readout cannot say "him again"; a
+     * portrait says it without a word, and says it identically on a boat four jumps from the last
+     * one. See {@link FishermanIdentity}.
      */
     protected void showFace() {
-        if (isHim()) {
-            dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
-            return;
-        }
-
-        dialog.getVisualPanel().showFleetInfo(dialog.getInteractionTarget().getName(),
-                (CampaignFleetAPI) dialog.getInteractionTarget(), null, null);
+        dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
     }
 
     protected void showMain() {
@@ -109,10 +97,12 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Purchase survey data", Option.SURVEY);
         dialog.getOptionPanel().addOption("Access the outfitter", Option.OUTFITTER);
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
+        dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
 
-        //rumors are his. A trawler working one system knows what everybody in that system knows,
-        //and the wanderer being the only source of them is half of why he is worth finding
-        if (isHim()) dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
+        //coloured while there is something to collect - the introduction, or a first catch that
+        //has not been shown to anybody yet
+        dialog.getOptionPanel().addOption("Ask to speak to the science end", Option.BAHA,
+                BahaDialog.hasBusiness() ? Misc.getHighlightColor() : null, null);
 
         dialog.getOptionPanel().addOption("Leave", Option.LEAVE);
 
@@ -150,6 +140,9 @@ public class FishermanDialog implements InteractionDialogPlugin {
             case RUMOR:
                 askRumor();
                 break;
+            case BAHA:
+                openBaha();
+                break;
             case MAIN:
                 showMain();
                 break;
@@ -168,12 +161,8 @@ public class FishermanDialog implements InteractionDialogPlugin {
     protected void openSurvey() {
         if (FishermanShelf.getOffers(dialog.getInteractionTarget()).isEmpty()) {
             dialog.getOptionPanel().clearOptions();
-            dialog.getTextPanel().addPara(isHim()
-                            ? "\"Shelf's bare - what I had, you bought, and I don't chart new"
-                            + " waters mid-trip.\""
-                            : "\"Shelf's bare. Everything the trade had out, you've had off us."
-                            + " Come back when the surveyors have caught up.\"",
-                    Misc.getGrayColor());
+            dialog.getTextPanel().addPara("\"Shelf's bare - what I had, you bought, and I don't"
+                    + " chart new waters mid-trip.\"", Misc.getGrayColor());
             dialog.getOptionPanel().addOption("Back", Option.MAIN);
             return;
         }
@@ -185,6 +174,23 @@ public class FishermanDialog implements InteractionDialogPlugin {
         FishermanSurveyDialog counter = new FishermanSurveyDialog(this::resume);
         dialog.setPlugin(counter);
         counter.init(dialog);
+    }
+
+    //---------------------------------------------------------------- Baha
+
+    /**
+     * The scientist, in the same frame and handed back the same way as the shop.
+     * <p>
+     * A separate plugin rather than more states in this one: the Fisherman sells things and Baha
+     * explains them, and mixing the two would put the tutorial's stages into the middle of a shop.
+     */
+    protected void openBaha() {
+        dialog.getOptionPanel().clearOptions();
+
+        BahaDialog baha = new BahaDialog(this::resume);
+
+        dialog.setPlugin(baha);
+        baha.init(dialog);
     }
 
     //---------------------------------------------------------------- outfitter

@@ -12,12 +12,14 @@ import org.lwjgl.util.vector.Vector2f;
 /**
  * One trawler to every inhabited system, kept there.
  * <p>
- * The wanderer is an event - he turns up, he is worth going to find, and he is gone. That is a poor
- * shape for the only place to buy a chart, because a player who wants one has nothing to do but wait
- * and travel. The core's boats are the other half of that: always somewhere, never far, and all
- * selling off the one shelf, so the trade reads as a trade rather than as a series of lucky
- * encounters. What is left worth crossing the sector for is the wanderer's own stock and his
- * rumors - see {@link FishermanShelf} and {@link FishRumors}.
+ * A boat that only turns up is a poor shape for the only place to buy a chart, because a player who
+ * wants one has nothing to do but wait and travel. These are the other half: always somewhere, never
+ * far, and all selling off the one shelf, so the trade reads as a trade rather than as a series of
+ * lucky encounters. What is left worth crossing the sector for is the visiting boat's own stock -
+ * see {@link FishermanShelf}.
+ * <p>
+ * They are crewed by the same man as the visiting one, and they do not explain how. That is the
+ * point of him.
  * <p>
  * They are posted rather than spawned: the sweep re-posts a system that has lost its boat, so one
  * killed in a fight is replaced in a week rather than leaving a hole for the rest of the campaign.
@@ -67,7 +69,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
 
         for (CampaignFleetAPI fleet : system.getFleets()) {
             if (!FishermanSpawner.isFisherman(fleet)) continue;
-            if (FishermanSpawner.isWanderer(fleet)) continue;
+            if (FishermanSpawner.isVisiting(fleet)) continue;
 
             if (!fleet.isExpired() && fleet.isAlive()) return fleet;
         }
@@ -84,7 +86,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
      */
     protected void post(StarSystemAPI system) {
         CampaignFleetAPI fleet = Global.getFactory().createEmptyFleet(
-                FishermanConstants.FACTION, FishermanConstants.CORE_FLEET_NAME, true);
+                FishermanConstants.FACTION, FishermanConstants.FLEET_NAME, true);
 
         for (String variant : FishermanConstants.CORE_SHIPS) {
             fleet.getFleetData().addFleetMember(
@@ -97,6 +99,9 @@ public class CoreFisherSpawner implements EveryFrameScript {
 
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.FLEET_FLAG, true);
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.SHARED_SHELF_FLAG, true);
+
+        //the same man at the wheel of this one too, which is the part nobody is meant to explain
+        FishermanIdentity.crew(fleet);
 
         system.addEntity(fleet);
 

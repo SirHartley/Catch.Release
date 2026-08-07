@@ -1,10 +1,8 @@
 ---------------------
 
 todo
-    - NPCs (Fisherman & Scientist)
     - The Ribcage fishing hub
     - Main quest tie-in (fish the 4th drone for galatia)
-    - Tutorial
     - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
@@ -23,12 +21,6 @@ Coherence
     - Show coherence in terrain bar and explain the source (if found)
     - The SFX is going to be a low whispering effect
 
-Tutorial
-- Tutorial hooks:
-    - Find lost tackle / equipment duing first survey like galatia to get you to visit a fisherman fleet in the core
-    - Have a rating approach you and give you the quest to head out to the fisherman fleet at the second planet you visit.
-    - Or interact with the fleet directly
-- The scientist & captain Baha is aboard and will talk to you, provide an introduction to fishing and give you the initial quest to get a simple fish, and provide basic equipment (abilities).
 
 Codex
 - open map from codex still broken
@@ -55,6 +47,13 @@ x  Inventory
   - Cargo icon should display the "marked" icon in the lower right.
   - Cargo fish Tooltip should say why it's wanted.
   - Fish crates should be stackable into a "pile of crates" by ctrl clicking it like packing fish into one crate. Only one pile of crates to exist in inventory, this is just to "clean up" all fish in your inventory.
+
+x Tutorial
+- Tutorial hooks:
+    - Find lost tackle / equipment duing first survey like galatia to get you to visit a fisherman fleet in the core
+    - Have a rating approach you and give you the quest to head out to the fisherman fleet at the second planet you visit.
+    - Or interact with the fleet directly
+- The scientist & captain Baha is aboard and will talk to you, provide an introduction to fishing and give you the initial quest to get a simple fish, and provide basic equipment (abilities).
 
 x Fisherman
   - Survey data: There should be a maximum of 6 data sets on sale at any time. Once sold, does not replenish until fisherman spawns again. Chance-based for higher rarities, accounting for what you already know (can't sell known data so the more you fish, the more he will offer rare template because you already know all the common ones.)
