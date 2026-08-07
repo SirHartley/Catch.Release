@@ -10,6 +10,8 @@ import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.tutorial.Castaway;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
@@ -58,10 +60,12 @@ public class ModPlugin extends BaseModPlugin {
         CoreFisherSpawner.register();
         FishermanQuest.Keeper.register();
 
-        // how anybody comes to be fishing at all - three hooks, none of them required
+        // how anybody comes to be fishing at all - four hooks, none of them required
         TutorialWreck.Watcher.register();
         Castaway.Watcher.register();
+        RatingBarEvent.VisitCounter.register();
         FishermanInterception.register();
+        FishingIntro.Keeper.register();
 
         // the colony conservatory's doors and its tank
         ConservatoryOptionProvider.register();

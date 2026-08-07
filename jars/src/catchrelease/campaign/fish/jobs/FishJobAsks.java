@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.CatchImplement;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -78,14 +79,26 @@ public class FishJobAsks {
     public static boolean rollCatchTerms(Random random, FishRequirement ask, float chance) {
         if (ask == null || random.nextFloat() > clamp(chance)) return false;
 
+        //an order is only an order if it can be filled. Until the introduction has handed the deep
+        //gear over, a harpoon-and-lamp ask is a sentence the player cannot act on at all - so the
+        //terms narrow to what is actually in their hands
+        boolean hasHarpoon = FishingIntro.hasGear("catchrelease_harpoon");
+        boolean hasLamps = FishingIntro.hasGear("catchrelease_searchlights");
+
         //weighted towards harpoon since it can also be narrowed by implement
-        boolean harpoon = random.nextFloat() > 0.35f;
+        boolean harpoon = hasHarpoon && random.nextFloat() > 0.35f;
 
         ask.method = harpoon ? FishLogEntry.Method.HARPOON : FishLogEntry.Method.DRONE;
 
         if (!harpoon) return true;
 
-        if (random.nextFloat() > 0.45f) ask.implement = pickImplement(random, ask.speciesId);
+        if (random.nextFloat() > 0.45f) {
+            ask.implement = pickImplement(random, ask.speciesId);
+
+            //lamps are the only way to a loose specimen, so without them that narrowing is a
+            //dead end and the ask is better left open than made impossible
+            if (!hasLamps && ask.implement == CatchImplement.BREACH_LAMP) ask.implement = null;
+        }
 
         return true;
     }

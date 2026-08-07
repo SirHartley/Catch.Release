@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.shop;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeStat;
+import com.fs.starfarer.api.Global;
 
 /**
  * The shelves of the shop, in the order they are walked past. The sheet only knows CAMPAIGN from
@@ -11,22 +12,44 @@ import catchrelease.memory.upgrades.UpgradeStat;
  */
 public enum ShopGroup {
 
-    SEARCHLIGHTS("Breach lamps", "Lamps"),
-    DRONES("Drones", "Drones"),
-    HARPOON("Harpoon", "Harpoon"),
+    SEARCHLIGHTS("Breach lamps", "Lamps", "catchrelease_searchlights"),
+    DRONES("Drones", "Drones", "catchrelease_rod"),
+    HARPOON("Harpoon", "Harpoon", "catchrelease_harpoon"),
     THE_CATCH("The catch", "Catch"),
-    DRONE_TACKLE("Drone tackle", "Drone rig"),
-    HARPOON_TIPS("Harpoon tips", "Harpoon"),
-    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig");
+    DRONE_TACKLE("Drone tackle", "Drone rig", "catchrelease_rod"),
+    HARPOON_TIPS("Harpoon tips", "Harpoon", "catchrelease_harpoon"),
+    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig", "catchrelease_searchlights");
 
     public final String title;
 
     /** What fits on a tab, where the full title would not. */
     public final String tabTitle;
 
+    /**
+     * The ability this shelf is about, or null for shelves that are about the catch itself.
+     * <p>
+     * A shop that lists upgrades and tackle for a rig the player has never been handed is a shop
+     * advertising a game they are not playing yet - and worse, it spoils the one thing the
+     * introduction has left to give them. The shelf appears with the gear.
+     */
+    public final String needsAbility;
+
     ShopGroup(String title, String tabTitle) {
+        this(title, tabTitle, null);
+    }
+
+    ShopGroup(String title, String tabTitle, String needsAbility) {
         this.title = title;
         this.tabTitle = tabTitle;
+        this.needsAbility = needsAbility;
+    }
+
+    /** Whether this shelf's gear is in the player's hands. */
+    public boolean isOwned() {
+        if (needsAbility == null) return true;
+
+        return Global.getSector() != null && Global.getSector().getPlayerFleet() != null
+                && Global.getSector().getPlayerFleet().hasAbility(needsAbility);
     }
 
     /** The shelf a stat sits on. Anything the ids do not place ends up with the catch. */

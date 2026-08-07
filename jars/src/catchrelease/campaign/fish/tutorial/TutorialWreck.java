@@ -49,7 +49,7 @@ public class TutorialWreck extends BaseCustomEntityPlugin {
         @Override
         public void advance(float amount) {
             if (isPlaced()) return;
-            if (FishingIntro.isAtLeast(FishingIntro.TAUGHT)) return;
+            if (FishingIntro.isAtLeast(FishingIntro.RODDED)) return;
 
             CampaignFleetAPI player = Global.getSector().getPlayerFleet();
             if (player == null) return;
@@ -114,10 +114,25 @@ public class TutorialWreck extends BaseCustomEntityPlugin {
         return hull;
     }
 
-    /** Whether an entity is the hulk, for the dialog router. */
+    /** Whether an entity is the hulk, for anything that routes on it. */
     public static boolean isWreck(SectorEntityToken entity) {
         return entity != null
                 && TutorialConstants.WRECK_ENTITY_ID.equals(entity.getCustomEntityType());
+    }
+
+    /**
+     * The hull as somebody would say it - "Eagle-class" - for the row that describes the find.
+     * <p>
+     * Empty for anything that is not the hulk, since the sheet asks every entity it opens on and a
+     * row that reads this is gated on the tag anyway.
+     */
+    public static String describeHull(SectorEntityToken entity) {
+        if (!isWreck(entity)) return "";
+
+        String hull = getHull(entity);
+        String name = hull.contains("_") ? hull.substring(0, hull.indexOf('_')) : hull;
+
+        return Misc.ucFirst(name) + "-class";
     }
 
     //---------------------------------------------------------------- the entity

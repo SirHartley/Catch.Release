@@ -196,7 +196,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
             stats.removeIf(stat -> ShopGroup.forStat(stat) == ShopGroup.THE_CATCH);
             stats.sort(Comparator.comparing(stat -> stat.id));
 
+            //a shelf for gear nobody has been handed yet is a shop advertising a game the player
+            //is not playing, and it gives away what the introduction has left to give
             for (ShopGroup group : ShopGroup.values()) {
+                if (!group.isOwned()) continue;
+
                 for (UpgradeStat stat : stats) {
                     if (ShopGroup.forStat(stat) == group) entries.add(ShopEntry.of(stat));
                 }
@@ -205,6 +209,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
             //iterate every Fit rather than a fixed list, so a new rig automatically gets a shelf
             for (Tackle.Fit rig : Tackle.Fit.values()) {
                 if (!rig.isRig()) continue;
+
+                ShopGroup shelf = ShopGroup.forRig(rig);
+                if (shelf != null && !shelf.isOwned()) continue;
 
                 List<Tackle> options = TackleManager.getOptions(rig);
                 options.remove(Tackle.NONE);

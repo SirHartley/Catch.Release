@@ -1,11 +1,5 @@
 package catchrelease.campaign.crime;
 
-import catchrelease.campaign.fish.fisherman.FishermanDialog;
-import catchrelease.campaign.fish.fisherman.FishermanSpawner;
-import catchrelease.campaign.fish.tutorial.Castaway;
-import catchrelease.campaign.fish.tutorial.CastawayDialog;
-import catchrelease.campaign.fish.tutorial.TutorialWreck;
-import catchrelease.campaign.fish.tutorial.TutorialWreckDialog;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.PluginPick;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -15,9 +9,13 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
- * Hands the game our own encounter screens - the fleets we have wronged, the fleets that want to
- * talk shop, and the two pieces of scenery the introduction is built out of. Keyed on flags on the
- * target, at the narrowest priority, so other mods overriding encounters still can.
+ * Hands the game the one encounter screen the mod still writes in Java: the fleets we have wronged.
+ * <p>
+ * Everything else the mod says now goes through {@code rules.csv}. The fishing boats, the hulk and
+ * the castaway are all ordinary rules-driven interactions keyed on a flag or a tag, which is what
+ * lets their dialogue live in the sheet where the jobs' already does. This is the exception because
+ * a harpooned fleet's screen is a <i>fleet interaction</i> - engage, disengage, comm link - and that
+ * is a plugin's shape rather than a conversation's.
  */
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
@@ -39,24 +37,7 @@ public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
     @Override
     public PluginPick<InteractionDialogPlugin> pickInteractionDialogPlugin(SectorEntityToken target) {
-        //the two things here that are not fleets: the hulk with the line in it, and the man who
-        //was put off a boat for looking at what came out of the water
-        if (TutorialWreck.isWreck(target)) {
-            return new PluginPick<InteractionDialogPlugin>(
-                    new TutorialWreckDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
-        }
-
-        if (Castaway.isCastaway(target)) {
-            return new PluginPick<InteractionDialogPlugin>(
-                    new CastawayDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
-        }
-
         if (!(target instanceof CampaignFleetAPI)) return null;
-
-        if (FishermanSpawner.isFisherman((CampaignFleetAPI) target)) {
-            return new PluginPick<InteractionDialogPlugin>(
-                    new FishermanDialog(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
-        }
 
         if (!HarpoonOffence.wasHarpooned((CampaignFleetAPI) target)) return null;
 

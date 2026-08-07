@@ -93,6 +93,15 @@ public class FishermanQuest {
         return stored instanceof Saved ? (Saved) stored : null;
     }
 
+    /** The wanted species as a name, for the rows that talk about it. */
+    public static String describe(Saved quest) {
+        if (quest == null) return "";
+
+        FishSpec spec = FishSpecLoader.getFishSpec(quest.speciesId);
+
+        return spec == null ? "the specimen" : spec.getDisplayName();
+    }
+
     public static int getRound() {
         return Global.getSector().getMemoryWithoutUpdate().getInt(ROUND_KEY);
     }

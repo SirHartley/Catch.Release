@@ -68,6 +68,9 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (!interval.intervalElapsed()) return;
 
         if (!canOffer()) return;
+        //the world does not start offering work until the introduction's first errand is done
+        if (!catchrelease.campaign.fish.tutorial.FishingIntro.isOpenForWork()) return;
+
         if (random.nextFloat() > CHANCE) return;
 
         FleetQuestType type = FleetQuestType.rollAny(random);
