@@ -25,7 +25,7 @@ FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""Whoever answers is laughing. \""It shot a rope at us! A rope!\"" The laughing stops very suddenly. \""Do it again and we will come and see what else your ship does.\""""
+!$entity.isHostile","AddText ""\""Do not say anything.\"" Whoever answers is not angry the way people usually are on this channel. \""We have seen that gear before. We know where it goes and we know what it brings back, and you have just put it through the side of a ship with people in it.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsPirate,OpenCommLink,"$faction.id == pirates
@@ -129,18 +129,22 @@ $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
 FireAll CatchReleaseFineOptions","""Peace be with you. Cut your engines.""
 
-$PersonRank $personName looks tired rather than angry, and looks at your fleet the way somebody looks at weather. ""A crew of ours has a hole in their ship and a story nobody believes. The Church is not interested in punishing curiosity. It is interested in the repair, which comes to $entity.catchrelease_harpoonFineDGS credits.""
+$PersonRank $personName looks tired rather than angry, and looks at your rig for rather longer than at your face. ""A crew of ours has a hole in their ship, put there by a machine built for reaching into somewhere nothing has any business reaching into.""
 
-""Pay it, and we will both call this a lesson.""",,
+""The Church will not be pricing that part of it. The repair comes to $entity.catchrelease_harpoonFineDGS credits, and that we will take.""
+
+""Pay it, and think about the rest on your own time.""",,
 catchrelease_fineDemandLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""Stop. Stop there.""
+FireAll CatchReleaseFineOptions","""Cut your drive.""
 
-The voice is young and delighted. ""You are the one with the machine that grabs. Everyone has heard. We are not supposed to want to see it.""
+$PersonRank $personName is looking at your ship rather than at you, and at one particular part of it. ""We know what that is. We know what it reaches into and we know what comes back through when it does.""
 
-A cough off-screen, and the delight is packed away. ""Tribute for the ship you holed. $entity.catchrelease_harpoonFineDGS credits. Then we look at your gear, and then we decide what it is."" Your ops chief does not react to that at all, which is its own kind of reaction.",,
+""There is a hull with a hole in it and a tribute owed for the hole. $entity.catchrelease_harpoonFineDGS credits. Pay that.""
+
+""The other thing - the rig, and the water you point it at - is not something anybody takes money about.""",,
 catchrelease_fineDemandPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
@@ -219,7 +223,7 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","$PersonRank $personName does not offer peace this time. ""We called the first one curiosity. You have been kind enough to correct us.""",,
+EndConversation NO_CONTINUE","$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
 catchrelease_fineDemandRepeatLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
@@ -761,7 +765,9 @@ CatchReleaseCMD tokens
 $catchreleaseWork
 !$catchreleaseWorkMet",,"""Still want the $catchreleaseWorkFish out of $catchreleaseWorkWhere. It is in there. It will keep being in there.""",100:catchrelease_fisherBack:Continue,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
-$global.catchrelease_intro_stage < 1","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it.""",,,
+$global.catchrelease_intro_stage < 1
+CatchReleaseCMD tokens
+$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it.""",,,"The rating has a boat behind them, which is the whole reason they are worth talking to and the whole reason they are not in a Church or Path port."
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not."" They look at your crew rather than at you, and seem to find whatever they were looking for. ""Everyone who does has that look about them.""
 
 They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the water that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
@@ -769,7 +775,8 @@ They turn the glass around without drinking from it. ""I crewed a boat that went
 ""They keep one in every system anybody lives in, out past the last colony where nothing is in the way. Hail it. And do not ask what is in the tank.""",catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
-$catchreleaseCrabAny","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
+$catchreleaseCrabAny
+$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
 catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible,"" he says, without being asked twice. ""Crablobab. That is me, and that is the crabs as well, it saves time."" One of the crate's occupants has got a claw through the mesh and is working on the rest of itself.
 
 He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",
@@ -1373,17 +1380,14 @@ EndConversation","You cut the link. The lamps keep burning, which is the only an
 Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,"A man with a fisher's tan and no boat to show for it has been nursing the same drink since before you came in, and keeps checking a slate that is not telling him anything new.",,
 catchrelease_campPirate_blurbBarHegemony,catchrelease_campPirate_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits with her registration papers squared on the table in front of her, which is what people do when the licence is the only part of the operation still working.",,
-catchrelease_campPirate_blurbBarChurch,catchrelease_campPirate_blurbBar,$faction.id == luddic_church score:10,,A fisher in a plain coat is eating nothing and saying grace over it anyway. Two of the people at his table are wearing the same coat and look considerably younger.,,
 catchrelease_campPirate_blurbBarIndependent,catchrelease_campPirate_blurbBar,$faction.id == independent score:10,,"A woman with a fisher's hands is going through a ledger backwards, which is how you read one when you are looking for the last month that made money.",,
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask him what the slate is telling him.,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,"A fisher is explaining something to a bored-looking clerk, quietly and for what is clearly not the first time, and the clerk is not writing any of it down.",,
 catchrelease_campMerc_blurbBarHegemony,catchrelease_campMerc_blurbBar,$faction.id == hegemony score:10,,A fisher in a patched flight jacket has a Navy grievance form in front of her and has filled in perhaps a third of it. The third she has filled in has been crossed out twice.,,
-catchrelease_campMerc_blurbBarChurch,catchrelease_campMerc_blurbBar,$faction.id == luddic_church score:10,,"A fisher sits alone with his hands flat on the table, in the posture of somebody who has decided that losing his temper here would not help anybody.",,
 catchrelease_campMerc_blurbBarIndependent,catchrelease_campMerc_blurbBar,$faction.id == independent score:10,,"A man who has plainly not been paid this month is buying a round anyway, which is either optimism or the last of it.",,
 catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask what the clerk is not writing down.,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,"A fisher is sitting well away from the door with her back to the wall, and has chosen the seat rather than fallen into it.",,
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket is sitting very still, and every time the door opens he looks at it and then makes himself stop looking at it.",,
-catchrelease_campPath_blurbBarChurch,catchrelease_campPath_blurbBar,$faction.id == luddic_church score:10,,"A fisher is in a corner with a chaplain, and whatever the chaplain is saying is not landing. The fisher keeps shaking her head, slowly, at something she has clearly already decided about.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why she picked that seat.,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one piece of water properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""

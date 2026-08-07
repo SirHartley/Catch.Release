@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 216 Java files across eight top-level packages, plus
+What is where, and which file to open first. 217 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -749,6 +749,8 @@ its next tick, rather than through `CatchReleaseCMD` — the handoff predates th
 no reason to move it. The bill adds a **global** marker beside the per-fleet flags, because the crew
 that was talked to need not still be near the player when anything reads it back; the marker is what
 keeps the sector-wide search off every other tick.
+
+**The Church and the Path are against the water, not against fish.** A rupture is a hole opened between here and hyperspace and everything pulled through it came from the wrong side of that hole, so the whole trade is people making a living off a wound in creation. Neither flag therefore produces a fisher, a buyer, a broker, or anybody in a bar with a favour to ask - no bar job at a Church or Path port, no trawler working a system either of them runs, no fishing offer on one of their hulls. What they do produce is everything in `campaign/crime`, plus the cells in `jobs/camp` that sit on ruptures so nobody can work them, and that is the only shape a Luddic interaction with this mod takes. `campaign/fish/FishingTaboo.java` is the one list; nothing hardcodes the two faction ids anywhere else.
 
 **A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
 

@@ -27,8 +27,8 @@ public class CultJob extends FishJob {
             return false;
         }
 
-        setGiverRank(Ranks.BROTHER);
-        setGiverVoice(Voices.FAITHFUL);
+        setGiverRank(Ranks.CITIZEN);
+        setGiverVoice(Voices.SPACER);
 
         if (!setUpGiver(createdAt)) return false;
 

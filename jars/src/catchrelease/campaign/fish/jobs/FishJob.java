@@ -205,6 +205,10 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         //introduction being asked for legendaries out of the abyss has been handed the wrong game
         if (!catchrelease.campaign.fish.tutorial.FishingIntro.isOpenForWork()) return false;
 
+        //nobody in a Church or Path port has fishing work, because to them the work is the problem
+        //rather than the fish - see FishingTaboo
+        if (catchrelease.campaign.fish.FishingTaboo.isTaboo(market)) return false;
+
         String required = getRequiredFactionId();
 
         return required == null || required.equals(market.getFactionId());
