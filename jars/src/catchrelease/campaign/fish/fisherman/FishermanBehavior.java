@@ -205,11 +205,20 @@ public class FishermanBehavior implements EveryFrameScript {
      * hull like any other freighter's. Either one puts the shop, the charts, the survey counter and
      * the whole introduction behind a fortnight of chase, over a rig that misfired once.
      * <p>
-     * {@code NEVER_AVOID_PLAYER_SLOWLY} is vanilla's own answer to the first, read by
-     * {@code Misc.isAvoidingPlayerHalfheartedly}. {@code MAKE_NON_HOSTILE} covers the second, and is
-     * the weaker of the two claims on purpose: vanilla lets {@code MAKE_HOSTILE} win unless
-     * {@code $makeNonHostileTakesPriority} is also set, and it is not, so anything that really
-     * means it can still turn this boat.
+     * Flight itself is decided by size, not by temper: {@code TacticalModule.pickEncounterOption}
+     * compares fleet strength and nothing else, and hands back {@code DISENGAGE} to anything under
+     * half the player's, which is this boat for most of a campaign. What that answer never reaches
+     * is a fleet with no quarrel - the module only asks it about fleets it considers hostile, or
+     * ones it has been told to edge away from. So the way to stop the running is to keep the boat
+     * out of both of those, permanently.
+     * <p>
+     * {@code NEVER_AVOID_PLAYER_SLOWLY} closes the second, read by
+     * {@code Misc.isAvoidingPlayerHalfheartedly}. The first needs two flags rather than one:
+     * {@code TacticalModule.isHostileTo} checks {@code MAKE_HOSTILE} <i>before</i>
+     * {@code MAKE_NON_HOSTILE}, so on its own the non-hostility loses to anything that turns the
+     * boat - and a hostile boat is a weaker boat, which is a running boat.
+     * {@code NON_HOSTILE_OVERRIDES_MAKE_HOSTILE} is vanilla's own answer to that, and moves the
+     * non-hostility to the front of the same method.
      * <p>
      * Written every frame rather than at spawn, because a boat already out there in somebody's save
      * never passed through the spawner - and if it is already running, this is what stops it.
@@ -223,6 +232,15 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (!memory.getBoolean(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE)) {
             memory.set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
+        }
+
+        if (!memory.getBoolean(MemFlags.NON_HOSTILE_OVERRIDES_MAKE_HOSTILE)) {
+            memory.set(MemFlags.NON_HOSTILE_OVERRIDES_MAKE_HOSTILE, true);
+        }
+
+        //the boat is not a party to whatever the player has going with the Independents
+        if (memory.getBoolean(MemFlags.MEMORY_KEY_MAKE_HOSTILE)) {
+            memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE);
         }
 
         //a boat that was already edging away when this shipped
