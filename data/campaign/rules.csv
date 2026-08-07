@@ -182,78 +182,106 @@ $PersonName sounds like somebody who took this contract for the fuel allowance a
 
 ""Say yes and we can both go back to what we were doing.""",,
 catchrelease_fineDemandRepeat,OpenCommLink,"$entity.catchrelease_fineConv score:1400
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","$PersonRank $personName does not appear to be reading from anything this time.
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","$PersonRank $personName does not appear to be reading from anything this time.
 
 ""Second one this month. There was a number attached to the first, and you will notice nobody is quoting you one now.""
 
 The link closes. Your sensors officer reports the formation spreading before you have finished turning to ask.",,
+catchrelease_fineDemandAgain,OpenCommLink,"$entity.catchrelease_fineConv score:1350
+$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+MakeOtherFleetAggressive catchreleasePatrol true 5
+MakeOtherFleetPreventDisengage catchreleasePatrol true 5
+$entity.catchrelease_harpoonPatrolDone = true 30
+$entity.catchrelease_harpoonForced = true 1
+unset $entity.catchrelease_fineConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","$PersonRank $personName has the file open and does not read from it.
+
+""We have stopped counting out loud. You will have noticed nobody is quoting you a number.""
+
+The link closes. Your sensors officer reports the formation spreading before you have finished turning to ask.",,"Scored below the second-time rows rather than above them, which is the whole trick: those are gated on the count being exactly two, so on a third they stop matching and this is what is left. Above them it would have won on the second as well, and the bug being fixed here is a patrol saying ""second"" when it is the fifth."
 catchrelease_fineDemandRepeatHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","""The second incident is not a fine. The second incident is a finding."" $PersonRank $personName sets the slate face down. ""Findings are executed.""",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","""The second incident is not a fine. The second incident is a finding."" $PersonRank $personName sets the slate face down. ""Findings are executed.""",,
 catchrelease_fineDemandRepeatTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
 catchrelease_fineDemandRepeatLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
 catchrelease_fineDemandRepeatLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","There is no greeting. Somebody laughs, once, the way you would at a door closing.",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","There is no greeting. Somebody laughs, once, the way you would at a door closing.",,
 catchrelease_fineDemandRepeatPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
 catchrelease_fineDemandRepeatDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_fineConv score:1410
-$entity.catchrelease_harpoonRepeat","MakeOtherFleetHostile catchreleasePatrol true 5
+$entity.catchrelease_harpoonRepeat
+$entity.catchrelease_harpoonCount == 2","MakeOtherFleetHostile catchreleasePatrol true 5
 MakeOtherFleetAggressive catchreleasePatrol true 5
 MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-EndConversation NO_CONTINUE","""You were told the penalty was the favourable outcome."" $PersonRank $personName sounds almost sorry. ""It was.""",,
+EndConversation NO_CONTINUE
+$entity.ignorePlayerCommRequests = true 0","""You were told the penalty was the favourable outcome."" $PersonRank $personName sounds almost sorry. ""It was.""",,
 catchrelease_patrolPaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1240
 $entity.catchrelease_harpoonFineSettled
 !$entity.isHostile","$menuState = fleetConvMain 0
@@ -290,6 +318,7 @@ catchrelease_fineRefuseSel,DialogOptionSelected,$option == catchrelease_refuseFi
 MakeOtherFleetAggressive catchreleasePatrol true 5
 $entity.catchrelease_harpoonPatrolDone = true 30
 unset $entity.catchrelease_fineConv
+$entity.ignorePlayerCommRequests = true 0
 ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
