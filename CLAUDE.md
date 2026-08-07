@@ -4,23 +4,48 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 
 ## Workflow
 
-- **Always use the `starsector-knowledge` skill** for anything touching the game: API
-  signatures, data file formats, game internals, obfuscated code. Never answer from memory -
-  the API changes between versions.
+- **Read the real sources wherever they answer the question.** They live in the repo under
+  `lib/`, zipped: `starfarer.api.zip` is the game's own API source, and `GraphicsLib.zip`,
+  `Lazylib_lunalib.zip` and `MagicLib.zip` are the dependency mods, source and jars both.
+  Unzip to a temp directory to read them - do not unpack them into the repo. A signature read
+  out of `lib/` beats one remembered or paraphrased.
+- **Use the `starsector-knowledge` skill for everything `lib/` does not cover**: the obfuscated
+  game internals, the stock data files, csv formats, mechanics. Never answer from memory - the
+  API changes between versions.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
+- **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
+  package gains or loses a file - any change that moves what a file does, what registers it,
+  or how the pieces fit lands in the map in the same commit. A change is not done while the
+  map still describes the old shape.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
   sitting on the branch.
+
+## Model assignments
+
+Split the work by kind of task rather than doing all of it in one place. The main session
+plans; subagents do the legwork.
+
+| Task | Who does it |
+|---|---|
+| Planning - architecture, sequencing, deciding what changes | Opus 5, in the main session |
+| Crawling and scoping - finding files, tracing call sites, reading the game sources | Sonnet 5 subagents (`model: sonnet`) |
+| Writing and editing code | Opus 4.8 subagents (`model: opus`) |
+| Anything UI or UI-adjacent - panels, dialogs, tooltips, renderers, shaders, sprites | Fable 5 subagents (`model: fable`) |
+
+The UI rule wins over the code rule: if a change touches something the player looks at, it
+goes to Fable 5 even though it is also code.
 
 ## Building
 
 Java 17 (`.idea/misc.xml` sets the language level; the source uses switch expressions).
 
-Compiles against the game and library jars, none of which live in this repo:
+Compiles against the game and library jars:
 
-- `starfarer.api.jar`, `starfarer_obf.jar` - from the game install's `starsector-core`
+- `starfarer.api.jar` - in `lib/`; `starfarer_obf.jar` is not, and still comes from the game
+  install's `starsector-core`
 - `Graphics.jar` (GraphicsLib), `LazyLib.jar`, `LunaLib.jar`, `MagicLib.jar` - the declared
-  dependencies in `mod_info.json`
+  dependencies in `mod_info.json`, each inside its zip in `lib/`
 - `lwjgl-2.9.3.jar`, `lwjgl_util-2.9.3.jar`, `json-20140107.jar`, `log4j-1.2.17.jar` - needed
   for `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json` and `Global.getLogger`
 
@@ -32,7 +57,8 @@ javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
 
 **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the full map** - every package, every file, one
 line each, plus the boot order and the index of what is registered by data rather than by code. Read
-it before going looking for something. Update it when a package gains or loses a file.
+it before going looking for something, and update it with every change - see the workflow rule
+above.
 
 The short version:
 

@@ -3,8 +3,12 @@
 What is where, and which file to open first. 217 Java files across eight top-level packages, plus
 the data tables that register them.
 
-Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
-that is wrong is worse than no map, because it is believed.
+Kept by hand, and updated by every change — not only when a package gains or loses a file, but
+whenever what a file does, what registers it, or how the pieces fit moves. The update belongs in
+the same commit as the change. A map that is wrong is worse than no map, because it is believed.
+
+Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
+dependency mods, zipped, to be read rather than edited.
 
 ---
 
