@@ -1,17 +1,12 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
-import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -70,26 +65,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     /** How many species can be up at once. Three weaves exist, and a fourth would have to pile. */
     public static final int MAX_SELECTED = 3;
-
-    /** The chips' own face: category art does not exist yet, and a stand-in says so honestly. */
-    public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
-
-    protected static transient LazyFont tinyFont;
-    protected static transient boolean tinyChecked = false;
-
-    /** The smallest hand the game writes in, for labels that were shouting at chip size. */
-    protected static LazyFont getTinyFont() {
-        if (tinyChecked) return tinyFont;
-        tinyChecked = true;
-
-        try {
-            tinyFont = LazyFont.loadFont(CHIP_ICON_FONT);
-        } catch (Exception e) {
-            tinyFont = null;
-        }
-
-        return tinyFont;
-    }
 
     protected final Host host;
     protected final FishPresence.Filter filter = new FishPresence.Filter();
@@ -183,18 +158,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public void advance(float amount) {
         if (searchField == null) return;
 
-        String text = searchField.getText();
-        boolean focused = searchField.hasFocus();
-
-        if (focused && SEARCH_GHOST.equals(text)) {
-            searchField.deleteAll(false);
-            text = "";
-        } else if (!focused && (text == null || text.isEmpty())) {
-            searchField.setText(SEARCH_GHOST);
-            text = SEARCH_GHOST;
-        }
-
-        String effective = text == null || SEARCH_GHOST.equals(text) ? "" : text;
+        String effective = PaneWidgets.tendGhost(searchField, SEARCH_GHOST);
         String current = filter.search == null ? "" : filter.search;
 
         if (!effective.equals(current)) {
@@ -212,7 +176,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         //planner sits above search - planning is the point, search is just how species get found
         CustomPanelAPI planner = panel.createCustomPanel(innerWidth, PLANNER_HEIGHT,
-                new PlannerButtonPlugin());
+                new PaneWidgets.TextButton(() -> "PLAN A ROUTE", () -> true,
+                        host::onPlannerRequested));
         controls.addCustom(planner, 0f);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Pick the fish you need - open jobs and upgrade asks are suggested - and plot"
@@ -238,7 +203,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         for (int i = 0; i < types.length; i++) {
             FishType type = types[i];
-            CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT, new ChipPlugin(type));
+            CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT,
+                    new PaneWidgets.Chip(type, filter, this::onChipToggled));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
             controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
@@ -247,7 +213,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addCustom(chipRow, 8f);
 
         CustomPanelAPI deselect = panel.createCustomPanel(innerWidth, DESELECT_HEIGHT,
-                new DeselectPlugin());
+                new PaneWidgets.TextButton(() -> "DESELECT ALL", () -> !selectedIds.isEmpty(),
+                        this::onDeselectAll));
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
                 "Clear the picked species and return to shading whole categories."),
@@ -389,240 +356,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         : "Click to toggle its waters on the map. F2 opens the codex.");
     }
 
-    // --- The drawn controls. ---
-
-    /** One type as a chip: a placeholder mark (category art doesn't exist yet) over the name,
-     *  lit in the type's colour while shown. */
-    protected class ChipPlugin extends BaseCustomUIPanelPlugin {
-
-        public static final float ICON_SIZE = 16f;
-
-        protected final FishType type;
-        protected PositionAPI chipPos;
-
-        protected transient LazyFont.DrawableString text;
-        protected transient SpriteAPI icon;
-        protected transient boolean iconChecked;
-
-        public ChipPlugin(FishType type) {
-            this.type = type;
-        }
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            chipPos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (chipPos == null || alphaMult <= 0f) return;
-
-            float x = chipPos.getX();
-            float y = chipPos.getY();
-            float w = chipPos.getWidth();
-            float h = chipPos.getHeight();
-
-            boolean on = filter.types.contains(type);
-            boolean hovered = ShopUi.contains(x, y, w, h,
-                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
-
-            if (on) {
-                ShopUi.drawQuad(x, y, w, h, type.color, (hovered ? 0.5f : 0.35f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.95f * alphaMult);
-            } else {
-                //off is absence, not another colour - dark field with just the underline remembering
-                ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
-                        (hovered ? 0.35f : 0.18f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.35f * alphaMult);
-            }
-
-            SpriteAPI face = getIcon();
-            if (face != null) {
-                float scale = Math.min(ICON_SIZE / face.getWidth(), ICON_SIZE / face.getHeight());
-
-                face.setSize(face.getWidth() * scale, face.getHeight() * scale);
-                face.setNormalBlend();
-                face.setAlphaMult((on ? 1f : 0.55f) * alphaMult);
-                face.renderAtCenter(Math.round(x + w * 0.5f),
-                        Math.round(y + h - 3f - ICON_SIZE * 0.5f));
-            }
-
-            //the smallest native size there is: a chip is a label, not a heading
-            LazyFont tiny = getTinyFont();
-            if (tiny == null) return;
-
-            if (text == null) {
-                text = ShopUi.createText(tiny, type.label);
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            Color color = on ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-            text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-
-            //held two pixels off the underline, which the label used to stand right on
-            text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
-                    Math.round(y + 4f + text.getHeight()));
-        }
-
-        protected SpriteAPI getIcon() {
-            if (iconChecked) return icon;
-            iconChecked = true;
-
-            try {
-                icon = Global.getSettings().getSprite(ModPlugin.MOD_ID, "placeholder");
-            } catch (Exception e) {
-                icon = null;
-            }
-
-            return icon;
-        }
-
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (chipPos == null) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed() || !event.isLMBDownEvent()) continue;
-                if (!ShopUi.contains(chipPos.getX(), chipPos.getY(), chipPos.getWidth(),
-                        chipPos.getHeight(), event.getX(), event.getY())) {
-                    continue;
-                }
-
-                event.consume();
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-                onChipToggled(type);
-
-                return;
-            }
-        }
-    }
-
-    /** Always-live button that opens the planner - a plan can be made from nothing. */
-    protected class PlannerButtonPlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI buttonPos;
-
-        protected transient LazyFont.DrawableString text;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            buttonPos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (buttonPos == null || alphaMult <= 0f) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            float x = buttonPos.getX();
-            float y = buttonPos.getY();
-            float w = buttonPos.getWidth();
-            float h = buttonPos.getHeight();
-
-            boolean hovered = ShopUi.contains(x, y, w, h,
-                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
-
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
-                    (hovered ? 0.45f : 0.32f) * alphaMult);
-
-            if (text == null) {
-                text = ShopUi.createText(small, "PLAN A ROUTE");
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-
-            text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-            text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
-                    Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-        }
-
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (buttonPos == null) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed() || !event.isLMBDownEvent()) continue;
-                if (!ShopUi.contains(buttonPos.getX(), buttonPos.getY(), buttonPos.getWidth(),
-                        buttonPos.getHeight(), event.getX(), event.getY())) {
-                    continue;
-                }
-
-                event.consume();
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-                host.onPlannerRequested();
-
-                return;
-            }
-        }
-    }
-
-    /** Way back to the survey: lit while there is anything to deselect, quiet otherwise. */
-    protected class DeselectPlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI buttonPos;
-
-        protected transient LazyFont.DrawableString text;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            buttonPos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (buttonPos == null || alphaMult <= 0f) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            float x = buttonPos.getX();
-            float y = buttonPos.getY();
-            float w = buttonPos.getWidth();
-            float h = buttonPos.getHeight();
-
-            boolean live = !selectedIds.isEmpty();
-            boolean hovered = live && ShopUi.contains(x, y, w, h,
-                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
-
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
-                    (live ? (hovered ? 0.45f : 0.32f) : 0.12f) * alphaMult);
-
-            if (text == null) {
-                text = ShopUi.createText(small, "DESELECT ALL");
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            Color color = live
-                    ? (hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor())
-                    : Misc.getGrayColor();
-
-            text.setBaseColor(ShopUi.withAlpha(color, (live ? 1f : 0.6f) * alphaMult));
-            text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
-                    Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-        }
-
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (buttonPos == null || selectedIds.isEmpty()) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed() || !event.isLMBDownEvent()) continue;
-                if (!ShopUi.contains(buttonPos.getX(), buttonPos.getY(), buttonPos.getWidth(),
-                        buttonPos.getHeight(), event.getX(), event.getY())) {
-                    continue;
-                }
-
-                event.consume();
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-                onDeselectAll();
-
-                return;
-            }
-        }
-    }
+    // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the planner. ---
 
     /** Line over the list: what it is, how many match, and the help mark - drawn live so the
      *  count is never stale. */
