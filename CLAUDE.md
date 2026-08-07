@@ -12,6 +12,21 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
   sitting on the branch.
 
+## Model assignments
+
+Split the work by kind of task rather than doing all of it in one place. The main session
+plans; subagents do the legwork.
+
+| Task | Who does it |
+|---|---|
+| Planning - architecture, sequencing, deciding what changes | Opus 5, in the main session |
+| Crawling and scoping - finding files, tracing call sites, reading the game sources | Sonnet 5 subagents (`model: sonnet`) |
+| Writing and editing code | Opus 4.8 subagents (`model: opus`) |
+| Anything UI or UI-adjacent - panels, dialogs, tooltips, renderers, shaders, sprites | Fable 5 subagents (`model: fable`) |
+
+The UI rule wins over the code rule: if a change touches something the player looks at, it
+goes to Fable 5 even though it is also code.
+
 ## Building
 
 Java 17 (`.idea/misc.xml` sets the language level; the source uses switch expressions).
