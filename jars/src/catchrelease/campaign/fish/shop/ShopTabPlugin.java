@@ -65,13 +65,14 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         boolean active = host.isActiveTab(id);
         boolean hovered = !active && isMouseOver();
 
+        //the chip's grammar: dark field, the underline remembering even while off
         if (active) {
             ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.5f * alphaMult);
-            ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.9f * alphaMult);
-        } else if (hovered) {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.3f * alphaMult);
+            ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.95f * alphaMult);
         } else {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);
+            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
+                    (hovered ? 0.35f : 0.18f) * alphaMult);
+            ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.35f * alphaMult);
         }
 
         LazyFont font = ShopUi.getBodyFont();

@@ -14,10 +14,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
@@ -25,7 +22,6 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -153,10 +149,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         /** Right-hand pane, torn down and rebuilt whenever its content changes. */
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
-        protected Object buyId;
-
-        /** Dev-mode free-grant button id, next to the buy button. Null outside dev mode. */
-        protected Object devBuyId;
+        protected PositionAPI pos;
 
         /**
          * The shopping-list ring the cursor is on, and where it is - written by the rows as they
@@ -528,37 +521,41 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
         }
 
+        /** The buy row: the shared text button, and dev mode's free grant beside it. */
         protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isDone()) return;
 
-            FishRarity rarity = entry.getPriceRarity();
-            boolean afford = entry.canAfford();
-
             String label = entry.isCurio() ? (entry.isOn() ? "SWITCH OFF" : "SWITCH ON")
                     : entry.isUpgrade() ? "UPGRADE" : "FIT";
-            Color base = afford
-                    ? (rarity == null ? Misc.getBasePlayerColor() : rarity.color)
-                    : Misc.getGrayColor();
 
-            buyId = new Object();
+            boolean dev = Global.getSettings().isDevMode() && !entry.isCurio();
 
-            info.setButtonFontOrbitron20Bold();
-            ButtonAPI button = info.addButton(label, buyId, base, Misc.getDarkPlayerColor(),
-                    Alignment.MID, CutStyle.TL_BR, 240f, 34f, 20f);
-            info.setButtonFontDefault();
+            CustomPanelAPI row = panel.createCustomPanel(240f + (dev ? 80f : 0f), 30f,
+                    new com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin() {
+                    });
 
-            button.setEnabled(afford);
+            CustomPanelAPI buy = panel.createCustomPanel(240f, 30f,
+                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> label,
+                            entry::canAfford, () -> buyClicked(entry, false)));
+            row.addComponent(buy).inTL(0f, 0f);
 
-            //tooltip only stacks vertically, so add below then re-anchor beside the real button
-            if (Global.getSettings().isDevMode() && !entry.isCurio()) {
-                devBuyId = new Object();
-
-                ButtonAPI dev = info.addButton("DEV", devBuyId, Misc.getHighlightColor(),
-                        Misc.getDarkPlayerColor(), Alignment.MID, CutStyle.TL_BR, 70f, 34f, 10f);
-
-                dev.getPosition().rightOfMid(button, 10f);
+            if (dev) {
+                CustomPanelAPI grant = panel.createCustomPanel(70f, 30f,
+                        new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> "DEV",
+                                () -> true, () -> buyClicked(entry, true)));
+                row.addComponent(grant).inTL(250f, 0f);
             }
 
+            info.addCustom(row, 20f);
+        }
+
+        protected void buyClicked(ShopEntry entry, boolean free) {
+            if (!(free ? entry.devBuy() : entry.buy())) return;
+
+            Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
+
+            refreshWallet();
+            rebuild(true);
         }
 
         /** The selected entry, falling back to the first visible one if the selection is stale. */
@@ -597,26 +594,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void buttonPressed(Object buttonId) {
-            if (devBuyId != null && buttonId == devBuyId) {
-                ShopEntry entry = getSelected();
-                if (entry == null || !entry.devBuy()) return;
-
-                Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
-
-                refreshWallet();
-                rebuild(true);
-                return;
-            }
-
-            if (buttonId != buyId) return;
-
-            ShopEntry entry = getSelected();
-            if (entry == null || !entry.buy()) return;
-
-            Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
-
-            refreshWallet();
-            rebuild(true);
         }
 
         @Override
@@ -626,7 +603,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public float getNoiseAlpha() {
-            return 0.05f;
+            return 0f;
         }
 
         @Override
@@ -668,10 +645,16 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void positionChanged(PositionAPI position) {
+            pos = position;
         }
 
+        /** The sidebar's dressing - the outfitter wears the same face as every other panel. */
         @Override
         public void renderBelow(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            ShopUi.drawPanel(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
+                    0.7f, alphaMult);
         }
 
         @Override
@@ -711,7 +694,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             float[] at = ShopUi.placeCard(markHoverX, markHoverY, width, height, TOOLTIP_OFFSET);
 
-            ShopUi.drawCard(at[0], at[1], width, height, alphaMult);
+            //the sidebar's dressing at card opacity, square-cornered like everything else now
+            ShopUi.drawPanel(at[0], at[1], width, height, 0.92f, alphaMult);
 
             float textX = Math.round(at[0] + TOOLTIP_PAD);
             float textY = Math.round(at[1] + height - TOOLTIP_PAD);

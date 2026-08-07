@@ -8,7 +8,6 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 
-import java.awt.Color;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -66,12 +65,13 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         renderTitle(x, y, height, alphaMult);
         renderPurse(x, y, width, height, alphaMult);
 
-        //the rule the whole band sits on
-        ShopUi.drawQuad(x, y, width, 1f, Misc.getBrightPlayerColor(), 0.35f * alphaMult);
+        //the rule the whole band sits on, in the pane headers' quiet hand
+        ShopUi.drawQuad(x, y, width, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
     }
 
+    /** The name in the header hand the sidebar's sections write in. */
     protected void renderTitle(float x, float y, float height, float alphaMult) {
-        LazyFont font = ShopUi.getTitleFont();
+        LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
 
         if (title == null) {
@@ -79,7 +79,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
             title.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        title.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
+        title.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
         title.draw(Math.round(x + 2f), Math.round(y + height * 0.5f + title.getHeight() * 0.5f));
     }
 
@@ -105,9 +105,11 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
     /** The other half of every price, so the purse tells the whole of it. */
     protected void renderCredits(float x, float y, float alphaMult) {
-        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Color.BLACK, 0.5f * alphaMult);
-        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Misc.getHighlightColor(),
-                0.08f * alphaMult);
+        //the chip's grammar: dark field, the identity colour underlining
+        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
+                0.18f * alphaMult);
+        ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, 2f, Misc.getHighlightColor(),
+                0.6f * alphaMult);
 
         LazyFont font = ShopUi.getBodyFont();
         if (font == null) return;
@@ -128,8 +130,10 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         //empty pockets go quiet rather than away, so the ladder stays readable
         float presence = count > 0 ? 1f : 0.4f;
 
-        ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, Color.BLACK, 0.5f * alphaMult);
-        ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, rarity.color, 0.1f * presence * alphaMult);
+        //the chip's grammar: dark field, the identity colour underlining
+        ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
+                0.18f * alphaMult);
+        ShopUi.drawQuad(x, y, CHIP_WIDTH, 2f, rarity.color, 0.6f * presence * alphaMult);
 
         SpriteAPI icon = SpriteLoader.getSprite("placeholder");
         if (icon != null) {

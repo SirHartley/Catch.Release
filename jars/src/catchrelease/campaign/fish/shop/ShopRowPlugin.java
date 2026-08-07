@@ -99,14 +99,16 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         boolean selected = host.isSelected(entry);
         boolean hovered = !selected && isMouseOver();
 
-        if (selected) {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.5f * alphaMult);
-            ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, Misc.getBrightPlayerColor(), 0.9f * alphaMult);
-        } else if (hovered) {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.3f * alphaMult);
-        } else {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);
-        }
+        float field = selected ? 0.5f : hovered ? 0.3f : 0.12f;
+        ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), field * alphaMult);
+
+        //every row wears its accent, graded by state - the sidebar rows' grammar, with the
+        //price's rarity as the identity colour
+        FishRarity tier = entry.getPriceRarity();
+        Color accent = tier == null ? Misc.getBasePlayerColor() : tier.color;
+
+        ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, accent,
+                (selected ? 0.9f : hovered ? 0.6f : 0.3f) * alphaMult);
 
         renderMarkRing(x, y, height, alphaMult);
         renderName(x, y, height, selected, alphaMult);
