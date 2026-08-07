@@ -183,6 +183,13 @@ catch" row does not appear beside its own — `KidsJob` and `MafiaJob` both do t
 
 ## The tree
 
+### `campaign/fish`
+One file sits at the root, because it is a fact about the setting rather than about any subsystem.
+
+| File | What it does |
+|---|---|
+| `FishingTaboo.java` | Who will not touch the water at all — the Church and the Path — and the three questions asked about them: is this flag one of them, is this port one of theirs, do they run this system. Read by the bar jobs, the fleet-quest spawner, the core trawler spawner and the lamp response, so the two faction ids appear exactly once in the mod |
+
 ### `campaign/fish/data`
 The data model: species, individual catches, the player's log, and the enums everything reads off.
 
@@ -270,6 +277,7 @@ explains how.
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
+| — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
@@ -371,8 +379,8 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
 
 ### `campaign/fish/crab`
+`rules.csv` (`catchrelease_crabBarAdd` and the rows under it); only the wares are Java.
 Crablobab's two wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
-wares' bookkeeping lives here. Not shop stock — see the note below.
 
 | File | What it does |
 |---|---|
