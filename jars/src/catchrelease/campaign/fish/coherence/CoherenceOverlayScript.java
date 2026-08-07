@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.coherence;
 import catchrelease.abilities.FishingRigs;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.rendering.plugins.CoherenceOverlayRenderer;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -15,9 +16,10 @@ import org.lazywizard.lazylib.MathUtils;
  * Decides when the low-coherence overlay shows and how hard, and keeps the whisper loop fed.
  * Drawing is {@link CoherenceOverlayRenderer}'s; this owns the rules.
  * <p>
- * Shows only while a rig is running ({@link FishingRigs}) somewhere aberrated enough to matter,
- * and eases out under any dialog or core UI screen - the minigame is hosted as a dialog, and a
- * screen warping under it would fight the very track the player is trying to read.
+ * Shows while a rig is running ({@link FishingRigs}) <i>or</i> a fishing boat is alongside, in water
+ * aberrated enough to matter, and eases out under any dialog or core UI screen - the minigame is
+ * hosted as a dialog, and a screen warping under it would fight the very track the player is trying
+ * to read.
  * <p>
  * Transient, registered every load from ModPlugin; the level starts at 0 and earns its way up.
  */
@@ -78,14 +80,39 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         }
     }
 
-    /** Zero with no rig running, zero under any dialog or menu, else the place's own level. */
+    /**
+     * Zero with nothing going on, zero under any dialog or menu, else the place's own level.
+     * <p>
+     * Two things count as something going on. A rig running is the player doing something to the
+     * fabric. A fishing boat close by is the fabric having already done something to somebody -
+     * whatever is aboard is what bad water does given long enough - and in water bad enough to
+     * matter, coming alongside one should turn the screen over exactly the way a lamp does.
+     */
     protected float getTargetLevel() {
         if (Global.getSector().getCampaignUI().isShowingDialog()) return 0f;
         if (Global.getSector().getCampaignUI().isShowingMenu()) return 0f;
 
-        if (!FishingRigs.isAnyRunning()) return 0f;
+        if (!FishingRigs.isAnyRunning() && !isNearFishingBoat()) return 0f;
 
         return levelFor(aberration);
+    }
+
+    /** Whether one of the trade's boats is within reach of the player, wherever they are. */
+    protected boolean isNearFishingBoat() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || player.getContainingLocation() == null) return false;
+
+        for (CampaignFleetAPI fleet : player.getContainingLocation().getFleets()) {
+            if (!FishermanSpawner.isFisherman(fleet)) continue;
+
+            if (Misc.getDistance(player.getLocation(), fleet.getLocation())
+                    <= FishConstants.COHERENCE_FISHERMAN_RANGE) {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Aberration to overlay level 0-1: nothing through "stable", full by "barely holding" -
