@@ -783,7 +783,8 @@ They turn the glass around without drinking from it. ""I crewed a boat that went
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny
-$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
+$catchreleaseStage >= 6
+$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,"Held until the introduction is finished. He sells a celebration charge and an explosive harpoon head to somebody who has not been handed a rod yet, and the first thing the trade has to say about itself should not be a man in a coat selling ordnance."
 catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible,"" he says, without being asked twice. ""Crablobab. That is me, and that is the crabs as well, it saves time."" One of the crate's occupants has got a claw through the mesh and is working on the rest of itself.
 
 He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",
