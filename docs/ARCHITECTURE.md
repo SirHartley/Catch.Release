@@ -191,6 +191,12 @@ capitalise for you and a sentence has to be able to start with one.
 | `$catchreleaseMore` | `handOver` | Whether the job is asking again |
 | Anything else | a job's `setJobTokens` | Per-job names: the dish, the species, the two men in a bar |
 
+**Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
+flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
+number wins regardless of which family it belongs to. The harpooned-crew greetings therefore
+lead with `!$entity.catchrelease_fisherman`, so the boat's own screen is never replaced by
+them. Anything new keyed on a flag an arbitrary fleet can carry needs the same check.
+
 A job with its own hand-over decision overrides `getDeliverFlag()` so the shared "hand over the
 catch" row does not appear beside its own — `KidsJob` and `MafiaJob` both do this.
 

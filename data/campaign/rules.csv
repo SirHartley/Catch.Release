@@ -1,90 +1,107 @@
 id,trigger,conditions,script,text,options,notes
-catchrelease_harpoonedComms,OpenCommLink,"$entity.catchrelease_harpooned score:1100
+catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
+$entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""The link opens onto an argument already in progress. Somebody reads your transponder code aloud, somebody else asks - twice, and not calmly - what exactly you thought you were fishing for, and your comms officer sits through all of it with the expression of a person who would rather be doing anything else.""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsHeg,OpenCommLink,"$faction.id == hegemony
+catchrelease_harpoonedCommsHeg,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == hegemony
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""Be advised, the incident has been logged.\"" $PersonRank $personName holds up a slate as though you could read it. \""Hull breach, non-standard munition, recovered intact. It is going to Naval Intelligence, because everything unidentified goes to Naval Intelligence. You will be hearing about the barb.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsTT,OpenCommLink,"$faction.id == tritachyon
+catchrelease_harpoonedCommsTT,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""Damage assessment is complete and your involvement is not in dispute.\"" $PersonRank $personName reads without inflection. \""You will receive a schedule of costs. It will be itemised. One of the items will be the harpoon, which we have kept.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsLC,OpenCommLink,"$faction.id == luddic_church
+catchrelease_harpoonedCommsLC,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == luddic_church
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""$PersonRank $personName looks at the puncture, then at you, with the particular patience of someone cataloguing a sin. \""A machine for taking things out of the dark,\"" $heOrShe says. \""And you pointed it at people.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsLP,OpenCommLink,"$faction.id == luddic_path
+catchrelease_harpoonedCommsLP,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == luddic_path
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""Do not say anything.\"" Whoever answers is not angry the way people usually are on this channel. \""We have seen that gear before. We know where it goes and we know what it brings back, and you have just put it through the side of a ship with people in it.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsPirate,OpenCommLink,"$faction.id == pirates
+catchrelease_harpoonedCommsPirate,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == pirates
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""That,\"" says $personName, with something close to admiration, \""is not a weapon. That is a fishing rig.\"" A pause. \""Which you fired. At us. What is wrong with you?\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+catchrelease_harpoonedCommsDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""You have discharged an unregistered device at a vessel of the Diktat.\"" $PersonRank $personName does not blink. \""I am required to ask whether this was deliberate. I am not required to believe the answer.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsLeague,OpenCommLink,"$faction.id == persean_league
+catchrelease_harpoonedCommsLeague,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""There is a form for this.\"" $PersonRank $personName sounds almost pleased about it. \""There is not a form for this, actually. I have checked. I am going to have to write to someone about the fact that there is no form for this.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsIndie,OpenCommLink,"$faction.id == independent
+catchrelease_harpoonedCommsIndie,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == independent
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","AddText ""\""You put a hook in us,\"" says $personName, in the flat voice of somebody who has had a long month and is not going to have a shorter one. \""Not a shot. A hook. We are going to be explaining that to the yard for a year.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
-catchrelease_harpoonedCommsOther,OpenCommLink,$entity.catchrelease_harpooned score:1050,"ShowDefaultVisual
+catchrelease_harpoonedCommsOther,OpenCommLink,"!$entity.catchrelease_fisherman
+$entity.catchrelease_harpooned score:1050","ShowDefaultVisual
 AddText ""The link is answered by somebody who already has your file open and a more pressing reason to dislike you already on it. The harpoon comes up once, near the end, in a list of things that will be dealt with later.""
 EndConversation NO_CONTINUE",,,"Fallback for a crew you holed who is hostile over something else entirely - the other rows all want the harpoon itself to be the reason. Lowest score here so every one of them outranks it. It exists because the comm link is highlighted on having been harpooned at all, and a highlighted link with nothing behind it is a dead option."
-catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
+catchrelease_harpoonedCommsHostile,OpenCommLink,"!$entity.catchrelease_fisherman
+$entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""They accept the link, listen to nothing, and close it before your comms officer has finished saying your name. Whatever was going to be said about the first harpoon is not going to be said about the second.""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"$faction.id == hegemony
+catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == hegemony
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Second incident. Same vessel. Same device.\"" $PersonRank $personName reaches off-screen. \""The logging phase of this is over.\""""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostileTT,OpenCommLink,"$faction.id == tritachyon
+catchrelease_harpoonedCommsHostileTT,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == tritachyon
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""The account is closed and has been escalated,\"" says $personName, already turning away. \""Escalation is not a conversation.\""""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostileLC,OpenCommLink,"$faction.id == luddic_church
+catchrelease_harpoonedCommsHostileLC,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == luddic_church
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Twice.\"" $PersonRank $personName closes $hisOrHer eyes briefly. \""Ludd is patient. I have been assured, repeatedly, that I am not required to be.\""""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostileLP,OpenCommLink,"$faction.id == luddic_path
+catchrelease_harpoonedCommsHostileLP,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == luddic_path
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""The link opens on someone already shouting orders to somebody else, and closes before any of them are addressed to you.""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostilePirate,OpenCommLink,"$faction.id == pirates
+catchrelease_harpoonedCommsHostilePirate,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == pirates
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Once was funny,\"" says $personName, and cuts the link on the word.""
 EndConversation NO_CONTINUE",,,
-catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
+$faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Deliberate, then.\"" $PersonRank $personName sounds satisfied to have it settled. The link closes.""
@@ -667,7 +684,8 @@ ShowDefaultVisual
 EndConversation","There is a pause on the other end that goes on slightly too long.
 
 ""Noted,"" $PersonRank $personName says, and writes something down. The link closes, and the $otherShipOrFleet holds its heading rather than turning away, which your sensors officer points out and which is somehow worse than if it had not.",,"Nothing happens to the player here and nothing happens to the crew - a hauler has no enforcement behind it. It goes in the report instead, which is filed as an evasion and charged in reputation a few days later, out of sight of the conversation."
-catchrelease_harpoonedCommsFleeing,OpenCommLink,"$entity.catchrelease_harpooned score:1250
+catchrelease_harpoonedCommsFleeing,OpenCommLink,"!$entity.catchrelease_fisherman
+$entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
 EndConversation NO_CONTINUE",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
