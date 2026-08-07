@@ -617,7 +617,7 @@ CatchReleaseCMD tokens
 $catchreleaseCarrying",RemoveOption catchrelease_wreckTake,,,
 catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The berths are made up. The galley is stocked. There is a half-finished meal on the mess table that has not rotted, because nothing here has, and the boarding party stop talking after the second compartment.
 
-Nobody is aboard. Nobody has been for a very long time, and nobody left in a hurry.",catchrelease_wreckLook2:Keep looking,
+Nobody is aboard. Nobody has been for a very long time, and nobody left in a hurry.",catchrelease_wreckLook2:Continue,
 catchrelease_wreckLook2,DialogOptionSelected,"$option == catchrelease_wreckLook2
 CatchReleaseCMD tokens",,,"catchrelease_wreckTake:Cut the head out and take it
 catchrelease_wreckLeave:Leave it where it lies",
@@ -703,146 +703,34 @@ catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fishe
 catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
 10:catchrelease_fisherSellCommon:Sell all unmarked commons
 20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon
-100:catchrelease_fisherBack:Back",
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherSellPick,DialogOptionSelected,$option == catchrelease_fisherSellPick,CatchReleaseCMD openBuyer,,,
 catchrelease_fisherSellCommon,DialogOptionSelected,$option == catchrelease_fisherSellCommon,CatchReleaseCMD sellUpTo COMMON,,,
 catchrelease_fisherSellUncommon,DialogOptionSelected,$option == catchrelease_fisherSellUncommon,CatchReleaseCMD sellUpTo UNCOMMON,,,
 catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,$menuState = catchreleaseFisher,,,
 catchrelease_fisherRumorYes,DialogOptionSelected,"$option == catchrelease_fisherRumor score:10
 CatchReleaseCMD tokens
-$catchreleaseRumor",CatchReleaseCMD rumor,"They lean in. Whatever they have heard, an intel note now carries it.",100:catchrelease_fisherBack:Back,
+$catchreleaseRumor",CatchReleaseCMD rumor,"They lean in. Whatever they have heard, an intel note now carries it.",100:catchrelease_fisherBack:Continue,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
-!$catchreleaseRumor",,"""Nothing on the wind this month. Ask again when the season turns.""",100:catchrelease_fisherBack:Back,
-catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
-CatchReleaseCMD tokens
-$catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from.
-
-It is turned over once. ""They intruded on what they should not have intruded upon.""
-
-Nothing further is offered, and the silence afterwards is not the kind you fill.","0:catchrelease_introAsk1_yes:""What is out here?""
-10:catchrelease_introAsk1_flat:""Tell me what the work is.""
-20:catchrelease_introAsk1_doubt:""Everybody who gets this far. How many is that?""
-100:catchrelease_fisherBack:Back",
-catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
-CatchReleaseCMD tokens
-$catchreleaseStage < 2
-!$catchreleaseCarrying",,"""You have questions. Everybody who gets this far has the same three, so I will save you two of them.""","0:catchrelease_introAsk1_yes:""What is out here?""
-10:catchrelease_introAsk1_flat:""Tell me what the work is.""
-20:catchrelease_introAsk1_doubt:""Everybody who gets this far. How many is that?""
-100:catchrelease_fisherBack:Back",
-catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
-CatchReleaseCMD tokens
-$catchreleaseCanSkip",,,"5:catchrelease_introSkip:""I have done this before. The breach calls me.""",
-catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"They look at you for slightly too long, and then not at all.
-
-""Then you will not want the speech.""
-
-The crate is already on the deck. Lamps, a rod, a line, a ledger, and six charts on top of it. No money changes hands in either direction.",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
-CatchReleaseCMD tokens
-$catchreleaseStage == 2
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
-CatchReleaseCMD sendOut
-CatchReleaseCMD tokens","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
-
-""The drones are the same rod. Over open water they hunt, under lamps they search. One tool, three moods.""
-
-""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking. That is why they come apart when you land them, and why the water they came out of matters more than they do.""
-
-""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere - the water there is thinner. See what that does to it.""","0:catchrelease_introTurnIn2R_yes:""Patterns. All right.""
-10:catchrelease_introTurnIn2R_flat:""Thinner water. Noted.""
-20:catchrelease_introTurnIn2R_doubt:""Ghosts.""",
-catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
-CatchReleaseCMD tokens
-$catchreleaseStage == 2
-!$catchreleaseTargetMet",,"""Still out there?""
-
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
-CatchReleaseCMD tokens
-$catchreleaseStage == 3
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
-CatchReleaseCMD giveDeepGear
-CatchReleaseCMD tokens","They hold it up, and do not say what they are looking for.
-
-""Thinner water, worse coherence, same animal. You have seen it now.""
-
-A second crate. Lamps, a harpoon, and a ledger.
-
-""Lamps burn a window through where there is no rupture. The line takes what the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here.""
-
-""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question.""","0:catchrelease_introTurnIn3R_yes:""A window through nothing. Fine.""
-10:catchrelease_introTurnIn3R_flat:""Lamp, line, ledger.""
-20:catchrelease_introTurnIn3R_doubt:""You are handing a stranger a harpoon.""",
-catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
-CatchReleaseCMD tokens
-$catchreleaseStage == 4
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
-CatchReleaseCMD giveCharts
-CatchReleaseCMD tokens","It goes into a case rather than onto the table.
-
-""That is the whole trade. Everything after it is doing it better.""
-
-""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself instead of sweeping until you are out of fuel. Two of them, on the house.""
-
-""Bring me both. And use the planner on your map before you go - it will run the route for you, because there are two of them now and doing that by eye is how people end up in the abyss.""","0:catchrelease_introTurnIn4R_yes:""Charts. Good.""
-10:catchrelease_introTurnIn4R_flat:""Two of them. Where?""
-20:catchrelease_introTurnIn4R_doubt:""On the house. Why?""",
-catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
-CatchReleaseCMD tokens
-$catchreleaseStage == 4
-!$catchreleaseTargetMet",,"""Take your time.""
-
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
-CatchReleaseCMD tokens
-$catchreleaseStage == 5
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
-CatchReleaseCMD finishIntro
-CatchReleaseCMD tokens","Both of them are looked at properly, which has not happened before.
-
-""Then you can read the water. The counter is open to you - charts for charts, and I will carry what I can.""
-
-Four more go across the table unasked: two common, one uncommon, and one they do not name.","0:catchrelease_introTurnIn5R_yes:""Then I am in.""
-10:catchrelease_introTurnIn5R_flat:""The counter is open. Understood.""
-20:catchrelease_introTurnIn5R_doubt:""One you do not name.""",
-catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
-CatchReleaseCMD tokens
-$catchreleaseStage == 5
-!$catchreleaseTargetMet",,"""Both of them. I did say.""
-
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",100:catchrelease_fisherBack:Back,
-catchrelease_introNoExplain,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
-CatchReleaseCMD tokens
-$catchreleaseStage == 3
-!$catchreleaseTargetMet",,"""Not yet.""
-
-""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""
-
-You ask how they are standing here when you left them four jumps back. They look at you as though you have asked what colour the dark is, and go back to the window.","0:catchrelease_introNoExplainR_yes:""All right. I did not see anything.""
-10:catchrelease_introNoExplainR_flat:""Still in there. Understood.""
-20:catchrelease_introNoExplainR_doubt:""I left you four jumps back.""",
-catchrelease_introDone,DialogOptionSelected,"$option == catchrelease_fisherIntro score:20
-CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,"""Still at it. Good. The charts are what I sell and the water is what I know - between the two that is most of a map.""",100:catchrelease_fisherBack:Back,
+!$catchreleaseRumor",,"""Nothing on the wind this month. Ask again when the season turns.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
 !$catchreleaseWork",CatchReleaseCMD rollWork,"""There is a reading I want and cannot go and take. One $catchreleaseWorkFish, out of $catchreleaseWorkWhere. Whatever you land there will be barely holding - that is the point of it, not the animal.""
 
 ""$catchreleaseWorkPay, and I will carry one more chart from then on. That part does not go away.""","0:catchrelease_workTake:Take it
-100:catchrelease_fisherBack:Back",
-catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,CatchReleaseCMD takeWork,An intel note marks the system.,100:catchrelease_fisherBack:Back,
+100:catchrelease_fisherBack:Continue",
+catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,CatchReleaseCMD takeWork,An intel note marks the system.,100:catchrelease_fisherBack:Continue,
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
 CatchReleaseCMD tokens
 $catchreleaseWork
 $catchreleaseWorkMet",,The $catchreleaseWorkFish goes on the table without being asked for.,"0:catchrelease_workTurnIn:Hand it over
-100:catchrelease_fisherBack:Back",
-catchrelease_workTurnIn,DialogOptionSelected,$option == catchrelease_workTurnIn,CatchReleaseCMD turnInWork,It is held up to the light for a long moment and then put away without comment.,100:catchrelease_fisherBack:Back,
+100:catchrelease_fisherBack:Continue",
+catchrelease_workTurnIn,DialogOptionSelected,$option == catchrelease_workTurnIn,CatchReleaseCMD turnInWork,It is held up to the light for a long moment and then put away without comment.,100:catchrelease_fisherBack:Continue,
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet",,"""Still want the $catchreleaseWorkFish out of $catchreleaseWorkWhere. It is in there. It will keep being in there.""",100:catchrelease_fisherBack:Back,
+!$catchreleaseWorkMet",,"""Still want the $catchreleaseWorkFish out of $catchreleaseWorkWhere. It is in there. It will keep being in there.""",100:catchrelease_fisherBack:Continue,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it.""",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not. Everyone who does has that look."" They turn the glass around. ""I crewed a boat that went further. Two seasons. It is the water that gets you, not the catch - nothing out there sits still enough to look at twice.""
@@ -863,26 +751,26 @@ CatchReleaseCMD tokens
 $catchreleaseCrabCelebrationAfford",,"""Little cartridges. You land something and they go off - paper, all colours, all over the readout. No, it does not help you catch anything. That is not what it is for. You have caught the fish already, that is the whole point of it.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.","0:catchrelease_crabBuyCelebration:Pay him
-10:catchrelease_crabStall:Ask what else is in the coat",
+10:catchrelease_crabStall:Continue",
 catchrelease_crabWareCelebrationShort,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabCelebrationAfford",,"""Little cartridges. You land something and they go off - paper, all colours, all over the readout. No, it does not help you catch anything. That is not what it is for. You have caught the fish already, that is the whole point of it.""
 
-He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Ask what else is in the coat,
-catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Ask what else is in the coat
+He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Continue,
+catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabExplosive_headAfford",,"""This one I will not pretend about. It does not catch. It goes on the harpoon and then whatever the harpoon touches is gone, and so is the harpoon. People buy it. I have stopped asking them what for.""
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.","0:catchrelease_crabBuyExplosive_head:Pay him
-10:catchrelease_crabStall:Ask what else is in the coat",
+10:catchrelease_crabStall:Continue",
 catchrelease_crabWareExplosive_headShort,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabExplosive_headAfford",,"""This one I will not pretend about. It does not catch. It goes on the harpoon and then whatever the harpoon touches is gone, and so is the harpoon. People buy it. I have stopped asking them what for.""
 
-He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Ask what else is in the coat,
-catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Ask what else is in the coat
+He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Continue,
+catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,BarCMD returnFromEvent false,"He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
 catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer.",,
@@ -899,8 +787,8 @@ CatchReleaseCMD tokens
 $catchreleaseStage >= 1",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
 catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,,"""A while."" A pause that goes on slightly too long to be a pause. ""The boats are newer than the work. That is usually the way of it.""
 
-You do not get a number, and it does not occur to you until later that you did not get a number.","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+You do not get a number, and it does not occur to you until later that you did not get a number.","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""They call you Baha, in the registry.""",
@@ -908,13 +796,13 @@ catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"No
 
 ""He signed for the first boat. The paperwork has never caught up and I have never asked it to.""
 
-The winch stops. It starts again.","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+The winch stops. It starts again.","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_why0ut,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 1",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
-catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Nothing to catch in there. The fabric is thick where people are - all that living presses it down flat."" A shrug. ""And they do not like the lamps. Nobody ever says why.""","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Nothing to catch in there. The fabric is thick where people are - all that living presses it down flat."" A shrug. ""And they do not like the lamps. Nobody ever says why.""","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
@@ -922,22 +810,22 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 
 That appears to be the whole answer. Then, after a while:
 
-""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not water.""","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not water.""","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
 catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Habits, mostly. Something on the other side did a thing so many times that the shape of the doing survived the doer."" A hand turns over. ""Then it drifts in here, and here has rules about having a body, so it grows one.""
 
-""That is why they come apart when the water is bad. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+""That is why they come apart when the water is bad. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
 catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""It is not worse. It is thinner. You can see further through it and there is more on the other side to see.""
 
-""People say worse because of what it does to them, which is a different subject and not one the water is interested in.""","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+""People say worse because of what it does to them, which is a different subject and not one the water is interested in.""","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 5",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
@@ -945,14 +833,14 @@ catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishB
 
 ""Not the way you mean.""
 
-The lights outside the window sweep past, and for the length of that sweep the crew behind them are standing in a different order.","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
+The lights outside the window sweep past, and for the length of that sweep the crew behind them are standing in a different order.","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
 catchrelease_fisherOptAsk_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
-catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""Nothing I brought aboard."" They say it as though answering a different question. ""You do not land the big ones. You get a reading off them and you cut the line, and if you are quick about it they do not follow the line back.""","0:catchrelease_fisherAskBack:Ask something else
-100:catchrelease_fisherBack:Back",
-catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Let it go,
+catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""Nothing I brought aboard."" They say it as though answering a different question. ""You do not land the big ones. You get a reading off them and you cut the line, and if you are quick about it they do not follow the line back.""","0:catchrelease_fisherAskBack:Speak of other things
+100:catchrelease_fisherBack:Continue",
+catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Continue,
 catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
@@ -962,56 +850,122 @@ catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarg
 CatchReleaseCMD tokens
 $catchreleaseTargetPond",,"""$catchreleaseTarget. There is a rupture open in $catchreleaseTargetWhere and it is sitting in it.""
 
-""It will keep sitting in it. They do not wander, the ones I ask for - they are already where they were going.""",100:catchrelease_fisherBack:Back,
+""It will keep sitting in it. They do not wander, the ones I ask for - they are already where they were going.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:5
 CatchReleaseCMD tokens
 !$catchreleaseTargetPond",,"""$catchreleaseTarget. Open water, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
 
-""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Back,
-catchrelease_introAsk1_yes,DialogOptionSelected,$option == catchrelease_introAsk1_yes,"AddText ""They almost look pleased about the question, which is somehow worse.""
-FireAll CatchReleaseIntroListen",,,
-catchrelease_introAsk1_flat,DialogOptionSelected,$option == catchrelease_introAsk1_flat,"AddText """"""Work,"""" they repeat, as though testing whether the word will hold.""
-FireAll CatchReleaseIntroListen",,,
-catchrelease_introAsk1_doubt,DialogOptionSelected,$option == catchrelease_introAsk1_doubt,"AddText """"""Enough that I have a speech."""" A pause. """"Not so many that I have had to change it.""""""
-FireAll CatchReleaseIntroListen",,,
-catchrelease_introListenBody,CatchReleaseIntroListen,,,"""The fabric is thin in places. Has been since the gates went. Where it is thinnest, things come through - alive, mostly, and they do not hold together well on this side.""
+""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Continue,
+catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
+CatchReleaseCMD tokens
+$catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from.
+
+It is turned over once. ""They intruded on what they should not have intruded upon.""
+
+Nothing further is offered, and the silence afterwards is not the kind you fill.","catchrelease_intro_listen:""What is out here?""
+catchrelease_intro_brief:""Skip the speech. What is it you need?""",
+catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
+CatchReleaseCMD tokens
+$catchreleaseStage < 2
+!$catchreleaseCarrying",,"""You have questions. Everybody who gets this far has the same three, so I will save you two of them.""","catchrelease_intro_listen:""What is out here?""
+catchrelease_intro_brief:""Skip the speech. What is it you need?""",
+catchrelease_intro_listen,DialogOptionSelected,$option == catchrelease_intro_listen,,"""The fabric is thin in places. Has been since the gates went. Where it is thinnest, things come through - alive, mostly, and they do not hold together well on this side.""
 
 ""We call them fish. It is not accurate. It stuck.""
 
-""The second question is whether it is safe. It is not. The third one you will not ask until later.""","0:catchrelease_introRod_yes:""Show me.""
-10:catchrelease_introRod_flat:""What does it pay?""
-20:catchrelease_introRod_doubt:""You are describing a haunting.""",
-catchrelease_introRod_yes,DialogOptionSelected,$option == catchrelease_introRod_yes,"AddText """"""That is the right answer. It is also what the last one said.""""""
-FireAll CatchReleaseIntroTakeRod",,,
-catchrelease_introRod_flat,DialogOptionSelected,$option == catchrelease_introRod_flat,"AddText """"""In fish. Everything out here is paid in fish, including me.""""""
-FireAll CatchReleaseIntroTakeRod",,,
-catchrelease_introRod_doubt,DialogOptionSelected,$option == catchrelease_introRod_doubt,"AddText """"""I am describing a trade. What it is underneath that is not my department.""""""
-FireAll CatchReleaseIntroTakeRod",,"0:catchrelease_introRod_yes:""Show me.""
-10:catchrelease_introRod_flat:""What does it pay?""
-20:catchrelease_introRod_doubt:""You are describing a haunting.""",
-catchrelease_introTakeRodBody,CatchReleaseIntroTakeRod,,"CatchReleaseCMD giveRod
+""The second question is whether it is safe. It is not. The third one you will not ask until later.""",catchrelease_intro_rod:Continue,
+catchrelease_intro_brief,DialogOptionSelected,$option == catchrelease_intro_brief,"$option = catchrelease_intro_rod 0
+FireBest DialogOptionSelected","They do not appear to mind being cut off, which is its own kind of answer.",,
+catchrelease_intro_rod,DialogOptionSelected,$option == catchrelease_intro_rod,"CatchReleaseCMD giveRod
 CatchReleaseCMD tokens","A crate comes up onto the deck before the sentence is finished. One rod, secondhand, working.
 
 ""Near a rupture it opens the thing. Over an open one it puts drones down. It reads the situation - you do not have to.""
 
-""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. There is a rupture there with your name on it.""","0:catchrelease_introTakeRodR_yes:""I will bring it back.""
-10:catchrelease_introTakeRodR_flat:""Understood.""
-20:catchrelease_introTakeRodR_doubt:""And if the rupture objects to being opened?""",
-catchrelease_introTakeRodR_yes,DialogOptionSelected,$option == catchrelease_introTakeRodR_yes,,"""They all say that too."" The crate is already closed.",100:catchrelease_fisherBack:Back,
-catchrelease_introTakeRodR_flat,DialogOptionSelected,$option == catchrelease_introTakeRodR_flat,,A nod. The winch behind them starts again.,100:catchrelease_fisherBack:Back,
-catchrelease_introTakeRodR_doubt,DialogOptionSelected,$option == catchrelease_introTakeRodR_doubt,,"""Then you will know, which is more than most people manage out here.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn2R_yes,DialogOptionSelected,$option == catchrelease_introTurnIn2R_yes,,"""All right,"" they agree, as though you had settled something between you.",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn2R_flat,DialogOptionSelected,$option == catchrelease_introTurnIn2R_flat,,"""Noted,"" they echo, and it does not sound like agreement or disagreement.",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn2R_doubt,DialogOptionSelected,$option == catchrelease_introTurnIn2R_doubt,,"""Call them whatever holds still in your head. They do not answer to either of us.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn3R_yes,DialogOptionSelected,$option == catchrelease_introTurnIn3R_yes,,"""Fine,"" they say, and there is something almost like approval in it.",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn3R_flat,DialogOptionSelected,$option == catchrelease_introTurnIn3R_flat,,"""That is the whole of it, yes.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn3R_doubt,DialogOptionSelected,$option == catchrelease_introTurnIn3R_doubt,,"""I am handing it to somebody who came back. That is the only test there is.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn4R_yes,DialogOptionSelected,$option == catchrelease_introTurnIn4R_yes,,"""Good,"" they agree. ""Most people want the gear. The chart is the gear.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn4R_flat,DialogOptionSelected,$option == catchrelease_introTurnIn4R_flat,,"""It is on them. That is rather the point of a chart.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn4R_doubt,DialogOptionSelected,$option == catchrelease_introTurnIn4R_doubt,,"""Because you will come back for the third one, and that one you will pay for.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn5R_yes,DialogOptionSelected,$option == catchrelease_introTurnIn5R_yes,,"""You were in at the first pond. This is only the paperwork catching up.""",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn5R_flat,DialogOptionSelected,$option == catchrelease_introTurnIn5R_flat,,"""Understood,"" they agree, already turning back to the window.",100:catchrelease_fisherBack:Back,
-catchrelease_introTurnIn5R_doubt,DialogOptionSelected,$option == catchrelease_introTurnIn5R_doubt,,"""Not out loud, no. You will know it when it is in your hold.""",100:catchrelease_fisherBack:Back,
-catchrelease_introNoExplainR_yes,DialogOptionSelected,$option == catchrelease_introNoExplainR_yes,,"That earns you a look that lasts slightly too long, and nothing else.",100:catchrelease_fisherBack:Back,
-catchrelease_introNoExplainR_flat,DialogOptionSelected,$option == catchrelease_introNoExplainR_flat,,"""It is. Go and get it.""",100:catchrelease_fisherBack:Back,
-catchrelease_introNoExplainR_doubt,DialogOptionSelected,$option == catchrelease_introNoExplainR_doubt,,"""You left a boat four jumps back."" They do not elaborate, and the winch runs on.",100:catchrelease_fisherBack:Back,
+""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. There is a rupture there with your name on it.""",catchrelease_fisherBack:Continue,
+catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
+CatchReleaseCMD tokens
+$catchreleaseStage == 2
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD sendOut
+CatchReleaseCMD tokens","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
+
+""The drones are the same rod. Over open water they hunt, under lamps they search. One tool, three moods.""
+
+""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking. That is why they come apart when you land them, and why the water they came out of matters more than they do.""
+
+""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere - the water there is thinner. See what that does to it.""","catchrelease_intro_ghosts:""Ghosts.""
+catchrelease_fisherBack:Continue",
+catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Call them whatever holds still in your head."" They are already looking past you at the window. ""They do not answer to either of us.""",catchrelease_fisherBack:Continue,
+catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD giveDeepGear
+CatchReleaseCMD tokens","They hold it up, and do not say what they are looking for.
+
+""Thinner water, worse coherence, same animal. You have seen it now.""
+
+A second crate. Lamps, a harpoon, and a ledger.
+
+""Lamps burn a window through where there is no rupture. The line takes what the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here.""
+
+""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question.""",catchrelease_fisherBack:Continue,
+catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
+CatchReleaseCMD tokens
+$catchreleaseStage == 4
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD giveCharts
+CatchReleaseCMD tokens","It goes into a case rather than onto the table.
+
+""That is the whole trade. Everything after it is doing it better.""
+
+""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself instead of sweeping until you are out of fuel. Two of them, on the house.""
+
+""Bring me both. And use the planner on your map before you go - it will run the route for you, because there are two of them now and doing that by eye is how people end up in the abyss.""",catchrelease_fisherBack:Continue,
+catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
+CatchReleaseCMD tokens
+$catchreleaseStage == 5
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD finishIntro
+CatchReleaseCMD tokens","Both of them are looked at properly, which has not happened before.
+
+""Then you can read the water. The counter is open to you - charts for charts, and I will carry what I can.""
+
+Four more go across the table unasked: two common, one uncommon, and one they do not name.",catchrelease_fisherBack:Continue,
+catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
+CatchReleaseCMD tokens
+$catchreleaseStage == 2
+!$catchreleaseTargetMet",,"""Still out there?""
+
+""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
+CatchReleaseCMD tokens
+$catchreleaseStage == 4
+!$catchreleaseTargetMet",,"""Take your time.""
+
+""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
+CatchReleaseCMD tokens
+$catchreleaseStage == 5
+!$catchreleaseTargetMet",,"""Both of them. I did say.""
+
+""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""",catchrelease_fisherBack:Continue,
+catchrelease_introNoExplain,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetMet",,"""Not yet.""
+
+""$catchreleaseTarget. $catchreleaseTargetWhere. It is in there.""","catchrelease_intro_fourJumps:""I left you four jumps back.""
+catchrelease_fisherBack:Continue",
+catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,,"""You left a boat four jumps back."" They go back to the window, and the winch runs on.",catchrelease_fisherBack:Continue,
+catchrelease_introDone,DialogOptionSelected,"$option == catchrelease_fisherIntro score:20
+CatchReleaseCMD tokens
+$catchreleaseStage >= 6",,"""Still at it. Good. The charts are what I sell and the water is what I know - between the two that is most of a map.""",catchrelease_fisherBack:Continue,
+catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseCanSkip",,,"5:catchrelease_introSkip:""I have done this before. The breach calls me.""",
+catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"They look at you for slightly too long, and then not at all.
+
+""Then you will not want the speech.""
+
+The crate is already on the deck. Lamps, a rod, a line, a ledger, and six charts on top of it. No money changes hands in either direction.",catchrelease_fisherBack:Continue,
