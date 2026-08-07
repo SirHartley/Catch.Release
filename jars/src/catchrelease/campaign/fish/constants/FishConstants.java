@@ -454,6 +454,15 @@ public class FishConstants {
     public static final float COHERENCE_WHISPER_VOLUME = 0.7f;
 
     /**
+     * How near a fishing boat counts as approaching one, for the warp.
+     * <p>
+     * The other thing that turns the screen over. A rig running is the player doing something to
+     * the fabric; a fishing boat is the fabric having already done something to somebody, and
+     * standing next to it in bad water should read the same way.
+     */
+    public static final float COHERENCE_FISHERMAN_RANGE = 2500f;
+
+    /**
      * Track's hyperspace backing and its warp grid. The grid border doesn't move, so the swim
      * stays inside the bar. CELLS is vertices per side; the radii are screen pixels (small - the
      * bar is 52 wide).

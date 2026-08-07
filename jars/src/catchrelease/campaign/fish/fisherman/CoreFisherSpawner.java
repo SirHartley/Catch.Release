@@ -19,7 +19,7 @@ import org.lwjgl.util.vector.Vector2f;
  * see {@link FishermanShelf}.
  * <p>
  * They are crewed by the same man as the visiting one, and they do not explain how. That is the
- * point of him.
+ * point of them.
  * <p>
  * They are posted rather than spawned: the sweep re-posts a system that has lost its boat, so one
  * killed in a fight is replaced in a week rather than leaving a hole for the rest of the campaign.

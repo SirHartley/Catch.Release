@@ -49,22 +49,22 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
-	# somebody else's harpoon, still transmitting, stuck in a world nobody lives on - the find that
-	# opens the fishing trade. Domain-era probe art stands in until there is a head sprite for it
-	"catchrelease_LostHarpoon":{
-		"defaultName":"Transponder Signal",
-		"nameInText":"transponder signal",
-		"shortName":"signal",
+	# somebody who did this before you, beside the rupture that killed them. Domain-era hulk art
+	# stands in until there is a holed-cruiser sprite
+	"catchrelease_TutorialWreck":{
+		"defaultName":"Derelict Cruiser",
+		"nameInText":"derelict cruiser",
+		"shortName":"wreck",
 		"aOrAn":"a",
 		"isOrAre":"is",
-		"defaultRadius":30,
+		"defaultRadius":60,
 		"interactionImage":"graphics/illustrations/space_wreckage.jpg",
 		"icon":"graphics/icons/derelict.png",
-		"iconWidth":22,
-		"iconHeight":22,
-		"sprite":"graphics/stations/survey_probe.png",
-		"spriteWidth":40,
-		"spriteHeight":40,
+		"iconWidth":27,
+		"iconHeight":27,
+		"sprite":"graphics/stations/survey_ship.png",
+		"spriteWidth":60,
+		"spriteHeight":60,
 		"renderShadow":true,
 		"useLightColor":true,
 		"showInCampaign":true,
@@ -75,8 +75,37 @@
 		"renderCircleIndicator":true,
 		"renderCircleIndicatorSelectionFlash":true,
 		"layers":[STATIONS],
-		"tags":["has_interaction_dialog", "catchrelease_lost_harpoon"],
-		"pluginClass":"catchrelease.campaign.fish.tutorial.LostHarpoon"
+		"tags":["has_interaction_dialog", "catchrelease_tutorial_wreck"],
+		"pluginClass":"catchrelease.campaign.fish.tutorial.TutorialWreck"
+	},
+
+	# the one crewman who was put off the boat, still transmitting from the surface
+	"catchrelease_Castaway":{
+		"defaultName":"Distress Beacon",
+		"nameInText":"distress beacon",
+		"shortName":"beacon",
+		"aOrAn":"a",
+		"isOrAre":"is",
+		"defaultRadius":20,
+		"interactionImage":"graphics/illustrations/vacuum_colony.jpg",
+		"icon":"graphics/icons/derelict.png",
+		"iconWidth":18,
+		"iconHeight":18,
+		"sprite":"graphics/stations/survey_probe.png",
+		"spriteWidth":30,
+		"spriteHeight":30,
+		"renderShadow":true,
+		"useLightColor":true,
+		"showInCampaign":true,
+		"showIconOnMap":true,
+		"showNameOnMap":false,
+		"scaleNameWithZoom":false,
+		"scaleIconWithZoom":true,
+		"renderCircleIndicator":true,
+		"renderCircleIndicatorSelectionFlash":true,
+		"layers":[STATIONS],
+		"tags":["has_interaction_dialog", "catchrelease_castaway"],
+		"pluginClass":"catchrelease.campaign.fish.tutorial.Castaway"
 	},
 
 	# the fishing boats' mark on the system map - drawn there and nowhere else, so the boat can be

@@ -115,6 +115,12 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                         catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_MAX_ABERRATION)
                 : Aberration.of(anchor);
 
+        //a chart request is a question about the water rather than about the animal, so what the
+        //trade planted always comes up barely holding whatever the local reading would have said
+        if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(anchor)) {
+            aberration = 1f;
+        }
+
         this.specimen = FishCatch.roll(fish, aberration, quality,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
 

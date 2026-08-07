@@ -2,56 +2,64 @@ package catchrelease.campaign.fish.tutorial;
 
 public class TutorialConstants {
 
-    /** Where the intro's stage lives, and the person who runs it. */
+    /** Where the introduction's stage lives. */
     public static final String STAGE_KEY = "$catchrelease_intro_stage";
-    public static final String BAHA_KEY = "$catchrelease_baha";
-
-    /** How many markets the player has walked into, for the hand on the shoulder. */
-    public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";
-    public static final int MARKETS_BEFORE_APPROACH = 2;
 
     /**
-     * Baha, who never changes either. No rank and no post: an id the game does not know would take
-     * the encounter screen down with it, and the title is in what they say anyway.
-     */
-    public static final String BAHA_FIRST = "Baha";
-    public static final String BAHA_LAST = "";
-    public static final String BAHA_PORTRAIT = "graphics/portraits/portrait36.png";
-
-    /**
-     * The rig handed over at the introduction, and the one held back.
+     * The rig, all of it, handed over in one go.
      * <p>
-     * The three are the whole loop - a light to find something by, a rod for a pond, a line to
-     * throw. The outfitter is the reward for the first catch, because it is the one piece that
-     * does nothing at all until there is something in the hold to spend.
+     * There is no ladder here on purpose. The introduction is detached from the ordinary loop - it
+     * is how somebody stops being a person who has never heard of this and starts being one who
+     * has - and metering the gear out across it would turn a scene into a checklist.
      */
-    public static final String[] STARTING_GEAR = {
+    public static final String[] GEAR = {
             "catchrelease_searchlights",
             "catchrelease_rod",
             "catchrelease_harpoon",
+            "catchrelease_shop",
     };
-    public static final String OUTFITTER = "catchrelease_shop";
 
-    /** What the first task asks for: one specimen, of anything. */
-    public static final int FIRST_CATCH_COUNT = 1;
+    //---------------------------------------------------------------- the wreck
 
-    //---------------------------------------------------------------- the lost harpoon
+    /** Somebody's cruiser, with a line still in it. */
+    public static final String WRECK_ENTITY_ID = "catchrelease_TutorialWreck";
+    public static final String WRECK_PLACED_KEY = "$catchrelease_wreckPlaced";
+    public static final String WRECK_NAME = "Derelict Cruiser";
 
-    public static final String HARPOON_ENTITY_ID = "catchrelease_LostHarpoon";
-    public static final String HARPOON_PLACED_KEY = "$catchrelease_lostHarpoon";
-    public static final String HARPOON_NAME = "Transponder Signal";
+    /** Whether the player pulled the head out and is carrying it back. */
+    public static final String CARRYING_KEY = "$catchrelease_carryingHarpoon";
 
-    /** How far out from the core the wreck is looked for, in light-years. */
-    public static final float HARPOON_MIN_LY = 4f;
-    public static final float HARPOON_MAX_LY = 14f;
+    /** Cruiser hulls the wreck can turn out to be. Random, because it is nobody in particular. */
+    public static final String[] WRECK_HULLS = {
+            "eagle_Balanced",
+            "falcon_Attack",
+            "dominator_Assault",
+            "venture_Exploration",
+            "apogee_Balanced",
+    };
 
-    /** It sits on the limb rather than in orbit - close enough to read as stuck there. */
-    public static final float HARPOON_SURFACE_PAD = 30f;
-    public static final float HARPOON_ORBIT_DAYS = 90f;
+    /** How near the rupture the hulk sits, and how far off a pond counts as "in view". */
+    public static final float WRECK_ORBIT_RADIUS = 700f;
+    public static final float WRECK_ORBIT_DAYS = 180f;
+    public static final float WRECK_SPOT_RANGE = 4000f;
 
-    /** How far to one side of the world the rupture sits - over it, nobody could see it. */
-    public static final float HARPOON_POND_OFFSET = 900f;
+    //---------------------------------------------------------------- the castaway
 
-    /** Its own detectability, so the signal is what finds it rather than a survey sweep. */
-    public static final float HARPOON_SENSOR_PROFILE = 400f;
+    /** The one exiled crewman, and where the survey put him. */
+    public static final String CASTAWAY_ENTITY_ID = "catchrelease_Castaway";
+    public static final String CASTAWAY_PLACED_KEY = "$catchrelease_castawayPlaced";
+    public static final String CASTAWAY_NAME = "Distress Beacon";
+
+    public static final float CASTAWAY_SURFACE_PAD = 30f;
+    public static final float CASTAWAY_ORBIT_DAYS = 90f;
+
+    //---------------------------------------------------------------- the interception
+
+    /**
+     * How the boat arrives when it decides to head somebody off: outside the viewport, and gone
+     * again if the player leaves.
+     */
+    public static final float INTERCEPT_SPAWN_DISTANCE = 2600f;
+    public static final float INTERCEPT_TRIGGER_RANGE = 1400f;
+    public static final float INTERCEPT_CHECK_SECONDS = 0.5f;
 }
