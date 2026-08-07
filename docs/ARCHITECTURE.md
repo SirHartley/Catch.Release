@@ -101,18 +101,22 @@ they are granted by `FishingIntro`, not by character creation.
 `catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
 merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
 
-**`data/campaign/bar_events.csv`** — 11 jobs, all `FishJob`s. The two bar encounters that are *not*
-jobs — Crablobab and the rating — are `AddBarEvents` rows in `rules.csv` instead, with no Java at
-all. **Three of the job ids do not match their class name:**
+**`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
+three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
+like the rest. The two bar encounters that are *not* jobs — Crablobab and the rating — are
+`AddBarEvents` rows in `rules.csv` instead, with no Java at all. **Three of the job ids do not match
+their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
-| `catchrelease_standingOrder` | `StandingOrderJob` | | `catchrelease_duel` | **`KidsJob`** |
-| `catchrelease_chef` | `ChefJob` | | `catchrelease_ring` | **`MafiaJob`** |
-| `catchrelease_startup` | `StartupJob` | | `catchrelease_client` | **`CompanionJob`** |
-| `catchrelease_butler` | `ButlerJob` | | `catchrelease_academy` | `AcademyJob` |
-| `catchrelease_curator` | `CuratorJob` | | `catchrelease_tuber` | `TuberJob` |
-| `catchrelease_cult` | `CultJob` | | | |
+| `catchrelease_standingOrder` | `StandingOrderJob` | | `catchrelease_academy` | `AcademyJob` |
+| `catchrelease_chef` | `ChefJob` | | `catchrelease_tuber` | `TuberJob` |
+| `catchrelease_startup` | `StartupJob` | | `catchrelease_cult` | `CultJob` |
+| `catchrelease_butler` | `ButlerJob` | | `catchrelease_campPirate` | `PirateCampJob` |
+| `catchrelease_curator` | `CuratorJob` | | `catchrelease_campMerc` | `MercCampJob` |
+| `catchrelease_duel` | **`KidsJob`** | | `catchrelease_campPath` | `PatherCampJob` |
+| `catchrelease_ring` | **`MafiaJob`** | | | |
+| `catchrelease_client` | **`CompanionJob`** | | | |
 
 **`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`,
 `catchrelease_coherence_field` → `CoherenceTerrain`. Carries the plugin class only; name, radius,
@@ -120,7 +124,7 @@ layers and tags all come from the plugin — including the terrain id as a tag, 
 does **not** add for you and which anything looking a terrain up by tag depends on.
 
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
-`catchrelease_fish_bundle` → `FishBundleItemPlugin`.
+`catchrelease_fish_bundle` → `FishBundleItemPlugin`, `catchrelease_fish_pile` → `FishPileItemPlugin`.
 
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
@@ -130,7 +134,11 @@ the colony structure that opens the fishing trade and keeps the aquarium.
 (`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
 **not** here any more.
 
-**`data/campaign/rules.csv`** — all dialogue. See the contract below.
+**`data/campaign/rules.csv`** — all dialogue. See the contract below. One row registers *behaviour*
+rather than words and is easy to miss when hunting for it in Java: `catchrelease_fisherEncounter`,
+on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms`, which is the whole
+reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
+There is no plugin behind it — see the gotcha below.
 
 **`data/config/sounds.json`** — 6 ids of our own, merged into vanilla's ~600. Ability sounds are
 named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
@@ -276,7 +284,7 @@ explains how.
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
-| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
+| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving — and `keepStanding()`, which pins the boat non-hostile and un-fleeing every frame |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
@@ -762,7 +770,7 @@ no reason to move it. The bill adds a **global** marker beside the per-fleet fla
 that was talked to need not still be near the player when anything reads it back; the marker is what
 keeps the sector-wide search off every other tick.
 
-**Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed, and the mod had one that could not have worked.
+**Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed. The mod briefly had one that lit the comm option up instead - `$hailing` and `$highlightComms`, written before `super.init`, the same trick `HarpoonedFleetFID` still uses and which does work. It was the wrong question: a lit option on a screen that should never have opened is still that screen.
 
 **`PopulateOptions` is not fired for you.** The engine fires it automatically after a `DialogOptionSelected` row, and *not* after `OpenCommLink` - so a comm row that sets `$menuState` and stops produces a conversation with no options under it. Every row in the mod that opens a menu from a comm link calls `FireAll PopulateOptions` itself.
 
