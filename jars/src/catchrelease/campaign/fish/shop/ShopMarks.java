@@ -24,7 +24,7 @@ import java.util.Set;
  * What a mark does lives elsewhere and reads through the questions here: the route planner
  * suggests every species that could satisfy a marked ask, the map screens hang the quest-yellow
  * dot off {@link #isMarked}, and the cargo icons hang it off {@link #isWanted}, which counts
- * the open jobs too. {@link #drawDot} draws it where the caller puts it: bottom left on cargo
+ * the open jobs too. {@link #drawDot} draws it where the caller puts it: bottom right on cargo
  * icons, on the ring's lower right for the map holder, at the row's right end on the map pane
  * and route popup.
  */
@@ -34,6 +34,10 @@ public class ShopMarks {
 
     /** The dot itself, relative to the icon it stands on. */
     public static final float DOT_RADIUS = 3.5f;
+
+    /** How far the dot's centre sits in from the cargo cell's corner - the one number all
+     *  three cargo icon plugins place it by. */
+    public static final float DOT_INSET = 8f;
 
     @SuppressWarnings("unchecked")
     public static Set<String> getMarkedKeys() {
@@ -292,7 +296,7 @@ public class ShopMarks {
         }
     }
 
-    /** The quest-yellow dot a needed fish wears - bottom left on cargo icons, placed to fit the
+    /** The quest-yellow dot a needed fish wears - bottom right on cargo icons, placed to fit the
      *  layout on the map screens. */
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
         //a dark seat under it, so the yellow reads on any icon

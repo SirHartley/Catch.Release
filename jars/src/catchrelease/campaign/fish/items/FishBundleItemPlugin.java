@@ -113,7 +113,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         //the wanted dot: a marked ware or an open job would take something in the crate
         for (FishCatch entry : contents) {
             if (ShopMarks.isWanted(entry)) {
-                ShopMarks.drawDot(x + 8f, y + 8f, ShopMarks.DOT_RADIUS, alphaMult);
+                ShopMarks.drawDot(x + w - ShopMarks.DOT_INSET, y + ShopMarks.DOT_INSET,
+                        ShopMarks.DOT_RADIUS, alphaMult);
                 break;
             }
         }
