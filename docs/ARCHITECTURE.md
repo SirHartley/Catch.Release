@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 191 Java files across eight top-level packages, plus
+What is where, and which file to open first. 192 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -226,7 +226,8 @@ trades while it does.
 | `FishermanSpawner.java` | The daily roll: where the boat may spawn, and what leans the odds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
-| `FishermanSurveyDialog.java` | The chart counter: this visit's rolled shelf as silhouette cards in the outfitter's dress |
+| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, the wanderer's own, and the pool that keeps them apart |
+| `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |

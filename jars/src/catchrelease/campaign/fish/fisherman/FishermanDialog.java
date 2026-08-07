@@ -140,7 +140,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
      * The shelf itself lives on the boat - see {@link FishermanSurveyDialog}.
      */
     protected void openSurvey() {
-        if (FishermanSurveyDialog.getOffers(dialog.getInteractionTarget()).isEmpty()) {
+        if (FishermanShelf.getOffers(dialog.getInteractionTarget()).isEmpty()) {
             dialog.getOptionPanel().clearOptions();
             dialog.getTextPanel().addPara("\"Shelf's bare - what I had, you bought, and I don't"
                     + " chart new waters mid-trip.\"", Misc.getGrayColor());

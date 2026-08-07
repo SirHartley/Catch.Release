@@ -83,6 +83,7 @@ public class FishermanBehavior implements EveryFrameScript {
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()) {
             expireLamps(0f);
             dropMarker();
+            dropShelf();
             done = true;
             return;
         }
@@ -225,6 +226,7 @@ public class FishermanBehavior implements EveryFrameScript {
         done = true;
 
         dropMarker();
+        dropShelf();
 
         Global.getSector().getMemoryWithoutUpdate().unset(FishermanConstants.ACTIVE_KEY);
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
@@ -270,6 +272,17 @@ public class FishermanBehavior implements EveryFrameScript {
         }
 
         marker = null;
+    }
+
+    /**
+     * Gives whatever the boat did not sell back to the pool.
+     * <p>
+     * The pool is what stops two boats putting the same chart up, so a shelf that left with the
+     * fleet still holding its ids would take those species out of circulation for good - nothing
+     * else could ever be offered them again.
+     */
+    protected void dropShelf() {
+        FishermanShelf.releaseFor(fleet);
     }
 
     /**

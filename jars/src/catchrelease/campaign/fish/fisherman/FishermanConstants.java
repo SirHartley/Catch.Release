@@ -63,9 +63,24 @@ public class FishermanConstants {
     /** Survey data costs fish one rung below the species' own rarity; commons cost a common. */
     public static final int SURVEY_COST = 2;
 
-    /** The survey shelf: rolled once per visit, sold down, never restocked until the next boat. */
+    /** The wanderer's shelf: rolled once per visit, sold down, never restocked until the next boat. */
     public static final String SURVEY_STOCK_KEY = "$catchrelease_fisherman_survey";
     public static final int SURVEY_STOCK = 6;
+
+    /** Set on a boat that sells off the core's one shelf rather than a shelf of its own. */
+    public static final String SHARED_SHELF_FLAG = "$catchrelease_fisher_shared";
+
+    /** The core's shelf, when it was last topped up, and the part-month carried over. */
+    public static final String SHARED_STOCK_KEY = "$catchrelease_fisher_shared_stock";
+    public static final String SHARED_STAMP_KEY = "$catchrelease_fisher_shared_stocked";
+    public static final String SHARED_BANKED_KEY = "$catchrelease_fisher_shared_banked";
+
+    /** How fast the core's shelf comes back, up to {@link #SURVEY_STOCK}. */
+    public static final int SHARED_REGEN_PER_MONTH = 2;
+    public static final float SHARED_REGEN_DAYS = 30f;
+
+    /** Every chart on sale anywhere, so no two boats offer the same one. */
+    public static final String LISTED_KEY = "$catchrelease_fisher_listed";
 
     /** Roll weight by rarity ordinal: commons likely, legendaries a long shot - and as the
      *  commons become known they leave the pool, so a seasoned fisher is offered rarer charts. */
