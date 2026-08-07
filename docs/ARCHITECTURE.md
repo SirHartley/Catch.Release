@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 189 Java files across eight top-level packages, plus
+What is where, and which file to open first. 190 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -227,6 +227,7 @@ trades while it does.
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
 | `FishermanSurveyDialog.java` | The chart counter: this visit's rolled shelf as silhouette cards in the outfitter's dress |
+| `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
 | `FishermanConstants.java` | Every number the above read |
 
@@ -444,7 +445,7 @@ Shader and GL machinery.
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
 | `plugins/WarpedRectRenderer.java` | A sprite warped per-vertex by a grid, no shader |
-| `renderers/FleetMarkerRenderer.java` | A small icon off a fleet's corner, in vanilla's own geometry and whoever's colour — the quest offer's cyan `!`, the Fisherman's own icon |
+| `renderers/FleetMarkerRenderer.java` | A small icon off a fleet's corner, in vanilla's own geometry and whoever's colour — the quest offer's cyan `!` |
 | `renderers/RippleRingRenderer.java` | One growing, fading ring, pinned to one location |
 | `renderers/SimpleRippleDataRunner.java` | Advances and expires a `RippleData` |
 | `helper/Stencil.java` | Depth-mask sprite masking. Stencil-buffer variants are deprecated |
@@ -720,6 +721,13 @@ edge of a sweep was two searchlights working the dark on their own. `keepVisible
 a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrightness(1f)` every tick,
 which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
 re-applied each tick rather than set at spawn, so it heals a boat that predates it.
+
+**Finding a fishing boat is a map problem, not a space problem.** Nothing is painted over the hull —
+out in space the boat is already lit, and a mark there says nothing the lamps did not. The map is the
+screen where it is one blip among forty, so `FishermanMapIcon` is a custom entity that rides the
+fleet with `showInCampaign` false and `showIconOnMap` true — the pair vanilla's own `base_intel_icon`
+is built from. It carries no sensor profile, so it is never a contact to be found; it is simply
+drawn, which is what makes the boat locatable while it is out of sight.
 
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a

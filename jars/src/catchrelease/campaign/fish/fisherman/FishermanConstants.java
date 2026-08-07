@@ -92,16 +92,6 @@ public class FishermanConstants {
     public static final float DIALOG_DIM = 0.9f;
 
     /**
-     * The mark over the boat while it is in the system, so it can be found on a busy map.
-     * <p>
-     * The mod's own icon rather than vanilla's mission indicator: this is not an errand and nothing
-     * is owed either way, it is a shop that happens to be a fleet. Placeholder art for now.
-     */
-    public static final String MARKER_SPRITE_CATEGORY = catchrelease.ModPlugin.MOD_ID;
-    public static final String MARKER_SPRITE = "placeholder";
-    public static final float MARKER_SIZE = 22f;
-
-    /**
      * How far off the boat can be seen, and the id the modifier is held under.
      * <p>
      * Far enough to cover any system. The lamps are drawn wherever the boat is, whether or not

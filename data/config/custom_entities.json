@@ -49,6 +49,25 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
+	# the fishing boats' mark on the system map - drawn there and nowhere else, so the boat can be
+	# found among the blips without anything being painted over its hull out in space
+	"catchrelease_FisherMapIcon":{
+		"defaultRadius":10,
+		"showInCampaign":false,
+		"showIconOnMap":true,
+		"showNameOnMap":false,
+		"scaleNameWithZoom":false,
+		"scaleIconWithZoom":true,
+		"icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
+		"iconWidth":22,
+		"iconHeight":22,
+		"iconColor":[255,180,50,255],
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"tags":["catchrelease_fisher_icon"],
+		"pluginClass":"catchrelease.campaign.fish.fisherman.FishermanMapIcon"
+	},
+
 	"catchrelease_FishingDrone":{
 		"defaultRadius":15, # used if radius<0 in addCustomEntity()
 		"showInCampaign":true, # show in campaign layer
