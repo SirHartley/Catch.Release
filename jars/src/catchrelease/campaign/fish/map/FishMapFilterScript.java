@@ -377,7 +377,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             popup = new FishRoutePopup(this);
             popupPanel = Global.getSettings().createCustom(FishMapPane.WIDTH, paneHeight, popup);
-            popup.mount(popupPanel, FishMapPane.WIDTH);
+            popup.mount(popupPanel, FishMapPane.WIDTH, paneHeight);
 
             ((UIPanelAPI) mapScreen).addComponent(popupPanel)
                     .setSize(FishMapPane.WIDTH, paneHeight)
