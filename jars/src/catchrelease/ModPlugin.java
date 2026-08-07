@@ -8,6 +8,9 @@ import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.FishingRating;
+import catchrelease.campaign.fish.tutorial.LostHarpoon;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
 import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
@@ -52,6 +55,11 @@ public class ModPlugin extends BaseModPlugin {
         // the fishing trade - transient watchers, the fleets themselves are what persist
         FishermanSpawner.register();
         CoreFisherSpawner.register();
+
+        // how anybody comes to be fishing at all
+        FishingIntro.healOldSave();
+        LostHarpoon.place();
+        FishingRating.VisitCounter.register();
 
         // the colony conservatory's doors and its tank
         ConservatoryOptionProvider.register();

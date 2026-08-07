@@ -7,18 +7,16 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * A standing trawler's working day: the same rig as the wanderer's, on a boat that never leaves.
+ * A standing boat's working day: the same rig as the visiting one's, on a boat that never leaves.
  * <p>
- * Everything the lamps do is inherited - the sweep, the staged motes, the throws, the map mark and
- * the pinned visibility are one rig and there is no reason for the core to have a second copy of it.
- * Three things differ, and they are the three hooks overridden here.
+ * Everything else is inherited - the sweep, the staged motes, the throws, the map mark, the pinned
+ * visibility and his name in whatever state the local water leaves it. It is the same trade and the
+ * same man; only the schedule and the route are the boat's own.
  * <p>
- * It is not visiting, so the fortnight clock, the wind-down and the despawn never run. It does not
- * wear his name, because it is not him - the drift is his plot point and a trawler picking it up
- * would give it away as an effect on the water rather than a fact about the man. And it does not
- * patrol: {@code PATROL_SYSTEM} wanders the whole system and will cut across an inhabited orbit
- * getting anywhere, which is the one thing these boats are posted not to do. See
- * {@link OuterReaches}.
+ * Two things differ, and they are the two hooks overridden here. It is not visiting, so the
+ * fortnight clock, the wind-down and the despawn never run. And it does not patrol:
+ * {@code PATROL_SYSTEM} wanders the whole system and will cut across an inhabited orbit getting
+ * anywhere, which is the one thing these boats are posted not to do. See {@link OuterReaches}.
  */
 public class CoreFisherBehavior extends FishermanBehavior {
 
@@ -30,11 +28,6 @@ public class CoreFisherBehavior extends FishermanBehavior {
     @Override
     protected boolean isVisiting() {
         return false;
-    }
-
-    /** Not him, so not his name - and nothing to rename, since a trawler is only ever a trawler. */
-    @Override
-    protected void keepNamed() {
     }
 
     /**

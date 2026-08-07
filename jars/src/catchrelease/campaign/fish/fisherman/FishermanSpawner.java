@@ -138,7 +138,7 @@ public class FishermanSpawner implements EveryFrameScript {
         fleet.forceSync();
         fleet.setTransponderOn(true);
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.FLEET_FLAG, true);
-        fleet.getMemoryWithoutUpdate().set(FishermanConstants.WANDERER_FLAG, true);
+        fleet.getMemoryWithoutUpdate().set(FishermanConstants.VISITING_FLAG, true);
 
         //the same man at the wheel every time - see FishermanIdentity
         FishermanIdentity.crew(fleet);
@@ -169,9 +169,13 @@ public class FishermanSpawner implements EveryFrameScript {
                 && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.FLEET_FLAG);
     }
 
-    /** Whether it is <i>him</i>, rather than one of the core's standing trawlers. */
-    public static boolean isWanderer(CampaignFleetAPI fleet) {
+    /**
+     * Whether this boat is only passing through, rather than one of the standing ones.
+     * <p>
+     * A question about the schedule and nothing else. Every one of them is him.
+     */
+    public static boolean isVisiting(CampaignFleetAPI fleet) {
         return fleet != null
-                && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.WANDERER_FLAG);
+                && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.VISITING_FLAG);
     }
 }

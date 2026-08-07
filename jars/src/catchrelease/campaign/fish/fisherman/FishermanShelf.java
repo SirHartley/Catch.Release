@@ -14,15 +14,15 @@ import java.util.List;
 /**
  * What survey data is for sale, and on which boat.
  * <p>
- * Two shelves, because there are two kinds of boat. The standing fleets in the inhabited core all
- * sell off <b>one</b> shelf held in sector memory - they are the same trade running the same charts
- * between the same ports, and six boats each rolling their own stock would mean flying a circuit
- * until the roll came up right. That shelf is not restocked on a visit either; it comes back at
+ * Two shelves, because there are two kinds of schedule. The standing boats in the inhabited core all
+ * sell off <b>one</b> shelf held in sector memory - it is one man running the same charts between the
+ * same ports, and six boats each rolling their own stock would mean flying a circuit until the roll
+ * came up right. That shelf is not restocked on a visit either; it comes back at
  * {@link FishermanConstants#SHARED_REGEN_PER_MONTH} charts a month whether anybody is buying or not,
  * which is a supply rather than a shop.
  * <p>
- * The wanderer out past the last colony keeps his own, rolled fresh each visit and gone with him -
- * he is not part of any circuit and nothing out there restocks anything.
+ * The boat out past the last colony keeps its own, rolled fresh each visit and gone with it - that
+ * run is not part of any circuit and nothing out there restocks anything.
  * <p>
  * One registry sits across both: {@link FishermanConstants#LISTED_KEY} holds every chart on sale
  * anywhere, and no roll picks something already on it. Otherwise the two shelves would sooner or
