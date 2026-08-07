@@ -727,7 +727,11 @@ public class FishingIntro {
                 }
 
                 QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
-                mote = QuestPond.placeMote(pond, speciesId);
+
+                //holds, unlike every other errand's fish. Somebody being taught what a rupture is
+                //should find the thing they were sent for still in it - "elusive" is a difficulty,
+                //and the first catch is not the place to be teaching difficulty
+                mote = QuestPond.placeMote(pond, speciesId, true);
                 break;
             }
         }

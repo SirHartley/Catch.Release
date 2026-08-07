@@ -114,6 +114,28 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /**
+     * Set on a mote that is meant to still be there when the player arrives.
+     * <p>
+     * Every other mote is scenery with a lifespan - it crosses its water once and goes, and the
+     * spawners keep putting new ones out. That is right for a pond somebody is fishing and wrong for
+     * a specimen an errand has named, because a named fish that fades and is replanted somewhere
+     * else reads as teleporting rather than as swimming. One that holds picks a new corner of its
+     * own pond instead of expiring, so it mills about inside the water it was planted in and is
+     * still there in an hour.
+     * <p>
+     * Read off the entity's memory rather than held as a field, because the flag is set by whoever
+     * planted it after construction, and a mote is rebuilt from its params on load.
+     */
+    public static final String HOLDS_KEY = "$catchrelease_moteHolds";
+
+    public boolean holdsStation() {
+        return entity != null && entity.getMemoryWithoutUpdate().getBoolean(HOLDS_KEY);
+    }
+
+    /** How far into the pond a holding mote will wander, as a fraction of the pond's radius. */
+    public static final float HOLD_RANGE = 0.5f;
+
     /** Whether this mote came from a pond, as opposed to loose in open water. Fixed at creation. */
     public boolean isFromPond() {
         return pond != null;
@@ -192,6 +214,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
+            //a holding mote has nowhere to be going, so arriving is just a reason to pick somewhere
+            //else in the same water. Anything else has finished its crossing
+            if (holdsStation() && pickNewTargetInPond()) return;
+
             Misc.fadeAndExpire(entity);
             return;
         }
@@ -207,7 +233,39 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         entity.setLocation(next.x, next.y);
 
-        if (hasLeftThePond()) Misc.fadeAndExpire(entity);
+        //a holding mote that has been pushed past the mask - by a pond closing around it rather
+        //than by its own course - is turned back rather than lost
+        if (hasLeftThePond() && !(holdsStation() && pickNewTargetInPond())) {
+            Misc.fadeAndExpire(entity);
+        }
+    }
+
+    /**
+     * Somewhere else inside the same pond to swim to, well within the mask.
+     * <p>
+     * Well inside the mask rather than across all of it, so a course through the middle cannot clip
+     * the boundary and end the crossing early. The reach is measured against how open the pond
+     * currently is and not against its full radius: a pond closing around a mote shrinks the mask
+     * below the fixed fraction, and a target chosen outside the boundary would put the mote back
+     * over the line the moment it arrived - repicking every frame and never getting home.
+     *
+     * @return whether a new course was set, which is false only when there is no pond to swim in
+     */
+    protected boolean pickNewTargetInPond() {
+        if (pond == null) return false;
+
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
+        if (plugin == null) return false;
+
+        float reach = pond.getRadius() * Math.min(HOLD_RANGE, plugin.activity * 0.8f);
+
+        Vector2f next = MathUtils.getPointOnCircumference(pond.getLocation(),
+                MathUtils.getRandomNumberInRange(reach * 0.25f, reach),
+                MathUtils.getRandomNumberInRange(0f, 360f));
+
+        target = next;
+
+        return true;
     }
 
     /**
