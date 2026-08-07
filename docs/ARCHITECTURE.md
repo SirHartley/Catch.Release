@@ -52,8 +52,8 @@ Everything game-facing is wired from `ModPlugin.java`.
 1. `OnJumpPondSpawner.register()` — ponds appear as the player jumps into systems
 2. `BuriedMoteSpawner.register()` — maintains the buried-mote population near the player
 3. `ChargeManager.register()` — regenerating charge pools for the charged abilities
-4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets their custom encounter screen,
-   the one conversation still written in Java
+4. `CatchReleaseCampaignPlugin.register()` — hands harpooned fleets and fishing boats their custom
+   encounter screens
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
@@ -266,6 +266,7 @@ explains how.
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
+| `FishermanFID.java` | The encounter screen: marks the comm link while the introduction is unfinished |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |

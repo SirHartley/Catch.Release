@@ -1,5 +1,7 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.campaign.fish.fisherman.FishermanFID;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.PluginPick;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -9,13 +11,14 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
- * Hands the game the one encounter screen the mod still writes in Java: the fleets we have wronged.
+ * Hands the game the two encounter screens the mod writes in Java: the fleets we have wronged, and
+ * the fishing boats.
  * <p>
- * Everything else the mod says now goes through {@code rules.csv}. The fishing boats, the hulk and
- * the castaway are all ordinary rules-driven interactions keyed on a flag or a tag, which is what
- * lets their dialogue live in the sheet where the jobs' already does. This is the exception because
- * a harpooned fleet's screen is a <i>fleet interaction</i> - engage, disengage, comm link - and that
- * is a plugin's shape rather than a conversation's.
+ * Every word either of them says still comes out of {@code rules.csv}, and so does all of the hulk
+ * and the castaway. What cannot live in the sheet is the screen <i>around</i> the words - a fleet
+ * interaction is engage, disengage, comm link, leave, and that is a plugin's shape rather than a
+ * conversation's. Both picks here only reach into that shape: one to fire a greeting the encounter
+ * would otherwise never ask for, the other to mark the comm link as the thing to click.
  */
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
@@ -39,9 +42,20 @@ public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
     public PluginPick<InteractionDialogPlugin> pickInteractionDialogPlugin(SectorEntityToken target) {
         if (!(target instanceof CampaignFleetAPI)) return null;
 
-        if (!HarpoonOffence.wasHarpooned((CampaignFleetAPI) target)) return null;
+        CampaignFleetAPI fleet = (CampaignFleetAPI) target;
 
-        return new PluginPick<InteractionDialogPlugin>(
-                new HarpoonedFleetFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+        //asked first: a fishing boat somebody put a hook in is a harpooned fleet before it is
+        //anything else, and it has a line waiting that the other screen would swallow
+        if (HarpoonOffence.wasHarpooned(fleet)) {
+            return new PluginPick<InteractionDialogPlugin>(
+                    new HarpoonedFleetFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+        }
+
+        if (FishermanSpawner.isFisherman(fleet)) {
+            return new PluginPick<InteractionDialogPlugin>(
+                    new FishermanFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
+        }
+
+        return null;
     }
 }
