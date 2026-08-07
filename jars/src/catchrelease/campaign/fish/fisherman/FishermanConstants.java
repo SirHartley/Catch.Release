@@ -10,11 +10,15 @@ public class FishermanConstants {
     /** The flag on any fishing boat, which is what routes interaction to the trade's own dialog. */
     public static final String FLEET_FLAG = "$catchrelease_fisherman";
 
-    /** The flag on the one wandering boat: him, rather than one of the core's trawlers. */
-    public static final String WANDERER_FLAG = "$catchrelease_fisherman_himself";
+    /**
+     * The flag on the boat that is only passing through.
+     * <p>
+     * Purely about the boat's schedule. It is the same man on every one of them - see
+     * {@link FishermanIdentity} - so nothing about who the player is talking to hangs off this.
+     */
+    public static final String VISITING_FLAG = "$catchrelease_fisherman_visiting";
 
     /** The core's standing boats: one to a populated system, working the outer reaches. */
-    public static final String CORE_FLEET_NAME = "Breach Trawler";
     public static final String[] CORE_SHIPS = {
             "buffalo_Standard",
             "shepherd_Frontier",
@@ -76,7 +80,7 @@ public class FishermanConstants {
     /** Survey data costs fish one rung below the species' own rarity; commons cost a common. */
     public static final int SURVEY_COST = 2;
 
-    /** The wanderer's shelf: rolled once per visit, sold down, never restocked until the next boat. */
+    /** A visiting boat's shelf: rolled once per visit, sold down, gone when it leaves. */
     public static final String SURVEY_STOCK_KEY = "$catchrelease_fisherman_survey";
     public static final int SURVEY_STOCK = 6;
 

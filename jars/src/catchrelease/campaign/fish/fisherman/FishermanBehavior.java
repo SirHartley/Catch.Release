@@ -128,7 +128,7 @@ public class FishermanBehavior implements EveryFrameScript {
     /**
      * Whether this boat is passing through.
      * <p>
-     * The wanderer is; the core's standing trawlers are not, and for them the visit clock and
+     * The one that turns up is; the core's standing boats are not, and for them the visit clock and
      * everything downstream of it - the wind-down, the despawn, the last-seen stamp - is simply not
      * a thing that happens. Kept as a question rather than a flag so a subclass that lives somewhere
      * answers it once and inherits the rest of the rig unchanged.
@@ -175,12 +175,12 @@ public class FishermanBehavior implements EveryFrameScript {
 
         keepNamed();
 
-        //a boat out there since before the trade had two kinds of boat in it. Written once, and
-        //only because without it the dialog would take him for one of the core's trawlers
+        //a boat out there since before there were two kinds of schedule. Written once, and only
+        //because the shelf and the spawner both ask which kind of boat this is
         if (isVisiting()
-                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.WANDERER_FLAG)) {
+                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.VISITING_FLAG)) {
 
-            fleet.getMemoryWithoutUpdate().set(FishermanConstants.WANDERER_FLAG, true);
+            fleet.getMemoryWithoutUpdate().set(FishermanConstants.VISITING_FLAG, true);
         }
 
         if (marker == null || marker.getContainingLocation() != fleet.getContainingLocation()) {

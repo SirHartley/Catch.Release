@@ -9,7 +9,6 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
@@ -56,14 +55,6 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         showFace();
 
-        if (!isHim()) {
-            dialog.getTextPanel().addPara("The trawler answers on the second hail. \"Working the"
-                    + " deep end. Charts, gear, or are you selling?\"");
-
-            showMain();
-            return;
-        }
-
         float drift = FishermanIdentity.getDrift(dialog.getInteractionTarget()
                 .getContainingLocation());
 
@@ -80,27 +71,16 @@ public class FishermanDialog implements InteractionDialogPlugin {
         showMain();
     }
 
-    /** Whether this is the wanderer, rather than one of the core's standing trawlers. */
-    protected boolean isHim() {
-        return dialog.getInteractionTarget() instanceof CampaignFleetAPI
-                && FishermanSpawner.isWanderer((CampaignFleetAPI) dialog.getInteractionTarget());
-    }
-
     /**
-     * The man rather than the hulls, for the one boat where that is the point.
+     * The man rather than the hulls.
      * <p>
-     * The same face campaign after campaign is a thing a fleet readout cannot say and a portrait
-     * says without a word. A trawler has no such claim on anybody's attention and gets the hulls,
-     * which is what it is.
+     * Every boat in the trade answers with the same face - that is the plot point, and it only
+     * lands if the screen says it without comment. A fleet readout cannot say "him again"; a
+     * portrait says it without a word, and says it identically on a boat four jumps from the last
+     * one. See {@link FishermanIdentity}.
      */
     protected void showFace() {
-        if (isHim()) {
-            dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
-            return;
-        }
-
-        dialog.getVisualPanel().showFleetInfo(dialog.getInteractionTarget().getName(),
-                (CampaignFleetAPI) dialog.getInteractionTarget(), null, null);
+        dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
     }
 
     protected void showMain() {
@@ -109,11 +89,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Purchase survey data", Option.SURVEY);
         dialog.getOptionPanel().addOption("Access the outfitter", Option.OUTFITTER);
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
-
-        //rumors are his. A trawler working one system knows what everybody in that system knows,
-        //and the wanderer being the only source of them is half of why he is worth finding
-        if (isHim()) dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
-
+        dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
         dialog.getOptionPanel().addOption("Leave", Option.LEAVE);
 
         dialog.getOptionPanel().setShortcut(Option.LEAVE,
@@ -168,12 +144,8 @@ public class FishermanDialog implements InteractionDialogPlugin {
     protected void openSurvey() {
         if (FishermanShelf.getOffers(dialog.getInteractionTarget()).isEmpty()) {
             dialog.getOptionPanel().clearOptions();
-            dialog.getTextPanel().addPara(isHim()
-                            ? "\"Shelf's bare - what I had, you bought, and I don't chart new"
-                            + " waters mid-trip.\""
-                            : "\"Shelf's bare. Everything the trade had out, you've had off us."
-                            + " Come back when the surveyors have caught up.\"",
-                    Misc.getGrayColor());
+            dialog.getTextPanel().addPara("\"Shelf's bare - what I had, you bought, and I don't"
+                    + " chart new waters mid-trip.\"", Misc.getGrayColor());
             dialog.getOptionPanel().addOption("Back", Option.MAIN);
             return;
         }

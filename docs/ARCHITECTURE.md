@@ -29,7 +29,7 @@ that is wrong is worse than no map, because it is believed.
 | Aiming and reticules | `skillshot/` (has its own README) |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
-| The fishing boats — wanderer and trawlers | `campaign/fish/fisherman/` |
+| The fishing boats, standing and visiting | `campaign/fish/fisherman/` |
 | The colony structure and its aquarium | `campaign/fish/colony/` |
 | Consequences of harpooning a fleet | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
@@ -53,7 +53,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the wandering Fisherman
-8. `CoreFisherSpawner.register()` — one standing trawler to every inhabited system
+8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
 9. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
 10. `AquariumTankScript.register()` — the aquarium on the colony's main menu
 11. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
@@ -219,19 +219,20 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
-The fishing trade. Two kinds of boat: the wandering Fisherman, who turns up in uninhabited water for
-a fortnight and is always the same man, and a standing trawler posted to every inhabited system,
-working the outer reaches off one shared shelf.
+The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
+outer reaches off one shared shelf, and a visiting one that turns up in uninhabited water for a
+fortnight with a shelf of its own. Every one of them answers with the same face, and none of them
+explains how.
 
 | File | What it does |
 |---|---|
-| `FishermanSpawner.java` | The daily roll for the wanderer: where he may turn up, and what leans the odds |
-| `CoreFisherSpawner.java` | One trawler to every inhabited system, re-posted if it is lost |
-| `CoreFisherBehavior.java` | The standing boat: the same rig, no visit clock, and the outer-reaches route |
+| `FishermanSpawner.java` | The daily roll for the visiting boat: where it may turn up, and what leans the odds |
+| `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
+| `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
-| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, the wanderer's own, and the pool that keeps them apart |
+| `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, a visiting boat's own, and the pool that keeps them apart |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
@@ -729,9 +730,12 @@ a flat `getDetectedRangeMod()` so he is never a blip, and `forceSensorFaderBrigh
 which is a per-frame override rather than a setting and is how vanilla drives its own faders. It is
 re-applied each tick rather than set at spawn, so it heals a boat that predates it.
 
-**The Fisherman is one person, made once.** Every other fleet in the game is fresh hulls under a
-fresh officer with a fresh name; he deliberately is not, because the same face turning up four jumps
-and eight months later is the point of him. `FishermanIdentity` keeps the `PersonAPI` in sector
+**The Fisherman is one person, made once — and he is on every boat.** Every other fleet in the game
+is fresh hulls under a fresh officer with a fresh name; he deliberately is not, because the same face
+turning up four jumps and eight months later is the point of him. Standing boat or visiting one, the
+encounter shows the same portrait and says nothing about it. The flag that separates the two is
+`$catchrelease_fisherman_visiting`, and it is about the *schedule* — nothing about who the player is
+talking to hangs off it. `FishermanIdentity` keeps the `PersonAPI` in sector
 memory and hands the same object back at every spawn, and the encounter shows the portrait rather
 than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
 `getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
