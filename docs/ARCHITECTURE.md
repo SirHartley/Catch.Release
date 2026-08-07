@@ -266,7 +266,6 @@ explains how.
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
-| `FishermanFID.java` | The encounter screen: marks the comm link while the introduction is unfinished |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards in the outfitter's dress |
@@ -750,6 +749,10 @@ its next tick, rather than through `CatchReleaseCMD` — the handoff predates th
 no reason to move it. The bill adds a **global** marker beside the per-fleet flags, because the crew
 that was talked to need not still be near the player when anything reads it back; the marker is what
 keeps the sector-wide search off every other tick.
+
+**Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed, and the mod had one that could not have worked.
+
+**`PopulateOptions` is not fired for you.** The engine fires it automatically after a `DialogOptionSelected` row, and *not* after `OpenCommLink` - so a comm row that sets `$menuState` and stops produces a conversation with no options under it. Every row in the mod that opens a menu from a comm link calls `FireAll PopulateOptions` itself.
 
 **The Church and the Path are against the water, not against fish.** A rupture is a hole opened between here and hyperspace and everything pulled through it came from the wrong side of that hole, so the whole trade is people making a living off a wound in creation. Neither flag therefore produces a fisher, a buyer, a broker, or anybody in a bar with a favour to ask - no bar job at a Church or Path port, no trawler working a system either of them runs, no fishing offer on one of their hulls. What they do produce is everything in `campaign/crime`, plus the cells in `jobs/camp` that sit on ruptures so nobody can work them, and that is the only shape a Luddic interaction with this mod takes. `campaign/fish/FishingTaboo.java` is the one list; nothing hardcodes the two faction ids anywhere else.
 

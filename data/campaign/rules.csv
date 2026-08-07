@@ -676,35 +676,44 @@ catchrelease_ratingOffer,DialogOptionSelected,$option == catchrelease_ratingOffe
 He does not explain that either, and it is somehow the most informative thing he has said.","catchrelease_ratingWho:""Who put you here?""
 catchrelease_ratingLeave:Leave",
 catchrelease_ratingLeave,DialogOptionSelected,$option == catchrelease_ratingLeave,DismissDialog,,,
+catchrelease_fisherEncounter,BeginFleetEncounter,"$catchrelease_fisherman score:1000
+!$isHostile","unset $ignorePlayerCommRequests
+OpenComms",,,"Walking up to a trawler goes straight into the conversation, which is what OpenComms is for - it sets the flag the encounter reads at the end of its own init and takes the OPEN_COMM branch instead of building the fleet screen. Without this row the boat gets the ordinary engage/disengage/leave screen with an unlabelled comm link at the bottom of it, and everything the boat is for sits behind a line that reads like every hauler in the sector."
 catchrelease_fisherComms0,OpenCommLink,"$entity.catchrelease_fisherman score:1000
 CatchReleaseCMD tokens
-$catchreleaseDrift == 0",$menuState = catchreleaseFisher,"The trawler's comm crackles. ""Evening. Lights are good tonight. Buying, selling, or just drifting?""",,
+$catchreleaseDrift == 0","$menuState = catchreleaseFisher
+FireAll PopulateOptions","The trawler's comm crackles. ""Evening. Lights are good tonight. Buying, selling, or just drifting?""",,
 catchrelease_fisherComms1,OpenCommLink,"$entity.catchrelease_fisherman score:1010
 CatchReleaseCMD tokens
-$catchreleaseDrift == 1",$menuState = catchreleaseFisher,"The trawler's comm crackles. ""Evening. Lights are holding, near enough. Buying, selling, or just drifting?""
+$catchreleaseDrift == 1","$menuState = catchreleaseFisher
+FireAll PopulateOptions","The trawler's comm crackles. ""Evening. Lights are holding, near enough. Buying, selling, or just drifting?""
 
 The comm image sits a half-second behind them, the way a bad relay does - except there is no relay out here.",,
 catchrelease_fisherComms2,OpenCommLink,"$entity.catchrelease_fisherman score:1020
 CatchReleaseCMD tokens
-$catchreleaseDrift == 2",$menuState = catchreleaseFisher,"The trawler's comm crackles, twice, out of order. ""Evening. Lights are good tonight - were good tonight. Buying, selling, or just drifting?""
+$catchreleaseDrift == 2","$menuState = catchreleaseFisher
+FireAll PopulateOptions","The trawler's comm crackles, twice, out of order. ""Evening. Lights are good tonight - were good tonight. Buying, selling, or just drifting?""
 
 Their voice arrives a moment before the channel opens, and the lights behind them sweep out of time with the ones outside the window.",,
 catchrelease_fisherComms3,OpenCommLink,"$entity.catchrelease_fisherman score:1030
 CatchReleaseCMD tokens
-$catchreleaseDrift == 3",$menuState = catchreleaseFisher,"The trawler's comm opens on a face already mid-sentence. ""- good tonight, lights are good tonight, lights are - evening. Buying, or selling, or just drifting?""
+$catchreleaseDrift == 3","$menuState = catchreleaseFisher
+FireAll PopulateOptions","The trawler's comm opens on a face already mid-sentence. ""- good tonight, lights are good tonight, lights are - evening. Buying, or selling, or just drifting?""
 
 The picture will not hold. There is somebody on the other end of it and they are answering, and the crew behind them are the crew from a boat that is not this one. Somebody aboard says they have met them before. Somebody else says they have never seen them.",,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
-$menuState = catchreleaseFisher","The hail is answered before your comms officer has finished sending it.
+$menuState = catchreleaseFisher
+FireAll PopulateOptions","The hail is answered before your comms officer has finished sending it.
 
 ""New code on my board, this far out, with the lights on."" Whoever is aboard sounds like they have been awake a long time. ""Nobody gets past the picket by accident, $playerName. Ask.""",,"First contact. The four drift greetings assume you already know what a fishing boat is doing out here - somebody who found one on their own does not, and until this row existed they were handed the ordinary greeting and left to guess. Scored above the greetings and below the interception, so a boat that came to them still says its own line. The script is the same point the bar rating and the castaway call: hailing a boat is being told where one is."
 catchrelease_fisherIntercept,OpenCommLink,"$entity.catchrelease_fisherman score:1100
 CatchReleaseCMD tokens
 $entity.catchrelease_intercepted
 $catchreleaseStage < 2","CatchReleaseCMD point
-$menuState = catchreleaseFisher","The boat is not where it was ten minutes ago and nobody aboard mentions it.
+$menuState = catchreleaseFisher
+FireAll PopulateOptions","The boat is not where it was ten minutes ago and nobody aboard mentions it.
 
 ""You were about to put a hand in that. You are not equipped for it, and I would rather not fish you out afterwards.""",,
 catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
@@ -734,7 +743,7 @@ catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
-catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,EndConversation,,,
+catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,DismissDialog,,,
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher
 FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
