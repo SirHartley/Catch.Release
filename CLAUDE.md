@@ -4,14 +4,19 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 
 ## Workflow
 
-- **Read the real sources wherever they answer the question.** They live in the repo under
-  `lib/`, zipped: `starfarer.api.zip` is the game's own API source, and `GraphicsLib.zip`,
-  `Lazylib_lunalib.zip` and `MagicLib.zip` are the dependency mods, source and jars both.
-  Unzip to a temp directory to read them - do not unpack them into the repo. A signature read
-  out of `lib/` beats one remembered or paraphrased.
-- **Use the `starsector-knowledge` skill for everything `lib/` does not cover**: the obfuscated
-  game internals, the stock data files, csv formats, mechanics. Never answer from memory - the
-  API changes between versions.
+- **Ask the `starsector-knowledge` skill first, and for anything vanilla ask it only.** It is
+  the full API, the decompiled internals and the whole stock `data/` folder for one exact game
+  build, indexed - and it covers the obfuscated code and the csv formats, which nothing else
+  does. Never answer from memory: the API changes between versions and a remembered signature
+  is the expensive kind of wrong.
+- **Go to the real sources when the skill runs short.** They live in the repo under `lib/`,
+  zipped: `starfarer.api.zip` is the game's own API source, and `GraphicsLib.zip`,
+  `Lazylib_lunalib.zip` and `MagicLib.zip` are the dependency mods, source and jars both. Unzip
+  to a temp directory to read them - do not unpack them into the repo. Two cases earn it: the
+  skill answered but not fully, or the change is knotty enough to want a whole subsystem read
+  end to end. The dependency mods are the exception to the rule above - the skill is vanilla
+  only, so for GraphicsLib, LazyLib, LunaLib and MagicLib `lib/` is not the fallback, it is the
+  only source there is.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
 - **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
