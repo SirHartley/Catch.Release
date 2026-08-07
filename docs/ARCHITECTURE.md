@@ -434,11 +434,13 @@ Codex pages for species.
 | `FishCodexEntry.java` | One page: description, catch data, record, location, art, and the jump to the sector map |
 
 ### `campaign/fish/coherence`
-The low-coherence overlay: the screen warps purple while a rig runs somewhere thin.
+The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
+is close, or one of the trade's boats is - whichever of the three pulls hardest, weighted by
+distance for the last two.
 
 | File | What it does |
 |---|---|
-| `CoherenceOverlayScript.java` | The rules: when it shows, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
 | `CoherenceTerrain.java` | The terrain-bar line. Invisible terrain covering a whole location whose `containsEntity` is "is the overlay up" rather than a distance — IndEvo's trick, so nothing has to be moved under the fleet |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
@@ -539,7 +541,7 @@ Shader and GL machinery.
 |---|---|
 | `distortion/CampaignDistortionRenderer.java` | GraphicsLib's distortion pass, rebuilt to run on the campaign map |
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
-| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside |
+| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside. Both warp and tint sit under a radial mask that leaves the middle of the screen clear |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |

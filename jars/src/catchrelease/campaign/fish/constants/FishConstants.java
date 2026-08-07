@@ -448,6 +448,11 @@ public class FishConstants {
      */
     public static final float COHERENCE_OVERLAY_FLOOR = 0.12f;
     public static final float COHERENCE_OVERLAY_CEIL = 0.8f;
+
+    /** Centre-distance the overlay may creep in to at full level (0 centre, 1 mid-edge), never
+     *  past - the middle of the screen stays readable however bad the water gets. */
+    public static final float COHERENCE_OVERLAY_INNER_CLEAR = 0.4f;
+
     public static final float COHERENCE_OVERLAY_EASE_IN = 2f;
     public static final float COHERENCE_OVERLAY_EASE_OUT = 1.5f;
     public static final String SOUND_COHERENCE_WHISPERS = "catchrelease_coherence_whispers";
@@ -461,6 +466,17 @@ public class FishConstants {
      * standing next to it in bad water should read the same way.
      */
     public static final float COHERENCE_FISHERMAN_RANGE = 2500f;
+
+    /**
+     * The aberration a boat's vicinity assumes - 0.9 stability, so 0.1 - even where the water
+     * reads dead calm. Turned into a level by dividing by CEIL directly rather than through
+     * {@code levelFor}: the FLOOR would eat 0.1 whole, and the boat must always show.
+     */
+    public static final float COHERENCE_FISHERMAN_ABERRATION = 0.1f;
+
+    /** Multiplied by pond radius: how far past the water's edge an open pond still turns the
+     *  screen over. Measured from the surface, so anywhere on the pond is full strength. */
+    public static final float COHERENCE_POND_RANGE_MULT = 4f;
 
     /**
      * Track's hyperspace backing and its warp grid. The grid border doesn't move, so the swim
