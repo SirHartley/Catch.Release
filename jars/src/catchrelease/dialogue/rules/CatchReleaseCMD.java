@@ -458,8 +458,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     //---------------------------------------------------------------- chart requests
 
-    /** Held between the pitch and the answer; a declined job is not kept anywhere. */
-    protected transient FishermanQuest.Saved pending;
+    /**
+     * Held between the pitch and the answer; a declined job is not kept anywhere.
+     * <p>
+     * Static, because the pitch and the acceptance are two different rows and the engine owes no
+     * promise that both run on the same command instance - an instance field here is state
+     * balanced on an implementation detail.
+     */
+    protected static FishermanQuest.Saved pending;
 
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
         pending = FishermanQuest.roll();
