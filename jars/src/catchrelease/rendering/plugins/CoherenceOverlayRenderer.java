@@ -1,5 +1,6 @@
 package catchrelease.rendering.plugins;
 
+import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -50,6 +51,7 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
     protected int uTime = -1;
     protected int uVisibleUV = -1;
     protected int uWarp = -1;
+    protected int uInnerClear = -1;
 
     /** This frame's strength, 0-1; at 0 nothing is drawn. Meant to be fed every frame. */
     public static void setLevel(float level) {
@@ -107,6 +109,7 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
         GL20.glUniform1f(uLevel, level);
         GL20.glUniform1f(uTime, time);
+        GL20.glUniform1f(uInnerClear, FishConstants.COHERENCE_OVERLAY_INNER_CLEAR);
         GL20.glUniform2f(uVisibleUV, ShaderLib.getVisibleU(), ShaderLib.getVisibleV());
 
         //pixels to per-axis texcoords, so the wobble is the same size in x and y on screen
@@ -156,6 +159,7 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
         uTime = GL20.glGetUniformLocation(program, "time");
         uVisibleUV = GL20.glGetUniformLocation(program, "visibleUV");
         uWarp = GL20.glGetUniformLocation(program, "warp");
+        uInnerClear = GL20.glGetUniformLocation(program, "innerClear");
 
         GL20.glUniform1i(GL20.glGetUniformLocation(program, "tex"), 0);
         GL20.glUniform3f(GL20.glGetUniformLocation(program, "colorMult"),

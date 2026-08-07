@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 217 Java files across eight top-level packages, plus
+What is where, and which file to open first. 218 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -74,6 +74,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 15. `FishMapFilterScript` as a transient script — the sector-map filter
 16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+18. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -101,18 +102,22 @@ they are granted by `FishingIntro`, not by character creation.
 `catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
 merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
 
-**`data/campaign/bar_events.csv`** — 11 jobs, all `FishJob`s. The two bar encounters that are *not*
-jobs — Crablobab and the rating — are `AddBarEvents` rows in `rules.csv` instead, with no Java at
-all. **Three of the job ids do not match their class name:**
+**`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
+three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
+like the rest. The two bar encounters that are *not* jobs — Crablobab and the rating — are
+`AddBarEvents` rows in `rules.csv` instead, with no Java at all. **Three of the job ids do not match
+their class name:**
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|
-| `catchrelease_standingOrder` | `StandingOrderJob` | | `catchrelease_duel` | **`KidsJob`** |
-| `catchrelease_chef` | `ChefJob` | | `catchrelease_ring` | **`MafiaJob`** |
-| `catchrelease_startup` | `StartupJob` | | `catchrelease_client` | **`CompanionJob`** |
-| `catchrelease_butler` | `ButlerJob` | | `catchrelease_academy` | `AcademyJob` |
-| `catchrelease_curator` | `CuratorJob` | | `catchrelease_tuber` | `TuberJob` |
-| `catchrelease_cult` | `CultJob` | | | |
+| `catchrelease_standingOrder` | `StandingOrderJob` | | `catchrelease_academy` | `AcademyJob` |
+| `catchrelease_chef` | `ChefJob` | | `catchrelease_tuber` | `TuberJob` |
+| `catchrelease_startup` | `StartupJob` | | `catchrelease_cult` | `CultJob` |
+| `catchrelease_butler` | `ButlerJob` | | `catchrelease_campPirate` | `PirateCampJob` |
+| `catchrelease_curator` | `CuratorJob` | | `catchrelease_campMerc` | `MercCampJob` |
+| `catchrelease_duel` | **`KidsJob`** | | `catchrelease_campPath` | `PatherCampJob` |
+| `catchrelease_ring` | **`MafiaJob`** | | | |
+| `catchrelease_client` | **`CompanionJob`** | | | |
 
 **`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`,
 `catchrelease_coherence_field` → `CoherenceTerrain`. Carries the plugin class only; name, radius,
@@ -120,7 +125,7 @@ layers and tags all come from the plugin — including the terrain id as a tag, 
 does **not** add for you and which anything looking a terrain up by tag depends on.
 
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
-`catchrelease_fish_bundle` → `FishBundleItemPlugin`.
+`catchrelease_fish_bundle` → `FishBundleItemPlugin`, `catchrelease_fish_pile` → `FishPileItemPlugin`.
 
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
@@ -130,7 +135,11 @@ the colony structure that opens the fishing trade and keeps the aquarium.
 (`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
 **not** here any more.
 
-**`data/campaign/rules.csv`** — all dialogue. See the contract below.
+**`data/campaign/rules.csv`** — all dialogue. See the contract below. One row registers *behaviour*
+rather than words and is easy to miss when hunting for it in Java: `catchrelease_fisherEncounter`,
+on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms`, which is the whole
+reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
+There is no plugin behind it — see the gotcha below.
 
 **`data/config/sounds.json`** — 6 ids of our own, merged into vanilla's ~600. Ability sounds are
 named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
@@ -276,7 +285,7 @@ explains how.
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
-| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
+| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving — and `keepStanding()`, which pins the boat non-hostile and un-fleeing every frame |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
@@ -425,11 +434,13 @@ Codex pages for species.
 | `FishCodexEntry.java` | One page: description, catch data, record, location, art, and the jump to the sector map |
 
 ### `campaign/fish/coherence`
-The low-coherence overlay: the screen warps purple while a rig runs somewhere thin.
+The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
+is close, or one of the trade's boats is - whichever of the three pulls hardest, weighted by
+distance for the last two.
 
 | File | What it does |
 |---|---|
-| `CoherenceOverlayScript.java` | The rules: when it shows, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
 | `CoherenceTerrain.java` | The terrain-bar line. Invisible terrain covering a whole location whose `containsEntity` is "is the overlay up" rather than a distance — IndEvo's trick, so nothing has to be moved under the fleet |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
@@ -530,7 +541,7 @@ Shader and GL machinery.
 |---|---|
 | `distortion/CampaignDistortionRenderer.java` | GraphicsLib's distortion pass, rebuilt to run on the campaign map |
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
-| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside |
+| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside. Both warp and tint sit under a radial mask that leaves the middle of the screen clear |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
@@ -561,6 +572,7 @@ Shader and GL machinery.
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |
 | `helper/animation/ArchedTrajectoryFollowingMote.java` | A glowing mote drawn along that arc |
 | `reflection/ReflectionUtils.java` | Reflection via `MethodHandle`, to dodge the classloader ban |
+| `testing/DevShortcut.java` | The Ü key: skips the introduction, grants every rig and the shop, issues charts of every rung. A `CampaignInputListener` on the post-core pass, so anything with a text field has already eaten the key; matched on the typed character rather than a scancode. Dev mode only, read per press |
 | `testing/TestStencilRenderer.java` | Dev renderer. Commented out of `ModPlugin` |
 
 ---
@@ -762,7 +774,7 @@ no reason to move it. The bill adds a **global** marker beside the per-fleet fla
 that was talked to need not still be near the player when anything reads it back; the marker is what
 keeps the sector-wide search off every other tick.
 
-**Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed, and the mod had one that could not have worked.
+**Walking up to a fishing boat must not show the fleet screen.** Everything the trawler is for is behind a comm link, and vanilla's encounter renders that link as one unlabelled line under engage and disengage - a combat prompt with a shop hidden in it. `OpenComms` on a `BeginFleetEncounter` row is vanilla's own answer: it sets the flag the encounter reads at the end of its own `init`, which takes the `OPEN_COMM` branch instead of building the fleet screen at all. No plugin needed. The mod briefly had one that lit the comm option up instead - `$hailing` and `$highlightComms`, written before `super.init`, the same trick `HarpoonedFleetFID` still uses and which does work. It was the wrong question: a lit option on a screen that should never have opened is still that screen.
 
 **`PopulateOptions` is never fired for you - not after `OpenCommLink`, and not after
 `DialogOptionSelected` either.** The engine's whole contribution is what `FireBest`/`FireAll` do
@@ -957,5 +969,6 @@ do nothing.
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. The pond is terrain now |
 | `campaign/fish/intel/FishMapIntel` | Dead husk, kept so old saves can delete it. Removable once no save predates the map filter |
 | `campaign/fish/shop/ShopStorage` | The store/retrieve/sell counter is gone. Kept only to hand back fish a save is still holding in it, once, on the next shop open |
+| `testing/DevShortcut` | Registered from `ModPlugin` as a transient listener; does nothing unless dev mode is on |
 | `testing/TestStencilRenderer` | Commented out of `ModPlugin` |
 | The pond's shader swirl | Dormant behind `PondConstants.POND_HOLE_LOOK`, which currently selects the stencil hole renderer |

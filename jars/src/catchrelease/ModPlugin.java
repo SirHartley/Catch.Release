@@ -23,6 +23,7 @@ import catchrelease.memory.charges.ChargeManager;
 import catchrelease.campaign.fish.spawner.BuriedMoteSpawner;
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
 import catchrelease.skillshot.SkillshotFramework;
+import catchrelease.testing.DevShortcut;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 
@@ -81,6 +82,9 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new FishMapFilterScript());
         Global.getSector().addTransientScript(new FishIntelPlanetPanel());
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
+
+        //an input listener rather than a script; inert unless dev mode is on
+        DevShortcut.register();
 
         //Testing
         //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
