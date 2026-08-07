@@ -15,23 +15,27 @@ import java.util.List;
  * What survey data is for sale, and on which boat.
  * <p>
  * Two shelves, because there are two kinds of schedule. The standing boats in the inhabited core all
- * sell off <b>one</b> shelf held in sector memory - it is one man running the same charts between the
- * same ports, and six boats each rolling their own stock would mean flying a circuit until the roll
- * came up right. That shelf is not restocked on a visit either; it comes back at
- * {@link FishermanConstants#SHARED_REGEN_PER_MONTH} charts a month whether anybody is buying or not,
- * which is a supply rather than a shop.
+ * sell off <b>one</b> shelf held in sector memory - it is one person running the same charts between
+ * the same ports, and six boats each rolling their own stock would mean flying a circuit until the
+ * roll came up right.
  * <p>
  * The boat out past the last colony keeps its own, rolled fresh each visit and gone with it - that
  * run is not part of any circuit and nothing out there restocks anything.
+ * <p>
+ * Both are narrow: {@link FishermanConstants#SURVEY_SLOTS_BASE} charts out at once, plus whatever
+ * has been earned working for the trade - see {@link #getSlots}. Two is a supply, not a shop, and
+ * widening it is the reason to take a job.
+ * <p>
+ * The shared shelf restocks off the <b>sale</b>, not off a calendar: every purchase books a
+ * replacement due {@link FishermanConstants#SHARED_REGEN_DAYS} later, and asking is what redeems the
+ * ones that have come due. A monthly tick pays out to whoever happens to ask just after it, which
+ * rewards standing still; dating it off the purchase means the wait is the same wait for everybody
+ * and starts when the player caused it.
  * <p>
  * One registry sits across both: {@link FishermanConstants#LISTED_KEY} holds every chart on sale
  * anywhere, and no roll picks something already on it. Otherwise the two shelves would sooner or
  * later put the same species up twice, and a player who bought it in one place would find the other
  * copy quietly vanish - which reads as the shop having lied about its stock.
- * <p>
- * The shared shelf tops itself up lazily, on the ask, from the timestamp of the last top-up. A
- * script ticking once a month for a shelf nobody may look at for a year is work for nothing, and the
- * answer to "how much has come back" is arithmetic either way.
  */
 public class FishermanShelf {
 
@@ -48,6 +52,23 @@ public class FishermanShelf {
     public static boolean isShared(SectorEntityToken fleet) {
         return fleet != null
                 && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.SHARED_SHELF_FLAG);
+    }
+
+    //---------------------------------------------------------------- how wide
+
+    /** How many charts are out at once: the floor, plus whatever the trade has been paid in. */
+    public static int getSlots() {
+        return FishermanConstants.SURVEY_SLOTS_BASE + Global.getSector().getMemoryWithoutUpdate()
+                .getInt(FishermanConstants.SURVEY_SLOTS_KEY);
+    }
+
+    /** One more chart on the shelf, for good. What a job for the trade actually buys. */
+    public static void widen(int by) {
+        if (by <= 0) return;
+
+        Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.SURVEY_SLOTS_KEY,
+                Global.getSector().getMemoryWithoutUpdate()
+                        .getInt(FishermanConstants.SURVEY_SLOTS_KEY) + by);
     }
 
     /**
@@ -69,14 +90,14 @@ public class FishermanShelf {
         if (stored instanceof List) return (List<String>) stored;
 
         List<String> stock = new ArrayList<>();
-        roll(stock, FishermanConstants.SURVEY_STOCK);
+        roll(stock, getSlots());
 
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.SURVEY_STOCK_KEY, stock);
 
         return stock;
     }
 
-    /** The core's one shelf, filled on the first ask of the campaign and topped up by the clock. */
+    /** The core's one shelf, filled on the first ask of the campaign and restocked by its sales. */
     @SuppressWarnings("unchecked")
     public static List<String> getSharedStock() {
         Object stored = Global.getSector().getMemoryWithoutUpdate()
@@ -84,57 +105,56 @@ public class FishermanShelf {
 
         if (stored instanceof List) {
             List<String> stock = (List<String>) stored;
-            regenerate(stock);
+            redeem(stock);
 
             return stock;
         }
 
         List<String> stock = new ArrayList<>();
-        roll(stock, FishermanConstants.SURVEY_STOCK);
+        roll(stock, getSlots());
 
         Global.getSector().getMemoryWithoutUpdate()
                 .set(FishermanConstants.SHARED_STOCK_KEY, stock);
-        stamp(0f);
 
         return stock;
     }
 
     /**
-     * Whole months since the last top-up, paid out at the monthly rate.
+     * Replacements that have come due since anybody last looked.
      * <p>
-     * The part-month is banked rather than thrown away: the stamp always moves to now, and what was
-     * left over is carried in days. Moving the stamp back by the unspent remainder instead would
-     * mean doing arithmetic on a timestamp whose units are the engine's business, and a player who
-     * asked on the 29th day of every month would otherwise never be owed anything at all.
+     * One booked per sale, redeemed on the ask - a shelf nobody visits for a year does not need a
+     * script ticking for it, and the answer to "what is owed" is the same arithmetic either way.
+     * Also tops up to the slot count outright, which is what makes a slot earned from a job appear
+     * as a chart rather than as an empty space.
      */
-    protected static void regenerate(List<String> stock) {
-        Object last = Global.getSector().getMemoryWithoutUpdate()
-                .get(FishermanConstants.SHARED_STAMP_KEY);
+    protected static void redeem(List<String> stock) {
+        List<Long> pending = getPending();
 
-        if (!(last instanceof Long)) {
-            stamp(0f);
-            return;
+        for (int i = pending.size() - 1; i >= 0; i--) {
+            if (Global.getSector().getClock().getElapsedDaysSince(pending.get(i))
+                    < FishermanConstants.SHARED_REGEN_DAYS) {
+
+                continue;
+            }
+
+            pending.remove(i);
         }
 
-        float banked = Global.getSector().getMemoryWithoutUpdate()
-                .getFloat(FishermanConstants.SHARED_BANKED_KEY);
-
-        float elapsed = banked + Global.getSector().getClock().getElapsedDaysSince((Long) last);
-
-        int months = (int) (elapsed / FishermanConstants.SHARED_REGEN_DAYS);
-        if (months <= 0) return;
-
-        roll(stock, Math.min(FishermanConstants.SURVEY_STOCK,
-                stock.size() + months * FishermanConstants.SHARED_REGEN_PER_MONTH));
-
-        stamp(elapsed - months * FishermanConstants.SHARED_REGEN_DAYS);
+        roll(stock, Math.max(0, getSlots() - pending.size()));
     }
 
-    protected static void stamp(float banked) {
-        Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.SHARED_STAMP_KEY,
-                Global.getSector().getClock().getTimestamp());
-        Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.SHARED_BANKED_KEY,
-                banked);
+    /** The sales still owing a replacement, by the day each was made. */
+    @SuppressWarnings("unchecked")
+    public static List<Long> getPending() {
+        Object stored = Global.getSector().getMemoryWithoutUpdate()
+                .get(FishermanConstants.SHARED_PENDING_KEY);
+        if (stored instanceof List) return (List<Long>) stored;
+
+        List<Long> pending = new ArrayList<>();
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(FishermanConstants.SHARED_PENDING_KEY, pending);
+
+        return pending;
     }
 
     //---------------------------------------------------------------- the roll
@@ -240,17 +260,30 @@ public class FishermanShelf {
         return offers;
     }
 
-    /** A chart sold: off the shelf it was on, and out of the pool. */
+    /**
+     * A chart sold: off the shelf it was on, out of the pool, and - on the shared shelf - a
+     * replacement booked, dated from today.
+     */
     public static void take(SectorEntityToken fleet, String specId) {
         getStock(fleet).remove(specId);
         getListed().remove(specId);
+
+        if (isShared(fleet)) {
+            getPending().add(Global.getSector().getClock().getTimestamp());
+        }
     }
 
-    /** A sale taken back, put where it stood. */
+    /** A sale taken back, put where it stood - and the replacement it booked cancelled with it. */
     public static void putBack(SectorEntityToken fleet, String specId, int index) {
         List<String> stock = getStock(fleet);
 
         if (!stock.contains(specId)) stock.add(Math.min(index, stock.size()), specId);
         if (!getListed().contains(specId)) getListed().add(specId);
+
+        if (!isShared(fleet)) return;
+
+        //the newest booking is this purchase's, since undo only ever takes back the last one
+        List<Long> pending = getPending();
+        if (!pending.isEmpty()) pending.remove(pending.size() - 1);
     }
 }

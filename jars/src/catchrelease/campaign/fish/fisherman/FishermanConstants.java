@@ -82,18 +82,31 @@ public class FishermanConstants {
 
     /** A visiting boat's shelf: rolled once per visit, sold down, gone when it leaves. */
     public static final String SURVEY_STOCK_KEY = "$catchrelease_fisherman_survey";
-    public static final int SURVEY_STOCK = 6;
+
+    /**
+     * How many charts are out at once to begin with, and where the extra slots earned by doing
+     * work for the trade are counted.
+     * <p>
+     * Two is deliberately thin. A shelf that always has six things on it is a shop; a shelf with
+     * two is a supply, and widening it is the reason to take a job.
+     */
+    public static final int SURVEY_SLOTS_BASE = 2;
+    public static final String SURVEY_SLOTS_KEY = "$catchrelease_fisher_slots";
 
     /** Set on a boat that sells off the core's one shelf rather than a shelf of its own. */
     public static final String SHARED_SHELF_FLAG = "$catchrelease_fisher_shared";
 
-    /** The core's shelf, when it was last topped up, and the part-month carried over. */
+    /** The core's shelf, and the sales it still owes a replacement for. */
     public static final String SHARED_STOCK_KEY = "$catchrelease_fisher_shared_stock";
-    public static final String SHARED_STAMP_KEY = "$catchrelease_fisher_shared_stocked";
-    public static final String SHARED_BANKED_KEY = "$catchrelease_fisher_shared_banked";
+    public static final String SHARED_PENDING_KEY = "$catchrelease_fisher_shared_pending";
 
-    /** How fast the core's shelf comes back, up to {@link #SURVEY_STOCK}. */
-    public static final int SHARED_REGEN_PER_MONTH = 2;
+    /**
+     * How long after a chart is <b>sold</b> the surveyors have another ready.
+     * <p>
+     * Dated off the sale rather than off a calendar. A shelf on a monthly tick pays out to
+     * whoever happens to ask after the tick, which rewards standing still; dating it off the
+     * purchase means the wait is the same wait for everybody and starts when the player caused it.
+     */
     public static final float SHARED_REGEN_DAYS = 30f;
 
     /** Every chart on sale anywhere, so no two boats offer the same one. */
