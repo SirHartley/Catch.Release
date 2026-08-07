@@ -774,7 +774,7 @@ $catchreleaseWork
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
-$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it.""",,,"The rating has a boat behind them, which is the whole reason they are worth talking to and the whole reason they are not in a Church or Path port."
+$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it."" highlight",,,"The rating has a boat behind them, which is the whole reason they are worth talking to and the whole reason they are not in a Church or Path port."
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not."" They look at your crew rather than at you, and seem to find whatever they were looking for. ""Everyone who does has that look about them.""
 
 They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the water that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
@@ -783,7 +783,8 @@ They turn the glass around without drinking from it. ""I crewed a boat that went
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny
-$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,
+$catchreleaseStage >= 6
+$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crate how the crab business is"" ""A man with a great many pockets is working the room with a crate of live crabs, and is plainly losing money on every one of them.""",,,"Held until the introduction is finished. He sells a celebration charge and an explosive harpoon head to somebody who has not been handed a rod yet, and the first thing the trade has to say about itself should not be a man in a coat selling ordnance."
 catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible,"" he says, without being asked twice. ""Crablobab. That is me, and that is the crabs as well, it saves time."" One of the crate's occupants has got a claw through the mesh and is working on the rest of itself.
 
 He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",

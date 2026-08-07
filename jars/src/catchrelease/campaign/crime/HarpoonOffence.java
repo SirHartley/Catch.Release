@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -184,6 +185,14 @@ public class HarpoonOffence {
      * three things they do in turn are the whole of their side of this.
      */
     protected static void escalate(CampaignFleetAPI victim, int hits) {
+        //the trade's own boats stop at the bill. There is one man on that wheel, he is the shop,
+        //the charts and the introduction, and a campaign where he spends twenty days refusing to
+        //be caught up with is a campaign missing half the mod over a misfired rig
+        if (FishermanSpawner.isFisherman(victim)) {
+            if (hits >= HITS_BEFORE_DEMAND) demand(victim);
+            return;
+        }
+
         if (isCombatCrew(victim)) {
             if (hits >= HITS_BEFORE_HOSTILE) turnHostile(victim);
             return;
@@ -364,6 +373,10 @@ public class HarpoonOffence {
      * side, and there's no version of that where the crew wants to talk first.
      */
     public static void turnHostile(CampaignFleetAPI victim) {
+        //the one exemption, and it covers the explosive head too: a hostile boat is a boat that
+        //runs, and a boat that runs takes the shop and the charts with it
+        if (FishermanSpawner.isFisherman(victim)) return;
+
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
 
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_HOSTILE, REASON, true, HOSTILE_DAYS);

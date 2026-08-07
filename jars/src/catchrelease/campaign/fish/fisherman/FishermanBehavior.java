@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
@@ -13,6 +14,8 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
@@ -174,6 +177,7 @@ public class FishermanBehavior implements EveryFrameScript {
                 FishermanConstants.DETECTED_RANGE);
 
         keepNamed();
+        keepStanding();
 
         //a boat out there since before there were two kinds of schedule. Written once, and only
         //because the shelf and the spawner both ask which kind of boat this is
@@ -191,6 +195,44 @@ public class FishermanBehavior implements EveryFrameScript {
 
         //a per-frame override rather than a setting, which is how vanilla's own faders are driven
         fleet.forceSensorFaderBrightness(1f);
+    }
+
+    /**
+     * The boat does not run from the player, and cannot be made to.
+     * <p>
+     * Vanilla's civilian AI runs from anybody it is hostile to and edges away from anybody carrying
+     * {@code $cfai_avoidPlayerSlowly} - which the mod's own harpoon fallout used to set on this
+     * hull like any other freighter's. Either one puts the shop, the charts, the survey counter and
+     * the whole introduction behind a fortnight of chase, over a rig that misfired once.
+     * <p>
+     * {@code NEVER_AVOID_PLAYER_SLOWLY} is vanilla's own answer to the first, read by
+     * {@code Misc.isAvoidingPlayerHalfheartedly}. {@code MAKE_NON_HOSTILE} covers the second, and is
+     * the weaker of the two claims on purpose: vanilla lets {@code MAKE_HOSTILE} win unless
+     * {@code $makeNonHostileTakesPriority} is also set, and it is not, so anything that really
+     * means it can still turn this boat.
+     * <p>
+     * Written every frame rather than at spawn, because a boat already out there in somebody's save
+     * never passed through the spawner - and if it is already running, this is what stops it.
+     */
+    protected void keepStanding() {
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+
+        if (!memory.getBoolean(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY)) {
+            memory.set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        }
+
+        if (!memory.getBoolean(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE)) {
+            memory.set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
+        }
+
+        //a boat that was already edging away when this shipped
+        if (memory.getBoolean(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY)) {
+            memory.unset(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY);
+        }
+
+        if (memory.getBoolean(HarpoonOffence.FLEEING_FLAG)) {
+            memory.unset(HarpoonOffence.FLEEING_FLAG);
+        }
     }
 
     /**
