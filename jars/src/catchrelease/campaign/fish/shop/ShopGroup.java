@@ -44,12 +44,23 @@ public enum ShopGroup {
         this.needsAbility = needsAbility;
     }
 
-    /** Whether this shelf's gear is in the player's hands. */
-    public boolean isOwned() {
+    /**
+     * Whether this shelf is on the floor at all.
+     * <p>
+     * Two conditions, and the second one is the interesting one. Owning the rig is obvious - a shop
+     * that lists tackle for a harpoon nobody has is advertising a game the player is not playing.
+     * But the deep shelves stay shut for one rung <i>after</i> the lamps and harpoon change hands:
+     * the introduction hands over the gear and the errand to use it in the same breath, and the
+     * upgrades for it are what completing that errand buys. Opening them at the same moment would
+     * make the errand a formality.
+     */
+    public boolean isUnlocked() {
         if (needsAbility == null) return true;
 
-        return Global.getSector() != null && Global.getSector().getPlayerFleet() != null
-                && Global.getSector().getPlayerFleet().hasAbility(needsAbility);
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
+        if (!Global.getSector().getPlayerFleet().hasAbility(needsAbility)) return false;
+
+        return catchrelease.campaign.fish.tutorial.FishingIntro.isShelfOpen(this);
     }
 
     /** The shelf a stat sits on. Anything the ids do not place ends up with the catch. */

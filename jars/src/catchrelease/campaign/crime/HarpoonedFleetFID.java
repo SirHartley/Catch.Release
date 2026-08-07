@@ -3,13 +3,16 @@ package catchrelease.campaign.crime;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.util.Misc;
 
-import java.awt.Color;
-
 /**
- * What a crew has to say to the person who harpooned them. Vanilla's encounter (options,
- * disengage rules, allied-fleet branches) is left untouched; this only adds a line.
+ * What a crew has to say to the person who harpooned them. Vanilla's encounter (options, disengage
+ * rules, allied-fleet branches) is left untouched; this only fires a line.
+ * <p>
+ * The line lives in {@code rules.csv} like every other word in the mod. This picks <i>which</i> of
+ * them off the fleet id, so the same crew always says the same thing.
  */
 public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
 
@@ -54,6 +57,13 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
         other.getMemoryWithoutUpdate().set(HIGHLIGHT_COMMS, true, 0f);
     }
 
+    /**
+     * Fires the sheet's opening line for a harpooned crew.
+     * <p>
+     * Which of the four they use is picked off the fleet id, so the same crew always says the same
+     * thing - but the lines themselves are rows, like every other word in the mod. The faction's
+     * own name goes over as a token for the row to use.
+     */
     protected void speak() {
         if (spoken || dialog == null) return;
         spoken = true;
@@ -61,29 +71,23 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
         CampaignFleetAPI other = getOtherFleet();
         if (other == null) return;
 
-        Color colour = other.getFaction() == null
-                ? Misc.getNegativeHighlightColor()
-                : other.getFaction().getBaseUIColor();
+        String name = other.getFaction() == null
+                ? "the crew" : other.getFaction().getDisplayNameWithArticle();
 
-        dialog.getTextPanel().addPara(pick(other), colour);
+        MemoryAPI memory = other.getMemoryWithoutUpdate();
+
+        memory.set(LINE_KEY, Math.floorMod(other.getId().hashCode(), LINES), 0f);
+        memory.set(NAME_KEY, name, 0f);
+        memory.set(NAME_CAP_KEY, Misc.ucFirst(name), 0f);
+
+        FireBest.fire(null, dialog, getMemoryMap(), "CatchReleaseHarpoonedGreeting");
     }
 
-    /** Picked deterministically off the fleet id, so the same crew always says the same line. */
-    protected String pick(CampaignFleetAPI other) {
-        String name = other.getFaction() == null ? "The crew" : other.getFaction().getDisplayNameWithArticle();
-
-        String[] lines = {
-                Misc.ucFirst(name) + " opens with a question about the harpoon, and does not appear"
-                        + " to be waiting for an answer.",
-                "There is a hole in their hull the shape of your fishing gear, and"
-                        + " " + name + " would like it noted.",
-                Misc.ucFirst(name) + " has your transponder code, the puncture, and a great deal to"
-                        + " say about both.",
-                "Whatever " + name + " expected to be shot at with today, it was not a rope.",
-        };
-
-        return lines[Math.floorMod(other.getId().hashCode(), lines.length)];
-    }
+    /** How many lines the sheet carries, and where the pick and the name are handed over. */
+    public static final int LINES = 4;
+    public static final String LINE_KEY = "$catchreleaseHarpoonLine";
+    public static final String NAME_KEY = "$otherFleetFactionArticle";
+    public static final String NAME_CAP_KEY = "$otherFleetFactionArticleCap";
 
     protected CampaignFleetAPI getOtherFleet() {
         if (dialog == null) return null;

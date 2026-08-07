@@ -199,7 +199,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             //a shelf for gear nobody has been handed yet is a shop advertising a game the player
             //is not playing, and it gives away what the introduction has left to give
             for (ShopGroup group : ShopGroup.values()) {
-                if (!group.isOwned()) continue;
+                if (!group.isUnlocked()) continue;
 
                 for (UpgradeStat stat : stats) {
                     if (ShopGroup.forStat(stat) == group) entries.add(ShopEntry.of(stat));
@@ -211,7 +211,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 if (!rig.isRig()) continue;
 
                 ShopGroup shelf = ShopGroup.forRig(rig);
-                if (shelf != null && !shelf.isOwned()) continue;
+                if (shelf != null && !shelf.isUnlocked()) continue;
 
                 List<Tackle> options = TackleManager.getOptions(rig);
                 options.remove(Tackle.NONE);
