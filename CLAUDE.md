@@ -28,18 +28,20 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 
 ## Model assignments
 
-Split the work by kind of task rather than doing all of it in one place. The main session
-plans; subagents do the legwork.
+Opus 5, in the main session, writes the code. Planning and code are the same job here - the
+reasons live in the javadoc, and a class handed to somebody else comes back explaining what it
+does instead of why it is built that way.
+
+Subagents are for legwork that does not produce shipped code:
 
 | Task | Who does it |
 |---|---|
-| Planning - architecture, sequencing, deciding what changes | Opus 5, in the main session |
+| Planning and writing code - architecture, sequencing, every Java file | Opus 5, in the main session |
 | Crawling and scoping - finding files, tracing call sites, reading the game sources | Sonnet 5 subagents (`model: sonnet`) |
-| Writing and editing code | Opus 4.8 subagents (`model: opus`) |
 | Anything UI or UI-adjacent - panels, dialogs, tooltips, renderers, shaders, sprites | Fable 5 subagents (`model: fable`) |
 
-The UI rule wins over the code rule: if a change touches something the player looks at, it
-goes to Fable 5 even though it is also code.
+The UI rule still wins where it applies: if a change touches something the player looks at, it
+goes to Fable 5.
 
 ## Building
 

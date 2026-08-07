@@ -83,7 +83,7 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new FishIntelPlanetPanel());
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
-        //inert unless dev mode is on, so it costs a shipped build one boolean a frame
+        //an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();
 
         //Testing
