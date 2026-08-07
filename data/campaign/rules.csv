@@ -52,6 +52,9 @@ $entity.catchrelease_harpooned score:1110
 !$entity.isHostile","AddText ""\""You put a hook in us,\"" says $personName, in the flat voice of somebody who has had a long month and is not going to have a shorter one. \""Not a shot. A hook. We are going to be explaining that to the yard for a year.\""""
 $menuState = fleetConvMain 0
 FireAll PopulateOptions",,,
+catchrelease_harpoonedCommsOther,OpenCommLink,$entity.catchrelease_harpooned score:1050,"ShowDefaultVisual
+AddText ""The link is answered by somebody who already has your file open and a more pressing reason to dislike you already on it. The harpoon comes up once, near the end, in a list of things that will be dealt with later.""
+EndConversation NO_CONTINUE",,,"Fallback for a crew you holed who is hostile over something else entirely - the other rows all want the harpoon itself to be the reason. Lowest score here so every one of them outranks it. It exists because the comm link is highlighted on having been harpooned at all, and a highlighted link with nothing behind it is a dead option."
 catchrelease_harpoonedCommsHostile,OpenCommLink,"$entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""They accept the link, listen to nothing, and close it before your comms officer has finished saying your name. Whatever was going to be said about the first harpoon is not going to be said about the second.""
