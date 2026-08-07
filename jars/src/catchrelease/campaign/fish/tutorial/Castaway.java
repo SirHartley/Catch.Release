@@ -68,7 +68,10 @@ public class Castaway extends BaseCustomEntityPlugin {
                 host.getRadius() + TutorialConstants.CASTAWAY_SURFACE_PAD,
                 TutorialConstants.CASTAWAY_ORBIT_DAYS);
 
-        beacon.setDiscoverable(false);
+        //discoverable, like everything else in a system that is not a star or a slipstream. The
+        //message below is what points the player at it, so the beacon does not also have to be
+        //visible from the edge of the system to be findable
+        beacon.setDiscoverable(true);
 
         Misc.makeImportant(beacon, "catchrelease_tutorial");
 

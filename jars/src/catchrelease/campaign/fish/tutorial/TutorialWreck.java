@@ -90,9 +90,11 @@ public class TutorialWreck extends BaseCustomEntityPlugin {
                 pond.getRadius() + TutorialConstants.WRECK_ORBIT_RADIUS,
                 TutorialConstants.WRECK_ORBIT_DAYS);
 
-        //not discoverable: the point is that it is plainly there the moment the rupture is, and a
-        //thing the player has to survey first is a thing they will fly past
-        wreck.setDiscoverable(false);
+        //discoverable, like everything else in a system that is not a star or a slipstream. It sits
+        //in orbit around the rupture the introduction is already sending the player to, so being
+        //found is very nearly guaranteed by the errand itself - and a derelict visible from across
+        //the system before anybody has looked at it is a derelict nobody had to find
+        wreck.setDiscoverable(true);
 
         Misc.makeImportant(wreck, "catchrelease_tutorial");
     }

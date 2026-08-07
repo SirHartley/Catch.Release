@@ -158,10 +158,29 @@ public class Aberration {
     }
 
     protected static float getHypershuntShare(Vector2f locInHyper) {
-        float nearest = getNearestLY(locInHyper, taggedWith(Tags.CORONAL_TAP, FOREIGN_HYPERSHUNTS));
+        return getHypershuntShare(locInHyper, false);
+    }
+
+    protected static float getHypershuntShare(Vector2f locInHyper, boolean foundOnly) {
+        float nearest = getNearestLY(locInHyper,
+                taggedWith(Tags.CORONAL_TAP, FOREIGN_HYPERSHUNTS), foundOnly);
 
         return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
                 * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
+    }
+
+    /**
+     * Whether the player has actually found this, for the readings that are only allowed to know
+     * what the player knows.
+     * <p>
+     * The rule is the same for everything that sits inside a system, and it is one rule rather than
+     * a judgement per source: hidden until somebody has been there and looked. Exactly two things
+     * are exempt, and neither of them is an object you find - a star, because a system's own sun is
+     * drawn on the sector map from the first day and a black hole with it, and a slipstream, which
+     * is visible the moment it runs. Everything else is a survey result.
+     */
+    protected static boolean isFound(SectorEntityToken entity) {
+        return entity != null && !entity.isDiscoverable();
     }
 
     /**
@@ -171,14 +190,14 @@ public class Aberration {
      * source measured from different distances - they have different reaches and different depths,
      * so the nearest is not reliably the worst.
      *
-     * @param discoveredOnly for the route planner, which may only reason about what the player has
-     *                       actually seen
+     * @param foundOnly for the route planner, which may only reason about what the player has
+     *                  actually surveyed - see {@link #isFound}
      */
-    protected static float getGateShare(Vector2f locInHyper, boolean discoveredOnly) {
+    protected static float getGateShare(Vector2f locInHyper, boolean foundOnly) {
         float worst = 0f;
 
         for (SectorEntityToken gate : taggedWith(Tags.GATE, FOREIGN_GATES)) {
-            if (discoveredOnly && gate.isDiscoverable()) continue;
+            if (foundOnly && !isFound(gate)) continue;
 
             boolean active = isGateActive(gate);
 
@@ -210,7 +229,11 @@ public class Aberration {
 
     /** Machines big enough to lean on local space, which is not the same as opening it. */
     protected static float getEngineShare(Vector2f locInHyper) {
-        float nearest = getNearestLY(locInHyper, taggedWith(null, FOREIGN_ENGINES));
+        return getEngineShare(locInHyper, false);
+    }
+
+    protected static float getEngineShare(Vector2f locInHyper, boolean foundOnly) {
+        float nearest = getNearestLY(locInHyper, taggedWith(null, FOREIGN_ENGINES), foundOnly);
 
         return falloff(nearest, FishConstants.ABERRATION_ENGINE_LY)
                 * FishConstants.ABERRATION_ENGINE_WEIGHT;
@@ -245,17 +268,16 @@ public class Aberration {
 
         float worst = getSlipstreamShare(loc);
 
-        //no discovery check on this one: a system's star is drawn on the sector map from the start,
-        //so a black hole is a thing the player can already see and route around
+        //one of the two exemptions: a system's star is drawn on the sector map from the start, so a
+        //black hole is a thing the player can already see and route around. The other is the
+        //slipstream above, visible the moment it runs. Everything else waits to be surveyed
         worst = Math.max(worst, getBlackHoleShare(loc));
 
-        worst = Math.max(worst, getDiscoveredHypershuntShare(loc));
-
-        //same rule as the hypershunt: a gate the player has not found cannot steer a plan they are
-        //meant to be able to reason about
+        //every in-system object goes through the same gate - nothing the player has not surveyed
+        //can steer a plan they are meant to be able to reason about, whatever kind of object it is
+        worst = Math.max(worst, getHypershuntShare(loc, true));
         worst = Math.max(worst, getGateShare(loc, true));
-
-        worst = Math.max(worst, getEngineShare(loc));
+        worst = Math.max(worst, getEngineShare(loc, true));
 
         if (hasEnteredAbyss()) worst = Math.max(worst, getAbyssShare(loc, system));
 
@@ -269,20 +291,6 @@ public class Aberration {
         }
 
         return false;
-    }
-
-    /** The hypershunt share counting only taps the player has actually laid eyes on. */
-    protected static float getDiscoveredHypershuntShare(Vector2f locInHyper) {
-        float nearest = Float.MAX_VALUE;
-
-        for (SectorEntityToken tap : taggedWith(Tags.CORONAL_TAP, FOREIGN_HYPERSHUNTS)) {
-            if (tap.isDiscoverable()) continue;
-
-            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, tap.getLocationInHyperspace()));
-        }
-
-        return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
-                * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
     }
 
     /** Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes
@@ -301,10 +309,14 @@ public class Aberration {
                 * FishConstants.ABERRATION_SLIPSTREAM_WEIGHT;
     }
 
-    protected static float getNearestLY(Vector2f locInHyper, Iterable<SectorEntityToken> entities) {
+    /** @param foundOnly whether to skip anything the player has not surveyed - see {@link #isFound} */
+    protected static float getNearestLY(Vector2f locInHyper, Iterable<SectorEntityToken> entities,
+                                        boolean foundOnly) {
         float nearest = Float.MAX_VALUE;
 
         for (SectorEntityToken entity : entities) {
+            if (foundOnly && !isFound(entity)) continue;
+
             nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, entity.getLocationInHyperspace()));
         }
 
