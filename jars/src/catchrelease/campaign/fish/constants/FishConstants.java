@@ -468,6 +468,17 @@ public class FishConstants {
     public static final float COHERENCE_FISHERMAN_RANGE = 2500f;
 
     /**
+     * The aberration a boat's vicinity assumes - 0.9 stability, so 0.1 - even where the water
+     * reads dead calm. Turned into a level by dividing by CEIL directly rather than through
+     * {@code levelFor}: the FLOOR would eat 0.1 whole, and the boat must always show.
+     */
+    public static final float COHERENCE_FISHERMAN_ABERRATION = 0.1f;
+
+    /** Multiplied by pond radius: how far past the water's edge an open pond still turns the
+     *  screen over. Measured from the surface, so anywhere on the pond is full strength. */
+    public static final float COHERENCE_POND_RANGE_MULT = 4f;
+
+    /**
      * Track's hyperspace backing and its warp grid. The grid border doesn't move, so the swim
      * stays inside the bar. CELLS is vertices per side; the radii are screen pixels (small - the
      * bar is 52 wide).
