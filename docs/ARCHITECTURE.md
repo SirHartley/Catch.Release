@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 192 Java files across eight top-level packages, plus
+What is where, and which file to open first. 195 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand. When a package gains or loses a file, the table below is the thing to update — a map
@@ -29,7 +29,7 @@ that is wrong is worse than no map, because it is believed.
 | Aiming and reticules | `skillshot/` (has its own README) |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
-| The wandering Fisherman fleet | `campaign/fish/fisherman/` |
+| The fishing boats — wanderer and trawlers | `campaign/fish/fisherman/` |
 | The colony structure and its aquarium | `campaign/fish/colony/` |
 | Consequences of harpooning a fleet | `campaign/crime/` |
 | Anything that must survive a save | `memory/` |
@@ -53,12 +53,13 @@ Everything game-facing is wired from `ModPlugin.java`.
 5. `HarpoonPatrolResponse.register()` — sends a patrol after an outstanding harpooning
 6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
 7. `FishermanSpawner.register()` — the daily roll for the wandering Fisherman
-8. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
-9. `AquariumTankScript.register()` — the aquarium on the colony's main menu
-10. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-11. `SkillshotFramework.register()` — the aiming framework
-12. `FishMapFilterScript` as a transient script — the sector-map filter
-13. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+8. `CoreFisherSpawner.register()` — one standing trawler to every inhabited system
+9. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
+10. `AquariumTankScript.register()` — the aquarium on the colony's main menu
+11. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
+12. `SkillshotFramework.register()` — the aiming framework
+13. `FishMapFilterScript` as a transient script — the sector-map filter
+14. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -218,12 +219,16 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
-The wandering Fisherman: an independent fleet that fishes the player's system for two weeks and
-trades while it does.
+The fishing trade. Two kinds of boat: the wandering Fisherman, who turns up in uninhabited water for
+a fortnight and is always the same man, and a standing trawler posted to every inhabited system,
+working the outer reaches off one shared shelf.
 
 | File | What it does |
 |---|---|
-| `FishermanSpawner.java` | The daily roll: where the boat may spawn, and what leans the odds |
+| `FishermanSpawner.java` | The daily roll for the wanderer: where he may turn up, and what leans the odds |
+| `CoreFisherSpawner.java` | One trawler to every inhabited system, re-posted if it is lost |
+| `CoreFisherBehavior.java` | The standing boat: the same rig, no visit clock, and the outer-reaches route |
+| `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, NPC harpoon throws, the leaving |
 | `FishermanDialog.java` | Talking to it: survey counter hand-off, outfitter hand-off, fish buyer, rumors |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — the core's one shelf, the wanderer's own, and the pool that keeps them apart |
@@ -733,6 +738,16 @@ than a fleet readout — a thing a hull list cannot say. What changes is how wel
 figure, not a specimen's jittered one), and the boat's name, the greeting, and the line under it all
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
+
+**A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
+system and will cut straight across an inhabited orbit getting anywhere, so the standing trawlers
+route themselves: `OuterReaches` defines a band from past the outermost inhabited world out to a
+little beyond the furthest thing in orbit — the far-flung planets are on the route, the populated
+inner system is not — and `pick()` rejects a destination *and* the leg to it, since a fleet flies its
+assignment in a straight line and a good destination reached by cutting through Jangala is the thing
+being avoided. Legs are issued one at a time from where the boat actually is; a queue of them would
+be a queue planned from a position it has since left. A system too crowded for any leg falls back to
+the far edge, which is clear of everything by construction.
 
 **Finding a fishing boat is a map problem, not a space problem.** Nothing is painted over the hull —
 out in space the boat is already lit, and a mark there says nothing the lamps did not. The map is the

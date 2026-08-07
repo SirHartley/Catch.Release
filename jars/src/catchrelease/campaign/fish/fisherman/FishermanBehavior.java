@@ -95,7 +95,7 @@ public class FishermanBehavior implements EveryFrameScript {
         //the stay is counted in days the player was not here for. A boat that vanishes while
         //somebody is standing next to it was never really there, and a fortnight spent fishing
         //alongside it is a fortnight of the visit the player gets none of
-        if (!watched) daysOut += Global.getSector().getClock().convertToDays(amount);
+        if (!watched && isVisiting()) daysOut += Global.getSector().getClock().convertToDays(amount);
 
         keepWorking();
 
@@ -110,7 +110,7 @@ public class FishermanBehavior implements EveryFrameScript {
         if (!watched) {
             expireLamps(0f);
 
-            if (daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
+            if (isVisiting() && daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
             return;
         }
 
@@ -123,6 +123,18 @@ public class FishermanBehavior implements EveryFrameScript {
 
         harpoonInterval.advance(amount);
         if (harpoonInterval.intervalElapsed()) throwHarpoon();
+    }
+
+    /**
+     * Whether this boat is passing through.
+     * <p>
+     * The wanderer is; the core's standing trawlers are not, and for them the visit clock and
+     * everything downstream of it - the wind-down, the despawn, the last-seen stamp - is simply not
+     * a thing that happens. Kept as a question rather than a flag so a subclass that lives somewhere
+     * answers it once and inherits the rest of the rig unchanged.
+     */
+    protected boolean isVisiting() {
+        return true;
     }
 
     /** Lights out, the one departure sound, and a short grace for the fade before the boat goes. */

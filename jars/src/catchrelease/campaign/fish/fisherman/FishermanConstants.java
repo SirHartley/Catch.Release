@@ -7,8 +7,21 @@ public class FishermanConstants {
     public static final String FLEET_NAME = "The Fisherman";
     public static final String FACTION = "independent";
 
-    /** The flag on the fleet that routes interaction to the Fisherman's own dialog. */
+    /** The flag on any fishing boat, which is what routes interaction to the trade's own dialog. */
     public static final String FLEET_FLAG = "$catchrelease_fisherman";
+
+    /** The flag on the one wandering boat: him, rather than one of the core's trawlers. */
+    public static final String WANDERER_FLAG = "$catchrelease_fisherman_himself";
+
+    /** The core's standing boats: one to a populated system, working the outer reaches. */
+    public static final String CORE_FLEET_NAME = "Breach Trawler";
+    public static final String[] CORE_SHIPS = {
+            "buffalo_Standard",
+            "shepherd_Frontier",
+    };
+
+    /** How often the core is swept for a system that has lost its boat. */
+    public static final float CORE_CHECK_DAYS = 7f;
 
     /** Where the live fleet is parked in sector memory, so only one ever exists at a time. */
     public static final String ACTIVE_KEY = "$catchrelease_fisherman_fleet";

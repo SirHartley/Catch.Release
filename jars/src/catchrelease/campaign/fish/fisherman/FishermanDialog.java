@@ -9,6 +9,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
@@ -55,6 +56,14 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
         showFace();
 
+        if (!isHim()) {
+            dialog.getTextPanel().addPara("The trawler answers on the second hail. \"Working the"
+                    + " deep end. Charts, gear, or are you selling?\"");
+
+            showMain();
+            return;
+        }
+
         float drift = FishermanIdentity.getDrift(dialog.getInteractionTarget()
                 .getContainingLocation());
 
@@ -71,14 +80,27 @@ public class FishermanDialog implements InteractionDialogPlugin {
         showMain();
     }
 
+    /** Whether this is the wanderer, rather than one of the core's standing trawlers. */
+    protected boolean isHim() {
+        return dialog.getInteractionTarget() instanceof CampaignFleetAPI
+                && FishermanSpawner.isWanderer((CampaignFleetAPI) dialog.getInteractionTarget());
+    }
+
     /**
-     * The man rather than the hulls.
+     * The man rather than the hulls, for the one boat where that is the point.
      * <p>
-     * He is the point of the encounter - the same face, campaign after campaign, which is a thing
-     * a fleet readout cannot say and a portrait says without a word.
+     * The same face campaign after campaign is a thing a fleet readout cannot say and a portrait
+     * says without a word. A trawler has no such claim on anybody's attention and gets the hulls,
+     * which is what it is.
      */
     protected void showFace() {
-        dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
+        if (isHim()) {
+            dialog.getVisualPanel().showPersonInfo(FishermanIdentity.get(), true);
+            return;
+        }
+
+        dialog.getVisualPanel().showFleetInfo(dialog.getInteractionTarget().getName(),
+                (CampaignFleetAPI) dialog.getInteractionTarget(), null, null);
     }
 
     protected void showMain() {
@@ -87,7 +109,11 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Purchase survey data", Option.SURVEY);
         dialog.getOptionPanel().addOption("Access the outfitter", Option.OUTFITTER);
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
-        dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
+
+        //rumors are his. A trawler working one system knows what everybody in that system knows,
+        //and the wanderer being the only source of them is half of why he is worth finding
+        if (isHim()) dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
+
         dialog.getOptionPanel().addOption("Leave", Option.LEAVE);
 
         dialog.getOptionPanel().setShortcut(Option.LEAVE,
@@ -137,13 +163,17 @@ public class FishermanDialog implements InteractionDialogPlugin {
 
     /**
      * The chart counter: its own panel in the outfitter's dress, handed the frame the same way.
-     * The shelf itself lives on the boat - see {@link FishermanSurveyDialog}.
+     * Which shelf is behind the counter is {@link FishermanShelf}'s business, not this screen's.
      */
     protected void openSurvey() {
         if (FishermanShelf.getOffers(dialog.getInteractionTarget()).isEmpty()) {
             dialog.getOptionPanel().clearOptions();
-            dialog.getTextPanel().addPara("\"Shelf's bare - what I had, you bought, and I don't"
-                    + " chart new waters mid-trip.\"", Misc.getGrayColor());
+            dialog.getTextPanel().addPara(isHim()
+                            ? "\"Shelf's bare - what I had, you bought, and I don't chart new"
+                            + " waters mid-trip.\""
+                            : "\"Shelf's bare. Everything the trade had out, you've had off us."
+                            + " Come back when the surveyors have caught up.\"",
+                    Misc.getGrayColor());
             dialog.getOptionPanel().addOption("Back", Option.MAIN);
             return;
         }
