@@ -7,8 +7,21 @@ public class FishermanConstants {
     public static final String FLEET_NAME = "The Fisherman";
     public static final String FACTION = "independent";
 
-    /** The flag on the fleet that routes interaction to the Fisherman's own dialog. */
+    /** The flag on any fishing boat, which is what routes interaction to the trade's own dialog. */
     public static final String FLEET_FLAG = "$catchrelease_fisherman";
+
+    /** The flag on the one wandering boat: him, rather than one of the core's trawlers. */
+    public static final String WANDERER_FLAG = "$catchrelease_fisherman_himself";
+
+    /** The core's standing boats: one to a populated system, working the outer reaches. */
+    public static final String CORE_FLEET_NAME = "Breach Trawler";
+    public static final String[] CORE_SHIPS = {
+            "buffalo_Standard",
+            "shepherd_Frontier",
+    };
+
+    /** How often the core is swept for a system that has lost its boat. */
+    public static final float CORE_CHECK_DAYS = 7f;
 
     /** Where the live fleet is parked in sector memory, so only one ever exists at a time. */
     public static final String ACTIVE_KEY = "$catchrelease_fisherman_fleet";
@@ -63,9 +76,24 @@ public class FishermanConstants {
     /** Survey data costs fish one rung below the species' own rarity; commons cost a common. */
     public static final int SURVEY_COST = 2;
 
-    /** The survey shelf: rolled once per visit, sold down, never restocked until the next boat. */
+    /** The wanderer's shelf: rolled once per visit, sold down, never restocked until the next boat. */
     public static final String SURVEY_STOCK_KEY = "$catchrelease_fisherman_survey";
     public static final int SURVEY_STOCK = 6;
+
+    /** Set on a boat that sells off the core's one shelf rather than a shelf of its own. */
+    public static final String SHARED_SHELF_FLAG = "$catchrelease_fisher_shared";
+
+    /** The core's shelf, when it was last topped up, and the part-month carried over. */
+    public static final String SHARED_STOCK_KEY = "$catchrelease_fisher_shared_stock";
+    public static final String SHARED_STAMP_KEY = "$catchrelease_fisher_shared_stocked";
+    public static final String SHARED_BANKED_KEY = "$catchrelease_fisher_shared_banked";
+
+    /** How fast the core's shelf comes back, up to {@link #SURVEY_STOCK}. */
+    public static final int SHARED_REGEN_PER_MONTH = 2;
+    public static final float SHARED_REGEN_DAYS = 30f;
+
+    /** Every chart on sale anywhere, so no two boats offer the same one. */
+    public static final String LISTED_KEY = "$catchrelease_fisher_listed";
 
     /** Roll weight by rarity ordinal: commons likely, legendaries a long shot - and as the
      *  commons become known they leave the pool, so a seasoned fisher is offered rarer charts. */
@@ -90,16 +118,6 @@ public class FishermanConstants {
      * has no getter for what it was. This is the figure vanilla uses for its own comm screens.
      */
     public static final float DIALOG_DIM = 0.9f;
-
-    /**
-     * The mark over the boat while it is in the system, so it can be found on a busy map.
-     * <p>
-     * The mod's own icon rather than vanilla's mission indicator: this is not an errand and nothing
-     * is owed either way, it is a shop that happens to be a fleet. Placeholder art for now.
-     */
-    public static final String MARKER_SPRITE_CATEGORY = catchrelease.ModPlugin.MOD_ID;
-    public static final String MARKER_SPRITE = "placeholder";
-    public static final float MARKER_SIZE = 22f;
 
     /**
      * How far off the boat can be seen, and the id the modifier is held under.

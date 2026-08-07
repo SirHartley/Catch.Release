@@ -103,6 +103,23 @@ public class FishLog {
         return entry != null && entry.locationDataUnlocked;
     }
 
+    /**
+     * The inverse of {@link #unlockLocationData}, for a purchase taken back. A hint-only entry
+     * that exists solely because of that unlock is removed outright; a species with catches on
+     * the books keeps its record and only has the location flag lowered.
+     */
+    public static void relockLocationData(String speciesId) {
+        FishLogEntry entry = get(speciesId);
+        if (entry == null) return;
+
+        if (entry.hintOnly && entry.caught <= 0) {
+            getLog().remove(speciesId);
+            return;
+        }
+
+        entry.locationDataUnlocked = false;
+    }
+
     /** Raw clock timestamp; formatted as a date only where displayed. */
     protected static long getTimestamp() {
         if (Global.getSector() == null) return 0L;

@@ -16,6 +16,20 @@ scrapped
 ---------------------
 qa_
 
+Coherence
+- Add an overlay to denote low coherence while fishing abilities are active. 
+    - This overlay should work exactly like the radiation overlay in IndEvo, but instead be purple and have a warping shader effect applied to whatever is below it.
+    - Warp intensity depending on coherence level
+    - Show coherence in terrain bar and explain the source (if found)
+    - The SFX is going to be a low whispering effect
+
+Tutorial
+- Tutorial hooks:
+    - Find lost tackle / equipment duing first survey like galatia to get you to visit a fisherman fleet in the core
+    - Have a rating approach you and give you the quest to head out to the fisherman fleet at the second planet you visit.
+    - Or interact with the fleet directly
+- The scientist & captain Baha is aboard and will talk to you, provide an introduction to fishing and give you the initial quest to get a simple fish, and provide basic equipment (abilities).
+
 Codex
 - open map from codex still broken
 

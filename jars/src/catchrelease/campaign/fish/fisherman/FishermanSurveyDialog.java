@@ -1,20 +1,22 @@
 package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.data.FishLog;
-import catchrelease.campaign.fish.data.FishRarity;
-import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -22,7 +24,6 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
 
@@ -32,14 +33,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Fisherman's chart counter: the survey data on sale this visit, as a proper panel in the
- * outfitter's own dress.
+ * The Fisherman's chart counter: the survey data on sale, as a proper panel in the outfitter's own
+ * dress.
  * <p>
- * The shelf is rolled once per visit - up to {@link FishermanConstants#SURVEY_STOCK} species the
- * player has no data on, weighted so commons are likely and legendaries a long shot. As the
- * player's knowledge grows the common end of the pool empties, so a seasoned fisher is offered
- * rarer charts by the same roll. Sold data does not restock; the shelf refills when the next
- * boat does.
+ * Which shelf is being sold off, how it was rolled and when it comes back are all
+ * {@link FishermanShelf}'s - this is the counter, not the stock room. All it needs to know is that
+ * a boat has offers and that buying one takes it off whichever shelf it stood on.
  * <p>
  * Each card is built around the species' art coloured down to a silhouette over the minigame's
  * fading colour disc - the shape of the thing is on offer, the look of it still has to be
@@ -62,76 +61,10 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
     public static final float DISC_RADIUS = 56f;
     public static final float ART_SIZE = 78f;
 
-    /** One species on offer, with the fish that pay for it. */
-    public static class SurveyOffer {
-        public FishSpec spec;
-        public FishRarity costRarity;
-        public int costCount;
-    }
-
-    //---------------------------------------------------------------- the shelf
-
-    /**
-     * This visit's stock, rolled on first ask and lived on the boat itself - the shelf dies
-     * with the fleet, and the next boat rolls its own.
-     */
-    @SuppressWarnings("unchecked")
-    public static List<String> getStock(SectorEntityToken fleet) {
-        if (fleet == null) return new ArrayList<>();
-
-        Object stored = fleet.getMemoryWithoutUpdate().get(FishermanConstants.SURVEY_STOCK_KEY);
-        if (stored instanceof List) return (List<String>) stored;
-
-        List<String> stock = rollStock();
-        fleet.getMemoryWithoutUpdate().set(FishermanConstants.SURVEY_STOCK_KEY, stock);
-
-        return stock;
-    }
-
-    /** The roll: unknown species only, weighted by rarity, drawn without replacement. */
-    protected static List<String> rollStock() {
-        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
-
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
-
-            int rung = Math.min(spec.rarity.ordinal(),
-                    FishermanConstants.SURVEY_RARITY_WEIGHTS.length - 1);
-            picker.add(spec, FishermanConstants.SURVEY_RARITY_WEIGHTS[rung]);
-        }
-
-        List<String> stock = new ArrayList<>();
-        while (!picker.isEmpty() && stock.size() < FishermanConstants.SURVEY_STOCK) {
-            stock.add(picker.pickAndRemove().id);
-        }
-
-        return stock;
-    }
-
-    /** The shelf as offers, pruned of anything learned since it was rolled. */
-    public static List<SurveyOffer> getOffers(SectorEntityToken fleet) {
-        List<SurveyOffer> offers = new ArrayList<>();
-        List<String> stock = getStock(fleet);
-
-        stock.removeIf(id -> FishLog.isCaught(id) || FishLog.isLocationDataUnlocked(id));
-
-        for (String id : stock) {
-            FishSpec spec = FishSpecLoader.getFishSpec(id);
-            if (spec == null) continue;
-
-            SurveyOffer offer = new SurveyOffer();
-            offer.spec = spec;
-
-            int rung = spec.rarity.ordinal();
-            offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.values()[rung - 1];
-            offer.costCount = rung == 0 ? 1 : FishermanConstants.SURVEY_COST;
-
-            offers.add(offer);
-        }
-
-        return offers;
-    }
+    /** The undo button, lower left, standing only while there is a purchase to take back. */
+    public static final float UNDO_WIDTH = 170f;
+    public static final float UNDO_HEIGHT = 26f;
+    public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
 
     //---------------------------------------------------------------- the panel
 
@@ -220,6 +153,13 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
                 if (!event.isLMBDownEvent()) continue;
 
+                if (lastPurchase != null && ShopUi.contains(pos.getX() + PAD, pos.getY() + PAD,
+                        UNDO_WIDTH, UNDO_HEIGHT, event.getX(), event.getY())) {
+                    event.consume();
+                    undo();
+                    continue;
+                }
+
                 int index = cardIndexAt(event.getX(), event.getY());
                 if (index < 0) continue;
 
@@ -228,18 +168,82 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             }
         }
 
+        /**
+         * The last purchase, held so it can be taken back. The spend walks worst-first through
+         * stacks and crates, so the receipt is the hold's whole fish inventory as it stood -
+         * putting the price back means putting that picture back, not re-adding a count.
+         */
+        protected static class Receipt {
+            String specId;
+            int stockIndex;
+            List<Object[]> fishAboard;
+        }
+
+        protected Receipt lastPurchase;
+
         protected void buy(int index) {
-            List<SurveyOffer> offers = getOffers(dialog.getInteractionTarget());
+            List<FishermanShelf.SurveyOffer> offers =
+                    FishermanShelf.getOffers(dialog.getInteractionTarget());
             if (index >= offers.size()) return;
 
-            SurveyOffer offer = offers.get(index);
+            FishermanShelf.SurveyOffer offer = offers.get(index);
             if (FishCurrency.count(offer.costRarity) < offer.costCount) return;
+
+            Receipt receipt = new Receipt();
+            receipt.specId = offer.spec.id;
+            receipt.stockIndex = Math.max(0,
+                    FishermanShelf.getStock(dialog.getInteractionTarget()).indexOf(offer.spec.id));
+            receipt.fishAboard = snapshotFish();
+
             if (!FishCurrency.spend(offer.costRarity, offer.costCount)) return;
 
             FishLog.unlockLocationData(offer.spec.id);
-            getStock(dialog.getInteractionTarget()).remove(offer.spec.id);
+            FishermanShelf.take(dialog.getInteractionTarget(), offer.spec.id);
 
+            lastPurchase = receipt;
             Global.getSoundPlayer().playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
+        }
+
+        /** Every fish stack aboard - loose specimens and crates - as data plus count. */
+        protected List<Object[]> snapshotFish() {
+            List<Object[]> stacks = new ArrayList<>();
+
+            CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+                if (!FishItems.FISH.equals(data.getId()) && !FishItems.isContainer(data)) continue;
+
+                stacks.add(new Object[]{data, (int) stack.getSize()});
+            }
+
+            return stacks;
+        }
+
+        /** The purchase taken back: fish restored as they were, chart relocked and reshelved. */
+        protected void undo() {
+            if (lastPurchase == null) return;
+
+            CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+                if (!FishItems.FISH.equals(data.getId()) && !FishItems.isContainer(data)) continue;
+
+                cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
+            }
+            for (Object[] entry : lastPurchase.fishAboard) {
+                cargo.addSpecial((SpecialItemData) entry[0], (Integer) entry[1]);
+            }
+
+            FishLog.relockLocationData(lastPurchase.specId);
+
+            FishermanShelf.putBack(dialog.getInteractionTarget(), lastPurchase.specId,
+                    lastPurchase.stockIndex);
+
+            lastPurchase = null;
+            Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
         }
 
         //---------------------------------------------------------------- drawing
@@ -272,7 +276,12 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             sub.draw(Math.round(x + PAD),
                     Math.round(y + h - PAD - heading.getHeight() - 4f));
 
-            List<SurveyOffer> offers = getOffers(dialog.getInteractionTarget());
+            //the way back out of a slip, standing only while there is one to take back -
+            //drawn even over a bare shelf, since buying the last chart is how it empties
+            if (lastPurchase != null) drawUndoButton(x + PAD, y + PAD, small, alphaMult);
+
+            List<FishermanShelf.SurveyOffer> offers =
+                    FishermanShelf.getOffers(dialog.getInteractionTarget());
 
             if (offers.isEmpty()) {
                 LazyFont.DrawableString empty = small.createText(
@@ -307,7 +316,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         protected int cardIndexAt(float x, float y) {
             if (pos == null) return -1;
 
-            List<SurveyOffer> offers = getOffers(dialog.getInteractionTarget());
+            List<FishermanShelf.SurveyOffer> offers =
+                    FishermanShelf.getOffers(dialog.getInteractionTarget());
 
             for (int i = 0; i < offers.size(); i++) {
                 float[] card = cardRect(i);
@@ -322,7 +332,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
 
         /** One chart for sale: the silhouette on its fading disc, the name, the price. */
-        protected void drawCard(SurveyOffer offer, float x, float y, float w, float h,
+        protected void drawCard(FishermanShelf.SurveyOffer offer, float x, float y, float w, float h,
                                 LazyFont small, float alphaMult) {
 
             boolean afford = FishCurrency.count(offer.costRarity) >= offer.costCount;
@@ -372,6 +382,24 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                             : Misc.getNegativeHighlightColor(), alphaMult),
                     small.getBaseHeight(), w - 12f);
             price.draw(Math.round(cx - price.getWidth() * 0.5f), Math.round(y + PAD + 14f));
+        }
+
+        /** The undo button in the cards' own dress: dark seat, 1px frame, brighter under the mouse. */
+        protected void drawUndoButton(float x, float y, LazyFont small, float alphaMult) {
+            boolean hovered = ShopUi.contains(x, y, UNDO_WIDTH, UNDO_HEIGHT, mouseX, mouseY);
+
+            ShopUi.drawQuad(x, y, UNDO_WIDTH, UNDO_HEIGHT, Misc.getDarkPlayerColor(),
+                    (hovered ? 0.35f : 0.15f) * alphaMult);
+            ShopUi.drawQuad(x, y + UNDO_HEIGHT - 1f, UNDO_WIDTH, 1f, Misc.getDarkPlayerColor(), alphaMult);
+            ShopUi.drawQuad(x, y, UNDO_WIDTH, 1f, Misc.getDarkPlayerColor(), alphaMult);
+            ShopUi.drawQuad(x, y, 1f, UNDO_HEIGHT, Misc.getDarkPlayerColor(), alphaMult);
+            ShopUi.drawQuad(x + UNDO_WIDTH - 1f, y, 1f, UNDO_HEIGHT, Misc.getDarkPlayerColor(), alphaMult);
+
+            LazyFont.DrawableString label = small.createText("Undo last purchase",
+                    ShopUi.withAlpha(hovered ? Misc.getBasePlayerColor() : Misc.getTextColor(),
+                            alphaMult), small.getBaseHeight());
+            label.draw(Math.round(x + (UNDO_WIDTH - label.getWidth()) * 0.5f),
+                    Math.round(y + (UNDO_HEIGHT + label.getHeight()) * 0.5f));
         }
 
         @Override
