@@ -6,6 +6,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -34,15 +35,21 @@ public class FleetQuestSpawner implements EveryFrameScript {
     public static final float CHECK_MIN_DAYS = 3f;
     public static final float CHECK_MAX_DAYS = 7f;
 
-    /** The chance a check that could produce one actually does. */
-    public static final float CHANCE = 0.25f;
+    /**
+     * The chance a check that could produce one actually does.
+     * <p>
+     * Deliberately small. A check runs every few days and the sector is full of hulls, so anything
+     * generous turns "a fleet out here would like a word" into "every fleet out here would like a
+     * word" - and the whole effect depends on it being unusual enough to be worth flying over to.
+     */
+    public static final float CHANCE = 0.07f;
 
     /** How many can be running at once, sector-wide. */
-    public static final int MAX_ACTIVE = 2;
+    public static final int MAX_ACTIVE = 1;
 
     /** Kept on the sector so a reload cannot be used to re-roll a check that just said no. */
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
-    public static final float COOLDOWN_DAYS = 25f;
+    public static final float COOLDOWN_DAYS = 45f;
 
     /** Transient, per the mod's idiom - the state that matters is on the sector and the fleets. */
     public static void register() {
@@ -149,6 +156,15 @@ public class FleetQuestSpawner implements EveryFrameScript {
         return true;
     }
 
+    /** The three sizes vanilla files scavengers under. */
+    protected static boolean isScavenger(CampaignFleetAPI fleet) {
+        String type = fleet.getMemoryWithoutUpdate().getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
+
+        return FleetTypes.SCAVENGER_SMALL.equals(type)
+                || FleetTypes.SCAVENGER_MEDIUM.equals(type)
+                || FleetTypes.SCAVENGER_LARGE.equals(type);
+    }
+
     /**
      * Whether this is a hull that could plausibly want a fish and be talked to about it.
      * <p>
@@ -159,6 +175,16 @@ public class FleetQuestSpawner implements EveryFrameScript {
      * a dozen places that do not check.
      */
     protected boolean canCarryAnOffer(CampaignFleetAPI fleet) {
+        //scavengers and nobody else. Everything about the errand assumes somebody already picking
+        //over the system with time on their hands and no schedule to keep - a trader has a manifest
+        //and a destination, and hanging "wait here indefinitely" on one produced a fleet whose own
+        //story had to be thrown away to make room. A scavenger parked on a rupture is a scavenger
+        if (!isScavenger(fleet)) return false;
+
+        //the trade's own boat is the shop, the charts and the introduction. Copying it into a
+        //quest fleet, which is what accepting does, would take all of that out of the campaign
+        if (catchrelease.campaign.fish.fisherman.FishermanSpawner.isFisherman(fleet)) return false;
+
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
         if (fleet == null || fleet == player) return false;

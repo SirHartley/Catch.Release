@@ -49,6 +49,16 @@ public class FleetQuest extends FishJob {
     /** The pitch, as a memory value, so the rules rows can read it without knowing the types. */
     public static final String PITCH_KEY = "$catchrelease_fleetQuestPitch";
 
+    /**
+     * What they want, written out once and handed over as a string.
+     * <p>
+     * The row that speaks the pitch had no way to say it. The job's own tokens are written by
+     * {@code updateData}, which runs when the player is talking to a <i>giver</i> the mission
+     * framework knows about - and at the pitch the offer has not been accepted, so there is no
+     * mission and no tokens. Handing the sentence over on the fleet's memory sidesteps all of it.
+     */
+    public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
+
     /** Set once the player has agreed, so the opening pitch is not read out a second time. */
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
 
@@ -201,6 +211,16 @@ public class FleetQuest extends FishJob {
         //reported rather than quietly removed: whoever was running this fleet finds out here
         original.despawn(CampaignEventListener.FleetDespawnReason.OTHER, null);
 
+        //and then actually taken off the board. despawn() files the paperwork - it tells whatever
+        //was managing the fleet that it is gone - but the hull itself was still sitting in the
+        //system beside its own copy, with its own AI, being two fleets. Moved out of the way first
+        //so the fade happens somewhere nobody is looking, stripped of the AI that would otherwise
+        //keep steering it while it fades, and then expired
+        original.setAI(null);
+        original.setLocation(0f, 0f);
+
+        Misc.fadeAndExpire(original);
+
         return copy;
     }
 
@@ -288,6 +308,13 @@ public class FleetQuest extends FishJob {
     protected void offer() {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
+        giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
+
+        //a scavenger that decides mid-errand that the player looks like salvage is a scavenger the
+        //player can no longer hand a fish to. Whatever else they were going to do out here, the one
+        //carrying an offer does not turn on you
+        Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(), MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE,
+                IMPORTANT_REASON, true, HOLD_DAYS);
 
         ensureMarked();
     }
@@ -305,6 +332,7 @@ public class FleetQuest extends FishJob {
 
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
+        giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
 
         //carried over rather than re-derived: the answer was given to the hull that is now gone, and
         //without it the copy would open by making the same offer over again
@@ -366,6 +394,7 @@ public class FleetQuest extends FishJob {
 
         giver.getMemoryWithoutUpdate().unset(QUEST_FLAG);
         giver.getMemoryWithoutUpdate().unset(PITCH_KEY);
+        giver.getMemoryWithoutUpdate().unset(ASK_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
         giver.getMemoryWithoutUpdate().unset(REF_KEY);
 

@@ -3,7 +3,10 @@ package catchrelease.campaign.fish.jobs.fleet;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.Random;
 
@@ -96,13 +99,39 @@ public enum FleetQuestType {
     }
 
     /** Rolls the requested catch; smaller asks than bar job orders, since this interrupts rather than being planned for. */
+    /**
+     * Something that actually lives somewhere, for the asks that name a species.
+     * <p>
+     * Common or uncommon only: these are the errands where the fish is a part rather than a prize -
+     * a printer feedstock, a packing gel - and sending somebody after a legendary for a drive repair
+     * would read as the crew not knowing what they need.
+     */
+    protected static String pickSpecies(Random random) {
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.rarity.ordinal() > FishRarity.UNCOMMON.ordinal()) continue;
+
+            picker.add(spec, 1f);
+        }
+
+        FishSpec pick = picker.pick();
+
+        return pick == null ? null : pick.id;
+    }
+
     public FishRequirement rollAsk(Random random) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
             case STRANDED:
             case SCAVENGER_ENGINE:
+                //a bare count describes itself as "1 specimen", which is not an errand - it is a
+                //blank where the errand should be. Both of these want one particular thing out of
+                //the water, so they get a species and the intel reads as a request
                 ask.count = 1;
+                ask.speciesId = pickSpecies(random);
                 break;
 
             case STARVING:

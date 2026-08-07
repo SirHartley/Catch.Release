@@ -257,7 +257,7 @@ Jobs hung on a hull that was already out there, which then has to still be there
 | File | What it does |
 |---|---|
 | `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()` |
-| `FleetQuestSpawner.java` | Picks a civilian hull already in the player's system and hangs an offer on it. Spawns nothing |
+| `FleetQuestSpawner.java` | Hangs an offer on a hull already in the player's system; spawns nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep, and the trade's own boat would be copied away by accepting it. Rare on purpose: one active at a time, 7% a check, 45-day cooldown |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
 
@@ -792,6 +792,10 @@ written to that claim.
 **A hostile fleet can still be talked to, and the hail is what makes it possible.** The camp job needs a conversation with a pirate pack that is hostile by default, which no memory flag softens. Vanilla's answer is in the Galatia arc's gate-sitting pirates: `HailPlayer` on `BeginFleetEncounter` opens the link regardless of the relationship, and `MakeOtherFleetGoAway` is what ends it when they agree to leave. Nothing about the fleet is made friendly — the conversation is a thing the player gets to have, not a promise about how it ends.
 
 **The camp job polls rather than being told.** Being killed, bought off, talked off and quietly wandering away do not share a hook, and only two of the four happen inside a conversation. So `CampedSpotJob.advanceImpl` asks one question on the mission's own tick instead of four rules rows each reporting a different way.
+
+**`despawn()` files the paperwork; it does not clear the board.** Accepting a fleet quest copies the giver into a hull of the mod's own and retires the original, and calling `despawn(reason, null)` tells whatever was managing that fleet it is gone - but leaves the hull sitting in the system beside its copy, still steered by its own AI, visibly two fleets. The disposal is `setAI(null)`, move to the origin, then `Misc.fadeAndExpire` (note the name - there is no `fadeAndDespawn`).
+
+**`EndConversation` hands the screen back to the fleet encounter, which is not an exit.** The encounter then offers the comm link again, which reopens the same conversation: continue, leave them to it, continue, with no way out but the escape key. Any ending that means "and now you are done with this fleet" wants `DismissDialog`.
 
 **Two flags are the only things that colour a comm link, and both erase themselves.** `$hailing` and `$highlightComms` are read and `unset` by `FleetInteractionDialogPluginImpl` as it builds the option, so a highlight is a one-shot that has to be re-set for every encounter it should appear in. Which means the bug is never a highlight that fails to clear - it is something re-setting the flag on a condition that outlived the reason for it.
 
