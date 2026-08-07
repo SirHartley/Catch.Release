@@ -4,9 +4,14 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 
 ## Workflow
 
-- **Always use the `starsector-knowledge` skill** for anything touching the game: API
-  signatures, data file formats, game internals, obfuscated code. Never answer from memory -
-  the API changes between versions.
+- **Read the real sources wherever they answer the question.** They live in the repo under
+  `lib/`, zipped: `starfarer.api.zip` is the game's own API source, and `GraphicsLib.zip`,
+  `Lazylib_lunalib.zip` and `MagicLib.zip` are the dependency mods, source and jars both.
+  Unzip to a temp directory to read them - do not unpack them into the repo. A signature read
+  out of `lib/` beats one remembered or paraphrased.
+- **Use the `starsector-knowledge` skill for everything `lib/` does not cover**: the obfuscated
+  game internals, the stock data files, csv formats, mechanics. Never answer from memory - the
+  API changes between versions.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
@@ -31,11 +36,12 @@ goes to Fable 5 even though it is also code.
 
 Java 17 (`.idea/misc.xml` sets the language level; the source uses switch expressions).
 
-Compiles against the game and library jars, none of which live in this repo:
+Compiles against the game and library jars:
 
-- `starfarer.api.jar`, `starfarer_obf.jar` - from the game install's `starsector-core`
+- `starfarer.api.jar` - in `lib/`; `starfarer_obf.jar` is not, and still comes from the game
+  install's `starsector-core`
 - `Graphics.jar` (GraphicsLib), `LazyLib.jar`, `LunaLib.jar`, `MagicLib.jar` - the declared
-  dependencies in `mod_info.json`
+  dependencies in `mod_info.json`, each inside its zip in `lib/`
 - `lwjgl-2.9.3.jar`, `lwjgl_util-2.9.3.jar`, `json-20140107.jar`, `log4j-1.2.17.jar` - needed
   for `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json` and `Global.getLogger`
 
