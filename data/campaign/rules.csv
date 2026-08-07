@@ -980,3 +980,356 @@ AddTextSmall ""Acquired full fishing rig and six charts"" highlight","They look 
 ""Then you will not want the speech.""
 
 The crate is already on the deck. Lamps, a rod, a line, a ledger, and six charts on top of it. Your ops chief signs for it and does not ask why nobody wanted paying.",catchrelease_fisherBack:Continue,
+catchrelease_lampStop,BeginFleetEncounter,"$catchrelease_sawLamps score:1050
+!$catchrelease_lampStopped
+!$isHostile","$catchrelease_lampStopped = true 30
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $ignorePlayerCommRequests
+AddText ""You're being hailed by the $faction $otherShipOrFleet."" $faction.baseColor
+CatchReleaseCMD lampStop
+OpenComms",,,"A patrol that has seen the lamps lit somewhere they are not allowed, arriving. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. Marked as had here rather than at each ending, as the cargo scan does: the patrol is still pursuing while the dialog is open, so a conversation that only counted once it was finished would reopen the instant the player closed it. The command runs after the hail so the standing it costs is printed under that line rather than over it."
+catchrelease_lampWarn,OpenCommLink,"$entity.catchrelease_lampConv score:1500
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Cut the lamps. Now, and then we'll talk.""
+
+$PersonRank $personName is not looking at you. $HeOrShe is looking at something off to one side, and whatever it is saying does not appear to be good news.
+
+""Whatever those are, they are reading on our instruments as a hull breach the size of a landing bay, and they are doing it within sight of $entity.catchrelease_lampWhere. Consider that the warning.""",,
+catchrelease_lampWarnHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Hegemony Navy. Cut the lamps.""
+
+$PersonRank $personName reads from a screen with the flat delivery of somebody who has read it before. ""Operation of an unregistered field device within sight of a registered population centre. That is $entity.catchrelease_lampWhere, and there are people on it.""
+
+$HeOrShe looks up. ""Kill the power and we file it as a first instance. That is the whole of what I am authorised to offer.""",,
+catchrelease_lampWarnTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Cut the lights, please.""
+
+The voice is pleasant and does not slow down for any of it. ""You are operating an unlicensed aperture device inside a corporate exclusion zone. Tri-Tachyon holds four patents adjacent to whatever that is, none of which you have, and the liability position over $entity.catchrelease_lampWhere is - I am told - unattractive.""
+
+$PersonRank $personName waits. ""Switch it off and this stays a note in a file nobody reads.""",,
+catchrelease_lampWarnLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""In the name of Ludd, put that out.""
+
+There is no preamble and no rank offered. $PersonRank $personName's voice is steady in the way of somebody holding it steady.
+
+""We have seen what that light does. It is a wound, and you are carrying it through creation as though it were a lantern. Put it out and we will not ask what you were looking for.""",,
+catchrelease_lampWarnLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Turn it off.""
+
+$PersonRank $personName does not appear to have blinked since the link opened. ""That's a hole. You've cut a hole in the world and you're dragging it around behind you like it's luggage.""
+
+""Off. Now. Or we come and put it out for you, and we're not gentle about doors.""",,
+catchrelease_lampWarnPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Kill the lights.""
+
+$PersonRank $personName does not sound official about it, which is somehow worse. ""Whatever that is, it has every sensor in this system screaming, and some of the ones screaming are ours. There's people under $entity.catchrelease_lampWhere who pay us for that not to happen.""
+
+""Off. I'd rather not explain to them why it kept happening.""",,
+catchrelease_lampWarnDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Cut it. Cut it now.""
+
+$PersonRank $personName says that before saying anything else, and only then remembers the rest of it. ""This is a Diktat patrol. You are operating an unauthorised device over $entity.catchrelease_lampWhere. There is no permit for that device because there is no such device.""
+
+$HeOrShe lets that stand. ""Switch it off and I will not have to decide what to write.""",,
+catchrelease_lampWarnLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""League patrol. Please cut power to whatever that is.""
+
+$PersonRank $personName is polite about it and clearly reading from a card. ""We are obliged to inform you that unlicensed operation of a fabric-active device within the approaches to $entity.catchrelease_lampWhere is prohibited under convention, and that a first instance carries a warning.""
+
+$HeOrShe puts the card down. ""That was the first instance. Please put it out.""",,
+catchrelease_lampWarnIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_lampConv score:1505
+$entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Hey. Turn that off.""
+
+$PersonRank $personName is not reading from anything and does not appear to be enjoying this. ""I don't know what that is and I don't want to. What I know is my instruments went white and there's a station full of people at $entity.catchrelease_lampWhere who felt it.""
+
+""Nobody's written anything down yet. Put it out.""",,
+catchrelease_lampFine,OpenCommLink,"$entity.catchrelease_lampConv score:1510
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""Lamps off. Somebody has already had to tell you that once.""
+
+$PersonRank $personName has the previous stop up on a screen and does not bother pretending otherwise. ""There is a schedule for the second one. $entity.catchrelease_lampFineDGS credits, paid here, and the lamps go dark before you leave the link.""
+
+""Or we do it the way the schedule says to do it when nobody pays.""",,
+catchrelease_lampFineHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""Hegemony Navy. You have been warned about this once already.""
+
+$PersonRank $personName does not read off the screen this time. ""Second instance of the same offence, which takes it off my discretion and onto a schedule. $entity.catchrelease_lampFineDGS credits.""
+
+""Pay it, kill the lamps, and it stays an administrative matter. Decline, and it becomes a matter for the ships behind me, which I am also authorised to offer.""",,
+catchrelease_lampFineTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""Again.""
+
+The pleasantness has been switched off somewhere between stops. ""Second incident. Policy at this point is a settlement rather than a note, and the settlement is $entity.catchrelease_lampFineDGS credits.""
+
+$PersonRank $personName lets a moment go by. ""The alternative is a write-off, and I should say plainly that the asset being written off in that scenario is you.""",,
+catchrelease_lampFineLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""You were asked once.""
+
+$PersonRank $personName sounds less angry than tired. ""The Church does not fine people for sin. It fines them for damage. There is damage, and it comes to $entity.catchrelease_lampFineDGS credits.""
+
+""Pay it, put the light out, and go. We would all prefer that.""",,
+catchrelease_lampFineLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""You didn't listen.""
+
+$PersonRank $personName is smiling, which the link renders badly and which does not help. ""So here's how it goes now. $entity.catchrelease_lampFineDGS credits, and the lamps go dark, and that buys you off this once.""
+
+""Say no and we take the rig apart with you still bolted to it.""",,
+catchrelease_lampFinePirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""Twice.""
+
+$PersonRank $personName sounds genuinely put out. ""I let it go the first time because I couldn't be bothered. Now there's paperwork, and paperwork out here means somebody wants paying.""
+
+""$entity.catchrelease_lampFineDGS credits and the lights go out. Or we take it out of the hull.""",,
+catchrelease_lampFineDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""You were told.""
+
+$PersonRank $personName says it as a charge rather than a complaint. ""Second operation of the same device in Diktat space. The penalty for a second is fixed, and it is $entity.catchrelease_lampFineDGS credits.""
+
+""There is no third schedule. There is only a third response.""",,
+catchrelease_lampFineLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""League patrol. We have you on record from the last time.""
+
+$PersonRank $personName has put the card away. ""A second instance is a fine rather than a warning - $entity.catchrelease_lampFineDGS credits - and the device goes cold before you break the link.""
+
+""I would take that. The convention is much shorter about what follows it.""",,
+catchrelease_lampFineIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_lampConv score:1515
+$entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
+FireAll CatchReleaseLampFineOptions","""You again.""
+
+$PersonRank $personName rubs $hisOrHer eyes. ""Look. I am not paid enough to have a position on what that thing is. But somebody at $entity.catchrelease_lampWhere filed something after the last time, and now I have a number to collect.""
+
+""$entity.catchrelease_lampFineDGS credits, lights out, everybody goes home.""",,
+catchrelease_lampScan,OpenCommLink,"$entity.catchrelease_lampConv score:1520
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Cut the lamps and stand by to be boarded.""
+
+$PersonRank $personName is past explaining. ""Twice was a fine. Three times is an inspection, and I am told to be specific about what we are inspecting for.""
+
+""Whatever you have been pulling out through those holes. All of it.""",,
+catchrelease_lampScanHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Hegemony Navy. Heave to and prepare to be boarded.""
+
+$PersonRank $personName reads the authority out in full, which takes some time, and then stops reading. ""Third instance. At a third the schedule stops fining and starts confiscating, and what it confiscates is the reason you keep doing it.""
+
+""Every specimen in that hold. Cut your lamps and open your bays.""",,
+catchrelease_lampScanTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Please hold station for boarding.""
+
+""Three incidents is where the policy changes character,"" $PersonRank $personName says. ""We are no longer settling. We are recovering. Anything recovered from an unlicensed aperture is - and I am quoting - a corporate asset improperly held.""
+
+$HeOrShe sounds, for the first time, interested. ""Research would very much like to see what you have.""",,
+catchrelease_lampScanLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Stand down and open your holds.""
+
+$PersonRank $personName does not raise $hisOrHer voice for it. ""Three times now. We have stopped believing you will put it out because we asked.""
+
+""Whatever you have taken from behind that light does not belong on a ship with people aboard it. We will be removing it.""",,
+catchrelease_lampScanLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Cut it and open up.""
+
+$PersonRank $personName has given up the pretence that there is a procedure here. ""Third time. Third time we take the catch, because that's the part you actually care about, and it's the part that shouldn't exist.""
+
+""Every last one of them. Off the ship.""",,
+catchrelease_lampScanPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Lamps off. We're coming aboard.""
+
+$PersonRank $personName has stopped being annoyed and started being interested, which is a change for the worse. ""Third time is where we stop asking about money and start asking what's in the hold.""
+
+""Word is you've been pulling things out of that light. We'd like to see them.""",,
+catchrelease_lampScanDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Cut power and prepare for inspection.""
+
+$PersonRank $personName offers no reason and does not appear to think one is owed. ""Third contravention. The third response is seizure of materials.""
+
+""Open the hold. Do not make me specify which hold.""",,
+catchrelease_lampScanLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""League patrol. Prepare to be boarded.""
+
+$PersonRank $personName has stopped apologising for the convention. ""A third instance provides for seizure of anything obtained by means of the prohibited device. That is the whole of the catch, and it is not a discretionary provision.""
+
+""Cut the lamps and open the hold.""",,
+catchrelease_lampScanIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_lampConv score:1525
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Off. Now. And open the hold.""
+
+$PersonRank $personName sounds like somebody working from instructions $heOrShe did not write. ""Third time, and this time they gave me orders instead of a number. They want whatever is in there.""
+
+""I'm sorry. I've read what those lights do.""",,
+catchrelease_lampGuns,OpenCommLink,"$entity.catchrelease_lampConv score:1530
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName does not open with anything.
+
+""Again. This month.""
+
+The link closes. Across the formation, weapons come up, and every one of them is tracking the lamp mounts rather than the hulls.",,
+catchrelease_lampGunsHeg,OpenCommLink,"$faction.id == hegemony
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""Fourth instance, same month.""
+
+$PersonRank $personName is not reading from anything and is not going to. ""There is nothing further on the schedule. The schedule assumed there would not be a fourth.""
+
+The link closes. The formation is already spreading out.",,
+catchrelease_lampGunsTT,OpenCommLink,"$faction.id == tritachyon
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""There will be no further correspondence on this.""
+
+$PersonRank $personName sounds almost apologetic about it. ""The device is being removed. What remains is a question of how much of your hull it is still attached to.""
+
+The link closes.",,
+catchrelease_lampGunsLC,OpenCommLink,"$faction.id == luddic_church
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName is not alone at the screen this time, and nobody behind $himOrHer is speaking.
+
+""We asked. We fined. We took what you had taken. And here it is again, burning, inside the same month.""
+
+""Ludd forgive you. We will not."" The link closes.",,
+catchrelease_lampGunsLP,OpenCommLink,"$faction.id == luddic_path
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","There is no greeting.
+
+""Told you. Told you what we'd do about it.""
+
+""We will remove these lights by force."" The link closes, and the Path ships do not so much manoeuvre as commit.",,
+catchrelease_lampGunsPirate,OpenCommLink,"$faction.id == pirates
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName has clearly been shouted at by somebody further up.
+
+""Four. In a month. You've made this my problem, and I don't solve problems the way the Navy does.""
+
+The link closes. They come in fast and low, aimed at the mounts.",,
+catchrelease_lampGunsDiktat,OpenCommLink,"$faction.id == sindrian_diktat
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","""Fourth contravention within the month.""
+
+$PersonRank $personName recites it as a finding rather than a warning. ""There is no fourth penalty. There is a standing order.""
+
+The link closes. Weapons come up across the formation in one motion, as though rehearsed.",,
+catchrelease_lampGunsLeague,OpenCommLink,"$faction.id == persean_league
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName has the convention open on a screen, and closes it.
+
+""There is no fourth provision. Nobody drafting it expected a fourth.""
+
+""We will remove the device."" The link closes, and the League ships begin to spread.",,
+catchrelease_lampGunsIndie,OpenCommLink,"$faction.id == independent
+$entity.catchrelease_lampConv score:1535
+$entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+MakeOtherFleetPreventDisengage catchreleaseLamps true 5
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation NO_CONTINUE","$PersonRank $personName does not look sorry this time.
+
+""Four times. In a month. Over people.""
+
+""Nobody is collecting anything."" The link closes.",,
+catchrelease_lampWarnOptOut,CatchReleaseLampWarnOptions,,,,0:catchrelease_lampsOut:Cut power to the lamps,
+catchrelease_lampWarnOptRefuse,CatchReleaseLampWarnOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
+catchrelease_lampFineOptPay,CatchReleaseLampFineOptions,,DoCanAffordCheck $entity.catchrelease_lampFine catchrelease_lampPayFine,,0:catchrelease_lampPayFine:Pay the fine and cut the lamps ($entity.catchrelease_lampFineDGS credits),"Same affordability handling as the harpoon patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
+catchrelease_lampFineOptRefuse,CatchReleaseLampFineOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
+catchrelease_lampScanOptSubmit,CatchReleaseLampScanOptions,,,,0:catchrelease_lampInspect:Cut the lamps and submit to the inspection,
+catchrelease_lampScanOptRefuse,CatchReleaseLampScanOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
+catchrelease_lampsOutSel,DialogOptionSelected,$option == catchrelease_lampsOut,"CatchReleaseCMD lampsOff
+MakeOtherFleetPreventDisengage catchreleaseLamps false
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation","The lamps go out one at a time, and the readings on the other ship settle as they do.
+
+""Logged,"" $PersonRank $personName says, and cuts the link.",,
+catchrelease_lampPaySel,DialogOptionSelected,$option == catchrelease_lampPayFine,"AddRemoveCommodity credits -$entity.catchrelease_lampFine true
+CatchReleaseCMD lampsOff
+MakeOtherFleetPreventDisengage catchreleaseLamps false
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation","The credits go across, and then the lamps go out, in that order. $PersonRank $personName appears to notice the order.
+
+""Filed."" The link closes without ceremony.",,
+catchrelease_lampInspectSel,DialogOptionSelected,$option == catchrelease_lampInspect,"CatchReleaseCMD lampsOff
+MakeOtherFleetPreventDisengage catchreleaseLamps false
+unset $entity.catchrelease_lampConv","Your lamps go dark. A shuttle crosses, and for the better part of an hour there are strangers in the hold with lists.",0:catchrelease_lampSeized:Continue,"Two beats rather than one, which is the rhythm vanilla's own inspection uses: the narration here, then the losses, then the closing line. Splitting them is not cosmetic - a row's text is added after its script has run, so seizing in this row would print the losses above the paragraph describing the boarding."
+catchrelease_lampSeizedSel,DialogOptionSelected,$option == catchrelease_lampSeized,"CatchReleaseCMD seizeFish
+FireBest CatchReleaseLampSeized",,,"No text of its own: the command prints the losses, and the fired rows say what was said over them."
+catchrelease_lampSeizedFull,CatchReleaseLampSeized,$entity.catchrelease_lampHaul score:10,"ShowDefaultVisual
+EndConversation","Nobody aboard the patrol looks at the crates for longer than they have to, and nobody signs anything in front of you.
+
+""That will be all,"" $PersonRank $personName says, and the link closes.",,
+catchrelease_lampSeizedEmpty,CatchReleaseLampSeized,!$entity.catchrelease_lampHaul,"ShowDefaultVisual
+EndConversation","They find tanks, and racks, and a great deal of ice, and nothing in any of it.
+
+""Nothing aboard,"" somebody reports, and $PersonRank $personName takes rather longer than necessary to accept that. The link closes.",,
+catchrelease_lampRefuseSel,DialogOptionSelected,$option == catchrelease_lampRefuse,"CatchReleaseCMD lampRefused
+MakeOtherFleetHostile catchreleaseLamps true 5
+MakeOtherFleetAggressive catchreleaseLamps true 5
+$entity.ignorePlayerCommRequests = true 0
+unset $entity.catchrelease_lampConv
+ShowDefaultVisual
+EndConversation","You cut the link. The lamps keep burning, which is the only answer anybody aboard the other ship was waiting for.
+
+Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."

@@ -236,6 +236,37 @@ public class FishCurrency {
     }
 
     /**
+     * Takes everything, crates included, and says how many specimens that was.
+     * <p>
+     * Not a spend: nothing is being paid for and there is no requirement to fall short of, so this
+     * empties the hold of fish whatever is in it and never puts a partial crate back. The one caller
+     * is a patrol's inspection, which is not shopping.
+     */
+    public static int seizeAll() {
+        CargoAPI cargo = getCargo();
+        if (cargo == null) return 0;
+
+        int taken = 0;
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null) continue;
+
+            List<FishCatch> contents = read(stack);
+            if (contents.isEmpty()) continue;
+
+            //read() already multiplies a loose stack out by its size, but reports a crate stack as
+            //one crate's contents - the whole stack is being taken either way
+            taken += FishItems.isContainer(data)
+                    ? contents.size() * (int) stack.getSize() : contents.size();
+
+            cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
+        }
+
+        return taken;
+    }
+
+    /**
      * Best specimen aboard matching a requirement (null if none), for buyers who pay on quality
      * rather than count. Judged by where it sits in its own species' size range, not raw weight.
      */
