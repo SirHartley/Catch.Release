@@ -7,6 +7,8 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
+import catchrelease.campaign.fish.tutorial.BahaDialog;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -44,6 +46,7 @@ public class FishermanDialog implements InteractionDialogPlugin {
         SELL,
         SELL_PICK,
         RUMOR,
+        BAHA,
         LEAVE
     }
 
@@ -59,6 +62,11 @@ public class FishermanDialog implements InteractionDialogPlugin {
                 .getContainingLocation());
 
         dialog.getTextPanel().addPara(FishermanIdentity.getGreeting(drift));
+
+        //hailing a boat is the third way into the introduction, and the only one that needs
+        //nothing to have happened first - so the greeting is also where the player learns there
+        //is somebody aboard who explains things
+        FishingIntro.point();
 
         //what is wrong with him here, where anything is - said in the colour the mod already
         //reads a failing coherence in, so it lands as the same fact about the same water
@@ -90,6 +98,12 @@ public class FishermanDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().addOption("Access the outfitter", Option.OUTFITTER);
         dialog.getOptionPanel().addOption("Sell fish", Option.SELL);
         dialog.getOptionPanel().addOption("Ask about rumors", Option.RUMOR);
+
+        //coloured while there is something to collect - the introduction, or a first catch that
+        //has not been shown to anybody yet
+        dialog.getOptionPanel().addOption("Ask to speak to the science end", Option.BAHA,
+                BahaDialog.hasBusiness() ? Misc.getHighlightColor() : null, null);
+
         dialog.getOptionPanel().addOption("Leave", Option.LEAVE);
 
         dialog.getOptionPanel().setShortcut(Option.LEAVE,
@@ -126,6 +140,9 @@ public class FishermanDialog implements InteractionDialogPlugin {
             case RUMOR:
                 askRumor();
                 break;
+            case BAHA:
+                openBaha();
+                break;
             case MAIN:
                 showMain();
                 break;
@@ -157,6 +174,23 @@ public class FishermanDialog implements InteractionDialogPlugin {
         FishermanSurveyDialog counter = new FishermanSurveyDialog(this::resume);
         dialog.setPlugin(counter);
         counter.init(dialog);
+    }
+
+    //---------------------------------------------------------------- Baha
+
+    /**
+     * The scientist, in the same frame and handed back the same way as the shop.
+     * <p>
+     * A separate plugin rather than more states in this one: the Fisherman sells things and Baha
+     * explains them, and mixing the two would put the tutorial's stages into the middle of a shop.
+     */
+    protected void openBaha() {
+        dialog.getOptionPanel().clearOptions();
+
+        BahaDialog baha = new BahaDialog(this::resume);
+
+        dialog.setPlugin(baha);
+        baha.init(dialog);
     }
 
     //---------------------------------------------------------------- outfitter
