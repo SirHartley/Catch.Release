@@ -42,7 +42,7 @@ public class DevShortcut implements CampaignInputListener {
      * The key as the player's own keyboard produces it, which is the only description that survives
      * a change of layout. Compared case-insensitively so a stray shift is not a different key.
      */
-    public static final char KEY = 'ü';
+    public static final char KEY = 'j';
 
     /** Behind vanilla's own listeners: this should be the last thing offered a key, not the first. */
     public static final int PRIORITY = -1000;
@@ -56,24 +56,9 @@ public class DevShortcut implements CampaignInputListener {
         return PRIORITY;
     }
 
+    //claude you retard if you put this in postCore it'll only eat consumed events
     @Override
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
-    }
-
-    @Override
-    public void processCampaignInputPreFleetControl(List<InputEventAPI> events) {
-    }
-
-    /**
-     * After the core UI, deliberately.
-     * <p>
-     * The ways to be typing a Ü are mostly not conversations - renaming a ship in refit, a codex
-     * search, naming a colony - and everything that owns a text field has already had the event and
-     * consumed it by the time this pass runs. Taking the press here means the guard is the game's
-     * own input ordering rather than a list of screens somebody has to remember to keep current.
-     */
-    @Override
-    public void processCampaignInputPostCore(List<InputEventAPI> events) {
         if (!Global.getSettings().isDevMode()) return;
 
         for (InputEventAPI event : events) {
@@ -86,6 +71,15 @@ public class DevShortcut implements CampaignInputListener {
             fire();
             return;
         }
+    }
+
+    @Override
+    public void processCampaignInputPreFleetControl(List<InputEventAPI> events) {
+    }
+
+    @Override
+    public void processCampaignInputPostCore(List<InputEventAPI> events) {
+
     }
 
     /** Everything the introduction would have granted, plus charts of every rung to test with. */

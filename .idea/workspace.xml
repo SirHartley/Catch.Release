@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="Fixed crash with shop indicator due to consumed input being accessed">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="added libs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/fish.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/fish.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/testing/DevShortcut.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/testing/DevShortcut.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -373,7 +372,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786057210393</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="added libs">
+      <option name="closed" value="true" />
+      <created>1786126869696</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1786126869696</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -388,7 +395,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="file structure&#10;basic fish pond spawning" />
     <MESSAGE value="parallax, pond visuals" />
     <MESSAGE value="shader-based render setup instead of stencil-based" />
     <MESSAGE value="fishing pond glow border" />
@@ -413,6 +419,7 @@
     <MESSAGE value="some adjustments" />
     <MESSAGE value="Colour adjustments to treasure rarity scale" />
     <MESSAGE value="Fixed crash with shop indicator due to consumed input being accessed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed crash with shop indicator due to consumed input being accessed" />
+    <MESSAGE value="added libs" />
+    <option name="LAST_COMMIT_MESSAGE" value="added libs" />
   </component>
 </project>
