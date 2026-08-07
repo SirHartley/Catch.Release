@@ -134,6 +134,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "dropCutComm":
                 return dropCutComm(dialog);
 
+            case "leaveEncounter":
+                return leaveEncounter(dialog);
+
             //---- panels. Machinery rather than dialogue, and the one thing not in the sheet
             case "openShop":
                 return openPanel(dialog, new FishShopDialog(this::resume));
@@ -413,6 +416,35 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      * Options are cleared first - they would otherwise stand under the panel, and the hidden text
      * panel drags them sideways with it.
      */
+    /**
+     * Leaves a fleet encounter the way vanilla's own Leave leaves one.
+     * <p>
+     * {@code DismissDialog} closes the window and nothing else. That is not enough here, because
+     * {@code FleetInteractionDialogPluginImpl.init} has already built a real {@code BattleAPI}
+     * between the player and the other fleet - it does that for every encounter, fight or no fight -
+     * and vanilla only takes it apart again in its {@code LEAVE} handler, which calls
+     * {@code cleanUpBattle()} before dismissing. Skip that and the battle stays attached to both
+     * hulls, so the <i>next</i> approach finds {@code otherFleet.getBattle() != null}, decides an
+     * engagement is already under way, and opens on the join-battle screen instead of a
+     * conversation.
+     * <p>
+     * {@code cleanUpBattle} is public and guards itself with a {@code cleanedUp} flag, so this is
+     * vanilla's own teardown called at vanilla's own moment, and calling it twice is harmless.
+     */
+    protected boolean leaveEncounter(InteractionDialogAPI dialog) {
+        if (dialog == null) return false;
+
+        if (dialog.getPlugin() instanceof
+                com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl fid) {
+
+            fid.cleanUpBattle();
+        }
+
+        dialog.dismiss();
+
+        return true;
+    }
+
     /**
      * Takes vanilla's "Cut the comm link" back off the list.
      * <p>
