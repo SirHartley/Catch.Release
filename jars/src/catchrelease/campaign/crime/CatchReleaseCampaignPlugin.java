@@ -1,7 +1,5 @@
 package catchrelease.campaign.crime;
 
-import catchrelease.campaign.fish.fisherman.FishermanFID;
-import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.PluginPick;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -11,14 +9,16 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 /**
- * Hands the game the two encounter screens the mod writes in Java: the fleets we have wronged, and
- * the fishing boats.
+ * Hands the game the one encounter screen the mod writes in Java: the fleets we have wronged.
  * <p>
- * Every word either of them says still comes out of {@code rules.csv}, and so does all of the hulk
- * and the castaway. What cannot live in the sheet is the screen <i>around</i> the words - a fleet
- * interaction is engage, disengage, comm link, leave, and that is a plugin's shape rather than a
- * conversation's. Both picks here only reach into that shape: one to fire a greeting the encounter
- * would otherwise never ask for, the other to mark the comm link as the thing to click.
+ * Every word it says still comes out of {@code rules.csv}, and so does all of the hulk and the
+ * castaway. What cannot live in the sheet is the screen <i>around</i> the words, and this pick only
+ * reaches into that shape - to fire a greeting the encounter would otherwise never ask for.
+ * <p>
+ * The fishing boats used to be picked here too and are not any more. They never needed a plugin:
+ * what they needed was to skip the fleet screen entirely, and vanilla already has a command for
+ * that - {@code OpenComms} on a {@code BeginFleetEncounter} row. See
+ * {@code catchrelease_fisherEncounter}.
  */
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
@@ -49,11 +49,6 @@ public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
         if (HarpoonOffence.wasHarpooned(fleet)) {
             return new PluginPick<InteractionDialogPlugin>(
                     new HarpoonedFleetFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
-        }
-
-        if (FishermanSpawner.isFisherman(fleet)) {
-            return new PluginPick<InteractionDialogPlugin>(
-                    new FishermanFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
         }
 
         return null;
