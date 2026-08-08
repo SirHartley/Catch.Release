@@ -24,9 +24,9 @@ public enum FleetQuestType {
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
-                    + " it has not got. There is water nearby - bring us something out of it and we"
+                    + " it has not got. There is a rupture nearby - bring us something out of it and we"
                     + " will make it worth the detour.",
-            "They need something living out of the local water before the printer will run again.",
+            "They need something living out of a nearby rupture before the printer will run again.",
             "Holding position"),
 
     SEEKER("Fleet on a Hunt",
@@ -55,7 +55,7 @@ public enum FleetQuestType {
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
             "Coil's going and the gel that packs it is not something you can synthesise out here."
-                    + " You can fish it out of the local water, apparently. We looked it up. Bring"
+                    + " You can fish it out of a local rupture, apparently. We looked it up. Bring"
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
             "Holding position"),

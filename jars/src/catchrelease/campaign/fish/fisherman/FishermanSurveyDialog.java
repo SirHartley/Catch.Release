@@ -290,7 +290,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     tooltip.addPara("Charts for charts", Misc.getBasePlayerColor(), 0f);
 
-                    tooltip.addPara("Survey data marks a species' waters on your map - the shape"
+                    tooltip.addPara("Survey data marks a species' range on your map - the shape"
                             + " of the thing is on the chart, the look of it still has to be"
                             + " caught.", 8f);
 
@@ -319,7 +319,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     tooltip.addPara(offer.spec.getDisplayName(), offer.spec.rarity.color, 0f);
                     tooltip.addPara(offer.spec.getTypeName(), Misc.getGrayColor(), 2f);
 
-                    tooltip.addPara("Charts this species' waters on your map.", 8f);
+                    tooltip.addPara("Charts this species' range on your map.", 8f);
 
                     int have = FishCurrency.count(offer.costRarity);
                     boolean afford = have >= offer.costCount;

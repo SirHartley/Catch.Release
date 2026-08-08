@@ -320,7 +320,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                 "" + (int)(DETECTABILITY_PERCENT) + "%"
         );
 
-        tooltip.addPara("The lamps will not run beside an open pond rupture - that water is the"
+        tooltip.addPara("The lamps will not run beside an open pond rupture - that one is the"
                 + " R.O.D.'s.", Misc.getGrayColor(), pad);
 
         addUpgradesToTooltip(tooltip, pad);

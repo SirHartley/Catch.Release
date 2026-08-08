@@ -16,6 +16,6 @@ public class PirateCampJob extends CampedSpotJob {
 
     @Override
     public String getBaseName() {
-        return "Pirates on the Water";
+        return "Pirates on the Rupture";
     }
 }

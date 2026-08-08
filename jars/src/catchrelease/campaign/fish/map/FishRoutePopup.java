@@ -219,7 +219,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                         () -> !selected.isEmpty(), this::plot));
         footer.addCustom(plot, 4f);
         footer.addTooltipToPrevious(createSimpleTooltip(260f,
-                "Plot the shortest route through the picked species' waters and draw it on"
+                "Plot the shortest route through the picked species' ranges and draw it on"
                         + " the hyperspace map."),
                 TooltipMakerAPI.TooltipLocation.ABOVE);
 
@@ -328,13 +328,13 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                     ? names.get(0) + ", " + names.get(1) + " +" + (names.size() - 2) + " more"
                     : String.join(", ", names);
 
-            say("No charted waters for " + listed + ".", Misc.getNegativeHighlightColor());
+            say("No charted range for " + listed + ".", Misc.getNegativeHighlightColor());
             return;
         }
 
         FishRoute.Saved route = FishRoutePlanner.plan(new ArrayList<>(selected));
         if (route == null) {
-            say("No route - nothing picked has charted waters.", Misc.getNegativeHighlightColor());
+            say("No route - nothing picked has a charted range.", Misc.getNegativeHighlightColor());
             return;
         }
 
@@ -393,7 +393,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 tooltip.addPara("The search field and the type chips narrow the list.", 8f);
 
                 tooltip.addPara("PLOT ROUTE plots the shortest route through the picked"
-                        + " species' waters and draws it on the hyperspace map.", 8f);
+                        + " species' ranges and draws it on the hyperspace map.", 8f);
 
                 tooltip.addPara("F2 over a row opens that species' codex page.",
                         Misc.getGrayColor(), 8f);

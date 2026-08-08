@@ -157,7 +157,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         footer.addTooltipToPrevious(createSimpleTooltip(280f,
                 "Paints how well the fabric is holding over the whole sector: clear where it"
                         + " holds, purple where it runs thin, hot where it is barely there."
-                        + " Specimens taken in thin water come up aberrant."),
+                        + " Specimens taken where the fabric is thin come up aberrant."),
                 TooltipMakerAPI.TooltipLocation.ABOVE);
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - COHERENCE_HEIGHT);
@@ -220,14 +220,14 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addCustom(planner, 0f);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Pick the fish you need - open jobs and upgrade asks are suggested - and plot"
-                        + " the shortest route through their waters."),
+                        + " the shortest route through their ranges."),
                 TooltipMakerAPI.TooltipLocation.BELOW);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(filter.search == null || filter.search.isEmpty()
                 ? SEARCH_GHOST : filter.search);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
-                "Type to filter the species by name. The list and the waters follow as you type."),
+                "Type to filter the species by name. The list and the shading follow as you type."),
                 TooltipMakerAPI.TooltipLocation.BELOW);
 
         FishType[] types = FishType.values();
@@ -351,8 +351,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.addPara(type.label, type.color, 0f);
                 tooltip.addPara(filter.types.contains(type)
-                        ? "Click to hide this type's species and waters."
-                        : "Click to show this type's species and waters.", Misc.getGrayColor(), 6f);
+                        ? "Click to hide this type's species and shading."
+                        : "Click to show this type's species and shading.", Misc.getGrayColor(), 6f);
             }
         };
     }
@@ -366,7 +366,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                tooltip.addPara("Reading the waters", Misc.getBasePlayerColor(), 0f);
+                tooltip.addPara("Reading the map", Misc.getBasePlayerColor(), 0f);
 
                 tooltip.addPara("Enable type chips to shade whole territories. Pick species off"
                         + " the list to shade only those - up to three at once for planning a"
@@ -374,7 +374,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         + " other, so overlaps cross instead of piling.", 8f);
 
                 tooltip.addPara("A filled circle by a name is a species somebody aboard has"
-                        + " landed. A hollow one is known only from survey data: its waters"
+                        + " landed. A hollow one is known only from survey data: its range"
                         + " shade, but nobody has seen the creature itself.", 8f);
 
                 tooltip.addPara("F2 over a row opens that species' codex page.", Misc.getGrayColor(), 8f);
@@ -391,8 +391,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         //the shared species card, with this pane's own action line read live at hover time
         return FishTooltips.create(spec, () ->
                 !selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED
-                        ? "Three waters are already up - deselect one first."
-                        : "Click to toggle its waters on the map. F2 opens the codex.");
+                        ? "Three ranges are already up - deselect one first."
+                        : "Click to toggle its range on the map. F2 opens the codex.");
     }
 
     // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the planner. ---

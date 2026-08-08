@@ -16,6 +16,6 @@ public class MercCampJob extends CampedSpotJob {
 
     @Override
     public String getBaseName() {
-        return "Hired Guns on the Water";
+        return "Hired Guns on the Rupture";
     }
 }

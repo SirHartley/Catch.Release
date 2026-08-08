@@ -194,7 +194,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         if (!Global.CODEX_TOOLTIP_MODE) tooltip.addTitle(spec.getName());
         else tooltip.addSpacer(-10f);
 
-        tooltip.addPara("Fires a head on a line at whatever is in the water. A hit drives it back"
+        tooltip.addPara("Fires a head on a line at whatever the fabric is showing. A hit drives it back"
                 + " and holds it while it is played, and a landed specimen comes home on the line.",
                 pad);
 

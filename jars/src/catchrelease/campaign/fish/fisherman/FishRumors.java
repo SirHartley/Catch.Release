@@ -193,7 +193,7 @@ public class FishRumors {
                 String name = stranger == null ? "something that has no business there"
                         : stranger.getDisplayName();
                 return "Word is " + name + " has been seen in " + rumor.systemName
-                        + ", a long way from its own waters.";
+                        + ", a long way from its own range.";
             default:
                 return "The fabric is running thin in " + rumor.systemName
                         + " - the rarer things are close to the surface for now.";

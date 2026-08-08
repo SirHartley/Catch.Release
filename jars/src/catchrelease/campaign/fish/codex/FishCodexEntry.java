@@ -271,7 +271,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 FishLocationSummary.describe(spec));
 
         if (logged.hintOnly) {
-            text.addPara("Nothing of this one has been landed. The waters are on the map.",
+            text.addPara("Nothing of this one has been landed. The range is on the map.",
                     Misc.getGrayColor(), 3f);
             return;
         }

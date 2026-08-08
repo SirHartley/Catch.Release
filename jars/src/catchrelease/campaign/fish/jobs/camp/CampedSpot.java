@@ -104,7 +104,7 @@ public class CampedSpot {
         mem.set(MemFlags.MEMORY_KEY_NO_JUMP, true);
 
         fleet.clearAssignments();
-        fleet.addAssignment(FleetAssignment.ORBIT_AGGRESSIVE, pond, HOLD_DAYS, "Sitting on the water");
+        fleet.addAssignment(FleetAssignment.ORBIT_AGGRESSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
 
         return fleet;
     }
