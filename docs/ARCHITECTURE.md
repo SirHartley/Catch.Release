@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 218 Java files across eight top-level packages, plus
+What is where, and which file to open first. 220 Java files across eight top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -430,10 +430,11 @@ The sector-map fish filter.
 | File | What it does |
 |---|---|
 | `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list |
-| `FishMapPane.java` | The side panel: planner button, search, type chips, species list |
+| `FishMapPane.java` | The side panel: planner button, search, type chips, species list, the coherence toggle on its floor |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
-| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges and the close-route label |
+| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges, the close-route label, and the coherence heat map under it all |
+| `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
 | `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed |

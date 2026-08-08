@@ -47,6 +47,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         /** The planner button was pressed - float the planner over the map. */
         void onPlannerRequested();
+
+        /** The coherence toggle moved - paint or clear the heat map over the sector. */
+        void onCoherenceToggled(boolean shown);
     }
 
     public static final float WIDTH = 250f;
@@ -61,10 +64,22 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float CONTROLS_HEIGHT = 154f;
     public static final float ROW_HEIGHT = 24f;
 
+    /** The coherence toggle's strip along the pane's floor. */
+    public static final float COHERENCE_HEIGHT = 22f;
+    public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
+
     public static final String SEARCH_GHOST = "Search...";
 
     /** How many species can be up at once. Three weaves exist, and a fourth would have to pile. */
     public static final int MAX_SELECTED = 3;
+
+    /** Static, so the choice survives the pane being rebuilt every time the map opens. */
+    protected static boolean coherenceShown = false;
+
+    /** Whether the heat map is up - the host re-asks after rebuilding the overlay. */
+    public static boolean isCoherenceShown() {
+        return coherenceShown;
+    }
 
     protected final Host host;
     protected final FishPresence.Filter filter = new FishPresence.Filter();
@@ -121,7 +136,31 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         this.height = height;
 
         buildControls();
+        buildFooter();
         rebuildList();
+    }
+
+    /** The pane's floor: the coherence toggle, anchored from the bottom edge. */
+    protected void buildFooter() {
+        float innerWidth = width - PAD * 2f - 6f;
+        TooltipMakerAPI footer = panel.createUIElement(innerWidth, COHERENCE_HEIGHT, false);
+
+        CustomPanelAPI toggle = panel.createCustomPanel(innerWidth, COHERENCE_HEIGHT,
+                new PaneWidgets.TextButton(
+                        () -> coherenceShown ? "HIDE COHERENCE" : "SHOW COHERENCE",
+                        () -> true,
+                        () -> {
+                            coherenceShown = !coherenceShown;
+                            host.onCoherenceToggled(coherenceShown);
+                        }));
+        footer.addCustom(toggle, 0f);
+        footer.addTooltipToPrevious(createSimpleTooltip(280f,
+                "Paints how well the fabric is holding over the whole sector: clear where it"
+                        + " holds, purple where it runs thin, hot where it is barely there."
+                        + " Specimens taken in thin water come up aberrant."),
+                TooltipMakerAPI.TooltipLocation.ABOVE);
+
+        panel.addUIElement(footer).inTL(PAD, height - PAD - COHERENCE_HEIGHT);
     }
 
     @Override
@@ -234,7 +273,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         List<FishSpec> shown = FishPresence.getShown(filter);
         shownCount = shown.size();
 
-        float listHeight = height - CONTROLS_HEIGHT - PAD * 2f;
+        float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f;
         //same air on both sides - the list's slot is inset PAD left and right alike
         listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
 
