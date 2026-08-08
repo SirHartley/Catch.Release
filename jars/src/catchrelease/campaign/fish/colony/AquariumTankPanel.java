@@ -24,9 +24,9 @@ import java.util.List;
 /**
  * The tank: the conservatory's aquarium, live on the colony's main menu. Pure GL - water with a
  * caustic weave and leaning light shafts, a stone bed with kelp swaying off it, a glass line
- * with a lit rim, a few bubbles, and every fish in the stock swimming its own way. A backdrop
- * png at {@link #BACKDROP_PATH} is picked up when present and drawn behind the water's tint.
- * Just the glass - stocking and the display switch live in the aquarium office.
+ * with a lit rim, a few bubbles, and every fish in the stock swimming its own way, with whichever
+ * {@link Backdrop} the conservatory is showing hung behind the water's tint. Just the glass -
+ * stocking, the display switch and the choice of scene all live in the aquarium office.
  * <p>
  * Each specimen keeps its species' minigame manners: {@link FishMotion#SMOOTH} wanders,
  * {@link FishMotion#DARTER} sits and bolts, sinkers keep to the floor and floaters to the
@@ -113,13 +113,6 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     public static final Color GLASS = new Color(120, 200, 230);
     public static final Color KELP = new Color(24, 74, 52);
 
-    /**
-     * Backdrop art, drawn behind the water tint when the file exists - drop a png at this path
-     * and the tank picks it up; without one the gradient carries the scene alone.
-     * {@link SpriteLoader} logs the miss once and hands back null forever after.
-     */
-    public static final String BACKDROP_PATH = "graphics/catchrelease/effects/aquarium_bg.png";
-
     protected final BreachConservatory conservatory;
     protected final InteractionDialogAPI dialog;
 
@@ -135,6 +128,9 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     protected PositionAPI pos;
     protected float time = 0f;
+
+    /** Set on a pane standing in for the real tank - see {@link #setPreview}. */
+    protected Backdrop preview;
 
     /** 0 on the frame it is mounted, 1 once it has arrived. */
     protected float shown = 0f;
@@ -159,6 +155,37 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
+    /**
+     * The scene hung behind the water, as a file path, or null for none.
+     * <p>
+     * Whichever {@link Backdrop} this conservatory is showing - the choice is the tank's, the
+     * ownership is the player's, and both live in {@link Backdrops}. Null carries the gradient
+     * alone, which is also what a row whose art has not been drawn yet comes to.
+     * <p>
+     * The art is cropped to cover, so any image works and one of the wrong shape loses its edges
+     * rather than letterboxing. The glass is {@code 468 x 170} at the game's own UI scale - a hair
+     * under {@code 2.75:1} - so art drawn at about {@code 936 x 340} covers it and stays sharp on
+     * a scaled-up interface.
+     */
+    protected String backdropPath() {
+        Backdrop hanging = preview != null ? preview : Backdrops.getHanging(conservatory);
+
+        return hanging == null || Backdrops.isBare(hanging) ? null : hanging.sprite;
+    }
+
+    /**
+     * Shows a scene this conservatory is not hanging, for a pane that is about the scene rather
+     * than about the colony - the office's picker, and Crablobab's coat.
+     * <p>
+     * A preview is the tank itself and not a picture of one: same water, same caustics, same light
+     * and the same crop, because the whole question being asked is what it will look like. It also
+     * means there is one drawing of an aquarium in the mod rather than two that can drift.
+     */
+    public void setPreview(Backdrop backdrop) {
+        preview = backdrop;
+    }
+
+
     @Override
     public void advance(float amount) {
         time += amount;
@@ -177,7 +204,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     /** Rebuilds the sim when the stock changes under it - the buttons, the office, anything. */
     protected void syncStock() {
-        List<String> stock = conservatory.getAquariumFish();
+        //null on a preview pane opened somewhere there is no colony at all - the man in the coat
+        //will sell you a scene long before you have anywhere to hang it
+        List<String> stock = conservatory == null
+                ? java.util.Collections.emptyList() : conservatory.getAquariumFish();
 
         int stamp = stock.hashCode();
         if (stamp == stockStamp) return;
@@ -281,12 +311,13 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
         drawGlass(x, y, w, h, alphaMult);
 
-        if (fish.isEmpty()) drawEmptyLine(x, y, w, h, alphaMult);
+        //a preview is about the scene, and an empty tank is not news about a scene
+        if (fish.isEmpty() && preview == null) drawEmptyLine(x, y, w, h, alphaMult);
     }
 
     /** The scene behind the water, when the art exists; the tint over it keeps it submerged. */
     protected void drawBackdrop(float x, float y, float w, float h, float alphaMult) {
-        SpriteAPI backdrop = SpriteLoader.loadSprite(BACKDROP_PATH);
+        SpriteAPI backdrop = SpriteLoader.loadSprite(backdropPath());
         if (backdrop == null || backdrop.getWidth() <= 0f) return;
 
         //cover, not fit: the glass is the crop and the art fills every corner of it
@@ -305,7 +336,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
      * surface shimmer breathing under the rim.
      */
     protected void drawWater(float x, float y, float w, float h, float alphaMult) {
-        boolean backdropped = SpriteLoader.loadSprite(BACKDROP_PATH) != null;
+        boolean backdropped = SpriteLoader.loadSprite(backdropPath()) != null;
         float body = (backdropped ? 0.62f : 0.92f) * alphaMult;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);

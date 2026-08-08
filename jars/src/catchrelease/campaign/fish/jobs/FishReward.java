@@ -1,6 +1,9 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.campaign.fish.colony.Backdrop;
+import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -44,6 +47,10 @@ public abstract class FishReward {
 
     public static FishReward locationData(String speciesId) {
         return new LocationData(speciesId);
+    }
+
+    public static FishReward backdrop(String backdropId) {
+        return new BackdropReward(backdropId);
     }
 
     public static FishReward blueprint(String itemId, String data) {
@@ -136,6 +143,40 @@ public abstract class FishReward {
             //grants ownership, not just a fit - removing it later must not require buying it back
             TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
+        }
+    }
+
+    /**
+     * A scene for the back of an aquarium: the one payment that is worth nothing whatsoever.
+     * <p>
+     * Deliberately. Every other reward here makes the rig better, the hold fuller or the map more
+     * legible, and a job that pays in one is a job that has moved the campaign along. A backdrop
+     * moves nothing: it is a picture, and the only thing it is good for is that somebody who has
+     * been fishing for a hundred hours has somewhere to put it. That is exactly why it can be
+     * handed out freely - there is no ladder for it to unbalance.
+     * <p>
+     * Granted to the player rather than to a colony, on {@link Backdrops}' split: which of your
+     * conservatories ends up hanging it is a decision for later, and possibly for a colony that
+     * does not exist yet.
+     */
+    public static class BackdropReward extends FishReward {
+        public final String backdropId;
+
+        public BackdropReward(String backdropId) {
+            this.backdropId = backdropId;
+        }
+
+        @Override
+        public String describe() {
+            Backdrop backdrop = BackdropLoader.get(backdropId);
+
+            return backdrop == null ? "a rolled-up backdrop"
+                    : "an aquarium backdrop - " + backdrop.getDisplayName();
+        }
+
+        @Override
+        public void grant() {
+            Backdrops.own(backdropId);
         }
     }
 

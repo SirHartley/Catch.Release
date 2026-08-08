@@ -4,6 +4,11 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.LampOffence;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.FishingTaboo;
+import catchrelease.campaign.fish.colony.AquariumManageDialog;
+import catchrelease.campaign.fish.colony.AquariumTankPanel;
+import catchrelease.campaign.fish.colony.AquariumTankScript;
+import catchrelease.campaign.fish.colony.Backdrop;
+import catchrelease.campaign.fish.crab.CrabBackdrops;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
@@ -100,6 +105,20 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
+
+    /**
+     * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
+     * <p>
+     * Tokens rather than a per-constant set like the wares get, because there is no constant: the
+     * table decides how many there are and the port decides which one, so the sheet can only be
+     * written about "the one he has".
+     */
+    public static final String CRAB_BACKDROP = "$catchreleaseCrabBackdrop";
+    public static final String CRAB_BACKDROP_NAME = "$catchreleaseCrabBackdropName";
+    public static final String CRAB_BACKDROP_DESC = "$catchreleaseCrabBackdropDesc";
+    public static final String CRAB_BACKDROP_PRICE = "$catchreleaseCrabBackdropPrice";
+    public static final String CRAB_BACKDROP_CRABS = "$catchreleaseCrabBackdropCrabs";
+    public static final String CRAB_BACKDROP_AFFORD = "$catchreleaseCrabBackdropAfford";
 
     /**
      * Whether this is a port where anybody would admit to fishing.
@@ -219,10 +238,37 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             //---- the man with the crate
             case "crabBuy":
                 return buyCrabWare(arg);
+            case "crabBuyBackdrop":
+                return CrabBackdrops.buy(getMarket(dialog));
+            case "crabShowBackdrop":
+                return showBackdrop(dialog);
 
             default:
                 return false;
         }
+    }
+
+    /**
+     * Unrolls the scene he is carrying into the visual slot, as the tank itself rather than as the
+     * bare picture - the same pane the conservatory's own rack previews with, so what he is selling
+     * and what you would be looking at are demonstrably the same thing.
+     * <p>
+     * No conservatory behind it: he sells scenes to people who have nowhere to hang them yet, and
+     * the pane copes. Put his portrait back with vanilla's own {@code RestoreSavedVisual}.
+     */
+    protected boolean showBackdrop(InteractionDialogAPI dialog) {
+        if (dialog == null) return false;
+
+        Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
+        if (scene == null) return false;
+
+        AquariumTankPanel pane = new AquariumTankPanel(null, dialog);
+        pane.setPreview(scene);
+
+        dialog.getVisualPanel().showCustomPanel(AquariumManageDialog.PREVIEW_WIDTH,
+                AquariumTankScript.PANEL_HEIGHT, pane);
+
+        return true;
     }
 
     /** Crablobab's stock changing hands. The sheet says what he says; this counts the crabs. */
@@ -393,8 +439,18 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
-        local.set(CRAB_ANY, CrabWares.isAnythingLeft(), 0);
+        Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
+
+        local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
         local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
+
+        local.set(CRAB_BACKDROP, scene != null, 0);
+        local.set(CRAB_BACKDROP_NAME, scene == null ? "" : scene.getDisplayName(), 0);
+        local.set(CRAB_BACKDROP_DESC, scene == null || scene.desc == null ? "" : scene.desc, 0);
+        local.set(CRAB_BACKDROP_PRICE,
+                Misc.getDGSCredits(CrabBackdrops.getCredits(scene)), 0);
+        local.set(CRAB_BACKDROP_CRABS, CrabBackdrops.getCrabs(scene), 0);
+        local.set(CRAB_BACKDROP_AFFORD, CrabBackdrops.canAfford(scene), 0);
 
         for (CrabWares ware : CrabWares.values()) {
             String key = "$catchreleaseCrab" + Misc.ucFirst(ware.name().toLowerCase());

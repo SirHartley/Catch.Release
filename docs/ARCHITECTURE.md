@@ -138,6 +138,11 @@ does **not** add for you and which anything looking a terrain up by tag depends 
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
 
+**`data/campaign/backdrops.csv`** — the scenes that can hang behind the aquarium's water. Read by
+`BackdropLoader` into `Backdrop`; no class is registered from it, it is a table of art. Columns are
+name, sprite path, rarity, whether Crablobab may stock it and whether a conservatory has it on the
+day it is built. The art is cropped to cover a `468 x 170` pane, so about `936 x 340` at 2x.
+
 **`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
 (`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's two props
 (`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
@@ -254,7 +259,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 |---|---|
 | `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
-| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Blueprint, Commodity |
+| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop, Blueprint, Commodity |
 | `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
@@ -295,12 +300,14 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 
 | File | What it does |
 |---|---|
-| `BreachConservatory.java` | The structure itself; also holds the aquarium's stock and its on/off switch |
+| `BreachConservatory.java` | The structure itself; also holds the aquarium's stock, its on/off switch and which backdrop this tank hangs |
 | `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
-| `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
+| `AquariumManageDialog.java` | The office: stock the tank, empty it, change the scene behind the water, or shut the display off. The scenery rack previews on hover, and what it shows is an actual `AquariumTankPanel` rather than a picture of the art |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing. Mounts as soon as the docked core UI is anything short of fully covering, rather than waiting for its fader to finish, so the tank comes back with the menu |
 | `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed. How one *carries* itself is its `Build`, off the crab/mollusc/fish tags rather than off its motion: fish slant up to `MAX_PITCH` and no further, molluscs and oddments never turn and only list, crabs live on the stones. The drawn angle is the bounded pitch, never the raw heading, so nothing rotates up through the vertical to come about |
+| `Backdrop.java` | One row of `data/campaign/backdrops.csv`: a scene for behind the water — name, art path, rarity, whether Crablobab stocks it, whether a conservatory has it from the start |
+| `Backdrops.java` | Two scopes: which scenes the *player* has come by (sector memory) and which one a *conservatory* is hanging (the industry). Resolution, ownership and the has-the-art-been-drawn question |
 
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
@@ -424,6 +431,7 @@ Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` 
 | File | What it does |
 |---|---|
 | `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing twice and the next rock offers the next thing. Priced off rarity; anything already owned drops out of the rotation |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.
@@ -598,6 +606,7 @@ Shader and GL machinery.
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
+| `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once. One object per path is shared by every caller, so it is handed back neutral - native size, white, full alpha, normal blend - and a caller that wants it otherwise says so |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |

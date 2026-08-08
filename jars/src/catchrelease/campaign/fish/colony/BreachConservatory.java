@@ -63,6 +63,17 @@ public class BreachConservatory extends BaseIndustry {
     /** The display switch - managing the aquarium includes being able to turn it off. */
     protected boolean aquariumEnabled = true;
 
+    /**
+     * Which scene is hung behind the water, by {@link Backdrop} id, or null for whatever
+     * {@link Backdrops#getDefault} says.
+     * <p>
+     * On the industry rather than in sector memory because it is a fact about this tank: two
+     * colonies can show two different scenes, and a colony that is lost should take its choice
+     * with it rather than leave an id pointing at nothing. What the player <i>owns</i> is the
+     * other scope entirely - see {@link Backdrops}.
+     */
+    protected String backdropId = null;
+
     @Override
     public void apply() {
         super.apply(true);
@@ -92,6 +103,13 @@ public class BreachConservatory extends BaseIndustry {
                 tooltip.addPara("The aquarium is empty.", Misc.getGrayColor(), 10f);
             }
 
+            Backdrop hanging = Backdrops.getHanging(this);
+
+            if (hanging != null && !Backdrops.isBare(hanging)) {
+                tooltip.addPara("Hung against %s.", 4f, Misc.getHighlightColor(),
+                        hanging.getDisplayName().toLowerCase());
+            }
+
             if (!aquariumEnabled) {
                 tooltip.addPara("The display is currently shut off.", Misc.getGrayColor(), 4f);
             }
@@ -112,6 +130,14 @@ public class BreachConservatory extends BaseIndustry {
 
     public void setAquariumEnabled(boolean enabled) {
         aquariumEnabled = enabled;
+    }
+
+    public String getBackdropId() {
+        return backdropId;
+    }
+
+    public void setBackdropId(String id) {
+        backdropId = id;
     }
 
     /** The functional conservatory on a market, or null - the single gate everything routes on. */

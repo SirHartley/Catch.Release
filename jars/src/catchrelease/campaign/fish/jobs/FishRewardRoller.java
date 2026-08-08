@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.campaign.fish.colony.Backdrop;
+import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -13,6 +15,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +75,9 @@ public class FishRewardRoller {
         if (allowCredits && roll < 0.34f) return FishReward.credits(value);
         if (roll < 0.52f) return rollUpgrade(random);
         if (roll < 0.66f) return rollTackle(random);
-        if (roll < 0.80f) return rollLocationData(random);
-        if (roll < 0.90f) return rollGoods(random, value);
+        if (roll < 0.78f) return rollLocationData(random);
+        if (roll < 0.86f) return rollBackdrop(random);
+        if (roll < 0.93f) return rollGoods(random, value);
 
         return rollBlueprint(random);
     }
@@ -124,6 +128,34 @@ public class FishRewardRoller {
         if (unknown.isEmpty()) return null;
 
         return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id);
+    }
+
+    /**
+     * A scene for an aquarium, weighted towards the plain ones.
+     * <p>
+     * The one payment on the list that is worth nothing - which is what makes it a good one to
+     * offer. Everything else here moves the campaign along, and a table of rewards that only ever
+     * moves the campaign along is a table with no room in it for a thing somebody just wanted.
+     * <p>
+     * Only what the player does not have, and only what the sheet lets out this way at all: a
+     * scene marked as Crablobab's is still allowed here, since he is a rotation rather than a
+     * gate, but one marked as neither his nor a starter is something meant to be found elsewhere
+     * and a job is not elsewhere.
+     */
+    protected static FishReward rollBackdrop(Random random) {
+        WeightedRandomPicker<Backdrop> picker = new WeightedRandomPicker<>(random);
+
+        for (Backdrop backdrop : Backdrops.getUnowned()) {
+            if (!backdrop.crabStock) continue;
+
+            //the rarity ladder read backwards: a job is a plausible way to come by a reef and an
+            //implausible way to come by the abyss
+            picker.add(backdrop, 1f / (1f + backdrop.rarity.ordinal() * 2f));
+        }
+
+        Backdrop picked = picker.pick();
+
+        return picked == null ? null : FishReward.backdrop(picked.id);
     }
 
     protected static FishReward rollGoods(Random random, int value) {
