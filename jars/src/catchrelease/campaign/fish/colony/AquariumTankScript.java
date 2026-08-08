@@ -21,7 +21,8 @@ import java.util.List;
  * The crawl is by capability, like every screen we stand on: the encounter dialog comes off
  * {@code CampaignState}, and the planet visual inside it is the child with {@code getPlanet}.
  * The tank mounts when the dialog's market has a working, switched-on conservatory, the docked
- * core UI is not covering the menu, and the planet image is the visual actually on screen; it
+ * core UI is anything short of fully covering the menu, and the planet image is the visual
+ * actually on screen; it
  * unmounts the moment any of that stops being true. That last one is what keeps the glass on the
  * colony's main menu and off the bar, the briefing portraits and anything else shown over the top.
  * Every step fails soft - a surprise means no tank, and the menu is exactly as vanilla drew it.
@@ -30,6 +31,9 @@ public class AquariumTankScript implements EveryFrameScript {
 
     public static final String APP_DRIVER = "com.fs.state.AppDriver";
     public static final String CAMPAIGN_STATE = "com.fs.starfarer.campaign.CampaignState";
+
+    /** Core-UI brightness at which the menu counts as covered - see {@link #coreCoverage}. */
+    public static final float COVERED = 0.999f;
 
     public static final float GAP = 8f;
     public static final float TANK_HEIGHT = 170f;
@@ -69,7 +73,8 @@ public class AquariumTankScript implements EveryFrameScript {
         if (dialog == null || failed) return;
 
         try {
-            boolean wanted = getConservatory(dialog) != null && !isCoreCovering(dialog)
+            boolean wanted = getConservatory(dialog) != null
+                    && coreCoverage(dialog) < COVERED
                     && findPlanetVisual(dialog) != null;
 
             if (wanted && panel == null) mount();
@@ -112,24 +117,37 @@ public class AquariumTankScript implements EveryFrameScript {
     }
 
     /**
-     * Whether the docked core UI (trade, refit, the colony screen) is up over the menu.
+     * How much of the menu the docked core UI (trade, refit, the colony screen) is covering,
+     * 0 to 1.
      * <p>
      * Not a null check: the dialog keeps the core UI object for its whole life once one has
      * been opened - dismissal only fades it out, nothing nulls the field - so {@code getCoreUI}
      * answering is no proof anything is showing. The fader is what actually knows, and it is
      * why the tank used to vanish for good after any colony-screen visit: the check read the
      * husk as coverage and never mounted again until re-docking rebuilt the dialog.
+     * <p>
+     * A reading rather than the yes/no it used to be, because yes/no is where the pop-in came
+     * from. Coming back from the colony screen the menu is drawn again at once and the core UI
+     * fades off it over a good fraction of a second; a tank that waits for {@code isFadedOut}
+     * spends all of that missing and then arrives in one frame, on top of a menu the player has
+     * already been looking at. Anything short of fully covered is enough to mount on, and
+     * mounting early costs nothing - the tank is a child of the dialog and the core UI is drawn
+     * over it, so there is nothing to see until there is.
      */
-    protected boolean isCoreCovering(Object dialog) {
+    protected float coreCoverage(Object dialog) {
         Object core = ReflectionUtils.invokeIfExists(dialog, "getCoreUI");
-        if (core == null) return false;
+        if (core == null) return 0f;
 
         Object fader = ReflectionUtils.invokeIfExists(core, "getFader");
-        if (fader == null) return true;
+        if (fader == null) return 1f;
 
+        Object brightness = ReflectionUtils.invokeIfExists(fader, "getBrightness");
+        if (brightness instanceof Float) return (Float) brightness;
+
+        //no reading to be had; back to the question that at least always answers
         Object fadedOut = ReflectionUtils.invokeIfExists(fader, "isFadedOut");
 
-        return !(fadedOut instanceof Boolean) || !((Boolean) fadedOut);
+        return fadedOut instanceof Boolean && (Boolean) fadedOut ? 0f : 1f;
     }
 
     /**
@@ -166,7 +184,7 @@ public class AquariumTankScript implements EveryFrameScript {
     /**
      * Whether a component is on screen: it has a fader, and that fader is neither out nor on its
      * way out. Anything that cannot be asked counts as gone, which is the same way round as
-     * {@link #isCoreCovering} and the same bargain the whole class is written on - a surprise
+     * {@link #coreCoverage} and the same bargain the whole class is written on - a surprise
      * costs the tank, never the menu underneath it.
      */
     protected boolean isShowing(Object component) {

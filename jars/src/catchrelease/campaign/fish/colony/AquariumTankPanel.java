@@ -83,8 +83,21 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     protected final BreachConservatory conservatory;
     protected final InteractionDialogAPI dialog;
 
+    /**
+     * How long the tank takes to come up, in seconds.
+     * <p>
+     * The other half of the pop-in. The tank is mounted by a watcher rather than built with the
+     * menu, so however early that watcher gets to it there is always some frame on which the tank
+     * was not there and the next one on which it is - and at full strength that frame is a pop.
+     * Eased on, it is the water clearing.
+     */
+    public static final float FADE_IN = 0.4f;
+
     protected PositionAPI pos;
     protected float time = 0f;
+
+    /** 0 on the frame it is mounted, 1 once it has arrived. */
+    protected float shown = 0f;
 
     protected final List<TankFish> fish = new ArrayList<>();
     protected int stockStamp = -1;
@@ -109,6 +122,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     @Override
     public void advance(float amount) {
         time += amount;
+        shown = Math.min(1f, shown + amount / FADE_IN);
 
         syncStock();
 
@@ -193,8 +207,11 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     @Override
-    public void render(float alphaMult) {
-        if (pos == null || alphaMult <= 0f) return;
+    public void render(float parentAlpha) {
+        if (pos == null) return;
+
+        float alphaMult = parentAlpha * shown;
+        if (alphaMult <= 0f) return;
 
         float x = pos.getX() + WALL_PAD;
         float y = pos.getY() + WALL_PAD;
