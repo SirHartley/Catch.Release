@@ -360,7 +360,14 @@ public class Aberration {
     }
 
     /**
-     * Deepest in the abyss is as far from holding together as anything gets.
+     * Deepest in the abyss is as far from holding together as anything gets - and every step out of
+     * it is a step back toward holding.
+     * <p>
+     * Read off the <b>uncapped</b> depth, which is the only version of vanilla's field that has a
+     * gradient in it. The capped one is 1 from the far corner across most of the wedge and then 0
+     * within ten thousand units, so everything the abyss touched came out identical and its edge was
+     * a wall. See {@link FishConstants#ABERRATION_ABYSS_SPAN}, which is how deep counts as fully
+     * abyssal and is set to 1 to get the old cliff back.
      *
      * @param foundOnly the abyss counts for the route planner only once the player has stood in it;
      *                  before that its depth is hearsay
@@ -368,12 +375,17 @@ public class Aberration {
     protected static float abyssShare(Vector2f locInHyper, LocationAPI location, boolean foundOnly) {
         if (foundOnly && !hasEnteredAbyss()) return 0f;
 
-        float depth = Misc.getAbyssalDepth(locInHyper);
+        float depth = Misc.getAbyssalDepth(locInHyper, true);
 
-        //an abyssal system reads as fully in it even where the depth at its own coordinates does not
-        if (depth <= 0f && location != null && location.hasTag(Tags.SYSTEM_ABYSSAL)) depth = 1f;
+        float share = MathUtils.clamp(
+                depth / Math.max(0.01f, FishConstants.ABERRATION_ABYSS_SPAN), 0f, 1f);
 
-        return MathUtils.clamp(depth, 0f, 1f) * AberrationSource.ABYSS.weight;
+        //an abyssal system reads as fully in it even where the depth at its own coordinates does
+        //not - vanilla will call a system abyssal that the analytic field puts outside the wedge,
+        //and a system somebody has been told is in the abyss is in the abyss
+        if (share <= 0f && location != null && location.hasTag(Tags.SYSTEM_ABYSSAL)) share = 1f;
+
+        return share * AberrationSource.ABYSS.weight;
     }
 
     /**

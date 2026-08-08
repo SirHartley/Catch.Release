@@ -433,6 +433,27 @@ public class FishConstants {
      * stars, and a tap not at all.
      */
     public static final float ABERRATION_ABYSS_WEIGHT = 1f;
+
+    /**
+     * How deep the abyss has to be before it reads as bad as it gets, in units of vanilla's own
+     * uncapped depth.
+     * <p>
+     * Vanilla's capped depth is a cliff: it is exactly 1 from the far corner most of the way across
+     * the wedge and then falls to nothing in about ten thousand units, so the abyss reads as one
+     * flat slab with a hard edge. The uncapped figure has the gradient the cap throws away - it
+     * runs about 20 in the corner down to 1 at the line where the cap stops holding - and dividing
+     * by this is what puts that gradient back.
+     * <p>
+     * At 8 the fade runs from roughly the middle of the wedge out to its edge, six times the width
+     * of the cliff it replaces. Higher stretches it further and makes the abyss milder overall;
+     * <b>1 restores the old behaviour exactly</b>, which is what makes this a safe number to argue
+     * with.
+     * <p>
+     * It is a reading and not a rendering knob: what the map paints, what a specimen out of that
+     * water comes up like and what the terrain readout says are all the same number, and the whole
+     * point is that they stay that way. Grading the abyss grades all three.
+     */
+    public static final float ABERRATION_ABYSS_SPAN = 8f;
     public static final float ABERRATION_BLACKHOLE_WEIGHT = 0.85f;
     public static final float ABERRATION_HYPERSHUNT_WEIGHT = 0.75f;
     public static final float ABERRATION_SLIPSTREAM_WEIGHT = 0.6f;
