@@ -14,6 +14,10 @@ scrapped
 ---------------------
 qa_
 
+Pond
+- Viewport snapper still unreliable, doesn't always lock when opening pond
+- ROD can double fire due to low CD - increase.
+
 QOL
 - LYNE-Drone auto dispatch (feels like a cheat...)
 
@@ -22,7 +26,7 @@ Sound
 - Minigame lacks soundstrack
 - Celebration tush on catch & extra for treasure
 - "Got treasure" notif when successfully taking in treasure
--
+- Harpoon needs activation, catch and retract sounds
 
 Codex
 - open map from codex still broken

@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="whisper sfx&#10;aquarium BG&#10;minor changes to constants">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="whisper sfx&#10;tileable HS BG">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/abilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/coherence/CoherenceOverlayScript.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/coherence/CoherenceOverlayScript.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/overlay/whispers.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/overlay/whispers.ogg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -409,7 +404,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786223238685</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="whisper sfx&#10;tileable HS BG">
+      <option name="closed" value="true" />
+      <created>1786227093530</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1786227093530</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -424,7 +427,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="start on search lights&#10;search light soundwork" />
     <MESSAGE value="searchlight water ripple effect" />
     <MESSAGE value="more searchlights, stats" />
     <MESSAGE value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
@@ -449,6 +451,7 @@
     <MESSAGE value="fixed dev input listener" />
     <MESSAGE value="concept update" />
     <MESSAGE value="whisper sfx&#10;aquarium BG&#10;minor changes to constants" />
-    <option name="LAST_COMMIT_MESSAGE" value="whisper sfx&#10;aquarium BG&#10;minor changes to constants" />
+    <MESSAGE value="whisper sfx&#10;tileable HS BG" />
+    <option name="LAST_COMMIT_MESSAGE" value="whisper sfx&#10;tileable HS BG" />
   </component>
 </project>
