@@ -1,10 +1,8 @@
 id,name,sprite,rarity,crabStock,owned,desc
 catchrelease_bd_none,No backdrop,,COMMON,FALSE,TRUE,"The glass, the water and whatever the lights are doing. Nothing behind it."
-catchrelease_bd_default,Standing water,graphics/catchrelease/effects/aquarium_bg.png,COMMON,TRUE,TRUE,"Whatever the conservatory was shipped with. Dark, deep and specific to nowhere."
-catchrelease_bd_reef,Shelf reef,graphics/catchrelease/aquarium/reef.png,COMMON,TRUE,FALSE,"A shelf of something coral-coloured, painted from a description rather than from life."
-catchrelease_bd_wreck,Sounding hull,graphics/catchrelease/aquarium/wreck.png,UNCOMMON,TRUE,FALSE,"The stern of something that went down a long way from any sea. Nobody asks which."
-catchrelease_bd_kelp,Kelp gallery,graphics/catchrelease/aquarium/kelp.png,UNCOMMON,TRUE,FALSE,"Columns of weed going up further than the tank is tall, which the tank does not explain."
-catchrelease_bd_trench,The trench,graphics/catchrelease/aquarium/trench.png,RARE,TRUE,FALSE,"A cut in the floor with the light stopping partway down it. Popular with people who have never been down one."
-catchrelease_bd_lamps,Lamp line,graphics/catchrelease/aquarium/lamps.png,RARE,TRUE,FALSE,"A row of breach lamps burning in open water, seen from below. A working scene, sold as a view."
-catchrelease_bd_rupture,Open rupture,graphics/catchrelease/aquarium/rupture.png,EPIC,TRUE,FALSE,"A hole with the wrong stars through it. Conservatories that hang this one get letters about it."
-catchrelease_bd_abyss,The abyss,graphics/catchrelease/aquarium/abyss.png,LEGENDARY,FALSE,FALSE,"Nothing, painted accurately. There is a great deal of it and it is not black."
+catchrelease_bd_castle,Rocky Castle,graphics/catchrelease/aquarium/castle.png,COMMON,TRUE,FALSE,-
+catchrelease_bd_beach,Sandy Shallows,graphics/catchrelease/aquarium/default.png,COMMON,TRUE,FALSE,-
+catchrelease_bd_abyss,The Abyss,graphics/catchrelease/aquarium/abyss.png,UNCOMMON,TRUE,FALSE,-
+catchrelease_bd_alien,Alien Remnants,graphics/catchrelease/aquarium/alien.png,LEGENDARY,TRUE,FALSE,-
+catchrelease_bd_deep,The Deep,graphics/catchrelease/aquarium/deep.png,RARE,TRUE,FALSE,-
+catchrelease_bd_lava,Lava Bath,graphics/catchrelease/aquarium/lava.png,EPIC,TRUE,FALSE,-

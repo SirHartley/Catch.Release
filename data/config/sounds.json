@@ -8,7 +8,7 @@
 	# row that can stop the mod starting. Swap the path when the whisper is recorded; nothing else
 	# needs to change. Must be mono, since this goes through playLoop.
 	"catchrelease_coherence_whispers":[
-		{"file":"sounds/catchrelease/spotlight/spotlight_loop.ogg","pitch":0.25,"volume":0.55},
+		{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":0.25,"volume":0.55},
 	],
 	"catchrelease_ui_searchlight_on":{
 		"sounds":[

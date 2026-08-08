@@ -14,351 +14,46 @@ scrapped
 ---------------------
 qa_
 
-Fish
-- need five more legendaries - one for each quadrant
-
-Fisherman
-- Just had one spawn next to a sun. Should only spawn in outer rim in populated systems. No spawn distance requirements in unpopulated systems.
-- Ask about something else has a "cut commlink" option - remove that
-- Ask about something else has a "continue" option - should be "I've heard enough."
-- Fisherman fleet should have the ignore other fleets, ignored by other fleets flags
-
-Quests / tutorial
-- The tutorial "bring me X out of Y just stays blank because whatever it's trying to load isn't firing.
-- Quest stages don't complete on catching the required fish (no intel update, no removal of "Important" mark)
-
-Intel
-- All fishing & quest related intel entries are currently very low-information and "underdressed". Check how other quest-related intel entries do it and mirror their level of detail.
-
-ROD/LINE
-- LINE drones can catch invisible motes under searchlights, which they should never be able to do - the only upgrade for this is for the harpoon.
-
-Shop
-- Revert title to large font
-- List of options should be same width as header
-- needs a "leave" button in the bottom right
-
-Industry
-- Shutting the display off, then on again causes it to stay invisible until the panel is reloaded
-- remove fish tank buttons, can be managed through industry anyways
-- Add some more embellishments to the tank graphics, it's kinda cheap. Add suppor tfor a background png. Make the water more watery.
-
-Map
-- Stripes should be static in size and not change size when scrolling
-
 Codex
 - open map from codex still broken
+
+Tutorial
+- Stages don't telegraph well
+- Text is a mess
+- Dialogue tree is a mess
+- Fisherman acts as if you were in another system when you are not
+- Half the dialogue lacks quest info
+
+Fisherman
+- Rumors don't tell you a rumor in text, it just gives you an intel. That's trash.
+
+Interaction
+- Fleets camping unstable fabric spots never engage and don't have dialogue - also don't lock out the spot.
+- Revenge fleets have zero origin info about them and also don't have dialogue
+
+Map
+- Coherence overlay to be an unlock?
 
 ---------------------
 
 handed off_
 
-Quests/tutorial
-- If the fisherman fleet that gave you the quest dies for any reason, the quest giver should move to another instance of the fisherman fleet in the core. It should respawn upon next entry to the system and have the quest re-attached.
-- Mark any specific ponds that are required by a quest with the classic golden ! (makeImportant vanilla) and make the intel point to it, like when there is a specific fish it wants you to catch (see: first fisherman tutorial quest).
-- Change the initial tutorial quest to accept any fish of common or better rarity.
+Aquarium
+- Has a delayed pop-in uppon opening the main menu
+- Fish behaviour: Fish that go up and down should not change their heading past delta 30 deg angle to horizontal line
+- FIsh behaviour: Mollusc and Misc should not change their heading at all, just drift into a random direction while slightly tilting either way
+- Fish behaviour: Crabs should be bound to the bottom of the pond & scurry about like crabs do.
+- fish behaviour: I've seen fish do a barrel roll when flipping. Don't think that's intentional.
 
-Crabolabob
-- Should sell Breach Conservatory Industry BP (aquarium). Check Planetary Shield BP on how to implement an industry BP.
+Aquarium
+- Also renders when accessing the bar - should be MENUSTATE = MAIN only
+- Fish behaviour is weird, they sometimes flip and spin around
+- Fish don't seem to scale by size
 
-Fisherman
-- Should not spawn in every single system in the rim - only once a month after you last saw them. Timer resets when entering the a core system. He should have a medium-low chance to spawn upon entering the system to make sure you don't encounter him in the first system you enter...
-- Shows a "cut the comm link" option for no reason - get rid of that
-- should always move at burn 4 unless catching up to you during the tutorial quest, in which case he unlocks and runs burn 16.
-- Talking to, then leaving, then talking to the fisherman moves me into an active battle with him against me. Why?
-- Should not fire the harpoon
-- Give him a third searchlight (currently has 2)
-
-Fleet Quests
-- Fisherman can be chosen for random quests - he should be immune. Actually, ONLY pick scavengers for random quest fleet targets. If they are a questgiver, they should not flip into piracy mode.
-- Not every god damn fleet is supposed to be picked as a questgiver, the rate is way too high.
-- If a fleet is duplicated by an accepted quest, it doesn't seem like the old one correctly despawns. The original fleet should be moved to 0.0 on the coordinate grid, be assigned null as AI and be made Misc.fadeAndDespawn as noted in the initial prompt
-- Intel says "1 specimen" - one specimen of what exactly? Did it bug out and not specify a target?
-- the fish required do not display in the dialogue. You should be handling that by handing a pre-made text to the fleet via memory key, or by using a custom RuleCommandPlugin.
-- All fleet quest interactions end with "continue", then go into "leave them to it", and cycle back to "continue" - leaving you in a loop without exit.
-
-Cargo
-- Fish cargo icons always display as "blacked out" in cargo
-- Fish cargo icons do not show the "wanted" indicator in the lower left (neither do crates)
-
-Patrol Interactions
-- Lamp: Patrols that have caught you with the lamps on (and that you resolved by turning them off) will ignore you if you turn them back on later and not confront you. These patrols should still be able to confront you.
-- Harpoon: Patrol: Using a story point to resolve a situation causes the comms to be marked yellow after leaving - should be white.
-- Harpoon: Patrol: Second Time: You're throwing text up via script, but the "open comms" action is still there. It should be white, and not yield a response, like normal for combat encounters.
-- Harpoon: Patrol: Should continue counting, because if you disengage and do it again they will still say "second time" when it is in fact the third or more.
-- Harpoon: Civil: Request comms should not be yellow after initial dialogue has resolved
-- Harpoon: Civil: If civil fleet of a civilized faction (= not pirate / pather) is smaller than you in strength, it should start running away after being harpooned the first time (including e-burn & avoid fleet flag) and try to find a patrol fleet to tattle to.
-- Harpoon: Civil: If the civil fleet is of larger strength than you, it should work stage 1 as it currently is (ignore you).
-- Harpoon: Civil: If the civil fleet is of larger strength than you, it should run you down and demand compensation for stage 2, not continue on its way.
-- Harpoon: Civil: If the civil fleet is of larger strength than you, it should start running away (including e-burn & avoid flag) after the third time and try to notify a patrol fleet, which should respond with the harpoon interaction.
-
-Fisherman
-- Fleet should never run from you
-
-Bar Encounters
-- Crabolabob (or whatever the name) should not spawn until the tutorial is done
-- Tutorial bar encounter should colour yellow in the list
-
-Fisherman
-- Survey data seller text runs out of boy
-- survey data seller needs a "return" button to the lower left
-- survey data seller needs sales feedback: "bought survey data
-
-Coherence
-- Add an overlay to denote low coherence while fishing abilities are active.
-    - This overlay should work exactly like the radiation overlay in IndEvo, but instead be purple and have a warping shader effect applied to whatever is below it.
-    - Warp intensity depending on coherence level
-    - Show coherence in terrain bar and explain the source (if found)
-    - The SFX is going to be a low whispering effect
-
-x Fishing planner
-  - Search field text now invisible, should render black
-  - Search field add top pad 5px
-  - Remove "marked" text label, redundant and overlaps
-
-x  General
-  - Instead of a placeholder icon for fish that you only know the survey data of, make it a blacked out version of the actual icon (the normal icon just with all coloured pixels filled in black. Retain alpha)
-  -> this change affects all places where the placeholder for survey data fish icons is currently used
-
-
-x Shop
-  - "Mark important" button should have on hover tooltip telling you what it does
-
-x  Inventory
-  - Fish cargo should stack into crates by default
-  - Cargo icon should display the "marked" icon in the lower right.
-  - Cargo fish Tooltip should say why it's wanted.
-  - Fish crates should be stackable into a "pile of crates" by ctrl clicking it like packing fish into one crate. Only one pile of crates to exist in inventory, this is just to "clean up" all fish in your inventory.
-
-x Tutorial
-- Tutorial hooks:
-    - Find lost tackle / equipment duing first survey like galatia to get you to visit a fisherman fleet in the core
-    - Have a rating approach you and give you the quest to head out to the fisherman fleet at the second planet you visit.
-    - Or interact with the fleet directly
-- The scientist & captain Baha is aboard and will talk to you, provide an introduction to fishing and give you the initial quest to get a simple fish, and provide basic equipment (abilities).
-
-x Fisherman
-  - Survey data: There should be a maximum of 6 data sets on sale at any time. Once sold, does not replenish until fisherman spawns again. Chance-based for higher rarities, accounting for what you already know (can't sell known data so the more you fish, the more he will offer rare template because you already know all the common ones.)
-  - Survey data: There should be a proper UI panel for buying Survey data. Center it around the fish sprite but colour that sprite black so it's only the silhouette. I love what you did with the minigame icon holder (coloured fade circle bg), you can reuse that.
-  - Use the fish shop UI style so it's consistent.
-  - Selling fish: Option to open shop not conspicous enough when other options are coloured. Make "open shop" button entirely yellow and option 1, for "sell all unmarked of rarity X" only colour the rarity part, not the whole option
-  - Selling fish: Marked fish should not be batch-sold
-  - Rumors about species outside their own waters should always make these species spawn with abnormally high quality and/or stability and/or size, disregarding surrounding modifiers.
-
-
-x Map
- - Route planner should feature on-hover tooltip like all the other panels
- - Route planner search field still the same colour as bg, is invisible
- - Route planner increase search field top pad to equal search field bottom distance to cat buttons
- - Route planner explanation to be moved to a on-hover pop up on a ? just like hyperspace map sidebar has
- - Hyperspace sidebar "marked" sign to be centered in row horizontally, not bl
- - all fish tooltips should show section "Required by: " section if the fish is marked important or needed by quest, including cargo tooltip
-
-x Quest fleets
-- The randomly spawning fleets are annoying as shit. We're moving back to an attached implementation where the quest picks a random scav fleet or similar. Attach a muted cyan ! marker to those fleets (like Misc.makeImportant does, but different colour because passive quest)
-- Once accepted, the scavenger will reportFleetDestroyed to attached listeners. If the quest is accepted, copy the entire fleet into a new one and supplant it so it doesn't fuck with potential route managers. Make the fleet stationary until the quest is resolved or expired, then have it head to source and despawn.
-
-x Harpooning other fleets
-- Patrols should treat any harpooning action against fleets of factions they are not hostile with as infraction
-- Civ fleets should go tattle to a nearby patrol of any non-hostile faction to fine you. It's about the space you are in, not the fleets allegiance.
-- If a fleet can't find a patrol to tattle to, they will SOMETIMES send a hitman after you if they know who you are. Check Alpha Core Scientist bar quest, it features a hired merc that comes after you if you keep the core, just adapt that.
-- Harpooning a civ fleet with an exploding harpoon while transponder is on will always get you a hitman merc
-
-x Map
- - hyperspace sidebar - left pad still too small
- - hyperspace sidebar - add 2px distance between category text and below colour indicator line
- - hyperspace sidebar panel border too bright now
- - System sidebar - icons not centered
- - System sidebar - get rid of scrollbar, looks terrible and I'll cut down on fish that can spawn in a system later anyway, assume that it will never overrun. After removing the scrollbar, make sure icons are centered and pads are not too big.
- - System sidebar - panel border too bright now
- - Plan a route - close button position should have top and side pad similar, currently top pad too little
- - Plan a route - panel search bar barely visible due to same colour as bg
- - Plan a route - panel search bar not aligned
- - plan a route - panel "too many selected" tooltip doesn't fit into line and newlines, thus overlapping button+
-
-x Coherence/Aberration
-- black holes should lower coherence
-
-x Minigame
-- Treasure BG animation should start upon panel spawn, not be paused
-- Treasure list entries should be center aligned if one piece, left/right split as current if there is an amount
-
-x Shop
-  - Mark for later should be an empty round icon you can click to turn yellow. It should be integrated into the entry in the list, to the left: selection strip, mark as important, title, level. It should be centered horizontally
-  - Modifiers should also be mark-able
-
-X Breach Lights
-  - FAN ARRAY: The distortion shader effect of the breach lights should be present along the full length of the light, not only the end
-  - FAN ARRAY: Takes forever to initiate, should be the same spoolup animation intervals as the normal lights
-  - FAN ARRAY: Cone width should be wider at default size, roughly 30%
-
-x Cargo
- - Fish in inventory can sometimes display as very small.
-
-x Fisherman
-- Should not despawn while you are in-system, timer only ticks down after you left.
-- Pressing esc in shop panel during fisherman encounter should throw you back to fleet dialogue, not close dialogue
-
-x Map
-  - Border colour for both big and small side panel not bright enough - use same as map panel
-  - Big sidepanel filter block too wide to the right, should be in line with list of entries below it
-  - Small filter panel should be one column max, and have a scroller if the icons exceed the panel. Make sure entries are centered.
-  - Small filter panel heading should have no H/L/R pad and fill the full width of the side panel
-
-x  FishIntelPlanetPanel  LazyFont body = ShopUi.getBodyFont(); should have black border to match other UI text
-
-x Harpooning fleets
- - Non-combat fleet that gets harpooned should complain about it when approached but not run you down.
- - Non-combat fleet that you harpoon a second time should run you down, demand compensation but not turn hostile
- - Do it a third time and the fleet should start running away from you and try to notify a patrol if there are any in the system
-
-x Shop
-- Add the ability to "mark" an upgrade, which plays the fish required into the route planner and marks fish needed for that upgrade in quest yellow in inventory (border?), and wherever they are displayed by adding a yellow dot in the top left.
-
-x Map
-  - Plot route lacks feedback when a fish can't be selected for or no location for a fish is found.
-  - Fish location overview (circles) should also not draw around systems that are cut off from hyper or abyssal. The only exception is the system "Limbo", which must stay available.
-  - local system sidebar should NOT be painted but via components like the large filter bar is. Scrap the entire paint bar version and make it via components, resizing the map window accordingly just like for the large filter bar.
-  - Big filter sidebar right pad isn't the same size as left pad - center content
-  - Panel background fill should be black transparent like the other panels in the UI (see intel-planets panels...)
-
-  Intel-Planets Catch Info
-  - Panel Border should be same colour as title fill
-  - Panel background fill should be black transparent like the other panels in the UI
-
-x Fish
-- Way too much overlap between fish habitats, they can be much more specific, like only being catchable near locations of low coherence or high coherence, sun colour, quadrant, constellation age.
-- Some fish might even only spawn in ponds or only spawn in searchlights
-
-x Map
-- Route planner must not pick systems that can't be procGen quest targets like cut off from hyper ect
-- Route planner "catch in this location" marker with the fish icons inside lacks padding to the inner edge when multiple icons are present
-- Route planner should support category filters and search just like the default panel does
-- Route planner confirm & close button overlaps list, hard to see
-- "Plot route" button text overruns borders of button. Move the close button to the top right of the tab
-- The massive filter bar should not be visible in the "system" tab, only in the "hyperspace" tab.
-- Local fish sidebar & intel-planets: The "catchable fish" tooltip should be the same as the filter block uses including codex linkage
-- Local fish sidebar & intel-planets: The circle around fish icons should reflect their rarity
-- intel-planets: box should be as high as planet desc it is aligned to, at max. Add a scroller to the content if the amount of fish exceed the height of the box.
-- intel-planets: title bar should be end to end with the borders of the box, no padding to either side. It should be about 1.5x as high to match the planet box.
-
-x Breach lamps
-- Fanned array should have slight purple "light" bands to each side to make it look like a seach lamp, the gradient isn't strong enough atm and the fanned array is too "clear"
-- increase flicker
-
-x Sound
-- Most sound bytes crash the game. Note. # denotes a comment in the json files, it's a custom parser.
-
-x Quests
-- Second stage of tuber doesn't allow handing in catch
-
-x Harpoon
-- Harpooning a random fleet twice does not trigger a patrol response twice, but the second incident should trigger the hostile patrol mode
-
-x Minigame
-- Coins should not only rotate horizontally - make them spin and wobble and flip unpredictably
-
-x Map
-- Hovering over a star system should add a tooltip showing the icons and names of the fish that can be caught in that system (adhere to location data / unlock system).
-- opening map via codex should jump to hyperspace map, not system map
-
-x Fishing planner on Map
-- Add a fishing planner that goes like "I need to catch fish -> select up to 5 fish you need to catch, pull suggested fish from open fishing quests & upgrades -> plot optimal route, least distance travelled -> display route on fishing map by having the icon(s) in circles above the relevant star systems and arrows between them (base game intel map has methods for arrow render) -> keep this route saved until the player actively clicks the label away (have a "X - close route") label in the top center of the map, clicking it resets route.
-- Fishing planner should be triggered by a button in the fishing map filter, above the search bar. It should ideally be a pop-up panel that renders over the map panel, with the fish selector icon&name based.
-- Account for slipstreams and, if the player found them, the hypershunts & abyss for stability
-
-x Codex
-- Remove the star map in the catch location data
-- If you have survey data unlocked the fish should show in the codex list using the category icon & the cat data codex entry that we already have
-- Pressing the "view map" button now just closes all windows...
-
-x shop
-- purchasing an upgrade to an ability should disable that ability if it's active
-- remove Store fish, retrieve fish and sell fish buttons
-
-x Drone Swarm
-- LINE drones / ROD ability gain a new effect: While breach lamps are active, using it dispatches roaming drones that try to intercept exposed motes. Use the normal ROD upgrades.
-
-x Searchlights
-- Breach mode visuals are insanely good, we're making this the default mode. Scrap the upgrade. Adjust Fanned array to use a similar visual
-- Rename seachlights to Breach Lamps
-- search light spawn animation in fanned array mode spawns them at radius 0 and then jumps the light into the correct pos a frame later, that's wrong, it should spawn in target pos immediately
--- We're reworking search lights ability / gameplay loop. The new loop for them is: Search for mote, auto-expose it, harpoon it.
-- Breach Lamps always expose the mote they pass over and makes it harpoon-able
-- If a Breach Lamp travels across a mote, make the mote gradually switch to the normal colour and look it has in a pond, with it being fully switched at about 40% into the light cone.
-- Motes close to the lights but not in the lights show as negative mote by default - the radius at which searchlights show "unexposed" motes is upgradeable
-- Rarity indicator visuals not pronounced enough
-- Add an upgrade that slows any mote entering the light (expensive)
-- Searchlights and ROD are mutually exclusive. no searchlights near an active pond (ROD in LINE mode), and ROD can't be used to unlock a pond while lights are on since they switch into LINE mode when lights are on as per the recent ROD ability Drone change
-
-xReward Qualifications
-- Add new possible requirement for quest: Catch modes: Harpoon or LINE Drones
-- Add new possible requirement for quest: Catch Implement: Pond or Breach Lamps
-- These should be combineable, so a medium-difficulty quest might read: "Bass of average quality and low coherence, caught with a harpoon through a breach lamp."
-
-x Colony Aquarium
-- Add a structure: Breach Conservatory (as usual, use placeholder image).
-- This is a local fish store & aquarium unlocking the fishing interactions features for your own colony.
-- If you need info on how to do industries, here's a lot of my implementations: https://github.com/SirHartley/Industrial.Evolution/tree/master/jars/src/indevo/industries
-- Allows access to the fishing shop on this colony (on-click via IndustryOptionProvider & custom panel as we already have)
-- Allows managing the aquarium (including disabling it)
-- Adds a fully animated aquarium to the colony main menu on the right, side bar, below planet interaction image. This should be a basic opengl rendered one for now, we'll add sprites later.
-- Add button to add/remove fish below this render
-- Fish in aquarium should behave according to their movement mode.
-- Fish in aquarium should have slight warp making them "breathe" and seem alive. Rotate the sprites in the tank accordingly so they actually swim with heading. We'll have to specify the "sprite direction", maybe via 360 degree field in csv.
-- Should show which are larger via size stat
-
-x Crablobab
-- Add Crablobab the Crab Salesman as a bar encounter. He randomly shows up every now and then and sells two things:
-- Confetti minigame effects should be purchaseable upgrade from Crablobab the crab salesman
-- explosive harpoon should be purchaseable upgrade from Crablobab the crab salesman (- Add an explosive harpoon modifier. This modifier should explode any fish it hits, then fade out the line while having it thrown away by the force. Use vanilla explosion vfx,there's a class for that). Doesn't do anything else for now. If it hits a fleet it turns hostile immediately and takes damage.
-
-x Fleet encounters
-- Static fleets shouldn't just randomly appear. Move all fleets that are in distress to a distress call implementation. Use the vanilla way to do this, it should have a framework.
-- Fleets without an immediate problem immobilizing them should spawn off-screen, wander into view with a ! on them. Once you interact with the fleet, if you don't take the quest, unmark important, have the fleet leave and despawn off-screen, mirror the brhaviour of the https://github.com/SirHartley/Industrial.Evolution/blob/master/jars/src/indevo/exploration/meteor/scripts/TutorialEncounterScript.java
-
-x Wandering fisherman
-- There should be instances of a fleet wandering a system you are in that serves as on-the-go upgrade and fishing interaction hub. This fleet should be called "The Fisherman".
-- Spawn it with one cruiser and a few logi ships.
-- Faction: Indie
-- It should be using the searchlights in "fan" mode, don't need to account for upgrades. Searchlight visuals should be using the old, yellow light impl, not the new breach one. No sounds to be played except during start and wind-down.
-- The fisherman should sometimes harpoon random fish under the searchlights. No minigame, just spool the animation and assume immediate success where the game would usually pop up.
-- Talking to this fleet should give the following options:
-    - Purchase survey data (uncommon survey requires common fish, to purchase rare survey data -> requires uncommon fish, ect). UI required.
-    - Access outfitter, throw up the UI we already have.
-    - Sell fish at market price - check how the vanilla AI core trade-in panel does it and mirror that. Add a button to sell all fish up to a certain rarity.
-    - Ask about rumors (Rumors should give intel about a system with temporarily increased overall rarity, with higher loot chance when fishing, or with fish that usually don't spawn there. Rumors are only available once a month.) 
- - Fisherman should wander around the system and fish for 2 weeks, then turn off the searchlights and jump out, despawning immediately. 
- - Wandering fisherman should prefer spawning outside the core. Should never spawn in systems cut off from hyper, not in the abyss, not in special systems or systems that are not proc-gen.
- - Should prefer to spawn when the player has a cargo full of fish, or when it hasn't spawned in a while (2 months?)
-
-x Bar encounters
-The mod will add bar encounters spawning individuals that request fish in certain make, quantity and quality. They sometimes request fish from a specific location.
-They provide payment in fishing upgrades, tackles, location data, blueprints, special items or money. These bar encounters should support:
-- Factional spawning
-- Multistage quests
-- spawning static or pre-made "cyan" quest motes in specific ponds
-- marking ponds as quest important
-- Quests that may spawn (we'll implement those later, this is just for reference on what the framework needs to support):
-chef that wants certain feesh (3 types at once?) for dish
-startup guy that wants feesh because its needed for his project (he's gonna figure out the supply chain later)
-butler for super rich guy that wants specific fish above size x
-conservartionist that needs it for his aquarium
-two kids that want specific kinds for a pokemon battle
-two mafia guys that want specific kinds for a drug-fuelled battle ring (you can bet on one of them and double or lose your reward)
-totally not a prostitute that wants it for a client (won't disclose why, only spawns on hegemony worlds)
-galatian researcher requesting for a type of fish for a project
-TriTuber that wants one for a video
-Cultists request one, do not say why
-
-x Pond
-- Swirl renderer still gone. Trial a new design that makes it look like a hole, include the warping hyperspace bg
-- unstable terrain should not spawn below ring bands
-
-x Harpooning fleets
-- low rep impact flag should not be set I think, mirroring cargo inspection
-- commlink option to be highlighted when fleet has something to say
-- dialogue text in commlink option should be default text colour
+Quests
+- Quests don't seem to mark species as important anymore.
+- Quest marks never vanish from ponds even if you catch the quest target
+- Quest Ponds marked with quest marks seem to spawn cyan motes when they shouldn't? Might only be a tutorial issue
 
 ---------------------
 
@@ -367,6 +62,9 @@ self_
 - fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
 - Icons
 - Harpoon needs better tip sprite
+- Crabolabob should sell a few aquarium backdrops
+- need five more legendaries - one for each quadrant
+- Suspicious lack of shark, turtle and whale
 
 ---------------------
 

@@ -49,7 +49,7 @@ public class CoherenceHeatField {
      * Above one it does the opposite - mild thinness is a hint you have to look for, and the colour
      * is earned.
      */
-    public static final float ALPHA_CAP = 0.14f;
+    public static final float ALPHA_CAP = 0.2f;
     public static final float HEAT_EASE = 1.8f;
 
     /** The pond glow's purple for thin water, leaning hot where it is barely holding. */
