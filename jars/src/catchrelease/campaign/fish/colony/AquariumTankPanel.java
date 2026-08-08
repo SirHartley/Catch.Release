@@ -36,6 +36,14 @@ import java.util.List;
  * {@link FishSpec#spriteDirection}, and a fish swimming the "wrong" way turns over through
  * edge-on rather than rotating onto its back.
  * <p>
+ * <b>How a specimen carries itself is a separate question from where it goes</b>, and it comes
+ * off the same crab/mollusc/fish tags the codex names a type by - see {@link TankFish.Build}.
+ * Fish point where they are going but never more than {@link #MAX_PITCH} off level; molluscs and
+ * the odds and ends never turn at all and only list; crabs live on the stones and dash along
+ * them. The drawn angle staying inside that band is also what keeps a fish coming about from
+ * looking like a fish looping: the course still swings the whole way round, but the body never
+ * rotates up through the vertical to follow it.
+ * <p>
  * Size on screen is the specimen's real length read against the whole table's range, so a waller
  * dwarfs a pipechovy and a good one of either is visibly the better fish - the tank shows off
  * exactly what the log would brag about.
@@ -68,6 +76,38 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     /** Degrees a second a fish will swing its nose round towards where it is actually going. */
     public static final float TURN_RATE = 240f;
 
+    /**
+     * How far off the horizontal a specimen is ever <i>drawn</i>, in degrees.
+     * <p>
+     * The course is not clamped - a fish rising still rises, and the heading still swings the
+     * whole way round when it turns - but a fish rising does not stand on its tail to do it. It
+     * swims up at a slant. Drawing the body along the raw heading had specimens vertical several
+     * times a minute in a tank where crossing the glass takes a couple of seconds, and it is what
+     * made coming about look like a loop: the nose went up through straight-up on the way.
+     */
+    public static final float MAX_PITCH = 30f;
+
+    /** How far a drifter leans, and how slowly. A mollusc does not point anywhere; it lists. */
+    public static final float DRIFT_TILT = 8f;
+    public static final float DRIFT_TILT_RATE = 0.5f;
+
+    /**
+     * How far a crab's underside clears the stone bed, in px, and the slice of tank it wanders
+     * up and down within.
+     * <p>
+     * In pixels off the specimen's own size rather than a flat fraction, because the tank is
+     * 170px tall and a large specimen is 76 of them: a band that stands a small crab neatly on
+     * the stones puts a big one's legs through the floor, where the scissor cuts them off.
+     */
+    public static final float CRAB_BED_PX = 4f;
+    public static final float CRAB_BOB = 0.03f;
+
+    /** A crab crosses a short stretch of floor at a time, quickly, and then thinks about it. */
+    public static final float CRAB_DASH_MIN = 0.05f;
+    public static final float CRAB_DASH_MAX = 0.24f;
+    public static final float CRAB_SPEED = 2.2f;
+    public static final float CRAB_ROCK = 5f;
+
     public static final Color WATER_DEEP = new Color(8, 24, 38);
     public static final Color WATER_SHALLOW = new Color(18, 60, 84);
     public static final Color GLASS = new Color(120, 200, 230);
@@ -83,8 +123,21 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     protected final BreachConservatory conservatory;
     protected final InteractionDialogAPI dialog;
 
+    /**
+     * How long the tank takes to come up, in seconds.
+     * <p>
+     * The other half of the pop-in. The tank is mounted by a watcher rather than built with the
+     * menu, so however early that watcher gets to it there is always some frame on which the tank
+     * was not there and the next one on which it is - and at full strength that frame is a pop.
+     * Eased on, it is the water clearing.
+     */
+    public static final float FADE_IN = 0.4f;
+
     protected PositionAPI pos;
     protected float time = 0f;
+
+    /** 0 on the frame it is mounted, 1 once it has arrived. */
+    protected float shown = 0f;
 
     protected final List<TankFish> fish = new ArrayList<>();
     protected int stockStamp = -1;
@@ -109,6 +162,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     @Override
     public void advance(float amount) {
         time += amount;
+        shown = Math.min(1f, shown + amount / FADE_IN);
 
         syncStock();
 
@@ -193,8 +247,11 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     @Override
-    public void render(float alphaMult) {
-        if (pos == null || alphaMult <= 0f) return;
+    public void render(float parentAlpha) {
+        if (pos == null) return;
+
+        float alphaMult = parentAlpha * shown;
+        if (alphaMult <= 0f) return;
 
         float x = pos.getX() + WALL_PAD;
         float y = pos.getY() + WALL_PAD;
@@ -471,8 +528,28 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
      */
     protected static class TankFish {
 
+        /**
+         * How a specimen carries itself, which is a different question from how it moves about.
+         * <p>
+         * Motion is the species sheet's business and decides where a specimen goes; this decides
+         * which way round and which way up it is while it goes there, and the two do not answer
+         * to each other. A mollusc the sheet calls a floater still rises - it just does not turn
+         * to face the surface on the way, because it has nothing to turn with.
+         */
+        protected enum Build {
+            /** Anything with a spine: points where it is going, within {@link #MAX_PITCH}. */
+            SWIMMER,
+
+            /** Molluscs, and everything the sheet files as Other: never turns, only lists. */
+            DRIFTER,
+
+            /** Crabs: on the stones, sideways, in short bursts. */
+            CRAWLER
+        }
+
         protected final FishCatch data;
         protected final FishSpec spec;
+        protected final Build build;
 
         protected final float lengthPx;
         protected final float aspect;
@@ -484,6 +561,25 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         protected float heading;
         protected float pause = 0f;
         protected boolean darting = false;
+
+        /**
+         * How far off level the body is <i>drawn</i>, which is the heading bounded to
+         * {@link #MAX_PITCH} for a swimmer and something else entirely for the other two.
+         * <p>
+         * Kept apart from {@link #heading} rather than clamping that, because the heading is the
+         * course and the course is allowed anywhere: it is what steers, what decides the side in
+         * {@link #advanceTurnover}, and what has to swing the full half-circle when a fish turns
+         * round. Only the drawing is bounded.
+         */
+        protected float pitch = 0f;
+
+        /** Its own clock, for the leans and rocks that answer to nothing else. */
+        protected float age = 0f;
+
+        /** The band a crawler is allowed in, as tank fractions - depends on the tank's height and
+         *  on how big this one is, so it is worked out on the tick rather than declared. */
+        protected float floorMin = 0f;
+        protected float floorMax = 0f;
 
         /**
          * Which way round the fish is, as a signed scale on its own length: 1 facing the way the
@@ -506,6 +602,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         public TankFish(FishCatch data) {
             this.data = data;
             this.spec = data.getSpec();
+            this.build = buildOf(spec);
 
             lengthPx = lengthOnGlass(data);
 
@@ -514,7 +611,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             aspect = art != null && art.getWidth() > 0f
                     ? art.getHeight() / art.getWidth() : 0.5f;
 
-            mode = spec.motion == FishMotion.MIXED ? rollMixedMode() : spec.motion;
+            mode = nextMode();
             wavePhase = MathUtils.getRandomNumberInRange(0f, 6.28f);
 
             //started level and already round the right way, so opening the menu is not a room of
@@ -523,10 +620,38 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             heading = rightward ? 0f : 180f;
             turnover = turnoverTarget = rightward ? 1f : -1f;
 
-            //scattered in, so a fresh tank does not start as a firing squad
+            //scattered in, so a fresh tank does not start as a firing squad; a crab scatters
+            //along the floor, since that is the only place a crab is ever going to be
             loc.set(MathUtils.getRandomNumberInRange(0.15f, 0.85f),
-                    MathUtils.getRandomNumberInRange(0.2f, 0.8f));
+                    build == Build.CRAWLER ? 0.1f
+                            : MathUtils.getRandomNumberInRange(0.2f, 0.8f));
             target.set(loc);
+        }
+
+        /**
+         * Off the same crab/mollusc/fish tags the codex reads a type off, so the tank and the
+         * sheet cannot disagree about what a thing is. Anything unfiled drifts, which is the safe
+         * default: it is the one manner that assumes nothing about the animal's shape.
+         */
+        protected static Build buildOf(FishSpec spec) {
+            if (spec.tags.contains("crab")) return Build.CRAWLER;
+            if (spec.tags.contains("mollusc")) return Build.DRIFTER;
+            if (spec.tags.contains("fish")) return Build.SWIMMER;
+
+            return Build.DRIFTER;
+        }
+
+        /**
+         * The manner it is about to move in: the sheet's, or a fresh roll for
+         * {@link FishMotion#MIXED} - with the bolt taken out of anything that drifts. A mollusc
+         * crossing the tank at three times speed is not drifting, whatever the roll said, and
+         * sixteen of the drifting rows on the sheet are MIXED.
+         */
+        protected FishMotion nextMode() {
+            FishMotion rolled = spec.motion == FishMotion.MIXED ? rollMixedMode() : spec.motion;
+
+            return build == Build.DRIFTER && rolled == FishMotion.DARTER
+                    ? FishMotion.SMOOTH : rolled;
         }
 
         protected FishMotion rollMixedMode() {
@@ -548,10 +673,19 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
          * has to decide which way round it is.
          */
         public void advance(float amount, float tankW, float tankH) {
-            if (spec.motion == FishMotion.MIXED) {
+            age += amount;
+
+            //the stones, plus half of however tall this one is, so it stands on the bed and not
+            //through it
+            floorMin = MathUtils.clamp((CRAB_BED_PX + lengthPx * aspect * 0.5f)
+                    / Math.max(tankH, 1f), 0.05f, 0.5f);
+            floorMax = floorMin + CRAB_BOB;
+
+            //a crab has nowhere else to be, so the mode churn has nothing to say to it
+            if (spec.motion == FishMotion.MIXED && build != Build.CRAWLER) {
                 modeLeft -= amount;
                 if (modeLeft <= 0f) {
-                    mode = rollMixedMode();
+                    mode = nextMode();
                     modeLeft = MathUtils.getRandomNumberInRange(6f, 12f);
                 }
             }
@@ -563,31 +697,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 pause -= amount;
                 vel.scale(Math.max(0f, 1f - amount * 3f));
             } else if (reachedTarget(tankW, tankH)) {
-                switch (mode) {
-                    case DARTER:
-                        if (darting) {
-                            darting = false;
-                            pause = MathUtils.getRandomNumberInRange(1.5f, 4.5f) / restless;
-                        } else {
-                            darting = true;
-                            pickTarget(0.1f, 0.9f);
-                        }
-                        break;
-                    case SINKER:
-                        pause = MathUtils.getRandomNumberInRange(0.5f, 2f) / restless;
-                        pickTarget(0.05f, 0.4f);
-                        break;
-                    case FLOATER:
-                        pause = MathUtils.getRandomNumberInRange(0.5f, 2f) / restless;
-                        pickTarget(0.6f, 0.95f);
-                        break;
-                    default:
-                        pause = MathUtils.getRandomNumberInRange(0.2f, 1.5f) / restless;
-                        pickTarget(0.1f, 0.9f);
-                        break;
-                }
+                pickNext(restless);
             } else {
-                float mult = mode == FishMotion.DARTER && darting ? 3.2f : 1f;
+                float mult = build == Build.CRAWLER ? CRAB_SPEED
+                        : mode == FishMotion.DARTER && darting ? 3.2f : 1f;
 
                 //steered in pixels at a flat pixels-a-second, then handed back as fractions
                 Vector2f desired = new Vector2f((target.x - loc.x) * tankW,
@@ -604,8 +717,11 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 vel.y += (desired.y - vel.y) * ease;
             }
 
+            boolean floored = build == Build.CRAWLER;
+
             loc.x = MathUtils.clamp(loc.x + vel.x * amount, 0.04f, 0.96f);
-            loc.y = MathUtils.clamp(loc.y + vel.y * amount, 0.06f, 0.94f);
+            loc.y = MathUtils.clamp(loc.y + vel.y * amount,
+                    floored ? floorMin : 0.06f, floored ? floorMax : 0.94f);
 
             //face the way it is actually going on the glass, by the shortest turn, never snapping
             if (vel.lengthSquared() > 1e-8f) {
@@ -616,6 +732,83 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
                 float turn = Math.min(Math.abs(diff), TURN_RATE * amount);
                 heading = Misc.normalizeAngle(heading + turn * sign);
+            }
+
+            advanceBearing(amount, speed / Math.max(tankW, 1f));
+        }
+
+        /** Where to go next, which is the species sheet's question everywhere except the floor. */
+        protected void pickNext(float restless) {
+            if (build == Build.CRAWLER) {
+                //no depth to choose and no far side to make for: a dash along the stones, then a
+                //stop, which is the entire behavioural repertoire of a crab
+                pause = MathUtils.getRandomNumberInRange(0.4f, 2.2f) / restless;
+
+                float dash = MathUtils.getRandomNumberInRange(CRAB_DASH_MIN, CRAB_DASH_MAX)
+                        * (Math.random() < 0.5 ? -1f : 1f);
+
+                target.set(MathUtils.clamp(loc.x + dash, 0.08f, 0.92f),
+                        MathUtils.getRandomNumberInRange(floorMin, floorMax));
+                return;
+            }
+
+            switch (mode) {
+                case DARTER:
+                    if (darting) {
+                        darting = false;
+                        pause = MathUtils.getRandomNumberInRange(1.5f, 4.5f) / restless;
+                    } else {
+                        darting = true;
+                        pickTarget(0.1f, 0.9f);
+                    }
+                    break;
+                case SINKER:
+                    pause = MathUtils.getRandomNumberInRange(0.5f, 2f) / restless;
+                    pickTarget(0.05f, 0.4f);
+                    break;
+                case FLOATER:
+                    pause = MathUtils.getRandomNumberInRange(0.5f, 2f) / restless;
+                    pickTarget(0.6f, 0.95f);
+                    break;
+                default:
+                    pause = MathUtils.getRandomNumberInRange(0.2f, 1.5f) / restless;
+                    pickTarget(0.1f, 0.9f);
+                    break;
+            }
+        }
+
+        /**
+         * Which way up the body is drawn, and - for everything that turns - which way round.
+         * <p>
+         * A swimmer's is the heading's own elevation with the horizontal component taken as
+         * positive, bounded to {@link #MAX_PITCH}: a specimen climbing dead vertically reads as a
+         * steep climb rather than as a mast, and the side it is on is still decided by the
+         * heading, so the turn is a come-about at a slant rather than a loop over the top.
+         *
+         * @param speed the specimen's own cruise, in tank fractions a second, for the rock
+         */
+        protected void advanceBearing(float amount, float speed) {
+            switch (build) {
+                case DRIFTER:
+                    //never turns and never aims: a slow list either way, on its own clock, while
+                    //it goes wherever the sheet was sending it. advanceTurnover is deliberately
+                    //not called - the side it started on is the side it keeps
+                    pitch = DRIFT_TILT * (float) Math.sin(age * DRIFT_TILT_RATE + wavePhase);
+                    return;
+
+                case CRAWLER:
+                    //flat on its legs, with the shell rocking while the legs are working
+                    pitch = CRAB_ROCK * (float) Math.sin(age * 9f + wavePhase)
+                            * Math.min(1f, vel.length() / Math.max(speed, 1e-5f));
+                    break;
+
+                default:
+                    double radians = Math.toRadians(heading);
+
+                    pitch = MathUtils.clamp((float) Math.toDegrees(Math.atan2(
+                            Math.sin(radians), Math.abs(Math.cos(radians)))),
+                            -MAX_PITCH, MAX_PITCH);
+                    break;
             }
 
             advanceTurnover(amount);
@@ -655,7 +848,9 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
          * is mapped onto that axis from its own {@link FishSpec#spriteDirection}, and a fish
          * heading anywhere leftish is turned over rather than rotated onto its back - the length
          * scales through zero and out the far side, which is a fish coming about rather than a
-         * sprite changing its mind. A travelling wave walks head to tail - light at the jaw, loose
+         * sprite changing its mind. The angle it is drawn at is {@link #pitch} and not the
+         * heading, so nothing ever rotates up through the vertical to get from one side to the
+         * other. A travelling wave walks head to tail - light at the jaw, loose
          * at the fin - and the whole body pulses a couple of percent, which is the breathing.
          */
         public void render(float tankX, float tankY, float tankW, float tankH,
@@ -675,11 +870,13 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             float breathe = 1f + 0.025f * (float) Math.sin(time * 1.7f + wavePhase);
             float breatheAcross = 1f + 0.035f * (float) Math.sin(time * 1.7f + wavePhase + 1.1f);
 
-            //the body lies along the heading and is scaled along itself by the turnover, so the
-            //head stays pointed where the fish is going the whole way round; the sign only decides
-            //which end of the sprite the head is, and it changes at the instant the fish is
-            //edge-on and has no width for the change to show in
-            float renderAngle = turnover < 0f ? heading + 180f : heading;
+            //the body lies along the bounded pitch rather than along the raw heading, and is
+            //scaled along itself by the turnover, which is what puts the head at the right end.
+            //The angle is mirrored on the far side because the scale runs before the rotation, so
+            //by the time the body is turned it has already been swung the half-circle - and it is
+            //ridden by the turnover rather than switched at its sign, so the one frame where the
+            //body has no length has no jump in it either
+            float renderAngle = pitch * turnover;
 
             GL11.glPushMatrix();
             GL11.glTranslatef(cx, cy, 0f);

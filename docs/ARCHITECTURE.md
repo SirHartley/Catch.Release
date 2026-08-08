@@ -299,8 +299,8 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
 | `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
-| `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing |
-| `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed |
+| `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing. Mounts as soon as the docked core UI is anything short of fully covering, rather than waiting for its fader to finish, so the tank comes back with the menu |
+| `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed. How one *carries* itself is its `Build`, off the crab/mollusc/fish tags rather than off its motion: fish slant up to `MAX_PITCH` and no further, molluscs and oddments never turn and only list, crabs live on the stones. The drawn angle is the bounded pitch, never the raw heading, so nothing rotates up through the vertical to come about |
 
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
