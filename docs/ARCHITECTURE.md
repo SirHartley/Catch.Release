@@ -394,7 +394,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
-| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts every `FishAsker` in the log too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
+| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which only the outfitter asks; `isWanted` counts every `FishAsker` in the log too, which is what the dot means on every other screen, and is cached because it is asked per cell per frame |
 | `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |

@@ -522,8 +522,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
             }
 
-            //the shopping-list dot at the row's right end, centred on the row's own midline
-            if (catchrelease.campaign.fish.shop.ShopMarks.isMarked(spec)) {
+            //the wanted dot at the row's right end, centred on the row's own midline - asked of
+            //everything that wants a fish, errands included, not the shopping list alone
+            if (catchrelease.campaign.fish.shop.ShopMarks.isWanted(spec)) {
                 catchrelease.campaign.fish.shop.ShopMarks.drawDot(
                         x + w - 8f, y + h * 0.5f,
                         catchrelease.campaign.fish.shop.ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
