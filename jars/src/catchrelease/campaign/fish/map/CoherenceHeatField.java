@@ -36,16 +36,20 @@ public class CoherenceHeatField {
     public static final float SHOW_FLOOR = 0.08f;
 
     /**
-     * The wash at its very worst, and how the climb to it is shaped.
+     * The ceiling on this layer, and the shape of the climb to it.
      * <p>
-     * The exponent is the important one and it used to be 0.7, which is a curve that <i>front
-     * loads</i>: a tenth of the way up the scale it was already a fifth of the way up the alpha,
-     * and a third of the way up it was nearly half. So most of the sector arrived at once, at
-     * something close to full strength, and the range between "mildly thin" and "barely holding"
-     * had almost nothing left to say. Above one it does the opposite - mild thinness is a hint you
-     * have to look for, and the colour is earned by places that deserve it.
+     * {@code ALPHA_CAP} is the only alpha number here and nothing on the layer ever exceeds it -
+     * the worst water in the sector paints at exactly this and everywhere else paints at less, so
+     * turning it down turns the whole overlay down and nothing else has to be touched.
+     * <p>
+     * {@code HEAT_EASE} shapes what "less" means. It was 0.7, and an exponent under one <i>front
+     * loads</i>: a tenth of the way up the scale was already a fifth of the way up the alpha, a
+     * third of the way up was nearly half. So most of the sector arrived at once at close to full
+     * strength and the range between "mildly thin" and "barely holding" had nothing left to say.
+     * Above one it does the opposite - mild thinness is a hint you have to look for, and the colour
+     * is earned.
      */
-    public static final float MAX_ALPHA = 0.22f;
+    public static final float ALPHA_CAP = 0.14f;
     public static final float HEAT_EASE = 1.8f;
 
     /** The pond glow's purple for thin water, leaning hot where it is barely holding. */
@@ -142,7 +146,7 @@ public class CoherenceHeatField {
         float heat = MathUtils.clamp((value - SHOW_FLOOR) / (1f - SHOW_FLOOR), 0f, 1f);
 
         //eased so the bottom of the range is faint and the top of it is earned - see HEAT_EASE
-        float alpha = MAX_ALPHA * (float) Math.pow(heat, HEAT_EASE) * alphaMult;
+        float alpha = ALPHA_CAP * (float) Math.pow(heat, HEAT_EASE) * alphaMult;
 
         float r = (THIN.getRed() + (WORST.getRed() - THIN.getRed()) * heat) / 255f;
         float g = (THIN.getGreen() + (WORST.getGreen() - THIN.getGreen()) * heat) / 255f;
