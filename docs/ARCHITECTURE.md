@@ -434,7 +434,7 @@ The sector-map fish filter.
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
 | `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges, the close-route label, and the coherence heat map under it all |
-| `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget. Bare points, not systems, so it needs `openSpaceReading` to answer with the whole index; `HEAT_EASE` above 1 keeps the bottom of the range faint |
+| `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget. Bare points, not systems, so it needs `openSpaceReading` to answer with the whole index; `HEAT_EASE` above 1 keeps the bottom of the range faint; bounds are the sector rectangle exactly, because past it `getAbyssalDepth` measures how far off the map you are rather than the water |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
 | `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR` |
