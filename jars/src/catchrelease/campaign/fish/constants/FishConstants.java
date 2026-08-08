@@ -462,23 +462,26 @@ public class FishConstants {
     /**
      * The same sources measured the other way: world units, inside the system they stand in.
      * <p>
-     * The light-year figures above answer "how bad is the water in this system", which is one
-     * number for the whole system and is what a pond, a catch and a habitat are judged on. They
-     * cannot answer "how near is the player standing to the thing right now", because at that scale
-     * every object in a system is at the same light-year coordinates. That is the question the
-     * overlay asks, every frame, and these are what it asks it with - see
-     * {@code Aberration.localPull}.
+     * The light-year figures above answer "how bad is the water in this system", which is one number
+     * for the whole system and is what a pond, a catch and a habitat are judged on. They cannot
+     * answer "how near is the player standing to the thing right now", because at that scale every
+     * object in a system shares the system's coordinates. That is the question the overlay asks,
+     * every frame - see {@code Aberration.localPull}.
      * <p>
-     * Deliberately not derived from the light-year reaches. Twelve light-years of hypershunt
-     * converts to six times the width of a large system, which would make the answer 1 everywhere
-     * and the whole question pointless. These are sized so that crossing a system is something the
-     * screen notices.
+     * Derived, not tabulated. There is one reach per source and it lives above; this is the same
+     * ordering read at the scale of a system rather than of the sector - a flat base every source
+     * gets for being present at all, and a slope that keeps a hypershunt reaching further than a
+     * dormant gate. A second column of hand-picked world-unit reaches would be five more numbers to
+     * keep in step with the five that already exist, and the last time this was written that way
+     * four of the five were the light-year figure retyped and the fifth was a fudge.
+     * <p>
+     * The scale is deliberately tight - a couple of thousand units to five and a half - because the
+     * honest conversion is not useful here: {@code unitsPerLightYear} is 2000, so a hypershunt's
+     * twelve light-years is 24000 units and reads flat across any system it is in. True, and no use
+     * to a screen effect whose whole job is to notice the player crossing a system.
      */
-    public static final float ABERRATION_LOCAL_STAR = 14000f;
-    public static final float ABERRATION_LOCAL_HYPERSHUNT = 11000f;
-    public static final float ABERRATION_LOCAL_GATE = 5000f;
-    public static final float ABERRATION_LOCAL_GATE_ACTIVE = 13000f;
-    public static final float ABERRATION_LOCAL_ENGINE = 4000f;
+    public static final float ABERRATION_LOCAL_BASE = 2000f;
+    public static final float ABERRATION_LOCAL_PER_LY = 300f;
 
     /**
      * How much of a system's reading is felt anywhere in it, with the rest earned by standing near

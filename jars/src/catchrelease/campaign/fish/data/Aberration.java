@@ -188,7 +188,7 @@ public class Aberration {
         float nearest = 0f;
 
         for (AberrationSource source : AberrationSource.values()) {
-            if (source.localReach <= 0f) continue;
+            if (!source.isLocal()) continue;
 
             for (SectorEntityToken entity : localSources(system, source)) {
                 float reach = source.localReach(entity);

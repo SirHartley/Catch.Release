@@ -22,10 +22,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
  * <b>Foreign tags cost nothing.</b> A tag no mod has registered matches no entity, so every line
  * below works unchanged whether or not the mod that would fill it is installed.
  * <p>
- * <b>Two reaches.</b> The light-year reach is the one that matters between systems, and is what the
- * sector map and every steady reading are built from. The local reach is world units, for the one
- * question the light-year figure cannot answer: how near the player is standing to the thing, right
- * now, inside its own system. A source with no local reach is one there is no "standing near" for.
+ * <b>One reach, read at two scales.</b> The light-year figure is what matters between systems, and
+ * is what the sector map and every steady reading are built from. {@link #localReach} is the same
+ * figure in world units, for the one question it cannot answer: how near the player is standing to
+ * the thing, right now, inside its own system. Derived rather than tabulated beside it - a second
+ * column of hand-picked world-unit reaches is five more numbers to keep in step with the five that
+ * already exist, and {@link #isLocal} rather than a zero in that column is what says a source is
+ * one there is any such thing as standing near.
  */
 public enum AberrationSource {
 
@@ -34,7 +37,7 @@ public enum AberrationSource {
      * <p>
      * A depth field over hyperspace rather than an object: read at a point, with nothing to be near.
      */
-    ABYSS("the abyss", Find.DEPTH, 0f, FishConstants.ABERRATION_ABYSS_WEIGHT, 0f, false),
+    ABYSS("the abyss", Find.DEPTH, 0f, FishConstants.ABERRATION_ABYSS_WEIGHT, false),
 
     /**
      * A collapsed star bends what is around it, so what comes out of the water near one is bent too.
@@ -43,12 +46,12 @@ public enum AberrationSource {
      * the route planner, since a system's own star is drawn on the sector map from the first day.
      */
     BLACK_HOLE("a collapsed star", Find.STAR, FishConstants.ABERRATION_BLACKHOLE_LY,
-            FishConstants.ABERRATION_BLACKHOLE_WEIGHT, FishConstants.ABERRATION_LOCAL_STAR, false),
+            FishConstants.ABERRATION_BLACKHOLE_WEIGHT, false),
 
     /** Power drawn across a region, which reaches further than a black hole and pulls less hard. */
     HYPERSHUNT("a hypershunt", Find.TAG, FishConstants.ABERRATION_HYPERSHUNT_LY,
-            FishConstants.ABERRATION_HYPERSHUNT_WEIGHT, FishConstants.ABERRATION_LOCAL_HYPERSHUNT,
-            true, Tags.CORONAL_TAP, "aotd_hypershunt_receiver"),
+            FishConstants.ABERRATION_HYPERSHUNT_WEIGHT, true,
+            Tags.CORONAL_TAP, "aotd_hypershunt_receiver"),
 
     /**
      * The other source never hidden: a stream is visible the moment it runs, and it is the only
@@ -56,7 +59,7 @@ public enum AberrationSource {
      * own anchors rather than off any system.
      */
     SLIPSTREAM("a slipstream", Find.STREAM, FishConstants.ABERRATION_SLIPSTREAM_LY,
-            FishConstants.ABERRATION_SLIPSTREAM_WEIGHT, 0f, false),
+            FishConstants.ABERRATION_SLIPSTREAM_WEIGHT, false),
 
     /**
      * The doors, which are two sources wearing one object.
@@ -67,7 +70,7 @@ public enum AberrationSource {
      * row, because the nearest gate is not reliably the worst one.
      */
     GATE("a gate", Find.TAG, FishConstants.ABERRATION_GATE_LY, FishConstants.ABERRATION_GATE_WEIGHT,
-            FishConstants.ABERRATION_LOCAL_GATE, true, Tags.GATE, "bifrost") {
+            true, Tags.GATE, "bifrost") {
 
         @Override
         public float reachLY(SectorEntityToken at) {
@@ -79,10 +82,8 @@ public enum AberrationSource {
             return isLit(at) ? FishConstants.ABERRATION_GATE_ACTIVE_WEIGHT : weight;
         }
 
-        @Override
-        public float localReach(SectorEntityToken at) {
-            return isLit(at) ? FishConstants.ABERRATION_LOCAL_GATE_ACTIVE : localReach;
-        }
+        //no local override: the in-system reach is derived from the light-year one, so a gate
+        //lighting up widens both at once and there is nothing here to keep in step
     },
 
     /**
@@ -93,8 +94,7 @@ public enum AberrationSource {
      * one, which is why this row has no vanilla tag.
      */
     ENGINE("something built too large", Find.TAG, FishConstants.ABERRATION_ENGINE_LY,
-            FishConstants.ABERRATION_ENGINE_WEIGHT, FishConstants.ABERRATION_LOCAL_ENGINE,
-            true, null, "aotd_pluto_station");
+            FishConstants.ABERRATION_ENGINE_WEIGHT, true, null, "aotd_pluto_station");
 
     /** How instances of a source are found, which is the part that is not the same for all of them. */
     public enum Find {
@@ -122,9 +122,6 @@ public enum AberrationSource {
     /** How hard it pulls at zero distance, before falloff. */
     public final float weight;
 
-    /** Inside its own system, in world units. Zero for a source there is no standing near. */
-    public final float localReach;
-
     /**
      * Whether the player has to have found it.
      * <p>
@@ -137,14 +134,13 @@ public enum AberrationSource {
     /** Vanilla's tag, then anybody else's. Empty for the rows that are not found by tag at all. */
     public final String[] tags;
 
-    AberrationSource(String label, Find find, float reachLY, float weight, float localReach,
-                     boolean survey, String... tags) {
+    AberrationSource(String label, Find find, float reachLY, float weight, boolean survey,
+                     String... tags) {
 
         this.label = label;
         this.find = find;
         this.reachLY = reachLY;
         this.weight = weight;
-        this.localReach = localReach;
         this.survey = survey;
 
         //nulls are allowed in the list so a row can say "no vanilla tag" without a second
@@ -171,8 +167,33 @@ public enum AberrationSource {
         return weight;
     }
 
+    /**
+     * The same reach read at the scale of a system rather than of the sector, in world units.
+     * <p>
+     * Derived from {@link #reachLY(SectorEntityToken)} and never tabulated beside it - one reach per
+     * source, expressed twice by arithmetic instead of twice by hand. A gate lighting up widens both
+     * in the same breath, which is the whole reason there is no override for this on {@link #GATE}.
+     * <p>
+     * Not the honest conversion, which would be {@code Misc.getUnitsPerLightYear()} and is no use:
+     * at 2000 units to the light-year a hypershunt's twelve reach 24000, flat across any system it
+     * stands in. True, and nothing for a screen effect to work with. The base is what a source is
+     * worth for being present at all and the slope is what keeps the ordering - see
+     * {@link FishConstants#ABERRATION_LOCAL_BASE}.
+     */
     public float localReach(SectorEntityToken at) {
-        return localReach;
+        return FishConstants.ABERRATION_LOCAL_BASE
+                + FishConstants.ABERRATION_LOCAL_PER_LY * reachLY(at);
+    }
+
+    /**
+     * Whether this is a source there is any such thing as standing near.
+     * <p>
+     * The two that are not are the two that were never objects in a system: the abyss is a depth
+     * field over hyperspace and a slipstream is hyperspace terrain. Asked instead of testing the
+     * reach for zero, since the reach is derived now and every row has one.
+     */
+    public boolean isLocal() {
+        return find == Find.TAG || find == Find.STAR;
     }
 
     /**
