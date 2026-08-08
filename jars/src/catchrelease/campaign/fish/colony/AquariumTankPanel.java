@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -35,16 +36,21 @@ import java.util.List;
  * {@link FishSpec#spriteDirection}, and a fish swimming the "wrong" way turns over through
  * edge-on rather than rotating onto its back.
  * <p>
- * Size on screen scales with the individual catch's size stat, so the tank shows off exactly
- * what the log would brag about.
+ * Size on screen is the specimen's real length read against the whole table's range, so a waller
+ * dwarfs a pipechovy and a good one of either is visibly the better fish - the tank shows off
+ * exactly what the log would brag about.
  */
 public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     public static final float WALL_PAD = 6f;
 
-    /** On-screen fish length in px, walked by the catch's size-fraction. */
-    public static final float FISH_LENGTH_MIN = 26f;
-    public static final float FISH_LENGTH_MAX = 54f;
+    /**
+     * On-screen fish length in px, at the two ends of everything the table can hold - the
+     * smallest larva at one end and the largest waller at the other, with every specimen of
+     * every species between them.
+     */
+    public static final float FISH_LENGTH_MIN = 12f;
+    public static final float FISH_LENGTH_MAX = 76f;
 
     public static final int WARP_SEGMENTS = 10;
 
@@ -414,6 +420,44 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 Math.round(y + (h + line.getHeight()) * 0.5f));
     }
 
+    /**
+     * How long a specimen is on the glass, in px, from how long it actually is in metres.
+     * <p>
+     * The tank used to walk this off the catch's size-fraction, which is where the specimen sits
+     * <i>within its own species</i> - so a waller and a pipechovy both came out the same middling
+     * forty-odd pixels, and the size the fish was graded and paid for never showed. Worse, the
+     * fraction is the average of two rolls that are each already bunched towards the middle, so
+     * even within one species the whole stock landed within a few pixels of each other.
+     * <p>
+     * Against the real length instead, and logarithmically, because the table spans nearly two
+     * hundred to one and a linear reading would put every fish in the sector under a pixel to
+     * make room for the waller. The ends are the table's own, so the biggest thing in the water
+     * is the biggest thing on the glass no matter what a species file adds later.
+     */
+    protected static float lengthOnGlass(FishCatch data) {
+        float span = FISH_LENGTH_MAX - FISH_LENGTH_MIN;
+
+        float shortest = Float.MAX_VALUE;
+        float longest = 0f;
+
+        for (FishSpec other : FishSpecLoader.getAllFishSpecs()) {
+            if (other.lengthMin > 0f) shortest = Math.min(shortest, other.lengthMin);
+            longest = Math.max(longest, other.lengthMax);
+        }
+
+        //a table of one length, or none at all: the species scale says nothing, so fall back on
+        //where the specimen sits in its own range rather than drawing everything identically
+        if (shortest == Float.MAX_VALUE || longest <= shortest) {
+            return FISH_LENGTH_MIN + span * data.getSizeFraction();
+        }
+
+        float floor = (float) Math.log(shortest);
+        float reach = (float) Math.log(longest) - floor;
+        float here = (float) Math.log(Math.max(data.length, shortest)) - floor;
+
+        return FISH_LENGTH_MIN + span * MathUtils.clamp(here / reach, 0f, 1f);
+    }
+
     protected static void setColor(Color color, float alpha) {
         GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f,
                 color.getBlue() / 255f, Math.max(0f, Math.min(1f, alpha)));
@@ -463,8 +507,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             this.data = data;
             this.spec = data.getSpec();
 
-            lengthPx = FISH_LENGTH_MIN
-                    + (FISH_LENGTH_MAX - FISH_LENGTH_MIN) * data.getSizeFraction();
+            lengthPx = lengthOnGlass(data);
 
             SpriteAPI art = SpriteLoader.loadSprite(spec.icon);
             sprite = art;
