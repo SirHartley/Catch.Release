@@ -129,6 +129,9 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     protected PositionAPI pos;
     protected float time = 0f;
 
+    /** Set on a pane standing in for the real tank - see {@link #setPreview}. */
+    protected Backdrop preview;
+
     /** 0 on the frame it is mounted, 1 once it has arrived. */
     protected float shown = 0f;
 
@@ -165,9 +168,21 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
      * a scaled-up interface.
      */
     protected String backdropPath() {
-        Backdrop hanging = Backdrops.getHanging(conservatory);
+        Backdrop hanging = preview != null ? preview : Backdrops.getHanging(conservatory);
 
         return hanging == null || Backdrops.isBare(hanging) ? null : hanging.sprite;
+    }
+
+    /**
+     * Shows a scene this conservatory is not hanging, for a pane that is about the scene rather
+     * than about the colony - the office's picker, and Crablobab's coat.
+     * <p>
+     * A preview is the tank itself and not a picture of one: same water, same caustics, same light
+     * and the same crop, because the whole question being asked is what it will look like. It also
+     * means there is one drawing of an aquarium in the mod rather than two that can drift.
+     */
+    public void setPreview(Backdrop backdrop) {
+        preview = backdrop;
     }
 
 
@@ -189,7 +204,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     /** Rebuilds the sim when the stock changes under it - the buttons, the office, anything. */
     protected void syncStock() {
-        List<String> stock = conservatory.getAquariumFish();
+        //null on a preview pane opened somewhere there is no colony at all - the man in the coat
+        //will sell you a scene long before you have anywhere to hang it
+        List<String> stock = conservatory == null
+                ? java.util.Collections.emptyList() : conservatory.getAquariumFish();
 
         int stamp = stock.hashCode();
         if (stamp == stockStamp) return;
@@ -293,7 +311,8 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
         drawGlass(x, y, w, h, alphaMult);
 
-        if (fish.isEmpty()) drawEmptyLine(x, y, w, h, alphaMult);
+        //a preview is about the scene, and an empty tank is not news about a scene
+        if (fish.isEmpty() && preview == null) drawEmptyLine(x, y, w, h, alphaMult);
     }
 
     /** The scene behind the water, when the art exists; the tint over it keeps it submerged. */

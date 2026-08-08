@@ -302,7 +302,7 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 |---|---|
 | `BreachConservatory.java` | The structure itself; also holds the aquarium's stock, its on/off switch and which backdrop this tank hangs |
 | `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
-| `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
+| `AquariumManageDialog.java` | The office: stock the tank, empty it, change the scene behind the water, or shut the display off. The scenery rack previews on hover, and what it shows is an actual `AquariumTankPanel` rather than a picture of the art |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing. Mounts as soon as the docked core UI is anything short of fully covering, rather than waiting for its fader to finish, so the tank comes back with the menu |
 | `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed. How one *carries* itself is its `Build`, off the crab/mollusc/fish tags rather than off its motion: fish slant up to `MAX_PITCH` and no further, molluscs and oddments never turn and only list, crabs live on the stones. The drawn angle is the bounded pitch, never the raw heading, so nothing rotates up through the vertical to come about |
