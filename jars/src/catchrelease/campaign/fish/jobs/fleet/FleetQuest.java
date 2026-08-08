@@ -446,9 +446,10 @@ public class FleetQuest extends FishJob {
         info.addPara("They are not going anywhere. Whatever else happens, they will be where you"
                 + " left them when you have it.", pad);
 
+        //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {
-            info.addPara("They will not wait forever, though - %s left.", pad,
-                    Misc.getHighlightColor(), Math.round(getDaysLeft()) + " days");
+            addDays(info, "They will not wait forever, though - ", "left.", getDaysLeft(),
+                    getBulletColorForMode(ListInfoMode.IN_DESC), pad);
         }
     }
 
