@@ -45,6 +45,7 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
     protected boolean loaded = false;
     protected boolean usable = false;
+    protected boolean validated = false;
 
     protected int program = 0;
     protected int uLevel = -1;
@@ -121,11 +122,19 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, ShaderLib.getScreenTexture());
 
-        //some drivers only report a bad program state at this point
-        GL20.glValidateProgram(program);
-        if (GL20.glGetProgrami(program, GL20.GL_VALIDATE_STATUS) == GL11.GL_FALSE) {
-            ShaderLib.exitDraw();
-            return;
+        //some drivers only report a bad program state here, with textures bound - but asked
+        //once, on the first frame, and believed after that: glGetProgrami is a synchronous
+        //readback that stalls the whole GL pipeline, and asking it every frame is what took
+        //the campaign from three digits of fps to one around a lit lamp
+        if (!validated) {
+            validated = true;
+
+            GL20.glValidateProgram(program);
+            if (GL20.glGetProgrami(program, GL20.GL_VALIDATE_STATUS) == GL11.GL_FALSE) {
+                usable = false;
+                ShaderLib.exitDraw();
+                return;
+            }
         }
 
         GL11.glDisable(GL11.GL_BLEND);

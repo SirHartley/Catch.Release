@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
@@ -28,8 +29,10 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Work the trade puts out: one named specimen, from one named place, and it will be there.
@@ -492,7 +495,7 @@ public class FishermanQuest {
         }
 
         @Override
-        public String getSmallDescriptionTitle() {
+        public String getName() {
             FishSpec spec = getSpec();
 
             if (quest.landed) return "Chart request: take it back";
@@ -501,8 +504,41 @@ public class FishermanQuest {
         }
 
         @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            info.addPara(getSmallDescriptionTitle(), getTitleColor(mode), 0f);
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        /**
+         * The facts under the title, the same on the list row and the open panel: the quarry,
+         * the water, what the mark is, and the pay. No day count - the quest does not expire.
+         */
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color h = Misc.getHighlightColor();
+            Color tc = getBulletColorForMode(mode);
+
+            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+
+            FishSpec spec = getSpec();
+
+            info.addPara("Wanted: %s", initPad, tc, h,
+                    spec == null ? "the named species" : spec.getDisplayName());
+            info.addPara("In %s", 0f, tc, h, quest.systemName);
+            info.addPara(quest.atPond ? "The mark is a rupture"
+                    : "The mark is open water - lamp work", tc, 0f);
+            info.addPara("%s and one more chart on the shelf", 0f, tc, h,
+                    Misc.getDGSCredits(quest.credits));
+
+            unindent(info);
         }
 
         @Override
@@ -510,8 +546,14 @@ public class FishermanQuest {
             FishSpec spec = getSpec();
             String name = spec == null ? "the named species" : spec.getDisplayName();
 
+            //the specimen itself at the top, where vanilla's missions put the poster's crest -
+            //still what the note is about once it is aboard, so it stays on both branches
+            info.addImage(spec == null || spec.icon == null || spec.icon.isEmpty()
+                    ? FishConstants.ITEM_ICON_FALLBACK : spec.icon, width, 80f, 10f);
+
             if (quest.landed) {
-                info.addPara("The specimen is in the hold. Take it to a fishing boat.", 10f);
+                info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                        Misc.getHighlightColor(), Misc.ucFirst(name));
             } else {
                 info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
                                 + " in there until somebody lands it.", 10f,
@@ -528,6 +570,8 @@ public class FishermanQuest {
 
             info.addPara("Pays %s and one more chart on the shelf, permanently.", 10f,
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
+
+            addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override
@@ -536,9 +580,22 @@ public class FishermanQuest {
         }
 
         @Override
-        public java.util.Set<String> getIntelTags(SectorMapAPI map) {
-            java.util.Set<String> tags = new java.util.LinkedHashSet<>();
+        public String getSortString() {
+            return getSortStringNewestFirst();
+        }
+
+        /** The Fisherman's colours - the request is his, whichever boat happens to carry it. */
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getFaction(FishermanConstants.FACTION);
+        }
+
+        @Override
+        public Set<String> getIntelTags(SectorMapAPI map) {
+            Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
+            tags.add(Tags.INTEL_MISSIONS);
+            tags.add(FishermanConstants.FACTION);
 
             return tags;
         }

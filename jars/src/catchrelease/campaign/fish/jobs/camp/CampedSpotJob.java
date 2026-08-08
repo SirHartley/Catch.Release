@@ -246,9 +246,10 @@ public abstract class CampedSpotJob extends FishJob {
         info.addPara("They want %s out of that rupture, and are offering %s.", pad,
                 Misc.getHighlightColor(), describeAsks(), describeRewards());
 
+        //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {
-            info.addPara("%s left before they give the spot up for good.", pad,
-                    Misc.getHighlightColor(), Math.round(getDaysLeft()) + " days");
+            addDays(info, "left before they give the spot up for good.", getDaysLeft(),
+                    getBulletColorForMode(ListInfoMode.IN_DESC), pad);
         }
     }
 

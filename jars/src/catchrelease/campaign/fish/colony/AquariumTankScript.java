@@ -6,22 +6,17 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.ui.Alignment;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.CutStyle;
 import com.fs.starfarer.api.ui.PositionAPI;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
-import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 
 /**
  * Hangs the conservatory's aquarium on the colony's main menu: the tank panel sits in the right
- * sidebar directly below the planet's interaction image, with the add/take buttons under the
- * glass.
+ * sidebar directly below the planet's interaction image. Just the glass - stocking and the
+ * display switch live in the aquarium office, off the industry's own click-menu.
  * <p>
  * The crawl is by capability, like every screen we stand on: the encounter dialog comes off
  * {@code CampaignState}, and the planet visual inside it is the child with {@code getPlanet}.
@@ -36,8 +31,7 @@ public class AquariumTankScript implements EveryFrameScript {
 
     public static final float GAP = 8f;
     public static final float TANK_HEIGHT = 170f;
-    public static final float PANEL_HEIGHT =
-            TANK_HEIGHT + AquariumTankPanel.BUTTON_STRIP + AquariumTankPanel.WALL_PAD * 2f;
+    public static final float PANEL_HEIGHT = TANK_HEIGHT + AquariumTankPanel.WALL_PAD * 2f;
 
     /** The dialog the tank currently stands in. A new dialog means a fresh mount. */
     protected Object dialog;
@@ -114,11 +108,25 @@ public class AquariumTankScript implements EveryFrameScript {
         return conservatory;
     }
 
-    /** Whether the docked core UI (trade, refit, the colony screen) is up over the menu. */
+    /**
+     * Whether the docked core UI (trade, refit, the colony screen) is up over the menu.
+     * <p>
+     * Not a null check: the dialog keeps the core UI object for its whole life once one has
+     * been opened - dismissal only fades it out, nothing nulls the field - so {@code getCoreUI}
+     * answering is no proof anything is showing. The fader is what actually knows, and it is
+     * why the tank used to vanish for good after any colony-screen visit: the check read the
+     * husk as coverage and never mounted again until re-docking rebuilt the dialog.
+     */
     protected boolean isCoreCovering(Object dialog) {
         Object core = ReflectionUtils.invokeIfExists(dialog, "getCoreUI");
+        if (core == null) return false;
 
-        return core != null;
+        Object fader = ReflectionUtils.invokeIfExists(core, "getFader");
+        if (fader == null) return true;
+
+        Object fadedOut = ReflectionUtils.invokeIfExists(fader, "isFadedOut");
+
+        return !(fadedOut instanceof Boolean) || !((Boolean) fadedOut);
     }
 
     /** The planet's interaction image: the dialog child that knows what planet it is showing. */
@@ -136,7 +144,7 @@ public class AquariumTankScript implements EveryFrameScript {
         return null;
     }
 
-    /** Builds the tank under the planet image, buttons under the glass. */
+    /** Builds the tank under the planet image. Just the glass - stocking is the office's job. */
     protected void mount() {
         UIComponentAPI visual = findPlanetVisual(dialog);
         if (visual == null) return;
@@ -162,35 +170,9 @@ public class AquariumTankScript implements EveryFrameScript {
 
         panel = Global.getSettings().createCustom(width, PANEL_HEIGHT, plugin);
 
-        buildButtons(panel, plugin, width);
-
         ((UIPanelAPI) dialog).addComponent(panel)
                 .setSize(width, PANEL_HEIGHT)
                 .inTL(x, yFromTop);
-    }
-
-    /** The add/take pair, side by side in the strip below the water. */
-    protected void buildButtons(CustomPanelAPI panel, AquariumTankPanel plugin, float width) {
-        float inner = width - AquariumTankPanel.WALL_PAD * 2f;
-        float buttonWidth = (inner - GAP) * 0.5f;
-        float buttonHeight = AquariumTankPanel.BUTTON_STRIP - 8f;
-
-        TooltipMakerAPI element = panel.createUIElement(inner,
-                AquariumTankPanel.BUTTON_STRIP, false);
-
-        plugin.addButtonId = new Object();
-        plugin.removeButtonId = new Object();
-
-        ButtonAPI add = element.addButton("ADD FISH", plugin.addButtonId,
-                Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                Alignment.MID, CutStyle.TL_BR, buttonWidth, buttonHeight, 0f);
-
-        ButtonAPI take = element.addButton("TAKE FISH", plugin.removeButtonId,
-                Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
-                Alignment.MID, CutStyle.TL_BR, buttonWidth, buttonHeight, 0f);
-        take.getPosition().rightOfMid(add, GAP);
-
-        panel.addUIElement(element).inBL(AquariumTankPanel.WALL_PAD, 2f);
     }
 
     protected void removePanel() {

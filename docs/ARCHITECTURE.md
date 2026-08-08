@@ -291,7 +291,7 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image |
-| `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
+| `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
@@ -308,11 +308,11 @@ explains how.
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
-| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture and the note turns into "take it back" |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture and the note turns into "take it back". Its `QuestIntel` carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month" |
 | `FishermanConstants.java` | Every number the above read |
 
 ### `dialogue/rules`
@@ -330,7 +330,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, the intel note. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture and re-points the note at the boat |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture and re-points the note at the boat |
 | `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
 | `Castaway.java` | The rating put off a boat for looking, found on a survey |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
@@ -420,7 +420,7 @@ Modules bolted to a rig.
 
 | File | What it does |
 |---|---|
-| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies |
+| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play |
 | `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE` |
 
 ### `campaign/fish/map`

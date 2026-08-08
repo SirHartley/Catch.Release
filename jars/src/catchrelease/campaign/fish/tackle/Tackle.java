@@ -52,6 +52,14 @@ public enum Tackle {
         }
     },
 
+    STASIS_CRADLE("Stasis Cradle", Fit.DRONE,
+            "The drones carry the catch home in a held field rather than a net. What comes aboard is"
+                    + " nearer the shape it had before the water got at it.") {
+        {
+            coherenceBonus = 0.25f;
+        }
+    },
+
     BAITED_RESONATOR("Baited Resonator", Fit.DRONE,
             "Sings to the deeper things. Rarer specimens surface more often.") {
         {
@@ -88,6 +96,14 @@ public enum Tackle {
                     + " have betrayed as a dent rather than exposed outright.") {
         {
             deepStrike = true;
+        }
+    },
+
+    SHORING_HEAD("Shoring Head", Fit.HARPOON,
+            "The barb holds the specimen to its own shape all the way up the line, instead of letting"
+                    + " the trip back finish what the rupture started.") {
+        {
+            coherenceBonus = 0.25f;
         }
     },
 
@@ -145,6 +161,17 @@ public enum Tackle {
     public float treasureChanceMult = 1f;
     public float rarityBias = 1f;
     public float qualityBias = 0f;
+
+    /**
+     * How much steadier a specimen taken on this rig reads, as aberration taken off the water's own
+     * figure - so 0.25 on water at 0.6 lands a specimen that reads 0.35.
+     * <p>
+     * Coherence is the player-facing side of aberration, and this is the only axis that moves it
+     * after the catch is decided rather than by fishing somewhere else. Floored at perfectly
+     * coherent; it cannot make a specimen read better than the fabric allows.
+     */
+    public float coherenceBonus = 0f;
+
     public boolean shipTackle = false;
     public boolean sonar = false;
 

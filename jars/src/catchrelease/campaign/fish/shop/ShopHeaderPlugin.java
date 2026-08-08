@@ -69,9 +69,9 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(x, y, width, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
     }
 
-    /** The name in the header hand the sidebar's sections write in. */
+    /** The name, back in the large hand - a small-caps title read as a section label, not a shop sign. */
     protected void renderTitle(float x, float y, float height, float alphaMult) {
-        LazyFont font = ShopUi.getSmallFont();
+        LazyFont font = ShopUi.getTitleFont();
         if (font == null) return;
 
         if (title == null) {
@@ -79,7 +79,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
             title.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        title.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+        title.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
         title.draw(Math.round(x + 2f), Math.round(y + height * 0.5f + title.getHeight() * 0.5f));
     }
 
