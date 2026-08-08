@@ -66,6 +66,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_MET = "$catchreleaseTargetMet";
     public static final String TARGET_POND = "$catchreleaseTargetPond";
     public static final String TARGET_DEEP = "$catchreleaseTargetDeep";
+
+    /**
+     * Whether there is an errand at all, and whether it has a place attached.
+     * <p>
+     * Both exist so that a row which names the errand can refuse to print rather than print a
+     * sentence with holes in it. The second is not paranoia: the chart rung asks for two specimens
+     * the player has to go and find with the charts, so it deliberately has no system to name, and
+     * a line reading "out of" and then nothing is the shape that bug takes.
+     */
+    public static final String TARGET_SET = "$catchreleaseTargetSet";
+    public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
 
@@ -370,9 +381,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         local.set(TARGET, FishingIntro.describeTarget(), 0);
         local.set(TARGET_MET, FishingIntro.isTargetMet(), 0);
-        local.set(TARGET_WHERE, rung == null ? "" : rung.systemName, 0);
+        local.set(TARGET_WHERE, rung == null || rung.systemName == null ? "" : rung.systemName, 0);
         local.set(TARGET_POND, rung != null && rung.atPond, 0);
         local.set(TARGET_DEEP, rung != null && rung.needsDeepGear, 0);
+        local.set(TARGET_SET, rung != null, 0);
+        local.set(TARGET_PLACED, rung != null && rung.systemName != null, 0);
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);

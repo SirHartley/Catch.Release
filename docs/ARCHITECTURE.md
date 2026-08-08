@@ -191,6 +191,14 @@ capitalise for you and a sentence has to be able to start with one.
 | `$catchreleaseMore` | `handOver` | Whether the job is asking again |
 | Anything else | a job's `setJobTokens` | Per-job names: the dish, the species, the two men in a bar |
 
+**A row cannot print what its own script writes.** `FireAll`/`FireBest` `applyRule` emits the text
+column - tokens replaced - and *then* runs the script, so a row that grants a rung and rolls the next
+errand is printing tokens the roll has not written yet. The introduction's briefings therefore live
+on their own trigger, `CatchReleaseIntroBrief`: the granting row ends its script by firing it, and
+the brief row loads the tokens in its own conditions, by which time the roll has happened. The same
+ordering makes `Highlight` in a script column correct - `SetTextHighlights` calls
+`highlightInLastPara`, which is that row's own text precisely because the text went first.
+
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
 number wins regardless of which family it belongs to. The harpooned-crew greetings therefore

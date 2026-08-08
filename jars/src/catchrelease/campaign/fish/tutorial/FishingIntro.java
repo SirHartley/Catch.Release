@@ -795,6 +795,12 @@ public class FishingIntro {
                     info.addPara("There is a trade working the far edges of the inhabited systems."
                             + " Find one of their boats and hail it.", 10f);
                 }
+            } else if (target.systemName == null) {
+                //the chart rung, which is the one errand with no place in it - the whole lesson is
+                //that the charts say where. A line naming a system it does not have would read
+                //"out of" and then nothing, which is what it did
+                info.addPara("Bring back %s. The charts say where; the planner on the map will"
+                        + " plot it.", 10f, Misc.getHighlightColor(), describeTarget());
             } else {
                 info.addPara("Bring back %s, out of %s.", 10f, Misc.getHighlightColor(),
                         describeTarget(), target.systemName);
