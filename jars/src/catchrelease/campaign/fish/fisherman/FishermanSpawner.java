@@ -193,6 +193,12 @@ public class FishermanSpawner implements EveryFrameScript {
         Vector2f at = MathUtils.getPointOnCircumference(near, distance,
                 MathUtils.getRandomNumberInRange(0f, 360f));
 
+        //every placement of a boat goes through the same gate, even one that cannot currently trip
+        //it - this spawner only works uninhabited systems, where OuterReaches has no band to
+        //enforce and hands the point straight back. Asking anyway is what keeps "a boat is only
+        //ever put where the reaches allow" a rule rather than a coincidence of who calls what
+        at = OuterReaches.place(system, at);
+
         system.addEntity(fleet);
         fleet.setLocation(at.x, at.y);
 
