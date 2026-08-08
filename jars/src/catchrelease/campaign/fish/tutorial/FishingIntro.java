@@ -259,6 +259,19 @@ public class FishingIntro {
          * first cast by landing the wrong animal.
          */
         public boolean anySpecies;
+
+        /**
+         * Whether the hold has answered this, which is a different question from the errand being
+         * over.
+         * <p>
+         * The errand ends at the boat - that is the shape of the whole ladder - but landing the
+         * thing is the moment the player did the part they were asked to do, and until this
+         * existed nothing at all happened at that moment. The mark stayed on the rupture, the note
+         * still read as an errand outstanding, and the only way to find out it had worked was to
+         * fly back and see a new option. Recorded on the target rather than in sector memory
+         * because it is a fact about this errand and should die with it.
+         */
+        public boolean landed;
     }
 
     public static Target getTarget() {
@@ -273,11 +286,71 @@ public class FishingIntro {
             return;
         }
 
+        //the outgoing errand lets go of its water before the incoming one is stored, or the mark
+        //on the old rupture outlives every reference to what put it there
+        letGo(getTarget());
+
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
     }
 
     protected static void clearTarget() {
+        letGo(getTarget());
+
         Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
+    }
+
+    /**
+     * Takes this errand's claim off whatever rupture it was using.
+     * <p>
+     * Every other user of {@link QuestPond} pairs its claim with a release; the introduction only
+     * ever claimed. What that leaves is vanilla's own mission marker - the gold ring and the
+     * exclamation - burned onto a rupture for the rest of the campaign, on every rupture the
+     * ladder ever used, pointing at nothing.
+     * <p>
+     * Asked of every rupture in the system rather than the one remembered, because the claim is
+     * named: {@link QuestPond#release} only lets go of ponds held under this errand's own key and
+     * ignores the rest.
+     */
+    protected static void letGo(Target target) {
+        if (target == null || target.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!system.getId().equals(target.systemId)) continue;
+
+            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+                QuestPond.release(pond, TutorialConstants.TARGET_KEY);
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * The moment the hold answers the errand: the water is done with, and the note says so.
+     * <p>
+     * Booked once, and unbooked if the specimen leaves the hold again - sold, or spent on
+     * something else - so the mark and the note follow what is actually aboard rather than what
+     * was aboard once.
+     */
+    protected static void setLanded(Target target, boolean landed) {
+        if (target == null || target.landed == landed) return;
+
+        target.landed = landed;
+
+        if (landed) letGo(target);
+
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(IntroIntel.class)) {
+
+            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+        }
+    }
+
+    /** Whether the current errand has been answered by something in the hold. */
+    public static boolean isLanded() {
+        Target target = getTarget();
+
+        return target != null && target.landed;
     }
 
     /**
@@ -674,6 +747,12 @@ public class FishingIntro {
             Target target = getTarget();
             if (target == null) return;
 
+            //asked before anything about where the player is, since the answer is about the hold
+            //and travels with it. This is also the only thing that notices a catch at all - the
+            //minigame has no idea what the introduction wants
+            setLanded(target, isTargetMet());
+            if (target.landed) return;
+
             CampaignFleetAPI player = Global.getSector().getPlayerFleet();
             if (player == null) return;
 
@@ -775,6 +854,8 @@ public class FishingIntro {
             if (isCarryingHarpoon() && !isAtLeast(RODDED)) return "Return the harpoon";
             if (!isAtLeast(RODDED)) return "Fishing: find a boat";
 
+            if (isLanded()) return "Fishing: take it back";
+
             return "Fishing: " + describeTarget();
         }
 
@@ -795,6 +876,9 @@ public class FishingIntro {
                     info.addPara("There is a trade working the far edges of the inhabited systems."
                             + " Find one of their boats and hail it.", 10f);
                 }
+            } else if (target.landed) {
+                info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                        Misc.getHighlightColor(), Misc.ucFirst(describeTarget()));
             } else if (target.systemName == null) {
                 //the chart rung, which is the one errand with no place in it - the whole lesson is
                 //that the charts say where. A line naming a system it does not have would read
@@ -844,7 +928,8 @@ public class FishingIntro {
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
             Target target = getTarget();
 
-            if (target != null) {
+            //once it is aboard the water is not where the player is being sent
+            if (target != null && !target.landed) {
                 for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                     if (!system.getId().equals(target.systemId)) continue;
 
