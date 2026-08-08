@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
@@ -13,12 +14,11 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -210,20 +210,48 @@ public class FishRumors {
         }
 
         @Override
-        public String getSmallDescriptionTitle() {
+        public String getName() {
             return "Fisherman's rumor: " + rumor.systemName;
         }
 
         @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            info.addPara(getSmallDescriptionTitle(), getTitleColor(mode), 0f);
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        /**
+         * The clock under the title, the same on the list row and the open panel - counted off
+         * the saved timestamp rather than said as "about a month", because the number is right
+         * there and a rumor half spent should read as half spent.
+         */
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color tc = getBulletColorForMode(mode);
+
+            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+
+            float daysLeft = FishermanConstants.RUMOR_DURATION_DAYS
+                    - Global.getSector().getClock().getElapsedDaysSince(rumor.started);
+
+            addDays(info, "before it is stale", Math.max(daysLeft, 0f), tc, initPad);
+
+            unindent(info);
         }
 
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             info.addPara(describe(rumor), 10f);
-            info.addPara("Good for about a month from when it was heard.",
-                    Misc.getGrayColor(), 10f);
+
+            addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override
@@ -232,9 +260,22 @@ public class FishRumors {
         }
 
         @Override
+        public String getSortString() {
+            return getSortStringNewestFirst();
+        }
+
+        /** The Fisherman's colours - the rumor is his, whichever boat happened to pass it on. */
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getFaction(FishermanConstants.FACTION);
+        }
+
+        @Override
         public Set<String> getIntelTags(SectorMapAPI map) {
-            Set<String> tags = new LinkedHashSet<>();
+            Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
+            tags.add(Tags.INTEL_MISSIONS);
+            tags.add(FishermanConstants.FACTION);
 
             return tags;
         }

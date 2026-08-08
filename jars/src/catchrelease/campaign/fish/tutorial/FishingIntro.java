@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.tutorial;
 
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -32,9 +31,9 @@ import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -771,7 +770,7 @@ public class FishingIntro {
     public static class IntroIntel extends BaseIntelPlugin {
 
         @Override
-        public String getSmallDescriptionTitle() {
+        public String getName() {
             if (isCarryingHarpoon() && !isAtLeast(RODDED)) return "Return the harpoon";
             if (!isAtLeast(RODDED)) return "Fishing: find a boat";
 
@@ -779,8 +778,50 @@ public class FishingIntro {
         }
 
         @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            info.addPara(getSmallDescriptionTitle(), getTitleColor(mode), 0f);
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        /**
+         * The facts under the title, the same on the list row and the open panel: what is wanted,
+         * where, and what gear the water will answer to. No day count - the ladder has no clock.
+         */
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color h = Misc.getHighlightColor();
+            Color tc = getBulletColorForMode(mode);
+
+            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+
+            Target target = getTarget();
+
+            if (target == null) {
+                SectorEntityToken at = getMapLocation(null);
+                if (at != null && at.getContainingLocation() != null) {
+                    info.addPara("Nearest boat: %s", initPad, tc, h,
+                            at.getContainingLocation().getName());
+                }
+            } else {
+                info.addPara("Wanted: %s", initPad, tc, h, describeTarget());
+                info.addPara("In %s", 0f, tc, h, target.systemName);
+
+                if (target.needsDeepGear) {
+                    info.addPara("Breach lamp and harpoon line only", tc, 0f);
+                } else if (target.atPond) {
+                    info.addPara("The mark is a rupture", tc, 0f);
+                }
+            }
+
+            unindent(info);
         }
 
         @Override
@@ -809,22 +850,25 @@ public class FishingIntro {
                 }
             }
 
-            SectorEntityToken at = getMapLocation(null);
-            if (at != null && at.getContainingLocation() != null) {
-                info.addPara("Nearest boat: %s", 10f, Misc.getHighlightColor(),
-                        at.getContainingLocation().getName());
-            }
+            addBulletPoints(info, ListInfoMode.IN_DESC);
+        }
+
+        /** Vanilla's own tutorial-mission icon, which is exactly what this is. */
+        @Override
+        public String getIcon() {
+            return Global.getSettings().getSpriteName("campaignMissions", "tutorial");
         }
 
         @Override
-        public String getIcon() {
-            return FishConstants.CODEX_CATEGORY_ICON;
+        public String getSortString() {
+            return getSortStringNewestFirst();
         }
 
         @Override
         public Set<String> getIntelTags(SectorMapAPI map) {
-            Set<String> tags = new LinkedHashSet<>();
+            Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
+            tags.add(Tags.INTEL_MISSIONS);
 
             return tags;
         }

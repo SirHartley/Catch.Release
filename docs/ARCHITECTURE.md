@@ -300,11 +300,11 @@ explains how.
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
-| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed. Its `QuestIntel` carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month" |
 | `FishermanConstants.java` | Every number the above read |
 
 ### `dialogue/rules`
@@ -322,7 +322,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, the intel note |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon |
 | `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
 | `Castaway.java` | The rating put off a boat for looking, found on a survey |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
