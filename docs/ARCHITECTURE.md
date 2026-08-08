@@ -434,7 +434,7 @@ The sector-map fish filter.
 
 | File | What it does |
 |---|---|
-| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list |
+| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list. The planner borrows the sidebar's slot, so `paneStanding` tracks whether the sidebar is actually on screen - `applied` only records that `activate()` ran, and a failed hand-back would otherwise never reconcile |
 | `FishMapPane.java` | The side panel: planner button, search, type chips, species list, the coherence toggle on its floor |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
