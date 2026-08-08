@@ -431,6 +431,7 @@ Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` 
 | File | What it does |
 |---|---|
 | `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing twice and the next rock offers the next thing. Priced off rarity; anything already owned drops out of the rotation |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.

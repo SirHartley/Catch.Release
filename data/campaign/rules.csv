@@ -852,12 +852,14 @@ $catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with t
 catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible,"" he says, without being asked twice. ""Crablobab. That is me, and that is the crabs as well, it saves time."" One of the crate's occupants has got a claw through the mesh and is working on the rest of itself.
 
 He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",
-catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall
-CatchReleaseCMD tokens",,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
+catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabBackdrop",RestoreSavedVisual,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
 5:catchrelease_crabWareEarmuffs:Earmuffs
 10:catchrelease_crabWareExplosive_head:Explosive Head
 20:catchrelease_crabWareConservatory:Breach Conservatory Plans
-100:catchrelease_crabLeave:Tell him you are all right for crabs",
+30:catchrelease_crabWareBackdrop:Ask about the roll under his arm
+100:catchrelease_crabLeave:Tell him you are all right for crabs","the stall, when there is a scene in the coat as well as the hardware"
 catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabCelebrationAfford",,"""Little cartridges. You land something and they go off - paper, all colours, all over the readout. No, it does not help you catch anything. That is not what it is for. You have caught the fish already, that is the whole point of it.""
@@ -926,7 +928,36 @@ catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_cr
 
 Your ops chief signs it into the hold under a heading that did not exist this morning.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
-catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,BarCMD returnFromEvent false,"He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
+catchrelease_crabStallBare,DialogOptionSelected,"$option == catchrelease_crabStall score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabBackdrop",RestoreSavedVisual,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
+5:catchrelease_crabWareEarmuffs:Earmuffs
+10:catchrelease_crabWareExplosive_head:Explosive Head
+20:catchrelease_crabWareConservatory:Breach Conservatory Plans
+100:catchrelease_crabLeave:Tell him you are all right for crabs",the same stall once every scene in the table is already yours
+catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabBackdropAfford","SaveCurrentVisual
+CatchReleaseCMD crabShowBackdrop
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement, which is not the first time he has done it.
+
+""$catchreleaseCrabBackdropName. $catchreleaseCrabBackdropDesc Behind the glass it looks like somewhere. That is the whole trick of it - nobody stands at a tank to look at water.""
+
+He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs.","0:catchrelease_crabBuyBackdrop:Pay him
+10:catchrelease_crabStall:Continue","one scene at a time - which one is CrabBackdrops' business, not the sheet's"
+catchrelease_crabWareBackdropShort,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabBackdropAfford","SaveCurrentVisual
+CatchReleaseCMD crabShowBackdrop
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement, which is not the first time he has done it.
+
+""$catchreleaseCrabBackdropName. $catchreleaseCrabBackdropDesc Behind the glass it looks like somewhere. That is the whole trick of it - nobody stands at a tank to look at water.""
+
+He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs. You are short, and he rolls it up again without hurrying about it.",10:catchrelease_crabStall:Continue,
+catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls it, ties it, and hands it over still warm from the wall. ""Somewhere to hang it is your business.""","0:catchrelease_crabStall:Continue
+100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,"RestoreSavedVisual
+BarCMD returnFromEvent false","He takes it well. ""Nobody wants crabs,"" he says, to the room, and goes back to trying to sell them to it.",,
 catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,"$otherFleetFactionArticleCap opens with a question about the harpoon, and does not appear to be waiting for an answer to it.",,
 catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,"There is a hole in their hull the shape of your fishing gear, and $otherFleetFactionArticle would like you to know that it has been noted.",,
 catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,"$otherFleetFactionArticleCap has your transponder code, the puncture, and a great deal to say about the relationship between the two.",,
