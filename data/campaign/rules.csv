@@ -978,7 +978,8 @@ CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
 catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""Nothing I brought aboard."" They say it as though answering a different question. ""You do not land the big ones. You get a reading off them and you cut the line, and if you are quick about it they do not follow the line back.""","0:catchrelease_fisherAskBack:Speak of other things
 100:catchrelease_fisherBack:Continue",
-catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Continue,
+catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"CatchReleaseCMD dropCutComm
+SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Continue,"The cut link is vanilla's convOptionLeave, a PopulateOptions row conditioned on $isPerson alone - so every FireAll PopulateOptions in this conversation collects it, this submenu included. The main menu drops it in catchrelease_fisherOptLeave and this is the same job for the same reason: the boat carries its own way out, and vanilla's lands the player back on the engage screen of a fleet nobody is fighting. Scripts run after the panel has been cleared and repopulated, so removing here removes what was just added."
 catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
