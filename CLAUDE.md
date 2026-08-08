@@ -17,6 +17,11 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   end to end. The dependency mods are the exception to the rule above - the skill is vanilla
   only, so for GraphicsLib, LazyLib, LunaLib and MagicLib `lib/` is not the fallback, it is the
   only source there is.
+- **Any player-facing line starts in [`docs/LORE.md`](docs/LORE.md).** What the fabric, a breach,
+  a pattern, the ROD and the Fisherman are, who in-universe calls them what, and the one tone rule -
+  whimsy on the surface, nothing good underneath, and never say so. Dialogue, species descriptions,
+  tackle blurbs and intel notes all answer to it. It also lists what the mod does that the fiction
+  has not explained yet; do not invent an answer in a row, settle it there first.
 - **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
   verified against decompiled engine source - triggers, memory scopes, the operator table, the
   truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
