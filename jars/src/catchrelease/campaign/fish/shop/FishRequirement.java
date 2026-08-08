@@ -205,7 +205,6 @@ public class FishRequirement {
         switch (method) {
             case HARPOON: return "a harpoon";
             case DRONE: return "LINE drones";
-            case BOMB: return "a depth bomb";
             default: return "no recorded gear";
         }
     }

@@ -508,7 +508,8 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog at the narrowest priority - the one custom encounter screen left |
 
 ### `abilities`
-Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `entities/`.
+Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `constants/`
+(tuning), and usually `entities/`; `charges/` is shared between them rather than a rig of its own.
 
 | File | What it does |
 |---|---|
