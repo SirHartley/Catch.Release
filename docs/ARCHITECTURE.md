@@ -412,7 +412,7 @@ Modules bolted to a rig.
 
 | File | What it does |
 |---|---|
-| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies |
+| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play |
 | `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE` |
 
 ### `campaign/fish/map`
