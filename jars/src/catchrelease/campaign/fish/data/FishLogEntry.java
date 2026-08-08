@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class FishLogEntry implements Serializable {
 
     public enum Method {
-        DRONE("LINE drones"),
+        DRONE("LYNE drones"),
         HARPOON("Harpoon"),
 
         /**

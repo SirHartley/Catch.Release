@@ -204,7 +204,7 @@ public class FishRequirement {
     protected String getMethodName() {
         switch (method) {
             case HARPOON: return "a harpoon";
-            case DRONE: return "LINE drones";
+            case DRONE: return "LYNE drones";
             default: return "no recorded gear";
         }
     }
