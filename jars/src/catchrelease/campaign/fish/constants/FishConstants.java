@@ -495,15 +495,20 @@ public class FishConstants {
     public static final float ABERRATION_STREAM_SAMPLE_LY = 0.5f;
 
     /**
-     * How much of a system's reading is felt anywhere in it, with the rest earned by standing near
-     * whatever is causing it.
+     * How much standing on top of an in-system source adds to what the system already reads.
      * <p>
-     * Never zero: a system with a live gate in it is bad water at its edges too, and an overlay
-     * that switched off the moment the player drifted away from the object would read as a bug
-     * rather than as distance. A system whose reading comes from somewhere else entirely - a gate
-     * two light-years away, the abyss - has nothing in it to stand near, and sits at this share.
+     * A lift, not a gate, and the distinction is the whole of it. The system's reading is what the
+     * water is worth everywhere in that system - it is what a pond there yields, what a specimen
+     * out of it comes up like, and what the screen should be doing about it. Standing next to the
+     * thing responsible is <i>more</i> than that, not the only way to get any of it.
+     * <p>
+     * Multiplying by a nearness figure instead, which is what this used to do, quietly deleted the
+     * system's own reading from the overlay: most systems are thin because of something outside
+     * them - a gate two light-years off, a stream overhead, the abyss - and none of those is a
+     * thing there is any standing near. Every one of them came out at the floor, which is to say
+     * flat, which is to say the screen stopped answering to the water.
      */
-    public static final float ABERRATION_LOCAL_FLOOR = 0.55f;
+    public static final float ABERRATION_LOCAL_LIFT = 0.5f;
 
     /**
      * The low-coherence overlay: a full-screen warp and purple lean while a rig runs somewhere

@@ -54,7 +54,7 @@ public class CoherenceOverlayScript implements EveryFrameScript {
      * than that; neither of these costs anything worth spacing out.
      */
     protected float aberration = 0f;
-    protected float pull = FishConstants.ABERRATION_LOCAL_FLOOR;
+    protected float pull = 0f;
 
     @Override
     public void advance(float amount) {
@@ -98,10 +98,10 @@ public class CoherenceOverlayScript implements EveryFrameScript {
      * way, but never fading to nothing alongside: the boat's vicinity is bad water even where the
      * system's reading is not ({@link FishConstants#COHERENCE_FISHERMAN_ABERRATION}).
      * <p>
-     * All three ride {@link #here()} rather than the system's reading raw. The system says how bad
-     * the water is; where in the system the fleet is standing says how much of that it is standing
-     * in. Crossing a system towards the thing causing the reading now brightens the screen on the
-     * way, which is the one thing a single cached number per system could never show.
+     * All three ride {@link #here()} - the system's reading, lifted where the fleet is standing on
+     * top of whatever in the system is causing it. A lift and not a scale: the system's reading is
+     * what the water is worth everywhere in that system, and standing next to the thing responsible
+     * is more than that rather than the only way to get any of it.
      */
     protected float getTargetLevel() {
         if (Global.getSector().getCampaignUI().isShowingDialog()) return 0f;
@@ -115,9 +115,17 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         return target;
     }
 
-    /** The system's steady reading, taken down by however far the fleet is from what causes it. */
+    /**
+     * The system's steady reading, lifted by however near the fleet is to what causes it.
+     * <p>
+     * Scaling by the nearness instead - which this did for exactly one commit - takes the system's
+     * own reading out of the answer altogether, because most systems are thin on account of
+     * something outside them and nothing outside a system is a thing to stand near. Every one of
+     * those came out flat at the floor, so the screen stopped responding to the water and answered
+     * only to how close the rig was to a pond.
+     */
     protected float here() {
-        return aberration * pull;
+        return Math.min(1f, aberration * (1f + FishConstants.ABERRATION_LOCAL_LIFT * pull));
     }
 
     /**

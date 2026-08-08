@@ -15,11 +15,15 @@ import java.awt.Color;
  * there. What it shows is {@link Aberration#baseAt}, the same reading every specimen and the
  * thin-fabric terrain already answer to.
  * <p>
- * That reading walks every system, gate and slipstream in the sector, and is priced for once a
- * conversation rather than per pixel - so the field is sampled onto a one-light-year grid on a
- * budget, a few hundred nodes per rendered frame, and sweeps in as a front while the survey
- * completes. The sources are static or seasonal; a field sampled once is good for the whole
- * map session.
+ * The reading is a walk of the whole sector's sources, so the field is sampled onto a
+ * one-light-year grid on a budget - a few hundred nodes per rendered frame - and sweeps in as a
+ * front while the survey completes. The sources are static or seasonal; a field sampled once is
+ * good for the whole map session.
+ * <p>
+ * It samples bare points rather than systems, deliberately: what it paints is the water
+ * <i>between</i> the stars as much as at them, and a gate's reach is a disc that does not care
+ * whose system it crosses. {@code Aberration} has to answer a point that belongs to nothing with
+ * everything it knows for this to mean anything, and for two commits it did not.
  */
 public class CoherenceHeatField {
 
@@ -32,7 +36,19 @@ public class CoherenceHeatField {
 
     /** Below this the fabric counts as holding and the map stays clear. */
     public static final float SHOW_FLOOR = 0.08f;
-    public static final float MAX_ALPHA = 0.38f;
+
+    /**
+     * The wash at its very worst, and how the climb to it is shaped.
+     * <p>
+     * The exponent is the important one and it used to be 0.7, which is a curve that <i>front
+     * loads</i>: a tenth of the way up the scale it was already a fifth of the way up the alpha,
+     * and a third of the way up it was nearly half. So most of the sector arrived at once, at
+     * something close to full strength, and the range between "mildly thin" and "barely holding"
+     * had almost nothing left to say. Above one it does the opposite - mild thinness is a hint you
+     * have to look for, and the colour is earned by places that deserve it.
+     */
+    public static final float MAX_ALPHA = 0.22f;
+    public static final float HEAT_EASE = 1.8f;
 
     /** The pond glow's purple for thin water, leaning hot where it is barely holding. */
     public static final Color THIN = new Color(150, 30, 190);
@@ -123,8 +139,8 @@ public class CoherenceHeatField {
     protected void corner(float value, float alphaMult) {
         float heat = MathUtils.clamp((value - SHOW_FLOOR) / (1f - SHOW_FLOOR), 0f, 1f);
 
-        //eased so mild thinness is readable without the worst of it clipping flat
-        float alpha = MAX_ALPHA * (float) Math.pow(heat, 0.7) * alphaMult;
+        //eased so the bottom of the range is faint and the top of it is earned - see HEAT_EASE
+        float alpha = MAX_ALPHA * (float) Math.pow(heat, HEAT_EASE) * alphaMult;
 
         float r = (THIN.getRed() + (WORST.getRed() - THIN.getRed()) * heat) / 255f;
         float g = (THIN.getGreen() + (WORST.getGreen() - THIN.getGreen()) * heat) / 255f;
