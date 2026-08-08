@@ -484,6 +484,17 @@ public class FishConstants {
     public static final float ABERRATION_LOCAL_PER_LY = 300f;
 
     /**
+     * How finely a slipstream's ribbon is walked when it goes into the index, in light-years.
+     * <p>
+     * A stream is a polyline of hundreds of segments spanning tens of light-years, and every point
+     * along it thins the fabric - so it cannot be one mark, and it should not be hundreds either.
+     * Walked at this stride instead, which bounds the error in distance-to-ribbon at half of it.
+     * Against a six light-year falloff that is a couple of percent, and it keeps a long stream to a
+     * few dozen marks rather than a few hundred.
+     */
+    public static final float ABERRATION_STREAM_SAMPLE_LY = 0.5f;
+
+    /**
      * How much of a system's reading is felt anywhere in it, with the rest earned by standing near
      * whatever is causing it.
      * <p>
