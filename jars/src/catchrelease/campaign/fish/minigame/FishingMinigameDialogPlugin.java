@@ -115,8 +115,15 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                         catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_MAX_ABERRATION)
                 : Aberration.of(anchor);
 
+        //tackle that holds a specimen to its shape on the way up, applied to whatever the water
+        //and the stranger cap between them decided
+        if (tackle.coherenceBonus > 0f) {
+            aberration = Math.max(0f, aberration - tackle.coherenceBonus);
+        }
+
         //a chart request is a question about the water rather than about the animal, so what the
-        //trade planted always comes up barely holding whatever the local reading would have said
+        //trade planted always comes up barely holding whatever the local reading would have said -
+        //and whatever was on the rig, which is why this is last
         if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(anchor)) {
             aberration = 1f;
         }

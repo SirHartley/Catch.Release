@@ -91,6 +91,7 @@ public class ShopPricing {
         if (tackle.deepStrike) return 2;
         if (tackle.fanBeam) return 2;
         if (tackle.qualityBias > 0f || tackle.treasureChanceMult > 1f) return 1;
+        if (tackle.coherenceBonus > 0f) return 1;
 
         return 0;
     }
