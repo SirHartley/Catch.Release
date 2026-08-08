@@ -539,7 +539,7 @@ catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,"A woman at the end 
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Find out what she wants.,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I have a client,"" she says. ""That is the word I am going to use and we are both going to leave it there.""
 
-""He wants a fish. A real one, out of a rupture, not off a menu. $catchreleaseAskCap - that is the floor, and I want you to understand that it is a floor.""
+""He wants a fish. A real one, out of the water, not off a menu. $catchreleaseAskCap - that is the floor, and I want you to understand that it is a floor.""
 
 You ask what it is for. She looks at you with enormous patience.
 
@@ -630,7 +630,7 @@ catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score
 What they are asking for, when it is finally put plainly, is $entity.catchrelease_fleetQuestAsk.","0:catchrelease_fqAccept:""We can find you one.""
 10:catchrelease_fqDecline:Decline","The pitch and the ask are both read off the fleet's own memory, so one row serves every kind of trouble it could be in. The ask has to come from there rather than from the job's own tokens: those are written by updateData, which needs an accepted mission, and at the pitch there is not one yet."
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter",They send over what little they know about the local fabric and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
+CatchReleaseCMD leaveEncounter",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,CatchReleaseCMD leaveEncounter,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
@@ -841,7 +841,7 @@ CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it."" highlight",,,"The rating has a boat behind them, which is the whole reason they are worth talking to and the whole reason they are not in a Church or Path port."
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not."" They look at your crew rather than at you, and seem to find whatever they were looking for. ""Everyone who does has that look about them.""
 
-They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the fabric that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
+They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the water that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
 
 ""They keep one in every system anybody lives in, out past the last colony where nothing is in the way. Hail it. And do not ask what is in the tank.""",catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
@@ -977,7 +977,7 @@ catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patte
 100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is it worse the further out you go?""",
+$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
 catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""It is not worse. It is thinner. You can see further through it and there is more on the other side to see.""
 
 ""People say worse because of what it does to them, which is a different subject and not one the fabric is interested in.""","0:catchrelease_fisherAskBack:Speak of other things
@@ -1522,7 +1522,7 @@ catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,"A fisher is sit
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket is sitting very still, and every time the door opens he looks at it and then makes himself stop looking at it.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why she picked that seat.,
-catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one rupture properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""
+catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one piece of water properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""
 
 ""$catchreleaseCampManyCap. In $catchreleaseCampWhere. Flying dark and not going anywhere.""
 
@@ -1555,7 +1555,7 @@ $catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Rupture is clear
 catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He takes the crate with both hands, opens it on the table in front of everybody, and looks at what is inside for long enough that the noise around the table stops.
 
-""That is my rupture,"" he says, and pays you $catchreleaseReward without counting it.",,
+""That is my water,"" he says, and pays you $catchreleaseReward without counting it.",,
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""They will be polite to you as well,"" she says. ""Do not let that do anything to you.""",,
 catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,"""No,"" she agrees. ""Probably not."" She goes back to the form.",,
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
@@ -1569,7 +1569,7 @@ catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchreleas
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 !$catchreleaseCampCleared",,"""They are still on it,"" she says, and looks at the door.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my rupture."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my water."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She opens the crate herself, in the middle of the bar, with the door in plain sight and no apparent interest in it any more.
 

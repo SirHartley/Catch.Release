@@ -55,7 +55,7 @@ public enum FleetQuestType {
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
             "Coil's going and the gel that packs it is not something you can synthesise out here."
-                    + " You can fish it out of a local rupture, apparently. We looked it up. Bring"
+                    + " You can fish it out of the local water, apparently. We looked it up. Bring"
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
             "Holding position"),

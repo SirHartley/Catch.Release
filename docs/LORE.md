@@ -50,6 +50,26 @@ This is why:
 - Crablobab can sell a man the plans for a building he has no business having, and the man builds it;
 - a coat has more pockets than a coat has, and nobody mentions the coat.
 
+### The trade looks like a trade
+
+The largest thing nobody notices is the trade itself.
+
+**People believe there are fishermen.** Plural — an industry, a profession, boats out past the
+picket, a going concern. There is one Fisherman. He is in every inhabited system at once and he is
+nowhere, and because a boat is always somewhere near, it reads as a fleet rather than as a fact
+about one man. **Nobody has remarked that it is always the same hull.** Nobody has remarked that it
+is always the same face.
+
+**And nothing carries any of it.** No freighters run the catch inward, no port has a quota for it,
+no yard fits a hull out for the work, and one boat could not supply a street let alone a sector.
+Fish are on menus regardless. **Nobody minds that there is no logistics under this**, in a sector
+where everyone eats reconstituted protein precisely because nobody has solved logistics.
+
+Both are the same reflex as the clam's third hinge, at the scale of an economy: an entire industry
+that does not add up, accepted because the alternative is to work out what is actually happening.
+Independent fishers exist and are sincere — they own a rupture, they work it, they are being
+squeezed by pirates. What they believe they are part of does not exist.
+
 **Nobody in this mod is ever the one who notices.** Not NPCs, not the player's crew, not the
 narration. The player may notice. That is the only place the horror is allowed to happen, and it
 must arrive there on its own.
@@ -67,18 +87,30 @@ Hyperspace is on the other side of it. Not "above" or "below" — the fabric has
 maps to a human one; a breach opens onto hyperspace the way a fourth dimension opens onto the three
 you have. Prose should use *through* and *under* loosely and never commit to a geometry.
 
-**There is no water.** Nothing in this setting is submerged, floating, or wet. There is realspace,
-there is hyperspace, and there is the fabric between them, and a breach is a worn place in cloth
-rather than a pool. Where a metaphor is wanted, the fabric supplies one already: it is thin, worn,
-thick, holding, going. "The water" as a name for any of that is wrong and reads as a different
-game.
+**There is no water**, and the fabric is the word for what there is instead. Nothing is submerged,
+floating or wet; a breach is a worn place in cloth rather than a pool. Where a metaphor is wanted
+the fabric already supplies one — thin, worn, thick, holding, going — and anything that reads as an
+ocean is reaching for the wrong setting.
 
-The one exception is real water, in a real tank, in the conservatory's aquarium — where somebody
-has put a landed specimen behind glass and filled the space with something. That is water because
-it is water.
+**But "the water" is what people say who do not know any better**, and that is worth keeping,
+sparingly. To a rating, a bar patron, a cook, a buyer, an independent fisher who believes they are
+in a fishing trade, *the water* is simply where the fish come from. They are not being poetic. They
+have never been told otherwise and would not follow it if they were. It sits alongside *fish* as
+the vocabulary of somebody who has not thought about it, which is nearly everybody.
 
-*Fish* survives because it is what people call the things, and the document says why. *Water* has
-no such excuse: nobody has ever been fishing in anything.
+The rules for using it:
+
+- **Default to the fabric, or to a rupture.** Reach for "the water" only when the fact that *this
+  speaker would say it* is doing work in the line.
+- **Never from the Fisherman.** He says fabric, and the gap between his word and theirs is one of
+  the few places the setting shows through.
+- **Never from the UI, an intel note, or the narration.** Those are the player's own instruments
+  and are not somebody talking.
+- **Sparingly.** It was in forty lines once and the setting drowned in it. A handful is a register;
+  a habit is a different game.
+
+Real water — a tank with a lid, the conservatory's hall of pressure glass — is water because it is
+water, and needs no permission.
 
 Hyperspace itself is about as hospitable as the worst thing you have ever read about it being.
 Exposure warps mind and body. Nobody sane goes in. Nothing that lives there is a person.
@@ -374,20 +406,22 @@ and no one has any observations to offer about it.
 
 | Thing | Trade / official | Slang, and the UI | Never |
 |---|---|---|---|
-| Reality's substrate | the fabric | — | **"the water"**, "the veil", "the aether" |
+| Reality's substrate | the fabric | "the water" — laymen only, and rarely | "the veil", "the aether" |
 | A worn-through place | a breach, a rupture | a pond, a spot | a jump point, a portal, a gate |
 | A hyperspace ghost | a pattern | a fish | a creature, an animal, a species (except as a table term) |
 | The drones | LYNE drones | the drones, the rod | robots, probes |
 | The retrieval line | — | the rope, the line | cable, cord, winch line |
 | The lamps | breach lights | searchlights, the lights, the lamps | floodlights, spotlights |
-| Local reality's condition | coherence | thin, worn, holding, going | **"bad water"**, "corruption", "taint" |
+| Local reality's condition | coherence | thin, worn, holding, going | "corruption", "taint" |
 
 The mod's own UI leans slang almost everywhere, because the UI belongs to whoever is holding the
 rod. Precision is a *character* choice — somebody being careful, or somebody who knows too much.
 
-The bolded entries are the ones this document got wrong once and had to be swept back out of forty
-lines of dialogue. A fisher's patch is **a rupture**, not a piece of water; a species' habitat is
-**its range**, not its waters; somewhere with no rupture in it is **open space**.
+Three substitutions the document got wrong once and had to sweep out of forty lines: a fisher's
+patch is **a rupture** rather than a piece of water except where the fisher's own voice is the
+point; a species' habitat is **its range**, never its waters, because that phrasing belongs to the
+player's charts and the charts are not somebody talking; and somewhere with no rupture in it is
+**open space**.
 
 ---
 
