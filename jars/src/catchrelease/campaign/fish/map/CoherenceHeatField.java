@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.Aberration;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
@@ -29,7 +28,6 @@ public class CoherenceHeatField {
 
     /** One light-year per grid node; GL interpolates the gradient across each cell. */
     public static final float CELL = 2000f;
-    public static final float MARGIN = 6f * 2000f;
 
     /** Sampling budget per rendered frame - the whole sector fills in about a second. */
     public static final int SAMPLES_PER_FRAME = 500;
@@ -59,26 +57,30 @@ public class CoherenceHeatField {
     protected final float[] values;
     protected int filled = 0;
 
-    /** Bounds from the systems that exist, with enough margin to catch the abyss around them. */
+    /**
+     * The sector rectangle, exactly, and not one node past it.
+     * <p>
+     * It used to be the systems' own bounding box with six light-years of margin thrown around it,
+     * on the reasoning that the abyss reaches past where anybody lives. It does - but the abyss it
+     * was reaching into is not water. Outside the map rectangle {@code getAbyssalDepth} stops
+     * describing hyperspace and starts describing how far off the edge you have wandered: it climbs
+     * a full point every two thousand units and caps. So of the twelve thousand units of margin,
+     * ten thousand were a flat maximum reading, and the map wore a saturated purple frame all the
+     * way round that had nothing whatever to do with the fabric.
+     * <p>
+     * The map draws the rectangle, so the field paints the rectangle. The last node lands on the
+     * boundary rather than past it, where the out-of-map term is still exactly zero.
+     */
     public CoherenceHeatField() {
-        float loX = Float.MAX_VALUE, hiX = -Float.MAX_VALUE;
-        float loY = Float.MAX_VALUE, hiY = -Float.MAX_VALUE;
+        float w = Global.getSettings().getFloat("sectorWidth");
+        float h = Global.getSettings().getFloat("sectorHeight");
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            Vector2f at = system.getLocation();
+        minX = -w * 0.5f;
+        minY = -h * 0.5f;
 
-            loX = Math.min(loX, at.x);
-            hiX = Math.max(hiX, at.x);
-            loY = Math.min(loY, at.y);
-            hiY = Math.max(hiY, at.y);
-        }
+        cols = (int) Math.floor(w / CELL) + 1;
+        rows = (int) Math.floor(h / CELL) + 1;
 
-        if (loX > hiX) loX = hiX = loY = hiY = 0f;
-
-        minX = loX - MARGIN;
-        minY = loY - MARGIN;
-        cols = (int) ((hiX + MARGIN - minX) / CELL) + 2;
-        rows = (int) ((hiY + MARGIN - minY) / CELL) + 2;
         values = new float[cols * rows];
     }
 
