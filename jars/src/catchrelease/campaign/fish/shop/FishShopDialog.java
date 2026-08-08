@@ -44,7 +44,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float PAD = 12f;
     public static final float HEADER_HEIGHT = 46f;
     public static final float LIST_WIDTH = 320f;
-    public static final float ROW_WIDTH = LIST_WIDTH - 18f;
+
+    /** Rows span the same width as the tab header over them; the scroller keeps its 6px. */
+    public static final float ROW_WIDTH = LIST_WIDTH - 6f;
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
 
@@ -71,6 +73,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
+
+    /** The way out, bottom right. */
+    public static final float LEAVE_WIDTH = 120f;
+    public static final float LEAVE_HEIGHT = 26f;
 
     /**
      * What happens when the shop is closed.
@@ -240,6 +246,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildTabs();
             buildList();
             buildDetail();
+            buildLeave();
+        }
+
+        /** The way out, bottom right - the same door every panel in the mod has. */
+        protected void buildLeave() {
+            CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, LEAVE_HEIGHT,
+                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> "LEAVE",
+                            () -> true, () -> {
+                                if (callbacks != null) callbacks.dismissDialog();
+                            }));
+
+            panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - LEAVE_HEIGHT);
+            added.add(leave);
         }
 
         /**
