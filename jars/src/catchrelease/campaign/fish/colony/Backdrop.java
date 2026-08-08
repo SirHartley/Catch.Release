@@ -10,9 +10,10 @@ import catchrelease.campaign.fish.data.FishRarity;
  * having them, and the reason they can be handed out as job payment without upsetting a balance.
  * <p>
  * The art is drawn behind the water's tint and cropped to cover the glass, so any image works and
- * an image of the wrong shape simply loses its edges. The glass is {@code 468 x 170} at the game's
- * own UI scale, which is a hair under {@code 2.75:1}; supply it at twice that - about
- * {@code 936 x 340} - and it stays sharp on a scaled-up interface.
+ * an image of the wrong shape simply loses its edges rather than letterboxing. The pane is
+ * {@code 388 x 170} at the game's own UI scale with the glass line drawn over its edge, which
+ * leaves {@code 386 x 168} of art actually visible - near enough {@code 2.3:1}. Supply it at twice
+ * that, about {@code 772 x 336}, and it stays sharp on a scaled-up interface.
  */
 public class Backdrop {
 
