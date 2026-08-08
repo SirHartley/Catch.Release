@@ -21,8 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The tank: the conservatory's aquarium, live on the colony's main menu. Pure GL - dark water,
- * a glass line, a few bubbles, and every fish in the stock swimming its own way.
+ * The tank: the conservatory's aquarium, live on the colony's main menu. Pure GL - water with a
+ * caustic weave and leaning light shafts, a stone bed with kelp swaying off it, a glass line
+ * with a lit rim, a few bubbles, and every fish in the stock swimming its own way. A backdrop
+ * png at {@link #BACKDROP_PATH} is picked up when present and drawn behind the water's tint.
+ * Just the glass - stocking and the display switch live in the aquarium office.
  * <p>
  * Each specimen keeps its species' minigame manners: {@link FishMotion#SMOOTH} wanders,
  * {@link FishMotion#DARTER} sits and bolts, sinkers keep to the floor and floaters to the
@@ -37,9 +40,6 @@ import java.util.List;
  */
 public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
-    /** The strip below the water reserved for the add/remove buttons. */
-    public static final float BUTTON_STRIP = 34f;
-
     public static final float WALL_PAD = 6f;
 
     /** On-screen fish length in px, walked by the catch's size-fraction. */
@@ -51,6 +51,14 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     public static final Color WATER_DEEP = new Color(8, 24, 38);
     public static final Color WATER_SHALLOW = new Color(18, 60, 84);
     public static final Color GLASS = new Color(120, 200, 230);
+    public static final Color KELP = new Color(24, 74, 52);
+
+    /**
+     * Backdrop art, drawn behind the water tint when the file exists - drop a png at this path
+     * and the tank picks it up; without one the gradient carries the scene alone.
+     * {@link SpriteLoader} logs the miss once and hands back null forever after.
+     */
+    public static final String BACKDROP_PATH = "graphics/catchrelease/effects/aquarium_bg.png";
 
     protected final BreachConservatory conservatory;
     protected final InteractionDialogAPI dialog;
@@ -63,12 +71,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     protected final List<Bubble> bubbles = new ArrayList<>();
 
-    /** Set by whoever builds the button row; presses come back through buttonPressed. */
-    public Object addButtonId;
-    public Object removeButtonId;
-
-    /** Guards against a picker being opened twice before the first resolves. */
-    protected boolean pickerOpen = false;
+    /** The tank's furniture, laid once per mount so it does not rearrange itself per frame. */
+    protected final List<float[]> pebbles = new ArrayList<>();
+    protected final List<float[]> kelp = new ArrayList<>();
+    protected boolean furnished = false;
 
     public AquariumTankPanel(BreachConservatory conservatory, InteractionDialogAPI dialog) {
         this.conservatory = conservatory;
@@ -78,19 +84,6 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     @Override
     public void positionChanged(PositionAPI position) {
         pos = position;
-    }
-
-    @Override
-    public void buttonPressed(Object buttonId) {
-        if (dialog == null || pickerOpen) return;
-
-        if (buttonId == addButtonId) {
-            pickerOpen = true;
-            AquariumTransfers.openAddPicker(dialog, conservatory, moved -> pickerOpen = false);
-        } else if (buttonId == removeButtonId) {
-            pickerOpen = true;
-            AquariumTransfers.openTakePicker(dialog, conservatory, moved -> pickerOpen = false);
-        }
     }
 
     @Override
@@ -134,7 +127,30 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     protected float tankHeight() {
-        return pos == null ? 0f : pos.getHeight() - BUTTON_STRIP - WALL_PAD * 2f;
+        return pos == null ? 0f : pos.getHeight() - WALL_PAD * 2f;
+    }
+
+    /** Rolls the pebbles and the kelp once - furniture that rearranged itself would be a bug. */
+    protected void furnish(float w, float h) {
+        if (furnished) return;
+        furnished = true;
+
+        float x = 8f;
+        while (x < w - 8f) {
+            //{x, radius, shade} - a low bank of stones along the floor
+            pebbles.add(new float[]{x, MathUtils.getRandomNumberInRange(1.6f, 3.4f),
+                    MathUtils.getRandomNumberInRange(0.5f, 1f)});
+            x += MathUtils.getRandomNumberInRange(5f, 14f);
+        }
+
+        int strands = Math.max(2, (int) (w / 90f));
+        for (int i = 0; i < strands; i++) {
+            //{x, height, phase, lean} - one blade of kelp, swaying on its own clock
+            kelp.add(new float[]{MathUtils.getRandomNumberInRange(0.08f, 0.92f) * w,
+                    MathUtils.getRandomNumberInRange(0.35f, 0.7f) * h,
+                    MathUtils.getRandomNumberInRange(0f, 6.28f),
+                    MathUtils.getRandomNumberInRange(-6f, 6f)});
+        }
     }
 
     protected void advanceBubbles(float amount, float w, float h) {
@@ -161,12 +177,12 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         if (pos == null || alphaMult <= 0f) return;
 
         float x = pos.getX() + WALL_PAD;
-        float y = pos.getY() + BUTTON_STRIP + WALL_PAD;
+        float y = pos.getY() + WALL_PAD;
         float w = tankWidth();
         float h = tankHeight();
         if (w <= 0f || h <= 0f) return;
 
-        drawWater(x, y, w, h, alphaMult);
+        furnish(w, h);
 
         //the water clips its contents; anything mid-warp past the glass stays behind it
         float scale = Global.getSettings().getScreenScaleMult();
@@ -174,8 +190,15 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         GL11.glScissor((int) (x * scale), (int) (y * scale),
                 (int) (w * scale), (int) (h * scale));
 
+        drawBackdrop(x, y, w, h, alphaMult);
+        drawWater(x, y, w, h, alphaMult);
+        drawKelp(x, y, alphaMult);
+        drawFloor(x, y, w, alphaMult);
+
         for (Bubble bubble : bubbles) bubble.render(x, y, alphaMult, time);
         for (TankFish swimmer : fish) swimmer.render(x, y, w, h, alphaMult, time);
+
+        drawLight(x, y, w, h, alphaMult);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
@@ -184,20 +207,67 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         if (fish.isEmpty()) drawEmptyLine(x, y, w, h, alphaMult);
     }
 
-    /** Dark at the floor, faintly lit at the surface, with a light-line under the rim. */
+    /** The scene behind the water, when the art exists; the tint over it keeps it submerged. */
+    protected void drawBackdrop(float x, float y, float w, float h, float alphaMult) {
+        SpriteAPI backdrop = SpriteLoader.loadSprite(BACKDROP_PATH);
+        if (backdrop == null || backdrop.getWidth() <= 0f) return;
+
+        //cover, not fit: the glass is the crop and the art fills every corner of it
+        float scale = Math.max(w / backdrop.getWidth(), h / backdrop.getHeight());
+
+        backdrop.setSize(backdrop.getWidth() * scale, backdrop.getHeight() * scale);
+        backdrop.setColor(Color.WHITE);
+        backdrop.setNormalBlend();
+        backdrop.setAlphaMult(alphaMult);
+        backdrop.renderAtCenter(x + w * 0.5f, y + h * 0.5f);
+    }
+
+    /**
+     * The water itself: the depth gradient (translucent over a backdrop, near-solid without
+     * one), a slow caustic weave of brighter bands drifting through the middle depths, and the
+     * surface shimmer breathing under the rim.
+     */
     protected void drawWater(float x, float y, float w, float h, float alphaMult) {
+        boolean backdropped = SpriteLoader.loadSprite(BACKDROP_PATH) != null;
+        float body = (backdropped ? 0.62f : 0.92f) * alphaMult;
+
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         GL11.glBegin(GL11.GL_QUADS);
-        setColor(WATER_DEEP, 0.92f * alphaMult);
+        setColor(WATER_DEEP, body);
         GL11.glVertex2f(x, y);
         GL11.glVertex2f(x + w, y);
-        setColor(WATER_SHALLOW, 0.92f * alphaMult);
+        setColor(WATER_SHALLOW, body);
         GL11.glVertex2f(x + w, y + h);
         GL11.glVertex2f(x, y + h);
         GL11.glEnd();
+
+        //the caustic weave: soft bright bands sliding through the water at their own speeds,
+        //which is most of what makes still water read as water
+        for (int i = 0; i < 3; i++) {
+            float drift = time * (5f + i * 3.5f);
+            float bandY = y + h * (0.3f + 0.18f * i)
+                    + (float) Math.sin(time * 0.5f + i * 2.1f) * h * 0.06f;
+            float thickness = h * 0.1f;
+
+            GL11.glBegin(GL11.GL_QUAD_STRIP);
+            int steps = 14;
+            for (int s = 0; s <= steps; s++) {
+                float px = x + w * s / steps;
+                float wave = (float) Math.sin((px + drift * (i % 2 == 0 ? 1f : -1f)) * 0.045f
+                        + i * 1.7f);
+                float lift = wave * thickness * 0.5f;
+                float glow = 0.05f + 0.04f * wave;
+
+                setColor(GLASS, Math.max(0f, glow) * alphaMult);
+                GL11.glVertex2f(px, bandY + lift + thickness * 0.5f);
+                setColor(GLASS, 0f);
+                GL11.glVertex2f(px, bandY + lift - thickness * 0.5f);
+            }
+            GL11.glEnd();
+        }
 
         //the surface shimmer: a thin brighter band that breathes with the tank
         float shimmer = 0.16f + 0.05f * (float) Math.sin(time * 0.9f);
@@ -211,6 +281,93 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         GL11.glEnd();
     }
 
+    /** Shafts of surface light leaning through the water, wandering a little. Drawn over the
+     *  swimmers - light in water sits on top of what swims through it. */
+    protected void drawLight(float x, float y, float w, float h, float alphaMult) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+
+        for (int i = 0; i < 3; i++) {
+            float anchor = x + w * (0.2f + 0.3f * i)
+                    + (float) Math.sin(time * 0.17f + i * 2.3f) * w * 0.06f;
+            float half = w * 0.045f;
+            float lean = w * 0.07f;
+            float strength = 0.05f + 0.02f * (float) Math.sin(time * 0.4f + i * 1.3f);
+
+            GL11.glBegin(GL11.GL_QUADS);
+            setColor(GLASS, strength * alphaMult);
+            GL11.glVertex2f(anchor - half, y + h);
+            GL11.glVertex2f(anchor + half, y + h);
+            setColor(GLASS, 0f);
+            GL11.glVertex2f(anchor + half * 2.2f + lean, y);
+            GL11.glVertex2f(anchor - half * 2.2f + lean, y);
+            GL11.glEnd();
+        }
+
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    /** The kelp: blades swaying from the floor, each segment leaning on the one below it. */
+    protected void drawKelp(float x, float y, float alphaMult) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        for (float[] blade : kelp) {
+            float baseX = x + blade[0];
+            float height = blade[1];
+            float phase = blade[2];
+            float lean = blade[3];
+
+            int segments = 8;
+            float width = 3.2f;
+
+            GL11.glBegin(GL11.GL_QUAD_STRIP);
+            for (int s = 0; s <= segments; s++) {
+                float up = s / (float) segments;
+
+                //sway grows with height off the floor; the root never moves
+                float sway = (float) Math.sin(time * 0.8f + phase + up * 2.2f)
+                        * 6f * up * up + lean * up;
+                float px = baseX + sway;
+                float py = y + 4f + height * up;
+                float half = width * (1f - up * 0.55f);
+
+                setColor(KELP, (0.75f - up * 0.3f) * alphaMult);
+                GL11.glVertex2f(px - half, py);
+                GL11.glVertex2f(px + half, py);
+            }
+            GL11.glEnd();
+        }
+    }
+
+    /** The floor: a dark bed with a low bank of stones on it. */
+    protected void drawFloor(float x, float y, float w, float alphaMult) {
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        //the bed itself, darker than any water above it
+        GL11.glBegin(GL11.GL_QUADS);
+        setColor(Color.BLACK, 0.5f * alphaMult);
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x + w, y);
+        setColor(Color.BLACK, 0f);
+        GL11.glVertex2f(x + w, y + 10f);
+        GL11.glVertex2f(x, y + 10f);
+        GL11.glEnd();
+
+        for (float[] stone : pebbles) {
+            float shade = stone[2];
+
+            catchrelease.rendering.helper.Disc.draw(x + stone[0], y + 3f, stone[1],
+                    new Color((int) (40 * shade), (int) (52 * shade), (int) (60 * shade)),
+                    0.9f * alphaMult, 0.9f * alphaMult, false);
+        }
+    }
+
+    /** The glass: the panes' one-pixel border, with a brighter bevel line along the top rim. */
     protected void drawGlass(float x, float y, float w, float h, float alphaMult) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
@@ -223,6 +380,13 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         GL11.glVertex2f(x + w, y);
         GL11.glVertex2f(x + w, y + h);
         GL11.glVertex2f(x, y + h);
+        GL11.glEnd();
+
+        //the rim catching the room's light
+        setColor(GLASS, 0.35f * alphaMult);
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex2f(x + 1f, y + h - 1f);
+        GL11.glVertex2f(x + w - 1f, y + h - 1f);
         GL11.glEnd();
     }
 

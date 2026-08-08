@@ -35,7 +35,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float OUTLINE_ALPHA = 0.6f;
     public static final float OUTLINE_WIDTH = 1.5f;
 
-    public static final float STRIPE_SPACING = 16f;
+    /** Between stripe centres, in world units - the pattern is anchored to the map, not the
+     *  screen, so it neither crawls when panning nor rescales against the waters when zooming.
+     *  Roughly ten bands across a lone system's blob. */
+    public static final float STRIPE_SPACING_WORLD = 600f;
 
     /** How a blob's fill is painted. The three picks each get their own, so overlaps read. */
     public static final int STYLE_SOLID = 0;
@@ -308,7 +311,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glVertex2f(boxMinX, boxMaxY);
             GL11.glEnd();
         } else {
-            renderStripes(boxMinX, boxMinY, boxMaxX, boxMaxY, blob.style);
+            renderStripes(blob.mesh.minX, blob.mesh.minY, blob.mesh.maxX, blob.mesh.maxY,
+                    blob.style, factor, centerX, centerY);
         }
 
         GL11.glDisable(GL11.GL_STENCIL_TEST);
@@ -337,15 +341,23 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnd();
     }
 
-    /** Diagonal bands clipped by the blob's stencil - rising right for pick two, left for pick
-     *  three, so overlapping waters cross instead of piling. */
-    protected void renderStripes(float minX, float minY, float maxX, float maxY, int style) {
+    /**
+     * Diagonal bands clipped by the blob's stencil - rising right for pick two, left for pick
+     * three, so overlapping waters cross instead of piling.
+     * <p>
+     * Cut in <b>world</b> space and transformed like the mesh, so the pattern is paint on the
+     * map rather than a screen door in front of it: panning does not make the stripes crawl
+     * through the waters, and zooming scales them with the territory they mark instead of
+     * changing how much of it each band covers.
+     */
+    protected void renderStripes(float minX, float minY, float maxX, float maxY, int style,
+                                 float factor, float centerX, float centerY) {
         //the diagonal's unit vectors: along the stripe, and across it
         float dirX = 0.70710678f;
         float dirY = style == STYLE_STRIPE_LEFT ? -0.70710678f : 0.70710678f;
         float normX = -dirY, normY = dirX;
 
-        //the box's reach along each axis, from its corners
+        //the box's reach along each axis, from its corners - all of it in world units
         float alongMin = Float.MAX_VALUE, alongMax = -Float.MAX_VALUE;
         float acrossMin = Float.MAX_VALUE, acrossMax = -Float.MAX_VALUE;
 
@@ -362,20 +374,24 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             acrossMax = Math.max(acrossMax, across);
         }
 
-        float width = STRIPE_SPACING * 0.5f;
+        float width = STRIPE_SPACING_WORLD * 0.5f;
 
-        float start = (float) Math.floor(acrossMin / STRIPE_SPACING) * STRIPE_SPACING;
+        float start = (float) Math.floor(acrossMin / STRIPE_SPACING_WORLD) * STRIPE_SPACING_WORLD;
 
         GL11.glBegin(GL11.GL_QUADS);
 
-        for (float across = start; across < acrossMax; across += STRIPE_SPACING) {
+        for (float across = start; across < acrossMax; across += STRIPE_SPACING_WORLD) {
             float nearX = normX * across, nearY = normY * across;
             float farX = normX * (across + width), farY = normY * (across + width);
 
-            GL11.glVertex2f(nearX + dirX * alongMin, nearY + dirY * alongMin);
-            GL11.glVertex2f(nearX + dirX * alongMax, nearY + dirY * alongMax);
-            GL11.glVertex2f(farX + dirX * alongMax, farY + dirY * alongMax);
-            GL11.glVertex2f(farX + dirX * alongMin, farY + dirY * alongMin);
+            GL11.glVertex2f((nearX + dirX * alongMin) * factor + centerX,
+                    (nearY + dirY * alongMin) * factor + centerY);
+            GL11.glVertex2f((nearX + dirX * alongMax) * factor + centerX,
+                    (nearY + dirY * alongMax) * factor + centerY);
+            GL11.glVertex2f((farX + dirX * alongMax) * factor + centerX,
+                    (farY + dirY * alongMax) * factor + centerY);
+            GL11.glVertex2f((farX + dirX * alongMin) * factor + centerX,
+                    (farY + dirY * alongMin) * factor + centerY);
         }
 
         GL11.glEnd();
