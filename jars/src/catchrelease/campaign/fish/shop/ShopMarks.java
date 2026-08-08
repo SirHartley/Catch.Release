@@ -141,10 +141,11 @@ public class ShopMarks {
     protected static long wantedAskCacheTime;
 
     /**
-     * Every current ask - marked wares and open jobs both - the same data
-     * {@link #getRequiredBy} reads, minus the names. Cached for {@link #WANTED_CACHE_MS}:
-     * {@link #isWanted} is asked per cargo cell per frame, and collecting the jobs' asks walks
-     * the whole intel manager, which a full hold would otherwise do dozens of times a frame.
+     * Every current ask - marked wares and everything in the log that is waiting on a fish - the
+     * same data {@link #getRequiredBy} reads, minus the names. Cached for
+     * {@link #WANTED_CACHE_MS}: {@link #isWanted} is asked per cargo cell per frame, and
+     * collecting the asks walks the whole intel manager, which a full hold would otherwise do
+     * dozens of times a frame.
      */
     protected static List<FishRequirement> getWantedAsks() {
         long now = System.currentTimeMillis();
@@ -158,9 +159,9 @@ public class ShopMarks {
             for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
                     : Global.getSector().getIntelManager().getIntel()) {
 
-                if (!(intel instanceof catchrelease.campaign.fish.jobs.FishJob job)) continue;
+                if (!(intel instanceof FishAsker asker)) continue;
 
-                for (FishRequirement ask : job.getAsks()) {
+                for (FishRequirement ask : asker.getAsks()) {
                     if (ask != null) out.add(ask);
                 }
             }
@@ -276,7 +277,7 @@ public class ShopMarks {
         return out;
     }
 
-    /** Open jobs whose asks pass the test, each named once. */
+    /** Everything in the log whose asks pass the test, each named once. */
     protected static void addAskingJobs(List<String> out,
                                         java.util.function.Predicate<FishRequirement> test) {
         if (Global.getSector() == null) return;
@@ -284,12 +285,12 @@ public class ShopMarks {
         for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
                 : Global.getSector().getIntelManager().getIntel()) {
 
-            if (!(intel instanceof catchrelease.campaign.fish.jobs.FishJob job)) continue;
+            if (!(intel instanceof FishAsker asker)) continue;
 
-            for (FishRequirement ask : job.getAsks()) {
+            for (FishRequirement ask : asker.getAsks()) {
                 if (ask == null || !test.test(ask)) continue;
 
-                String name = job.getBaseName();
+                String name = asker.getAskerName();
                 if (name != null && !out.contains(name)) out.add(name);
                 break;
             }

@@ -249,7 +249,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 
 | File | What it does |
 |---|---|
-| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract |
+| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Blueprint, Commodity |
 | `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
@@ -391,7 +391,8 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
-| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts the open jobs too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
+| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts every `FishAsker` in the log too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
+| `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |

@@ -846,7 +846,50 @@ public class FishingIntro {
     //---------------------------------------------------------------- the note
 
     /** One entry for the whole ladder, retitled at each rung. */
-    public static class IntroIntel extends BaseIntelPlugin {
+    public static class IntroIntel extends BaseIntelPlugin
+            implements catchrelease.campaign.fish.shop.FishAsker {
+
+        /**
+         * The rung's quarry, so a specimen the ladder sent the player after wears the same mark a
+         * job's would - see {@link catchrelease.campaign.fish.shop.FishAsker}.
+         * <p>
+         * The gear clause rides along for the lamp rung, which is the one rung where the wrong
+         * specimen of the right species does not answer. It costs nothing on the species screens -
+         * {@link FishRequirement#couldBeSatisfiedBy} only tests what a species decides - and it is
+         * what keeps the hold from marking a rod-caught one as spent for.
+         * <p>
+         * Nothing at all on the first rung. Anything the player can land answers it, and a
+         * requirement that matches everything would put a mark on every row of the codex.
+         */
+        @Override
+        public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
+            List<catchrelease.campaign.fish.shop.FishRequirement> out = new ArrayList<>();
+
+            Target target = getTarget();
+            if (target == null || target.anySpecies) return out;
+
+            for (String speciesId : target.speciesIds) {
+                catchrelease.campaign.fish.shop.FishRequirement ask =
+                        new catchrelease.campaign.fish.shop.FishRequirement();
+
+                ask.speciesId = speciesId;
+
+                if (target.needsDeepGear) {
+                    ask.implement = CatchImplement.BREACH_LAMP;
+                    ask.method = FishLogEntry.Method.HARPOON;
+                }
+
+                out.add(ask);
+            }
+
+            return out;
+        }
+
+        /** The ladder, not the rung - the title changes at every step and this must not. */
+        @Override
+        public String getAskerName() {
+            return "Fishing lessons";
+        }
 
         @Override
         public String getName() {

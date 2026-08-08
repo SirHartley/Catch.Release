@@ -482,12 +482,38 @@ public class FishermanQuest {
     //---------------------------------------------------------------- the note
 
     /** Where to go and what to bring back. */
-    public static class QuestIntel extends BaseIntelPlugin {
+    public static class QuestIntel extends BaseIntelPlugin
+            implements catchrelease.campaign.fish.shop.FishAsker {
 
         protected final Saved quest;
 
         public QuestIntel(Saved quest) {
             this.quest = quest;
+        }
+
+        /**
+         * The named specimen, so it wears the same mark a job's ask would - see
+         * {@link catchrelease.campaign.fish.shop.FishAsker}. The species alone: what makes this
+         * particular animal the right one is the water it came out of, which is
+         * {@link #QUEST_FISH_FLAG}'s business and not something the hold can be asked about.
+         */
+        @Override
+        public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
+            List<catchrelease.campaign.fish.shop.FishRequirement> out = new java.util.ArrayList<>();
+            if (quest == null || quest.speciesId == null) return out;
+
+            catchrelease.campaign.fish.shop.FishRequirement ask =
+                    new catchrelease.campaign.fish.shop.FishRequirement();
+
+            ask.speciesId = quest.speciesId;
+            out.add(ask);
+
+            return out;
+        }
+
+        @Override
+        public String getAskerName() {
+            return "Chart request";
         }
 
         protected FishSpec getSpec() {
