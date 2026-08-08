@@ -16,6 +16,6 @@ public class PatherCampJob extends CampedSpotJob {
 
     @Override
     public String getBaseName() {
-        return "Pathers on the Water";
+        return "Pathers on the Rupture";
     }
 }

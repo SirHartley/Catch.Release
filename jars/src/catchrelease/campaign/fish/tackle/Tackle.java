@@ -54,7 +54,7 @@ public enum Tackle {
 
     STASIS_CRADLE("Stasis Cradle", Fit.DRONE,
             "The drones carry the catch home in a held field rather than a net. What comes aboard is"
-                    + " nearer the shape it had before the water got at it.") {
+                    + " nearer the shape it had before the crossing got at it.") {
         {
             coherenceBonus = 0.25f;
         }
@@ -91,8 +91,8 @@ public enum Tackle {
 
     //--- harpoon
     FATHOM_HEAD("Fathom Head", Fit.HARPOON,
-            "Reads the fabric rather than the water above it. The head takes what is under the"
-                    + " surface: a specimen that has dived to shake the line, and anything the lamps"
+            "Reads under the fabric rather than across it. The head takes what has gone below:"
+                    + " a specimen that has dived to shake the line, and anything the lamps"
                     + " have betrayed as a dent rather than exposed outright.") {
         {
             deepStrike = true;

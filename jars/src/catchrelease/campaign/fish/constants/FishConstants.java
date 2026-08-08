@@ -483,7 +483,7 @@ public class FishConstants {
     /**
      * The same sources measured the other way: world units, inside the system they stand in.
      * <p>
-     * The light-year figures above answer "how bad is the water in this system", which is one number
+     * The light-year figures above answer "how thin is the fabric in this system", which is one number
      * for the whole system and is what a pond, a catch and a habitat are judged on. They cannot
      * answer "how near is the player standing to the thing right now", because at that scale every
      * object in a system shares the system's coordinates. That is the question the overlay asks,

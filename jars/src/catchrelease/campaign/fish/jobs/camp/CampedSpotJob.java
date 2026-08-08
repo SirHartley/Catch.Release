@@ -239,7 +239,7 @@ public abstract class CampedSpotJob extends FishJob {
             info.addPara("Kill them, pay them off, or talk them out of it - nobody has asked for it"
                     + " to be done a particular way.", pad);
         } else {
-            info.addPara("The water in %s is clear. What is left is the proof.", pad,
+            info.addPara("The rupture in %s is clear. What is left is the proof.", pad,
                     Misc.getHighlightColor(), systemName);
         }
 

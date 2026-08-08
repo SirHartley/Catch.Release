@@ -534,7 +534,7 @@ public class FishermanQuest {
                     spec == null ? "the named species" : spec.getDisplayName());
             info.addPara("In %s", 0f, tc, h, quest.systemName);
             info.addPara(quest.atPond ? "The mark is a rupture"
-                    : "The mark is open water - lamp work", tc, 0f);
+                    : "The mark is open space - lamp work", tc, 0f);
             info.addPara("%s and one more chart on the shelf", 0f, tc, h,
                     Misc.getDGSCredits(quest.credits));
 
@@ -561,7 +561,7 @@ public class FishermanQuest {
 
                 info.addPara(quest.atPond
                                 ? "The mark is a rupture. Drop a rod down it."
-                                : "The mark is open water. Nothing will show it but the lamps.",
+                                : "The mark is open space. Nothing will show it but the lamps.",
                         Misc.getGrayColor(), 10f);
 
                 info.addPara("Whatever comes up will be barely holding. That is what they are"

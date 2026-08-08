@@ -161,7 +161,7 @@ $PersonRank $personName is looking at your ship rather than at you, and at one p
 
 ""There is a hull with a hole in it and a tribute owed for the hole. $entity.catchrelease_harpoonFineDGS credits. Pay that.""
 
-""The other thing - the rig, and the water you point it at - is not something anybody takes money about.""",,
+""The other thing - the rig, and what you point it at - is not something anybody takes money about.""",,
 catchrelease_fineDemandPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
@@ -364,7 +364,7 @@ catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,cat
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Standing order,"" $heOrShe says, and turns the slate round. ""$catchreleaseAskCap. I am not fussy about who brings them, only that they arrive.""
 
 ""$catchreleaseRewardCap, on delivery.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_jobDecline:""Not my sort of work.""",
 catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"$HeOrShe writes something next to the list without looking up. ""It will keep.""",,
 catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The slate goes back to the bar top.,,
 catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,SetTextHighlights $catchreleaseAsk,"$HeOrShe taps the slate. ""$catchreleaseAskCap. The order has not changed.""",,
@@ -434,7 +434,7 @@ catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_as
 She taps the slate. ""Either will do. A perfect one teaches you what the species is meant to be. A ruined one teaches you what is happening to it. I have space for both and no preference between them.""
 
 ""$catchreleaseRewardCap. And I will not ask where.""","catchrelease_jobAccept:Agree to stock the tank.
-catchrelease_jobDecline:""Not my sort of water.""",
+catchrelease_jobDecline:""Not my sort of work.""",
 catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Keep it wet,"" she says. ""Whichever one you find.""",,
 catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,She covers the slate again.,,
 catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,SetTextHighlights $catchreleaseAsk,"""Still $catchreleaseAsk,"" she says. ""Either sort. I have not become fussier.""",,
@@ -539,7 +539,7 @@ catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,"A woman at the end 
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Find out what she wants.,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I have a client,"" she says. ""That is the word I am going to use and we are both going to leave it there.""
 
-""He wants a fish. A real one, out of the water, not off a menu. $catchreleaseAskCap - that is the floor, and I want you to understand that it is a floor.""
+""He wants a fish. A real one, out of a rupture, not off a menu. $catchreleaseAskCap - that is the floor, and I want you to understand that it is a floor.""
 
 You ask what it is for. She looks at you with enormous patience.
 
@@ -630,12 +630,12 @@ catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score
 What they are asking for, when it is finally put plainly, is $entity.catchrelease_fleetQuestAsk.","0:catchrelease_fqAccept:""We can find you one.""
 10:catchrelease_fqDecline:Decline","The pitch and the ask are both read off the fleet's own memory, so one row serves every kind of trouble it could be in. The ask has to come from there rather than from the job's own tokens: those are written by updateData, which needs an accepted mission, and at the pitch there is not one yet."
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter",They send over what little they know about the local water and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
+CatchReleaseCMD leaveEncounter",They send over what little they know about the local fabric and settle in to wait. Whatever else happens out here they will be exactly where you left them.,,
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,CatchReleaseCMD leaveEncounter,"They take it the way anyone takes it. The link closes without anything further being said, and the light over them goes out.",,"Declining ends the offer. Nothing was spawned to carry it, so there is nothing to tidy away - the mark comes off and the fleet carries on with whatever it was already doing."
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","SetTextHighlights $entity.catchrelease_fleetQuestAsk
-FireAll CatchReleaseFleetQuestTurnIn","They are exactly where you left them and they have not stopped watching the water.
+FireAll CatchReleaseFleetQuestTurnIn","They are exactly where you left them, and they have not stopped watching.
 
 They are still waiting on $entity.catchrelease_fleetQuestAsk.",,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
@@ -774,7 +774,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage < 6",,,0:catchrelease_fisherIntro:Ask what any of this is,
 catchrelease_fisherOptIntroDone,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,,0:catchrelease_fisherIntro:Ask about the water,
+$catchreleaseStage >= 6",,,0:catchrelease_fisherIntro:Ask about the fabric,
 catchrelease_fisherOptShop,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4",,,10:catchrelease_fisherShop:Access the outfitter,
@@ -802,7 +802,7 @@ catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFi
 FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
-catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart new waters mid-trip. The surveyors will catch up.""",,
+catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart mid-trip. The surveyors will catch up.""",,
 catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
 10:catchrelease_fisherSellCommon:Sell all unmarked commons
 20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon
@@ -841,7 +841,7 @@ CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the rating in the corner what they keep staring at"" ""A rating in deck coveralls with no ship patch has been nursing one drink for a very long time, and has been listening to you for most of it."" highlight",,,"The rating has a boat behind them, which is the whole reason they are worth talking to and the whole reason they are not in a Church or Path port."
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"""You are heading out past the picket, are you not."" They look at your crew rather than at you, and seem to find whatever they were looking for. ""Everyone who does has that look about them.""
 
-They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the water that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
+They turn the glass around without drinking from it. ""I crewed a boat that went further. Two seasons of it. It is the fabric that gets you and not the catch - nothing out there sits still long enough to look at twice, and your eyes go on trying anyway.""
 
 ""They keep one in every system anybody lives in, out past the last colony where nothing is in the way. Hail it. And do not ask what is in the tank.""",catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
@@ -966,21 +966,21 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 
 That appears to be the whole answer. Then, after a while:
 
-""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not water.""","0:catchrelease_fisherAskBack:Speak of other things
+""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not the fabric.""","0:catchrelease_fisherAskBack:Speak of other things
 100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
 catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Habits, mostly. Something on the other side did a thing so many times that the shape of the doing survived the doer."" A hand turns over. ""Then it drifts in here, and here has rules about having a body, so it grows one.""
 
-""That is why they come apart when the water is bad. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Speak of other things
+""That is why they come apart when the fabric is thin. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Speak of other things
 100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is it worse the further out you go?""",
 catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""It is not worse. It is thinner. You can see further through it and there is more on the other side to see.""
 
-""People say worse because of what it does to them, which is a different subject and not one the water is interested in.""","0:catchrelease_fisherAskBack:Speak of other things
+""People say worse because of what it does to them, which is a different subject and not one the fabric is interested in.""","0:catchrelease_fisherAskBack:Speak of other things
 100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
@@ -1011,14 +1011,14 @@ $catchreleaseTargetPond",,"""$catchreleaseTarget. There is a rupture open in $ca
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:5
 CatchReleaseCMD tokens
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open water, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
+$catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open space, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
 
 ""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetCharted,DialogOptionSelected,"$option == catchrelease_askTarget score:6
 CatchReleaseCMD tokens
 !$catchreleaseTargetPlaced",,"""$catchreleaseTarget. I am not telling you where - that is what the charts are for, and reading one is the half of this you have not done yet.""
 
-""The planner on your map will plot it once you have. Do not do it by eye.""",100:catchrelease_fisherBack:Continue,"The chart rung is the one errand with no system attached, by design. Both the other branches name a place, so without this one the ask fell to the open-water row and printed nothing where the system should be."
+""The planner on your map will plot it once you have. Do not do it by eye.""",100:catchrelease_fisherBack:Continue,"The chart rung is the one errand with no system attached, by design. Both the other branches name a place, so without this one the ask fell to the open-space row and printed nothing where the system should be."
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
 CatchReleaseCMD tokens
 $catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from, and your ops chief notices that and says nothing about it either.
@@ -1052,9 +1052,9 @@ CatchReleaseCMD sendOut
 CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
 
-""The drones are the same rod you already have. Over open water they hunt; under lamps they search. One tool, three moods, and it picks the mood itself.""
+""The drones are the same rod you already have. Over an open rupture they hunt; under lamps they search. One tool, three moods, and it picks the mood itself.""
 
-""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking at them. That is why they come apart when you land them, and why the water they came out of matters a great deal more than they do.""","catchrelease_intro_ghosts:""Ghosts.""
+""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking at them. That is why they come apart when you land them, and why the fabric they came through matters a great deal more than they do.""","catchrelease_intro_ghosts:""Ghosts.""
 catchrelease_fisherBack:Continue",
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Call them whatever holds still in your head."" They are already looking past you at the window. ""They do not answer to either of us, and they have never once answered to me.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
@@ -1065,7 +1065,7 @@ CatchReleaseCMD giveDeepGear
 CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief","They hold it up to the light for a while and do not say what they are looking for. Your science officer, watching over your shoulder, quietly stops taking notes.
 
-""Thinner water, worse coherence, same pattern. You have seen it now.""
+""Thinner fabric, worse coherence, same pattern. You have seen it now.""
 
 A second crate comes up. Lamps, a harpoon, and a ledger.
 
@@ -1080,7 +1080,7 @@ FireBest CatchReleaseIntroBrief","It goes into a case rather than onto the table
 
 ""That is the whole trade. Everything after this is doing it better.""
 
-""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself, instead of sweeping until you are out of fuel and patience. Two of them, on the house.""",catchrelease_fisherBack:Continue,
+""Survey data is where a thing lives - the fabric, the star, the age of the place. Read a chart and you know where to point yourself, instead of sweeping until you are out of fuel and patience. Two of them, on the house.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
@@ -1089,7 +1089,7 @@ CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
 AddTextSmall ""Survey counter opened"" highlight","Both of them are looked at properly, which has not happened before.
 
-""Then you can read the water. The counter is open to you, $playerName - charts for charts, and I will carry what I can.""
+""Then you can read the fabric. The counter is open to you, $playerName - charts for charts, and I will carry what I can.""
 
 Four more go across the table unasked: two common, one uncommon, and one they do not name.",catchrelease_fisherBack:Continue,
 catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
@@ -1099,7 +1099,7 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
-$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere. The water there is thinner. See what that does to it.""",,
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere. The fabric there is thinner. See what that does to it.""",,
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
@@ -1116,7 +1116,7 @@ $catchreleaseStage == 2
 catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
-!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Take your time. The water is not going anywhere and neither, apparently, are you.""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Take your time. The fabric is not going anywhere and neither, apparently, are you.""
 
 ""$catchreleaseTarget. $catchreleaseTargetWhere.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
@@ -1137,7 +1137,7 @@ catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_
 Your comms officer checks the transponder twice, then stops checking it.",catchrelease_fisherBack:Continue,
 catchrelease_introDone,DialogOptionSelected,"$option == catchrelease_fisherIntro score:20
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,"""Still at it. Good. The charts are what I sell and the water is what I know - between the two that is most of a map.""",catchrelease_fisherBack:Continue,
+$catchreleaseStage >= 6",,"""Still at it. Good. The charts are what I sell and the fabric is what I know - between the two that is most of a map.""",catchrelease_fisherBack:Continue,
 catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseCanSkip",,,"5:catchrelease_introSkip:""I have done this before. The breach calls me.""",
@@ -1522,17 +1522,17 @@ catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,"A fisher is sit
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket is sitting very still, and every time the door opens he looks at it and then makes himself stop looking at it.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why she picked that seat.,
-catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one piece of water properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""
+catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Same rupture for nine years,"" he says. ""You learn one rupture properly and it keeps you. Then somebody who has never fished anything in their life parks on it because it is a nice quiet spot to park.""
 
 ""$catchreleaseCampManyCap. In $catchreleaseCampWhere. Flying dark and not going anywhere.""
 
-He turns the slate around. It is a fuel invoice, and the number on it is not one he can pay twice. ""I do not care how. Kill them, buy them off, tell them a story - I have stopped having a preference. Just bring me $catchreleaseAsk out of that water afterwards, so I know it was that water.""
+He turns the slate around. It is a fuel invoice, and the number on it is not one he can pay twice. ""I do not care how. Kill them, buy them off, tell them a story - I have stopped having a preference. Just bring me $catchreleaseAsk out of that rupture afterwards, so I know it was that one.""
 
 ""$catchreleaseRewardCap, and it is most of what I have left.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:""Find other water.""",
+catchrelease_jobDecline:""Find another rupture.""",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"The clerk leaves without looking back. The fisher does not watch.
 
-""They are not pirates,"" she says. ""That is the whole problem. Pirates you can report. These ones have a contract, and a contract means somebody who is not out there gets to decide what happens to my water, and nobody will tell me who.""
+""They are not pirates,"" she says. ""That is the whole problem. Pirates you can report. These ones have a contract, and a contract means somebody who is not out there gets to decide what happens to my rupture, and nobody will tell me who.""
 
 ""$catchreleaseCampManyCap, sitting on a rupture in $catchreleaseCampWhere, perfectly polite about it. They told me to come back in a year.""
 
@@ -1540,22 +1540,22 @@ She looks at you properly for the first time. ""I do not need them arrested. I n
 catchrelease_jobDecline:""Somebody is paying them. Somebody will pay the next lot too.""",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Because I want to see the door,"" she says. ""You asked.""
 
-She does not lower her voice, which somehow makes it worse. ""There is a cell sitting on my rupture in $catchreleaseCampWhere. $catchreleaseCampManyCap. They are not robbing anybody. They are there because they have decided the water is an offence, and that anything that comes out of it is an offence, and that people who go in after it are the same.""
+She does not lower her voice, which somehow makes it worse. ""There is a cell sitting on my rupture in $catchreleaseCampWhere. $catchreleaseCampManyCap. They are not robbing anybody. They are there because they have decided the rupture is an offence, and that anything that comes out of it is an offence, and that people who go in after it are the same.""
 
 ""They let me leave. They were very clear that it was a decision they made.""
 
-""I want my water back. However that happens. And I want $catchreleaseAsk out of it in my hands afterwards, because I would like to hold the thing they said should not exist. $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to go and see them.
+""I want my rupture back. However that happens. And I want $catchreleaseAsk out of it in my hands afterwards, because I would like to hold the thing they said should not exist. $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to go and see them.
 catchrelease_jobDecline:""Not against the Path.""",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Nine years,"" he says again, to himself, and goes back to the invoice.",,
 catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,He turns the slate back around without any particular bitterness. It is not the first no.,,
 catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
 !$catchreleaseCampCleared",,"""Still sitting there?"" He does not sound surprised. ""They would be. It is a nice quiet spot to park.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Water is clear, then."" He almost smiles. ""Bring me $catchreleaseAsk out of it and I will believe it properly.""",,
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Rupture is clear, then."" He almost smiles. ""Bring me $catchreleaseAsk out of it and I will believe it properly.""",,
 catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He takes the crate with both hands, opens it on the table in front of everybody, and looks at what is inside for long enough that the noise around the table stops.
 
-""That is my water,"" he says, and pays you $catchreleaseReward without counting it.",,
+""That is my rupture,"" he says, and pays you $catchreleaseReward without counting it.",,
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""They will be polite to you as well,"" she says. ""Do not let that do anything to you.""",,
 catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,"""No,"" she agrees. ""Probably not."" She goes back to the form.",,
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
@@ -1564,12 +1564,12 @@ catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelea
 $catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Gone."" She sits with that for a second. ""Then bring me $catchreleaseAsk out of it, and I will go back out.""",,
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She does not open the crate in the bar. She signs for it, pays you $catchreleaseReward, and carries it out herself, and through the window you can see her stop halfway across the dock and open it there instead.",,
-catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Do not talk to them about it,"" she says. ""Whatever you decide to do. Do not get into it with them about the water.""",,
+catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Do not talk to them about it,"" she says. ""Whatever you decide to do. Do not get into it with them about the rupture.""",,
 catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"She nods, as though you have confirmed something. ""No. Nobody is.""",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 !$catchreleaseCampCleared",,"""They are still on it,"" she says, and looks at the door.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my water."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
+$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my rupture."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She opens the crate herself, in the middle of the bar, with the door in plain sight and no apparent interest in it any more.
 
@@ -1587,7 +1587,7 @@ catchrelease_campHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
 $entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
 FireAll CatchReleaseCampOptions","""Well, look at this."" The man on the screen has his boots up on something that was not designed for boots. ""Somebody has actually come out. We had a bet.""
 
-""Here is where we are. There is a hole in space out here that nobody owns, nobody patrols, and nobody comes looking in. Do you know what that is worth? Because it is not worth what is in the water. It is worth being somewhere nobody looks.""
+""Here is where we are. There is a hole in space out here that nobody owns, nobody patrols, and nobody comes looking in. Do you know what that is worth? Because it is not worth what is in it. It is worth being somewhere nobody looks.""
 
 $HeOrShe takes the boots down. ""$entity.catchrelease_campBribeDGS credits buys us a different nowhere. That is the whole offer, and I would take it, because the other thing we are good at is this.""",,
 catchrelease_campHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
@@ -1601,13 +1601,13 @@ catchrelease_campHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
 $entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
 FireAll CatchReleaseCampOptions","The woman on the screen is not armed and is standing in front of somebody who is.
 
-""You have come for the water,"" she says. ""Everyone does. It opens up out of nothing, and there are things living in it that were never born, and every single one of you decides the correct response is a net.""
+""You have come for the rupture,"" she says. ""Everyone does. It opens up out of nothing, and there are things living in it that were never born, and every single one of you decides the correct response is a net.""
 
-""We are not stopping you fishing. We are stopping this. This hole, this water, these things. Somebody has to sit in front of it.""
+""We are not stopping you fishing. We are stopping this. This hole, this place, these things. Somebody has to sit in front of it.""
 
 She says the next part like a formality, and like she already knows the answer. ""You will offer us money. People do. $entity.catchrelease_campBribeDGS credits, or whatever the figure is. Offer it if you like.""",,
 catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),"Greyed out with a reason rather than hidden, the way vanilla handles a bribe the player cannot cover."
-catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them the water is not worth it,"The third way through, for a fleet that can neither win the fight nor cover the bribe. Same bonus XP key the enforcement stops use - it is the same kind of thing being talked out of."
+catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them the rupture is not worth it,"The third way through, for a fleet that can neither win the fight nor cover the bribe. Same bonus XP key the enforcement stops use - it is the same kind of thing being talked out of."
 catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLink:Cut the comm link,"Vanilla's own option and vanilla's own handler. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
 catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
 $entity.catchrelease_campCleared = true
@@ -1615,12 +1615,12 @@ MakeOtherFleetGoAway true
 ShowDefaultVisual
 EndConversation NO_CONTINUE","The transfer clears while the link is still open, and whoever is on the other end watches it land before saying anything else.
 
-""Pleasure."" The formation is already coming about.",,"No handoff to the job beyond the flag: the mission polls whether the water is quiet on its own tick, because being killed, bought off, talked off and quietly leaving do not share a hook and only one of them happens inside a conversation."
+""Pleasure."" The formation is already coming about.",,"No handoff to the job beyond the flag: the mission polls whether the rupture is quiet on its own tick, because being killed, bought off, talked off and quietly leaving do not share a hook and only one of them happens inside a conversation."
 catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-EndConversation NO_CONTINUE","You do not argue about the water. You talk about the rupture instead - what it is, how long the ones like it stay open, and what has been recorded coming out of the ones that stayed open longest.
+EndConversation NO_CONTINUE","You do not argue about whose it is. You talk about the rupture instead - what it is, how long the ones like it stay open, and what has been recorded coming out of the ones that stayed open longest.
 
-None of it is a threat and all of it is true, which is what makes it work. Somewhere in the middle the person on the screen stops interrupting, and by the end they are looking past you at the water rather than at you.
+None of it is a threat and all of it is true, which is what makes it work. Somewhere in the middle the person on the screen stops interrupting, and by the end they are looking past you at the rupture rather than at you.
 
 ""We were going to move on anyway,"" they say, to nobody, and the formation begins to come about.",,

@@ -67,10 +67,18 @@ Hyperspace is on the other side of it. Not "above" or "below" — the fabric has
 maps to a human one; a breach opens onto hyperspace the way a fourth dimension opens onto the three
 you have. Prose should use *through* and *under* loosely and never commit to a geometry.
 
-**Water is the fabric.** This is the mod's central metaphor and it is a metaphor the *characters*
-use, not a description of anything. When somebody says the water is thin, bad, deep or good, they
-mean the local state of reality. When somebody says a specimen came out of bad water, they mean it
-was pulled through somewhere reality was barely holding, and it shows.
+**There is no water.** Nothing in this setting is submerged, floating, or wet. There is realspace,
+there is hyperspace, and there is the fabric between them, and a breach is a worn place in cloth
+rather than a pool. Where a metaphor is wanted, the fabric supplies one already: it is thin, worn,
+thick, holding, going. "The water" as a name for any of that is wrong and reads as a different
+game.
+
+The one exception is real water, in a real tank, in the conservatory's aquarium — where somebody
+has put a landed specimen behind glass and filled the space with something. That is water because
+it is water.
+
+*Fish* survives because it is what people call the things, and the document says why. *Water* has
+no such excuse: nobody has ever been fishing in anything.
 
 Hyperspace itself is about as hospitable as the worst thing you have ever read about it being.
 Exposure warps mind and body. Nobody sane goes in. Nothing that lives there is a person.
@@ -111,7 +119,7 @@ event. Extra limbs. A missing half. No pain, no bleeding, no change to how they 
 thing is simply not there any more, and never was, as far as reality is now concerned.
 
 To **patterns**: they stop holding their shape reliably. A low-coherence specimen keeps slipping.
-It carries marks it was not landed with. It drifts as though still in water. It does not die. It may
+It carries marks it was not landed with. It drifts, unhurried, against nothing. It does not die. It may
 talk. It may make you see things.
 
 Some people will pay a great deal for that. A thing that bends reality on a table in front of you is
@@ -120,11 +128,11 @@ for.
 
 A specimen's coherence is a property of *where it was taken*, not of the specimen. Two things pulled
 through the same breach read nearly the same. So nobody says a fish is badly made — they say the
-water was bad.
+fabric was thin where it came through.
 
 Gear can shore a specimen up on the way home. The trick is not clever: you carry a piece of
 permanence alongside it. A held field, a barb that keeps the thing to its own shape all the way up
-the line. It cannot make a specimen better than the water allowed; it can stop the trip finishing
+the line. It cannot make a specimen better than the fabric allowed; it can stop the trip finishing
 what the breach started.
 
 ## The breach
@@ -164,7 +172,7 @@ Two things follow that writing should honour:
   in `fish.csv` should read like something *imitating* an animal with imperfect reference material.
 - **The imitation is not for your benefit.** A pattern that looks back is not curious. The
   Fisherman: *"It is not the looking. It is that the thing looks back, and it does not know how to
-  stop, and it does not know that you are not water."*
+  stop, and it does not know that you are not the fabric."*
 
 **Rarity is rarity.** Some patterns are simply more common than others. It is not a measure of age,
 size, danger or depth, and nothing should imply that it is.
@@ -233,7 +241,7 @@ only** and should never be treated as a physical object in prose. Nothing is ree
 is inert without a breach to work against, so no hull has ever been opened onto hyperspace by one.
 The reaction it gets is not about the damage. It is about what the thing on the end *is*: a device
 for punching a hole into hyperspace, fired at a crewed hull. You would not welcome a sea mine
-through your window on the grounds that there is no water in the room.
+through your window on the grounds that there is nothing for it to go off in.
 
 ### Breach lights
 
@@ -261,7 +269,7 @@ justified.
 
 ### Charts
 
-The trade sells survey data: which waters a given pattern tends to appear in. It comes from the
+The trade sells survey data: a pattern's range, and which systems it tends to turn up in. It comes from the
 Fisherman, from what the trade collectively knows about what turns up where, and from the fact that
 none of this is obliged to make sense.
 
@@ -292,7 +300,7 @@ Write him:
   anybody has found. That should be more unsettling than a catch would be.
 - **He never explains what he is.** He does not appear to think it is interesting.
 
-His **name degrades where the water is bad** — letters drop out by position, the same way in the same
+His **name degrades where the fabric is thin** — letters drop out by position, the same way in the same
 place every time, because the degradation is a property of the place rather than of him.
 
 **What he does with the catch he takes in payment is never explained, and that is a rule rather than
@@ -366,16 +374,20 @@ and no one has any observations to offer about it.
 
 | Thing | Trade / official | Slang, and the UI | Never |
 |---|---|---|---|
-| Reality's substrate | the fabric | the water | "the veil", "the aether" |
+| Reality's substrate | the fabric | — | **"the water"**, "the veil", "the aether" |
 | A worn-through place | a breach, a rupture | a pond, a spot | a jump point, a portal, a gate |
 | A hyperspace ghost | a pattern | a fish | a creature, an animal, a species (except as a table term) |
 | The drones | LYNE drones | the drones, the rod | robots, probes |
 | The retrieval line | — | the rope, the line | cable, cord, winch line |
 | The lamps | breach lights | searchlights, the lights, the lamps | floodlights, spotlights |
-| Local reality's condition | coherence | good water, bad water, thin water | "corruption", "taint" |
+| Local reality's condition | coherence | thin, worn, holding, going | **"bad water"**, "corruption", "taint" |
 
 The mod's own UI leans slang almost everywhere, because the UI belongs to whoever is holding the
 rod. Precision is a *character* choice — somebody being careful, or somebody who knows too much.
+
+The bolded entries are the ones this document got wrong once and had to be swept back out of forty
+lines of dialogue. A fisher's patch is **a rupture**, not a piece of water; a species' habitat is
+**its range**, not its waters; somewhere with no rupture in it is **open space**.
 
 ---
 
