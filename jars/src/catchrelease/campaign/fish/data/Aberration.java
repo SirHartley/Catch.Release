@@ -62,10 +62,12 @@ import java.util.Map;
  *     as the player crosses a system, and it is the one question the cached figure cannot answer.
  * </ul>
  *
- * <b>Hyperspace has no entity reading at all.</b> Not an optimisation - the two sources that exist
- * out there are the abyss, which is a depth field, and slipstreams, which are hyperspace terrain.
- * Nothing else is reachable from a point that is not in a system, and nothing reads aberration in
- * hyperspace anyway: ponds are only ever placed in systems and the rigs will not run outside one.
+ * <b>A point belonging to no system still reads everything.</b> It briefly did not, on the
+ * reasoning that nothing asks about hyperspace - and the map's coherence heat field, which samples
+ * a grid of bare points across the sector to paint what the water is like around each of them,
+ * came out showing the two sources that happen to be terrain and nothing else. Open space is not
+ * a special case; it is the ordinary case without the one rule that needs a system, which is that
+ * a source standing in the place being read counts at full weight.
  * <p>
  * <b>Foreign tags.</b> Other mods put things in the sector that belong on the list, and the list
  * names them by tag - see {@link AberrationSource}. Nothing here depends on any of those mods being
@@ -182,18 +184,17 @@ public class Aberration {
      * units, from the location's own entity lists - never {@code SectorAPI.getEntitiesWithTag},
      * which would walk the whole sector for an answer about one system.
      * <p>
-     * Floored rather than zeroed where there is nothing to stand near: a system whose reading comes
-     * from a gate two light-years away is still bad water throughout, and an overlay that switched
-     * off as the player drifted clear of an object would read as a fault rather than as distance.
-     * See {@link FishConstants#ABERRATION_LOCAL_FLOOR}.
+     * <b>Zero means "nothing here to stand near", not "no aberration here".</b> Most systems are
+     * thin because of something outside them, and this will honestly say nothing about those. It is
+     * something to <i>add</i> to the system's reading and never something to scale it by - see
+     * {@link FishConstants#ABERRATION_LOCAL_LIFT}, and the paragraph there about what scaling it
+     * did to the overlay.
      */
     public static float localPull(SectorEntityToken from) {
-        if (from == null) return FishConstants.ABERRATION_LOCAL_FLOOR;
+        if (from == null) return 0f;
 
         LocationAPI location = from.getContainingLocation();
-        if (!(location instanceof StarSystemAPI system)) {
-            return FishConstants.ABERRATION_LOCAL_FLOOR;
-        }
+        if (!(location instanceof StarSystemAPI system)) return 0f;
 
         float nearest = 0f;
 
@@ -209,8 +210,7 @@ public class Aberration {
             }
         }
 
-        return FishConstants.ABERRATION_LOCAL_FLOOR
-                + (1f - FishConstants.ABERRATION_LOCAL_FLOOR) * MathUtils.clamp(nearest, 0f, 1f);
+        return MathUtils.clamp(nearest, 0f, 1f);
     }
 
     /**
@@ -324,10 +324,20 @@ public class Aberration {
     }
 
     /**
-     * Hyperspace, where the only two sources are the ones that were never objects.
+     * A bare point, belonging to no system - hyperspace between the stars, or a spot on the map.
      * <p>
-     * Evaluated rather than cached because a fleet in hyperspace is somewhere new every frame, and
-     * cheap enough to make that fine: the abyss is one lookup and the streams are already indexed.
+     * Everything reaches it. This is the same walk {@link #build} does for a system, minus the one
+     * rule that only makes sense for a system: a source standing <i>in</i> the place being read
+     * counts at full weight, and a point in open space is not in anything.
+     * <p>
+     * It answered with the abyss and the streams alone for two commits, on the reasoning that
+     * nothing reads aberration out in hyperspace. Wrong, and the map is the proof: the coherence
+     * heat field samples a grid of bare points across the whole sector to paint what the water is
+     * like around each of them, and got a picture of the two sources that are terrain with every
+     * gate, hypershunt, collapsed star and engine missing from it.
+     * <p>
+     * Not cached, and does not need to be: a point in open space is a different point every frame,
+     * and against a built index this is a few hundred rejected distances.
      */
     protected static Reading openSpaceReading(Vector2f locInHyper, LocationAPI location,
                                               boolean foundOnly) {
@@ -335,10 +345,15 @@ public class Aberration {
         float worst = abyssShare(locInHyper, location, foundOnly);
         AberrationSource blame = worst > 0f ? AberrationSource.ABYSS : null;
 
-        float stream = getSlipstreamShare(locInHyper);
-        if (stream > worst) {
-            worst = stream;
-            blame = AberrationSource.SLIPSTREAM;
+        for (Mark mark : marks()) {
+            if (!mark.isLive()) continue;
+            if (foundOnly && !mark.isFound()) continue;
+
+            float share = mark.shareAt(locInHyper);
+            if (share <= worst) continue;
+
+            worst = share;
+            blame = mark.source;
         }
 
         return new Reading(MathUtils.clamp(worst, 0f, 1f), blame);
@@ -404,6 +419,16 @@ public class Aberration {
         protected final float weight;
 
         /**
+         * The reach again, squared, in world units.
+         * <p>
+         * Purely so a point can be rejected without a square root. The heat field samples thousands
+         * of points against every mark in the sector and almost every pair is out of range, so the
+         * reject is the operation that actually runs - {@code Misc.getDistanceLY} would take a
+         * sqrt and a divide first and then throw the answer away.
+         */
+        protected final float reachSq;
+
+        /**
          * Held so discovery can be asked live rather than baked into the index.
          * <p>
          * Surveying a hypershunt should change the route planner's mind now, not when the index
@@ -421,10 +446,20 @@ public class Aberration {
 
             this.reachLY = source.reachLY(entity);
             this.weight = source.weight(entity);
+
+            float reachWorld = this.reachLY * Misc.getUnitsPerLightYear();
+            this.reachSq = reachWorld * reachWorld;
         }
 
         protected float shareAt(Vector2f locInHyper) {
-            return falloff(Misc.getDistanceLY(locInHyper, inHyper), reachLY) * weight;
+            float dx = locInHyper.x - inHyper.x;
+            float dy = locInHyper.y - inHyper.y;
+
+            float distSq = dx * dx + dy * dy;
+            if (distSq >= reachSq) return 0f;
+
+            return falloff((float) Math.sqrt(distSq) / Misc.getUnitsPerLightYear(), reachLY)
+                    * weight;
         }
 
         /**
