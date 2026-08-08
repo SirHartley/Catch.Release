@@ -21,10 +21,10 @@ import java.util.List;
  * The crawl is by capability, like every screen we stand on: the encounter dialog comes off
  * {@code CampaignState}, and the planet visual inside it is the child with {@code getPlanet}.
  * The tank mounts when the dialog's market has a working, switched-on conservatory, the docked
- * core UI is anything short of fully covering the menu, and the planet image is the visual
- * actually on screen; it
- * unmounts the moment any of that stops being true. That last one is what keeps the glass on the
- * colony's main menu and off the bar, the briefing portraits and anything else shown over the top.
+ * core UI is anything short of fully covering the menu, and the planet image is the visual actually
+ * on screen; it unmounts the moment any of that stops being true. That last one is what keeps the
+ * glass on the colony's main menu and off the bar, the briefing portraits and anything else shown
+ * over the top.
  * Every step fails soft - a surprise means no tank, and the menu is exactly as vanilla drew it.
  */
 public class AquariumTankScript implements EveryFrameScript {
@@ -38,6 +38,26 @@ public class AquariumTankScript implements EveryFrameScript {
     public static final float GAP = 8f;
     public static final float TANK_HEIGHT = 170f;
     public static final float PANEL_HEIGHT = TANK_HEIGHT + AquariumTankPanel.WALL_PAD * 2f;
+
+    /**
+     * How wide the tank comes out on the colony menu, measured off a running game.
+     * <p>
+     * The real tank never uses this - it takes the planet image's own width, which is the only
+     * honest answer and adapts to whatever the interface is doing. A <i>preview</i> has no planet
+     * image to measure, and a preview of the wrong width is worse than no preview: it crops the
+     * art differently from the pane it is previewing, which is the one thing it exists to get
+     * right. So it quotes this, and {@link #getPanelWidth} hands back the real figure instead the
+     * moment a real tank has reported one.
+     */
+    public static final float PANEL_WIDTH = 400f;
+
+    /** The width a real tank was last mounted at, or 0 before one has been. */
+    protected static float mountedWidth = 0f;
+
+    /** What a preview should be built at: measured if the menu has ever said, quoted otherwise. */
+    public static float getPanelWidth() {
+        return mountedWidth > 0f ? mountedWidth : PANEL_WIDTH;
+    }
 
     /** The dialog the tank currently stands in. A new dialog means a fresh mount. */
     protected Object dialog;
@@ -222,6 +242,9 @@ public class AquariumTankScript implements EveryFrameScript {
 
         AquariumTankPanel plugin =
                 new AquariumTankPanel(conservatory, (InteractionDialogAPI) dialog);
+
+        //what the menu actually gave us, for the previews that cannot ask
+        mountedWidth = width;
 
         panel = Global.getSettings().createCustom(width, PANEL_HEIGHT, plugin);
 

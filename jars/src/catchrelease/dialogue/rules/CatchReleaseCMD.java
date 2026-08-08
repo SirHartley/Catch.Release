@@ -4,7 +4,6 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.LampOffence;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.FishingTaboo;
-import catchrelease.campaign.fish.colony.AquariumManageDialog;
 import catchrelease.campaign.fish.colony.AquariumTankPanel;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.Backdrop;
@@ -265,7 +264,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         AquariumTankPanel pane = new AquariumTankPanel(null, dialog);
         pane.setPreview(scene);
 
-        dialog.getVisualPanel().showCustomPanel(AquariumManageDialog.PREVIEW_WIDTH,
+        dialog.getVisualPanel().showCustomPanel(AquariumTankScript.getPanelWidth(),
                 AquariumTankScript.PANEL_HEIGHT, pane);
 
         return true;
