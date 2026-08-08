@@ -283,7 +283,7 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 | `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image |
-| `AquariumTankPanel.java` | The tank: GL water, bubbles, and every specimen swimming its own way |
+| `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way |
 
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
