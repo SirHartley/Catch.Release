@@ -177,8 +177,8 @@ public enum Tackle {
 
     /**
      * Whether the head reaches below the fabric, not just across the water. Covers two cases: a
-     * mote diving deep (the depth bomb used to handle this and no longer exists), and a mote buried
-     * within a lamp's passive reach, which shows as a dent but is never exposed by a beam.
+     * mote diving deep, and a mote buried within a lamp's passive reach, which shows as a dent but
+     * is never exposed by a beam.
      */
     public boolean deepStrike = false;
 

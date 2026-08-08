@@ -14,7 +14,15 @@ public class FishLogEntry implements Serializable {
         DRONE("LINE drones"),
         HARPOON("Harpoon"),
 
-        /** Depth bomb is gone from the game; kept so old saves still name the gear for past records. */
+        /**
+         * The depth bomb is gone and nothing can be caught on one any more.
+         * <p>
+         * The constant stays, and cannot be deleted: these fields are serialised into the save by
+         * name, so a campaign that landed anything on a depth bomb before it was removed would fail
+         * to load against an enum that no longer has the name in it. It costs one line and it is
+         * the difference between an old save opening and not. Everything else about the rig is
+         * gone; this is bookkeeping for catches that did happen.
+         */
         BOMB("Depth bomb"),
         UNKNOWN("Unrecorded");
 
