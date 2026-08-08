@@ -5,6 +5,7 @@ import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
@@ -74,7 +75,8 @@ public class ModPlugin extends BaseModPlugin {
         ConservatoryOptionProvider.register();
         AquariumTankScript.register();
 
-        // data
+        // data - the aberration index fills on arriving somewhere and on opening the sector map
+        Aberration.Watcher.register();
         UpgradeManager.getInstance().updateBaseValues();
         SkillshotFramework.register();
 

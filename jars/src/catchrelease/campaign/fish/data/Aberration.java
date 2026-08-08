@@ -1,12 +1,14 @@
 package catchrelease.campaign.fish.data;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
+import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.impl.campaign.GateEntityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.util.Misc;
@@ -14,47 +16,76 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * How badly a specimen holds to reality, from where it was taken - the inverse of the coherence the
  * player is shown on it.
  * <p>
- * Several things thin the local fabric, taken at their strongest rather than summed. Abyss reads
- * directly off depth; everything else falls off with distance in light-years from the system (not
- * world units), since what matters is which part of the sector this is.
+ * Several things thin the local fabric, taken at their strongest rather than summed. What they are,
+ * how far each reaches and how hard it pulls is {@link AberrationSource}; this is the arithmetic and
+ * the bookkeeping.
+ *
+ * <h2>Why this is not a set of loops over the sector</h2>
+ *
+ * It was, and it cost the frame rate. Every reading walked every star system for a black hole, then
+ * asked the sector for every gate, every hypershunt and every foreign engine by tag - and
+ * {@code SectorAPI.getEntitiesWithTag} iterates hyperspace and every system on each call - then
+ * walked all of hyperspace's terrain for slipstreams. Six sector-wide crawls per reading, and
+ * readings were taken from tooltips and terrain readouts that ask again every frame, and from the
+ * route planner once per candidate system.
  * <p>
- * A gate counts twice over, because it is two different objects. Dormant it is a hole with the lid
- * on - three light-years and not much of it. Lit, something is being held open between here and
- * somewhere else, and it reads harder than anything but the abyss. Which is why gates cannot go
- * through {@link #getNearestLY} like the rest: the nearest gate is not necessarily the worst one,
- * and a dormant gate overhead can matter less than a live one two systems away.
+ * None of that work was needed twice. <b>A gate does not move.</b> Neither does a hypershunt, a
+ * black hole or anything else here; slipstreams are the single exception, and they are hyperspace
+ * terrain that changes on the scale of a cycle. So the crawl happens once and is kept:
+ *
+ * <ul>
+ * <li><b>The index</b> ({@link #marks()}) is one pass over the sector producing a flat list of
+ *     sources with their positions, reaches and weights already resolved. Rebuilt when the day
+ *     rolls over or the gates switch on, and not otherwise. Evaluating a point against it is a loop
+ *     over a few dozen floats.
+ * <li><b>The steady reading</b> of a system - what a pond, a catch, a habitat and the overlay's
+ *     intensity are all judged on - is computed from the index and cached per system. Filled for the
+ *     player's own system when they arrive in it, for every system at once when the sector map
+ *     opens, and on demand for anything else that asks.
+ * <li><b>The local pull</b> ({@link #localPull}) is the only thing computed every frame, and it
+ *     never leaves the system the player is standing in: it asks that one location for its own
+ *     tagged entities and measures world-unit distance to them. It is what makes the overlay breathe
+ *     as the player crosses a system, and it is the one question the cached figure cannot answer.
+ * </ul>
+ *
+ * <b>Hyperspace has no entity reading at all.</b> Not an optimisation - the two sources that exist
+ * out there are the abyss, which is a depth field, and slipstreams, which are hyperspace terrain.
+ * Nothing else is reachable from a point that is not in a system, and nothing reads aberration in
+ * hyperspace anyway: ponds are only ever placed in systems and the rigs will not run outside one.
  * <p>
- * <b>Foreign tags.</b> Other mods put things in the sector that belong on this list, and the list
- * names them by tag - see {@link #FOREIGN_GATES} and below. Nothing here depends on any of those
- * mods being installed: a tag nobody has registered simply matches nothing, so the lookup costs an
- * empty list and the reading is unchanged.
+ * <b>Foreign tags.</b> Other mods put things in the sector that belong on the list, and the list
+ * names them by tag - see {@link AberrationSource}. Nothing here depends on any of those mods being
+ * installed: a tag nobody has registered simply matches nothing.
  */
 public class Aberration {
 
-    /**
-     * Somebody else's gates, treated as gates.
-     * <p>
-     * A second network of doors between here and elsewhere is the same fact about the fabric as the
-     * first one, whoever built it.
-     */
-    public static final String[] FOREIGN_GATES = {"bifrost"};
+    //---------------------------------------------------------------- what a place reads
 
-    /** Somebody else's hypershunt, treated as a hypershunt, for the same reason. */
-    public static final String[] FOREIGN_HYPERSHUNTS = {"aotd_hypershunt_receiver"};
+    /** A place's reading and what is most to blame for it. */
+    public static class Reading {
 
-    /**
-     * Machines large enough to work on a planet rather than on a ship.
-     * <p>
-     * Not a hole in anything - a mining station with a laser that cuts worlds is only leaning on
-     * local space very hard, so it reads short and shallow next to the doors.
-     */
-    public static final String[] FOREIGN_ENGINES = {"aotd_pluto_station"};
+        public final float level;
+
+        /** Null when nothing there is worth blaming - see {@link #dominantSourceAt}. */
+        public final AberrationSource source;
+
+        public Reading(float level, AberrationSource source) {
+            this.level = level;
+            this.source = source;
+        }
+    }
+
+    public static final Reading NOTHING = new Reading(0f, null);
+
+    //---------------------------------------------------------------- the public reads
 
     /** For a pond, or anything else that was taken somewhere. */
     public static float of(SectorEntityToken where) {
@@ -82,253 +113,509 @@ public class Aberration {
      * putting it into the habitat would make a fish's range flicker between two spawns in one pond.
      */
     public static float baseAt(Vector2f locInHyper, LocationAPI location) {
-        if (locInHyper == null) return 0f;
-
-        float worst = getAbyssShare(locInHyper, location);
-        worst = Math.max(worst, getBlackHoleShare(locInHyper));
-        worst = Math.max(worst, getHypershuntShare(locInHyper));
-        worst = Math.max(worst, getSlipstreamShare(locInHyper));
-        worst = Math.max(worst, getGateShare(locInHyper, false));
-        worst = Math.max(worst, getEngineShare(locInHyper));
-
-        return MathUtils.clamp(worst, 0f, 1f);
+        return readingAt(locInHyper, location, false).level;
     }
 
     /**
-     * Names the strongest source at a place - "the abyss", "a collapsed star", "a hypershunt",
-     * "a slipstream" - or null when nothing there is worth blaming. The cut is the same one below
-     * which the coherence labels read "stable", so a named source and a bad reading always arrive
-     * together.
+     * Names the strongest source at a place - "the abyss", "a collapsed star", "a hypershunt" - or
+     * null when nothing there is worth blaming. The cut is the same one below which the coherence
+     * labels read "stable", so a named source and a bad reading always arrive together.
      */
     public static String dominantSourceAt(Vector2f locInHyper, LocationAPI location) {
-        if (locInHyper == null) return null;
+        Reading reading = readingAt(locInHyper, location, false);
 
-        float best = FishConstants.COHERENCE_OVERLAY_FLOOR;
-        String name = null;
+        if (reading.source == null) return null;
+        if (reading.level <= FishConstants.COHERENCE_OVERLAY_FLOOR) return null;
 
-        float share = getAbyssShare(locInHyper, location);
-        if (share > best) { best = share; name = "the abyss"; }
-
-        share = getBlackHoleShare(locInHyper);
-        if (share > best) { best = share; name = "a collapsed star"; }
-
-        share = getHypershuntShare(locInHyper);
-        if (share > best) { best = share; name = "a hypershunt"; }
-
-        share = getSlipstreamShare(locInHyper);
-        if (share > best) { best = share; name = "a slipstream"; }
-
-        share = getGateShare(locInHyper, false);
-        if (share > best) { best = share; name = "a gate"; }
-
-        share = getEngineShare(locInHyper);
-        if (share > best) { best = share; name = "something built too large"; }
-
-        return name;
+        return reading.source.label;
     }
 
     /**
-     * A collapsed star bends what is around it, so what comes out of the water near one is bent too.
+     * Route planner's read: deterministic (no spread), counting only what the player has found.
      * <p>
-     * Measured to the system rather than to the star itself: at this scale they are the same point,
-     * and a system's own coordinates are what the falloff is in light-years of. Full strength for
-     * anything caught in the system, tailing off into its neighbours.
+     * Stars and slipstreams always count - a system's sun is on the sector map from the first day
+     * and a stream is visible the moment it runs. Everything else is a survey result, and something
+     * the player has not surveyed cannot steer a plan they are meant to be able to reason about.
+     * The abyss counts once they have stood in it; before that its depth is hearsay.
      */
-    protected static float getBlackHoleShare(Vector2f locInHyper) {
-        float nearest = Float.MAX_VALUE;
+    public static float knownInstability(StarSystemAPI system) {
+        if (system == null || system.getLocation() == null) return 0f;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.hasBlackHole()) continue;
-
-            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, system.getLocation()));
-        }
-
-        return falloff(nearest, FishConstants.ABERRATION_BLACKHOLE_LY)
-                * FishConstants.ABERRATION_BLACKHOLE_WEIGHT;
-    }
-
-    /** Deepest in the abyss is as far from holding together as anything gets. */
-    protected static float getAbyssShare(Vector2f locInHyper, LocationAPI location) {
-        float depth = Misc.getAbyssalDepth(locInHyper);
-
-        //an abyssal system reads as fully in it even where the depth at its own coordinates does not
-        if (depth <= 0f && location != null && location.hasTag(Tags.SYSTEM_ABYSSAL)) depth = 1f;
-
-        return MathUtils.clamp(depth, 0f, 1f) * FishConstants.ABERRATION_ABYSS_WEIGHT;
-    }
-
-    protected static float getHypershuntShare(Vector2f locInHyper) {
-        return getHypershuntShare(locInHyper, false);
-    }
-
-    protected static float getHypershuntShare(Vector2f locInHyper, boolean foundOnly) {
-        float nearest = getNearestLY(locInHyper,
-                taggedWith(Tags.CORONAL_TAP, FOREIGN_HYPERSHUNTS), foundOnly);
-
-        return falloff(nearest, FishConstants.ABERRATION_HYPERSHUNT_LY)
-                * FishConstants.ABERRATION_HYPERSHUNT_WEIGHT;
+        return readingAt(system.getLocation(), system, true).level;
     }
 
     /**
-     * Whether the player has actually found this, for the readings that are only allowed to know
-     * what the player knows.
-     * <p>
-     * The rule is the same for everything that sits inside a system, and it is one rule rather than
-     * a judgement per source: hidden until somebody has been there and looked. Exactly two things
-     * are exempt, and neither of them is an object you find - a star, because a system's own sun is
-     * drawn on the sector map from the first day and a black hole with it, and a slipstream, which
-     * is visible the moment it runs. Everything else is a survey result.
+     * Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes the
+     * nearest, close enough for a rough number. Public since the route planner discounts travel
+     * along them, sampling several points per leg.
      */
-    protected static boolean isFound(SectorEntityToken entity) {
-        return entity != null && !entity.isDiscoverable();
-    }
+    public static float getSlipstreamShare(Vector2f locInHyper) {
+        if (locInHyper == null) return 0f;
 
-    /**
-     * The doors, each read on its own terms.
-     * <p>
-     * Per-gate rather than nearest-gate, because a live one and a dormant one are not the same
-     * source measured from different distances - they have different reaches and different depths,
-     * so the nearest is not reliably the worst.
-     *
-     * @param foundOnly for the route planner, which may only reason about what the player has
-     *                  actually surveyed - see {@link #isFound}
-     */
-    protected static float getGateShare(Vector2f locInHyper, boolean foundOnly) {
         float worst = 0f;
 
-        for (SectorEntityToken gate : taggedWith(Tags.GATE, FOREIGN_GATES)) {
-            if (foundOnly && !isFound(gate)) continue;
+        for (Mark mark : marks()) {
+            if (mark.source != AberrationSource.SLIPSTREAM) continue;
 
-            boolean active = isGateActive(gate);
-
-            float share = falloff(
-                    Misc.getDistanceLY(locInHyper, gate.getLocationInHyperspace()),
-                    active ? FishConstants.ABERRATION_GATE_ACTIVE_LY
-                            : FishConstants.ABERRATION_GATE_LY)
-                    * (active ? FishConstants.ABERRATION_GATE_ACTIVE_WEIGHT
-                            : FishConstants.ABERRATION_GATE_WEIGHT);
-
-            worst = Math.max(worst, share);
+            worst = Math.max(worst, mark.shareAt(locInHyper));
         }
 
         return worst;
     }
 
     /**
-     * Whether anything is coming through this one.
+     * How near the player is standing to something in this system that is thinning it, 0 to 1.
      * <p>
-     * Vanilla's own plugin is asked where there is one. A foreign gate is not that class and asking
-     * it directly would throw, so it is read off the sector-wide switch instead - which is the same
-     * question one step out, and the best answer available without knowing whose gate it is.
+     * The one figure taken every frame, and the one the cached reading cannot supply: at sector
+     * scale every object in a system shares the system's coordinates, so the steady reading is a
+     * single number for the whole system and says nothing about crossing it. This does, in world
+     * units, from the location's own entity lists - never {@code SectorAPI.getEntitiesWithTag},
+     * which would walk the whole sector for an answer about one system.
+     * <p>
+     * Floored rather than zeroed where there is nothing to stand near: a system whose reading comes
+     * from a gate two light-years away is still bad water throughout, and an overlay that switched
+     * off as the player drifted clear of an object would read as a fault rather than as distance.
+     * See {@link FishConstants#ABERRATION_LOCAL_FLOOR}.
      */
-    protected static boolean isGateActive(SectorEntityToken gate) {
-        if (gate.getCustomPlugin() instanceof GateEntityPlugin plugin) return plugin.isActive();
+    public static float localPull(SectorEntityToken from) {
+        if (from == null) return FishConstants.ABERRATION_LOCAL_FLOOR;
 
-        return GateEntityPlugin.areGatesActive();
-    }
+        LocationAPI location = from.getContainingLocation();
+        if (!(location instanceof StarSystemAPI system)) {
+            return FishConstants.ABERRATION_LOCAL_FLOOR;
+        }
 
-    /** Machines big enough to lean on local space, which is not the same as opening it. */
-    protected static float getEngineShare(Vector2f locInHyper) {
-        return getEngineShare(locInHyper, false);
-    }
+        float nearest = 0f;
 
-    protected static float getEngineShare(Vector2f locInHyper, boolean foundOnly) {
-        float nearest = getNearestLY(locInHyper, taggedWith(null, FOREIGN_ENGINES), foundOnly);
+        for (AberrationSource source : AberrationSource.values()) {
+            if (source.localReach <= 0f) continue;
 
-        return falloff(nearest, FishConstants.ABERRATION_ENGINE_LY)
-                * FishConstants.ABERRATION_ENGINE_WEIGHT;
+            for (SectorEntityToken entity : localSources(system, source)) {
+                float reach = source.localReach(entity);
+                if (reach <= 0f) continue;
+
+                nearest = Math.max(nearest,
+                        falloff(Misc.getDistance(from.getLocation(), entity.getLocation()), reach));
+            }
+        }
+
+        return FishConstants.ABERRATION_LOCAL_FLOOR
+                + (1f - FishConstants.ABERRATION_LOCAL_FLOOR) * MathUtils.clamp(nearest, 0f, 1f);
     }
 
     /**
-     * Everything carrying any of these tags, vanilla's and other mods' alike.
+     * This one system's own sources, asked of the system rather than of the sector.
      * <p>
-     * {@code getEntitiesWithTag} rather than the custom-entity version, because a foreign mod is
-     * free to have built its gate out of something other than a custom entity, and an absent tag
-     * returns nothing rather than failing - which is what keeps all of this optional.
+     * {@code LocationAPI.getEntitiesWithTag} is a lookup in a list the location already keeps;
+     * {@code SectorAPI}'s namesake iterates hyperspace and every system in the sector to build a new
+     * one. They read identically at the call site, which is how the old class came to be doing the
+     * second sixty times a second.
      */
-    protected static List<SectorEntityToken> taggedWith(String vanilla, String[] foreign) {
+    protected static List<SectorEntityToken> localSources(StarSystemAPI system,
+                                                          AberrationSource source) {
+
+        if (source == AberrationSource.BLACK_HOLE) {
+            List<SectorEntityToken> out = new ArrayList<>(1);
+
+            if (system.hasBlackHole() && system.getStar() != null) out.add(system.getStar());
+
+            return out;
+        }
+
+        if (source.find != AberrationSource.Find.TAG) return new ArrayList<>(0);
+
         List<SectorEntityToken> out = new ArrayList<>();
-
-        if (vanilla != null) out.addAll(Global.getSector().getEntitiesWithTag(vanilla));
-
-        for (String tag : foreign) out.addAll(Global.getSector().getEntitiesWithTag(tag));
+        for (String tag : source.tags) out.addAll(system.getEntitiesWithTag(tag));
 
         return out;
     }
 
+    //---------------------------------------------------------------- the cached readings
+
     /**
-     * Route planner's read: deterministic (no spread), counting only what the player has found -
-     * slipstreams always count (visible the moment they run), but an undiscovered hypershunt or
-     * an abyss never entered can't steer a plan the player is meant to reason about.
+     * The steady reading per system, and the survey-gated one beside it.
+     * <p>
+     * Two maps rather than one entry with two fields, because the second is only ever wanted by the
+     * route planner and computing it means asking every mark whether the player has found it.
      */
-    public static float knownInstability(StarSystemAPI system) {
-        if (system == null || system.getLocation() == null) return 0f;
+    protected static final Map<String, Reading> readings = new HashMap<>();
+    protected static final Map<String, Reading> known = new HashMap<>();
 
-        Vector2f loc = system.getLocation();
+    /**
+     * Reads a place, from cache where the place is a system.
+     * <p>
+     * Hyperspace is not cached and not indexed by position: a fleet out there is somewhere new every
+     * frame, and the only two sources that reach it are cheap to evaluate directly.
+     */
+    protected static Reading readingAt(Vector2f locInHyper, LocationAPI location,
+                                       boolean foundOnly) {
 
-        float worst = getSlipstreamShare(loc);
+        if (locInHyper == null) return NOTHING;
 
-        //one of the two exemptions: a system's star is drawn on the sector map from the start, so a
-        //black hole is a thing the player can already see and route around. The other is the
-        //slipstream above, visible the moment it runs. Everything else waits to be surveyed
-        worst = Math.max(worst, getBlackHoleShare(loc));
+        if (location instanceof StarSystemAPI system) return readingFor(system, foundOnly);
 
-        //every in-system object goes through the same gate - nothing the player has not surveyed
-        //can steer a plan they are meant to be able to reason about, whatever kind of object it is
-        worst = Math.max(worst, getHypershuntShare(loc, true));
-        worst = Math.max(worst, getGateShare(loc, true));
-        worst = Math.max(worst, getEngineShare(loc, true));
-
-        if (hasEnteredAbyss()) worst = Math.max(worst, getAbyssShare(loc, system));
-
-        return MathUtils.clamp(worst, 0f, 1f);
+        return openSpaceReading(locInHyper, location, foundOnly);
     }
 
-    /** Whether the player has ever stood in the abyss - before that, its depth is hearsay. */
-    protected static boolean hasEnteredAbyss() {
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.hasTag(Tags.SYSTEM_ABYSSAL) && system.isEnteredByPlayer()) return true;
+    /** A system's steady reading, computed once and held until something could have changed it. */
+    protected static Reading readingFor(StarSystemAPI system, boolean foundOnly) {
+        if (system == null || system.getLocation() == null) return NOTHING;
+
+        //the index first, since asking for it is what checks whether everything held is still
+        //valid - and a clear happening between the lookup and the store would file a stale answer
+        List<Mark> found = marks();
+
+        Map<String, Reading> cache = foundOnly ? known : readings;
+
+        Reading held = cache.get(system.getId());
+        if (held != null) return held;
+
+        Reading built = build(found, system, foundOnly);
+        cache.put(system.getId(), built);
+
+        return built;
+    }
+
+    /**
+     * One system's reading, off the index.
+     * <p>
+     * Sources standing in this system count at full weight rather than by light-year distance,
+     * which is zero for all of them - the falloff is between systems, and the question of how near
+     * the player is to one of them inside the system is {@link #localPull}'s.
+     */
+    protected static Reading build(List<Mark> found, StarSystemAPI system, boolean foundOnly) {
+        Vector2f at = system.getLocation();
+
+        float worst = 0f;
+        AberrationSource blame = null;
+
+        //the depth field, which has no marks and is the only source that can reach 1 on its own
+        float abyss = abyssShare(at, system, foundOnly);
+        if (abyss > worst) {
+            worst = abyss;
+            blame = AberrationSource.ABYSS;
         }
+
+        for (Mark mark : found) {
+            if (foundOnly && !mark.isFound()) continue;
+
+            float share = system.getId().equals(mark.systemId)
+                    ? mark.weight
+                    : mark.shareAt(at);
+
+            if (share <= worst) continue;
+
+            worst = share;
+            blame = mark.source;
+        }
+
+        return new Reading(MathUtils.clamp(worst, 0f, 1f), blame);
+    }
+
+    /**
+     * Hyperspace, where the only two sources are the ones that were never objects.
+     * <p>
+     * Evaluated rather than cached because a fleet in hyperspace is somewhere new every frame, and
+     * cheap enough to make that fine: the abyss is one lookup and the streams are already indexed.
+     */
+    protected static Reading openSpaceReading(Vector2f locInHyper, LocationAPI location,
+                                              boolean foundOnly) {
+
+        float worst = abyssShare(locInHyper, location, foundOnly);
+        AberrationSource blame = worst > 0f ? AberrationSource.ABYSS : null;
+
+        float stream = getSlipstreamShare(locInHyper);
+        if (stream > worst) {
+            worst = stream;
+            blame = AberrationSource.SLIPSTREAM;
+        }
+
+        return new Reading(MathUtils.clamp(worst, 0f, 1f), blame);
+    }
+
+    /**
+     * Deepest in the abyss is as far from holding together as anything gets.
+     *
+     * @param foundOnly the abyss counts for the route planner only once the player has stood in it;
+     *                  before that its depth is hearsay
+     */
+    protected static float abyssShare(Vector2f locInHyper, LocationAPI location, boolean foundOnly) {
+        if (foundOnly && !hasEnteredAbyss()) return 0f;
+
+        float depth = Misc.getAbyssalDepth(locInHyper);
+
+        //an abyssal system reads as fully in it even where the depth at its own coordinates does not
+        if (depth <= 0f && location != null && location.hasTag(Tags.SYSTEM_ABYSSAL)) depth = 1f;
+
+        return MathUtils.clamp(depth, 0f, 1f) * AberrationSource.ABYSS.weight;
+    }
+
+    /**
+     * Whether the player has ever stood in the abyss - before that, its depth is hearsay.
+     * <p>
+     * Memoised, because the answer only ever travels one way and the question costs a walk of every
+     * system in the sector - which the map's own fill would otherwise ask once per system. Cleared
+     * by the {@link Watcher} whenever the player changes location, since arriving somewhere is the
+     * only event that can turn it true.
+     */
+    protected static Boolean entered = null;
+
+    protected static boolean hasEnteredAbyss() {
+        if (entered != null && entered) return true;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.hasTag(Tags.SYSTEM_ABYSSAL) && system.isEnteredByPlayer()) {
+                entered = true;
+
+                return true;
+            }
+        }
+
+        entered = false;
 
         return false;
     }
 
-    /** Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes
-     *  the nearest, close enough for a rough number. Public since the route planner discounts
-     *  travel along them. */
-    public static float getSlipstreamShare(Vector2f locInHyper) {
-        float nearest = Float.MAX_VALUE;
+    //---------------------------------------------------------------- the index
 
-        for (CampaignTerrainAPI terrain : Global.getSector().getHyperspace().getTerrainCopy()) {
-            if (!Terrain.SLIPSTREAM.equals(terrain.getType())) continue;
+    /** One source, found once, with everything about it already worked out. */
+    protected static class Mark {
 
-            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, terrain.getLocation()));
+        protected final AberrationSource source;
+
+        /** Where on the sector map it is, which is what the light-year falloff measures from. */
+        protected final Vector2f inHyper;
+
+        /** Which system it stands in, or null for the ones that are not in one. */
+        protected final String systemId;
+
+        protected final float reachLY;
+        protected final float weight;
+
+        /**
+         * Held so discovery can be asked live rather than baked into the index.
+         * <p>
+         * Surveying a hypershunt should change the route planner's mind now, not when the index
+         * next rebuilds. Null for the sources there is nothing to discover.
+         */
+        protected final SectorEntityToken entity;
+
+        protected Mark(AberrationSource source, Vector2f inHyper, String systemId,
+                       SectorEntityToken entity) {
+
+            this.source = source;
+            this.inHyper = inHyper;
+            this.systemId = systemId;
+            this.entity = entity;
+
+            this.reachLY = source.reachLY(entity);
+            this.weight = source.weight(entity);
         }
 
-        return falloff(nearest, FishConstants.ABERRATION_SLIPSTREAM_LY)
-                * FishConstants.ABERRATION_SLIPSTREAM_WEIGHT;
+        protected float shareAt(Vector2f locInHyper) {
+            return falloff(Misc.getDistanceLY(locInHyper, inHyper), reachLY) * weight;
+        }
+
+        /**
+         * Whether the player has found this.
+         * <p>
+         * One rule for everything that sits inside a system - hidden until somebody has been there
+         * and looked. The rows that are exempt say so themselves ({@code survey}), and neither of
+         * them is an object you find.
+         */
+        protected boolean isFound() {
+            if (!source.survey) return true;
+
+            return entity != null && !entity.isDiscoverable();
+        }
     }
 
-    /** @param foundOnly whether to skip anything the player has not surveyed - see {@link #isFound} */
-    protected static float getNearestLY(Vector2f locInHyper, Iterable<SectorEntityToken> entities,
-                                        boolean foundOnly) {
-        float nearest = Float.MAX_VALUE;
+    protected static List<Mark> index = null;
 
-        for (SectorEntityToken entity : entities) {
-            if (foundOnly && !isFound(entity)) continue;
+    /**
+     * What the index was built against.
+     * <p>
+     * The date, because slipstreams are the one source that moves and they move on the scale of a
+     * cycle; and whether the gates are lit, because that switch turns every gate in the sector into
+     * a different source overnight. Nothing else on the list can change without a new campaign.
+     */
+    protected static long stampDate = Long.MIN_VALUE;
+    protected static boolean stampGates = false;
 
-            nearest = Math.min(nearest, Misc.getDistanceLY(locInHyper, entity.getLocationInHyperspace()));
+    /** The sector's sources, crawled once. */
+    protected static List<Mark> marks() {
+        checkStamp();
+
+        if (index == null) index = crawl();
+
+        return index;
+    }
+
+    /**
+     * Drops everything the moment the world it was measured from stops matching.
+     * <p>
+     * Called on the way into every read, so it has to be free: two field comparisons and no
+     * allocation. It is the whole of the invalidation - there is nothing to subscribe to, because
+     * nothing on the list moves on its own.
+     */
+    protected static void checkStamp() {
+        long date = Global.getSector().getClock().getCycle() * 10000L
+                + Global.getSector().getClock().getMonth() * 100L
+                + Global.getSector().getClock().getDay();
+
+        boolean gates = AberrationSource.gatesLit();
+
+        if (date == stampDate && gates == stampGates) return;
+
+        stampDate = date;
+        stampGates = gates;
+
+        index = null;
+        readings.clear();
+        known.clear();
+    }
+
+    /**
+     * The one pass over the sector.
+     * <p>
+     * Tagged sources come out of {@code SectorAPI.getEntitiesWithTag}, which is the expensive call
+     * this whole class is arranged around calling once. The other two kinds are not entities and
+     * are gathered their own way.
+     */
+    protected static List<Mark> crawl() {
+        List<Mark> out = new ArrayList<>();
+
+        for (AberrationSource source : AberrationSource.values()) {
+            switch (source.find) {
+                case TAG:
+                    for (String tag : source.tags) {
+                        for (SectorEntityToken entity : Global.getSector().getEntitiesWithTag(tag)) {
+                            if (entity == null || entity.isExpired()) continue;
+
+                            out.add(new Mark(source, entity.getLocationInHyperspace(),
+                                    systemIdOf(entity), entity));
+                        }
+                    }
+                    break;
+
+                case STAR:
+                    for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                        if (!system.hasBlackHole() || system.getLocation() == null) continue;
+
+                        out.add(new Mark(source, system.getLocation(), system.getId(), null));
+                    }
+                    break;
+
+                case STREAM:
+                    for (CampaignTerrainAPI terrain
+                            : Global.getSector().getHyperspace().getTerrainCopy()) {
+
+                        if (!Terrain.SLIPSTREAM.equals(terrain.getType())) continue;
+
+                        out.add(new Mark(source, terrain.getLocation(), null, null));
+                    }
+                    break;
+
+                default:
+                    //a field, with nothing to mark - see abyssShare
+                    break;
+            }
         }
 
-        return nearest;
+        return out;
+    }
+
+    /** Which system an entity stands in, or null where it is not in one. */
+    protected static String systemIdOf(SectorEntityToken entity) {
+        LocationAPI location = entity.getContainingLocation();
+
+        return location instanceof StarSystemAPI system ? system.getId() : null;
     }
 
     /** 1 on top of it, 0 at the given range and beyond, curved so most of the effect is close in. */
-    protected static float falloff(float distanceLY, float rangeLY) {
-        if (distanceLY >= rangeLY || rangeLY <= 0f) return 0f;
+    protected static float falloff(float distance, float range) {
+        if (range <= 0f || distance >= range) return 0f;
 
-        float near = 1f - distanceLY / rangeLY;
+        float near = 1f - distance / range;
 
         return near * near;
+    }
+
+    //---------------------------------------------------------------- when the caches are filled
+
+    /**
+     * Fills the caches at the two moments worth filling them at, and at no other.
+     * <p>
+     * <b>Arriving somewhere</b> fills that one system, so the reading the overlay and every tooltip
+     * in it will be asking for is already there before anything asks. Leaving for hyperspace fills
+     * nothing: there is no entity reading out there to keep up to date.
+     * <p>
+     * <b>Opening the sector map</b> fills every system at once, because that is the screen that
+     * wants every system - the fishing map overlay colours them all and the route planner scores
+     * them all. It is also the cheapest possible moment to do it: the campaign is paused, so
+     * nothing can change underneath the answer, and one crawl serves the whole sector.
+     * <p>
+     * Runs while paused, since the map is a paused screen and the opening of it is the event.
+     */
+    public static class Watcher implements EveryFrameScript {
+
+        protected transient LocationAPI lastLocation;
+        protected transient boolean placed = false;
+        protected transient boolean mapWasOpen = false;
+
+        public static void register() {
+            Global.getSector().addTransientScript(new Watcher());
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return true;
+        }
+
+        @Override
+        public void advance(float amount) {
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            if (player == null) return;
+
+            LocationAPI where = player.getContainingLocation();
+
+            //the first look after a load is not an arrival, but the system still wants filling -
+            //the save was left standing in it
+            if (!placed || where != lastLocation) {
+                placed = true;
+                lastLocation = where;
+
+                //arriving somewhere is the only thing that can make the abyss a thing the player
+                //has stood in, which is what the route planner's reading turns on
+                entered = null;
+
+                if (where instanceof StarSystemAPI system) readingFor(system, false);
+            }
+
+            boolean mapOpen = Global.getSector().getCampaignUI() != null
+                    && Global.getSector().getCampaignUI().getCurrentCoreTab() == CoreUITabId.MAP;
+
+            if (mapOpen && !mapWasOpen) fillSector();
+
+            mapWasOpen = mapOpen;
+        }
+
+        /**
+         * Every system, both readings, off one crawl.
+         * <p>
+         * The crawl is the cost and it is paid once here; each system after that is a walk over a
+         * list of floats already in memory.
+         */
+        protected void fillSector() {
+            for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                readingFor(system, false);
+                readingFor(system, true);
+            }
+        }
     }
 }
