@@ -436,7 +436,7 @@ The sector-map fish filter.
 | `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges and the close-route label |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
-| `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed |
+| `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR` |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from open asks; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot, built from the sidebar's own parts: search, chips, pick up to five, plot |
