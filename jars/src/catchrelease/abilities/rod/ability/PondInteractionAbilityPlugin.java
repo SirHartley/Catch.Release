@@ -32,7 +32,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     protected String getActivationText() {
-        return isRoamingAvailable() ? "Dispatching Drones" : "Unlocking Pond";
+        return isRoamingAvailable() ? "Dispatching drones" : "Forcing the rupture";
     }
 
     /**

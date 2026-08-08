@@ -194,8 +194,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         if (!Global.CODEX_TOOLTIP_MODE) tooltip.addTitle(spec.getName());
         else tooltip.addSpacer(-10f);
 
-        tooltip.addPara("Fires a line at a mote. A hit drives it back and holds it on the line"
-                + " while it is played, and a landed specimen comes home on the line.", pad);
+        tooltip.addPara("Fires a head on a line at whatever is in the water. A hit drives it back"
+                + " and holds it while it is played, and a landed specimen comes home on the line.",
+                pad);
 
         tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
                 + " heavier one takes you with it.", Misc.getGrayColor(), pad);
