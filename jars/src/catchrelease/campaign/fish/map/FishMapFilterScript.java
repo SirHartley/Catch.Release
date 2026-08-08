@@ -363,6 +363,12 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
+    /** The heat map rides the overlay; the pane holds the choice, the overlay does the painting. */
+    @Override
+    public void onCoherenceToggled(boolean shown) {
+        if (overlay != null) overlay.setCoherenceShown(shown);
+    }
+
     /**
      * The planner takes the sidebar's own slot: the pane steps aside, the planner stands exactly
      * where it stood, and closing hands the slot back. A separate floating card was tried and
@@ -610,6 +616,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
+
+        //the toggle is sticky across map opens; a fresh overlay is told what was chosen
+        overlay.setCoherenceShown(FishMapPane.isCoherenceShown());
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);

@@ -127,6 +127,17 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 && y >= bounds[1] && y <= bounds[1] + bounds[3];
     }
 
+    /** The coherence heat map, built on first show and kept for the session's map. */
+    protected transient CoherenceHeatField heat;
+    protected boolean coherenceShown = false;
+
+    /** The sidebar's toggle lands here; the field is surveyed lazily, on the first show. */
+    public void setCoherenceShown(boolean shown) {
+        coherenceShown = shown;
+
+        if (shown && heat == null) heat = new CoherenceHeatField();
+    }
+
     /** The close label's rectangle as {x, y, width, height}, or null with nowhere to put it. */
     protected float[] getCloseLabelBounds() {
         if (panelPos == null) return null;
@@ -160,6 +171,20 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         //the waters and the route are hyperspace geometry; the system view's catch lives on
         //its own component pane now, mounted by the filter script
         if (!((LocationAPI) location).isHyperspace()) return;
+
+        //the heat map goes down first - it is the water the waters sit on
+        if (coherenceShown && heat != null) {
+            heat.sampleSome();
+
+            GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+            heat.render(factor, centerX, centerY, alphaMult);
+
+            GL11.glPopAttrib();
+        }
 
         if (!blobs.isEmpty()) {
             GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT
