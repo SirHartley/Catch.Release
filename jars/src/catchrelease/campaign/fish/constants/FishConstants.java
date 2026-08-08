@@ -460,6 +460,38 @@ public class FishConstants {
     public static final float ABERRATION_SPREAD = 0.05f;
 
     /**
+     * The same sources measured the other way: world units, inside the system they stand in.
+     * <p>
+     * The light-year figures above answer "how bad is the water in this system", which is one
+     * number for the whole system and is what a pond, a catch and a habitat are judged on. They
+     * cannot answer "how near is the player standing to the thing right now", because at that scale
+     * every object in a system is at the same light-year coordinates. That is the question the
+     * overlay asks, every frame, and these are what it asks it with - see
+     * {@code Aberration.localPull}.
+     * <p>
+     * Deliberately not derived from the light-year reaches. Twelve light-years of hypershunt
+     * converts to six times the width of a large system, which would make the answer 1 everywhere
+     * and the whole question pointless. These are sized so that crossing a system is something the
+     * screen notices.
+     */
+    public static final float ABERRATION_LOCAL_STAR = 14000f;
+    public static final float ABERRATION_LOCAL_HYPERSHUNT = 11000f;
+    public static final float ABERRATION_LOCAL_GATE = 5000f;
+    public static final float ABERRATION_LOCAL_GATE_ACTIVE = 13000f;
+    public static final float ABERRATION_LOCAL_ENGINE = 4000f;
+
+    /**
+     * How much of a system's reading is felt anywhere in it, with the rest earned by standing near
+     * whatever is causing it.
+     * <p>
+     * Never zero: a system with a live gate in it is bad water at its edges too, and an overlay
+     * that switched off the moment the player drifted away from the object would read as a bug
+     * rather than as distance. A system whose reading comes from somewhere else entirely - a gate
+     * two light-years away, the abyss - has nothing in it to stand near, and sits at this share.
+     */
+    public static final float ABERRATION_LOCAL_FLOOR = 0.55f;
+
+    /**
      * The low-coherence overlay: a full-screen warp and purple lean while a rig runs somewhere
      * thin. FLOOR/CEIL map the place's steady aberration onto overlay level 0-1 - nothing at
      * "stable", full by "barely holding", the same cuts the coherence labels use. FLOOR doubles

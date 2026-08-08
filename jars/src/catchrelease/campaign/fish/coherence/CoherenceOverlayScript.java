@@ -10,7 +10,6 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
@@ -41,24 +40,30 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         return CoherenceOverlayRenderer.getLevel();
     }
 
-    /** The place's steady reading ({@link Aberration#baseAt} - no per-catch jitter). Cached on an
-     *  interval: the read walks every system and slipstream, and the answer only moves when the
-     *  fleet does - in light-years. */
+    /**
+     * The place's steady reading ({@link Aberration#baseAt} - no per-catch jitter), and how near the
+     * fleet is standing to whatever in this system is causing it.
+     * <p>
+     * Two figures because they answer at two speeds. The reading is a property of the system and is
+     * cached there - it is the same number anywhere in it, and asking for it is a map lookup. The
+     * pull is the part that changes as the fleet moves, and it is measured against that system's own
+     * entities and nothing else, so it costs a short list walk rather than a crawl of the sector.
+     * <p>
+     * Both are taken every frame now. They used to be one figure on a one-second interval, because
+     * the one figure cost six sector-wide entity crawls and could not be afforded any more often
+     * than that; neither of these costs anything worth spacing out.
+     */
     protected float aberration = 0f;
-    protected boolean aberrationRead = false;
-    protected IntervalUtil recheck = new IntervalUtil(1f, 1f);
+    protected float pull = FishConstants.ABERRATION_LOCAL_FLOOR;
 
     @Override
     public void advance(float amount) {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) return;
 
-        recheck.advance(amount);
-        if (!aberrationRead || recheck.intervalElapsed()) {
-            aberration = Aberration.baseAt(fleet.getLocationInHyperspace(),
-                    fleet.getContainingLocation());
-            aberrationRead = true;
-        }
+        aberration = Aberration.baseAt(fleet.getLocationInHyperspace(),
+                fleet.getContainingLocation());
+        pull = Aberration.localPull(fleet);
 
         float target = getTargetLevel();
 
@@ -92,17 +97,27 @@ public class CoherenceOverlayScript implements EveryFrameScript {
      * somebody - whatever is aboard is what bad water does given long enough - weighted the same
      * way, but never fading to nothing alongside: the boat's vicinity is bad water even where the
      * system's reading is not ({@link FishConstants#COHERENCE_FISHERMAN_ABERRATION}).
+     * <p>
+     * All three ride {@link #here()} rather than the system's reading raw. The system says how bad
+     * the water is; where in the system the fleet is standing says how much of that it is standing
+     * in. Crossing a system towards the thing causing the reading now brightens the screen on the
+     * way, which is the one thing a single cached number per system could never show.
      */
     protected float getTargetLevel() {
         if (Global.getSector().getCampaignUI().isShowingDialog()) return 0f;
         if (Global.getSector().getCampaignUI().isShowingMenu()) return 0f;
 
-        float target = FishingRigs.isAnyRunning() ? levelFor(aberration) : 0f;
+        float target = FishingRigs.isAnyRunning() ? levelFor(here()) : 0f;
 
-        target = Math.max(target, getPondWeight() * levelFor(aberration));
-        target = Math.max(target, getBoatWeight() * Math.max(levelFor(aberration), boatMinimum()));
+        target = Math.max(target, getPondWeight() * levelFor(here()));
+        target = Math.max(target, getBoatWeight() * Math.max(levelFor(here()), boatMinimum()));
 
         return target;
+    }
+
+    /** The system's steady reading, taken down by however far the fleet is from what causes it. */
+    protected float here() {
+        return aberration * pull;
     }
 
     /**
