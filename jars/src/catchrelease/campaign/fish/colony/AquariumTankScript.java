@@ -20,8 +20,10 @@ import java.util.List;
  * <p>
  * The crawl is by capability, like every screen we stand on: the encounter dialog comes off
  * {@code CampaignState}, and the planet visual inside it is the child with {@code getPlanet}.
- * The tank mounts when the dialog's market has a working, switched-on conservatory and the
- * docked core UI is not covering the menu; it unmounts the moment any of that stops being true.
+ * The tank mounts when the dialog's market has a working, switched-on conservatory, the docked
+ * core UI is not covering the menu, and the planet image is the visual actually on screen; it
+ * unmounts the moment any of that stops being true. That last one is what keeps the glass on the
+ * colony's main menu and off the bar, the briefing portraits and anything else shown over the top.
  * Every step fails soft - a surprise means no tank, and the menu is exactly as vanilla drew it.
  */
 public class AquariumTankScript implements EveryFrameScript {
@@ -67,7 +69,8 @@ public class AquariumTankScript implements EveryFrameScript {
         if (dialog == null || failed) return;
 
         try {
-            boolean wanted = getConservatory(dialog) != null && !isCoreCovering(dialog);
+            boolean wanted = getConservatory(dialog) != null && !isCoreCovering(dialog)
+                    && findPlanetVisual(dialog) != null;
 
             if (wanted && panel == null) mount();
             if (!wanted && panel != null) removePanel();
@@ -129,19 +132,53 @@ public class AquariumTankScript implements EveryFrameScript {
         return !(fadedOut instanceof Boolean) || !((Boolean) fadedOut);
     }
 
-    /** The planet's interaction image: the dialog child that knows what planet it is showing. */
+    /**
+     * The planet's interaction image, if it is the visual the dialog is currently showing: the
+     * dialog child that knows what planet it is showing, and is on screen rather than on its way
+     * off it.
+     * <p>
+     * The showing half is not fussiness. The dialog swaps visuals by fading the outgoing one out
+     * and adding the incoming one beside it - nothing removes the old child until a later sweep
+     * catches its fader already out - so a plain "is there a planet child" answers yes for the
+     * whole crossfade and yes again for as long as the sweep takes. That is why the tank used to
+     * follow the player down to the dockside bar: the bar's own illustration went up, the planet
+     * image went away, and the glass stayed hanging where the image had been.
+     * <p>
+     * Asking the fader instead costs nothing and covers the rest of it for free - a portrait, a
+     * mission illustration, anything at all shown over the menu - where a test for the bar
+     * specifically would have to be written again for each of them.
+     */
     protected UIComponentAPI findPlanetVisual(Object dialog) {
         Object children = ReflectionUtils.invokeIfExists(dialog, "getChildrenCopy");
         if (!(children instanceof List)) return null;
 
         for (Object child : (List<?>) children) {
             if (child instanceof UIComponentAPI
-                    && ReflectionUtils.hasMethodOfName(child, "getPlanet")) {
+                    && ReflectionUtils.hasMethodOfName(child, "getPlanet")
+                    && isShowing(child)) {
                 return (UIComponentAPI) child;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Whether a component is on screen: it has a fader, and that fader is neither out nor on its
+     * way out. Anything that cannot be asked counts as gone, which is the same way round as
+     * {@link #isCoreCovering} and the same bargain the whole class is written on - a surprise
+     * costs the tank, never the menu underneath it.
+     */
+    protected boolean isShowing(Object component) {
+        Object fader = ReflectionUtils.invokeIfExists(component, "getFader");
+        if (fader == null) return false;
+
+        Object out = ReflectionUtils.invokeIfExists(fader, "isFadedOut");
+        Object going = ReflectionUtils.invokeIfExists(fader, "isFadingOut");
+
+        if (!(out instanceof Boolean) || !(going instanceof Boolean)) return false;
+
+        return !((Boolean) out) && !((Boolean) going);
     }
 
     /** Builds the tank under the planet image. Just the glass - stocking is the office's job. */

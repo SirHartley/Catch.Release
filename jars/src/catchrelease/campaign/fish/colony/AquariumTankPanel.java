@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -32,21 +33,40 @@ import java.util.List;
  * light, and {@link FishMotion#MIXED} cycles through the lot. The sprite is drawn as a strip
  * of segments ridden by a travelling wave - stronger at the tail, with a slow pulse over the
  * whole body - so the art breathes rather than gliding like a decal. Heading uses
- * {@link FishSpec#spriteDirection}, and a fish swimming the "wrong" way is mirrored across its
- * own spine rather than rotated onto its back.
+ * {@link FishSpec#spriteDirection}, and a fish swimming the "wrong" way turns over through
+ * edge-on rather than rotating onto its back.
  * <p>
- * Size on screen scales with the individual catch's size stat, so the tank shows off exactly
- * what the log would brag about.
+ * Size on screen is the specimen's real length read against the whole table's range, so a waller
+ * dwarfs a pipechovy and a good one of either is visibly the better fish - the tank shows off
+ * exactly what the log would brag about.
  */
 public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
     public static final float WALL_PAD = 6f;
 
-    /** On-screen fish length in px, walked by the catch's size-fraction. */
-    public static final float FISH_LENGTH_MIN = 26f;
-    public static final float FISH_LENGTH_MAX = 54f;
+    /**
+     * On-screen fish length in px, at the two ends of everything the table can hold - the
+     * smallest larva at one end and the largest waller at the other, with every specimen of
+     * every species between them.
+     */
+    public static final float FISH_LENGTH_MIN = 12f;
+    public static final float FISH_LENGTH_MAX = 76f;
 
     public static final int WARP_SEGMENTS = 10;
+
+    /**
+     * How far past straight up or straight down a heading has to get before the fish commits to
+     * turning over, as the cosine of the heading. A fish nosing near-vertical sits on the line
+     * between facing left and facing right, and without a band to hold it there the smallest
+     * wobble in its course would have it turning over and back every few frames.
+     */
+    public static final float TURNOVER_BAND = 0.15f;
+
+    /** How fast a fish turns over, across the whole -1 to 1 sweep - so a full reversal in half a second. */
+    public static final float TURNOVER_RATE = 4f;
+
+    /** Degrees a second a fish will swing its nose round towards where it is actually going. */
+    public static final float TURN_RATE = 240f;
 
     public static final Color WATER_DEEP = new Color(8, 24, 38);
     public static final Color WATER_SHALLOW = new Color(18, 60, 84);
@@ -400,6 +420,44 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 Math.round(y + (h + line.getHeight()) * 0.5f));
     }
 
+    /**
+     * How long a specimen is on the glass, in px, from how long it actually is in metres.
+     * <p>
+     * The tank used to walk this off the catch's size-fraction, which is where the specimen sits
+     * <i>within its own species</i> - so a waller and a pipechovy both came out the same middling
+     * forty-odd pixels, and the size the fish was graded and paid for never showed. Worse, the
+     * fraction is the average of two rolls that are each already bunched towards the middle, so
+     * even within one species the whole stock landed within a few pixels of each other.
+     * <p>
+     * Against the real length instead, and logarithmically, because the table spans nearly two
+     * hundred to one and a linear reading would put every fish in the sector under a pixel to
+     * make room for the waller. The ends are the table's own, so the biggest thing in the water
+     * is the biggest thing on the glass no matter what a species file adds later.
+     */
+    protected static float lengthOnGlass(FishCatch data) {
+        float span = FISH_LENGTH_MAX - FISH_LENGTH_MIN;
+
+        float shortest = Float.MAX_VALUE;
+        float longest = 0f;
+
+        for (FishSpec other : FishSpecLoader.getAllFishSpecs()) {
+            if (other.lengthMin > 0f) shortest = Math.min(shortest, other.lengthMin);
+            longest = Math.max(longest, other.lengthMax);
+        }
+
+        //a table of one length, or none at all: the species scale says nothing, so fall back on
+        //where the specimen sits in its own range rather than drawing everything identically
+        if (shortest == Float.MAX_VALUE || longest <= shortest) {
+            return FISH_LENGTH_MIN + span * data.getSizeFraction();
+        }
+
+        float floor = (float) Math.log(shortest);
+        float reach = (float) Math.log(longest) - floor;
+        float here = (float) Math.log(Math.max(data.length, shortest)) - floor;
+
+        return FISH_LENGTH_MIN + span * MathUtils.clamp(here / reach, 0f, 1f);
+    }
+
     protected static void setColor(Color color, float alpha) {
         GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f,
                 color.getBlue() / 255f, Math.max(0f, Math.min(1f, alpha)));
@@ -427,6 +485,16 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         protected float pause = 0f;
         protected boolean darting = false;
 
+        /**
+         * Which way round the fish is, as a signed scale on its own length: 1 facing the way the
+         * art was drawn, -1 the other way, and everything in between mid-turn. It is a number
+         * rather than a flag because turning over is something the eye has to be shown - a fish
+         * that changes sides in one frame reads as a glitch, and a fish that shortens to nothing
+         * and comes back the other way reads as a fish.
+         */
+        protected float turnover;
+        protected float turnoverTarget;
+
         /** What MIXED is currently being; everyone else keeps their own. */
         protected FishMotion mode;
         protected float modeLeft = 0f;
@@ -439,8 +507,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             this.data = data;
             this.spec = data.getSpec();
 
-            lengthPx = FISH_LENGTH_MIN
-                    + (FISH_LENGTH_MAX - FISH_LENGTH_MIN) * data.getSizeFraction();
+            lengthPx = lengthOnGlass(data);
 
             SpriteAPI art = SpriteLoader.loadSprite(spec.icon);
             sprite = art;
@@ -449,7 +516,12 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
             mode = spec.motion == FishMotion.MIXED ? rollMixedMode() : spec.motion;
             wavePhase = MathUtils.getRandomNumberInRange(0f, 6.28f);
-            heading = MathUtils.getRandomNumberInRange(0f, 360f);
+
+            //started level and already round the right way, so opening the menu is not a room of
+            //fish spinning to face where they are going
+            boolean rightward = MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f;
+            heading = rightward ? 0f : 180f;
+            turnover = turnoverTarget = rightward ? 1f : -1f;
 
             //scattered in, so a fresh tank does not start as a firing squad
             loc.set(MathUtils.getRandomNumberInRange(0.15f, 0.85f),
@@ -464,7 +536,17 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             return pool[(int) MathUtils.getRandomNumberInRange(0f, pool.length - 0.01f)];
         }
 
-        /** Positions are kept as fractions of the tank so a resize never beaches anyone. */
+        /**
+         * Positions are kept as fractions of the tank so a resize never beaches anyone, but every
+         * <i>decision</i> here is taken in pixels and converted back at the end.
+         * <p>
+         * The distinction is not pedantry. The tank is about twice as wide as it is tall, so a
+         * fraction of its width and a fraction of its height are different distances on the glass,
+         * and a course steered in fractions comes out steeper on screen than it was meant to and
+         * slower going up than going across. Worse, the heading taken off it disagreed with the
+         * visible travel, and disagreed most towards vertical - which is exactly where the fish
+         * has to decide which way round it is.
+         */
         public void advance(float amount, float tankW, float tankH) {
             if (spec.motion == FishMotion.MIXED) {
                 modeLeft -= amount;
@@ -474,13 +556,13 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 }
             }
 
-            float speed = (14f + 24f * spec.motionSpeed) / Math.max(tankW, 1f);
+            float speed = 14f + 24f * spec.motionSpeed;
             float restless = Math.max(0.3f, spec.restlessness);
 
             if (pause > 0f) {
                 pause -= amount;
                 vel.scale(Math.max(0f, 1f - amount * 3f));
-            } else if (reachedTarget()) {
+            } else if (reachedTarget(tankW, tankH)) {
                 switch (mode) {
                     case DARTER:
                         if (darting) {
@@ -507,11 +589,15 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             } else {
                 float mult = mode == FishMotion.DARTER && darting ? 3.2f : 1f;
 
-                Vector2f desired = Vector2f.sub(target, loc, null);
+                //steered in pixels at a flat pixels-a-second, then handed back as fractions
+                Vector2f desired = new Vector2f((target.x - loc.x) * tankW,
+                        (target.y - loc.y) * tankH);
                 if (desired.lengthSquared() > 0f) {
                     desired.normalise(desired);
                     desired.scale(speed * mult);
                 }
+                desired.x /= Math.max(tankW, 1f);
+                desired.y /= Math.max(tankH, 1f);
 
                 float ease = 1f - (float) Math.pow(0.05f, amount);
                 vel.x += (desired.x - vel.x) * ease;
@@ -521,22 +607,42 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             loc.x = MathUtils.clamp(loc.x + vel.x * amount, 0.04f, 0.96f);
             loc.y = MathUtils.clamp(loc.y + vel.y * amount, 0.06f, 0.94f);
 
-            //face the way it is actually going, by the shortest turn, never snapping
-            if (vel.lengthSquared() > 1e-6f) {
-                float toward = (float) Math.toDegrees(Math.atan2(vel.y, vel.x));
+            //face the way it is actually going on the glass, by the shortest turn, never snapping
+            if (vel.lengthSquared() > 1e-8f) {
+                float toward = (float) Math.toDegrees(
+                        Math.atan2(vel.y * tankH, vel.x * tankW));
                 float diff = Misc.getAngleDiff(heading, toward);
                 float sign = Misc.normalizeAngle(toward - heading) < 180f ? 1f : -1f;
 
-                float turn = Math.min(Math.abs(diff), 240f * amount);
+                float turn = Math.min(Math.abs(diff), TURN_RATE * amount);
                 heading = Misc.normalizeAngle(heading + turn * sign);
             }
+
+            advanceTurnover(amount);
         }
 
-        protected boolean reachedTarget() {
-            float dx = target.x - loc.x;
-            float dy = target.y - loc.y;
+        /**
+         * Decides which way round the fish should be and walks it there.
+         * <p>
+         * A heading inside {@link #TURNOVER_BAND} of vertical decides nothing and leaves the last
+         * answer standing, so a fish climbing or diving keeps the side it had instead of arguing
+         * with itself about it every frame.
+         */
+        protected void advanceTurnover(float amount) {
+            float facing = (float) Math.cos(Math.toRadians(heading));
 
-            return dx * dx + dy * dy < 0.003f;
+            if (facing > TURNOVER_BAND) turnoverTarget = 1f;
+            else if (facing < -TURNOVER_BAND) turnoverTarget = -1f;
+
+            float step = TURNOVER_RATE * amount;
+            turnover += MathUtils.clamp(turnoverTarget - turnover, -step, step);
+        }
+
+        protected boolean reachedTarget(float tankW, float tankH) {
+            float dx = (target.x - loc.x) * tankW;
+            float dy = (target.y - loc.y) * tankH;
+
+            return dx * dx + dy * dy < 144f;
         }
 
         protected void pickTarget(float yMin, float yMax) {
@@ -547,9 +653,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         /**
          * The strip render. The body lies along local +X with the head at the +X end; the art
          * is mapped onto that axis from its own {@link FishSpec#spriteDirection}, and a fish
-         * heading anywhere leftish is mirrored across its spine so it never swims on its back.
-         * A travelling wave walks head to tail - light at the jaw, loose at the fin - and the
-         * whole body pulses a couple of percent, which is the breathing.
+         * heading anywhere leftish is turned over rather than rotated onto its back - the length
+         * scales through zero and out the far side, which is a fish coming about rather than a
+         * sprite changing its mind. A travelling wave walks head to tail - light at the jaw, loose
+         * at the fin - and the whole body pulses a couple of percent, which is the breathing.
          */
         public void render(float tankX, float tankY, float tankW, float tankH,
                            float alphaMult, float time) {
@@ -568,14 +675,16 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             float breathe = 1f + 0.025f * (float) Math.sin(time * 1.7f + wavePhase);
             float breatheAcross = 1f + 0.035f * (float) Math.sin(time * 1.7f + wavePhase + 1.1f);
 
-            boolean mirrored = Math.cos(Math.toRadians(heading)) < 0;
-            float renderAngle = mirrored ? 180f - heading : heading;
+            //the body lies along the heading and is scaled along itself by the turnover, so the
+            //head stays pointed where the fish is going the whole way round; the sign only decides
+            //which end of the sprite the head is, and it changes at the instant the fish is
+            //edge-on and has no width for the change to show in
+            float renderAngle = turnover < 0f ? heading + 180f : heading;
 
             GL11.glPushMatrix();
             GL11.glTranslatef(cx, cy, 0f);
-            if (mirrored) GL11.glScalef(-1f, 1f, 1f);
             GL11.glRotatef(renderAngle, 0f, 0f, 1f);
-            GL11.glScalef(breathe, breatheAcross, 1f);
+            GL11.glScalef(turnover * breathe, breatheAcross, 1f);
 
             GL11.glEnable(GL11.GL_TEXTURE_2D);
             GL11.glEnable(GL11.GL_BLEND);
