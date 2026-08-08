@@ -78,10 +78,26 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
         return fleet.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
     }
 
-    /** Only motes currently lit by a lamp - unlit ones have no window through and go unreachable again as the mark fades. */
+    /**
+     * Only motes currently lit by a lamp - unlit ones have no window through and go unreachable
+     * again as the mark fades.
+     * <p>
+     * Lit outright, never merely dented. A dent is the fabric bruising near a beam rather than a
+     * hole burned through it, and there is nothing there for a drone to fly into; taking one
+     * anyway is the harpoon's Fathom Head, which is the whole of what that module is for. A rig
+     * that could do it unaided would leave nothing to buy.
+     * <p>
+     * Asked of buried motes only, which is everything this swarm goes looking for. A drone still
+     * holding the ordinary mote it has just unearthed is asked on ordinary terms instead: that one
+     * is through the fabric and swimming, and the lamp that showed it has no further say over it.
+     */
     @Override
     protected boolean isReachable(SectorEntityToken mote) {
-        return SearchlightAbilityPlugin.isLit(mote);
+        if (mote != null && mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin) {
+            return SearchlightAbilityPlugin.isLit(mote);
+        }
+
+        return super.isReachable(mote);
     }
 
     /** Reaching a buried mote unearths it into an ordinary mote, then plays the normal catch. */
