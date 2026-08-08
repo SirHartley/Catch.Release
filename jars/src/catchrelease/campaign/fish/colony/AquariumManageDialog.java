@@ -130,12 +130,9 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         AquariumTankPanel tank = new AquariumTankPanel(conservatory, dialog);
         tank.setPreview(backdrop);
 
-        dialog.getVisualPanel().showCustomPanel(PREVIEW_WIDTH,
+        dialog.getVisualPanel().showCustomPanel(AquariumTankScript.getPanelWidth(),
                 AquariumTankScript.PANEL_HEIGHT, tank);
     }
-
-    /** As wide as the pane the tank actually hangs in on the colony menu, so the crop matches. */
-    public static final float PREVIEW_WIDTH = 480f;
 
     @Override
     public void optionSelected(String optionText, Object optionData) {

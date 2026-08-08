@@ -163,9 +163,10 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
      * alone, which is also what a row whose art has not been drawn yet comes to.
      * <p>
      * The art is cropped to cover, so any image works and one of the wrong shape loses its edges
-     * rather than letterboxing. The glass is {@code 468 x 170} at the game's own UI scale - a hair
-     * under {@code 2.75:1} - so art drawn at about {@code 936 x 340} covers it and stays sharp on
-     * a scaled-up interface.
+     * rather than letterboxing. The pane is {@code 388 x 170} at the game's own UI scale and the
+     * glass line is drawn over its edge, leaving {@code 386 x 168} of art visible - near enough
+     * {@code 2.3:1} - so about {@code 772 x 336} covers it and stays sharp on a scaled-up
+     * interface.
      */
     protected String backdropPath() {
         Backdrop hanging = preview != null ? preview : Backdrops.getHanging(conservatory);

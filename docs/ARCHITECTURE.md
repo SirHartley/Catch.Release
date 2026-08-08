@@ -141,7 +141,8 @@ the colony structure that opens the fishing trade and keeps the aquarium.
 **`data/campaign/backdrops.csv`** — the scenes that can hang behind the aquarium's water. Read by
 `BackdropLoader` into `Backdrop`; no class is registered from it, it is a table of art. Columns are
 name, sprite path, rarity, whether Crablobab may stock it and whether a conservatory has it on the
-day it is built. The art is cropped to cover a `468 x 170` pane, so about `936 x 340` at 2x.
+day it is built. The art is cropped to cover a `388 x 170` pane with the glass line over its edge —
+`386 x 168` visible, near enough `2.3:1` — so about `772 x 336` at 2x.
 
 **`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
 (`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's two props
