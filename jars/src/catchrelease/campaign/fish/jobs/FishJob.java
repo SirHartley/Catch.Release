@@ -27,7 +27,8 @@ import java.util.Random;
  * Dialogue text lives in data/campaign/rules.csv, not here. This class only tracks state
  * (hold counting, spending, payment, wagers) and exposes it to the rows via memory tokens.
  */
-public abstract class FishJob extends HubMissionWithBarEvent {
+public abstract class FishJob extends HubMissionWithBarEvent
+        implements catchrelease.campaign.fish.shop.FishAsker {
 
     /**
      * Memory key the job hangs itself under on its giver. Shared by every job (not per-job), so
@@ -100,8 +101,15 @@ public abstract class FishJob extends HubMissionWithBarEvent {
         if (rolled != null) rewards.addAll(rolled);
     }
 
+    @Override
     public List<FishRequirement> getAsks() {
         return asks;
+    }
+
+    /** The job's own name, which is already what every other roll call of it says. */
+    @Override
+    public String getAskerName() {
+        return getBaseName();
     }
 
     public List<FishReward> getRewards() {

@@ -328,21 +328,15 @@ public class FishermanQuest {
      * <p>
      * {@link #plant} claims one and nothing ever let it go, so vanilla's own mission marker - the
      * gold ring and the exclamation - stayed burned onto that rupture for the rest of the campaign,
-     * pointing at a request that was over. Asked of every rupture in the system rather than the one
-     * remembered, since {@link QuestPond#release} only lets go of ponds held under this key.
+     * pointing at a request that was over. Asked of every rupture in the sector rather than of the
+     * one system the request remembers: the claim is named, so a wide sweep cannot take anybody
+     * else's marker off, and the remembered place is not reliably where the claim ended up.
      */
     protected static void letGo(Saved quest) {
-        if (quest == null || quest.systemId == null) return;
+        if (quest == null) return;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.getId().equals(quest.systemId)) continue;
-
-            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
-                QuestPond.release(pond, STATE_KEY);
-            }
-
-            return;
-        }
+        QuestPond.releaseAll(STATE_KEY);
+        QuestPond.clearMotes(STATE_KEY);
     }
 
     /**
@@ -389,7 +383,7 @@ public class FishermanQuest {
                 if (Misc.getDistance(pond.getLocation(), mark) > SPOT_SPREAD) continue;
 
                 QuestPond.claim(pond, STATE_KEY);
-                mote = QuestPond.placeMote(pond, quest.speciesId);
+                mote = QuestPond.placeMote(pond, quest.speciesId, STATE_KEY);
                 break;
             }
         }
@@ -411,10 +405,9 @@ public class FishermanQuest {
 
         if (mote == null) return;
 
-        mote.getMemoryWithoutUpdate().set(QuestPond.QUEST_MOTE_FLAG, true);
         mote.getMemoryWithoutUpdate().set(QUEST_FISH_FLAG, true);
 
-        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
+        QuestPond.markPlanted(mote, STATE_KEY);
     }
 
     /** Whether the planted specimen is still out there somewhere in the system. */
@@ -482,12 +475,38 @@ public class FishermanQuest {
     //---------------------------------------------------------------- the note
 
     /** Where to go and what to bring back. */
-    public static class QuestIntel extends BaseIntelPlugin {
+    public static class QuestIntel extends BaseIntelPlugin
+            implements catchrelease.campaign.fish.shop.FishAsker {
 
         protected final Saved quest;
 
         public QuestIntel(Saved quest) {
             this.quest = quest;
+        }
+
+        /**
+         * The named specimen, so it wears the same mark a job's ask would - see
+         * {@link catchrelease.campaign.fish.shop.FishAsker}. The species alone: what makes this
+         * particular animal the right one is the water it came out of, which is
+         * {@link #QUEST_FISH_FLAG}'s business and not something the hold can be asked about.
+         */
+        @Override
+        public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
+            List<catchrelease.campaign.fish.shop.FishRequirement> out = new java.util.ArrayList<>();
+            if (quest == null || quest.speciesId == null) return out;
+
+            catchrelease.campaign.fish.shop.FishRequirement ask =
+                    new catchrelease.campaign.fish.shop.FishRequirement();
+
+            ask.speciesId = quest.speciesId;
+            out.add(ask);
+
+            return out;
+        }
+
+        @Override
+        public String getAskerName() {
+            return "Chart request";
         }
 
         protected FishSpec getSpec() {

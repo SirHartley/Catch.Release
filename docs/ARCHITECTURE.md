@@ -79,7 +79,10 @@ Everything game-facing is wired from `ModPlugin.java`.
 15. `FishMapFilterScript` as a transient script — the sector-map filter
 16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-18. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
+18. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+   any more and fading every planted specimen no errand is still waiting on; repairs saves
+   carrying either, since transitions cannot
+19. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -249,11 +252,11 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 
 | File | What it does |
 |---|---|
-| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract |
+| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Blueprint, Commodity |
 | `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
-| `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it |
+| `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |
@@ -314,7 +317,7 @@ explains how.
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
-| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture and the note turns into "take it back". Its `QuestIntel` carries the species' own icon and the bullets vanilla's mission notes carry |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Its `QuestIntel` is a `FishAsker` and carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
@@ -336,7 +339,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture and re-points the note at the boat |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture, takes the planted specimen back out of the water and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
 | `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
 | `Castaway.java` | The rating put off a boat for looking, found on a survey |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
@@ -391,7 +394,8 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
-| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts the open jobs too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
+| `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which is what the map screens ask; `isWanted` counts every `FishAsker` in the log too, which is what a cargo icon asks, and is cached because it is asked per cell per frame |
+| `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |

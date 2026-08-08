@@ -306,22 +306,17 @@ public class FishingIntro {
      * exclamation - burned onto a rupture for the rest of the campaign, on every rupture the
      * ladder ever used, pointing at nothing.
      * <p>
-     * Asked of every rupture in the system rather than the one remembered, because the claim is
-     * named: {@link QuestPond#release} only lets go of ponds held under this errand's own key and
-     * ignores the rest.
+     * Asked of every rupture in the sector rather than of the one system the errand remembers. The
+     * claim is named, so asking widely costs nothing and cannot let go of anybody else's water -
+     * and the errand's remembered place is not reliably where its claim ended up. A rung with no
+     * system at all returned here before doing anything; an errand replaced while the player stood
+     * somewhere else pointed the sweep at the wrong system. Both left a marker behind.
      */
     protected static void letGo(Target target) {
-        if (target == null || target.systemId == null) return;
+        if (target == null) return;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.getId().equals(target.systemId)) continue;
-
-            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
-                QuestPond.release(pond, TutorialConstants.TARGET_KEY);
-            }
-
-            return;
-        }
+        QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
+        QuestPond.clearMotes(TutorialConstants.TARGET_KEY);
     }
 
     /**
@@ -809,7 +804,8 @@ public class FishingIntro {
                 //holds, unlike every other errand's fish. Somebody being taught what a rupture is
                 //should find the thing they were sent for still in it - "elusive" is a difficulty,
                 //and the first catch is not the place to be teaching difficulty
-                mote = QuestPond.placeMote(pond, speciesId, true);
+                mote = QuestPond.placeMote(pond, speciesId, true,
+                        TutorialConstants.TARGET_KEY);
                 break;
             }
         }
@@ -834,19 +830,56 @@ public class FishingIntro {
 
         if (mote == null) return;
 
-        mote.getMemoryWithoutUpdate().set(QuestPond.QUEST_MOTE_FLAG, true);
-
-        if (mote.getCustomPlugin()
-                instanceof catchrelease.campaign.fish.entities.FishEntityPlugin fish) {
-
-            fish.refreshColor();
-        }
+        QuestPond.markPlanted(mote, TutorialConstants.TARGET_KEY);
     }
 
     //---------------------------------------------------------------- the note
 
     /** One entry for the whole ladder, retitled at each rung. */
-    public static class IntroIntel extends BaseIntelPlugin {
+    public static class IntroIntel extends BaseIntelPlugin
+            implements catchrelease.campaign.fish.shop.FishAsker {
+
+        /**
+         * The rung's quarry, so a specimen the ladder sent the player after wears the same mark a
+         * job's would - see {@link catchrelease.campaign.fish.shop.FishAsker}.
+         * <p>
+         * The gear clause rides along for the lamp rung, which is the one rung where the wrong
+         * specimen of the right species does not answer. It costs nothing on the species screens -
+         * {@link FishRequirement#couldBeSatisfiedBy} only tests what a species decides - and it is
+         * what keeps the hold from marking a rod-caught one as spent for.
+         * <p>
+         * Nothing at all on the first rung. Anything the player can land answers it, and a
+         * requirement that matches everything would put a mark on every row of the codex.
+         */
+        @Override
+        public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
+            List<catchrelease.campaign.fish.shop.FishRequirement> out = new ArrayList<>();
+
+            Target target = getTarget();
+            if (target == null || target.anySpecies) return out;
+
+            for (String speciesId : target.speciesIds) {
+                catchrelease.campaign.fish.shop.FishRequirement ask =
+                        new catchrelease.campaign.fish.shop.FishRequirement();
+
+                ask.speciesId = speciesId;
+
+                if (target.needsDeepGear) {
+                    ask.implement = CatchImplement.BREACH_LAMP;
+                    ask.method = FishLogEntry.Method.HARPOON;
+                }
+
+                out.add(ask);
+            }
+
+            return out;
+        }
+
+        /** The ladder, not the rung - the title changes at every step and this must not. */
+        @Override
+        public String getAskerName() {
+            return "Fishing lessons";
+        }
 
         @Override
         public String getName() {
