@@ -52,10 +52,9 @@ public class NoiseMappedCircularRingRenderer {
         ensureShader();
         if (program == 0) return;
 
-        // save blend state to restore after
-        final boolean blendWasEnabled = GL11.glIsEnabled(GL11.GL_BLEND);
-        final int prevBlendSrc = GL11.glGetInteger(GL11.GL_BLEND_SRC);
-        final int prevBlendDst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        //blend state saved driver-side, not read back: glIsEnabled/glGetInteger are synchronous
+        //round-trips to the driver, and three of them per ring per frame showed up in profiling
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT);
 
         GL20.glUseProgram(program);
 
@@ -123,10 +122,7 @@ public class NoiseMappedCircularRingRenderer {
         // restore program and blend state
         GL20.glUseProgram(0);
 
-        GL11.glBlendFunc(prevBlendSrc, prevBlendDst);
-        if (!blendWasEnabled) {
-            GL11.glDisable(GL11.GL_BLEND);
-        }
+        GL11.glPopAttrib();
 
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }

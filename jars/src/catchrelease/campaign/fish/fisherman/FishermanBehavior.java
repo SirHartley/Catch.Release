@@ -12,6 +12,7 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -303,14 +304,30 @@ public class FishermanBehavior implements EveryFrameScript {
         }
     }
 
+    /** Where the boat's name was last read, and when - the drift read is the expensive part. */
+    protected transient LocationAPI namedFor;
+    protected transient long namedStamp;
+
     /**
      * The boat wears the name the local water lets it wear.
      * <p>
-     * Written only when it has actually changed - a name is a string on the fleet, and rewriting it
-     * sixty times a second to the same value is churn nothing asked for. The drift is a property of
-     * the system, so in practice this fires once on arrival.
+     * The name only moves when the water does, but reading the water is the cost: the drift goes
+     * through {@link catchrelease.campaign.fish.data.Aberration}, which walks every system and
+     * slipstream in the sector - and doing that every tick for every standing boat was a third of
+     * the whole frame in profiling. Re-read on arrival somewhere new and once a day thereafter
+     * (slipstreams shift with the season; nothing else in the reading moves at all).
      */
     protected void keepNamed() {
+        long now = Global.getSector().getClock().getTimestamp();
+
+        if (namedFor == fleet.getContainingLocation()
+                && Global.getSector().getClock().convertToDays(now - namedStamp) < 1f) {
+            return;
+        }
+
+        namedFor = fleet.getContainingLocation();
+        namedStamp = now;
+
         String name = FishermanIdentity.getDisplayName(FishermanIdentity.getDrift(fleet));
 
         if (!name.equals(fleet.getName())) fleet.setName(name);

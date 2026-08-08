@@ -99,6 +99,8 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     public void advance(float amount) {
         super.advance(amount);
 
+        readingAge += amount;
+
         idle = getLevel() > 0f ? 0f : idle + amount;
 
         if (idle > IDLE_EXPIRE) Misc.fadeAndExpire(entity, 0f);
@@ -143,19 +145,47 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
                 + " worth more to some buyers and less to others.", pad);
     }
 
-    protected float getAberration() {
-        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
-        if (fleet == null) return 0f;
+    /**
+     * The reading, refreshed once a second rather than asked fresh - the bar calls
+     * {@link #getTerrainName()} and {@link #getNameColor()} every frame it is drawn, and each
+     * ask used to walk every system and slipstream in the sector twice over: a fifth of the
+     * whole frame in profiling. Same interval the overlay script already uses for the same read.
+     */
+    public static final float READING_REFRESH = 1f;
 
-        return Aberration.baseAt(fleet.getLocationInHyperspace(), fleet.getContainingLocation());
+    protected transient boolean readingCached = false;
+    protected transient float readingAge = 0f;
+    protected transient float cachedAberration = 0f;
+    protected transient String cachedSource;
+
+    protected void refreshReading() {
+        if (readingCached && readingAge < READING_REFRESH) return;
+
+        readingCached = true;
+        readingAge = 0f;
+
+        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+
+        if (fleet == null) {
+            cachedAberration = 0f;
+            cachedSource = null;
+            return;
+        }
+
+        cachedAberration = Aberration.baseAt(
+                fleet.getLocationInHyperspace(), fleet.getContainingLocation());
+        cachedSource = Aberration.dominantSourceAt(
+                fleet.getLocationInHyperspace(), fleet.getContainingLocation());
+    }
+
+    protected float getAberration() {
+        refreshReading();
+        return cachedAberration;
     }
 
     protected String getSource() {
-        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
-        if (fleet == null) return null;
-
-        return Aberration.dominantSourceAt(fleet.getLocationInHyperspace(),
-                fleet.getContainingLocation());
+        refreshReading();
+        return cachedSource;
     }
 
     @Override
