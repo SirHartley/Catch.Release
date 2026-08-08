@@ -138,6 +138,11 @@ does **not** add for you and which anything looking a terrain up by tag depends 
 **`data/campaign/industries.csv`** — `catchrelease_conservatory` → `BreachConservatory`,
 the colony structure that opens the fishing trade and keeps the aquarium.
 
+**`data/campaign/backdrops.csv`** — the scenes that can hang behind the aquarium's water. Read by
+`BackdropLoader` into `Backdrop`; no class is registered from it, it is a table of art. Columns are
+name, sprite path, rarity, whether Crablobab may stock it and whether a conservatory has it on the
+day it is built. The art is cropped to cover a `468 x 170` pane, so about `936 x 340` at 2x.
+
 **`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
 (`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's two props
 (`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
@@ -295,12 +300,14 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 
 | File | What it does |
 |---|---|
-| `BreachConservatory.java` | The structure itself; also holds the aquarium's stock and its on/off switch |
+| `BreachConservatory.java` | The structure itself; also holds the aquarium's stock, its on/off switch and which backdrop this tank hangs |
 | `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
 | `AquariumManageDialog.java` | The office: stock the tank, empty it, or shut the display off |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing. Mounts as soon as the docked core UI is anything short of fully covering, rather than waiting for its fader to finish, so the tank comes back with the menu |
 | `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed. How one *carries* itself is its `Build`, off the crab/mollusc/fish tags rather than off its motion: fish slant up to `MAX_PITCH` and no further, molluscs and oddments never turn and only list, crabs live on the stones. The drawn angle is the bounded pitch, never the raw heading, so nothing rotates up through the vertical to come about |
+| `Backdrop.java` | One row of `data/campaign/backdrops.csv`: a scene for behind the water — name, art path, rarity, whether Crablobab stocks it, whether a conservatory has it from the start |
+| `Backdrops.java` | Two scopes: which scenes the *player* has come by (sector memory) and which one a *conservatory* is hanging (the industry). Resolution, ownership and the has-the-art-been-drawn question |
 
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
@@ -598,6 +605,7 @@ Shader and GL machinery.
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
+| `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once. One object per path is shared by every caller, so it is handed back neutral - native size, white, full alpha, normal blend - and a caller that wants it otherwise says so |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |
