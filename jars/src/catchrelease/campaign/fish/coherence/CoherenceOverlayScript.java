@@ -80,8 +80,9 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         if (level > 0f) CoherenceTerrain.ensureIn(fleet.getContainingLocation());
 
         //refreshed every frame or the engine fades it out itself; volume rides the level, so the
-        //whispers arrive and leave with the warp
-        if (level > 0f) {
+        //whispers arrive and leave with the warp. Earmuffs stop the loop being fed rather than
+        //muting it - a loop at zero volume is still a loop the engine is keeping alive
+        if (level > 0f && !catchrelease.campaign.fish.crab.CrabWares.EARMUFFS.isOn()) {
             Global.getSoundPlayer().playLoop(FishConstants.SOUND_COHERENCE_WHISPERS, fleet, 1f,
                     FishConstants.COHERENCE_WHISPER_VOLUME * level, fleet.getLocation(), Misc.ZERO);
         }

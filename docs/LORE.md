@@ -336,6 +336,15 @@ Anything of his that raises a question is answering it by being on the table.
 He is not a threat and not a mystery to be solved. He is a man with a coat, the coat is the horror,
 and nobody is going to mention the coat.
 
+**The earmuffs.** He sells a pair, for people who have been out where the fabric is thin and have
+had enough of what it sounds like. They work. They are comfortable. Put them on and you stop
+hearing it.
+
+They do not stop it. Nothing about the sound changes; the wearer simply stops receiving it, which
+is the whole of what was asked for and is not the same thing. He does not point this out, and he is
+not being sly - it did not occur to him that anybody would want the other thing. Nobody says it
+out loud afterwards either.
+
 ---
 
 ## Fishing, and why anybody does it
@@ -379,6 +388,8 @@ Not gaps. Writing a line that answers one of these is a regression, however ligh
 - **How the standing boats are all the same man.** "They do not explain how" is the whole of it.
 - **Where Crablobab gets his stock.** He makes no sense; neither does it; that is the transaction.
 - **How anybody charts the far side of the fabric.** The charts are right. Nobody has asked.
+- **What the whispering under a thin patch is.** It is heard where coherence is low and it is not
+  speech, or not only. Naming a source spoils it; so does confirming there is one.
 
 ## Still open
 

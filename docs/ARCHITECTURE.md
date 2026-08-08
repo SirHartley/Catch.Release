@@ -419,7 +419,7 @@ Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` 
 
 | File | What it does |
 |---|---|
-| `CrabWares.java` | The three wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 
 ### `campaign/fish/tackle`
 Modules bolted to a rig.

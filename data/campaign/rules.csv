@@ -854,6 +854,7 @@ catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Te
 He looks you over - the coat, the boots, whatever it is you have been doing to your hands - and decides something. ""You do not want crabs.""","catchrelease_crabStall:""What else is in the coat?""",
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall
 CatchReleaseCMD tokens",,He holds the coat open. There is more in it than there is coat.,"0:catchrelease_crabWareCelebration:Celebration Charges
+5:catchrelease_crabWareEarmuffs:Earmuffs
 10:catchrelease_crabWareExplosive_head:Explosive Head
 20:catchrelease_crabWareConservatory:Breach Conservatory Plans
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
@@ -870,6 +871,23 @@ CatchReleaseCMD tokens
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Continue,
 catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"It comes out of a pocket you would not have guessed at, and into your hands before the credits have finished moving.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Tell him you are all right for crabs",
+catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabEarmuffsAfford",,"""You have been out where it is thin, then. Everybody comes back asking about the noise."" He has them out before you have said which noise - thick, grey, softer than they look. ""These. Very good. You put them on and you do not hear it.""
+
+He seems to think that settles it.
+
+He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.","0:catchrelease_crabBuyEarmuffs:Pay him
+10:catchrelease_crabStall:Continue",
+catchrelease_crabWareEarmuffsShort,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabEarmuffsAfford",,"""You have been out where it is thin, then. Everybody comes back asking about the noise."" He has them out before you have said which noise - thick, grey, softer than they look. ""These. Very good. You put them on and you do not hear it.""
+
+He seems to think that settles it.
+
+He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs. You are short, and he is kind enough to talk about the weather until you have stopped counting.",10:catchrelease_crabStall:Continue,
+catchrelease_crabBuyEarmuffs,DialogOptionSelected,$option == catchrelease_crabBuyEarmuffs,CatchReleaseCMD crabBuy EARMUFFS,"They come out of a pocket already warm, which you decide not to think about. The trade counter in the outfitter will take them off again if you ever want the sound back.","0:catchrelease_crabStall:Continue
+100:catchrelease_crabLeave:Tell him you are all right for crabs","Switchable afterwards like the charges - see CrabWares.EARMUFFS. What it stops is the hearing, not the sound; the pitch is written not to claim otherwise."
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabExplosive_headAfford",,"""This one I will not pretend about. It does not catch. It goes on the harpoon and then whatever the harpoon touches is gone, and so is the harpoon. People buy it. I have stopped asking them what for.""
