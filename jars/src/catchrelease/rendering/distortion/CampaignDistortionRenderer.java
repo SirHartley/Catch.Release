@@ -155,6 +155,13 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (distortions.isEmpty()) return;
+
+        //the pass is two full-screen operations before a single distortion is drawn - a screen
+        //copy and a warp draw - and the list is sector-wide: the standing boats run lamps in
+        //systems the player is nowhere near. Nothing in sight means no pass at all, not a pass
+        //over nothing
+        if (!anyOnScreen(viewport)) return;
+
         if (!load()) return;
 
         draw(viewport);
@@ -297,6 +304,20 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         GL11.glPopAttrib();
 
         return norm;
+    }
+
+    /** Whether any distortion would actually land in this viewport, by the draw loop's own test. */
+    protected boolean anyOnScreen(ViewportAPI viewport) {
+        for (DistortionAPI distortion : distortions) {
+            Vector2f location = distortion.getLocation();
+            SpriteAPI sprite = distortion.getSprite();
+            if (location == null || sprite == null) continue;
+
+            float reach = Math.max(sprite.getWidth(), sprite.getHeight());
+            if (isOnScreen(viewport, location, reach)) return true;
+        }
+
+        return false;
     }
 
     /** The strongest distortion on screen, which is what everything else is scaled against. */
