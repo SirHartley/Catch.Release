@@ -48,6 +48,10 @@ public class QuestPond {
     /** Set on a mote a job placed, which is what makes it look like one. */
     public static final String QUEST_MOTE_FLAG = "$catchrelease_questMote";
 
+    /** Which job planted it, so the errand that put a specimen in the water can take it back out
+     *  again when it is done - see {@link #clearMotes}. */
+    public static final String PLANTED_BY_KEY = "$catchrelease_questMoteJob";
+
     /**
      * Marks a pond as needed by this job, alongside anybody else already holding it.
      * <p>
@@ -147,6 +151,17 @@ public class QuestPond {
                     release(pond, jobId);
                 }
             }
+
+            //and the specimens those errands planted, which outlive them the same way
+            for (SectorEntityToken mote : system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+                if (mote.isExpired()) continue;
+
+                String planter = getPlanter(mote);
+                if (planter == null) continue;
+                if (live != null && live.contains(planter)) continue;
+
+                Misc.fadeAndExpire(mote, 1f);
+            }
         }
     }
 
@@ -184,17 +199,21 @@ public class QuestPond {
      *
      * @return the mote, or null if the pond could not take one
      */
-    public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId) {
-        return placeMote(pond, speciesId, false);
+    public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId,
+                                              String jobId) {
+        return placeMote(pond, speciesId, false, jobId);
     }
 
     /**
      * @param holds whether it should stay in this pond rather than cross it once and go. An errand
      *              that expects the player to turn up and find the thing wants this; one where the
      *              specimen being hard to pin down is the point does not.
+     * @param jobId who planted it, so {@link #clearMotes} can take it back out again when the
+     *              errand is over. A holding specimen never expires on its own, which is the
+     *              whole point of it and the reason somebody has to.
      */
     public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId,
-                                              boolean holds) {
+                                              boolean holds, String jobId) {
         if (pond == null || speciesId == null) return null;
         if (!isPond(pond)) return null;
 
@@ -221,17 +240,63 @@ public class QuestPond {
 
         if (holds) mote.getMemoryWithoutUpdate().set(FishEntityPlugin.HOLDS_KEY, true);
 
-        //flag set, then color refreshed - color is decided at construction, before the flag exists
-        mote.getMemoryWithoutUpdate().set(QUEST_MOTE_FLAG, true);
-
-        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
+        markPlanted(mote, jobId);
 
         return mote;
+    }
+
+    /**
+     * Makes a mote read as a job's, wherever it was spawned.
+     * <p>
+     * The open-water errands build their own motes rather than going through {@link #placeMote} -
+     * there is no pond to put one in - so this is the one place that says what a planted specimen
+     * is, and both paths call it.
+     */
+    public static void markPlanted(SectorEntityToken mote, String jobId) {
+        if (mote == null) return;
+
+        //flag set, then color refreshed - color is decided at construction, before the flag exists
+        mote.getMemoryWithoutUpdate().set(QUEST_MOTE_FLAG, true);
+        if (jobId != null) mote.getMemoryWithoutUpdate().set(PLANTED_BY_KEY, jobId);
+
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
     }
 
     /** Whether this mote was placed by a job rather than risen out of the pond on its own. */
     public static boolean isQuestMote(SectorEntityToken mote) {
         return mote != null && mote.getMemoryWithoutUpdate().getBoolean(QUEST_MOTE_FLAG);
+    }
+
+    /**
+     * Takes back every specimen this job planted, wherever in the sector it put them.
+     * <p>
+     * Nothing did this, and a planted specimen that holds station never expires - which is what
+     * holding station <i>is</i>. So every rupture the introduction's ladder ever used kept a
+     * quest-blue mote in it for the rest of the campaign, one per rung, long after the rung was
+     * handed in. From the outside that reads as ruptures spawning quest fish on their own.
+     * <p>
+     * Faded rather than removed outright: it is a thing the player may well be looking at.
+     */
+    public static void clearMotes(String jobId) {
+        if (jobId == null || Global.getSector() == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) clearMotes(system, jobId);
+    }
+
+    public static void clearMotes(LocationAPI location, String jobId) {
+        if (location == null || jobId == null) return;
+
+        for (SectorEntityToken mote : location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (mote.isExpired()) continue;
+            if (!jobId.equals(getPlanter(mote))) continue;
+
+            Misc.fadeAndExpire(mote, 1f);
+        }
+    }
+
+    /** Which job planted this one, or null for anything that rose out of the water on its own. */
+    public static String getPlanter(SectorEntityToken mote) {
+        return mote == null ? null : mote.getMemoryWithoutUpdate().getString(PLANTED_BY_KEY);
     }
 
     /** Every pond in a system, found by the terrain's tag since ponds are terrain, not entities. */

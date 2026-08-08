@@ -336,6 +336,7 @@ public class FishermanQuest {
         if (quest == null) return;
 
         QuestPond.releaseAll(STATE_KEY);
+        QuestPond.clearMotes(STATE_KEY);
     }
 
     /**
@@ -382,7 +383,7 @@ public class FishermanQuest {
                 if (Misc.getDistance(pond.getLocation(), mark) > SPOT_SPREAD) continue;
 
                 QuestPond.claim(pond, STATE_KEY);
-                mote = QuestPond.placeMote(pond, quest.speciesId);
+                mote = QuestPond.placeMote(pond, quest.speciesId, STATE_KEY);
                 break;
             }
         }
@@ -404,10 +405,9 @@ public class FishermanQuest {
 
         if (mote == null) return;
 
-        mote.getMemoryWithoutUpdate().set(QuestPond.QUEST_MOTE_FLAG, true);
         mote.getMemoryWithoutUpdate().set(QUEST_FISH_FLAG, true);
 
-        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
+        QuestPond.markPlanted(mote, STATE_KEY);
     }
 
     /** Whether the planted specimen is still out there somewhere in the system. */

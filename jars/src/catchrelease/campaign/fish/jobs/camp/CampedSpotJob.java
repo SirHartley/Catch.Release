@@ -91,7 +91,7 @@ public abstract class CampedSpotJob extends FishJob {
         if (camper == null) return false;
 
         QuestPond.claim(pond, REF_KEY);
-        QuestPond.placeMote(pond, speciesId);
+        QuestPond.placeMote(pond, speciesId, REF_KEY);
 
         days = DAYS;
 

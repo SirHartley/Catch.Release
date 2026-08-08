@@ -316,6 +316,7 @@ public class FishingIntro {
         if (target == null) return;
 
         QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
+        QuestPond.clearMotes(TutorialConstants.TARGET_KEY);
     }
 
     /**
@@ -803,7 +804,8 @@ public class FishingIntro {
                 //holds, unlike every other errand's fish. Somebody being taught what a rupture is
                 //should find the thing they were sent for still in it - "elusive" is a difficulty,
                 //and the first catch is not the place to be teaching difficulty
-                mote = QuestPond.placeMote(pond, speciesId, true);
+                mote = QuestPond.placeMote(pond, speciesId, true,
+                        TutorialConstants.TARGET_KEY);
                 break;
             }
         }
@@ -828,13 +830,7 @@ public class FishingIntro {
 
         if (mote == null) return;
 
-        mote.getMemoryWithoutUpdate().set(QuestPond.QUEST_MOTE_FLAG, true);
-
-        if (mote.getCustomPlugin()
-                instanceof catchrelease.campaign.fish.entities.FishEntityPlugin fish) {
-
-            fish.refreshColor();
-        }
+        QuestPond.markPlanted(mote, TutorialConstants.TARGET_KEY);
     }
 
     //---------------------------------------------------------------- the note
