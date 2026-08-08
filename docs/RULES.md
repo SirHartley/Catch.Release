@@ -214,20 +214,37 @@ settings colour `buttonShortcut` (255,210,0) and a faction id resolves to that
 faction's colour. The bar screen reads it back off `BarEventData.optionColor`. Used by
 `catchrelease_ratingBarAdd`.
 
-**Line endings in this repo's `rules.csv` are not uniform, and an ordinary text edit
-will corrupt them.** The file uses **CRLF at record boundaries only**, with **bare LF
-inside quoted fields**. Three consequences, all of which have bitten:
+**Edit `rules.csv` through a CSV round-trip, and prove the round-trip first.** The
+file's line endings have changed once already and will change again the moment somebody
+opens it in the wrong editor. As of `00b0d1e` it is **pure LF throughout**; before that
+it was **CRLF at record boundaries with bare LF inside quoted fields**, and the appendix
+said so, which by then was wrong.
 
-- An editor that rewrites the file normalises every line ending and produces a
-  several-hundred-line diff for a one-line change. Edit it as **bytes** — read it
-  binary, splice, write binary.
+So do not hard-code either shape. Read the file, round-trip it unmodified, and compare
+bytes:
+
+```python
+src  = open(path, newline='', encoding='utf-8').read()
+rows = list(csv.reader(io.StringIO(src)))
+out  = io.StringIO()
+csv.writer(out, lineterminator='\n', quoting=csv.QUOTE_MINIMAL).writerows(rows)
+assert out.getvalue() == src      # if this fails, try '\r\n' before touching anything
+```
+
+A round-trip that is byte-identical means editing the parsed rows and writing them back
+changes only what you changed - a one-line edit stays a one-line diff. A round-trip that
+is *not* identical means the file's shape is not what you assumed, and finding out why is
+the job before the edit, not after it.
+
+Two hazards that survive whatever the endings are:
+
 - A `\r` that ends up *inside* a quoted script cell makes the command on that line
   unrecognisable (`ShowDefaultVisual\r`), silently.
-- The `notes` column takes prose, so a comma in it turns a 7-column row into 8. Quote
-  it.
+- The `notes` column takes prose, so a comma in it turns a 7-column row into 8. Let the
+  CSV writer do the quoting rather than hand-writing the commas.
 
-After any edit, check: `csv.reader` parses, every row has exactly 7 fields, and
-`b.count(b'\r') == b.count(b'\r\n')`.
+After any edit, check: `csv.reader` parses, every row has exactly 7 fields, and the diff
+is the size of the change you made.
 
 **Where the mod's own conventions live.** [`ARCHITECTURE.md`](ARCHITECTURE.md) has a
 "The rules.csv contract" section covering what this mod does on top of the language —

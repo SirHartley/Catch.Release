@@ -58,6 +58,33 @@ public enum CrabWares {
     },
 
     /**
+     * A pair of earmuffs, against the whispering that comes with thin water.
+     * <p>
+     * Switchable for the same reason the confetti is: it is a comfort rather than a capability, and
+     * somebody who bought it may want the sound back. What it does is stop the wearer hearing the
+     * whispering. It does not stop the whispering - see {@code docs/LORE.md}, and note that the
+     * blurb is written not to claim otherwise.
+     */
+    EARMUFFS("Earmuffs", 8000, 2,
+            "Worn out where the fabric is thin, against the sound that comes with it. Thick, warm,"
+                    + " and by all accounts very comfortable. You stop hearing it.") {
+        @Override
+        public boolean isOwned() {
+            return isBought(name());
+        }
+
+        @Override
+        public void grant() {
+            markBought(name());
+        }
+
+        @Override
+        public boolean isSwitchable() {
+            return true;
+        }
+    },
+
+    /**
      * The charge behind the barb. Granted through {@link ShopEntry}, which is the one place that
      * knows a running rig has to be stopped so it comes back up reading the module it now has.
      */
