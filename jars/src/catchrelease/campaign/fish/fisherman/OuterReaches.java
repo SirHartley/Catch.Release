@@ -104,6 +104,40 @@ public class OuterReaches {
     }
 
     /**
+     * Where a boat may actually be put, given somewhere it would like to be.
+     * <p>
+     * The band is a rule about <i>inhabited</i> systems and only about those. Where there are
+     * people, a fishing boat belongs past the last of them - anything closer in is either traffic
+     * over somebody's world or, at the extreme this exists to stop, a trawler parked against the
+     * star. Where there is nobody, there is nothing to keep clear of and no distance rule at all:
+     * the whole system is the water, and a boat may be anywhere in it.
+     * <p>
+     * Clamped along the point's own bearing from the star rather than re-rolled, so the nearest
+     * legal spot is the one taken and a placement that was chosen for a reason - to be a short way
+     * off the player, say - keeps as much of that reason as the band allows.
+     */
+    public static Vector2f place(StarSystemAPI system, Vector2f preferred) {
+        if (system == null || preferred == null) return preferred;
+        if (!isPopulated(system)) return preferred;
+
+        Vector2f center = center(system);
+
+        float inner = getInnerLimit(system);
+        float outer = getOuterLimit(system);
+
+        float distance = Misc.getDistance(center, preferred);
+        if (distance >= inner && distance <= outer) return preferred;
+
+        //a point sitting on the star has no bearing to keep, so it is given one
+        float bearing = distance <= 1f
+                ? MathUtils.getRandomNumberInRange(0f, 360f)
+                : Misc.getAngleInDegrees(center, preferred);
+
+        return MathUtils.getPointOnCircumference(center,
+                MathUtils.clamp(distance, inner, outer), bearing);
+    }
+
+    /**
      * Somewhere to work next: a point in the band whose leg from {@code from} clears every
      * inhabited world.
      * <p>

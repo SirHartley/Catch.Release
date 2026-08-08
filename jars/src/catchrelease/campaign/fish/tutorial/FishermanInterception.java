@@ -102,6 +102,13 @@ public class FishermanInterception implements EveryFrameScript {
      * Placed off the far side of the player from wherever it was, so the move is never on screen,
      * and pointed straight at them with the flags that make a fleet close and hold rather than go
      * back to what it was doing.
+     * <p>
+     * Through {@link OuterReaches#place} like every other placement of a boat, and this one needs
+     * it most: the drop point is measured off the player, the player is standing at a rupture, and
+     * ruptures are seeded from the star outwards - so somebody who found one in the inner system
+     * got a trawler materialising against the sun. The boat comes in at the near edge of its own
+     * band instead and closes from there, which is further to fly and the right place to fly it
+     * from. This only ever runs in an inhabited system, so the band always applies.
      */
     protected void cutOff(CampaignFleetAPI boat, CampaignFleetAPI player) {
         boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
@@ -109,6 +116,10 @@ public class FishermanInterception implements EveryFrameScript {
         Vector2f at = MathUtils.getPointOnCircumference(player.getLocation(),
                 TutorialConstants.INTERCEPT_SPAWN_DISTANCE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
+
+        if (player.getContainingLocation() instanceof StarSystemAPI system) {
+            at = OuterReaches.place(system, at);
+        }
 
         boat.setLocation(at.x, at.y);
 

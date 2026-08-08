@@ -88,6 +88,16 @@ public class FishermanQuest {
 
         public int round;
         public int credits;
+
+        /**
+         * Whether the hold has the specimen, as opposed to the request being finished.
+         * <p>
+         * The request finishes at the boat. Landing the thing is where the player did the part
+         * they were asked to do, and nothing marked that moment: the rupture kept its mission
+         * marker, the note kept saying it was still in there, and the only confirmation was flying
+         * back and finding a new option waiting.
+         */
+        public boolean landed;
     }
 
     public static Saved getActive() {
@@ -253,6 +263,8 @@ public class FishermanQuest {
         FishermanShelf.widen(SLOTS_PER_JOB);
 
         Global.getSector().getMemoryWithoutUpdate().set(ROUND_KEY, quest.round + 1);
+
+        letGo(quest);
         Global.getSector().getPersistentData().remove(STATE_KEY);
 
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
@@ -309,6 +321,48 @@ public class FishermanQuest {
         }
 
         return false;
+    }
+
+    /**
+     * Takes this request's claim off whatever rupture it was using.
+     * <p>
+     * {@link #plant} claims one and nothing ever let it go, so vanilla's own mission marker - the
+     * gold ring and the exclamation - stayed burned onto that rupture for the rest of the campaign,
+     * pointing at a request that was over. Asked of every rupture in the system rather than the one
+     * remembered, since {@link QuestPond#release} only lets go of ponds held under this key.
+     */
+    protected static void letGo(Saved quest) {
+        if (quest == null || quest.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!system.getId().equals(quest.systemId)) continue;
+
+            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+                QuestPond.release(pond, STATE_KEY);
+            }
+
+            return;
+        }
+    }
+
+    /**
+     * The moment the hold answers the request: the water is done with, and the note says so.
+     * <p>
+     * Unbooked again if the specimen leaves the hold, so the mark and the note follow what is
+     * aboard rather than what was aboard once.
+     */
+    protected static void setLanded(Saved quest, boolean landed) {
+        if (quest == null || quest.landed == landed) return;
+
+        quest.landed = landed;
+
+        if (landed) letGo(quest);
+
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(QuestIntel.class)) {
+
+            ((QuestIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+        }
     }
 
     //---------------------------------------------------------------- the fish itself
@@ -406,6 +460,12 @@ public class FishermanQuest {
             Saved quest = getActive();
             if (quest == null) return;
 
+            //asked before anything about where the player is: the answer is about the hold, and
+            //this is the only thing watching for it - the catch minigame has no idea what any
+            //request wants
+            setLanded(quest, isSatisfied());
+            if (quest.landed) return;
+
             CampaignFleetAPI player = Global.getSector().getPlayerFleet();
             if (player == null) return;
 
@@ -437,6 +497,8 @@ public class FishermanQuest {
         @Override
         public String getName() {
             FishSpec spec = getSpec();
+
+            if (quest.landed) return "Chart request: take it back";
 
             return "Chart request: " + (spec == null ? "a specimen" : spec.getDisplayName());
         }
@@ -482,22 +544,29 @@ public class FishermanQuest {
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             FishSpec spec = getSpec();
+            String name = spec == null ? "the named species" : spec.getDisplayName();
 
-            //the specimen itself at the top, where vanilla's missions put the poster's crest
+            //the specimen itself at the top, where vanilla's missions put the poster's crest -
+            //still what the note is about once it is aboard, so it stays on both branches
             info.addImage(spec == null || spec.icon == null || spec.icon.isEmpty()
                     ? FishConstants.ITEM_ICON_FALLBACK : spec.icon, width, 80f, 10f);
 
-            info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being in"
-                            + " there until somebody lands it.", 10f, Misc.getHighlightColor(),
-                    spec == null ? "the named species" : spec.getDisplayName(), quest.systemName);
+            if (quest.landed) {
+                info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                        Misc.getHighlightColor(), Misc.ucFirst(name));
+            } else {
+                info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
+                                + " in there until somebody lands it.", 10f,
+                        Misc.getHighlightColor(), name, quest.systemName);
 
-            info.addPara(quest.atPond
-                            ? "The mark is a rupture. Drop a rod down it."
-                            : "The mark is open water. Nothing will show it but the lamps.",
-                    Misc.getGrayColor(), 10f);
+                info.addPara(quest.atPond
+                                ? "The mark is a rupture. Drop a rod down it."
+                                : "The mark is open water. Nothing will show it but the lamps.",
+                        Misc.getGrayColor(), 10f);
 
-            info.addPara("Whatever comes up will be barely holding. That is what they are asking"
-                    + " about.", Misc.getGrayColor(), 10f);
+                info.addPara("Whatever comes up will be barely holding. That is what they are"
+                        + " asking about.", Misc.getGrayColor(), 10f);
+            }
 
             info.addPara("Pays %s and one more chart on the shelf, permanently.", 10f,
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
@@ -535,6 +604,9 @@ public class FishermanQuest {
          *  point at it rather than at the system around it. */
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
+            //once it is aboard the water is not where the player is being sent
+            if (quest.landed) return null;
+
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                 if (!system.getId().equals(quest.systemId)) continue;
 

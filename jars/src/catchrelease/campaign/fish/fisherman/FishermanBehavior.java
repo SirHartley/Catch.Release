@@ -272,6 +272,35 @@ public class FishermanBehavior implements EveryFrameScript {
         if (memory.getBoolean(HarpoonOffence.FLEEING_FLAG)) {
             memory.unset(HarpoonOffence.FLEEING_FLAG);
         }
+
+        keepOutOfEverybodysWay(memory);
+    }
+
+    /**
+     * The boat has no quarrel with anybody, and nobody has one with it.
+     * <p>
+     * The standing above is all about the <i>player</i>, and it left the rest of the sky alone: a
+     * trawler working the reaches of somebody's system was still an independent hull to every
+     * patrol, pirate pack and blockade that came past, and got treated like one. What that looks
+     * like is the shop, the charts and whatever errand is open evaporating because a raider found
+     * the boat while the player was three jumps away - and there is nothing to be done about it
+     * from the player's end, which is the part that makes it a bad rule rather than a hard one.
+     * <p>
+     * Both halves are needed and they are not the same question. Ignoring keeps the boat from
+     * picking a fight or fleeing one it was never in; ignored-by keeps everybody else from picking
+     * one with it. Either alone leaves a chase with one participant.
+     * <p>
+     * Written every frame with the rest of the standing, so a boat already out there in somebody's
+     * save gets it on the next tick rather than on the next spawn.
+     */
+    protected void keepOutOfEverybodysWay(MemoryAPI memory) {
+        if (!memory.getBoolean(MemFlags.FLEET_IGNORES_OTHER_FLEETS)) {
+            memory.set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
+        }
+
+        if (!memory.getBoolean(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS)) {
+            memory.set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
+        }
     }
 
     /**

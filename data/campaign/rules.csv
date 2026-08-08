@@ -926,7 +926,7 @@ $catchreleaseStage >= 1",,,"0:catchrelease_ask_howLong:""How long have you been 
 catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,,"""A while."" A pause that goes on slightly too long to be a pause. ""The boats are newer than the work. That is usually the way of it.""
 
 You do not get a number, and it does not occur to you until later that you did not get a number.","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""They call you Baha, in the registry.""",
@@ -935,12 +935,12 @@ catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"No
 ""He signed for the first boat. The paperwork has never caught up and I have never asked it to.""
 
 The winch stops. It starts again.","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_why0ut,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 1",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
 catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Nothing to catch in there. The fabric is thick where people are - all that living presses it down flat."" A shrug. ""And they do not like the lamps. Nobody ever says why.""","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
@@ -949,21 +949,21 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 That appears to be the whole answer. Then, after a while:
 
 ""It is not the looking. It is that the thing looks back, and it does not know how to stop, and it does not know that you are not water.""","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
 catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Habits, mostly. Something on the other side did a thing so many times that the shape of the doing survived the doer."" A hand turns over. ""Then it drifts in here, and here has rules about having a body, so it grows one.""
 
 ""That is why they come apart when the water is bad. Nothing is holding the shape but the habit.""","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
 catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""It is not worse. It is thinner. You can see further through it and there is more on the other side to see.""
 
 ""People say worse because of what it does to them, which is a different subject and not one the water is interested in.""","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 5",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
@@ -972,13 +972,14 @@ catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishB
 ""Not the way you mean.""
 
 The lights outside the window sweep past, and for the length of that sweep the crew behind them are standing in a different order.","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
+100:catchrelease_fisherBack:I've heard enough.",
 catchrelease_fisherOptAsk_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
 catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""Nothing I brought aboard."" They say it as though answering a different question. ""You do not land the big ones. You get a reading off them and you cut the line, and if you are quick about it they do not follow the line back.""","0:catchrelease_fisherAskBack:Speak of other things
-100:catchrelease_fisherBack:Continue",
-catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Continue,
+100:catchrelease_fisherBack:I've heard enough.",
+catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"CatchReleaseCMD dropCutComm
+SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:I've heard enough.,"The cut link is vanilla's convOptionLeave, a PopulateOptions row conditioned on $isPerson alone - so every FireAll PopulateOptions in this conversation collects it, this submenu included. The main menu drops it in catchrelease_fisherOptLeave and this is the same job for the same reason: the boat carries its own way out, and vanilla's lands the player back on the engage screen of a fleet nobody is fighting. Scripts run after the panel has been cleared and repopulated, so removing here removes what was just added."
 catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
@@ -991,9 +992,15 @@ $catchreleaseTargetPond",,"""$catchreleaseTarget. There is a rupture open in $ca
 ""It will keep sitting in it. They do not wander, the ones I ask for - they are already where they were going.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:5
 CatchReleaseCMD tokens
-!$catchreleaseTargetPond",,"""$catchreleaseTarget. Open water, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
+!$catchreleaseTargetPond
+$catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open water, $catchreleaseTargetWhere. Nothing will show it to you but the lamps, and it will not be pleased about the lamps.""
 
 ""Take your time. It is not going anywhere it has not already been.""",100:catchrelease_fisherBack:Continue,
+catchrelease_askTargetCharted,DialogOptionSelected,"$option == catchrelease_askTarget score:6
+CatchReleaseCMD tokens
+!$catchreleaseTargetPlaced",,"""$catchreleaseTarget. I am not telling you where - that is what the charts are for, and reading one is the half of this you have not done yet.""
+
+""The planner on your map will plot it once you have. Do not do it by eye.""",100:catchrelease_fisherBack:Continue,"The chart rung is the one errand with no system attached, by design. Both the other branches name a place, so without this one the ask fell to the open-water row and printed nothing where the system should be."
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
 CatchReleaseCMD tokens
 $catchreleaseCarrying",CatchReleaseCMD dropHarpoon,"You put the head on the table before anybody has said anything. It is not asked where it came from, and your ops chief notices that and says nothing about it either.
@@ -1016,24 +1023,20 @@ catchrelease_intro_brief,DialogOptionSelected,$option == catchrelease_intro_brie
 FireBest DialogOptionSelected","They do not appear to mind being cut off, which is its own kind of answer.",,
 catchrelease_intro_rod,DialogOptionSelected,$option == catchrelease_intro_rod,"CatchReleaseCMD giveRod
 CatchReleaseCMD tokens
-Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","A crate comes up onto the deck before the sentence is finished, and your ops chief signs for it without being asked to. One rod, secondhand, working.
+FireBest CatchReleaseIntroBrief","A crate comes up onto the deck before the sentence is finished, and your ops chief signs for it without being asked to. One rod, secondhand, working.
 
-""Near a rupture it opens the thing. Over an open one it puts drones down. It reads the situation, so you do not have to.""
-
-""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. There is a rupture there with your name on it.""",catchrelease_fisherBack:Continue,
+""Near a rupture it opens the thing. Over an open one it puts drones down. It reads the situation, so you do not have to.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD sendOut
 CatchReleaseCMD tokens
-Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
+FireBest CatchReleaseIntroBrief","It is weighed, turned over, and set down. ""Good. Now the part nobody explains.""
 
 ""The drones are the same rod you already have. Over open water they hunt; under lamps they search. One tool, three moods, and it picks the mood itself.""
 
-""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking at them. That is why they come apart when you land them, and why the water they came out of matters a great deal more than they do.""
-
-""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere. The water there is thinner. See what that does to it.""","catchrelease_intro_ghosts:""Ghosts.""
+""And the fish are not fish. They are patterns the ghosts assume when something on this side is looking at them. That is why they come apart when you land them, and why the water they came out of matters a great deal more than they do.""","catchrelease_intro_ghosts:""Ghosts.""
 catchrelease_fisherBack:Continue",
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Call them whatever holds still in your head."" They are already looking past you at the window. ""They do not answer to either of us, and they have never once answered to me.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
@@ -1042,28 +1045,24 @@ $catchreleaseStage == 3
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveDeepGear
 CatchReleaseCMD tokens
-Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","They hold it up to the light for a while and do not say what they are looking for. Your science officer, watching over your shoulder, quietly stops taking notes.
+FireBest CatchReleaseIntroBrief","They hold it up to the light for a while and do not say what they are looking for. Your science officer, watching over your shoulder, quietly stops taking notes.
 
 ""Thinner water, worse coherence, same animal. You have seen it now.""
 
 A second crate comes up. Lamps, a harpoon, and a ledger.
 
-""The lamps burn a window through where there is no rupture to use. The line takes whatever the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here, whatever they told you inside the picket.""
-
-""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question I am asking.""",catchrelease_fisherBack:Continue,
+""The lamps burn a window through where there is no rupture to use. The line takes whatever the window shows you. Everything in the ledger is bought with the catch - there is no other currency out here, whatever they told you inside the picket.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
 CatchReleaseCMD tokens
-Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","It goes into a case rather than onto the table, and the case is closed before your science officer can get a reading off it.
+FireBest CatchReleaseIntroBrief","It goes into a case rather than onto the table, and the case is closed before your science officer can get a reading off it.
 
 ""That is the whole trade. Everything after this is doing it better.""
 
-""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself, instead of sweeping until you are out of fuel and patience. Two of them, on the house.""
-
-""Bring me both. And use the planner on your map before you go. There are two of them now, and doing that by eye is how people end up in the abyss.""",catchrelease_fisherBack:Continue,
+""Survey data is where a thing lives - the water, the star, the age of the place. Read a chart and you know where to point yourself, instead of sweeping until you are out of fuel and patience. Two of them, on the house.""",catchrelease_fisherBack:Continue,
 catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
@@ -1075,6 +1074,21 @@ AddTextSmall ""Survey counter opened"" highlight","Both of them are looked at pr
 ""Then you can read the water. The counter is open to you, $playerName - charts for charts, and I will carry what I can.""
 
 Four more go across the table unasked: two common, one uncommon, and one they do not name.",catchrelease_fisherBack:Continue,
+catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
+$catchreleaseTargetSet
+$catchreleaseStage == 2
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. There is a rupture there with your name on it.""",,"The briefing cannot live in the row that rolls it. FireAll/FireBest applyRule emits the text column and replaces its tokens BEFORE running the script, so a row that grants the rung and then rolls the errand is printing tokens the roll has not written yet - blank on the first rung, which never had them, and the previous rung's answer on the rest. So the granting row ends its script by firing this trigger instead, and the row that lands here loads the tokens in its own conditions, by which time the roll has happened. Highlight is safe in a script column and stays there: SetTextHighlights calls highlightInLastPara, which is this row's own text precisely because the text went first."
+catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
+$catchreleaseTargetSet
+$catchreleaseStage == 3
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Which is the lesson. $catchreleaseTarget, out of $catchreleaseTargetWhere. The water there is thinner. See what that does to it.""",,
+catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
+$catchreleaseTargetSet
+$catchreleaseStage == 4
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring me $catchreleaseTarget out of $catchreleaseTargetWhere. Through a lamp, on a line. A thing out of a pond will not answer the question I am asking.""",,
+catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
+$catchreleaseTargetSet
+$catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Bring me both - $catchreleaseTarget. And use the planner on your map before you go. There are two of them now, and doing that by eye is how people end up in the abyss.""",,
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
@@ -1090,9 +1104,9 @@ $catchreleaseStage == 4
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
-!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Both of them, I did say."" A pause. ""Your navigator will thank you for using the planner.""
+!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget""","""Both of them, I did say."" A pause. ""Your navigator will thank you for using the planner.""
 
-""$catchreleaseTarget. $catchreleaseTargetWhere.""",catchrelease_fisherBack:Continue,
+""$catchreleaseTarget. Both, and the charts know where.""",catchrelease_fisherBack:Continue,
 catchrelease_introNoExplain,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
 CatchReleaseCMD tokens
 $catchreleaseStage == 3

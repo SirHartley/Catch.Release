@@ -191,6 +191,14 @@ capitalise for you and a sentence has to be able to start with one.
 | `$catchreleaseMore` | `handOver` | Whether the job is asking again |
 | Anything else | a job's `setJobTokens` | Per-job names: the dish, the species, the two men in a bar |
 
+**A row cannot print what its own script writes.** `FireAll`/`FireBest` `applyRule` emits the text
+column - tokens replaced - and *then* runs the script, so a row that grants a rung and rolls the next
+errand is printing tokens the roll has not written yet. The introduction's briefings therefore live
+on their own trigger, `CatchReleaseIntroBrief`: the granting row ends its script by firing it, and
+the brief row loads the tokens in its own conditions, by which time the roll has happened. The same
+ordering makes `Highlight` in a script column correct - `SetTextHighlights` calls
+`highlightInLastPara`, which is that row's own text precisely because the text went first.
+
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
 number wins regardless of which family it belongs to. The harpooned-crew greetings therefore
@@ -296,11 +304,11 @@ explains how.
 | `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system - a small base leaned on by a full hold and a long absence - after which the system is locked for a month so re-entry is not a re-roll |
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost - weekly, and again the moment the player arrives, so a destroyed boat is back by the time anybody looks |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
-| `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds |
-| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing; `keepPace()` holds it to burn 4 unless it is closing on somebody |
+| `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds. `place()` is the one gate every boat placement goes through: clamped into the band in an inhabited system, unconstrained where there is nobody |
+| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
-| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed. Its `QuestIntel` carries the species' own icon and the bullets vanilla's mission notes carry |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture and the note turns into "take it back". Its `QuestIntel` carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
@@ -312,7 +320,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic |
 
 ### `campaign/fish/tutorial`
@@ -322,11 +330,11 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture and re-points the note at the boat |
 | `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
 | `Castaway.java` | The rating put off a boat for looking, found on a survey |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
-| `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped - and the only thing that lets it off burn 4 while it closes |
+| `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped - and the only thing that lets it off burn 4 while it closes. Its drop point is clamped into the reaches, so a rupture in the inner system no longer parks a trawler against the star |
 | `TutorialConstants.java` | Every number the above read |
 
 ### `campaign/fish/minigame`
