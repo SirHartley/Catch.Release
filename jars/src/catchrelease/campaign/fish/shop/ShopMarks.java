@@ -21,12 +21,20 @@ import java.util.Set;
  * rung - the asks it stands for are always the current price, so buying a rung moves the mark
  * to the next one, and a finished or owned ware's mark expires on its own.
  * <p>
- * What a mark does lives elsewhere and reads through the questions here: the route planner
- * suggests every species that could satisfy a marked ask, the map screens hang the quest-yellow
- * dot off {@link #isMarked}, and the cargo icons hang it off {@link #isWanted}, which counts
- * the open jobs too. {@link #drawDot} draws it where the caller puts it: bottom right on cargo
- * icons, on the ring's lower right for the map holder, at the row's right end on the map pane
- * and route popup.
+ * What a mark does lives elsewhere and reads through the questions here, and there are two of
+ * them, asked by different screens for different reasons. {@link #isMarked} is the shopping list
+ * alone - the outfitter asks it, because a ring on a shop row means "this is the ware I picked".
+ * {@link #isWanted} is the shopping list <i>and</i> every open errand, which is what the
+ * quest-yellow dot means everywhere it is drawn: something is asking for this, do not sell it.
+ * <p>
+ * Every screen outside the outfitter wants the second one. They did not all get it - the hold
+ * asked {@code isWanted} while the sector map, its sidebar and the route planner asked
+ * {@code isMarked}, so a specimen an errand had sent the player after wore a dot in the cargo bay
+ * and none at all on the chart that was supposed to help find it. If a new screen has to choose,
+ * the question is whether it is the shop; if not, it is {@link #isWanted}.
+ * <p>
+ * {@link #drawDot} draws it where the caller puts it: bottom right on cargo icons, on the ring's
+ * lower right for the map holder, at the row's right end on the map pane and route popup.
  */
 public class ShopMarks {
 
