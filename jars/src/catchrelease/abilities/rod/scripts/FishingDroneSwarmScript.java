@@ -284,7 +284,11 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG);
     }
 
-    /** False while dived under the fabric; it resurfaces and can be picked up again then. */
+    /**
+     * False while dived under the fabric; it resurfaces and can be picked up again then. Asked
+     * for the whole of a chase and not only when one is picked, since what a drone can reach is
+     * a thing that changes under it while it flies.
+     */
     protected boolean isReachable(SectorEntityToken mote) {
         return FishEntityPlugin.isAvailable(mote);
     }
@@ -320,6 +324,16 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
             SectorEntityToken mote = plugin.getChaseTarget();
             if (mote == null) continue;
+
+            //break off on the same terms the chase was taken on. Reachability used to be asked
+            //once, at pick-up, and never again - so a lamp mark that faded while the drone was in
+            //the air, or a specimen that dived to shake the line, was still landed on contact.
+            //Both are exactly the reach the harpoon's deep-strike head is sold for, and no rig
+            //without it has any business having it
+            if (!isReachable(mote)) {
+                plugin.returnToOrbit();
+                continue;
+            }
 
             //measured against reach, not the tighter patrol orbit, or every chase past that inner
             //circle would be called off immediately

@@ -502,8 +502,8 @@ Four rigs. Each is `ability/` (the plugin), `constants/` (tuning), and usually `
 | `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet |
-| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces |
-| `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: a screen flying with the fleet, going after buried motes the breach lamps have lit and unearthing them on contact |
+| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
+| `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: a screen flying with the fleet, going after buried motes the breach lamps have **lit outright** and unearthing them on contact. A dent is not a hole — taking one is the harpoon's Fathom Head and nothing else |
 | `rod/rendering/FishingRingRenderer.java` | The dashed ring showing the fishing radius |
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |
