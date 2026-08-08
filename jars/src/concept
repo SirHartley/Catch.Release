@@ -14,6 +14,16 @@ scrapped
 ---------------------
 qa_
 
+QOL
+- LYNE-Drone auto dispatch (feels like a cheat...)
+
+Sound
+- Fish got wrong sounds - should be organs
+- Minigame lacks soundstrack
+- Celebration tush on catch & extra for treasure
+- "Got treasure" notif when successfully taking in treasure
+-
+
 Codex
 - open map from codex still broken
 
@@ -38,23 +48,6 @@ Map
 
 handed off_
 
-Aquarium
-- Has a delayed pop-in uppon opening the main menu
-- Fish behaviour: Fish that go up and down should not change their heading past delta 30 deg angle to horizontal line
-- FIsh behaviour: Mollusc and Misc should not change their heading at all, just drift into a random direction while slightly tilting either way
-- Fish behaviour: Crabs should be bound to the bottom of the pond & scurry about like crabs do.
-- fish behaviour: I've seen fish do a barrel roll when flipping. Don't think that's intentional.
-
-Aquarium
-- Also renders when accessing the bar - should be MENUSTATE = MAIN only
-- Fish behaviour is weird, they sometimes flip and spin around
-- Fish don't seem to scale by size
-
-Quests
-- Quests don't seem to mark species as important anymore.
-- Quest marks never vanish from ponds even if you catch the quest target
-- Quest Ponds marked with quest marks seem to spawn cyan motes when they shouldn't? Might only be a tutorial issue
-
 ---------------------
 
 self_
@@ -62,7 +55,6 @@ self_
 - fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
 - Icons
 - Harpoon needs better tip sprite
-- Crabolabob should sell a few aquarium backdrops
 - need five more legendaries - one for each quadrant
 - Suspicious lack of shark, turtle and whale
 

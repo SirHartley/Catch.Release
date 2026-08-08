@@ -1,7 +1,7 @@
 {
   "graphics": {
     "catchrelease": {
-          "hs_bg":"graphics/backgrounds/hyperspace_bg_cool.jpg",
+          "hs_bg":"graphics/catchrelease/background/hyperspace_bg_cool_tileable.jpg",
           "pond_1":"graphics/catchrelease/effects/fishing_hole_1.png",
           "spotlight_circle":"graphics/catchrelease/effects/spotlight_circle.png",
           "trail_foggy": "graphics/catchrelease/fx/trails_foggy.png",

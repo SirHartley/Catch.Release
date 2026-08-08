@@ -2,14 +2,11 @@
 	"catchrelease_ui_searchlight_loop":[
 		{"file":"sounds/catchrelease/spotlight/spotlight_loop.ogg","pitch":1.0,"volume":0.8},
 	],
-	# PLACEHOLDER. The real one is a low whisper and has not been cut yet; this is the spotlight
-	# loop dropped two octaves, which is roughly the right character and, more to the point, is a
-	# file that exists - the game resolves these at load, so a row pointing at a missing .ogg is a
-	# row that can stop the mod starting. Swap the path when the whisper is recorded; nothing else
-	# needs to change. Must be mono, since this goes through playLoop.
+
 	"catchrelease_coherence_whispers":[
-		{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":0.25,"volume":0.55},
+		{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":1,"volume":1},
 	],
+
 	"catchrelease_ui_searchlight_on":{
 		"sounds":[
 			{"file":"sounds/catchrelease/spotlight/spotlight_ability_on.ogg","pitch":0.9,"volume":0.6},
