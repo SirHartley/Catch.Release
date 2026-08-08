@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
+import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
@@ -44,8 +45,13 @@ import java.util.Map;
  * <ul>
  * <li><b>The index</b> ({@link #marks()}) is one pass over the sector producing a flat list of
  *     sources with their positions, reaches and weights already resolved. Rebuilt when the day
- *     rolls over or the gates switch on, and not otherwise. Evaluating a point against it is a loop
- *     over a few dozen floats.
+ *     rolls over or the gates switch on, and not otherwise; a mark whose source died inside a day
+ *     drops out on its own ({@link Mark#isLive}). Evaluating a point against it is a loop over a
+ *     few hundred floats.
+ * <li><b>A slipstream is not a point</b> and does not go in as one. It is a ribbon tens of
+ *     light-years long, so it enters the index as its own segments, walked at a fixed stride - see
+ *     {@link #addStream}. Indexing it at its anchor, which is what this used to do, put a
+ *     sector-crossing stream over the corner it started in and nowhere else.
  * <li><b>The steady reading</b> of a system - what a pond, a catch, a habitat and the overlay's
  *     intensity are all judged on - is computed from the index and cached per system. Filled for the
  *     player's own system when they arrive in it, for every system at once when the sector map
@@ -145,9 +151,12 @@ public class Aberration {
     }
 
     /**
-     * Slipstreams are ribbons, not points - measures to where the terrain is anchored and takes the
-     * nearest, close enough for a rough number. Public since the route planner discounts travel
-     * along them, sampling several points per leg.
+     * How strongly a slipstream runs over a point, taken from the nearest sample of any ribbon.
+     * <p>
+     * Public because the route planner discounts travel along a stream and samples several points
+     * per leg. The marks are the ribbons themselves rather than their anchors - see
+     * {@link #addStream}, which is what makes a stream something a leg can run <i>along</i> rather
+     * than something that exists at one end of itself.
      */
     public static float getSlipstreamShare(Vector2f locInHyper) {
         if (locInHyper == null) return 0f;
@@ -156,6 +165,7 @@ public class Aberration {
 
         for (Mark mark : marks()) {
             if (mark.source != AberrationSource.SLIPSTREAM) continue;
+            if (!mark.isLive()) continue;
 
             worst = Math.max(worst, mark.shareAt(locInHyper));
         }
@@ -297,6 +307,7 @@ public class Aberration {
         }
 
         for (Mark mark : found) {
+            if (!mark.isLive()) continue;
             if (foundOnly && !mark.isFound()) continue;
 
             float share = system.getId().equals(mark.systemId)
@@ -417,6 +428,18 @@ public class Aberration {
         }
 
         /**
+         * Whether the thing this was taken from is still there.
+         * <p>
+         * The index is rebuilt on the day rather than on an event, so anything that dies inside one
+         * would otherwise go on reading until midnight. Slipstreams are what this is for - a
+         * slipsurge is a stream that lasts hours - but a gate somebody removed gets the same
+         * courtesy for the same cost, which is one field read.
+         */
+        protected boolean isLive() {
+            return entity == null || !entity.isExpired();
+        }
+
+        /**
          * Whether the player has found this.
          * <p>
          * One rule for everything that sits inside a system - hidden until somebody has been there
@@ -512,7 +535,7 @@ public class Aberration {
 
                         if (!Terrain.SLIPSTREAM.equals(terrain.getType())) continue;
 
-                        out.add(new Mark(source, terrain.getLocation(), null, null));
+                        addStream(out, source, terrain);
                     }
                     break;
 
@@ -523,6 +546,52 @@ public class Aberration {
         }
 
         return out;
+    }
+
+    /**
+     * A slipstream, as the ribbon it actually is rather than as the point it is anchored at.
+     * <p>
+     * This is the one source on the list with a shape. A stream is a polyline of hundreds of
+     * segments running tens of light-years across the sector, and every system it passes is a system
+     * with a slipstream over it - but {@code terrain.getLocation()} is a single point at one end of
+     * it, which is what this class used to index and measure from. A stream running from one corner
+     * of the sector to the other therefore thinned the fabric at the corner it started in and
+     * nowhere else along its length.
+     * <p>
+     * So the segments go in instead, walked at a fixed stride: enough marks to follow the ribbon,
+     * few enough that a stream is dozens rather than hundreds. The stride is the whole of the
+     * error - a point between two marks is at worst half a stride further from the ribbon than it
+     * really is - and at half a light-year against a six light-year falloff that is a couple of
+     * percent.
+     * <p>
+     * Falls back to the anchor for anything that is not vanilla's own plugin, which is the same
+     * courtesy the foreign gate tags get: a stream some other mod built is still a stream, and one
+     * mark at the only position it will admit to beats no mark at all.
+     */
+    protected static void addStream(List<Mark> out, AberrationSource source,
+                                    CampaignTerrainAPI terrain) {
+
+        if (!(terrain.getPlugin() instanceof SlipstreamTerrainPlugin2 plugin)) {
+            out.add(new Mark(source, new Vector2f(terrain.getLocation()), null, terrain));
+            return;
+        }
+
+        float stride = FishConstants.ABERRATION_STREAM_SAMPLE_LY * Misc.getUnitsPerLightYear();
+
+        Vector2f last = null;
+
+        for (SlipstreamTerrainPlugin2.SlipstreamSegment segment : plugin.getSegments()) {
+            if (segment == null || segment.loc == null) continue;
+            if (last != null && Misc.getDistance(last, segment.loc) < stride) continue;
+
+            //copied, not held: the segment list is vanilla's own and its vectors are live
+            last = new Vector2f(segment.loc);
+
+            out.add(new Mark(source, last, null, terrain));
+        }
+
+        //a stream shorter than one stride, or one that has not been built yet, still exists
+        if (last == null) out.add(new Mark(source, new Vector2f(terrain.getLocation()), null, terrain));
     }
 
     /** Which system an entity stands in, or null where it is not in one. */

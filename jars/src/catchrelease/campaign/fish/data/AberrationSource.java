@@ -55,8 +55,11 @@ public enum AberrationSource {
 
     /**
      * The other source never hidden: a stream is visible the moment it runs, and it is the only
-     * thing on this list that ever moves. Hyperspace terrain, so it is measured off the ribbon's
-     * own anchors rather than off any system.
+     * thing on this list that ever moves.
+     * <p>
+     * The only one with a shape, too. Hyperspace terrain rather than an object in a system, and a
+     * ribbon rather than a point - every system it passes has a stream over it, not just the one it
+     * started next to. It enters the index as its own segments; see {@code Aberration.addStream}.
      */
     SLIPSTREAM("a slipstream", Find.STREAM, FishConstants.ABERRATION_SLIPSTREAM_LY,
             FishConstants.ABERRATION_SLIPSTREAM_WEIGHT, false),
