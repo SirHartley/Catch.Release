@@ -18,21 +18,44 @@ player who never looks closely should have a lovely time and never be told they 
 
 The horror is never announced. It is available. It lives in what is *not* said: a number that does
 not add up, a crew standing in a different order after the lights sweep past, a specimen that
-"continues afterwards, on the inside". Nobody in the fiction is horrified, which is the point —
-they are all far too used to it, or far too far gone to notice.
+"continues afterwards, on the inside". Nobody in the fiction is horrified, which is the point.
 
 Concretely, when writing:
 
 - **Never explain the horror.** If a line says the thing out loud it is the wrong line. The
   Fisherman's own answers are the model: *"They look at it."* — and then a pause, and then something
   worse that still does not explain anything.
-- **Nobody reacts correctly.** The ops chief signs for the crate. The science officer stops taking
-  notes and says nothing about why. The wrongness is ordinary to everyone present.
 - **Understatement over spectacle.** "Half a torso, gone, without changes to how they work or live"
   is the register. Not gore — subtraction.
-- **The player's crew are the audience surrogate**, and even they are acclimatising. That is its
-  own horror and should never be pointed at.
 - **No winking.** The mod never signals that it knows. It is a fishing mod.
+
+## Nobody notices, and that is not an accident
+
+This is the mechanism the whole tone rests on, and it is the most important thing in this document.
+
+**Low coherence does not look like low coherence unless you are standing near a breach.** That is
+literally how the mod works — the screen only turns over when a rig is running, a rupture is open or
+one of the boats is alongside. Everywhere else, a thing that cannot be true simply *is* true, and
+presents as ordinary.
+
+So people accept it. Not out of habit, and not because they are stupid — because the alternative is
+to reject reality's account of itself, and that is a far more dangerous thing to do than to nod and
+carry on. The clam opens along three hinges. Reality permits two. It has to make sense, because
+consider the alternative.
+
+This is why:
+
+- the ops chief signs for the crate;
+- the science officer stops taking notes and does not say why;
+- Crablobab can sell a man the plans for a building he has no business having, and the man builds it;
+- a coat has more pockets than a coat has, and nobody mentions the coat.
+
+**Nobody in this mod is ever the one who notices.** Not NPCs, not the player's crew, not the
+narration. The player may notice. That is the only place the horror is allowed to happen, and it
+must arrive there on its own.
+
+Corollary for writers: **a thing that makes no sense does not need to be justified.** It needs to be
+stated flatly and moved past. Justification is the tell.
 
 ---
 
@@ -59,17 +82,50 @@ pulled out of it is holding its shape. It is the mod's one continuous scale and 
 it: what a breach looks like, what a specimen comes up like, what a place does to the people
 standing in it, what the sector map paints.
 
-Low coherence is not a hazard in the ordinary sense. It does not damage you. It *edits* you, and it
-does not consider the edit to be an event. Extra limbs. A missing half. No pain, no bleeding, no
-change to how you work or live — the thing is simply not there any more and never was, as far as
-reality is now concerned.
+### What holds it up
 
-Being near a breach is what exposes you. Breach lights (see below) make a breach where there was
-none, which is why they are the most feared piece of equipment in this mod's world.
+**Permanence holds reality together, and it does so by simply being there.** Anything physical,
+anything settled, anything that has been the same thing for a while — a planet, a station, a hull, a
+person — improves the coherence of everything around it just by existing. Population does it best,
+because a great many people being definitely somewhere is a great deal of permanence in one place.
+
+The Fisherman puts it plainly: *"The fabric is thick where people are — all that living presses it
+down flat."*
+
+The inverse is the important half. **Things that are energy, or process, or concept — anything
+ill-defined, anything that is more a happening than an object — are the first to go** when coherence
+drops. A pattern is barely a thing at all, which is why the trip through a breach is the whole
+difficulty of this profession.
+
+### What wears it down
+
+Anything that interacts with hyperspace thins the fabric near it. That is vanilla's own physics and
+the mod does not add to it: gates, hypershunts, collapsed stars, slipstreams, machinery built on a
+planetary scale, and the abyss, which is not a source so much as the place the fabric has already
+lost.
+
+### What low coherence does
+
+To **people and things of permanence**: it edits them. Not damage — subtraction and addition without
+event. Extra limbs. A missing half. No pain, no bleeding, no change to how they work or live; the
+thing is simply not there any more, and never was, as far as reality is now concerned.
+
+To **patterns**: they stop holding their shape reliably. A low-coherence specimen keeps slipping.
+It carries marks it was not landed with. It drifts as though still in water. It does not die. It may
+talk. It may make you see things.
+
+Some people will pay a great deal for that. A thing that bends reality on a table in front of you is
+worth more than a fish, to a certain kind of buyer, and the trade does not ask what they want it
+for.
 
 A specimen's coherence is a property of *where it was taken*, not of the specimen. Two things pulled
-through the same breach read nearly the same. This matters for writing: nobody says a fish is
-"badly made". They say the water was bad.
+through the same breach read nearly the same. So nobody says a fish is badly made — they say the
+water was bad.
+
+Gear can shore a specimen up on the way home. The trick is not clever: you carry a piece of
+permanence alongside it. A held field, a barb that keeps the thing to its own shape all the way up
+the line. It cannot make a specimen better than the water allowed; it can stop the trip finishing
+what the breach started.
 
 ## The breach
 
@@ -110,6 +166,26 @@ Two things follow that writing should honour:
   Fisherman: *"It is not the looking. It is that the thing looks back, and it does not know how to
   stop, and it does not know that you are not water."*
 
+**Rarity is rarity.** Some patterns are simply more common than others. It is not a measure of age,
+size, danger or depth, and nothing should imply that it is.
+
+**Some patterns hide.** A buried one has dived deeper into the fabric rather than sitting under the
+breach where anything could reach it. It is not a different kind of thing — it is the same thing,
+further down, and only a lamp's passive reach will betray that it is there at all.
+
+### Eating them
+
+Mostly fine. That is the entire commercial case for the trade and it happens to be true.
+
+What a particular pattern does to the person who eats it is a per-species question, and where it
+matters the answer belongs in that species' description in `fish.csv` rather than here.
+
+**Eating a low-coherence specimen is a serious mistake.** You take on what it has: your own
+coherence drops, and from there it proceeds the way these things proceed. Nobody has written this
+down in-universe, and the trade sells at market rate.
+
+---
+
 ## The gear
 
 The whole rig exists to reach through a breach without going through it yourself.
@@ -118,6 +194,12 @@ The whole rig exists to reach through a breach without going through it yourself
 
 **The ROD is the technology that lets something pass through a breach into hyperspace and come back.**
 Everything else in the trade is a delivery system for a ROD head.
+
+The **D is Device**. The other two letters have never been expanded by anybody who matters, and
+everyone says "ROD device" regardless, which is wrong twice and universal.
+
+A ROD only does anything **while it is interacting with a breach or with fabric thin enough to
+count**. Away from one it is inert — an object, with a shape and a mass and no properties.
 
 It cannot carry living beings. They come back inside out — the polite word is that they lose
 coherence, and the polite word is doing a great deal of work.
@@ -147,6 +229,12 @@ The **rope** is not a rope. It is the retrieval working, and the retrieval is no
 "Rope" is slang and the mod uses it in dialogue; the drawn line exists **for gameplay legibility
 only** and should never be treated as a physical object in prose. Nothing is reeled. Nothing is tied.
 
+**Putting one into a ship** is a heavy object at speed and nothing more exotic than that — the head
+is inert without a breach to work against, so no hull has ever been opened onto hyperspace by one.
+The reaction it gets is not about the damage. It is about what the thing on the end *is*: a device
+for punching a hole into hyperspace, fired at a crewed hull. You would not welcome a sea mine
+through your window on the grounds that there is no water in the room.
+
 ### Breach lights
 
 **Searchlights, properly breach lights.** They do not illuminate. They **weaken realspace wherever
@@ -160,6 +248,26 @@ without the possibility of appeal. Whole crews.
 
 This is why every faction that polices anything treats running the lamps near a world the way they
 would treat discharging a weapon into it — not as smuggling, as an attack that has not landed yet.
+
+### Bycatch
+
+Hyperspace has things drifting in it. It always has — derelict hulls, wreckage, cargo that went in
+and never came out. A rig that plucks things across is not fussy about which things, so a trip
+brings up what was floating near the breach along with what was swimming under it.
+
+Hulls and wreckage need no further explanation than that. The odder recoveries — a blueprint, a
+crate of rare technology — are a gameplay concession and should be left unremarked rather than
+justified.
+
+### Charts
+
+The trade sells survey data: which waters a given pattern tends to appear in. It comes from the
+Fisherman, from what the trade collectively knows about what turns up where, and from the fact that
+none of this is obliged to make sense.
+
+A chart of the far side of the fabric should not be possible. The charts are correct anyway, the way
+a coachman who has not noticed he is dead still gets the coffin to the church on time. Nobody has
+raised it. See **Nobody notices** above — this is that principle, in a filing cabinet.
 
 ---
 
@@ -186,6 +294,10 @@ Write him:
 
 His **name degrades where the water is bad** — letters drop out by position, the same way in the same
 place every time, because the degradation is a property of the place rather than of him.
+
+**What he does with the catch he takes in payment is never explained, and that is a rule rather than
+a gap.** He is past the point where his reasons would be reasons. Do not write a line that gestures
+at an answer, including a coy one.
 
 ### The crew
 
@@ -215,8 +327,14 @@ A low-coherence entity that spawned off the Fisherman's fleet. He is the shape o
 and it is all wrong. The coat has far too many pockets and far more space than a coat has.
 
 He is cheerful, talkative and sells things. He is named after his crabs, or they after him; he says
-it saves time. He is not a threat and not a mystery to be solved — he is a man with a coat, and the
-coat is the horror, and nobody is going to mention the coat.
+it saves time.
+
+**He sells things he could not possibly have**, and the transaction goes through, and the buyer
+walks away satisfied — because he does not make sense either, and the two facts settle each other.
+Anything of his that raises a question is answering it by being on the table.
+
+He is not a threat and not a mystery to be solved. He is a man with a coat, the coat is the horror,
+and nobody is going to mention the coat.
 
 ---
 
@@ -228,7 +346,10 @@ They turned out to be **tasty — mostly**. That is the whole of the commercial 
 them as food and as curiosities, and **the people buying them do not generally know where they come
 from**.
 
-Nothing in the fiction has ever established what eating one does. Nobody has asked in print.
+A colony can go further and build a **Breach Conservatory**: a local outfitter and a public display
+tank, stocked from the owner's own catch. The tank works. The stock does not die. A permanent public
+exhibition of things that cannot die is the sort of civic amenity a population is pleased to have,
+and no one has any observations to offer about it.
 
 ---
 
@@ -249,26 +370,29 @@ rod. Precision is a *character* choice — somebody being careful, or somebody w
 
 ---
 
-## Not yet decided
+## Settled as unexplainable
 
-Held open deliberately. Do not invent answers to these in a `rules.csv` row; if a line needs one,
-settle it here first.
+Not gaps. Writing a line that answers one of these is a regression, however lightly it is done.
 
-- **What the Fisherman does with the catch he takes in trade.** The outfitter is bought with fish
-  and he says there is no other currency out here. Nothing says why he wants them or what becomes
-  of them.
-- **What eating a pattern does**, if anything, and whether anybody has connected it to anything.
-- **Why gates, hypershunts, collapsed stars, slipstreams and the abyss thin the fabric**, and why
-  they rank the way they do.
-- **Who buys low-coherence specimens, and for what.** The trade prices them differently and the mod
-  says so out loud in a tooltip.
-- **Where charts come from** — the trade sells survey data on where a given pattern lives, and
-  nothing establishes how anybody surveys the other side of the fabric.
-- **What comes up alongside the catch.** The rig recovers salvage, rare technology, blueprints and
-  occasionally an entire hull. Nothing explains what those are doing there.
-- **What a Breach Conservatory actually keeps.** A colony structure with a public display tank,
-  stocked from the player's own catch, holding patterns alive indefinitely on this side.
-- **What a pattern's rarity is a measure of**, and why a pattern cares about the local star's colour,
-  its constellation's age or which part of the sector it is in.
-- **Buried patterns** — the ones that never surfaced, visible only as a dent under a lamp.
-- **What happens to a ship a ROD harpoon hits**, beyond the bill for it.
+- **What the Fisherman does with the catch.** He is beyond reason. There is no answer to gesture at.
+- **Why the shape is so often a fish.** Never explained, in or out of universe.
+- **How the standing boats are all the same man.** "They do not explain how" is the whole of it.
+- **Where Crablobab gets his stock.** He makes no sense; neither does it; that is the transaction.
+- **How anybody charts the far side of the fabric.** The charts are right. Nobody has asked.
+
+## Still open
+
+- **What LYNE stands for.** Nothing yet. When it is needed it should be dull, technical and slightly
+  wrong, in the manner of a name assigned by somebody filling in a form.
+- **What the R and the O of ROD stand for.** Same treatment. The D is Device.
+
+## Out-of-universe touchstones
+
+For calibration only; none of this is canon and none of it should be referenced in the fiction.
+
+- **DREDGE** — for what eating the wrong thing does to you, and for the pacing of a cheerful
+  fishing loop with something underneath it.
+- **The King in Yellow** (Chambers) — for things that carry on correctly without noticing they
+  should not be able to.
+- **Warhammer 40,000's warp** — for how bad hyperspace is understood to be by ordinary people.
+- **The Flying Dutchman** — for the fleet.
