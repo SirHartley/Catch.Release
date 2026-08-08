@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.jobs.FishJob;
+import catchrelease.campaign.fish.shop.FishAsker;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -57,31 +58,36 @@ public class FishRoutePlanner {
         }
     }
 
-    /** Every species with an open ask: job asks (bar/fleet, both {@link FishJob}s via the intel
-     *  manager) and the shop's next upgrade/tackle rungs. Only species the player knows make the list. */
+    /**
+     * Every species with an open ask: every {@link FishAsker} in the log and the shop's marked
+     * upgrade and tackle rungs. Only species the player knows make the list.
+     * <p>
+     * Both halves go through {@link #suggest}, which they did not used to. The errand half asked
+     * the intel manager for {@link FishJob}s and took only asks that named a species outright,
+     * which missed two whole things at once. The introduction's ladder and the trade's chart
+     * requests are notes rather than bar jobs and are not {@code FishJob}s at all - which is the
+     * reason {@code FishAsker} exists - so nothing either of them wanted was ever suggested. And
+     * an errand asking for a kind of fish rather than a named one - any crab, anything rare or
+     * better - named nothing and so suggested nothing, on the one screen built to answer "where
+     * do I go for that".
+     */
     public static List<Suggestion> getSuggestions() {
         Map<String, String> byId = new LinkedHashMap<>();
 
         if (Global.getSector() != null) {
             for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
-                if (!(intel instanceof FishJob job)) continue;
+                if (!(intel instanceof FishAsker asker)) continue;
 
-                for (FishRequirement ask : job.getAsks()) {
-                    if (ask != null && ask.speciesId != null) {
-                        byId.putIfAbsent(ask.speciesId, "job");
-                    }
-                }
+                //what the row's right-hand tag says; a bar job is a job, the notes are not
+                String reason = asker instanceof FishJob ? "job" : "errand";
+
+                for (FishRequirement ask : asker.getAsks()) suggest(byId, ask, reason);
             }
         }
 
-        //the shop side is the shopping list: only what the player has marked asks for fish
-        //here, and a broad ask (a tag, a rarity floor) suggests everything that could pay it
+        //the shop side is the shopping list: only what the player has marked asks for fish here
         for (FishRequirement ask : ShopMarks.getMarkedRequirements()) {
-            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-                if (spec == null || spec.id == null) continue;
-
-                if (ask.couldBeSatisfiedBy(spec)) byId.putIfAbsent(spec.id, "marked");
-            }
+            suggest(byId, ask, "marked");
         }
 
         List<Suggestion> out = new ArrayList<>();
@@ -94,6 +100,35 @@ public class FishRoutePlanner {
         }
 
         return out;
+    }
+
+    /**
+     * Puts every known species that could pay this ask on the list, under the given reason. First
+     * reason wins, so an errand's own tag survives a marked ware wanting the same fish later.
+     * <p>
+     * An ask that every known species could pay is dropped rather than listed. It is not wrong -
+     * anything really would do - but it singles out nothing, which is the same case
+     * {@link FishAsker#getAsks} calls a legitimate empty answer, and a suggestion list holding
+     * the entire table is a suggestion list holding nothing. The introduction's opening rung is
+     * exactly this: any common fish or better, which is every fish there is.
+     */
+    protected static void suggest(Map<String, String> byId, FishRequirement ask, String reason) {
+        if (ask == null) return;
+
+        List<String> could = new ArrayList<>();
+        int known = 0;
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null) continue;
+            if (!FishPresence.isKnown(spec)) continue;
+
+            known++;
+            if (ask.couldBeSatisfiedBy(spec)) could.add(spec.id);
+        }
+
+        if (could.size() >= known) return;
+
+        for (String id : could) byId.putIfAbsent(id, reason);
     }
 
     /**

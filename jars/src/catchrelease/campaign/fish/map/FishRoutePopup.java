@@ -606,7 +606,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                         Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
             }
 
-            boolean marked = ShopMarks.isMarked(spec);
+            boolean marked = ShopMarks.isWanted(spec);
 
             //who is asking, right-aligned - the marked tag retired, the dot already says it
             if (row.reason != null && !"marked".equals(row.reason)) {
@@ -624,7 +624,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 }
             }
 
-            //the shopping-list dot at the row's right end, centred on the row's own midline
+            //the wanted dot at the row's right end, centred on the row's own midline
             if (marked) {
                 ShopMarks.drawDot(x + w - 8f, y + h * 0.5f,
                         ShopMarks.DOT_RADIUS - 0.5f, alphaMult);

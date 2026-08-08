@@ -67,8 +67,8 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
         //the art as painted once landed, its rimmed silhouette while only surveyed
         FishIcons.draw(spec, x, y, pos.getWidth() * ICON_SHARE, alphaMult);
 
-        //the shopping-list dot, bottom right on the ring - a marked upgrade wants this species
-        if (ShopMarks.isMarked(spec)) {
+        //the wanted dot, bottom right on the ring - a marked ware or an open errand wants this
+        if (ShopMarks.isWanted(spec)) {
             float off = radius * 0.707f;
             ShopMarks.drawDot(x + off, y - off, ShopMarks.DOT_RADIUS, alphaMult);
         }
