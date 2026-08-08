@@ -71,6 +71,16 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
     protected ButtonAPI fishButton;
     protected boolean applied = false;
+
+    /**
+     * Whether the sidebar is actually attached to the map screen right now, as opposed to
+     * {@link #applied}, which only records that {@link #activate()} ran. The two come apart when
+     * the planner hands the slot back and the re-add fails, and nothing else reconciles them -
+     * see {@link #ensurePaneStanding()}. Maintained by every add and remove of {@link #panePanel}
+     * rather than asked of the component, because the API has no attachment query and the
+     * internals' answer cannot be identity-checked against the screen without running the game.
+     */
+    protected boolean paneStanding = false;
     protected float originalScrollerWidth = 0f;
 
     protected FishMapPane pane;
@@ -171,6 +181,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             if (!applied && wantPane) activate();
             if (!systemApplied && wantSystem) activateSystemPane(viewed);
+
+            //the flag says the pane is up and the planner is down - make sure the glass
+            //agrees. applied only means activate() ran; a hand-back that broke half-way
+            //leaves the pane gone with neither branch above ever firing again
+            if (applied && wantPane && popupPanel == null) ensurePaneStanding();
 
             if (applied && pendingSpeciesId != null) applyPendingSpecies();
 
@@ -380,6 +395,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         try {
             ((UIPanelAPI) mapScreen).removeComponent(panePanel);
+            paneStanding = false;
 
             popup = new FishRoutePopup(this);
             popupPanel = Global.getSettings().createCustom(FishMapPane.WIDTH, paneHeight, popup);
@@ -427,14 +443,43 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     ((UIPanelAPI) mapScreen).addComponent(panePanel)
                             .setSize(FishMapPane.WIDTH, paneHeight)
                             .inTL(paneX, paneY);
+
+                    paneStanding = true;
                 }
-            } catch (Throwable ignored) {
-                //the screen is already gone, and the panel with it
+            } catch (Throwable t) {
+                //usually the screen going away mid-close; if it is in fact still up, the
+                //advance gate re-seats the pane next frame
+                Global.getLogger(FishMapFilterScript.class)
+                        .warn("Planner could not hand the sidebar's slot back", t);
             }
         }
 
         popup = null;
         popupPanel = null;
+    }
+
+    /**
+     * Re-seats the sidebar if it is wanted but not actually standing on the screen.
+     * {@code applied} only records that {@link #activate()} ran - a broken hand-back from the
+     * planner leaves the flag and the glass disagreeing, and no other path reconciles them.
+     * Reads {@link #paneStanding} rather than asking the component, since the API has no
+     * attachment query and the internals' {@code getParent} cannot be identity-checked against
+     * the screen from source alone - and a wrong answer there would re-seat the sidebar every
+     * frame, which is worse than the fault being healed.
+     */
+    protected void ensurePaneStanding() {
+        if (panePanel == null || mapScreen == null) return;
+
+        if (paneStanding) return;
+
+        //remove first: harmless when it is genuinely detached, and the one thing that stops a
+        //wrong answer here from stacking a second sidebar on top of the first
+        ((UIPanelAPI) mapScreen).removeComponent(panePanel);
+        ((UIPanelAPI) mapScreen).addComponent(panePanel)
+                .setSize(FishMapPane.WIDTH, paneHeight)
+                .inTL(paneX, paneY);
+
+        paneStanding = true;
     }
 
     /**
@@ -656,6 +701,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     .setSize(FishMapPane.WIDTH, paneHeight)
                     .inTL(paneX, paneY);
 
+            paneStanding = true;
+
             //the standing overlay follows the narrowed viewport
             if (overlayPanel != null) {
                 overlayPanel.getPosition().setSize(narrowWidth, paneHeight);
@@ -687,6 +734,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     scrollerPos.getCenterX(), scrollerPos.getCenterY());
 
             if (panePanel != null) ((UIPanelAPI) mapScreen).removeComponent(panePanel);
+            paneStanding = false;
 
             if (originalScrollerWidth > 0f) {
                 scrollerPos.setSize(originalScrollerWidth, scrollerPos.getHeight());
@@ -701,6 +749,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             pane = null;
             panePanel = null;
+            paneStanding = false;
 
             applied = false;
         } catch (Throwable t) {
@@ -866,6 +915,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         fishButton = null;
         pane = null;
         panePanel = null;
+        paneStanding = false;
         overlayPanel = null;
         overlay = null;
         popup = null;
@@ -894,6 +944,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         try {
             if (mapScreen != null) {
                 if (panePanel != null) ((UIPanelAPI) mapScreen).removeComponent(panePanel);
+                paneStanding = false;
+
                 if (systemPanePanel != null) {
                     ((UIPanelAPI) mapScreen).removeComponent(systemPanePanel);
                 }
