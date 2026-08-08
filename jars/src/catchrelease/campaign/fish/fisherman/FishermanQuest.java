@@ -328,21 +328,14 @@ public class FishermanQuest {
      * <p>
      * {@link #plant} claims one and nothing ever let it go, so vanilla's own mission marker - the
      * gold ring and the exclamation - stayed burned onto that rupture for the rest of the campaign,
-     * pointing at a request that was over. Asked of every rupture in the system rather than the one
-     * remembered, since {@link QuestPond#release} only lets go of ponds held under this key.
+     * pointing at a request that was over. Asked of every rupture in the sector rather than of the
+     * one system the request remembers: the claim is named, so a wide sweep cannot take anybody
+     * else's marker off, and the remembered place is not reliably where the claim ended up.
      */
     protected static void letGo(Saved quest) {
-        if (quest == null || quest.systemId == null) return;
+        if (quest == null) return;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.getId().equals(quest.systemId)) continue;
-
-            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
-                QuestPond.release(pond, STATE_KEY);
-            }
-
-            return;
-        }
+        QuestPond.releaseAll(STATE_KEY);
     }
 
     /**

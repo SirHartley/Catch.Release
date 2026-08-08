@@ -306,22 +306,16 @@ public class FishingIntro {
      * exclamation - burned onto a rupture for the rest of the campaign, on every rupture the
      * ladder ever used, pointing at nothing.
      * <p>
-     * Asked of every rupture in the system rather than the one remembered, because the claim is
-     * named: {@link QuestPond#release} only lets go of ponds held under this errand's own key and
-     * ignores the rest.
+     * Asked of every rupture in the sector rather than of the one system the errand remembers. The
+     * claim is named, so asking widely costs nothing and cannot let go of anybody else's water -
+     * and the errand's remembered place is not reliably where its claim ended up. A rung with no
+     * system at all returned here before doing anything; an errand replaced while the player stood
+     * somewhere else pointed the sweep at the wrong system. Both left a marker behind.
      */
     protected static void letGo(Target target) {
-        if (target == null || target.systemId == null) return;
+        if (target == null) return;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.getId().equals(target.systemId)) continue;
-
-            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
-                QuestPond.release(pond, TutorialConstants.TARGET_KEY);
-            }
-
-            return;
-        }
+        QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
     }
 
     /**

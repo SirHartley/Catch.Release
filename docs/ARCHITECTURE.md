@@ -79,7 +79,9 @@ Everything game-facing is wired from `ModPlugin.java`.
 15. `FishMapFilterScript` as a transient script — the sector-map filter
 16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-18. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
+18. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+   any more; repairs saves carrying a stranded claim, since transitions cannot
+19. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -253,7 +255,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Blueprint, Commodity |
 | `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
-| `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it |
+| `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |

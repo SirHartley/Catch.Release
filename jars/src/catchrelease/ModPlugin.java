@@ -11,8 +11,11 @@ import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
+import catchrelease.campaign.fish.jobs.FishJob;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
@@ -27,6 +30,10 @@ import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.testing.DevShortcut;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
@@ -85,6 +92,9 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new FishIntelPlanetPanel());
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
+        //housekeeping, once, before anything is looked at
+        sweepPondClaims();
+
         //an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();
 
@@ -92,6 +102,37 @@ public class ModPlugin extends BaseModPlugin {
         //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
         //LunaCampaignRenderer.addTransientRenderer(new TestStencilRenderer());
         //LunaCampaignRenderer.addTransientRenderer(new RippleRingRenderer());
+    }
+
+    /**
+     * Takes the mission marker off every rupture nothing is using any more.
+     * <p>
+     * Four things claim ruptures and each of them lets go on its own transitions, which is enough
+     * from here on and cannot repair a save that already has a marker burned into it - see
+     * {@link QuestPond#sweep}. The list of claimants lives here rather than in {@code QuestPond},
+     * because knowing who claims what is wiring and wiring is what this class is.
+     * <p>
+     * One entity walk per system, on load. The three ids are all of them.
+     */
+    protected void sweepPondClaims() {
+        Set<String> known = new LinkedHashSet<>();
+        known.add(TutorialConstants.TARGET_KEY);
+        known.add(FishermanQuest.STATE_KEY);
+        known.add(FishJob.REF_KEY);
+
+        Set<String> live = new LinkedHashSet<>();
+        if (FishingIntro.getTarget() != null) live.add(TutorialConstants.TARGET_KEY);
+        if (FishermanQuest.getActive() != null) live.add(FishermanQuest.STATE_KEY);
+
+        //every bar job shares the one reason, so one unfinished job holds the whole id
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
+            if (intel instanceof FishJob && !intel.isEnded()) {
+                live.add(FishJob.REF_KEY);
+                break;
+            }
+        }
+
+        QuestPond.sweep(known, live);
     }
 
     @Override
