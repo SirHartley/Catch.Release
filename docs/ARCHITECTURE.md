@@ -244,6 +244,10 @@ The first outbound transition is stage-gated: only stage 2 may call `sendOut`, w
 repeated `catchrelease_introFirstDone` selection at stage 3 replays the existing brief instead of
 rolling another target. That brief's unchanged `Continue` label routes through the real Fisherman
 encounter exit; the later briefing rungs continue to return to the Fisherman menu.
+The deep-gear explanation uses a conversation-local `CatchReleaseIntroDeepQuestions` submenu.
+Each supplied answer records its own transient asked flag and repopulates only the unanswered
+questions; `What do you want caught?` appears after the lights, return trace, and weapon-safety
+answers have all been read. An interrupted handoff simply starts that three-question menu again.
 
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher

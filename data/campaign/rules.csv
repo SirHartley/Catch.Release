@@ -1836,8 +1836,7 @@ He looks directly at you.
 
 ""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
 10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""
-100:catchrelease_introDeepDone:""What do you want caught?""",Technical resume for an interrupted basic-outfitter/deep-rig handoff.
+20:catchrelease_introWeaponQuestion:""This is a weapon.""",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
 catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Keep the drones flying. Keep the return clean. Fit tackle for the work you're actually doing.""
 
 He gestures at your manifest.
@@ -1868,19 +1867,21 @@ He looks directly at you.
 
 ""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
 10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""
-100:catchrelease_introDeepDone:""What do you want caught?""",
-catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,,"""Near enough for deck work.""
+20:catchrelease_introWeaponQuestion:""This is a weapon.""",The assignment option is added only after the three safety questions have been answered.
+catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,"$catchreleaseIntroLightAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""Near enough for deck work.""
 
 The Fisherman stops there.
 
-""Run them away from people.""",catchrelease_introDeepDone:Continue,
-catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,,"""Return trace.""
+""Run them away from people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,"$catchreleaseIntroHarpoonAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""Return trace.""
 
 He wipes a thumb across the display.
 
-""Looks like rope. Isn't. Don't build procedures around the picture.""",catchrelease_introDeepDone:Continue,
-catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,,"""It can put forty tonnes of bad judgment through a hull.""
+""Looks like rope. Isn't. Don't build procedures around the picture.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,"$catchreleaseIntroWeaponAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""It can put forty tonnes of bad judgment through a hull.""
 
 He considers the launcher.
 
@@ -1888,7 +1889,13 @@ He considers the launcher.
 
 A beat.
 
-""Don't shoot either one at people.""",catchrelease_introDeepDone:Continue,
+""Don't shoot either one at people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,0:catchrelease_introLightQuestion:""The lights make a rupture?"",
+catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?"",
+catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,20:catchrelease_introWeaponQuestion:""This is a weapon."",
+catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleaseIntroLightAsked
+$catchreleaseIntroHarpoonAsked
+$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:""What do you want caught?"",The assignment continuation appears after all three equipment and safety questions have been covered.
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
