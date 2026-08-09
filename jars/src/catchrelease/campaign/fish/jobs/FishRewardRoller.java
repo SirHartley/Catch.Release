@@ -32,6 +32,9 @@ public class FishRewardRoller {
     /** Roughly what a job is worth, before it is decided what shape that takes. */
     public static final int VALUE_PER_FISH = 1200;
 
+    /** Cash has to compete with actual Starsector work; barter values remain the reward budget. */
+    public static final float CREDIT_PAYOUT_MULT = 5f;
+
     /** How far either side of the reckoned worth a roll may land, as a fraction. */
     public static final float SPREAD = 0.35f;
 
@@ -57,7 +60,7 @@ public class FishRewardRoller {
         }
 
         // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
-        if (rewards.isEmpty()) rewards.add(FishReward.credits(Math.max(500, value)));
+        if (rewards.isEmpty()) rewards.add(FishReward.credits(creditPayout(value)));
 
         return rewards;
     }
@@ -65,12 +68,12 @@ public class FishRewardRoller {
     protected static FishReward rollOne(Random random, int value, boolean allowCredits) {
         float roll = random.nextFloat();
 
-        if (allowCredits && roll < 0.34f) return FishReward.credits(value);
+        if (allowCredits && roll < 0.34f) return FishReward.credits(creditPayout(value));
         if (roll < 0.52f) return rollUpgrade(random);
         if (roll < 0.66f) return rollTackle(random);
         if (roll < 0.78f) return rollLocationData(random, value);
         if (roll < 0.86f) return rollBackdrop(random);
-        if (allowCredits && roll < 0.93f) return FishReward.credits(value);
+        if (allowCredits && roll < 0.93f) return FishReward.credits(creditPayout(value));
 
         return rollBlueprint(random);
     }
@@ -185,6 +188,11 @@ public class FishRewardRoller {
 
         return FishReward.blueprint(weapon ? Items.WEAPON_BP : Items.FIGHTER_BP,
                 options.get(random.nextInt(options.size())));
+    }
+
+    /** Turns the roller's internal barter value into a cash payout without inflating item rewards. */
+    public static int creditPayout(int value) {
+        return Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
     }
 
     /** Same job, different day. */

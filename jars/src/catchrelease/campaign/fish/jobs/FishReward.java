@@ -211,7 +211,9 @@ public abstract class FishReward {
 
         /** Saves from before the fallback was stored deserialize it as zero. */
         protected int getFallbackCredits() {
-            return fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
+            int value = fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
+
+            return FishRewardRoller.creditPayout(value);
         }
     }
 
@@ -290,7 +292,7 @@ public abstract class FishReward {
         }
 
         protected int getCreditValue() {
-            return Math.max(500, quantity * 120);
+            return FishRewardRoller.creditPayout(quantity * 120);
         }
     }
 }
