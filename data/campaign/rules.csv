@@ -1146,7 +1146,8 @@ catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
-catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"The rating hears you out, then turns the glass between both hands.
+catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
+CatchReleaseCMD point","The rating hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -1597,10 +1598,11 @@ He looks past the camera.
 
 ""Missing the useful half.""","0:catchrelease_introHarpoonReturn:Return it
 100:catchrelease_fisherBack:Leave it there",
-catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
+catchrelease_introHelloRating,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
-!$catchreleaseCarrying",,"""So.""
+!$catchreleaseCarrying
+$global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
@@ -1608,14 +1610,34 @@ The Fisherman glances over a manifest.
 10:catchrelease_introCurious:""I want to know what you're doing out here.""
 20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
 100:catchrelease_fisherBack:""Not today.""",
-catchrelease_introHelloFromProperty,DialogOptionSelected,$option == catchrelease_introHello,,"""So.""
+catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
+CatchReleaseCMD tokens
+$catchreleaseStage < 2
+!$catchreleaseCarrying
+!$global.catchrelease_metRating",,"""So.""
+
+The Fisherman glances over a manifest.
+
+""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
+10:catchrelease_introCurious:""I want to know what you're doing out here.""
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for players who reached the Fisherman without the bar rating.
+catchrelease_introHelloFromPropertyRating,DialogOptionSelected,"$option == catchrelease_introHello
+$global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
 ""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
 10:catchrelease_introCurious:""I want to know what you're doing out here.""
 20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
-100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction.
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction after meeting the bar rating.
+catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
+!$global.catchrelease_metRating",,"""So.""
+
+The Fisherman glances over a manifest.
+
+""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
+10:catchrelease_introCurious:""I want to know what you're doing out here.""
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction without the bar rating.
 catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""Good.""
 
 The answer comes with no salesmanship attached.
