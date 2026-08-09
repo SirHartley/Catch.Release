@@ -100,11 +100,16 @@ public class DevShortcut implements CampaignInputListener {
 
     }
 
+    /**
+     * Every scene in the table, whether or not the table hands it out for free.
+     * <p>
+     * {@code Backdrop.owned} is the row saying a conservatory has this one the day it is built,
+     * which is the opposite of what a grant-me-everything key wants: reading it as a filter meant
+     * this granted the two scenes the player already had and nothing else. There is nothing to
+     * filter on - {@link Backdrops#own} is idempotent, so the ones already had cost a set lookup.
+     */
     protected void addBackgrounds(){
-        for (Backdrop backdrop : BackdropLoader.getAll()) {
-            if (!backdrop.owned) continue;
-            Backdrops.own(backdrop.id);
-        }
+        for (Backdrop backdrop : BackdropLoader.getAll()) Backdrops.own(backdrop.id);
 
         Global.getSector().getCampaignUI().addMessage(
                 "Dev shortcut: All backdrops unlocked.",
