@@ -4,6 +4,8 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
+import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -36,6 +38,9 @@ public class HarpoonWitness implements EveryFrameScript {
     protected CampaignFleetAPI patrol;
     protected String factionId;
     protected boolean identified;
+    protected String victimName;
+    protected String originName;
+    protected boolean explosive;
 
     protected float daysSpent = 0f;
     protected boolean done = false;
@@ -51,10 +56,16 @@ public class HarpoonWitness implements EveryFrameScript {
 
         if (victim == null || factionId == null) return;
 
+        String victimName = victim.getName();
+        LocationAPI origin = victim.getContainingLocation();
+        String originName = origin == null ? "open space"
+                : origin instanceof StarSystemAPI
+                ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
+
         //a charge in the hull with the player's own flag flying is not something anybody reports and
         //waits on. There is no patrol errand here - the money goes out the same day
         if (explosive && identified) {
-            HarpoonHitman.send(factionId, true);
+            HarpoonHitman.send(factionId, victimName, originName, true, true);
             return;
         }
 
@@ -64,7 +75,9 @@ public class HarpoonWitness implements EveryFrameScript {
 
         //nobody within reach to tell. Some of them let it go and some of them pay somebody
         if (patrol == null) {
-            if (identified && Math.random() < HarpoonHitman.CHANCE) HarpoonHitman.send(factionId);
+            if (identified && Math.random() < HarpoonHitman.CHANCE) {
+                HarpoonHitman.send(factionId, victimName, originName, explosive, false);
+            }
             return;
         }
 
@@ -75,16 +88,21 @@ public class HarpoonWitness implements EveryFrameScript {
                 "reporting an incident");
 
         Global.getSector().addScript(
-                new HarpoonWitness(victim, patrol, factionId, identified));
+                new HarpoonWitness(victim, patrol, factionId, identified,
+                        victimName, originName, explosive));
     }
 
     public HarpoonWitness(CampaignFleetAPI victim, CampaignFleetAPI patrol, String factionId,
-                          boolean identified) {
+                          boolean identified, String victimName, String originName,
+                          boolean explosive) {
 
         this.victim = victim;
         this.patrol = patrol;
         this.factionId = factionId;
         this.identified = identified;
+        this.victimName = victimName;
+        this.originName = originName;
+        this.explosive = explosive;
     }
 
     @Override
@@ -146,7 +164,9 @@ public class HarpoonWitness implements EveryFrameScript {
      * decide the matter is worth paying to settle.
      */
     protected void giveUp() {
-        if (identified && Math.random() < HarpoonHitman.CHANCE) HarpoonHitman.send(factionId);
+        if (identified && Math.random() < HarpoonHitman.CHANCE) {
+            HarpoonHitman.send(factionId, victimName, originName, explosive, false);
+        }
 
         release();
     }

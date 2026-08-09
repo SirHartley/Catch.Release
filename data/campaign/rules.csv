@@ -1,4 +1,13 @@
 id,trigger,conditions,script,text,options,notes
+catchrelease_hitmanEncounter,BeginFleetEncounter,$catchrelease_harpoonHitman score:1200,"FleetDesc
+HailPlayer",,,"The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first."
+catchrelease_hitmanHail,OpenCommLink,$entity.catchrelease_harpoonHitman score:1600,"Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
+
+""$entity.catchrelease_harpoonHitmanClient placed the contract. You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code.""
+
+The officer closes the report.
+
+""We're here to settle the account.""",100:cutCommLink:Cut the comm link,"Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
@@ -802,11 +811,11 @@ Their request comes down to $entity.catchrelease_fleetQuestAsk.","0:catchrelease
 5:catchrelease_fqAcceptNoPromise:""No promises.""
 10:catchrelease_fqDecline:Decline",Two acceptance phrasings intentionally converge
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter","They transmit their logs and the local survey references.
+CatchReleaseCMD leaveEncounter","They transmit their logs and the local range references.
 
 No formal contract follows.",,
 catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_fqAcceptNoPromise,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter","They transmit their logs and the local survey references.
+CatchReleaseCMD leaveEncounter","They transmit their logs and the local range references.
 
 No formal contract follows.",,Technical routing twin for the supplied second acceptance phrasing.
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,CatchReleaseCMD leaveEncounter,"""Fair enough.""
@@ -986,7 +995,7 @@ FireAll PopulateOptions","""Back again.""
 
 The Fisherman pushes something out of frame.
 
-""Got surveys if you need them. Got work if you don't.""
+""Got range data if you need it. Got work if you don't.""
 
 A crewman crosses behind him carrying a sealed crate. Halfway across the compartment there is no longer a crate in his hands.",,
 catchrelease_fisherComms2,OpenCommLink,"$entity.catchrelease_fisherman score:1020
@@ -1067,11 +1076,11 @@ $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
 catchrelease_fisherOptCharts,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
-$catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase survey data,
+$catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase range data,
 catchrelease_fisherOptChartsBare,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
-!$catchreleaseShelf",,,20:catchrelease_fisherChartsBare:Ask after new survey data,
+!$catchreleaseShelf",,,20:catchrelease_fisherChartsBare:Ask after new range data,
 catchrelease_fisherOptSell,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3
@@ -1089,7 +1098,7 @@ catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFi
 FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
-catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart mid-trip. The surveyors will catch up.""",,
+catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart mid-trip. The chart crews will catch up.""",,
 catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
 10:catchrelease_fisherSellCommon:Sell all unmarked commons
 20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon
@@ -1101,13 +1110,33 @@ catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,
 FireAll PopulateOptions",,,
 catchrelease_fisherRumorYes,DialogOptionSelected,"$option == catchrelease_fisherRumor score:10
 CatchReleaseCMD tokens
-$catchreleaseRumor",CatchReleaseCMD rumor,"The Fisherman listens to your question, then gives you a location and two names.
+$catchreleaseRumor","CatchReleaseCMD rumor
+CatchReleaseCMD tokens
+FireBest CatchReleaseRumorText",,100:catchrelease_fisherBack:Continue,
+catchrelease_rumorRarity,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorRarity score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman pulls a grease-marked chart from beneath the control unit.
 
-Your intel officer writes down both.
+""Rarer patterns are turning up in $catchreleaseRumorSystem.""
 
-""May be nothing.""
+He checks the date in one corner.
 
-He goes back to his work.",100:catchrelease_fisherBack:Continue,
+""Fabric's running thin in $catchreleaseRumorSystem. May be stale by the time you arrive.""",,
+catchrelease_rumorLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorLoot score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
+
+""Crews in $catchreleaseRumorSystem are bringing up more bycatch than usual. Wreckage. Lost cargo.""
+
+He closes the manifest.
+
+""Leave room in the hold.""",,
+catchrelease_rumorOutsider,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorOutsider score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman turns a range chart until one system sits under his thumb.
+
+""$catchreleaseRumorStranger. $catchreleaseRumorSystem.""
+
+He puts a finger against the recorded range.
+
+""Wrong range. Still there last I heard.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""
@@ -1119,7 +1148,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork",CatchReleaseCMD rollWork,"""Got one.""
 
-He sends over a survey entry.
+He sends over a range entry.
 
 ""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
 
@@ -1129,7 +1158,7 @@ The coherence trace attached to the record is poor.
 
 He names the payment: $catchreleaseWorkPay.
 
-""And I'll carry another survey slot for you afterward.""","0:catchrelease_workTake:Take the work
+""And I'll carry another chart on the shelf for you afterward.""","0:catchrelease_workTake:Take the work
 100:catchrelease_fisherBack:Not now",
 catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,CatchReleaseCMD takeWork,The system is added to your intel log.,100:catchrelease_fisherBack:Continue,
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
@@ -1465,7 +1494,7 @@ Another moment.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""They call you Baha, in the registry.""",
+$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""Do you have a name?""",
 catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"""Registry says Baha.""
 
 The Fisherman takes a drink.
@@ -1587,7 +1616,7 @@ catchrelease_askTargetCharted,DialogOptionSelected,"$option == catchrelease_askT
 CatchReleaseCMD tokens
 !$catchreleaseTargetPlaced",,"""$catchreleaseTarget.""
 
-He taps the survey entry.
+He taps the range entry.
 
 ""Chart's already told you what I would. Put it in the planner.""",100:catchrelease_fisherBack:Continue,
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
@@ -1823,7 +1852,7 @@ He points at the comm menu.
 
 ""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut.
+100:catchrelease_introShopLater:""I'll look later.""","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -1923,14 +1952,14 @@ He makes two small entries in the service ledger.
 
 ""Harpoon and light tackle are open to you now.""
 
-He sends two survey records to your fleet map.
+He sends two range records to your fleet map.
 
-""These are survey data. Common patterns, both of them.""
+""Range data. Common patterns, both of them.""
 
 Your map resolves each record into range information and candidate systems.
 
-""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:""Where does the survey information come from?""
-10:catchrelease_introPlannerAsk:""You want both of these?""",The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown.
+""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:""Where does the range data come from?""
+10:catchrelease_introPlannerAsk:""You want both of these?""","The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
 catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,SetOptionColor catchrelease_introPlannerAsk highlight,"""Surveys.""
 
 The Fisherman gives you a look over the rim of his mug.
@@ -1954,14 +1983,14 @@ $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-AddTextSmall ""Survey purchasing unlocked"" highlight
-AddTextSmall ""Fishing rumor added to intel"" highlight","The two catches are checked against their survey records.
+AddTextSmall ""Range data purchasing unlocked"" highlight
+FireBest CatchReleaseRumorText","The two catches are checked against their range records.
 
 The Fisherman marks the first entry complete, then the second.
 
 ""There.""
 
-The survey-purchasing interface unlocks on your fleet map.
+The range-data interface unlocks on your fleet map.
 
 Four additional records transfer with it: two common, one uncommon, and one rare.
 
@@ -2001,12 +2030,12 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 
 ""Use the breach lights until you have the return. Harpoon it. Bring it here.""
 
-He sends the survey mark.
+He sends the range mark.
 
 ""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
-$catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Both survey targets.""
+$catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Both range targets.""
 
 The Fisherman sends the records again.
 
@@ -2040,7 +2069,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 5
 !$catchreleaseTargetMet","Highlight ""$catchreleaseTarget""","""Both of them.""
 
-He taps the two survey entries.
+He taps the two range entries.
 
 ""Planner's on the map for a reason.""",catchrelease_fisherBack:Continue,
 catchrelease_introNoExplain,DialogOptionSelected,"$option == catchrelease_fisherIntro
@@ -2568,6 +2597,35 @@ Someone has already started repairing the damaged rack.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
 HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."
+catchrelease_campFirstHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""This spot's off limits.""
+
+The pirate glances toward the rupture.
+
+""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,"The first hail is the end of the camp's one-time intercept. The memory flag sends it back to its passive hold; later contacts fall through to the ordinary camp conversation."
+catchrelease_campFirstHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""You are entering a contracted exclusion zone. The rupture is off limits to fishing operations.""
+
+$PersonRank $personName sends over a file number.
+
+""Client identity is protected. The relocation figure is $entity.catchrelease_campBribeDGS credits. Otherwise, alter course.""",,
+catchrelease_campFirstHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","The woman on the screen stands in front of somebody armed.
+
+""Do not lower your machine into that rupture. This place is closed to fishing.""
+
+Her voice remains level.
+
+""You can offer $entity.catchrelease_campBribeDGS credits. We may take it. That changes where we stand, not what the machine is.""",,
 catchrelease_campHail,OpenCommLink,$entity.catchrelease_campFleet score:1000,"Highlight $entity.catchrelease_campBribeDGS
 FireAll CatchReleaseCampOptions","""You've come about the fishing spot.""
 

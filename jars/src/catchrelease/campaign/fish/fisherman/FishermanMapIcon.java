@@ -89,7 +89,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (fleet == null) return;
 
         tooltip.addTitle(fleet.getNameWithFaction());
-        tooltip.addPara("Fishing. Trades in survey data, buys a catch, and carries an outfitter.",
+        tooltip.addPara("Fishing. Trades in range data, buys a catch, and carries an outfitter.",
                 Misc.getGrayColor(), 10f);
     }
 }

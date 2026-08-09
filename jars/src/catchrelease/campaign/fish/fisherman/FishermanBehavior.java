@@ -224,7 +224,7 @@ public class FishermanBehavior implements EveryFrameScript {
      * <p>
      * Vanilla's civilian AI runs from anybody it is hostile to and edges away from anybody carrying
      * {@code $cfai_avoidPlayerSlowly} - which the mod's own harpoon fallout used to set on this
-     * hull like any other freighter's. Either one puts the shop, the charts, the survey counter and
+     * hull like any other freighter's. Either one puts the shop, the charts, the range counter and
      * the whole introduction behind a fortnight of chase, over a rig that misfired once.
      * <p>
      * Flight itself is decided by size, not by temper: {@code TacticalModule.pickEncounterOption}

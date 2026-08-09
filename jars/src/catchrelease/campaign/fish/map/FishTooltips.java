@@ -87,7 +87,7 @@ public final class FishTooltips {
                     tooltip.addPara("Caught " + logged.caught + (logged.caught == 1
                             ? " time." : " times."), 8f);
                 } else {
-                    tooltip.addPara("Known only from survey data.", Misc.getGrayColor(), 8f);
+                    tooltip.addPara("Known only from range data.", Misc.getGrayColor(), 8f);
                 }
 
                 tooltip.addPara("%s", 8f, Misc.getGrayColor(), Misc.getHighlightColor(),

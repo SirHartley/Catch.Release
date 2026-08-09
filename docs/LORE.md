@@ -824,9 +824,9 @@ Leaving something unexplained is often cleaner than explaining it badly.
 
 ---
 
-# 15. Survey data
+# 15. Range data
 
-Survey data describes where a particular pattern tends to occur.
+Range data describes where a particular pattern tends to occur.
 
 It can identify:
 
@@ -842,7 +842,7 @@ Nobody has performed that scrutiny.
 
 Do not solve this.
 
-The Fisherman may provide survey data.
+The Fisherman may provide range data.
 
 The trade may buy and sell it.
 
@@ -852,17 +852,17 @@ It works.
 
 ## Information-release order
 
-The tutorial should introduce surveys only after the player understands basic ROD fishing and the Harpoon/Breach Light loop.
+The tutorial should introduce range data only after the player understands basic ROD fishing and the Harpoon/Breach Light loop.
 
-The first tutorial survey handoff gives **two common targets**.
+The first tutorial range-data handoff gives **two common targets**.
 
 This is also the point where the fishing planner is explained, because the player now has more than one destination and therefore a reason to plan a route.
 
-After completing that two-target assignment, survey purchasing unlocks and the player receives:
+After completing that two-target assignment, range-data purchasing unlocks and the player receives:
 
-- two common surveys;
-- one uncommon survey;
-- one rare survey.
+- two common range entries;
+- one uncommon range entry;
+- one rare range entry.
 
 These rarity assignments are progression design, not an in-world statement that rare fish are stronger.
 
@@ -1089,7 +1089,7 @@ He teaches the player.
 
 He offers work.
 
-He sells surveys.
+He sells range data.
 
 He may give good advice.
 
@@ -1105,7 +1105,9 @@ He does not normally use it.
 
 Paperwork still identifies him that way.
 
-A fitting response is mundane rather than portentous:
+A fitting exchange is mundane rather than portentous:
+
+> "Do you have a name?"
 
 > "Registry says Baha."
 >
@@ -1482,22 +1484,22 @@ A special/golden tutorial catch is appropriate.
 
 Unlock the remaining owned-equipment shop categories.
 
-Give two common survey entries.
+Give two common range entries.
 
-Explain surveys.
+Explain range data.
 
 Explain the fishing planner because the player now has two simultaneous destinations.
 
 ## Final assignment
 
-Retrieve both surveyed patterns.
+Retrieve both charted patterns.
 
 On return:
 
-- unlock survey purchasing;
-- award two common surveys;
-- one uncommon;
-- one rare.
+- unlock range-data purchasing;
+- award two common range entries;
+- one uncommon range entry;
+- one rare range entry.
 
 At this point the player understands enough to explore the system independently.
 
@@ -1868,7 +1870,7 @@ Good:
 - "You give this equipment to every stranger?"
 - "I just left you in another system."
 - "This is a weapon."
-- "Where do the surveys come from?"
+- "Where does the range data come from?"
 - "No fish fighting."
 - Decline.
 - Pay the fine.
@@ -2324,7 +2326,7 @@ Do not answer them.
 - Why patterns so often become fish.
 - How the Fisherman is simultaneously present on multiple boats.
 - Where Crablobab gets his inventory.
-- How survey data about the far side can be correct.
+- How range data about the far side can be correct.
 - What produces the whispering in thin fabric.
 - What LYNE stands for.
 - What R and O stand for in ROD.

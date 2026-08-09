@@ -109,7 +109,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return selectedIds;
     }
 
-    /** No selection means the survey: the selection itself is the mode switch. */
+    /** No selection means the range view: the selection itself is the mode switch. */
     public boolean isCategoryView() {
         return selectedIds.isEmpty();
     }
@@ -374,7 +374,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         + " other, so overlaps cross instead of piling.", 8f);
 
                 tooltip.addPara("A filled circle by a name is a species somebody aboard has"
-                        + " landed. A hollow one is known only from survey data: its range"
+                        + " landed. A hollow one is known only from range data: its range"
                         + " shade, but nobody has seen the creature itself.", 8f);
 
                 tooltip.addPara("F2 over a row opens that species' codex page.", Misc.getGrayColor(), 8f);
@@ -448,7 +448,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     /** One species row: rarity-coloured accent bar, a circle marking caught (filled) vs
-     *  survey-only (hollow), and the name. Bar stays lit while its waters are on the map;
+     *  range-only (hollow), and the name. Bar stays lit while its waters are on the map;
      *  F2 opens the codex. */
     protected class RowPlugin extends BaseCustomUIPanelPlugin {
 
@@ -497,7 +497,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
             Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-            //filled = caught, hollow = survey-only; a shape rather than a shade, since every
+            //filled = caught, hollow = range-only; a shape rather than a shade, since every
             //shade here already means selection or rarity
             boolean caught = FishLog.isCaught(spec.id);
             float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;

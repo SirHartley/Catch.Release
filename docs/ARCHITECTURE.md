@@ -173,12 +173,15 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 417 logical rules. Its supplied dialogue is kept verbatim; the additional
+The current overhaul is 425 logical rules. Its supplied dialogue is kept verbatim except where a
+later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
 The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
 gated on stage 6, while the question rows retain their own information-release gates.
+Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
+rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
@@ -253,9 +256,12 @@ questions; `What do you want caught?` appears after the lights, return trace, an
 answers have all been read. An interrupted handoff simply starts that three-question menu again.
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
-cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies it.
-At the survey-data handoff, the existing `You want both of these?` route is quest-highlighted and is
-the only route to the next assignment. The optional survey-source answer returns to it, ensuring the
+cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies
+it. Manual asks and live graduation both fire `CatchReleaseRumorText` after the saved rumor exists;
+three rows turn its system, type and optional stranger-species tokens into distinct spoken scenes
+before reporting that the matching intel was added.
+At the range-data handoff, the existing `You want both of these?` route is quest-highlighted and is
+the only route to the next assignment. The optional range-source answer returns to it, ensuring the
 supplied sector-map, fishing-planner control, and two-route explanation is always delivered.
 
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
@@ -306,8 +312,8 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. Hand-over opens an asynchronous exact-specimen picker, then fires the existing payout rows only after the chosen fish have been spent. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishHandoffPicker.java` | Builds the eligible loose-fish cargo, validates an exact non-overlapping assignment against every ask (including same-species orders), and spends only the specimens the player selected |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
-| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop and Blueprint. LocationData carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff; the retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
-| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on survey rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints |
+| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop and Blueprint. LocationData is the internal range-data reward; it carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff. The retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
+| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
@@ -329,7 +335,7 @@ A fisher whose one good rupture has somebody parked on it. Three bar events, thr
 | `CampedSpotJob.java` | The shared job. Two conditions rather than one — clearing the camp is the work, the specimen is only the receipt. Asks `CampedSpot.isGone` and nothing more specific, so it never has an opinion about how the player did it. The offer only chooses the rupture and terms; the physical camper, pond claim and planted specimen are created on acceptance so discarded bar-event rolls cannot leave fleets behind |
 | `CampType.java` | Who is out there: pirates (there for money, will take money), mercenaries (paid to be there, and say so), pathers (not selling anything, and the bribe does the least good). Mercenary rather than independent deliberately — see the note in the file |
 | `CampSize.java` | Small, medium, large, and the words the fisher uses for each. The estimate is honest; it is the only warning the player gets |
-| `CampedSpot.java` | Spawns the camper on the rupture and holds it there without forcing pursuit: the fleet remains attackable, but uses vanilla's allow-disengage flag and a passive hold. The rupture carries a separate live camp flag that blocks the ROD only until the camper is gone. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
+| `CampedSpot.java` | Spawns the camper on the rupture. When the player first enters its location, the fleet intercepts until its one-time warning hail has fired; it then returns to a passive hold and always uses vanilla's allow-disengage flag. The rupture carries a separate live camp flag that blocks the ROD only until the camper is gone. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
 | `PirateCampJob.java` · `MercCampJob.java` · `PatherCampJob.java` | One per bar event, so each fisher gets their own pitch |
 
 ### `campaign/fish/jobs/fleet`
@@ -349,7 +355,7 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 |---|---|
 | `BreachConservatory.java` | The structure itself; also holds the aquarium's stock, its on/off switch and which backdrop this tank hangs |
 | `ConservatoryOptionProvider.java` | The two colony-screen options: the fish outfitter and the aquarium office |
-| `AquariumManageDialog.java` | The office: stock the tank, empty it, change the scene behind the water, or shut the display off. The scenery rack previews on hover, and what it shows is an actual `AquariumTankPanel` rather than a picture of the art |
+| `AquariumManageDialog.java` | The office: stock the tank, empty it, change the scene behind the water, or shut the display off. The scenery rack pages owned backdrops six at a time so Previous, Next and Back always fit under the nine-option ceiling; it previews on hover with an actual `AquariumTankPanel` rather than a picture of the art |
 | `AquariumTransfers.java` | Hold-to-tank and back, both through the vanilla cargo picker. Depositing unboxes the hold first so every specimen is independently selectable; withdrawing is already loose fish from the tank |
 | `AquariumTankScript.java` | Hangs the tank on the colony main menu, below the planet's image, and takes it down again whenever another visual is showing. Mounts as soon as the docked core UI is anything short of fully covering, rather than waiting for its fader to finish, so the tank comes back with the menu |
 | `AquariumTankPanel.java` | The tank: GL water with caustics and light shafts, kelp and stones, an optional backdrop png, and every specimen swimming its own way at the size it was actually landed. How one *carries* itself is its `Build`, off the crab/mollusc/fish tags rather than off its motion: fish slant up to `MAX_PITCH` and no further, molluscs and oddments never turn and only list, crabs live on the stones. The drawn angle is the bounded pitch, never the raw heading, so nothing rotates up through the vertical to come about |
@@ -369,14 +375,14 @@ explains how.
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds. `place()` is the one gate every boat placement goes through: clamped into the band in an inhabited system, unconstrained where there is nobody |
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
-| — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
-| `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
+| — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the range-data counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
+| `FishermanShelf.java` | What range data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Hand-over uses the shared exact-specimen picker. Its `QuestIntel` is a `FishAsker` and carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the Fisherman has named it, then permanently retires the greeting |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month". `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose and counts down against the rumor's own timestamp. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
 ### `dialogue/rules`
@@ -384,7 +390,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, and pending first-bycatch explanation), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, and the active rumor's system/type/stranger), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
 
 ### `campaign/fish/tutorial`
@@ -394,7 +400,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. Replacing a target explicitly updates the persistent intel destination; the two-chart rung returns no single map location, leaving its several destinations to the planner instead of falling through to the prior system's boat. Tutorial species are filtered through the same `FishHabitat` plus `CatchImplement` predicate as the real spawner, so a destination is never paired with a species that cannot occur there. Assigning the second lesson immediately ensures a Fisherman boat in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability, and load migration removes that dev-era shortcut and its hotbar slots from existing saves. The shortcut grants the same 2 common/1 uncommon/1 rare survey mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. Replacing a target explicitly updates the persistent intel destination; the two-chart rung returns no single map location, leaving its several destinations to the planner instead of falling through to the prior system's boat. Tutorial species are filtered through the same `FishHabitat` plus `CatchImplement` predicate as the real spawner, so a destination is never paired with a species that cannot occur there. Assigning the second lesson immediately ensures a Fisherman boat in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability, and load migration removes that dev-era shortcut and its hotbar slots from existing saves. The shortcut grants the same 2 common/1 uncommon/1 rare range-data mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
 | `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
 | `Castaway.java` | A rating missed during a badly reconciled crew transfer, found on a survey; accepting him aboard fades the one-use cache and opens the Fisherman breadcrumb |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
@@ -467,7 +473,7 @@ Fish in cargo.
 | File | What it does |
 |---|---|
 | `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes — and `unbox`, which expands crates and the pile into independently selectable specimens before a hand-off picker |
-| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
+| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Owns the shared coherence-label ladder used by cargo, catch results, ruptures and the terrain readout; its first non-stable rung is `unsettled` |
 | `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile |
 | `FishPileItemPlugin.java` | Every fish aboard on one line; right-click breaks it back into one crate per species |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
@@ -563,7 +569,7 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 | `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the escalation ladders. Armed crews turn on you at the second hit; unarmed ones are split by strength — a crew that is plainly outmatched (`isOutmatched`, vanilla's own 1.25× engage threshold) and has somebody to tell (`isCivilised`) runs on the *first* hole with an emergency burn and fetches a patrol, and everyone else works ignore → run you down for the bill → run and tell. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
 | `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
-| `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder |
+| `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder. Their map name identifies the client faction, while their memory carries the original fleet, location and recovered ROD projectile into the encounter hail |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a comm link highlighted only while the crew is actually owed something — `wasHarpooned` stays true for a month and colouring on it alone left a settled bill looking unsettled for weeks |
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog at the narrowest priority - the one custom encounter screen left |
 

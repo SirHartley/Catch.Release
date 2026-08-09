@@ -89,7 +89,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public boolean isVisible() {
         if (Global.getSector() == null) return false;
 
-        //bought survey data earns an entry too, not just an actual catch
+        //bought range data earns an entry too, not just an actual catch
         return FishLog.isCaught(speciesId) || FishLog.isLocationDataUnlocked(speciesId);
     }
 
@@ -123,7 +123,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishSpec spec = getSpec();
         FishLogEntry logged = getLogged();
 
-        //survey-only: everything but location is earned by actually landing one
+        //range-only: everything but location is earned by actually landing one
         boolean unseen = logged != null && logged.hintOnly;
 
         float width = panel.getPosition().getWidth();
@@ -194,7 +194,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     /** Type, rarity, and description text. */
     protected void addDescription(TooltipMakerAPI text, FishSpec spec, boolean unseen) {
         if (unseen) {
-            text.addPara("Known only from survey data. Nothing of this species has been seen"
+            text.addPara("Known only from range data. Nothing of this species has been seen"
                     + " aboard - only where to look, and what the instruments made of the way"
                     + " it moves.", Misc.getGrayColor(), BOX_GAP);
             return;
@@ -256,18 +256,18 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
 
-    /** Location box: sealed until caught or survey data bought, then survey summary + record system. */
+    /** Location box: sealed until caught or range data is bought, then range summary + record system. */
     protected void addLocationData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
         boolean open = logged != null
                 && (FishLog.isCaught(speciesId) || logged.locationDataUnlocked);
 
         if (!open) {
-            text.addPara("Sealed. Survey data for this species can be bought from someone who has"
+            text.addPara("Sealed. Range data for this species can be bought from someone who has"
                     + " been where it lives.", Misc.getGrayColor(), BOX_GAP);
             return;
         }
 
-        text.addPara("Survey: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
+        text.addPara("Range: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 FishLocationSummary.describe(spec));
 
         if (logged.hintOnly) {

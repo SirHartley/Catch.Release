@@ -1175,7 +1175,7 @@ public class FishingIntro {
 
             //once it is aboard the water is not where the player is being sent
             if (target != null && !target.landed) {
-                //the survey-data rung deliberately has no single system; the planner owns its
+                //the range-data rung deliberately has no single system; the planner owns its
                 //several destinations, and falling through to a boat leaves the old errand's arrow
                 //on whichever boat happened to be posted there
                 if (target.systemId == null) return null;

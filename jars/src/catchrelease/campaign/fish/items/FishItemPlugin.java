@@ -198,7 +198,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         if (aberration >= 0.8f) return "barely holding";
         if (aberration >= 0.55f) return "unstable";
         if (aberration >= 0.3f) return "slipping";
-        if (aberration >= 0.12f) return "settled";
+        if (aberration >= 0.12f) return "unsettled";
 
         return "stable";
     }

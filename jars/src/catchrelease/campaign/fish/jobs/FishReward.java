@@ -192,7 +192,7 @@ public abstract class FishReward {
             String name = FishSpecLoader.getFishSpec(speciesId) == null
                     ? speciesId : FishSpecLoader.getFishSpec(speciesId).getDisplayName();
 
-            return "survey data on the " + name;
+            return "range data on the " + name;
         }
 
         @Override

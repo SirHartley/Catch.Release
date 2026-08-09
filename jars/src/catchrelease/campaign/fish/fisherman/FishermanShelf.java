@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What survey data is for sale, and on which boat.
+ * What range data is for sale, and on which boat.
  * <p>
  * Two shelves, because there are two kinds of schedule. The standing boats in the inhabited core all
  * sell off <b>one</b> shelf held in sector memory - it is one person running the same charts between

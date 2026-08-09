@@ -37,7 +37,7 @@ import java.util.List;
  * border to border and matches the card's own header weight, and the box never grows taller
  * than the card; a stock that will not fit scrolls inside instead.
  * <p>
- * The knowledge rules are the map's: a caught species wears its art, one known only from survey
+ * The knowledge rules are the map's: a caught species wears its art, one known only from range data
  * data wears the generic mark - both ringed in their rarity's colour, with the same species
  * tooltip the sidebar uses and the same F2-to-codex key - and a species the player has never
  * encountered shows as a bare question mark that answers nothing.

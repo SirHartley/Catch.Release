@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * One round fish holder, wherever a screen lines fish up in circles - the intel Planets panel
  * and the system view's sidebar both. A dark disc under the rarity's ring and the face: the art
- * for a landed species, its silhouette for one known only from survey data, and a bare
+ * for a landed species, its silhouette for one known only from range data, and a bare
  * question mark - no colour, no name, no answers - for one the player has never heard of.
  * F2 over a named holder opens its codex page, the same key every fish row answers.
  */

@@ -106,6 +106,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Whether a rumor is going spare. */
     public static final String RUMOR = "$catchreleaseRumor";
+    public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
+    public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
+    public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
+    public static final String RUMOR_LOOT = "$catchreleaseRumorLoot";
+    public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
 
     /** Whether the Fisherman still needs to name the player's first recovered treasure. */
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
@@ -467,6 +472,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
+
+        FishRumors.Saved rumor = FishRumors.getActive();
+        local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
+        local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
+        local.set(RUMOR_RARITY, rumor != null && rumor.type == FishRumors.TYPE_RARITY, 0);
+        local.set(RUMOR_LOOT, rumor != null && rumor.type == FishRumors.TYPE_LOOT, 0);
+        local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);

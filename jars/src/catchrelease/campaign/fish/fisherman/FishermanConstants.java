@@ -95,7 +95,7 @@ public class FishermanConstants {
     public static final float SPAWN_DISTANCE_MIN = 4000f;
     public static final float SPAWN_DISTANCE_SPREAD = 3000f;
 
-    /** Survey data costs fish one rung below the species' own rarity; commons cost a common. */
+    /** Range data costs fish one rung below the species' own rarity; commons cost a common. */
     public static final int SURVEY_COST = 2;
 
     /** A visiting boat's shelf: rolled once per visit, sold down, gone when it leaves. */
@@ -119,7 +119,7 @@ public class FishermanConstants {
     public static final String SHARED_PENDING_KEY = "$catchrelease_fisher_shared_pending";
 
     /**
-     * How long after a chart is <b>sold</b> the surveyors have another ready.
+     * How long after a chart is <b>sold</b> the chart crews have another ready.
      * <p>
      * Dated off the sale rather than off a calendar. A shelf on a monthly tick pays out to
      * whoever happens to ask after the tick, which rewards standing still; dating it off the

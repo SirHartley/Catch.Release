@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +29,8 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         ADD,
         REMOVE,
         BACKDROP,
+        PREVIOUS_BACKDROPS,
+        NEXT_BACKDROPS,
         TOGGLE,
         BACK,
         LEAVE
@@ -35,6 +38,10 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
 
     protected final BreachConservatory conservatory;
     protected InteractionDialogAPI dialog;
+    protected int backdropPage;
+
+    /** Six leaves room for Previous, Next and Back under the option panel's nine-row ceiling. */
+    protected static final int BACKDROPS_PER_PAGE = 6;
 
     public AquariumManageDialog(BreachConservatory conservatory) {
         this.conservatory = conservatory;
@@ -90,12 +97,17 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         dialog.getOptionPanel().clearOptions();
 
         Backdrop hanging = Backdrops.getHanging(conservatory);
+        List<Backdrop> owned = Backdrops.getOwned();
+        int pages = Math.max(1, (owned.size() + BACKDROPS_PER_PAGE - 1) / BACKDROPS_PER_PAGE);
+        backdropPage = Math.max(0, Math.min(backdropPage, pages - 1));
+        int first = backdropPage * BACKDROPS_PER_PAGE;
+        int last = Math.min(first + BACKDROPS_PER_PAGE, owned.size());
 
         dialog.getTextPanel().addPara("Rolled scenery in a rack along the back wall, most of it"
                 + " painted by somebody who has never been near the water it is of.",
                 Misc.getGrayColor());
 
-        for (Backdrop backdrop : Backdrops.getOwned()) {
+        for (Backdrop backdrop : owned.subList(first, last)) {
             String label = backdrop.getDisplayName();
             if (hanging != null && backdrop.id.equals(hanging.id)) label += " - up now";
 
@@ -106,6 +118,12 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
             }
         }
 
+        if (backdropPage > 0) {
+            dialog.getOptionPanel().addOption("Previous page", Option.PREVIOUS_BACKDROPS);
+        }
+        if (backdropPage + 1 < pages) {
+            dialog.getOptionPanel().addOption("Next page", Option.NEXT_BACKDROPS);
+        }
         dialog.getOptionPanel().addOption("Back", Option.BACK);
         dialog.getOptionPanel().setShortcut(Option.BACK,
                 org.lwjgl.input.Keyboard.KEY_ESCAPE, false, false, false, true);
@@ -149,7 +167,18 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
                         ? "The tank lights hum back up." : "The tank goes dark.");
                 showMain();
             }
-            case BACKDROP -> showBackdrops();
+            case BACKDROP -> {
+                backdropPage = 0;
+                showBackdrops();
+            }
+            case PREVIOUS_BACKDROPS -> {
+                backdropPage--;
+                showBackdrops();
+            }
+            case NEXT_BACKDROPS -> {
+                backdropPage++;
+                showBackdrops();
+            }
             case BACK -> {
                 dialog.getVisualPanel().fadeVisualOut();
                 showMain();

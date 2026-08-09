@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -44,6 +45,14 @@ public class CampedSpot {
 
     /** Set by the conversation once they have agreed to leave, either way. */
     public static final String CLEARED_FLAG = "$catchrelease_campCleared";
+
+    /** Set by the first hail, after the camp has intercepted the player to state its claim. */
+    public static final String WARNED_FLAG = "$catchrelease_campWarned";
+
+    /** Prevents the closing-on-position notice repeating if the player leaves before contact. */
+    public static final String CLOSING_FLAG = "$catchrelease_campClosing";
+
+    public static final float WARNING_CHASE_DAYS = 3f;
 
     /** Set on the rupture while its camper remains, for the ROD's fishing lock. */
     public static final String POND_BLOCKED_FLAG = "$catchrelease_campedPond";
@@ -130,6 +139,84 @@ public class CampedSpot {
 
         fleet.clearAssignments();
         fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
+    }
+
+    /**
+     * Runs the player down once, so the camp states its claim before becoming a passive obstruction.
+     * The pursuit only exists while both fleets share a location and before the first hail has fired;
+     * after that, the fleet returns to the rupture and the ordinary allow-disengage behavior applies.
+     */
+    public static void updateWarningPursuit(CampaignFleetAPI fleet, SectorEntityToken pond) {
+        if (fleet == null || pond == null || fleet.getAI() == null) return;
+
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+        mem.set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
+
+        CampaignFleetAPI player = Global.getSector() == null
+                ? null : Global.getSector().getPlayerFleet();
+
+        boolean shouldChase = !mem.getBoolean(WARNED_FLAG)
+                && player != null
+                && fleet.getContainingLocation() != null
+                && fleet.getContainingLocation() == player.getContainingLocation();
+
+        if (!shouldChase) {
+            endWarningPursuit(fleet, pond, player);
+            return;
+        }
+
+        //Refresh the intent while the player is in-system. The assignment itself is repaired only
+        //when needed, so the queue cannot grow one intercept per mission tick.
+        mem.set(MemFlags.MEMORY_KEY_PURSUE_PLAYER, true, WARNING_CHASE_DAYS);
+        mem.set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, WARNING_CHASE_DAYS);
+        mem.set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, WARNING_CHASE_DAYS);
+
+        FleetAssignmentDataAPI current = fleet.getAI().getCurrentAssignment();
+        if (current == null || current.getAssignment() != FleetAssignment.INTERCEPT
+                || current.getTarget() != player) {
+            fleet.clearAssignments();
+            fleet.addAssignment(FleetAssignment.INTERCEPT, player, WARNING_CHASE_DAYS,
+                    "Closing to warn your fleet away");
+        }
+
+        if (!mem.getBoolean(CLOSING_FLAG)) {
+            mem.set(CLOSING_FLAG, true);
+            Global.getSector().getCampaignUI().addMessage(fleet.getName()
+                    + " is closing on your position.", Misc.getHighlightColor());
+        }
+    }
+
+    /** Clears only this feature's chase and restores the camp's passive hold. */
+    protected static void endWarningPursuit(CampaignFleetAPI fleet, SectorEntityToken pond,
+                                            CampaignFleetAPI player) {
+        if (fleet.getBattle() != null || fleet.getAI() == null) return;
+
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+        FleetAssignmentDataAPI current = fleet.getAI().getCurrentAssignment();
+        boolean wasWarningIntercept = current != null
+                && current.getAssignment() == FleetAssignment.INTERCEPT
+                && current.getTarget() == player;
+
+        if (wasWarningIntercept || current == null
+                || current.getAssignment() == FleetAssignment.ORBIT_AGGRESSIVE) {
+            fleet.clearAssignments();
+            fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, pond, HOLD_DAYS,
+                    "Sitting on the rupture");
+        }
+
+        fleet.setInteractionTarget(null);
+        if (fleet.getAI() instanceof ModularFleetAIAPI) {
+            ModularFleetAIAPI ai = (ModularFleetAIAPI) fleet.getAI();
+            if (ai.getTacticalModule().getTarget() == player) {
+                ai.getTacticalModule().setTarget(null);
+            }
+        }
+
+        mem.unset(MemFlags.MEMORY_KEY_PURSUE_PLAYER);
+        mem.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
+        //DO_NOT_GET_SIDETRACKED and NO_JUMP are permanent camp duties; only the temporary
+        //player-targeting flag belongs to this chase.
+        mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
     }
 
     public static void setPondBlocked(SectorEntityToken pond, boolean blocked) {
