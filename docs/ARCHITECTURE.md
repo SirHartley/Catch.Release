@@ -10,10 +10,12 @@ the same commit as the change. A map that is wrong is worse than no map, because
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.
 
-**[`LORE.md`](LORE.md) is the setting** — what a breach, a pattern, the ROD and the Fisherman
-actually are, who calls them what, and the tone rule the whole mod is written to. Read it before
-writing any player-facing line: `rules.csv`, a species description, a tackle blurb, an intel note.
-It also carries the list of things the mod does that the fiction has not explained yet.
+**[`LORE.md`](LORE.md) is the setting and writing authority** — what a breach, a pattern, the ROD,
+the Fisherman and Crablobab actually are; who notices contradictions; who is allowed to know what;
+the tutorial's information-release order; faction voices; terminology; and the prose rules every
+player-facing line follows. Read it before writing `rules.csv`, a species description, a tackle
+blurb, an intel note, colony text or UI copy. It also carries the settled unknowns the fiction must
+not explain.
 
 ---
 
@@ -170,6 +172,8 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
+The current overhaul is 403 logical rules. Its supplied dialogue is kept verbatim; the additional
+rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
 `tokens` writes the booleans and strings the rows branch on and always returns true, so it never
 changes whether a row matches; in *script*, a verb does the thing and returns whether it worked. The
@@ -338,7 +342,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including outfitter ownership, local-target location, and the interrupted deep-gear handoff), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic |
 
 ### `campaign/fish/tutorial`
@@ -348,9 +352,9 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture, takes the planted specimen back out of the water and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
-| `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
-| `Castaway.java` | The rating put off a boat for looking, found on a survey |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. The second-catch handoff opens the ROD-only outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly. The shortcut grants the same 2 common/1 uncommon/1 rare survey mix as the full route. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
+| `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
+| `Castaway.java` | A rating missed during a badly reconciled crew transfer, found on a survey; accepting him aboard fades the one-use cache and opens the Fisherman breadcrumb |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
 | `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped - and the only thing that lets it off burn 4 while it closes. Its drop point is clamped into the reaches, so a rupture in the inner system no longer parks a trawler against the star |
 | `TutorialConstants.java` | Every number the above read |

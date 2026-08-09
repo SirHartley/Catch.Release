@@ -158,10 +158,16 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         grant(TutorialConstants.OUTFITTER, text);
 
-        giveCharts(TutorialConstants.SKIP_CHARTS, null);
+        //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
+        giveCharts(TutorialConstants.FREE_COMMONS, null);
+        for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
+            giveChartsOfRarity(FishRarity.values()[rung],
+                    TutorialConstants.GRADUATION_CHARTS[rung]);
+        }
 
         clearTarget();
         Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.STAGE_KEY, DONE);
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         dropNote();
         rememberSeen();
@@ -195,12 +201,32 @@ public class FishingIntro {
         setTarget(rollTarget(FISH_ONE));
     }
 
-    /** Lesson three: the deep gear and the ledger, and something to point them at. */
+    /**
+     * Opens the basic outfitter after the second catch, before the deep rigs change hands.
+     * <p>
+     * Kept separate from {@link #giveDeepGear(TextPanelAPI)} because the dialogue deliberately
+     * introduces the ledger while it contains only the ROD/LINE shelves. The pending flag makes an
+     * interrupted conversation resume at the handoff instead of falling back to an empty stage-three
+     * reminder after the catch has already been taken.
+     */
+    public static void giveOutfitter(TextPanelAPI text) {
+        grant(TutorialConstants.OUTFITTER, text);
+        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
+    }
+
+    /** Whether the second-catch conversation still owes the player the deep rigs. */
+    public static boolean isDeepHandoffPending() {
+        return Global.getSector().getMemoryWithoutUpdate()
+                .getBoolean(TutorialConstants.DEEP_HANDOFF_KEY);
+    }
+
+    /** Lesson three: the deep gear, and something to point it at. */
     public static void giveDeepGear(TextPanelAPI text) {
         setStage(FISH_TWO);
 
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         grant(TutorialConstants.OUTFITTER, text);
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         setTarget(rollTarget(FISH_TWO));
     }
@@ -639,19 +665,33 @@ public class FishingIntro {
 
     //---------------------------------------------------------------- odds and ends
 
-    public static boolean isCarryingHarpoon() {
-        return Global.getSector().getMemoryWithoutUpdate()
-                .getBoolean(TutorialConstants.CARRYING_KEY);
+    public static boolean isCarryingFisherProperty() {
+        com.fs.starfarer.api.campaign.rules.MemoryAPI memory =
+                Global.getSector().getMemoryWithoutUpdate();
+
+        if (memory.getBoolean(TutorialConstants.FISHER_PROPERTY_KEY)) return true;
+
+        //A pre-overhaul save carrying the old breadcrumb is carrying the new fiction's assembly.
+        if (memory.getBoolean(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY)) {
+            memory.set(TutorialConstants.FISHER_PROPERTY_KEY, true);
+            memory.unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
+            return true;
+        }
+
+        return false;
     }
 
-    public static void takeHarpoon() {
-        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.CARRYING_KEY, true);
+    public static void takeFisherProperty() {
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(TutorialConstants.FISHER_PROPERTY_KEY, true);
 
         point();
     }
 
-    public static void dropHarpoon() {
-        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.CARRYING_KEY);
+    public static void dropFisherProperty() {
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.FISHER_PROPERTY_KEY);
+        Global.getSector().getMemoryWithoutUpdate()
+                .unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
     }
 
     /** The nearest standing boat to the player right now, by hyperspace distance. */
@@ -883,7 +923,9 @@ public class FishingIntro {
 
         @Override
         public String getName() {
-            if (isCarryingHarpoon() && !isAtLeast(RODDED)) return "Return the harpoon";
+            if (isCarryingFisherProperty() && !isAtLeast(RODDED)) {
+                return "Return the service assembly";
+            }
             if (!isAtLeast(RODDED)) return "Fishing: find a boat";
 
             if (isLanded()) return "Fishing: take it back";
@@ -943,9 +985,9 @@ public class FishingIntro {
             Target target = getTarget();
 
             if (target == null) {
-                if (isCarryingHarpoon()) {
-                    info.addPara("The head came out of the hull cleanly, which it should not have."
-                            + " Somebody owns it. Take it to a fishing boat.", 10f);
+                if (isCarryingFisherProperty()) {
+                    info.addPara("The LYNE service assembly still carries its last accepted"
+                            + " handshake. Take it to a fishing boat.", 10f);
                 } else {
                     info.addPara("There is a trade working the far edges of the inhabited systems."
                             + " Find one of their boats and hail it.", 10f);

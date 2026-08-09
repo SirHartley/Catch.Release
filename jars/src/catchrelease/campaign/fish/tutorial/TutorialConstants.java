@@ -22,15 +22,12 @@ public class TutorialConstants {
             "catchrelease_harpoon",
     };
 
-    /** The ledger. Given with the deep gear, since that is when there is anything to spend. */
+    /** The ledger. Introduced after the second catch, before the deep rigs change hands. */
     public static final String OUTFITTER = "catchrelease_shop";
 
     /** Free charts handed out along the way: two to learn on, then the graduation package. */
     public static final int FREE_COMMONS = 2;
     public static final int[] GRADUATION_CHARTS = {2, 1, 1};
-
-    /** What skipping is worth: every chart the long way would have paid, and all the gear. */
-    public static final int SKIP_CHARTS = 6;
 
     /** Where the "I have done this before" flag lives, outside any one save. */
     public static final String SEEN_FILE = "catchrelease_seen.txt";
@@ -42,8 +39,14 @@ public class TutorialConstants {
     public static final String WRECK_NAME = "Derelict Cruiser";
     public static final String WRECK_TAG = "catchrelease_tutorial_wreck";
 
-    /** Whether the player pulled the head out and is carrying it back. */
-    public static final String CARRYING_KEY = "$catchrelease_carryingHarpoon";
+    /** Whether the player recovered the Fisherman's LYNE service assembly from the wreck. */
+    public static final String FISHER_PROPERTY_KEY = "$catchrelease_fisherProperty";
+
+    /** Old saves used the same breadcrumb for a recovered harpoon head. Read once as an alias. */
+    public static final String LEGACY_CARRYING_HARPOON_KEY = "$catchrelease_carryingHarpoon";
+
+    /** The second catch is in, but the interrupted deep-gear handoff has not finished yet. */
+    public static final String DEEP_HANDOFF_KEY = "$catchrelease_deepHandoff";
 
     /** Cruiser hulls the wreck can turn out to be. Random, because it is nobody in particular. */
     public static final String[] WRECK_HULLS = {

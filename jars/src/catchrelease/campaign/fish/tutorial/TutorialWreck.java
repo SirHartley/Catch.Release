@@ -15,10 +15,10 @@ import org.lazywizard.lazylib.MathUtils;
 /**
  * Somebody who did this before you, still where it happened.
  * <p>
- * A cruiser, dead, with a fishing harpoon buried in the hull - put beside the first rupture the
- * player comes within sight of out where nobody lives. That siting is the entire argument: the
- * player's first look at unstable terrain and their first look at what it costs arrive in the same
- * frame, and neither needs a word of explanation.
+ * A stripped auxiliary with the Fisherman's damaged LYNE service assembly still clamped to its
+ * handling deck - put beside the first rupture the player comes within sight of out where nobody
+ * lives. It is a breadcrumb for somebody who finds unstable fabric before finding the trade, not
+ * usable fishing gear granted ahead of the introduction.
  * <p>
  * It appears the moment the pond comes into view rather than at sector generation, so it is always
  * <i>this</i> rupture - the one being looked at - and never a thing already sitting on the map
@@ -147,7 +147,7 @@ public class TutorialWreck extends BaseCustomEntityPlugin {
     @Override
     public void createMapTooltip(TooltipMakerAPI tooltip, boolean expanded) {
         tooltip.addTitle(TutorialConstants.WRECK_NAME);
-        tooltip.addPara("Cold, unclaimed, and holed by something that was not a weapon.",
+        tooltip.addPara("Cold, unclaimed, with a dead service assembly still clamped aboard.",
                 Misc.getGrayColor(), 10f);
     }
 }
