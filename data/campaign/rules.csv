@@ -1552,8 +1552,22 @@ $catchreleaseTargetPond",,"""$catchreleaseTarget. Rupture in $catchreleaseTarget
 He checks the return.
 
 ""Should still be there.""",100:catchrelease_fisherBack:Continue,
+catchrelease_askTargetOpenRod,DialogOptionSelected,"$option == catchrelease_askTarget score:9
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetPond
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+
+He forwards the system data.
+
+""Fabric runs thinner there. Still near the Core. Same drones, same ROD.""
+
+A pause.
+
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,Technical fallback for a stage-three target placed in open space; it reuses the supplied stage-three briefing verbatim and never names gear the player receives later.
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:8
 CatchReleaseCMD tokens
+$catchreleaseStage >= 4
 !$catchreleaseTargetPond
 $catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
 

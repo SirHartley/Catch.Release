@@ -186,6 +186,9 @@ Every option that completes a fish quest is coloured with rules-engine `SetOptio
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
 bar jobs, their duel/ring choice variants, fleet jobs and Fisherman work highlight their hand-off
 options without changing the dialogue or callback routing behind them.
+The retained tutorial target-reminder handlers also separate open-space targets by equipment rung:
+stage 3 reuses the supplied ROD-only briefing verbatim, while the supplied lights-and-harpoon
+reminder is gated to stage 4 or later.
 Opening the bar rating's event sets `$global.catchrelease_metRating`; the two first-contact entry
 families use that flag to include the supplied rating-specific ROD option only after that meeting.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
