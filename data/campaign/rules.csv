@@ -1621,7 +1621,14 @@ catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWan
 The answer comes with no salesmanship attached.
 
 ""Work's easier to explain.""",catchrelease_intro_rod:Continue,
-catchrelease_introCurious,DialogOptionSelected,$option == catchrelease_introCurious,,"""Fishing.""
+catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelease_introCurious
+$entity.catchrelease_intercepted",,"""Fishing.""
+
+The Fisherman waits.
+
+When it becomes apparent that you expect more, he sighs through his nose.",catchrelease_intro_rod:Continue,Technical routing twin: the rupture interception has already delivered the same final line.
+catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
+!$entity.catchrelease_intercepted",,"""Fishing.""
 
 The Fisherman waits.
 

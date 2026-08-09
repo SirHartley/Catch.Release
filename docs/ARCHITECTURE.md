@@ -172,8 +172,10 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 403 logical rules. Its supplied dialogue is kept verbatim; the additional
+The current overhaul is 404 logical rules. Its supplied dialogue is kept verbatim; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
+The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
+`Come alongside` sentence because the interception greeting has already delivered that same line.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
 `tokens` writes the booleans and strings the rows branch on and always returns true, so it never
 changes whether a row matches; in *script*, a verb does the thing and returns whether it worked. The
