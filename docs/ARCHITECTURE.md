@@ -173,7 +173,8 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 417 logical rules. Its supplied dialogue is kept verbatim; the additional
+The current overhaul is 420 logical rules. Its supplied dialogue is kept verbatim except where a
+later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
@@ -255,7 +256,10 @@ questions; `What do you want caught?` appears after the lights, return trace, an
 answers have all been read. An interrupted handoff simply starts that three-question menu again.
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
-cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies it.
+cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies
+it. Manual asks and live graduation both fire `CatchReleaseRumorText` after the saved rumor exists;
+three rows turn its system, type and optional stranger-species tokens into distinct spoken scenes
+before reporting that the matching intel was added.
 At the range-data handoff, the existing `You want both of these?` route is quest-highlighted and is
 the only route to the next assignment. The optional range-source answer returns to it, ensuring the
 supplied sector-map, fishing-planner control, and two-route explanation is always delivered.
@@ -378,7 +382,7 @@ explains how.
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the Fisherman has named it, then permanently retires the greeting |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month". `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose and counts down against the rumor's own timestamp. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
 ### `dialogue/rules`
@@ -386,7 +390,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, and pending first-bycatch explanation), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, and the active rumor's system/type/stranger), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
 
 ### `campaign/fish/tutorial`

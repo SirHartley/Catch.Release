@@ -1101,13 +1101,33 @@ catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,
 FireAll PopulateOptions",,,
 catchrelease_fisherRumorYes,DialogOptionSelected,"$option == catchrelease_fisherRumor score:10
 CatchReleaseCMD tokens
-$catchreleaseRumor",CatchReleaseCMD rumor,"The Fisherman listens to your question, then gives you a location and two names.
+$catchreleaseRumor","CatchReleaseCMD rumor
+CatchReleaseCMD tokens
+FireBest CatchReleaseRumorText",,100:catchrelease_fisherBack:Continue,
+catchrelease_rumorRarity,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorRarity score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman pulls a grease-marked chart from beneath the control unit.
 
-Your intel officer writes down both.
+""Rarer patterns are turning up in $catchreleaseRumorSystem.""
 
-""May be nothing.""
+He checks the date in one corner.
 
-He goes back to his work.",100:catchrelease_fisherBack:Continue,
+""Fabric's running thin in $catchreleaseRumorSystem. May be stale by the time you arrive.""",,
+catchrelease_rumorLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorLoot score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
+
+""Crews in $catchreleaseRumorSystem are bringing up more bycatch than usual. Wreckage. Lost cargo.""
+
+He closes the manifest.
+
+""Leave room in the hold.""",,
+catchrelease_rumorOutsider,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorOutsider score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman turns a range chart until one system sits under his thumb.
+
+""$catchreleaseRumorStranger. $catchreleaseRumorSystem.""
+
+He puts a finger against the recorded range.
+
+""Wrong range. Still there last I heard.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""
@@ -1955,7 +1975,7 @@ $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
 AddTextSmall ""Range data purchasing unlocked"" highlight
-AddTextSmall ""Fishing rumor added to intel"" highlight","The two catches are checked against their range records.
+FireBest CatchReleaseRumorText","The two catches are checked against their range records.
 
 The Fisherman marks the first entry complete, then the second.
 

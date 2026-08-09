@@ -204,23 +204,31 @@ public class FishRumors {
         return strangers.get((int) MathUtils.getRandomNumberInRange(0f, strangers.size() - 0.01f)).id;
     }
 
+    /** Species name only; the rules sheet owns the spoken sentence built around it. */
+    public static String getStrangerDisplayName(Saved rumor) {
+        if (rumor == null || rumor.type != TYPE_STRANGER) return "";
+
+        FishSpec stranger = FishSpecLoader.getFishSpec(rumor.strangerId);
+        return stranger == null ? "pattern" : stranger.getDisplayName();
+    }
+
     /** What a rumor promises, said the way the Fisherman would say it. */
     public static String describe(Saved rumor) {
         if (rumor == null) return "";
 
         switch (rumor.type) {
             case TYPE_LOOT:
-                return "The wrecks run thick in " + rumor.systemName
-                        + " - whatever is down there is coming up tangled in salvage.";
+                return "Retrievals in " + rumor.systemName
+                        + " are returning with more wreckage and lost cargo than usual.";
             case TYPE_STRANGER:
                 FishSpec stranger = FishSpecLoader.getFishSpec(rumor.strangerId);
                 String name = stranger == null ? "something that has no business there"
                         : stranger.getDisplayName();
-                return "Word is " + name + " has been seen in " + rumor.systemName
-                        + ", a long way from its own range.";
+                return "Reports place " + name + " in " + rumor.systemName
+                        + ", outside its recorded range.";
             default:
-                return "The fabric is running thin in " + rumor.systemName
-                        + " - the rarer things are close to the surface for now.";
+                return "Ruptures in " + rumor.systemName
+                        + " are producing rarer patterns while the local fabric remains thin.";
         }
     }
 
