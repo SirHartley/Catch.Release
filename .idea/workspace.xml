@@ -4,8 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="whisper sfx&#10;tileable HS BG">
+    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="icons">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_08_2026_17_24_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_08_2026_17_24__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/backdrops.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/backdrops.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/special_items.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/special_items.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/aquarium/lava.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/aquarium/lava.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/barrel.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/chemical_barrel.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/fishbarrel.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/icon/fishbarrel.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/hat_tricorn.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/oil_barrel.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/oil_raw.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/skull.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/AquariumManageDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/AquariumManageDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/Backdrop.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/Backdrop.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/dialogue/rules/CatchReleaseCMD.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/dialogue/rules/CatchReleaseCMD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/BackdropLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/helper/loading/BackdropLoader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -412,7 +429,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786227093530</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="icons">
+      <option name="closed" value="true" />
+      <created>1786231784536</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1786231784536</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -427,7 +452,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="searchlight water ripple effect" />
     <MESSAGE value="more searchlights, stats" />
     <MESSAGE value="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon" />
     <MESSAGE value="ROD animation&#10;More moving things around" />
@@ -452,6 +476,7 @@
     <MESSAGE value="concept update" />
     <MESSAGE value="whisper sfx&#10;aquarium BG&#10;minor changes to constants" />
     <MESSAGE value="whisper sfx&#10;tileable HS BG" />
-    <option name="LAST_COMMIT_MESSAGE" value="whisper sfx&#10;tileable HS BG" />
+    <MESSAGE value="icons" />
+    <option name="LAST_COMMIT_MESSAGE" value="icons" />
   </component>
 </project>

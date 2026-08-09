@@ -74,7 +74,6 @@ public class BackdropLoader {
 
         b.name = optString(row, "name", "");
         b.sprite = optString(row, "sprite", "");
-        b.desc = optString(row, "desc", "");
 
         b.rarity = FishRarity.parse(optString(row, "rarity", null), FishRarity.COMMON);
         b.crabStock = optBoolean(row, "crabStock", true);

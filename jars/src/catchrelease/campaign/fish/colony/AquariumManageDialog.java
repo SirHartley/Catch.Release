@@ -99,12 +99,10 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
             String label = backdrop.getDisplayName();
             if (hanging != null && backdrop.id.equals(hanging.id)) label += " - up now";
 
-            String note = describe(backdrop);
-
             if (backdrop.rarity == FishRarity.COMMON) {
-                dialog.getOptionPanel().addOption(label, backdrop, note);
+                dialog.getOptionPanel().addOption(label, backdrop, "The backdrop can be changed at any time. More can be found through quests or purchased from a certain crab merchant.");
             } else {
-                dialog.getOptionPanel().addOption(label, backdrop, backdrop.rarity.color, note);
+                dialog.getOptionPanel().addOption(label, backdrop, backdrop.rarity.color, "The backdrop can be changed at any time. More can be found through quests or purchased from a certain crab merchant.");
             }
         }
 
@@ -113,16 +111,6 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
                 org.lwjgl.input.Keyboard.KEY_ESCAPE, false, false, false, true);
 
         preview(hanging);
-    }
-
-    /** The tooltip under a row: what the table says, plus the one thing the table cannot say. */
-    protected String describe(Backdrop backdrop) {
-        String desc = backdrop.desc == null ? "" : backdrop.desc;
-
-        if (Backdrops.isBare(backdrop) || Backdrops.hasArt(backdrop)) return desc;
-
-        return desc.isEmpty() ? "The rack is empty where this one should be."
-                : desc + " (The rack is empty where this one should be.)";
     }
 
     /** Puts the tank itself in the visual slot, showing the scene being considered. */

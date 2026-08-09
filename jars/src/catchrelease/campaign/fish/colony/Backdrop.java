@@ -23,8 +23,6 @@ public class Backdrop {
     /** File path, the way every other art reference in the tables is written. */
     public String sprite;
 
-    public String desc;
-
     /**
      * What it is worth, on the same ladder the fish use.
      * <p>

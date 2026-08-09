@@ -14,6 +14,15 @@ scrapped
 ---------------------
 qa_
 
+Cargo
+- If a catch pile is undone, any fish you only have 1 unit of in the pile should unravelled as fish, not as fish boxes.
+
+General
+- Rename Coherence level: Settled to Unsettled
+
+Aquarium
+- BG selector can only display 9 entries including "return" and doesn't have a "next/last page" button. Should have a paginated option set.
+
 Pond
 - Viewport snapper still unreliable, doesn't always lock when opening pond
 - ROD can double fire due to low CD - increase.
@@ -60,6 +69,9 @@ self_
 - Icons
 - Harpoon needs better tip sprite
 - need five more legendaries - one for each quadrant
+- melon fish
+- box fish
+- radioactive fish
 - Suspicious lack of shark, turtle and whale
 
 ---------------------

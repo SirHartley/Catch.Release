@@ -939,9 +939,9 @@ catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crab
 CatchReleaseCMD tokens
 $catchreleaseCrabBackdropAfford","SaveCurrentVisual
 CatchReleaseCMD crabShowBackdrop
-SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement, which is not the first time he has done it.
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement. This obviously is not the first time he has done this.
 
-""$catchreleaseCrabBackdropName. $catchreleaseCrabBackdropDesc Behind the glass it looks like somewhere. That is the whole trick of it - nobody stands at a tank to look at water.""
+""$catchreleaseCrabBackdropName. Makes your aquarium look like an actual place, because nobody stands at a tank to look at water.""
 
 He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs.","0:catchrelease_crabBuyBackdrop:Pay him
 10:catchrelease_crabStall:Continue","one scene at a time - which one is CrabBackdrops' business, not the sheet's"
@@ -949,9 +949,9 @@ catchrelease_crabWareBackdropShort,DialogOptionSelected,"$option == catchrelease
 CatchReleaseCMD tokens
 !$catchreleaseCrabBackdropAfford","SaveCurrentVisual
 CatchReleaseCMD crabShowBackdrop
-SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement, which is not the first time he has done it.
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","He unrolls it against the wall with one movement. This obviously is not the first time he has done this.
 
-""$catchreleaseCrabBackdropName. $catchreleaseCrabBackdropDesc Behind the glass it looks like somewhere. That is the whole trick of it - nobody stands at a tank to look at water.""
+""$catchreleaseCrabBackdropName. Makes your aquarium look like an actual place, because nobody stands at a tank to look at water.""
 
 He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs. You are short, and he rolls it up again without hurrying about it.",10:catchrelease_crabStall:Continue,
 catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls it, ties it, and hands it over still warm from the wall. ""Somewhere to hang it is your business.""","0:catchrelease_crabStall:Continue

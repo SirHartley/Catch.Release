@@ -1,8 +1,21 @@
 id,name,sprite,rarity,crabStock,owned,desc
 catchrelease_bd_none,No backdrop,,COMMON,FALSE,TRUE,"The glass, the water and whatever the lights are doing. Nothing behind it."
-catchrelease_bd_castle,Rocky Castle,graphics/catchrelease/aquarium/castle.png,COMMON,TRUE,FALSE,-
-catchrelease_bd_beach,Sandy Shallows,graphics/catchrelease/aquarium/default.png,COMMON,TRUE,FALSE,-
-catchrelease_bd_abyss,The Abyss,graphics/catchrelease/aquarium/abyss.png,UNCOMMON,TRUE,FALSE,-
-catchrelease_bd_alien,Alien Remnants,graphics/catchrelease/aquarium/alien.png,LEGENDARY,TRUE,FALSE,-
-catchrelease_bd_deep,The Deep,graphics/catchrelease/aquarium/deep.png,RARE,TRUE,FALSE,-
-catchrelease_bd_lava,Lava Bath,graphics/catchrelease/aquarium/lava.png,EPIC,TRUE,FALSE,-
+catchrelease_bd_abyss,The Abyss,graphics/catchrelease/aquarium/abyss.png,UNCOMMON,TRUE,FALSE,The Abyss
+catchrelease_bd_alien,Alien Remnants,graphics/catchrelease/aquarium/alien.png,UNCOMMON,TRUE,FALSE,Alien Remnants
+catchrelease_bd_ancient,Ancient Ruins,graphics/catchrelease/aquarium/ancient.png,UNCOMMON,FALSE,FALSE,Ancient Ruins
+catchrelease_bd_atlantis,Magical Shores,graphics/catchrelease/aquarium/atlantis.png,EPIC,FALSE,FALSE,Magical Shores
+catchrelease_bd_beach,The Beach,graphics/catchrelease/aquarium/beach.png,COMMON,TRUE,FALSE,The Beach
+catchrelease_bd_castle,Rocky Castle,graphics/catchrelease/aquarium/castle.png,UNCOMMON,TRUE,FALSE,Rocky Castle
+catchrelease_bd_chasm,Deep Chasm,graphics/catchrelease/aquarium/chasm.png,UNCOMMON,FALSE,FALSE,Deep Chasm
+catchrelease_bd_arch,Coral Arch,graphics/catchrelease/aquarium/coral_arch.png,RARE,FALSE,FALSE,Coral Arch
+catchrelease_bd_death,Spacer Fate,graphics/catchrelease/aquarium/dead_spacer.png,EPIC,FALSE,FALSE,Spacer Fate
+catchrelease_bd_deep,The Deep,graphics/catchrelease/aquarium/deep.png,COMMON,TRUE,FALSE,The Deep
+catchrelease_bd_shallows,Sandy Shallows,graphics/catchrelease/aquarium/default.png,COMMON,FALSE,TRUE,Sandy Shallows
+catchrelease_bd_ice,Icy Waters,graphics/catchrelease/aquarium/ice.png,RARE,FALSE,FALSE,Icy Waters
+catchrelease_bd_kelp,Kelp Forest,graphics/catchrelease/aquarium/kelp_colourful.png,RARE,FALSE,FALSE,Kelp Forest
+catchrelease_bd_lava,Lava Bath,graphics/catchrelease/aquarium/lava.png,RARE,FALSE,FALSE,Lava Bath
+catchrelease_bd_reef,Arched Reef,graphics/catchrelease/aquarium/reef.png,COMMON,TRUE,FALSE,Arched Reef
+catchrelease_bd_ship,The Wreck,graphics/catchrelease/aquarium/ship.png,UNCOMMON,FALSE,FALSE,The Wreck
+catchrelease_bd_spaceship,Spaceship Crash,graphics/catchrelease/aquarium/spaceship.png,RARE,FALSE,FALSE,Spaceship Crash
+catchrelease_bd_temple,Glowing Temple,graphics/catchrelease/aquarium/temple.png,UNCOMMON,FALSE,FALSE,Glowing Temple
+catchrelease_bd_treasure,Sunken Treasure,graphics/catchrelease/aquarium/treasure.png,EPIC,FALSE,FALSE,Sunken Treasure

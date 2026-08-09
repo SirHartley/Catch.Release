@@ -445,7 +445,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         local.set(CRAB_BACKDROP, scene != null, 0);
         local.set(CRAB_BACKDROP_NAME, scene == null ? "" : scene.getDisplayName(), 0);
-        local.set(CRAB_BACKDROP_DESC, scene == null || scene.desc == null ? "" : scene.desc, 0);
         local.set(CRAB_BACKDROP_PRICE,
                 Misc.getDGSCredits(CrabBackdrops.getCredits(scene)), 0);
         local.set(CRAB_BACKDROP_CRABS, CrabBackdrops.getCrabs(scene), 0);
