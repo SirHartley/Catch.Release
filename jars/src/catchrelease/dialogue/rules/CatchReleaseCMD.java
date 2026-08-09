@@ -114,7 +114,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      */
     public static final String CRAB_BACKDROP = "$catchreleaseCrabBackdrop";
     public static final String CRAB_BACKDROP_NAME = "$catchreleaseCrabBackdropName";
-    public static final String CRAB_BACKDROP_DESC = "$catchreleaseCrabBackdropDesc";
     public static final String CRAB_BACKDROP_PRICE = "$catchreleaseCrabBackdropPrice";
     public static final String CRAB_BACKDROP_CRABS = "$catchreleaseCrabBackdropCrabs";
     public static final String CRAB_BACKDROP_AFFORD = "$catchreleaseCrabBackdropAfford";

@@ -137,20 +137,23 @@ public class FishRewardRoller {
      * offer. Everything else here moves the campaign along, and a table of rewards that only ever
      * moves the campaign along is a table with no room in it for a thing somebody just wanted.
      * <p>
-     * Only what the player does not have, and only what the sheet lets out this way at all: a
-     * scene marked as Crablobab's is still allowed here, since he is a rotation rather than a
-     * gate, but one marked as neither his nor a starter is something meant to be found elsewhere
-     * and a job is not elsewhere.
+     * Anything the player does not have. {@code crabStock} is not a gate here and must not become
+     * one: it says whether the man with the coat may carry a scene, and twelve of the nineteen
+     * rows say no - which is the table's way of saying those are the ones a job is <i>for</i>.
+     * Reading it as "only what he sells" left two thirds of the art unobtainable by any route in
+     * the game, which is also what the office's own tooltip promises against: scenes come from
+     * quests or from him.
      */
     protected static FishReward rollBackdrop(Random random) {
         WeightedRandomPicker<Backdrop> picker = new WeightedRandomPicker<>(random);
 
         for (Backdrop backdrop : Backdrops.getUnowned()) {
-            if (!backdrop.crabStock) continue;
-
             //the rarity ladder read backwards: a job is a plausible way to come by a reef and an
-            //implausible way to come by the abyss
-            picker.add(backdrop, 1f / (1f + backdrop.rarity.ordinal() * 2f));
+            //implausible way to come by the abyss. One he also sells is likelier still, since a
+            //job is not the only way to that one and the pool should lean on what it alone gives
+            float weight = 1f / (1f + backdrop.rarity.ordinal() * 2f);
+
+            picker.add(backdrop, backdrop.crabStock ? weight * 0.5f : weight);
         }
 
         Backdrop picked = picker.pick();
