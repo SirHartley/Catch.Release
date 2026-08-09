@@ -236,7 +236,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return FishermanQuest.showTurnInPicker(dialog, memoryMap);
 
             case "rumor":
-                return FishRumors.isAvailable() && FishRumors.create() != null;
+                return FishingIntro.isAtLeast(FishingIntro.DONE)
+                        && FishRumors.isAvailable() && FishRumors.create() != null;
 
             //---- the lamps, and who objects to them
             case "lampStop":
@@ -456,7 +457,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
-        local.set(RUMOR, FishRumors.isAvailable(), 0);
+        local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
+                && FishRumors.isAvailable(), 0);
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 

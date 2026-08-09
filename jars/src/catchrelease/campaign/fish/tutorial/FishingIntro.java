@@ -9,6 +9,7 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -172,6 +173,7 @@ public class FishingIntro {
 
         dropNote();
         rememberSeen();
+        FishRumors.ensureTutorialLead();
     }
 
     //---------------------------------------------------------------- the rungs
@@ -316,6 +318,12 @@ public class FishingIntro {
         }
 
         rememberSeen();
+        FishRumors.ensureTutorialLead();
+    }
+
+    /** Gives already-completed saves the same first lead as a live graduation hand-in. */
+    public static void ensureGraduationRumor() {
+        if (isAtLeast(DONE)) FishRumors.ensureTutorialLead();
     }
 
     //---------------------------------------------------------------- the targets

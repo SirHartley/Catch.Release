@@ -55,6 +55,7 @@ public class ModPlugin extends BaseModPlugin {
 
         //The dev-era ability-bar shop is gone; Fishermen and conservatories own the two doors.
         FishingIntro.removeLegacyOutfitterAbility();
+        FishingIntro.ensureGraduationRumor();
 
         // static fishing spots
         OnJumpPondSpawner.register();

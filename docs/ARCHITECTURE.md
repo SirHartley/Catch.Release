@@ -248,6 +248,9 @@ The deep-gear explanation uses a conversation-local `CatchReleaseIntroDeepQuesti
 Each supplied answer records its own transient asked flag and repopulates only the unanswered
 questions; `What do you want caught?` appears after the lights, return trace, and weapon-safety
 answers have all been read. An interrupted handoff simply starts that three-question menu again.
+Rumors are tutorial-graduation content: both the option producer and Java command reject stages
+below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
+cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies it.
 
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
@@ -366,7 +369,7 @@ explains how.
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month" |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. `RumorIntel` counts down against the rumor's own timestamp rather than claiming "about a month". `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
 ### `dialogue/rules`

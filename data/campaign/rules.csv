@@ -1067,7 +1067,7 @@ $catchreleaseStage >= 3
 $catchreleaseHoldHasFish",,,30:catchrelease_fisherSell:Sell fish,
 catchrelease_fisherOptRumor,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,40:catchrelease_fisherRumor:Ask about rumors,
+$catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
@@ -1943,7 +1943,8 @@ $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-AddTextSmall ""Survey purchasing unlocked"" highlight","The two catches are checked against their survey records.
+AddTextSmall ""Survey purchasing unlocked"" highlight
+AddTextSmall ""Fishing rumor added to intel"" highlight","The two catches are checked against their survey records.
 
 The Fisherman marks the first entry complete, then the second.
 
