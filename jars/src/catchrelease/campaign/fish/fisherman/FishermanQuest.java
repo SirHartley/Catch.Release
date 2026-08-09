@@ -5,22 +5,29 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.map.FishPresence;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.campaign.rules.MemKeys;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
@@ -32,6 +39,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -223,6 +231,46 @@ public class FishermanQuest {
 
     //---------------------------------------------------------------- the hand-in
 
+    /** Opens the named-specimen picker and resumes the Fisherman's sheet after a real transfer. */
+    public static boolean showTurnInPicker(final InteractionDialogAPI dialog,
+                                           final Map<String, MemoryAPI> memoryMap) {
+
+        Saved quest = getActive();
+        if (quest == null) return false;
+
+        FishRequirement ask = new FishRequirement();
+        ask.count = 1;
+        ask.speciesId = quest.speciesId;
+
+        boolean opened = FishHandoffPicker.show(dialog, "Select the requested specimen",
+                java.util.Collections.singletonList(ask), new FishHandoffPicker.Listener() {
+                    @Override
+                    public void picked(FishHandoffPicker.Selection selection) {
+                        if (turnIn(dialog == null ? null : dialog.getTextPanel(), selection)) {
+                            MemoryAPI local = memoryMap == null
+                                    ? null : memoryMap.get(MemKeys.LOCAL);
+                            if (local != null) {
+                                local.set("$option", "catchrelease_workTurnIn", 0f);
+                                local.set("$catchreleaseWorkHandoffPaid", true, 0f);
+                            }
+
+                            FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
+                        } else {
+                            FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+                        }
+                    }
+
+                    @Override
+                    public void cancelled() {
+                        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+                    }
+                });
+
+        if (!opened) FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+
+        return opened;
+    }
+
     /** Whether the hold has the named species aboard, loose or crated. */
     public static boolean isSatisfied() {
         Saved quest = getActive();
@@ -257,6 +305,18 @@ public class FishermanQuest {
     public static boolean turnIn(TextPanelAPI text) {
         Saved quest = getActive();
         if (quest == null || !spend(quest.speciesId)) return false;
+
+        return finishTurnIn(quest, text);
+    }
+
+    protected static boolean turnIn(TextPanelAPI text, FishHandoffPicker.Selection selection) {
+        Saved quest = getActive();
+        if (quest == null || selection == null || !selection.spend()) return false;
+
+        return finishTurnIn(quest, text);
+    }
+
+    protected static boolean finishTurnIn(Saved quest, TextPanelAPI text) {
 
         Global.getSector().getPlayerFleet().getCargo().getCredits().add(quest.credits);
 

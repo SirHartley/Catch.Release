@@ -12,7 +12,6 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
@@ -45,8 +44,8 @@ public abstract class FishReward {
         return new TackleReward(tackle);
     }
 
-    public static FishReward locationData(String speciesId) {
-        return new LocationData(speciesId);
+    public static FishReward locationData(String speciesId, int fallbackCredits) {
+        return new LocationData(speciesId, fallbackCredits);
     }
 
     public static FishReward backdrop(String backdropId) {
@@ -59,10 +58,6 @@ public abstract class FishReward {
 
     public static FishReward shipBlueprint(String hullId) {
         return new Blueprint(Items.SHIP_BP, hullId);
-    }
-
-    public static FishReward commodity(String commodityId, int quantity) {
-        return new Commodity(commodityId, quantity);
     }
 
     public static FishReward specialItem(String itemId, String data) {
@@ -183,13 +178,17 @@ public abstract class FishReward {
     /** A word about where something lives, which is the reward only a fisherman would want. */
     public static class LocationData extends FishReward {
         public final String speciesId;
+        public final int fallbackCredits;
 
-        public LocationData(String speciesId) {
+        public LocationData(String speciesId, int fallbackCredits) {
             this.speciesId = speciesId;
+            this.fallbackCredits = fallbackCredits;
         }
 
         @Override
         public String describe() {
+            if (isRedundant()) return new Credits(getFallbackCredits()).describe();
+
             String name = FishSpecLoader.getFishSpec(speciesId) == null
                     ? speciesId : FishSpecLoader.getFishSpec(speciesId).getDisplayName();
 
@@ -198,7 +197,23 @@ public abstract class FishReward {
 
         @Override
         public void grant() {
-            FishLog.unlockLocationData(speciesId);
+            if (isRedundant()) {
+                new Credits(getFallbackCredits()).grant();
+            } else {
+                FishLog.unlockLocationData(speciesId);
+            }
+        }
+
+        /** A landed specimen unlocks this data immediately, as does obtaining the chart elsewhere. */
+        protected boolean isRedundant() {
+            return FishLog.isLocationDataUnlocked(speciesId);
+        }
+
+        /** Saves from before the fallback was stored deserialize it as zero. */
+        protected int getFallbackCredits() {
+            int value = fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
+
+            return FishRewardRoller.creditPayout(value);
         }
     }
 
@@ -253,7 +268,10 @@ public abstract class FishReward {
         }
     }
 
-    /** Goods, for the ones who pay in what they happen to have. */
+    /**
+     * Old-save shell for jobs rolled before commodity rewards were removed. Kept under the same
+     * class name so XStream can load them, but paid out in the credit value the old roller used.
+     */
     public static class Commodity extends FishReward {
         public final String commodityId;
         public final int quantity;
@@ -265,17 +283,16 @@ public abstract class FishReward {
 
         @Override
         public String describe() {
-            CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(commodityId);
-
-            return quantity + " " + (spec == null ? commodityId : spec.getName().toLowerCase());
+            return new Credits(getCreditValue()).describe();
         }
 
         @Override
         public void grant() {
-            CargoAPI cargo = getPlayerCargo();
-            if (cargo == null) return;
+            new Credits(getCreditValue()).grant();
+        }
 
-            cargo.addCommodity(commodityId, quantity);
+        protected int getCreditValue() {
+            return FishRewardRoller.creditPayout(quantity * 120);
         }
     }
 }

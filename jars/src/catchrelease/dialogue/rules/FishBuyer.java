@@ -93,6 +93,8 @@ public class FishBuyer {
     public static boolean show(final InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
+        FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
+
         CargoAPI offer = Global.getFactory().createCargo(true);
 
         for (Stack held : read()) {

@@ -79,14 +79,14 @@ public class MafiaJob extends FishJob {
 
         if ("turnInFlat".equals(action)) {
             wager = null;
-            handOver(dialog, memoryMap);
+            showHandOverPicker(dialog, memoryMap);
 
             return true;
         }
 
         if ("turnInLeft".equals(action) || "turnInRight".equals(action)) {
             wager = "turnInLeft".equals(action) ? left : right;
-            handOver(dialog, memoryMap);
+            showHandOverPicker(dialog, memoryMap);
 
             return true;
         }

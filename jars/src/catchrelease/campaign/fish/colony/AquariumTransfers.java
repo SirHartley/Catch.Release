@@ -19,8 +19,8 @@ import java.util.List;
  * Shared by the aquarium office dialog and the tank's own buttons on the colony menu, so the
  * two doors into the same water cannot drift apart.
  * <p>
- * Only loose specimens move - a crated bundle is a crate, and nobody tips a crate into a
- * display tank.
+ * The add picker works in loose specimens. Crates and the pile are opened before it appears so
+ * the player chooses individual fish rather than moving a whole container at once.
  */
 public final class AquariumTransfers {
 
@@ -52,6 +52,8 @@ public final class AquariumTransfers {
 
     public static void openAddPicker(InteractionDialogAPI dialog,
                                      BreachConservatory conservatory, OnMoved after) {
+
+        FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
 
         CargoAPI offer = Global.getFactory().createCargo(true);
 
@@ -118,8 +120,8 @@ public final class AquariumTransfers {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (!FishItems.isCatch(data)) continue;
 
-            //a crate goes in whole: what the tank keeps is specimens, so the container is opened on
-            //the way and the fish inside it are what is added
+            //the picker supplies loose fish; container support keeps direct callers safe by moving
+            //the encoded contents rather than the box itself
             java.util.List<FishCatch> going = FishItems.read(data);
             if (going.isEmpty()) continue;
 

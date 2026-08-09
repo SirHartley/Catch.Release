@@ -233,7 +233,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "takeWork":
                 return takeWork();
             case "turnInWork":
-                return FishermanQuest.turnIn(text(dialog));
+                return FishermanQuest.showTurnInPicker(dialog, memoryMap);
 
             case "rumor":
                 return FishRumors.isAvailable() && FishRumors.create() != null;

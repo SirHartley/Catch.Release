@@ -839,7 +839,12 @@ public class FishingIntro {
                     continue;
                 }
 
-                QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+                //The first lesson accepts any fish from anywhere. It still plants a guaranteed
+                //specimen underfoot, but does not reserve the rupture or hang a mission marker on
+                //a place the requirement itself does not care about. Named-location rungs do both.
+                if (!target.anySpecies) {
+                    QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+                }
 
                 //holds, unlike every other errand's fish. Somebody being taught what a rupture is
                 //should find the thing they were sent for still in it - "elusive" is a difficulty,

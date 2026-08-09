@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -85,14 +86,6 @@ public abstract class CampedSpotJob extends FishJob {
         speciesId = spec.id;
         systemName = system.getName();
 
-        //the water is claimed and stocked before anybody is put on top of it, so a job that fails
-        //to raise its camper leaves nothing planted
-        camper = CampedSpot.spawn(getType(), size, pond, genRandom);
-        if (camper == null) return false;
-
-        QuestPond.claim(pond, REF_KEY);
-        QuestPond.placeMote(pond, speciesId, REF_KEY);
-
         days = DAYS;
 
         FishRequirement ask = new FishRequirement();
@@ -104,11 +97,31 @@ public abstract class CampedSpotJob extends FishJob {
 
         setUpSpine();
 
+        return true;
+    }
+
+    /**
+     * Creates the physical camp only once the player takes the job.
+     * <p>
+     * Bar-event offers are built speculatively and {@code abort()} does not call
+     * {@link #notifyEnded()}. Spawning during {@link #create(MarketAPI, boolean)} therefore left a
+     * fleet behind whenever an unaccepted offer was rerolled. Keeping world mutation here makes
+     * one accepted camp produce one camper, one pond claim, and one planted specimen.
+     */
+    @Override
+    public void acceptImpl(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        super.acceptImpl(dialog, memoryMap);
+
+        camper = CampedSpot.spawn(getType(), size, pond, random());
+        if (camper == null) return;
+
+        CampedSpot.setPondBlocked(pond, true);
+        QuestPond.claim(pond, REF_KEY);
+        QuestPond.placeMote(pond, speciesId, REF_KEY);
+
         //the map points at whoever is sitting on the water, which is where the player has to go
         //first regardless of how they intend to deal with it
         makeImportant(camper, null, Stage.WANTED);
-
-        return true;
     }
 
     /**
@@ -179,8 +192,15 @@ public abstract class CampedSpotJob extends FishJob {
     protected void advanceImpl(float amount) {
         super.advanceImpl(amount);
 
-        if (cleared || !CampedSpot.isGone(camper)) return;
+        if (cleared) return;
 
+        if (!CampedSpot.isGone(camper)) {
+            CampedSpot.allowPlayerToLeave(camper, pond);
+            CampedSpot.setPondBlocked(pond, true);
+            return;
+        }
+
+        CampedSpot.setPondBlocked(pond, false);
         cleared = true;
         camper = null;
 
@@ -212,6 +232,7 @@ public abstract class CampedSpotJob extends FishJob {
         CampedSpot.despawn(camper);
         camper = null;
 
+        CampedSpot.setPondBlocked(pond, false);
         QuestPond.release(pond, REF_KEY);
     }
 

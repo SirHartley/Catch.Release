@@ -387,9 +387,7 @@ $catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData s
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"Call $catchrelease_jobRef turnIn
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,"The job spends the fish, pays, and reports what happened in flags. The rows below read those flags and do the talking."
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,"The job opens the specimen picker; its callback spends the chosen fish, pays, and fires the rows below."
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -591,12 +589,8 @@ catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets 
 catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Tell them you are still looking.,
-catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,"Call $catchrelease_jobRef turnInLoud
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,"Call $catchrelease_jobRef turnInQuiet
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
+catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,Call $catchrelease_jobRef turnInLoud,,,
+catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,Call $catchrelease_jobRef turnInQuiet,,,
 catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -653,15 +647,9 @@ catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager
 catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
-catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,"Call $catchrelease_jobRef turnInFlat
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,"Call $catchrelease_jobRef turnInLeft
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,"Call $catchrelease_jobRef turnInRight
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
+catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,Call $catchrelease_jobRef turnInFlat,,,
+catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,Call $catchrelease_jobRef turnInLeft,,,
+catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,Call $catchrelease_jobRef turnInRight,,,
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -831,8 +819,10 @@ catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_flee
 Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
-catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn
-CatchReleaseCMD leaveEncounter","The cargo goes across.
+catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
+!$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
+catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
+$catchreleaseFleetHandoffPaid",CatchReleaseCMD leaveEncounter,"The cargo goes across.
 
 Someone on the receiving ship checks the containers and calls something away from the microphone.
 
@@ -1131,7 +1121,10 @@ The Fisherman recognizes it before the manifest finishes updating.
 
 ""That's the one.""","0:catchrelease_workTurnIn:Hand it over
 100:catchrelease_fisherBack:Not yet",
-catchrelease_workTurnIn,DialogOptionSelected,$option == catchrelease_workTurnIn,CatchReleaseCMD turnInWork,"He studies the coherence plot, marks something in the ledger, and has the container taken aft.
+catchrelease_workTurnInPicker,DialogOptionSelected,"$option == catchrelease_workTurnIn
+!$catchreleaseWorkHandoffPaid",CatchReleaseCMD turnInWork,,,
+catchrelease_workTurnIn,DialogOptionSelected,"$option == catchrelease_workTurnIn
+$catchreleaseWorkHandoffPaid",,"He studies the coherence plot, marks something in the ledger, and has the container taken aft.
 
 ""Good.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
@@ -1146,7 +1139,8 @@ catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
-catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,CatchReleaseCMD point,"The rating hears you out, then turns the glass between both hands.
+catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
+CatchReleaseCMD point","The rating hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -1431,7 +1425,7 @@ catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,,,
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,60:catchrelease_fisherAsk:Ask about something else,
+$catchreleaseStage >= 6",,,60:catchrelease_fisherAsk:Ask about something else,
 catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions","They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
 catchrelease_fisherAskBack,DialogOptionSelected,$option == catchrelease_fisherAskBack,"$menuState = catchreleaseFisherAsk 0
@@ -1597,10 +1591,11 @@ He looks past the camera.
 
 ""Missing the useful half.""","0:catchrelease_introHarpoonReturn:Return it
 100:catchrelease_fisherBack:Leave it there",
-catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
+catchrelease_introHelloRating,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
-!$catchreleaseCarrying",,"""So.""
+!$catchreleaseCarrying
+$global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
@@ -1608,20 +1603,47 @@ The Fisherman glances over a manifest.
 10:catchrelease_introCurious:""I want to know what you're doing out here.""
 20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
 100:catchrelease_fisherBack:""Not today.""",
-catchrelease_introHelloFromProperty,DialogOptionSelected,$option == catchrelease_introHello,,"""So.""
+catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
+CatchReleaseCMD tokens
+$catchreleaseStage < 2
+!$catchreleaseCarrying
+!$global.catchrelease_metRating",,"""So.""
+
+The Fisherman glances over a manifest.
+
+""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
+10:catchrelease_introCurious:""I want to know what you're doing out here.""
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for players who reached the Fisherman without the bar rating.
+catchrelease_introHelloFromPropertyRating,DialogOptionSelected,"$option == catchrelease_introHello
+$global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
 ""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
 10:catchrelease_introCurious:""I want to know what you're doing out here.""
 20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
-100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction.
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction after meeting the bar rating.
+catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
+!$global.catchrelease_metRating",,"""So.""
+
+The Fisherman glances over a manifest.
+
+""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
+10:catchrelease_introCurious:""I want to know what you're doing out here.""
+100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction without the bar rating.
 catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""Good.""
 
 The answer comes with no salesmanship attached.
 
 ""Work's easier to explain.""",catchrelease_intro_rod:Continue,
-catchrelease_introCurious,DialogOptionSelected,$option == catchrelease_introCurious,,"""Fishing.""
+catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelease_introCurious
+$entity.catchrelease_intercepted",,"""Fishing.""
+
+The Fisherman waits.
+
+When it becomes apparent that you expect more, he sighs through his nose.",catchrelease_intro_rod:Continue,Technical routing twin: the rupture interception has already delivered the same final line.
+catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
+!$entity.catchrelease_intercepted",,"""Fishing.""
 
 The Fisherman waits.
 
@@ -1889,7 +1911,7 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 
 The Fisherman sends the mark.
 
-""One will do. Don't make a profession of the first trip.""",,
+""One will do. Don't make a profession of the first trip.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
@@ -1901,7 +1923,7 @@ He forwards the system data.
 
 A pause.
 
-""Don't stay over the rupture longer than you need.""",,
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
@@ -1911,14 +1933,14 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 
 He sends the survey mark.
 
-""That one I want clean.""",,
+""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Both survey targets.""
 
 The Fisherman sends the records again.
 
-""Use the planner. Bring me one of each.""",,
+""Use the planner. Bring me one of each.""",100:catchrelease_fisherBack:Continue,
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2

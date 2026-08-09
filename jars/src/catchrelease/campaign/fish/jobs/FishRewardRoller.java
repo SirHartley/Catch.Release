@@ -10,7 +10,6 @@ import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
@@ -33,14 +32,11 @@ public class FishRewardRoller {
     /** Roughly what a job is worth, before it is decided what shape that takes. */
     public static final int VALUE_PER_FISH = 1200;
 
+    /** Cash has to compete with actual Starsector work; barter values remain the reward budget. */
+    public static final float CREDIT_PAYOUT_MULT = 5f;
+
     /** How far either side of the reckoned worth a roll may land, as a fraction. */
     public static final float SPREAD = 0.35f;
-
-    /** Goods worth handing over, all of them things a working ship actually wants. */
-    protected static final String[] GOODS = {
-            Commodities.SUPPLIES, Commodities.FUEL, Commodities.METALS,
-            Commodities.RARE_METALS, Commodities.ORGANICS, Commodities.DRUGS,
-    };
 
     /**
      * One payment, or two when the job is worth enough to be interesting.
@@ -64,7 +60,7 @@ public class FishRewardRoller {
         }
 
         // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
-        if (rewards.isEmpty()) rewards.add(FishReward.credits(Math.max(500, value)));
+        if (rewards.isEmpty()) rewards.add(FishReward.credits(creditPayout(value)));
 
         return rewards;
     }
@@ -72,12 +68,12 @@ public class FishRewardRoller {
     protected static FishReward rollOne(Random random, int value, boolean allowCredits) {
         float roll = random.nextFloat();
 
-        if (allowCredits && roll < 0.34f) return FishReward.credits(value);
+        if (allowCredits && roll < 0.34f) return FishReward.credits(creditPayout(value));
         if (roll < 0.52f) return rollUpgrade(random);
         if (roll < 0.66f) return rollTackle(random);
-        if (roll < 0.78f) return rollLocationData(random);
+        if (roll < 0.78f) return rollLocationData(random, value);
         if (roll < 0.86f) return rollBackdrop(random);
-        if (roll < 0.93f) return rollGoods(random, value);
+        if (allowCredits && roll < 0.93f) return FishReward.credits(creditPayout(value));
 
         return rollBlueprint(random);
     }
@@ -114,7 +110,7 @@ public class FishRewardRoller {
     }
 
     /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */
-    protected static FishReward rollLocationData(Random random) {
+    protected static FishReward rollLocationData(Random random, int fallbackCredits) {
         List<FishSpec> unknown = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
@@ -127,7 +123,8 @@ public class FishRewardRoller {
 
         if (unknown.isEmpty()) return null;
 
-        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id);
+        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id,
+                fallbackCredits);
     }
 
     /**
@@ -161,14 +158,6 @@ public class FishRewardRoller {
         return picked == null ? null : FishReward.backdrop(picked.id);
     }
 
-    protected static FishReward rollGoods(Random random, int value) {
-        String commodity = GOODS[random.nextInt(GOODS.length)];
-
-        int quantity = Math.max(5, value / 120);
-
-        return FishReward.commodity(commodity, quantity);
-    }
-
     /**
      * A weapon or fighter blueprint the player doesn't already know, named rather than blank - a
      * blueprint item's payload is its id, and one carrying nothing breaks its tooltip. Filtered the
@@ -199,6 +188,11 @@ public class FishRewardRoller {
 
         return FishReward.blueprint(weapon ? Items.WEAPON_BP : Items.FIGHTER_BP,
                 options.get(random.nextInt(options.size())));
+    }
+
+    /** Turns the roller's internal barter value into a cash payout without inflating item rewards. */
+    public static int creditPayout(int value) {
+        return Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
     }
 
     /** Same job, different day. */
