@@ -467,7 +467,7 @@ Fish in cargo.
 | File | What it does |
 |---|---|
 | `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes — and `unbox`, which expands crates and the pile into independently selectable specimens before a hand-off picker |
-| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
+| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Owns the shared coherence-label ladder used by cargo, catch results, ruptures and the terrain readout; its first non-stable rung is `unsettled` |
 | `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile |
 | `FishPileItemPlugin.java` | Every fish aboard on one line; right-click breaks it back into one crate per species |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
