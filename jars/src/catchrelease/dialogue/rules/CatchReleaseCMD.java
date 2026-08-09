@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.crab.CrabBackdrops;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.FishermanBycatch;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
@@ -105,6 +106,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Whether a rumor is going spare. */
     public static final String RUMOR = "$catchreleaseRumor";
+
+    /** Whether the Fisherman still needs to name the player's first recovered treasure. */
+    public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
@@ -238,6 +242,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "rumor":
                 return FishingIntro.isAtLeast(FishingIntro.DONE)
                         && FishRumors.isAvailable() && FishRumors.create() != null;
+
+            case "ackBycatch":
+                FishermanBycatch.markExplained();
+                return true;
 
             //---- the lamps, and who objects to them
             case "lampStop":
@@ -459,6 +467,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
+        local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 

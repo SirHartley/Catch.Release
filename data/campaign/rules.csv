@@ -1011,6 +1011,17 @@ A metallic impact follows from your left audio channel, though the trawler lies 
 He looks back to you.
 
 ""Captain. What can I do for you?""",,
+catchrelease_fisherBycatch,OpenCommLink,"$entity.catchrelease_fisherman score:1080
+CatchReleaseCMD tokens
+$catchreleaseBycatchPending","CatchReleaseCMD ackBycatch
+$menuState = catchreleaseFisher 0
+FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached to your catch log.
+
+""Bycatch.""
+
+He taps the entry once.
+
+""Wreckage. Lost cargo. Whatever the retrieval rig brings up with the pattern.""",,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point

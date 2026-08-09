@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.fisherman.FishermanBycatch;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
@@ -151,6 +152,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected void resolveTreasure() {
         if (treasureResolved) return;
         treasureResolved = true;
+
+        if (!minigame.getTakenTreasures().isEmpty()) FishermanBycatch.recordFound();
 
         for (MinigameTreasure treasure : minigame.getTakenTreasures()) {
             lootAwards.add(TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle));
