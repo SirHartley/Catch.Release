@@ -1903,7 +1903,8 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 4
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
-CatchReleaseCMD tokens","The Fisherman checks the harpoon telemetry while the specimen is transferred.
+CatchReleaseCMD tokens
+SetOptionColor catchrelease_introPlannerAsk highlight","The Fisherman checks the harpoon telemetry while the specimen is transferred.
 
 ""Good shot.""
 
@@ -1918,15 +1919,14 @@ He sends two survey records to your fleet map.
 Your map resolves each record into range information and candidate systems.
 
 ""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:""Where does the survey information come from?""
-10:catchrelease_introPlannerAsk:""You want both of these?""
-100:catchrelease_introSurveyDone:Continue",
-catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,,"""Surveys.""
+10:catchrelease_introPlannerAsk:""You want both of these?""",The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown.
+catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,SetOptionColor catchrelease_introPlannerAsk highlight,"""Surveys.""
 
 The Fisherman gives you a look over the rim of his mug.
 
 When you wait for the rest, he puts the mug down.
 
-""That's enough answer for a chart.""",catchrelease_introSurveyDone:Continue,
+""That's enough answer for a chart.""",10:catchrelease_introPlannerAsk:""You want both of these?"",The optional survey-source answer returns to the required planner question rather than skipping it.
 catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,,"""One of each.""
 
 He brings up your sector map and marks the fishing-planner control.

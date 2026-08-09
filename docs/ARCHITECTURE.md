@@ -251,6 +251,9 @@ answers have all been read. An interrupted handoff simply starts that three-ques
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
 cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies it.
+At the survey-data handoff, the existing `You want both of these?` route is quest-highlighted and is
+the only route to the next assignment. The optional survey-source answer returns to it, ensuring the
+supplied sector-map, fishing-planner control, and two-route explanation is always delivered.
 
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
