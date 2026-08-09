@@ -1748,9 +1748,14 @@ catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGh
 He shrugs.
 
 ""Good enough until somebody writes a better manual.""",catchrelease_introFirstDone:Continue,
-catchrelease_introFirstDone,DialogOptionSelected,$option == catchrelease_introFirstDone,"CatchReleaseCMD sendOut
+catchrelease_introFirstDone,DialogOptionSelected,"$option == catchrelease_introFirstDone
+CatchReleaseCMD tokens
+$catchreleaseStage == 2","CatchReleaseCMD sendOut
 CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
+catchrelease_introFirstDoneAlready,DialogOptionSelected,"$option == catchrelease_introFirstDone
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated Continue may replay the current brief but cannot call sendOut again and replace the assigned target.
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -1932,7 +1937,7 @@ He forwards the system data.
 
 A pause.
 
-""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherLeave:Continue,The first outbound briefing ends the Fisherman encounter; a repeated Continue can replay this brief without rolling a new target and still has a real exit.
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4

@@ -231,8 +231,12 @@ on their own trigger, `CatchReleaseIntroBrief`: the granting row ends its script
 the brief row loads the tokens in its own conditions, by which time the roll has happened. The same
 ordering makes `Highlight` in a script column correct - `SetTextHighlights` calls
 `highlightInLastPara`, which is that row's own text precisely because the text went first.
-Each briefing carries a `Continue` option back to `catchrelease_fisherBack`; a fired sub-trigger
-with text but no option leaves the rules dialog with no next selection.
+Each briefing carries a `Continue` option; a fired sub-trigger with text but no option leaves the
+rules dialog with no next selection.
+The first outbound transition is stage-gated: only stage 2 may call `sendOut`, while a stale or
+repeated `catchrelease_introFirstDone` selection at stage 3 replays the existing brief instead of
+rolling another target. That brief's unchanged `Continue` label routes through the real Fisherman
+encounter exit; the later briefing rungs continue to return to the Fisherman menu.
 
 **Scoring is a single sheet-wide ladder, not per-family.** Two families keyed on different
 flags can both match one hull - a harpooned fishing boat is the case that bit - and the higher
