@@ -45,8 +45,8 @@ public abstract class FishReward {
         return new TackleReward(tackle);
     }
 
-    public static FishReward locationData(String speciesId) {
-        return new LocationData(speciesId);
+    public static FishReward locationData(String speciesId, int fallbackCredits) {
+        return new LocationData(speciesId, fallbackCredits);
     }
 
     public static FishReward backdrop(String backdropId) {
@@ -183,13 +183,17 @@ public abstract class FishReward {
     /** A word about where something lives, which is the reward only a fisherman would want. */
     public static class LocationData extends FishReward {
         public final String speciesId;
+        public final int fallbackCredits;
 
-        public LocationData(String speciesId) {
+        public LocationData(String speciesId, int fallbackCredits) {
             this.speciesId = speciesId;
+            this.fallbackCredits = fallbackCredits;
         }
 
         @Override
         public String describe() {
+            if (isRedundant()) return new Credits(getFallbackCredits()).describe();
+
             String name = FishSpecLoader.getFishSpec(speciesId) == null
                     ? speciesId : FishSpecLoader.getFishSpec(speciesId).getDisplayName();
 
@@ -198,7 +202,21 @@ public abstract class FishReward {
 
         @Override
         public void grant() {
-            FishLog.unlockLocationData(speciesId);
+            if (isRedundant()) {
+                new Credits(getFallbackCredits()).grant();
+            } else {
+                FishLog.unlockLocationData(speciesId);
+            }
+        }
+
+        /** A landed specimen unlocks this data immediately, as does obtaining the chart elsewhere. */
+        protected boolean isRedundant() {
+            return FishLog.isLocationDataUnlocked(speciesId);
+        }
+
+        /** Saves from before the fallback was stored deserialize it as zero. */
+        protected int getFallbackCredits() {
+            return fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
         }
     }
 

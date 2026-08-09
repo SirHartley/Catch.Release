@@ -273,8 +273,8 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 |---|---|
 | `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
-| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop, Blueprint, Commodity |
-| `FishRewardRoller.java` | Rolls a payment scaled to a job's worth |
+| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop, Blueprint, Commodity. LocationData carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff |
+| `FishRewardRoller.java` | Rolls a payment scaled to a job's worth and preserves that value on survey rewards for live redundancy conversion |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |

@@ -75,7 +75,7 @@ public class FishRewardRoller {
         if (allowCredits && roll < 0.34f) return FishReward.credits(value);
         if (roll < 0.52f) return rollUpgrade(random);
         if (roll < 0.66f) return rollTackle(random);
-        if (roll < 0.78f) return rollLocationData(random);
+        if (roll < 0.78f) return rollLocationData(random, value);
         if (roll < 0.86f) return rollBackdrop(random);
         if (roll < 0.93f) return rollGoods(random, value);
 
@@ -114,7 +114,7 @@ public class FishRewardRoller {
     }
 
     /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */
-    protected static FishReward rollLocationData(Random random) {
+    protected static FishReward rollLocationData(Random random, int fallbackCredits) {
         List<FishSpec> unknown = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
@@ -127,7 +127,8 @@ public class FishRewardRoller {
 
         if (unknown.isEmpty()) return null;
 
-        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id);
+        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id,
+                fallbackCredits);
     }
 
     /**
