@@ -123,13 +123,26 @@ public class CoreFisherSpawner implements EveryFrameScript {
     }
 
     /**
+     * Returns the system's standing boat, posting one immediately when a directed tutorial errand
+     * cannot wait for the ordinary inhabited-system sweep.
+     * <p>
+     * The caller owns any lifecycle shorter than a normal core posting. This method only preserves
+     * the one-boat-per-system invariant and performs the standard placement and setup.
+     */
+    public static CampaignFleetAPI ensureBoat(StarSystemAPI system) {
+        CampaignFleetAPI existing = getBoat(system);
+
+        return existing != null ? existing : post(system);
+    }
+
+    /**
      * A small working boat, started somewhere in its own band.
      * <p>
      * Placed out in the reaches from the first frame rather than at the edge and told to travel -
      * these are not arriving from anywhere, they have been out there the whole time, and a fleet
      * flying in from the rim on the first day of the campaign says the opposite.
      */
-    protected void post(StarSystemAPI system) {
+    protected static CampaignFleetAPI post(StarSystemAPI system) {
         CampaignFleetAPI fleet = Global.getFactory().createEmptyFleet(
                 FishermanConstants.FACTION, FishermanConstants.FLEET_NAME, true);
 
@@ -158,5 +171,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         fleet.setLocation(at.x, at.y);
 
         fleet.addScript(new CoreFisherBehavior(fleet));
+
+        return fleet;
     }
 }

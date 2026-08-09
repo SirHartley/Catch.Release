@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -198,7 +199,74 @@ public class FishingIntro {
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
-        setTarget(rollTarget(FISH_ONE));
+        Target target = rollTarget(FISH_ONE);
+        setTarget(target);
+        ensureTargetBoat(target);
+    }
+
+    /**
+     * Posts the Fisherman in the second lesson's destination as soon as the destination is assigned.
+     * <p>
+     * Populated systems already have a standing boat. An uninhabited destination receives the same
+     * working boat for the life of this errand, then lets it go after the player leaves the system.
+     */
+    protected static void ensureTargetBoat(Target target) {
+        if (target == null || target.stage != FISH_ONE || target.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!target.systemId.equals(system.getId())) continue;
+
+            CampaignFleetAPI existing = CoreFisherSpawner.getBoat(system);
+            CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
+
+            if (existing == null && boat != null) {
+                boat.addScript(new TutorialBoatKeeper(boat, target.systemId));
+            }
+
+            return;
+        }
+    }
+
+    /** Holds an otherwise-uninhabited system's directed boat until its lesson is over. */
+    public static class TutorialBoatKeeper implements EveryFrameScript, Serializable {
+
+        private final CampaignFleetAPI boat;
+        private final String systemId;
+        private boolean done;
+
+        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId) {
+            this.boat = boat;
+            this.systemId = systemId;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (boat == null || boat.isExpired() || !boat.isAlive()) {
+                done = true;
+                return;
+            }
+
+            Target target = getTarget();
+            if (getStage() == FISH_ONE && target != null
+                    && systemId.equals(target.systemId)) return;
+
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            if (player != null
+                    && player.getContainingLocation() == boat.getContainingLocation()) return;
+
+            done = true;
+            boat.despawn();
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return false;
+        }
     }
 
     /**
