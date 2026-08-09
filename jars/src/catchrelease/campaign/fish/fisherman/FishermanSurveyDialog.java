@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Fisherman's chart counter: the survey data on sale, in the sidebar's own language.
+ * The Fisherman's chart counter: the range data on sale, in the sidebar's own language.
  * <p>
  * Which shelf is being sold off, how it was rolled and when it comes back are all
  * {@link FishermanShelf}'s - this is the counter, not the stock room. All it needs to know is that
@@ -290,7 +290,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     tooltip.addPara("Charts for charts", Misc.getBasePlayerColor(), 0f);
 
-                    tooltip.addPara("Survey data marks a species' range on your map - the shape"
+                    tooltip.addPara("Range data marks a species' range on your map - the shape"
                             + " of the thing is on the chart, the look of it still has to be"
                             + " caught.", 8f);
 
@@ -461,7 +461,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 float h = titlePos.getHeight();
 
                 if (text == null) {
-                    text = ShopUi.createText(small, "SURVEY DATA");
+                    text = ShopUi.createText(small, "RANGE DATA");
                     text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
                 }
 

@@ -11,7 +11,7 @@ import java.awt.Color;
 /**
  * A species' face, drawn the way the player's knowledge allows: the art as painted for a
  * species somebody has landed, and the same art as a black silhouette for one known only from
- * survey data - the shape of the thing is on the chart, the look of it still has to be caught.
+ * range data - the shape of the thing is on the chart, the look of it still has to be caught.
  * <p>
  * The silhouette keeps the art's alpha, so it is the fish's outline rather than a black box,
  * and wears a faint light rim - the same sprite offset a pixel each way underneath - so it

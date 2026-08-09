@@ -581,7 +581,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
             Color chrome = picked || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-            //filled = caught, hollow = survey-only; a shape rather than a shade, since every
+            //filled = caught, hollow = range-only; a shape rather than a shade, since every
             //shade here already means selection or rarity
             boolean caught = FishLog.isCaught(spec.id);
             float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
