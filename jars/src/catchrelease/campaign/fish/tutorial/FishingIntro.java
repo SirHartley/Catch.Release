@@ -3,14 +3,17 @@ package catchrelease.campaign.fish.tutorial;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -147,7 +150,7 @@ public class FishingIntro {
     }
 
     /**
-     * Straight to the end: every rig, the whole shop, six charts, and no money.
+     * Straight to the end: every rig, Fisherman outfitter access, six charts, and no money.
      * <p>
      * Not questioned, in the sheet or here. Somebody who says the breach is calling them is either
      * telling the truth or has done this before, and from where the Fisherman is standing those are
@@ -156,7 +159,6 @@ public class FishingIntro {
     public static void skip(TextPanelAPI text) {
         grant(TutorialConstants.ROD, text);
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-        grant(TutorialConstants.OUTFITTER, text);
 
         //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
         giveCharts(TutorialConstants.FREE_COMMONS, null);
@@ -171,6 +173,7 @@ public class FishingIntro {
 
         dropNote();
         rememberSeen();
+        FishRumors.ensureTutorialLead();
     }
 
     //---------------------------------------------------------------- the rungs
@@ -198,19 +201,78 @@ public class FishingIntro {
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
-        setTarget(rollTarget(FISH_ONE));
+        Target target = rollTarget(FISH_ONE);
+        setTarget(target);
+        ensureTargetBoat(target);
     }
 
     /**
-     * Opens the basic outfitter after the second catch, before the deep rigs change hands.
+     * Posts the Fisherman in the second lesson's destination as soon as the destination is assigned.
      * <p>
-     * Kept separate from {@link #giveDeepGear(TextPanelAPI)} because the dialogue deliberately
-     * introduces the ledger while it contains only the ROD/LINE shelves. The pending flag makes an
-     * interrupted conversation resume at the handoff instead of falling back to an empty stage-three
-     * reminder after the catch has already been taken.
+     * Populated systems already have a standing boat. An uninhabited destination receives the same
+     * working boat for the life of this errand, then lets it go after the player leaves the system.
      */
+    protected static void ensureTargetBoat(Target target) {
+        if (target == null || target.stage != FISH_ONE || target.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!target.systemId.equals(system.getId())) continue;
+
+            CampaignFleetAPI existing = CoreFisherSpawner.getBoat(system);
+            CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
+
+            if (existing == null && boat != null) {
+                boat.addScript(new TutorialBoatKeeper(boat, target.systemId));
+            }
+
+            return;
+        }
+    }
+
+    /** Holds an otherwise-uninhabited system's directed boat until its lesson is over. */
+    public static class TutorialBoatKeeper implements EveryFrameScript, Serializable {
+
+        private final CampaignFleetAPI boat;
+        private final String systemId;
+        private boolean done;
+
+        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId) {
+            this.boat = boat;
+            this.systemId = systemId;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (boat == null || boat.isExpired() || !boat.isAlive()) {
+                done = true;
+                return;
+            }
+
+            Target target = getTarget();
+            if (getStage() == FISH_ONE && target != null
+                    && systemId.equals(target.systemId)) return;
+
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            if (player != null
+                    && player.getContainingLocation() == boat.getContainingLocation()) return;
+
+            done = true;
+            boat.despawn();
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return false;
+        }
+    }
+
+    /** Marks the interrupted second-catch conversation as still owing its deep-gear handoff. */
     public static void giveOutfitter(TextPanelAPI text) {
-        grant(TutorialConstants.OUTFITTER, text);
         Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
     }
 
@@ -225,7 +287,6 @@ public class FishingIntro {
         setStage(FISH_TWO);
 
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-        grant(TutorialConstants.OUTFITTER, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         setTarget(rollTarget(FISH_TWO));
@@ -257,6 +318,12 @@ public class FishingIntro {
         }
 
         rememberSeen();
+        FishRumors.ensureTutorialLead();
+    }
+
+    /** Gives already-completed saves the same first lead as a live graduation hand-in. */
+    public static void ensureGraduationRumor() {
+        if (isAtLeast(DONE)) FishRumors.ensureTutorialLead();
     }
 
     //---------------------------------------------------------------- the targets
@@ -316,12 +383,22 @@ public class FishingIntro {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
+        updateIntel();
     }
 
     protected static void clearTarget() {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
+    }
+
+    /** Invalidates the persistent intel entry whenever its live destination is replaced. */
+    protected static void updateIntel() {
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(IntroIntel.class)) {
+
+            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+        }
     }
 
     /**
@@ -359,11 +436,7 @@ public class FishingIntro {
 
         if (landed) letGo(target);
 
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class)) {
-
-            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
-        }
+        updateIntel();
     }
 
     /** Whether the current errand has been answered by something in the hold. */
@@ -400,7 +473,9 @@ public class FishingIntro {
         target.needsDeepGear = stage == FISH_TWO;
         target.anySpecies = stage == RODDED;
 
-        FishSpec spec = pickSpecies(stage);
+        CatchImplement implement = target.needsDeepGear
+                ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
+        FishSpec spec = pickSpecies(stage, system, implement);
         if (spec == null) return null;
         target.speciesIds.add(spec.id);
 
@@ -459,15 +534,22 @@ public class FishingIntro {
         return pick != null ? pick : any.pick();
     }
 
-    /** Commons all the way up: the ladder is in the gear and the water, not in the quarry. */
-    protected static FishSpec pickSpecies(int stage) {
+    /**
+     * Commons all the way up, drawn only from what the destination's real spawn table permits.
+     * The ladder is in the gear and the water, not in assigning an animal that cannot live there.
+     */
+    protected static FishSpec pickSpecies(int stage, StarSystemAPI system,
+                                          CatchImplement implement) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+        FishHabitat habitat = FishHabitat.of(system);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
             if (spec.rarity.ordinal() > FishRarity.UNCOMMON.ordinal()) continue;
 
-            picker.add(spec, spec.rarity == FishRarity.COMMON ? 4f : 1f);
+            picker.add(spec, spec.spawnWeight
+                    * (spec.rarity == FishRarity.COMMON ? 4f : 1f));
         }
 
         return picker.pick();
@@ -639,6 +721,43 @@ public class FishingIntro {
         assignSlot(abilityId);
 
         if (text != null) AddRemoveCommodity.addAbilityGainText(abilityId, text);
+    }
+
+    /**
+     * One-way save migration for the dev-era outfitter ability.
+     * <p>
+     * The outfitter now opens only through a Fisherman or a colony conservatory. Remove both the
+     * owned ability and every hotbar reference so an upgraded save follows the same access rule.
+     */
+    public static void removeLegacyOutfitterAbility() {
+        String id = TutorialConstants.LEGACY_OUTFITTER;
+
+        if (Global.getSector().getCharacterData().getAbilities().contains(id)) {
+            Global.getSector().getCharacterData().removeAbility(id);
+        }
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player != null && player.hasAbility(id)) player.removeAbility(id);
+
+        Global.getSector().getCharacterData().getMemoryWithoutUpdate().unset("$ability:" + id);
+
+        AbilitySlotsAPI slots = Global.getSector().getUIData().getAbilitySlotsAPI();
+        if (slots == null) return;
+
+        int was = slots.getCurrBarIndex();
+
+        try {
+            for (int bar = 0; bar < 5; bar++) {
+                slots.setCurrBarIndex(bar);
+
+                for (AbilitySlotAPI slot : slots.getCurrSlotsCopy()) {
+                    if (id.equals(slot.getAbilityId())) slot.setAbilityId(null);
+                    if (id.equals(slot.getInHyperAbilityId())) slot.setInHyperAbilityId(null);
+                }
+            }
+        } finally {
+            slots.setCurrBarIndex(was);
+        }
     }
 
     protected static void assignSlot(String abilityId) {
@@ -973,7 +1092,9 @@ public class FishingIntro {
                 }
             } else {
                 info.addPara("Wanted: %s", initPad, tc, h, describeTarget());
-                info.addPara("In %s", 0f, tc, h, target.systemName);
+                if (target.systemName != null) {
+                    info.addPara("In %s", 0f, tc, h, target.systemName);
+                }
 
                 if (target.needsDeepGear) {
                     info.addPara("Breach lamp and harpoon line only", tc, 0f);
@@ -1054,6 +1175,11 @@ public class FishingIntro {
 
             //once it is aboard the water is not where the player is being sent
             if (target != null && !target.landed) {
+                //the survey-data rung deliberately has no single system; the planner owns its
+                //several destinations, and falling through to a boat leaves the old errand's arrow
+                //on whichever boat happened to be posted there
+                if (target.systemId == null) return null;
+
                 for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                     if (!system.getId().equals(target.systemId)) continue;
 
@@ -1066,6 +1192,10 @@ public class FishingIntro {
 
                     return system.getHyperspaceAnchor();
                 }
+
+                //A target that names a system which no longer resolves is still a target. It is not
+                //an instruction to substitute the nearest boat and point somewhere unrelated.
+                return null;
             }
 
             return getNearestBoat();

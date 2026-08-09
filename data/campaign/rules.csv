@@ -383,7 +383,7 @@ catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
+$catchreleaseHasFish",SetOptionColor catchrelease_jobTurnIn highlight,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
@@ -584,7 +584,8 @@ Then the quieter one empties another pocket onto the table.
 The total is $catchreleaseReward.",,
 catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
+$catchreleaseHasFish","SetOptionColor catchrelease_duelLoud highlight
+SetOptionColor catchrelease_duelQuiet highlight",,"catchrelease_duelLoud:Give the better one to the loud one.
 catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets which fish. The choice cannot be got wrong - the extra is paid for the specimen, not for the guess."
 catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
@@ -641,7 +642,9 @@ $catchreleaseFoe shrugs.
 No payment follows.",,
 catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
+$catchreleaseHasFish","SetOptionColor catchrelease_ringFlat highlight
+SetOptionColor catchrelease_ringLeft highlight
+SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Hand them over and take the fee.
 catchrelease_ringLeft:Put the fee on $catchreleaseLeft's fish.
 catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
 catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
@@ -817,7 +820,7 @@ FireAll CatchReleaseFleetQuestTurnIn","The fleet is still where you left it.
 They still need $entity.catchrelease_fleetQuestAsk.",,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
-$catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
+$catchreleaseHasFish",SetOptionColor catchrelease_fqTurnIn highlight,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
@@ -1008,6 +1011,17 @@ A metallic impact follows from your left audio channel, though the trawler lies 
 He looks back to you.
 
 ""Captain. What can I do for you?""",,
+catchrelease_fisherBycatch,OpenCommLink,"$entity.catchrelease_fisherman score:1080
+CatchReleaseCMD tokens
+$catchreleaseBycatchPending","CatchReleaseCMD ackBycatch
+$menuState = catchreleaseFisher 0
+FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached to your catch log.
+
+""Bycatch.""
+
+He taps the entry once.
+
+""Wreckage. Lost cargo. Whatever the retrieval rig brings up with the pattern.""",,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
@@ -1041,7 +1055,12 @@ He gestures away from it.
 ""Come alongside.""",,
 catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage < 6",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+$catchreleaseStage < 6
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+catchrelease_fisherOptIntroHandIn,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage < 6
+$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording and quest-yellow treatment only when the current target is aboard.
 catchrelease_fisherOptShop,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
@@ -1055,10 +1074,11 @@ $catchreleaseStage >= 6
 !$catchreleaseShelf",,,20:catchrelease_fisherChartsBare:Ask after new survey data,
 catchrelease_fisherOptSell,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
+$catchreleaseStage >= 3
 $catchreleaseHoldHasFish",,,30:catchrelease_fisherSell:Sell fish,
 catchrelease_fisherOptRumor,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,40:catchrelease_fisherRumor:Ask about rumors,
+$catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
@@ -1115,7 +1135,7 @@ catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,Catc
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
 CatchReleaseCMD tokens
 $catchreleaseWork
-$catchreleaseWorkMet",,"The requested specimen is transferred across.
+$catchreleaseWorkMet",SetOptionColor catchrelease_workTurnIn highlight,"The requested specimen is transferred across.
 
 The Fisherman recognizes it before the manifest finishes updating.
 
@@ -1535,7 +1555,7 @@ catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
 $catchreleaseStage < 6
-!$catchreleaseTargetMet",,,55:catchrelease_askTarget:Ask about the fish they want,
+!$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
 $catchreleaseTargetPond",,"""$catchreleaseTarget. Rupture in $catchreleaseTargetWhere.""
@@ -1543,8 +1563,22 @@ $catchreleaseTargetPond",,"""$catchreleaseTarget. Rupture in $catchreleaseTarget
 He checks the return.
 
 ""Should still be there.""",100:catchrelease_fisherBack:Continue,
+catchrelease_askTargetOpenRod,DialogOptionSelected,"$option == catchrelease_askTarget score:9
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetPond
+$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+
+He forwards the system data.
+
+""Fabric runs thinner there. Still near the Core. Same drones, same ROD.""
+
+A pause.
+
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,Technical fallback for a stage-three target placed in open space; it reuses the supplied stage-three briefing verbatim and never names gear the player receives later.
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:8
 CatchReleaseCMD tokens
+$catchreleaseStage >= 4
 !$catchreleaseTargetPond
 $catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
 
@@ -1739,13 +1773,19 @@ catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGh
 He shrugs.
 
 ""Good enough until somebody writes a better manual.""",catchrelease_introFirstDone:Continue,
-catchrelease_introFirstDone,DialogOptionSelected,$option == catchrelease_introFirstDone,"CatchReleaseCMD sendOut
+catchrelease_introFirstDone,DialogOptionSelected,"$option == catchrelease_introFirstDone
+CatchReleaseCMD tokens
+$catchreleaseStage == 2","CatchReleaseCMD sendOut
 CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
+catchrelease_introFirstDoneAlready,DialogOptionSelected,"$option == catchrelease_introFirstDone
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated Continue may replay the current brief but cannot call sendOut again and replace the assigned target.
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+$catchreleaseTargetMet
+$catchreleaseStage < 0","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveOutfitter
 CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
 
@@ -1761,7 +1801,29 @@ He closes both.
 
 A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:""What can I do with the outfitter?""
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",
+100:catchrelease_introShopLater:""I'll look later.""",Supplied wording retained verbatim; the live technical twin corrects the distinct-target comparison requested after playtesting.
+catchrelease_introTurnIn3Distinct,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD giveOutfitter
+CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
+
+""Different pattern. Different fabric.""
+
+A finger traces one coherence plot, then the other.
+
+""That's enough to teach the instruments what you're looking at.""
+
+He closes both.
+
+""You're ready for the outfitter.""
+
+He points at the comm menu.
+
+""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+10:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut.
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -1785,8 +1847,7 @@ He looks directly at you.
 
 ""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
 10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""
-100:catchrelease_introDeepDone:""What do you want caught?""",Technical resume for an interrupted basic-outfitter/deep-rig handoff.
+20:catchrelease_introWeaponQuestion:""This is a weapon.""",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
 catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Keep the drones flying. Keep the return clean. Fit tackle for the work you're actually doing.""
 
 He gestures at your manifest.
@@ -1817,19 +1878,21 @@ He looks directly at you.
 
 ""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
 10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""
-100:catchrelease_introDeepDone:""What do you want caught?""",
-catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,,"""Near enough for deck work.""
+20:catchrelease_introWeaponQuestion:""This is a weapon.""",The assignment option is added only after the three safety questions have been answered.
+catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,"$catchreleaseIntroLightAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""Near enough for deck work.""
 
 The Fisherman stops there.
 
-""Run them away from people.""",catchrelease_introDeepDone:Continue,
-catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,,"""Return trace.""
+""Run them away from people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,"$catchreleaseIntroHarpoonAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""Return trace.""
 
 He wipes a thumb across the display.
 
-""Looks like rope. Isn't. Don't build procedures around the picture.""",catchrelease_introDeepDone:Continue,
-catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,,"""It can put forty tonnes of bad judgment through a hull.""
+""Looks like rope. Isn't. Don't build procedures around the picture.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,"$catchreleaseIntroWeaponAsked = true 0
+FireAll CatchReleaseIntroDeepQuestions","""It can put forty tonnes of bad judgment through a hull.""
 
 He considers the launcher.
 
@@ -1837,7 +1900,13 @@ He considers the launcher.
 
 A beat.
 
-""Don't shoot either one at people.""",catchrelease_introDeepDone:Continue,
+""Don't shoot either one at people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,0:catchrelease_introLightQuestion:""The lights make a rupture?"",
+catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?"",
+catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,20:catchrelease_introWeaponQuestion:""This is a weapon."",
+catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleaseIntroLightAsked
+$catchreleaseIntroHarpoonAsked
+$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:""What do you want caught?"",The assignment continuation appears after all three equipment and safety questions have been covered.
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
@@ -1845,7 +1914,8 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 4
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
-CatchReleaseCMD tokens","The Fisherman checks the harpoon telemetry while the specimen is transferred.
+CatchReleaseCMD tokens
+SetOptionColor catchrelease_introPlannerAsk highlight","The Fisherman checks the harpoon telemetry while the specimen is transferred.
 
 ""Good shot.""
 
@@ -1860,15 +1930,14 @@ He sends two survey records to your fleet map.
 Your map resolves each record into range information and candidate systems.
 
 ""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:""Where does the survey information come from?""
-10:catchrelease_introPlannerAsk:""You want both of these?""
-100:catchrelease_introSurveyDone:Continue",
-catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,,"""Surveys.""
+10:catchrelease_introPlannerAsk:""You want both of these?""",The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown.
+catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,SetOptionColor catchrelease_introPlannerAsk highlight,"""Surveys.""
 
 The Fisherman gives you a look over the rim of his mug.
 
 When you wait for the rest, he puts the mug down.
 
-""That's enough answer for a chart.""",catchrelease_introSurveyDone:Continue,
+""That's enough answer for a chart.""",10:catchrelease_introPlannerAsk:""You want both of these?"",The optional survey-source answer returns to the required planner question rather than skipping it.
 catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,,"""One of each.""
 
 He brings up your sector map and marks the fishing-planner control.
@@ -1885,7 +1954,8 @@ $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-AddTextSmall ""Survey purchasing unlocked"" highlight","The two catches are checked against their survey records.
+AddTextSmall ""Survey purchasing unlocked"" highlight
+AddTextSmall ""Fishing rumor added to intel"" highlight","The two catches are checked against their survey records.
 
 The Fisherman marks the first entry complete, then the second.
 
@@ -1923,7 +1993,7 @@ He forwards the system data.
 
 A pause.
 
-""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherLeave:Continue,The first outbound briefing ends the Fisherman encounter; a repeated Continue can replay this brief without rolling a new target and still has a real exit.
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4

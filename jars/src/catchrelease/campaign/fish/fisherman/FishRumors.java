@@ -35,6 +35,7 @@ public class FishRumors {
 
     public static final String STATE_KEY = "$catchrelease_rumor";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
+    public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
 
     public static final int TYPE_RARITY = 0;
     public static final int TYPE_LOOT = 1;
@@ -137,6 +138,29 @@ public class FishRumors {
         RumorIntel intel = new RumorIntel(rumor);
         Global.getSector().getIntelManager().addIntel(intel);
         intel.endAfterDelay(FishermanConstants.RUMOR_DURATION_DAYS);
+
+        return rumor;
+    }
+
+    /**
+     * Gives tutorial graduates their first lead without consuming or checking the ordinary monthly
+     * ask gate. Idempotent across the live hand-in and completed-save migration on load.
+     */
+    public static Saved ensureTutorialLead() {
+        if (Global.getSector() == null) return null;
+
+        if (Global.getSector().getPersistentData().get(TUTORIAL_LEAD_KEY) instanceof Boolean
+                && (Boolean) Global.getSector().getPersistentData().get(TUTORIAL_LEAD_KEY)) {
+
+            return getActive();
+        }
+
+        Saved rumor = getActive();
+        if (rumor == null) rumor = create();
+
+        if (rumor != null) {
+            Global.getSector().getPersistentData().put(TUTORIAL_LEAD_KEY, true);
+        }
 
         return rumor;
     }
