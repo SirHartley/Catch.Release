@@ -437,7 +437,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(STAGE, FishingIntro.getStage(), 0);
         local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
         local.set(DEEP_HANDOFF, FishingIntro.isDeepHandoffPending(), 0);
-        local.set(OUTFITTER, FishingIntro.hasGear(TutorialConstants.OUTFITTER), 0);
+        local.set(OUTFITTER, FishingIntro.isAtLeast(FishingIntro.FISH_TWO), 0);
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
 

@@ -1808,9 +1808,11 @@ He closes both.
 
 ""You're ready for the outfitter.""
 
-A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+He points at the comm menu.
+
+""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern.
+100:catchrelease_introShopLater:""I'll look later.""",Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut.
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3

@@ -97,15 +97,16 @@ are rebuilt every load because their state lives in sector memory rather than in
 
 Classes the game instantiates by name. Grep the data file, not the call sites — there aren't any.
 
-**`data/campaign/abilities.csv`** — 5 abilities. The four of ours are `unlockedAtStart=FALSE`:
-they are granted by `FishingIntro`, not by character creation.
+**`data/campaign/abilities.csv`** — 5 rows. Three live fishing abilities are
+`unlockedAtStart=FALSE` and granted by `FishingIntro`; `catchrelease_shop` is a hidden, inert
+one-release migration stub so old saves can deserialize before load cleanup removes it.
 
 | Id | Class |
 |---|---|
 | `catchrelease_searchlights` | `abilities/searchlight/ability/SearchlightAbilityPlugin` |
 | `catchrelease_rod` | `abilities/rod/ability/PondInteractionAbilityPlugin` |
 | `catchrelease_harpoon` | `abilities/harpoon/ability/HarpoonAbilityPlugin` |
-| `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` |
+| `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` (legacy migration stub) |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
 **`data/config/settings.json`** — `ruleCommandPackages`, listing vanilla's five packages **plus**
@@ -369,7 +370,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including outfitter ownership, local-target location, and the interrupted deep-gear handoff), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, and the interrupted deep-gear handoff), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
 
 ### `campaign/fish/tutorial`
@@ -379,7 +380,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. Assigning the second lesson immediately ensures a Fisherman boat in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves. The second-catch handoff opens the ROD-only outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly. The shortcut grants the same 2 common/1 uncommon/1 rare survey mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. Assigning the second lesson immediately ensures a Fisherman boat in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability, and load migration removes that dev-era shortcut and its hotbar slots from existing saves. The shortcut grants the same 2 common/1 uncommon/1 rare survey mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
 | `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
 | `Castaway.java` | A rating missed during a badly reconciled crew transfer, found on a survey; accepting him aboard fades the one-use cache and opens the Fisherman breadcrumb |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
@@ -439,7 +440,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — and how to describe it |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
-| `FishShopAbilityPlugin.java` | The ability-bar button that opens it. Temporary until it lives on a market |
+| `FishShopAbilityPlugin.java` | Hidden inert migration stub for the removed ability-bar shortcut; load cleanup removes it and its hotbar references from old saves |
 | `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
@@ -1045,7 +1046,7 @@ him while nobody is watching — his lamps go into LunaLib's one sector-wide ren
 sounds play wherever the player is standing, not where they were asked for.
 
 **Closing the outfitter is not the same as closing the dialog.** `FishShopDialog` takes an optional
-`OnClose`; without one, escape closes the whole interaction, which is what the ability bar wants.
+`OnClose`; without one, escape closes the standalone interaction, as the colony conservatory wants.
 The Fisherman passes one, because the shop runs inside his conversation and dropping the encounter
 would read as the shop having hung up on somebody the player was mid-sentence with. The way back is
 the opener's to write: the shop hides the text and visual panels and dims the background going in,

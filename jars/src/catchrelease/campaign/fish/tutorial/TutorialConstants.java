@@ -22,8 +22,8 @@ public class TutorialConstants {
             "catchrelease_harpoon",
     };
 
-    /** The ledger. Introduced after the second catch, before the deep rigs change hands. */
-    public static final String OUTFITTER = "catchrelease_shop";
+    /** Removed ability-bar outfitter id, retained for one-way cleanup of existing saves. */
+    public static final String LEGACY_OUTFITTER = "catchrelease_shop";
 
     /** Free charts handed out along the way: two to learn on, then the graduation package. */
     public static final int FREE_COMMONS = 2;

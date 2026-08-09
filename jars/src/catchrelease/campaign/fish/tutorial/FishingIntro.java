@@ -148,7 +148,7 @@ public class FishingIntro {
     }
 
     /**
-     * Straight to the end: every rig, the whole shop, six charts, and no money.
+     * Straight to the end: every rig, Fisherman outfitter access, six charts, and no money.
      * <p>
      * Not questioned, in the sheet or here. Somebody who says the breach is calling them is either
      * telling the truth or has done this before, and from where the Fisherman is standing those are
@@ -157,7 +157,6 @@ public class FishingIntro {
     public static void skip(TextPanelAPI text) {
         grant(TutorialConstants.ROD, text);
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-        grant(TutorialConstants.OUTFITTER, text);
 
         //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
         giveCharts(TutorialConstants.FREE_COMMONS, null);
@@ -269,16 +268,8 @@ public class FishingIntro {
         }
     }
 
-    /**
-     * Opens the basic outfitter after the second catch, before the deep rigs change hands.
-     * <p>
-     * Kept separate from {@link #giveDeepGear(TextPanelAPI)} because the dialogue deliberately
-     * introduces the ledger while it contains only the ROD/LINE shelves. The pending flag makes an
-     * interrupted conversation resume at the handoff instead of falling back to an empty stage-three
-     * reminder after the catch has already been taken.
-     */
+    /** Marks the interrupted second-catch conversation as still owing its deep-gear handoff. */
     public static void giveOutfitter(TextPanelAPI text) {
-        grant(TutorialConstants.OUTFITTER, text);
         Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
     }
 
@@ -293,7 +284,6 @@ public class FishingIntro {
         setStage(FISH_TWO);
 
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-        grant(TutorialConstants.OUTFITTER, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         setTarget(rollTarget(FISH_TWO));
@@ -707,6 +697,43 @@ public class FishingIntro {
         assignSlot(abilityId);
 
         if (text != null) AddRemoveCommodity.addAbilityGainText(abilityId, text);
+    }
+
+    /**
+     * One-way save migration for the dev-era outfitter ability.
+     * <p>
+     * The outfitter now opens only through a Fisherman or a colony conservatory. Remove both the
+     * owned ability and every hotbar reference so an upgraded save follows the same access rule.
+     */
+    public static void removeLegacyOutfitterAbility() {
+        String id = TutorialConstants.LEGACY_OUTFITTER;
+
+        if (Global.getSector().getCharacterData().getAbilities().contains(id)) {
+            Global.getSector().getCharacterData().removeAbility(id);
+        }
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player != null && player.hasAbility(id)) player.removeAbility(id);
+
+        Global.getSector().getCharacterData().getMemoryWithoutUpdate().unset("$ability:" + id);
+
+        AbilitySlotsAPI slots = Global.getSector().getUIData().getAbilitySlotsAPI();
+        if (slots == null) return;
+
+        int was = slots.getCurrBarIndex();
+
+        try {
+            for (int bar = 0; bar < 5; bar++) {
+                slots.setCurrBarIndex(bar);
+
+                for (AbilitySlotAPI slot : slots.getCurrSlotsCopy()) {
+                    if (id.equals(slot.getAbilityId())) slot.setAbilityId(null);
+                    if (id.equals(slot.getInHyperAbilityId())) slot.setInHyperAbilityId(null);
+                }
+            }
+        } finally {
+            slots.setCurrBarIndex(was);
+        }
     }
 
     protected static void assignSlot(String abilityId) {
