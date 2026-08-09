@@ -10,10 +10,12 @@ the same commit as the change. A map that is wrong is worse than no map, because
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.
 
-**[`LORE.md`](LORE.md) is the setting** — what a breach, a pattern, the ROD and the Fisherman
-actually are, who calls them what, and the tone rule the whole mod is written to. Read it before
-writing any player-facing line: `rules.csv`, a species description, a tackle blurb, an intel note.
-It also carries the list of things the mod does that the fiction has not explained yet.
+**[`LORE.md`](LORE.md) is the setting and writing authority** — what a breach, a pattern, the ROD,
+the Fisherman and Crablobab actually are; who notices contradictions; who is allowed to know what;
+the tutorial's information-release order; faction voices; terminology; and the prose rules every
+player-facing line follows. Read it before writing `rules.csv`, a species description, a tackle
+blurb, an intel note, colony text or UI copy. It also carries the settled unknowns the fiction must
+not explain.
 
 ---
 
