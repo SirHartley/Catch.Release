@@ -1535,7 +1535,7 @@ catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
 $catchreleaseStage < 6
-!$catchreleaseTargetMet",,,55:catchrelease_askTarget:Ask about the fish they want,
+!$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
 $catchreleaseTargetPond",,"""$catchreleaseTarget. Rupture in $catchreleaseTargetWhere.""
