@@ -383,12 +383,22 @@ public class FishingIntro {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
+        updateIntel();
     }
 
     protected static void clearTarget() {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
+    }
+
+    /** Invalidates the persistent intel entry whenever its live destination is replaced. */
+    protected static void updateIntel() {
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(IntroIntel.class)) {
+
+            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+        }
     }
 
     /**
@@ -426,11 +436,7 @@ public class FishingIntro {
 
         if (landed) letGo(target);
 
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class)) {
-
-            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
-        }
+        updateIntel();
     }
 
     /** Whether the current errand has been answered by something in the hold. */
@@ -1086,7 +1092,9 @@ public class FishingIntro {
                 }
             } else {
                 info.addPara("Wanted: %s", initPad, tc, h, describeTarget());
-                info.addPara("In %s", 0f, tc, h, target.systemName);
+                if (target.systemName != null) {
+                    info.addPara("In %s", 0f, tc, h, target.systemName);
+                }
 
                 if (target.needsDeepGear) {
                     info.addPara("Breach lamp and harpoon line only", tc, 0f);
@@ -1167,6 +1175,11 @@ public class FishingIntro {
 
             //once it is aboard the water is not where the player is being sent
             if (target != null && !target.landed) {
+                //the survey-data rung deliberately has no single system; the planner owns its
+                //several destinations, and falling through to a boat leaves the old errand's arrow
+                //on whichever boat happened to be posted there
+                if (target.systemId == null) return null;
+
                 for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                     if (!system.getId().equals(target.systemId)) continue;
 
@@ -1179,6 +1192,10 @@ public class FishingIntro {
 
                     return system.getHyperspaceAnchor();
                 }
+
+                //A target that names a system which no longer resolves is still a target. It is not
+                //an instruction to substitute the nearest boat and point somewhere unrelated.
+                return null;
             }
 
             return getNearestBoat();
