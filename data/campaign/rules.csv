@@ -1055,6 +1055,7 @@ $catchreleaseStage >= 6
 !$catchreleaseShelf",,,20:catchrelease_fisherChartsBare:Ask after new survey data,
 catchrelease_fisherOptSell,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
+$catchreleaseStage >= 3
 $catchreleaseHoldHasFish",,,30:catchrelease_fisherSell:Sell fish,
 catchrelease_fisherOptRumor,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens

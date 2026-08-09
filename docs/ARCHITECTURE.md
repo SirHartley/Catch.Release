@@ -180,6 +180,8 @@ The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its 
 gated on stage 6, while the question rows retain their own information-release gates.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
+The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
+been handed in; carrying fish before that point does not expose the general sales flow.
 Opening the bar rating's event sets `$global.catchrelease_metRating`; the two first-contact entry
 families use that flag to include the supplied rating-specific ROD option only after that meeting.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
