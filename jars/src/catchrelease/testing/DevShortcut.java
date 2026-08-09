@@ -1,10 +1,15 @@
 package catchrelease.testing;
 
+import catchrelease.ModPlugin;
+import catchrelease.campaign.fish.colony.Backdrop;
+import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
+import catchrelease.helper.loading.BackdropLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.listeners.CampaignInputListener;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -61,6 +66,10 @@ public class DevShortcut implements CampaignInputListener {
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
         if (!Global.getSettings().isDevMode()) return;
 
+        MemoryAPI mem = Global.getSector().getMemoryWithoutUpdate();
+        String key =  "$" + ModPlugin.MOD_ID + "_devSkip";
+        int amt = mem.contains(key) ? mem.getInt(key) : 0;
+
         for (InputEventAPI event : events) {
             if (event.isConsumed() || !event.isKeyDownEvent()) continue;
             if (Character.toLowerCase(event.getEventChar()) != KEY) continue;
@@ -68,7 +77,16 @@ public class DevShortcut implements CampaignInputListener {
             //taken rather than passed on, so the press cannot also mean something else this frame
             event.consume();
 
-            fire();
+            if (amt == 0) {
+                addEquipment();
+                mem.set(key, amt++);
+            }
+
+            if (amt == 1) {
+                addBackgrounds();
+                mem.set(key, amt++);
+            }
+
             return;
         }
     }
@@ -82,8 +100,15 @@ public class DevShortcut implements CampaignInputListener {
 
     }
 
+    protected void addBackgrounds(){
+        for (Backdrop backdrop : BackdropLoader.getAll()) {
+            if (!backdrop.owned) continue;
+            Backdrops.own(backdrop.id);
+        }
+    }
+
     /** Everything the introduction would have granted, plus charts of every rung to test with. */
-    protected void fire() {
+    protected void addEquipment() {
         FishingIntro.skip(null);
 
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
