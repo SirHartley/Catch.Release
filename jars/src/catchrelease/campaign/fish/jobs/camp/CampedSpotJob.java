@@ -195,6 +195,7 @@ public abstract class CampedSpotJob extends FishJob {
         if (cleared) return;
 
         if (!CampedSpot.isGone(camper)) {
+            CampedSpot.updateWarningPursuit(camper, pond);
             CampedSpot.allowPlayerToLeave(camper, pond);
             CampedSpot.setPondBlocked(pond, true);
             return;

@@ -2588,6 +2588,35 @@ Someone has already started repairing the damaged rack.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
 HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."
+catchrelease_campFirstHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""This spot's off limits.""
+
+The pirate glances toward the rupture.
+
+""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,"The first hail is the end of the camp's one-time intercept. The memory flag sends it back to its passive hold; later contacts fall through to the ordinary camp conversation."
+catchrelease_campFirstHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","""You are entering a contracted exclusion zone. The rupture is off limits to fishing operations.""
+
+$PersonRank $personName sends over a file number.
+
+""Client identity is protected. The relocation figure is $entity.catchrelease_campBribeDGS credits. Otherwise, alter course.""",,
+catchrelease_campFirstHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
+$entity.catchrelease_campFleet
+!$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
+Highlight $entity.catchrelease_campBribeDGS
+FireAll CatchReleaseCampOptions","The woman on the screen stands in front of somebody armed.
+
+""Do not lower your machine into that rupture. This place is closed to fishing.""
+
+Her voice remains level.
+
+""You can offer $entity.catchrelease_campBribeDGS credits. We may take it. That changes where we stand, not what the machine is.""",,
 catchrelease_campHail,OpenCommLink,$entity.catchrelease_campFleet score:1000,"Highlight $entity.catchrelease_campBribeDGS
 FireAll CatchReleaseCampOptions","""You've come about the fishing spot.""
 
