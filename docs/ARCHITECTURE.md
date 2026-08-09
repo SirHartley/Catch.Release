@@ -340,7 +340,7 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens, opens the panels, walks the ladder (including the separate basic-outfitter/deep-gear handoff and recovered-property breadcrumb), and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss) and `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` |
 | `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic |
 
 ### `campaign/fish/tutorial`
@@ -350,8 +350,8 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture, takes the planted specimen back out of the water and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
-| `TutorialWreck.java` | A holed cruiser beside the first rupture seen out where nobody lives |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. The second-catch handoff opens the ROD-only outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly. The shortcut grants the same 4 common/1 uncommon/1 rare survey mix as the full route. `Keeper` both plants the specimen and watches the hold for it: landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
+| `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
 | `Castaway.java` | The rating put off a boat for looking, found on a survey |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
 | `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped - and the only thing that lets it off burn 4 while it closes. Its drop point is clamped into the reaches, so a rupture in the inner system no longer parks a trawler against the star |

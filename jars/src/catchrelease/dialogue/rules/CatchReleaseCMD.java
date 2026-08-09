@@ -82,6 +82,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_SET = "$catchreleaseTargetSet";
     public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
     public static final String CARRYING = "$catchreleaseCarrying";
+    public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
 
     /** The chart requests, which are the ordinary work and nothing to do with the ladder. */
@@ -186,6 +187,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "sendOut":
                 FishingIntro.sendOut(text(dialog));
                 return true;
+            case "giveOutfitter":
+                FishingIntro.giveOutfitter(text(dialog));
+                return true;
             case "giveDeepGear":
                 FishingIntro.giveDeepGear(text(dialog));
                 return true;
@@ -202,11 +206,19 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return true;
 
             //---- the hulk
+            case "carryFisherProperty":
+                FishingIntro.takeFisherProperty();
+                return true;
+            case "dropFisherProperty":
+                FishingIntro.dropFisherProperty();
+                return true;
+
+            //Aliases keep an old rules sheet usable during a hot reload of this update.
             case "carryHarpoon":
-                FishingIntro.takeHarpoon();
+                FishingIntro.takeFisherProperty();
                 return true;
             case "dropHarpoon":
-                FishingIntro.dropHarpoon();
+                FishingIntro.dropFisherProperty();
                 return true;
 
             //---- chart requests
@@ -417,7 +429,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 target == null ? null : target.getContainingLocation())), 0);
 
         local.set(STAGE, FishingIntro.getStage(), 0);
-        local.set(CARRYING, FishingIntro.isCarryingHarpoon(), 0);
+        local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
+        local.set(DEEP_HANDOFF, FishingIntro.isDeepHandoffPending(), 0);
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
 
