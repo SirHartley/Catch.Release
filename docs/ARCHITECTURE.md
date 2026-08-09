@@ -189,6 +189,9 @@ options without changing the dialogue or callback routing behind them.
 The retained tutorial target-reminder handlers also separate open-space targets by equipment rung:
 stage 3 reuses the supplied ROD-only briefing verbatim, while the supplied lights-and-harpoon
 reminder is gated to stage 4 or later.
+The supplied second-return row remains verbatim but is dormant; its live routing twin says
+`Different pattern. Different fabric.` because the second errand deliberately rolls a distinct
+species rather than asking for the first specimen again.
 Opening the bar rating's event sets `$global.catchrelease_metRating`; the two first-contact entry
 families use that flag to include the supplied rating-specific ROD option only after that meeting.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,

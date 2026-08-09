@@ -1773,7 +1773,8 @@ $catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated C
 catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+$catchreleaseTargetMet
+$catchreleaseStage < 0","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveOutfitter
 CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
 
@@ -1789,7 +1790,27 @@ He closes both.
 
 A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:""What can I do with the outfitter?""
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",
+100:catchrelease_introShopLater:""I'll look later.""",Supplied wording retained verbatim; the live technical twin corrects the distinct-target comparison requested after playtesting.
+catchrelease_introTurnIn3Distinct,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+$catchreleaseTargetMet","CatchReleaseCMD takeTarget
+CatchReleaseCMD giveOutfitter
+CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
+
+""Different pattern. Different fabric.""
+
+A finger traces one coherence plot, then the other.
+
+""That's enough to teach the instruments what you're looking at.""
+
+He closes both.
+
+""You're ready for the outfitter.""
+
+A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+10:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern.
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
