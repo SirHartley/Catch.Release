@@ -12,7 +12,6 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
@@ -59,10 +58,6 @@ public abstract class FishReward {
 
     public static FishReward shipBlueprint(String hullId) {
         return new Blueprint(Items.SHIP_BP, hullId);
-    }
-
-    public static FishReward commodity(String commodityId, int quantity) {
-        return new Commodity(commodityId, quantity);
     }
 
     public static FishReward specialItem(String itemId, String data) {
@@ -271,7 +266,10 @@ public abstract class FishReward {
         }
     }
 
-    /** Goods, for the ones who pay in what they happen to have. */
+    /**
+     * Old-save shell for jobs rolled before commodity rewards were removed. Kept under the same
+     * class name so XStream can load them, but paid out in the credit value the old roller used.
+     */
     public static class Commodity extends FishReward {
         public final String commodityId;
         public final int quantity;
@@ -283,17 +281,16 @@ public abstract class FishReward {
 
         @Override
         public String describe() {
-            CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(commodityId);
-
-            return quantity + " " + (spec == null ? commodityId : spec.getName().toLowerCase());
+            return new Credits(getCreditValue()).describe();
         }
 
         @Override
         public void grant() {
-            CargoAPI cargo = getPlayerCargo();
-            if (cargo == null) return;
+            new Credits(getCreditValue()).grant();
+        }
 
-            cargo.addCommodity(commodityId, quantity);
+        protected int getCreditValue() {
+            return Math.max(500, quantity * 120);
         }
     }
 }
