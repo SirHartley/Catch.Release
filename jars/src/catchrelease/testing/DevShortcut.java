@@ -79,12 +79,12 @@ public class DevShortcut implements CampaignInputListener {
 
             if (amt == 0) {
                 addEquipment();
-                mem.set(key, amt++);
+                mem.set(key, 1);
             }
 
             if (amt == 1) {
                 addBackgrounds();
-                mem.set(key, amt++);
+                mem.set(key, 2);
             }
 
             return;
@@ -105,6 +105,10 @@ public class DevShortcut implements CampaignInputListener {
             if (!backdrop.owned) continue;
             Backdrops.own(backdrop.id);
         }
+
+        Global.getSector().getCampaignUI().addMessage(
+                "Dev shortcut: All backdrops unlocked.",
+                Misc.getHighlightColor());
     }
 
     /** Everything the introduction would have granted, plus charts of every rung to test with. */
