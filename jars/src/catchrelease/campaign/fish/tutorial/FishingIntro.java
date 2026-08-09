@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.tutorial;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -458,7 +459,9 @@ public class FishingIntro {
         target.needsDeepGear = stage == FISH_TWO;
         target.anySpecies = stage == RODDED;
 
-        FishSpec spec = pickSpecies(stage);
+        CatchImplement implement = target.needsDeepGear
+                ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
+        FishSpec spec = pickSpecies(stage, system, implement);
         if (spec == null) return null;
         target.speciesIds.add(spec.id);
 
@@ -517,15 +520,22 @@ public class FishingIntro {
         return pick != null ? pick : any.pick();
     }
 
-    /** Commons all the way up: the ladder is in the gear and the water, not in the quarry. */
-    protected static FishSpec pickSpecies(int stage) {
+    /**
+     * Commons all the way up, drawn only from what the destination's real spawn table permits.
+     * The ladder is in the gear and the water, not in assigning an animal that cannot live there.
+     */
+    protected static FishSpec pickSpecies(int stage, StarSystemAPI system,
+                                          CatchImplement implement) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+        FishHabitat habitat = FishHabitat.of(system);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
             if (spec.rarity.ordinal() > FishRarity.UNCOMMON.ordinal()) continue;
 
-            picker.add(spec, spec.rarity == FishRarity.COMMON ? 4f : 1f);
+            picker.add(spec, spec.spawnWeight
+                    * (spec.rarity == FishRarity.COMMON ? 4f : 1f));
         }
 
         return picker.pick();
