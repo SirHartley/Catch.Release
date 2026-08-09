@@ -18,6 +18,7 @@ import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -70,6 +71,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_MET = "$catchreleaseTargetMet";
     public static final String TARGET_POND = "$catchreleaseTargetPond";
     public static final String TARGET_DEEP = "$catchreleaseTargetDeep";
+    public static final String TARGET_HERE = "$catchreleaseTargetHere";
 
     /**
      * Whether there is an errand at all, and whether it has a place attached.
@@ -83,6 +85,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
+    public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
 
     /** The chart requests, which are the ordinary work and nothing to do with the ladder. */
@@ -204,6 +207,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "skipIntro":
                 FishingIntro.skip(text(dialog));
                 return true;
+
+            case "rescueCastaway":
+                return rescueCastaway(dialog);
 
             //---- the hulk
             case "carryFisherProperty":
@@ -431,6 +437,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(STAGE, FishingIntro.getStage(), 0);
         local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
         local.set(DEEP_HANDOFF, FishingIntro.isDeepHandoffPending(), 0);
+        local.set(OUTFITTER, FishingIntro.hasGear(TutorialConstants.OUTFITTER), 0);
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
 
@@ -443,6 +450,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(TARGET_DEEP, rung != null && rung.needsDeepGear, 0);
         local.set(TARGET_SET, rung != null, 0);
         local.set(TARGET_PLACED, rung != null && rung.systemName != null, 0);
+        local.set(TARGET_HERE, rung != null && rung.systemId != null && target != null
+                && target.getContainingLocation() != null
+                && rung.systemId.equals(target.getContainingLocation().getId()), 0);
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
@@ -519,6 +529,19 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             fid.cleanUpBattle();
         }
 
+        dialog.dismiss();
+
+        return true;
+    }
+
+    /** Gives the stranded rating a berth, removes the one-use cache, and closes the dialog. */
+    protected boolean rescueCastaway(InteractionDialogAPI dialog) {
+        if (dialog == null) return false;
+
+        SectorEntityToken target = dialog.getInteractionTarget();
+        FishingIntro.point();
+
+        if (target != null) Misc.fadeAndExpire(target);
         dialog.dismiss();
 
         return true;
