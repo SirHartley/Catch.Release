@@ -387,9 +387,7 @@ $catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData s
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"Call $catchrelease_jobRef turnIn
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,"The job spends the fish, pays, and reports what happened in flags. The rows below read those flags and do the talking."
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,"The job opens the specimen picker; its callback spends the chosen fish, pays, and fires the rows below."
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -591,12 +589,8 @@ catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets 
 catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Tell them you are still looking.,
-catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,"Call $catchrelease_jobRef turnInLoud
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,"Call $catchrelease_jobRef turnInQuiet
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
+catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,Call $catchrelease_jobRef turnInLoud,,,
+catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,Call $catchrelease_jobRef turnInQuiet,,,
 catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -653,15 +647,9 @@ catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager
 catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
-catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,"Call $catchrelease_jobRef turnInFlat
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,"Call $catchrelease_jobRef turnInLeft
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
-catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,"Call $catchrelease_jobRef turnInRight
-FireBest catchreleaseJobPaid
-FireAll PopulateOptions",,,
+catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,Call $catchrelease_jobRef turnInFlat,,,
+catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,Call $catchrelease_jobRef turnInLeft,,,
+catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,Call $catchrelease_jobRef turnInRight,,,
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -831,8 +819,10 @@ catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_flee
 Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
-catchrelease_fqTurnInSel,DialogOptionSelected,$option == catchrelease_fqTurnIn,"Call $entity.catchrelease_jobRef turnIn
-CatchReleaseCMD leaveEncounter","The cargo goes across.
+catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
+!$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
+catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
+$catchreleaseFleetHandoffPaid",CatchReleaseCMD leaveEncounter,"The cargo goes across.
 
 Someone on the receiving ship checks the containers and calls something away from the microphone.
 
@@ -1131,7 +1121,10 @@ The Fisherman recognizes it before the manifest finishes updating.
 
 ""That's the one.""","0:catchrelease_workTurnIn:Hand it over
 100:catchrelease_fisherBack:Not yet",
-catchrelease_workTurnIn,DialogOptionSelected,$option == catchrelease_workTurnIn,CatchReleaseCMD turnInWork,"He studies the coherence plot, marks something in the ledger, and has the container taken aft.
+catchrelease_workTurnInPicker,DialogOptionSelected,"$option == catchrelease_workTurnIn
+!$catchreleaseWorkHandoffPaid",CatchReleaseCMD turnInWork,,,
+catchrelease_workTurnIn,DialogOptionSelected,"$option == catchrelease_workTurnIn
+$catchreleaseWorkHandoffPaid",,"He studies the coherence plot, marks something in the ledger, and has the container taken aft.
 
 ""Good.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25

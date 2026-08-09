@@ -10,6 +10,8 @@ import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -300,12 +302,51 @@ public abstract class FishJob extends HubMissionWithBarEvent
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
         if ("turnIn".equals(action)) {
-            handOver(dialog, memoryMap);
+            showHandOverPicker(dialog, memoryMap);
 
             return true;
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    /** Opens the exact-specimen handoff and resumes the sheet only after a valid selection. */
+    protected void showHandOverPicker(final InteractionDialogAPI dialog,
+                                      final Map<String, MemoryAPI> memoryMap) {
+
+        boolean opened = FishHandoffPicker.show(dialog, "Select specimens for the order", asks,
+                new FishHandoffPicker.Listener() {
+                    @Override
+                    public void picked(FishHandoffPicker.Selection selection) {
+                        if (handOver(selection, dialog, memoryMap)) {
+                            afterPickerPaid(dialog, memoryMap);
+                        } else {
+                            afterPickerCancelled(dialog, memoryMap);
+                        }
+                    }
+
+                    @Override
+                    public void cancelled() {
+                        afterPickerCancelled(dialog, memoryMap);
+                    }
+                });
+
+        if (!opened) afterPickerCancelled(dialog, memoryMap);
+    }
+
+    /** Default bar-job continuation; fleet errands override this with their encounter ending. */
+    protected void afterPickerPaid(InteractionDialogAPI dialog,
+                                   Map<String, MemoryAPI> memoryMap) {
+
+        FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+    }
+
+    /** Returns to the options that opened the picker without spending or advancing the job. */
+    protected void afterPickerCancelled(InteractionDialogAPI dialog,
+                                        Map<String, MemoryAPI> memoryMap) {
+
+        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
     }
 
     /**
@@ -345,6 +386,42 @@ public abstract class FishJob extends HubMissionWithBarEvent
         updateTokens(mem);
 
         if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
+    }
+
+    /** Picker-backed twin of {@link #handOver(InteractionDialogAPI, Map)}. */
+    protected boolean handOver(FishHandoffPicker.Selection selection, InteractionDialogAPI dialog,
+                               Map<String, MemoryAPI> memoryMap) {
+
+        MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+        if (selection == null) {
+            token(mem, PAID_KEY, false);
+            return false;
+        }
+
+        FishCatch offered = selection.getBestForFirstAsk();
+
+        beforePayment(offered, mem);
+
+        if (!selection.spend()) {
+            token(mem, PAID_KEY, false);
+            return false;
+        }
+
+        for (FishReward reward : rewards) reward.grant();
+        round++;
+
+        token(mem, PAID_KEY, true);
+        token(mem, BONUS_KEY, payBonus(offered));
+
+        boolean more = onDelivered();
+        if (more) setClock();
+
+        token(mem, MORE_KEY, more);
+        updateTokens(mem);
+
+        if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
+
+        return true;
     }
 
     /**

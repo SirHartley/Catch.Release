@@ -11,17 +11,23 @@ import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemKeys;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
+import java.util.Map;
 
 
 /**
@@ -377,6 +383,24 @@ public class FleetQuest extends FishJob {
     @Override
     protected String getDeliverFlag() {
         return DELIVER_FLAG;
+    }
+
+    @Override
+    protected void afterPickerPaid(InteractionDialogAPI dialog,
+                                   Map<String, MemoryAPI> memoryMap) {
+
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+        token(local, "$option", "catchrelease_fqTurnIn");
+        token(local, "$catchreleaseFleetHandoffPaid", true);
+
+        FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
+    }
+
+    @Override
+    protected void afterPickerCancelled(InteractionDialogAPI dialog,
+                                        Map<String, MemoryAPI> memoryMap) {
+
+        FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestTurnIn");
     }
 
     /**

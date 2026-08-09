@@ -70,7 +70,7 @@ public class KidsJob extends FishJob {
         if ("turnInLoud".equals(action) || "turnInQuiet".equals(action)) {
             toLoud = "turnInLoud".equals(action);
 
-            handOver(dialog, memoryMap);
+            showHandOverPicker(dialog, memoryMap);
 
             return true;
         }

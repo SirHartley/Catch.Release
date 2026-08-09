@@ -172,7 +172,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 406 logical rules. Its supplied dialogue is kept verbatim; the additional
+The current overhaul is 408 logical rules. Its supplied dialogue is kept verbatim; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
@@ -271,7 +271,8 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 
 | File | What it does |
 |---|---|
-| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. A `FishAsker`, so its asks reach the wanted-fish marks |
+| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. Hand-over opens an asynchronous exact-specimen picker, then fires the existing payout rows only after the chosen fish have been spent. A `FishAsker`, so its asks reach the wanted-fish marks |
+| `FishHandoffPicker.java` | Builds the eligible loose-fish cargo, validates an exact non-overlapping assignment against every ask (including same-species orders), and spends only the specimens the player selected |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop and Blueprint. LocationData carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff; the retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
 | `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on survey rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints |
@@ -304,7 +305,7 @@ Jobs hung on a hull that was already out there, which then has to still be there
 
 | File | What it does |
 |---|---|
-| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()` |
+| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; `take()` supplants the hull with a copy, then `mark()` and `hold()`. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
 | `FleetQuestSpawner.java` | Hangs an offer on a hull already in the player's system; spawns nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep, and the trade's own boat would be copied away by accepting it. Rare on purpose: one active at a time, 7% a check, 45-day cooldown |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
@@ -338,7 +339,7 @@ explains how.
 | `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the survey counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What survey data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
-| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Its `QuestIntel` is a `FishAsker` and carries the species' own icon and the bullets vanilla's mission notes carry |
+| `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Hand-over uses the shared exact-specimen picker. Its `QuestIntel` is a `FishAsker` and carries the species' own icon and the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
@@ -432,7 +433,7 @@ Fish in cargo.
 
 | File | What it does |
 |---|---|
-| `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes |
+| `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes — and `unbox`, which expands crates and the pile into independently selectable specimens before a hand-off picker |
 | `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle |
 | `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile |
 | `FishPileItemPlugin.java` | Every fish aboard on one line; right-click breaks it back into one crate per species |

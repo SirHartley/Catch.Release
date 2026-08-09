@@ -93,6 +93,41 @@ public class FishItems {
         return out;
     }
 
+    /**
+     * Opens every crate and pile in a cargo hold into loose specimen items.
+     * <p>
+     * Cargo pickers select stacks, not objects inside a special item's encoded payload. Expanding
+     * containers before opening one is what makes each specimen independently selectable. The
+     * change is intentionally kept if the picker is cancelled: the player has asked for a screen
+     * where individual fish can be managed, and silently re-boxing them would hide them again.
+     *
+     * @return number of specimens taken out of containers
+     */
+    public static int unbox(CargoAPI cargo) {
+        if (cargo == null) return 0;
+
+        int opened = 0;
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!isContainer(data)) continue;
+
+            List<FishCatch> contents = read(data);
+            int containers = (int) stack.getSize();
+
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
+
+            for (int i = 0; i < containers; i++) {
+                for (FishCatch entry : contents) {
+                    cargo.addSpecial(toItem(entry), 1);
+                    opened++;
+                }
+            }
+        }
+
+        return opened;
+    }
+
     /** What a stack of fish is worth at base value, crates included. */
     public static float getStackValue(CargoStackAPI stack) {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
