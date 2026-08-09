@@ -182,6 +182,10 @@ During the tutorial the intro option is the single route for both target reminde
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
+Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
+the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
+bar jobs, their duel/ring choice variants, fleet jobs and Fisherman work highlight their hand-off
+options without changing the dialogue or callback routing behind them.
 Opening the bar rating's event sets `$global.catchrelease_metRating`; the two first-contact entry
 families use that flag to include the supplied rating-specific ROD option only after that meeting.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,

@@ -383,7 +383,7 @@ catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
+$catchreleaseHasFish",SetOptionColor catchrelease_jobTurnIn highlight,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
@@ -584,7 +584,8 @@ Then the quieter one empties another pocket onto the table.
 The total is $catchreleaseReward.",,
 catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,"catchrelease_duelLoud:Give the better one to the loud one.
+$catchreleaseHasFish","SetOptionColor catchrelease_duelLoud highlight
+SetOptionColor catchrelease_duelQuiet highlight",,"catchrelease_duelLoud:Give the better one to the loud one.
 catchrelease_duelQuiet:Give the better one to the quiet one.","Which child gets which fish. The choice cannot be got wrong - the extra is paid for the specimen, not for the guess."
 catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
@@ -641,7 +642,9 @@ $catchreleaseFoe shrugs.
 No payment follows.",,
 catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",,,"catchrelease_ringFlat:Hand them over and take the fee.
+$catchreleaseHasFish","SetOptionColor catchrelease_ringFlat highlight
+SetOptionColor catchrelease_ringLeft highlight
+SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Hand them over and take the fee.
 catchrelease_ringLeft:Put the fee on $catchreleaseLeft's fish.
 catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
 catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
@@ -817,7 +820,7 @@ FireAll CatchReleaseFleetQuestTurnIn","The fleet is still where you left it.
 They still need $entity.catchrelease_fleetQuestAsk.",,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
-$catchreleaseHasFish",,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
+$catchreleaseHasFish",SetOptionColor catchrelease_fqTurnIn highlight,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
@@ -1041,7 +1044,12 @@ He gestures away from it.
 ""Come alongside.""",,
 catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage < 6",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+$catchreleaseStage < 6
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+catchrelease_fisherOptIntroHandIn,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage < 6
+$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording and quest-yellow treatment only when the current target is aboard.
 catchrelease_fisherOptShop,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
@@ -1116,7 +1124,7 @@ catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,Catc
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
 CatchReleaseCMD tokens
 $catchreleaseWork
-$catchreleaseWorkMet",,"The requested specimen is transferred across.
+$catchreleaseWorkMet",SetOptionColor catchrelease_workTurnIn highlight,"The requested specimen is transferred across.
 
 The Fisherman recognizes it before the manifest finishes updating.
 
