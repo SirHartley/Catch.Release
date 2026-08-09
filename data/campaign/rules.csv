@@ -1465,7 +1465,7 @@ Another moment.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""They call you Baha, in the registry.""",
+$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""Do you have a name?""",
 catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"""Registry says Baha.""
 
 The Fisherman takes a drink.

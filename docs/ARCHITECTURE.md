@@ -179,6 +179,8 @@ The rupture-interception twin for `catchrelease_introCurious` omits only the fin
 `Come alongside` sentence because the interception greeting has already delivered that same line.
 The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
 gated on stage 6, while the question rows retain their own information-release gates.
+Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
+rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
