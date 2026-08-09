@@ -5,6 +5,7 @@ import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.abilities.rod.scripts.RoamingDroneSwarmScript;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.skillshot.SkillshotFramework;
@@ -125,8 +126,13 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         //to do until landed. Checked before pond lookup - a roaming screen has no pond nearby
         if (swarm != null) return !swarm.isRecalling() && disableFrames <= 0;
 
+        SectorEntityToken pond = getPond();
+
+        //an occupied rupture is the camp's leverage: leaving is allowed, fishing is not
+        if (CampedSpot.isPondBlocked(pond)) return false;
+
         //roaming needs no pond; otherwise falls back to requiring a pond in range
-        if (!isRoamingAvailable() && getPond() == null) return false;
+        if (!isRoamingAvailable() && pond == null) return false;
 
         return super.isUsable();
     }
@@ -172,10 +178,15 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
                 + " whatever they have found down there.", pad, highlight, "breach lamps");
 
         if (!Global.CODEX_TOOLTIP_MODE) {
+            SectorEntityToken pond = getPond();
+
             //mirrors the press's own decision order
-            if (isRoamingAvailable()) {
+            if (CampedSpot.isPondBlocked(pond)) {
+                tooltip.addPara("A fleet is sitting on this rupture. The ROD cannot be deployed here.",
+                        Misc.getNegativeHighlightColor(), pad);
+            } else if (isRoamingAvailable()) {
                 tooltip.addPara("The breach lamps are lit. The drones will roam.", highlight, pad);
-            } else if (getPond() == null) {
+            } else if (pond == null) {
                 tooltip.addPara("Your fleet is not currently near a pond rupture.", Misc.getNegativeHighlightColor(), pad);
             }
 

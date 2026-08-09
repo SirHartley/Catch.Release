@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -43,6 +44,9 @@ public class CampedSpot {
 
     /** Set by the conversation once they have agreed to leave, either way. */
     public static final String CLEARED_FLAG = "$catchrelease_campCleared";
+
+    /** Set on the rupture while its camper remains, for the ROD's fishing lock. */
+    public static final String POND_BLOCKED_FLAG = "$catchrelease_campedPond";
 
     /** How far off the water they sit - close enough to be sitting on it, not close enough to be in it. */
     public static final float OFFSET = 350f;
@@ -97,6 +101,7 @@ public class CampedSpot {
         mem.set(WHO_KEY, type.token);
         mem.set(BRIBE_KEY, type.getBribe(size));
         mem.set(BRIBE_TEXT_KEY, Misc.getWithDGS(type.getBribe(size)));
+        mem.set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
 
         //they came here to sit on this, and a fleet that wandered off after the first passing
         //freighter would make the job describe something that is no longer true
@@ -104,9 +109,41 @@ public class CampedSpot {
         mem.set(MemFlags.MEMORY_KEY_NO_JUMP, true);
 
         fleet.clearAssignments();
-        fleet.addAssignment(FleetAssignment.ORBIT_AGGRESSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
+        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
 
         return fleet;
+    }
+
+    /**
+     * Keeps a camper on its water without turning a refused conversation into an inescapable
+     * pursuit. The assignment repair also updates campers carried by older saves.
+     */
+    public static void allowPlayerToLeave(CampaignFleetAPI fleet, SectorEntityToken pond) {
+        if (fleet == null) return;
+
+        fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
+
+        if (fleet.getBattle() != null || fleet.getAI() == null) return;
+
+        FleetAssignmentDataAPI current = fleet.getAI().getCurrentAssignment();
+        if (current == null || current.getAssignment() != FleetAssignment.ORBIT_AGGRESSIVE) return;
+
+        fleet.clearAssignments();
+        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
+    }
+
+    public static void setPondBlocked(SectorEntityToken pond, boolean blocked) {
+        if (pond == null) return;
+
+        if (blocked) {
+            pond.getMemoryWithoutUpdate().set(POND_BLOCKED_FLAG, true);
+        } else {
+            pond.getMemoryWithoutUpdate().unset(POND_BLOCKED_FLAG);
+        }
+    }
+
+    public static boolean isPondBlocked(SectorEntityToken pond) {
+        return pond != null && pond.getMemoryWithoutUpdate().getBoolean(POND_BLOCKED_FLAG);
     }
 
     /**

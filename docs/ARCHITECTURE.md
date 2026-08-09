@@ -296,7 +296,7 @@ A fisher whose one good rupture has somebody parked on it. Three bar events, thr
 | `CampedSpotJob.java` | The shared job. Two conditions rather than one — clearing the camp is the work, the specimen is only the receipt. Asks `CampedSpot.isGone` and nothing more specific, so it never has an opinion about how the player did it. The offer only chooses the rupture and terms; the physical camper, pond claim and planted specimen are created on acceptance so discarded bar-event rolls cannot leave fleets behind |
 | `CampType.java` | Who is out there: pirates (there for money, will take money), mercenaries (paid to be there, and say so), pathers (not selling anything, and the bribe does the least good). Mercenary rather than independent deliberately — see the note in the file |
 | `CampSize.java` | Small, medium, large, and the words the fisher uses for each. The estimate is honest; it is the only warning the player gets |
-| `CampedSpot.java` | Spawns the camper on the rupture and holds it there. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
+| `CampedSpot.java` | Spawns the camper on the rupture and holds it there without forcing pursuit: the fleet remains attackable, but uses vanilla's allow-disengage flag and a passive hold. The rupture carries a separate live camp flag that blocks the ROD only until the camper is gone. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
 | `PirateCampJob.java` · `MercCampJob.java` · `PatherCampJob.java` | One per bar event, so each fisher gets their own pitch |
 
 ### `campaign/fish/jobs/fleet`
@@ -541,7 +541,7 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 |---|---|
 | `FishingRigs.java` | One answer to "is any rig running" - lamps lit, swarm out, or a line in the water |
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |

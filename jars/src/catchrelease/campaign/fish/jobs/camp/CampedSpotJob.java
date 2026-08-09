@@ -115,6 +115,7 @@ public abstract class CampedSpotJob extends FishJob {
         camper = CampedSpot.spawn(getType(), size, pond, random());
         if (camper == null) return;
 
+        CampedSpot.setPondBlocked(pond, true);
         QuestPond.claim(pond, REF_KEY);
         QuestPond.placeMote(pond, speciesId, REF_KEY);
 
@@ -191,8 +192,15 @@ public abstract class CampedSpotJob extends FishJob {
     protected void advanceImpl(float amount) {
         super.advanceImpl(amount);
 
-        if (cleared || !CampedSpot.isGone(camper)) return;
+        if (cleared) return;
 
+        if (!CampedSpot.isGone(camper)) {
+            CampedSpot.allowPlayerToLeave(camper, pond);
+            CampedSpot.setPondBlocked(pond, true);
+            return;
+        }
+
+        CampedSpot.setPondBlocked(pond, false);
         cleared = true;
         camper = null;
 
@@ -224,6 +232,7 @@ public abstract class CampedSpotJob extends FishJob {
         CampedSpot.despawn(camper);
         camper = null;
 
+        CampedSpot.setPondBlocked(pond, false);
         QuestPond.release(pond, REF_KEY);
     }
 
