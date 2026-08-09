@@ -1889,7 +1889,7 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 
 The Fisherman sends the mark.
 
-""One will do. Don't make a profession of the first trip.""",,
+""One will do. Don't make a profession of the first trip.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
@@ -1901,7 +1901,7 @@ He forwards the system data.
 
 A pause.
 
-""Don't stay over the rupture longer than you need.""",,
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
@@ -1911,14 +1911,14 @@ $catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTar
 
 He sends the survey mark.
 
-""That one I want clean.""",,
+""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Both survey targets.""
 
 The Fisherman sends the records again.
 
-""Use the planner. Bring me one of each.""",,
+""Use the planner. Bring me one of each.""",100:catchrelease_fisherBack:Continue,
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
