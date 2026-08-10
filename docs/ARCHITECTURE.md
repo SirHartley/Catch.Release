@@ -179,8 +179,9 @@ later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
-The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
-gated on stage 6, while the question rows retain their own information-release gates.
+The Fisherman's `Ask about something else` submenu opens at stage 2, in the same `giveRod()` call
+that assigns the first tutorial target. The question rows retain their own information-release
+gates, so later subjects do not appear merely because the menu itself is available.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
 and answered topics share the same submenu without a separate repeat-question state. Two dedicated
 rules triggers stream every relevant unasked topic first and every answered topic afterward; the

@@ -1525,7 +1525,7 @@ catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,,,
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,,60:catchrelease_fisherAsk:Ask about something else,
+$catchreleaseStage >= 2",,,60:catchrelease_fisherAsk:Ask about something else,
 catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskPage = 0 0
 $menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions","They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
