@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.jobs.fleet;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.memory.upgrades.StatIds;
@@ -294,7 +295,9 @@ public class FleetQuest extends FishJob {
         if (ask.minRarity != null && ask.minRarity.ordinal() >= FishRarity.RARE.ordinal()) {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);
             int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
-            if (targetLevel > 0 && !ShopSchematics.has(stat, targetLevel)) {
+            String key = ShopSchematics.getKey(stat == null ? null : stat.id, targetLevel);
+            if (targetLevel > 0 && !ShopSchematics.has(stat, targetLevel)
+                    && !FishRewardRoller.isSchematicReserved(key)) {
                 addReward(FishReward.upgradeSchematic(stat.id, targetLevel));
             }
         }

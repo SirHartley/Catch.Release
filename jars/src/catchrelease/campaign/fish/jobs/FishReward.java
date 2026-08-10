@@ -47,6 +47,11 @@ public abstract class FishReward {
         return false;
     }
 
+    /** Stable identity for quest-pool reservation; null for rewards that are not schematics. */
+    public String getSchematicKey() {
+        return null;
+    }
+
     public static FishReward credits(int amount) {
         return new Credits(amount);
     }
@@ -208,6 +213,11 @@ public abstract class FishReward {
         public boolean hasOfferDetails() {
             return true;
         }
+
+        @Override
+        public String getSchematicKey() {
+            return ShopSchematics.getKey(statId, targetLevel);
+        }
     }
 
     /** A purchase permission for one outfitter modifier; the hardware itself is still bought. */
@@ -245,6 +255,11 @@ public abstract class FishReward {
         @Override
         public boolean hasOfferDetails() {
             return true;
+        }
+
+        @Override
+        public String getSchematicKey() {
+            return ShopSchematics.getKey(tackle);
         }
     }
 
