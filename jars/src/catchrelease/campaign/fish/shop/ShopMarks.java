@@ -75,7 +75,7 @@ public class ShopMarks {
 
     /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
     public static boolean isMarkable(ShopEntry entry) {
-        if (entry == null) return false;
+        if (entry == null || entry.isLocked()) return false;
 
         ShopPricing.Price price = entry.getPrice();
 
@@ -96,6 +96,7 @@ public class ShopMarks {
             if (key.startsWith("stat:")) {
                 UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
                 if (stat == null || ShopPricing.isMaxed(stat)) continue;
+                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
 
                 price = ShopPricing.getPrice(stat);
             } else if (key.startsWith("tackle:")) {
@@ -110,6 +111,7 @@ public class ShopMarks {
                 }
 
                 if (TackleManager.isOwned(tackle)) continue;
+                if (!ShopSchematics.has(tackle)) continue;
 
                 price = ShopPricing.getPrice(tackle);
             }
@@ -222,6 +224,7 @@ public class ShopMarks {
             if (key.startsWith("stat:")) {
                 UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
                 if (stat == null || ShopPricing.isMaxed(stat)) continue;
+                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(stat);
                 if (price != null && price.fish != null) {
@@ -239,6 +242,7 @@ public class ShopMarks {
                 }
 
                 if (TackleManager.isOwned(tackle)) continue;
+                if (!ShopSchematics.has(tackle)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(tackle);
                 if (price != null && price.fish != null) {
