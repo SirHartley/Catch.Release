@@ -297,6 +297,12 @@ public class FishConstants {
     /** Played once when the treasure card begins its end-of-catch tally. */
     public static final String SOUND_TREASURE_SUCCESS = "";
 
+    /** Played on each edge where the catch bar begins covering an active treasure. */
+    public static final String SOUND_TREASURE_HOVER = "";
+
+    /** Played once when the currently tracked treasure is fully taken. */
+    public static final String SOUND_TREASURE_GOT = "";
+
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
 
