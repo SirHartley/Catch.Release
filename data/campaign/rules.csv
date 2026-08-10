@@ -1113,13 +1113,15 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
-!$catchreleaseDeepHandoff",,,60:catchrelease_intro_fourJumps:"I just left you in another system.",
+!$catchreleaseDeepHandoff
+!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:"I just left you in another system.",
 catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
-!$catchreleaseDeepHandoff",,,70:catchrelease_introSameHull:"Is this the same ship?",
+!$catchreleaseDeepHandoff
+!$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:"Is this the same ship?",
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
@@ -2178,13 +2180,13 @@ The Fisherman is cleaning something narrow and metallic with a rag.
 He checks the local plot.
 
 ""Rupture's holding. Good day for it.""",100:catchrelease_fisherBack:Ask about the target,
-catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,,"""You left a boat there.""
+catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,$global.catchrelease_fisherAsked_fourJumps = true 0,"""You left a boat there.""
 
 The Fisherman folds the rag once.
 
 ""This one's here.""","0:catchrelease_introPressLocation:""That does not answer the question.""
 100:catchrelease_fisherBack:Let it go",
-catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,,"""If the registry asks.""
+catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,$global.catchrelease_fisherAsked_sameHull = true 0,"""If the registry asks.""
 
 He looks back toward the plot.
 

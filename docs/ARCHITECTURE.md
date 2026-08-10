@@ -190,7 +190,9 @@ During the tutorial the intro option is the single route for both target reminde
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
 When the stage-3 target is in the current system, the two continuity questions are root Fisherman
 menu options under the same target and deep-handoff gates that formerly nested them under that
-reminder; their existing answer chains return through `catchrelease_fisherBack` to that root menu.
+reminder. Each answer writes its own permanent campaign asked flag as it opens, removing only that
+root option thereafter; neither question enters the post-tutorial `Ask again` menu. Their existing
+answer chains return through `catchrelease_fisherBack` to the root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
 Landing treasure with a fish records the first bycatch recovery; the next ordinary Fisherman hail
