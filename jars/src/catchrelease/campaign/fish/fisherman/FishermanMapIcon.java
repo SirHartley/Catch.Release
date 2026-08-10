@@ -31,6 +31,9 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
 
+    private static final String SERVICE_LINE =
+            "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
+
     /**
      * Finds this boat's one current-location mark, removing duplicate survivors from older saves,
      * or creates it when the player has come alongside a boat with no mark yet.
@@ -155,7 +158,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (fleet == null) return;
 
         tooltip.addTitle(fleet.getNameWithFaction());
-        tooltip.addPara("Fishing. Trades in range data, buys a catch, and carries an outfitter.",
-                Misc.getGrayColor(), 10f);
+        int band = FishermanIdentity.getBand(FishermanIdentity.getDrift(fleet));
+        tooltip.addPara(FishermanIdentity.corrupt(SERVICE_LINE, band), Misc.getGrayColor(), 10f);
     }
 }

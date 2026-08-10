@@ -1023,7 +1023,7 @@ talking to hangs off it. `FishermanIdentity` keeps the `PersonAPI` in sector
 memory and hands the same object back at every spawn, and the encounter shows the portrait rather
 than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
 `getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
-figure, not a specimen's jittered one), and the boat's name, the greeting, and the line under it all
+figure, not a specimen's jittered one), and the boat's name, the greeting, and its map-tooltip line all
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
 
