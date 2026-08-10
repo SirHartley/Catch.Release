@@ -1037,9 +1037,7 @@ A metallic impact follows from your left audio channel, though the trawler lies 
 He looks back to you.
 
 ""Captain. What can I do for you?""",,
-catchrelease_fisherBycatch,OpenCommLink,"$entity.catchrelease_fisherman score:1080
-CatchReleaseCMD tokens
-$catchreleaseBycatchPending","CatchReleaseCMD ackBycatch
+catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBycatch,"CatchReleaseCMD ackBycatch
 $menuState = catchreleaseFisher 0
 FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached to your catch log.
 
@@ -1108,6 +1106,9 @@ $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
+catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
 catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3

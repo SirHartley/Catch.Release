@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 452 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 453 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -195,8 +195,10 @@ root option thereafter; neither question enters the post-tutorial `Ask again` me
 answer chains return through `catchrelease_fisherBack` to the root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
-Landing treasure with a fish records the first bycatch recovery; the next ordinary Fisherman hail
-uses a higher-scored one-time greeting to name it, then consumes the flag and opens the usual menu.
+Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
+offers a highlighted one-time question about what came up with the catch. Selecting it plays the
+existing explanation, consumes the pending state, and returns to the usual menu without entering
+`Ask again`.
 The safety interception remains higher-scored and therefore still takes precedence.
 Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
@@ -393,7 +395,7 @@ explains how.
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language |
 | `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
-| `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the Fisherman has named it, then permanently retires the greeting |
+| `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose and counts down against the rumor's own timestamp. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
