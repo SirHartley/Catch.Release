@@ -115,6 +115,29 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** Whether the Fisherman still needs to name the player's first recovered treasure. */
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
+    /** Whether any completed Fisherman topic belongs in the repeat-question menu. */
+    public static final String FISHER_ASK_AGAIN = "$catchreleaseFisherAskAgain";
+
+    /** Whether the repeat-question menu has a second page of completed topics. */
+    public static final String FISHER_ASK_AGAIN_PAGE_ONE = "$catchreleaseFisherAskAgainPageOne";
+
+    /**
+     * Campaign-long records of the repeatable Fisherman topics the player has actually opened.
+     * <p>
+     * The sheet writes these only on the answer rows, rather than on option production, so a
+     * newly-unlocked prompt remains new until the player has seen its answer.
+     */
+    protected static final String[] FISHER_ASKED_TOPICS = {
+            "$catchrelease_fisherAsked_howLong",
+            "$catchrelease_fisherAsked_baha",
+            "$catchrelease_fisherAsked_whyOut",
+            "$catchrelease_fisherAsked_looking",
+            "$catchrelease_fisherAsked_patterns",
+            "$catchrelease_fisherAsked_deepWater",
+            "$catchrelease_fisherAsked_fishBack",
+            "$catchrelease_fisherAsked_largest"
+    };
+
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
 
@@ -481,6 +504,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
+        MemoryAPI global = Global.getSector().getMemoryWithoutUpdate();
+        local.set(FISHER_ASK_AGAIN, hasAskedFisherTopic(global), 0);
+        local.set(FISHER_ASK_AGAIN_PAGE_ONE,
+                global.getBoolean(FISHER_ASKED_TOPICS[6])
+                        || global.getBoolean(FISHER_ASKED_TOPICS[7]), 0);
+
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
@@ -515,6 +544,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             local.set(WORK_PAY, Misc.getDGSCredits(work.credits), 0);
             local.set(WORK_POND, work.atPond, 0);
         }
+    }
+
+    /** True once any repeatable Fisherman topic has been answered in this campaign. */
+    protected boolean hasAskedFisherTopic(MemoryAPI global) {
+        for (String topic : FISHER_ASKED_TOPICS) {
+            if (global.getBoolean(topic)) return true;
+        }
+        return false;
     }
 
     //---------------------------------------------------------------- panels

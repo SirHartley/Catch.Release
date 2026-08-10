@@ -1475,14 +1475,28 @@ catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,60:catchrelease_fisherAsk:Ask about something else,
-catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$menuState = catchreleaseFisherAsk 0
+catchrelease_fisherOptAskAgain,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseFisherAskAgain",,,80:catchrelease_fisherAskAgain:Ask again,
+catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskAgainReturn = false 0
+$catchreleaseFisherAskAgainPage = 0 0
+$menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions","They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
-catchrelease_fisherAskBack,DialogOptionSelected,$option == catchrelease_fisherAskBack,"$menuState = catchreleaseFisherAsk 0
+catchrelease_fisherAskBack,DialogOptionSelected,"$option == catchrelease_fisherAskBack
+!$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainReturn,DialogOptionSelected,"$option == catchrelease_fisherAskBack
+$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAskAgain 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgain,DialogOptionSelected,$option == catchrelease_fisherAskAgain,"$catchreleaseFisherAskAgainReturn = true 0
+$catchreleaseFisherAskAgainPage = 0 0
+$menuState = catchreleaseFisherAskAgain 0
 FireAll PopulateOptions",,,
 catchrelease_fisherOptAsk_howLong,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
-catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,,"""Fishing?""
+$catchreleaseStage >= 1
+!$global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true 0,"""Fishing?""
 
 He thinks about it.
 
@@ -1494,8 +1508,9 @@ Another moment.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""Do you have a name?""",
-catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"""Registry says Baha.""
+$catchreleaseStage >= 1
+!$global.catchrelease_fisherAsked_baha",,,"10:catchrelease_ask_baha:""Do you have a name?""",
+catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,$global.catchrelease_fisherAsked_baha = true 0,"""Registry says Baha.""
 
 The Fisherman takes a drink.
 
@@ -1507,8 +1522,9 @@ He sets the mug down.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_why0ut,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
-catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Fabric's thick where people are.""
+$catchreleaseStage >= 1
+!$global.catchrelease_fisherAsked_whyOut",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
+catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,$global.catchrelease_fisherAsked_whyOut = true 0,"""Fabric's thick where people are.""
 
 He presses one palm flat against the table.
 
@@ -1520,8 +1536,9 @@ He lifts the hand.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 2",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
-catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,,"""They look.""
+$catchreleaseStage >= 2
+!$global.catchrelease_fisherAsked_looking",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
+catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,$global.catchrelease_fisherAsked_looking = true 0,"""They look.""
 
 He turns a control unit over in his hands.
 
@@ -1538,8 +1555,9 @@ He sets it down.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
-catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Ghost is an old spacer word. Pattern is what the instruments call it when the crossing gives them something they can measure.""
+$catchreleaseStage >= 3
+!$global.catchrelease_fisherAsked_patterns",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true 0,"""Ghost is an old spacer word. Pattern is what the instruments call it when the crossing gives them something they can measure.""
 
 He scratches at the stubble under his jaw.
 
@@ -1550,8 +1568,9 @@ catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_pa
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
-catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""Not water.""
+$catchreleaseStage >= 4
+!$global.catchrelease_fisherAsked_deepWater",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,$global.catchrelease_fisherAsked_deepWater = true 0,"""Not water.""
 
 There is no irritation in the correction.
 
@@ -1563,8 +1582,9 @@ He looks at you.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 5",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
-catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,,"""Not with any tackle I'd sell you.""
+$catchreleaseStage >= 5
+!$global.catchrelease_fisherAsked_fishBack",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,$global.catchrelease_fisherAsked_fishBack = true 0,"""Not with any tackle I'd sell you.""
 
 Behind him, a crewman reaches through a closed locker door and removes a wrench.
 
@@ -1572,12 +1592,51 @@ The Fisherman goes on cleaning the control unit.","0:catchrelease_fisherAskBack:
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
-catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
+$catchreleaseStage >= 6
+!$global.catchrelease_fisherAsked_largest",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true 0,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherAskAgain_howLong,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_fisherAskAgain_baha,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_baha",,,"10:catchrelease_ask_baha:""Do you have a name?""",
+catchrelease_fisherAskAgain_whyOut,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_whyOut",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
+catchrelease_fisherAskAgain_looking,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_looking",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
+catchrelease_fisherAskAgain_patterns,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_patterns",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_fisherAskAgain_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_deepWater",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_fisherAskAgain_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_fishBack",,,"0:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_fisherAskAgain_largest,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_largest",,,"10:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_fisherOptAskAgainNext,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+CatchReleaseCMD tokens
+$catchreleaseFisherAskAgainPageOne",,,80:catchrelease_fisherAskAgainNext:Next,
+catchrelease_fisherOptAskAgainPrevious,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1",,,80:catchrelease_fisherAskAgainPrevious:Previous,
+catchrelease_fisherOptAskAgainBack,PopulateOptions,$menuState == catchreleaseFisherAskAgain,,,100:catchrelease_fisherAskAgainBack:Back,
+catchrelease_fisherAskAgainNext,DialogOptionSelected,$option == catchrelease_fisherAskAgainNext,"$catchreleaseFisherAskAgainPage = 1 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainPrevious,DialogOptionSelected,$option == catchrelease_fisherAskAgainPrevious,"$catchreleaseFisherAskAgainPage = 0 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainBack,DialogOptionSelected,$option == catchrelease_fisherAskAgainBack,"$catchreleaseFisherAskAgainReturn = false 0
+$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions",,,
 catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:I've heard enough.,"The cut link is vanilla's convOptionLeave, a PopulateOptions row conditioned on $isPerson alone - so every FireAll PopulateOptions in this conversation collects it, this submenu included. The main menu drops it in catchrelease_fisherOptLeave and this is the same job for the same reason: the boat carries its own way out, and vanilla's lands the player back on the engage screen of a fleet nobody is fighting. Scripts run after the panel has been cleared and repopulated, so removing here removes what was just added."
 catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
