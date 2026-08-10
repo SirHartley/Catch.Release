@@ -532,7 +532,7 @@ The sector-map fish filter.
 
 | File | What it does |
 |---|---|
-| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list. The planner borrows the sidebar's slot, so `paneStanding` tracks whether the sidebar is actually on screen - `applied` only records that `activate()` ran, and a failed hand-back would otherwise never reconcile |
+| `FishMapFilterScript.java` | Inserts the filter button, resizes the map, mounts pane, overlay, planner popup; feeds the route's arrows to the map's own arrow list. It also stages codex-to-map requests until the codex dismissal callback has cleared the overlay, then applies the parked species focus when the real map screen attaches. The planner borrows the sidebar's slot, so `paneStanding` tracks whether the sidebar is actually on screen - `applied` only records that `activate()` ran, and a failed hand-back would otherwise never reconcile |
 | `FishMapPane.java` | The side panel: planner button, search, type chips, species list, the coherence toggle on its floor |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
@@ -556,7 +556,7 @@ Codex pages for species.
 | File | What it does |
 |---|---|
 | `FishCodex.java` | Installs the category and per-species entries; opens the codex on a species |
-| `FishCodexEntry.java` | One page: description, catch data, record, location, art, and the jump to the sector map |
+| `FishCodexEntry.java` | One page: description, catch data, record, location, art, and a staged jump to the pre-filtered hyperspace map |
 
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
