@@ -1184,7 +1184,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
 
 He sends over a range entry.
 
@@ -1198,6 +1198,9 @@ He names the payment: $catchreleaseWorkPay.
 
 ""And I'll carry another chart on the shelf for you afterward.""","0:catchrelease_workTake:Take the work
 100:catchrelease_fisherBack:Not now",
+catchrelease_workOfferNone,CatchReleaseWorkOffer,!$catchreleaseWorkRolled,,"The Fisherman works through the available range entries, then closes the list.
+
+""Nothing I can put a mark on right now.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,CatchReleaseCMD takeWork,The system is added to your intel log.,100:catchrelease_fisherBack:Continue,
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
 CatchReleaseCMD tokens

@@ -103,6 +103,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_WHERE = "$catchreleaseWorkWhere";
     public static final String WORK_PAY = "$catchreleaseWorkPay";
     public static final String WORK_POND = "$catchreleaseWorkPond";
+    public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
 
     /** Whether there is anything on the shelf, and anything in the hold. */
     public static final String SHELF = "$catchreleaseShelf";
@@ -848,16 +849,19 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected static FishermanQuest.Saved pending;
 
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
+        if (local != null) local.set(WORK_ROLLED, false, 0);
+
         pending = FishermanQuest.roll();
         if (pending == null) return false;
 
-        MemoryAPI local = memoryMap.get("local");
         if (local == null) return true;
 
         local.set(WORK_FISH, FishermanQuest.describe(pending), 0);
         local.set(WORK_WHERE, pending.systemName, 0);
         local.set(WORK_PAY, Misc.getDGSCredits(pending.credits), 0);
         local.set(WORK_POND, pending.atPond, 0);
+        local.set(WORK_ROLLED, true, 0);
 
         return true;
     }

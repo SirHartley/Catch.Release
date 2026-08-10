@@ -1042,8 +1042,12 @@ machinery and there is nothing for a sheet to say about it.
 
 **A work offer rolls before it speaks.** `catchrelease_workOffer` only rolls the pending chart request
 and fires `CatchReleaseWorkOffer`; `catchrelease_workOfferText` then reads the saved fish, place and
-payment tokens. Keeping the supplied offer text on that second row means the range has been selected
-before token replacement, rather than printing the fallback token names from before the roll. Its
+payment tokens after the roller has set the explicit `$catchreleaseWorkRolled` success token. RC8's
+rules parser does not implement `has` as a key-existence operator, so testing the fish-name string
+itself can never select an offer row. A mutually exclusive failure row says there is no marked work
+and returns to business, so an exhausted roller cannot leave an empty panel. Keeping the supplied
+offer text on the success row means the range has been selected before token replacement, rather
+than printing the fallback token names from before the roll. Its
 `SetTextHighlights` call colours those three supplied terms, while the active-work reminder highlights
 only its fish and place: it never makes a second promise about payment. The root menu keeps the
 `catchrelease_fisherWork` option id in both states, but its mutually exclusive producers label it
