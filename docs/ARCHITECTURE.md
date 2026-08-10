@@ -481,7 +481,7 @@ The outfitter: upgrades and tackle bought with fish.
 
 | File | What it does |
 |---|---|
-| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
+| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone. Locked rows explain their missing quest schematic on hover, including the purchase-only distinction and the final-two-rung rule. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy, including the schematic lock that blocks purchase without hiding introduced stock |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish. The capability-changing Breach Coupler occupies the unique top tackle tier: 20,000 credits plus a tier-five named catch ask |
