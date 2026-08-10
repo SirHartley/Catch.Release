@@ -75,7 +75,7 @@ public class ShopMarks {
 
     /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
     public static boolean isMarkable(ShopEntry entry) {
-        if (entry == null || entry.isLocked()) return false;
+        if (entry == null || entry.isPurchaseLocked()) return false;
 
         ShopPricing.Price price = entry.getPrice();
 
