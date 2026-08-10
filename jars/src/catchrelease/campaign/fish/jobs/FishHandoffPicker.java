@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.CargoPickerListener;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -127,7 +128,10 @@ public final class FishHandoffPicker {
                         int selected = countLoose(combined);
                         boolean ready = match(combined, asks) != null;
 
-                        panel.addPara("Required: %s", 0f, Misc.getHighlightColor(), describe(asks));
+                        String request = describe(asks);
+                        LabelAPI requiredLine = panel.addPara("Required: %s", 0f,
+                                Misc.getHighlightColor(), request);
+                        FishRequirement.highlight(requiredLine, asks, request);
                         panel.addPara("Selected: %s of %s specimens.", 10f,
                                 ready ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
                                 String.valueOf(selected), String.valueOf(required));

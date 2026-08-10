@@ -15,6 +15,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -267,8 +268,11 @@ public abstract class CampedSpotJob extends FishJob {
                     Misc.getHighlightColor(), systemName);
         }
 
-        info.addPara("They want %s out of that rupture, and are offering %s.", pad,
-                Misc.getHighlightColor(), describeAsks(), describeRewards());
+        String ask = describeAsks();
+        String reward = describeRewards();
+        LabelAPI terms = info.addPara("They want %s out of that rupture, and are offering %s.", pad,
+                Misc.getHighlightColor(), ask, reward);
+        FishRequirement.highlight(terms, asks, ask, reward);
 
         //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {

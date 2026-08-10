@@ -15,6 +15,7 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -31,6 +32,7 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -1195,12 +1197,16 @@ public class FishingIntro {
 
         @Override
         public String getSmallDescriptionTitle() {
-            return getName();
+            Target target = getTarget();
+            if (target == null) return getName();
+            if (target.landed) return "Fishing: take it back";
+            return "Fishing lesson";
         }
 
         @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            info.addPara(getName(), getTitleColor(mode), 0f);
+            LabelAPI title = info.addPara(getName(), getTitleColor(mode), 0f);
+            FishRequirement.highlight(title, getAsks(), getName());
 
             addBulletPoints(info, mode);
         }
@@ -1227,7 +1233,9 @@ public class FishingIntro {
                             at.getContainingLocation().getName());
                 }
             } else {
-                info.addPara("Wanted: %s", initPad, tc, h, describeTarget());
+                String wanted = describeTarget();
+                LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
+                FishRequirement.highlight(wantedLine, getAsks(), wanted);
                 if (target.systemName != null) {
                     info.addPara("In %s", 0f, tc, h, target.systemName);
                 }
@@ -1255,17 +1263,23 @@ public class FishingIntro {
                             + " Find one of their boats and hail it.", 10f);
                 }
             } else if (target.landed) {
-                info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
-                        Misc.getHighlightColor(), Misc.ucFirst(describeTarget()));
+                String wanted = Misc.ucFirst(describeTarget());
+                LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                        Misc.getHighlightColor(), wanted);
+                FishRequirement.highlight(landed, getAsks(), wanted);
             } else if (target.systemName == null) {
                 //the chart rung, which is the one errand with no place in it - the whole lesson is
                 //that the charts say where. A line naming a system it does not have would read
                 //"out of" and then nothing, which is what it did
-                info.addPara("Bring back %s. The charts say where; the planner on the map will"
-                        + " plot it.", 10f, Misc.getHighlightColor(), describeTarget());
+                String wanted = describeTarget();
+                LabelAPI charted = info.addPara("Bring back %s. The charts say where; the planner on the map will"
+                        + " plot it.", 10f, Misc.getHighlightColor(), wanted);
+                FishRequirement.highlight(charted, getAsks(), wanted);
             } else {
-                info.addPara("Bring back %s, out of %s.", 10f, Misc.getHighlightColor(),
-                        describeTarget(), target.systemName);
+                String wanted = describeTarget();
+                LabelAPI placed = info.addPara("Bring back %s, out of %s.", 10f,
+                        Misc.getHighlightColor(), wanted, target.systemName);
+                FishRequirement.highlight(placed, getAsks(), wanted, target.systemName);
 
                 if (target.needsDeepGear) {
                     info.addPara("It has to come up through a breach lamp, on a harpoon line."

@@ -9,10 +9,15 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A shop purchase's fish requirement: a count plus stackable qualities (type, rarity/grade floors,
@@ -139,6 +144,97 @@ public class FishRequirement {
         }
 
         return minRarity;
+    }
+
+    /** One exact substring in an ask and the rarity colour it should wear. */
+    public static class RarityHighlight {
+        public final String text;
+        public final FishRarity rarity;
+
+        public RarityHighlight(String text, FishRarity rarity) {
+            this.text = text;
+            this.rarity = rarity;
+        }
+    }
+
+    /** Returns every exact rarity-bearing substring in this requirement. */
+    public List<RarityHighlight> getRarityHighlights() {
+        Map<String, FishRarity> found = new LinkedHashMap<>();
+        collectRarityHighlights(found);
+
+        List<RarityHighlight> out = new ArrayList<>();
+        for (Map.Entry<String, FishRarity> entry : found.entrySet()) {
+            out.add(new RarityHighlight(entry.getKey(), entry.getValue()));
+        }
+        return out;
+    }
+
+    protected void collectRarityHighlights(Map<String, FishRarity> found) {
+        if (!anyOf.isEmpty()) {
+            for (FishRequirement alternative : anyOf) {
+                if (alternative != null) alternative.collectRarityHighlights(found);
+            }
+            return;
+        }
+
+        if (speciesId != null) {
+            FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
+            if (spec != null) found.put(spec.getDisplayName(), spec.rarity);
+            return;
+        }
+
+        if (minRarity != null) {
+            found.put(Misc.ucFirst(minRarity.name().toLowerCase()) + " or better", minRarity);
+        }
+    }
+
+    /** Collects rarity-bearing substrings across a complete order, preserving ask order. */
+    public static List<RarityHighlight> getRarityHighlights(List<FishRequirement> asks) {
+        if (asks == null || asks.isEmpty()) return Collections.emptyList();
+
+        Map<String, FishRarity> found = new LinkedHashMap<>();
+        for (FishRequirement ask : asks) {
+            if (ask != null) ask.collectRarityHighlights(found);
+        }
+
+        List<RarityHighlight> out = new ArrayList<>();
+        for (Map.Entry<String, FishRarity> entry : found.entrySet()) {
+            out.add(new RarityHighlight(entry.getKey(), entry.getValue()));
+        }
+        return out;
+    }
+
+    /** Applies rarity colours to an intel/UI label while ordinary highlights stay yellow. */
+    public static void highlight(LabelAPI label, List<FishRequirement> asks, String fallbackAsk,
+                                 String... normalHighlights) {
+        if (label == null) return;
+
+        List<String> strings = new ArrayList<>();
+        List<Color> colors = new ArrayList<>();
+        if (normalHighlights != null) {
+            for (String text : normalHighlights) {
+                if (text == null || text.isEmpty()) continue;
+                strings.add(text);
+                colors.add(Misc.getHighlightColor());
+            }
+        }
+
+        List<RarityHighlight> rarity = getRarityHighlights(asks);
+        if (rarity.isEmpty()) {
+            if (fallbackAsk != null && !fallbackAsk.isEmpty()) {
+                strings.add(fallbackAsk);
+                colors.add(Misc.getHighlightColor());
+            }
+        } else {
+            for (RarityHighlight entry : rarity) {
+                strings.add(entry.text);
+                colors.add(entry.rarity.color);
+            }
+        }
+
+        if (strings.isEmpty()) return;
+        label.setHighlight(strings.toArray(new String[0]));
+        label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
     /** The whole ask as one sentence fragment: "3 crabs, Rare or better, graded Fine or better". */

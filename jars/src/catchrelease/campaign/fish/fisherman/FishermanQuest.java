@@ -32,6 +32,7 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -610,12 +611,13 @@ public class FishermanQuest {
 
         @Override
         public String getSmallDescriptionTitle() {
-            return getName();
+            return quest.landed ? "Chart request: take it back" : "Chart request";
         }
 
         @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            info.addPara(getName(), getTitleColor(mode), 0f);
+            LabelAPI title = info.addPara(getName(), getTitleColor(mode), 0f);
+            FishRequirement.highlight(title, getAsks(), getName());
 
             addBulletPoints(info, mode);
         }
@@ -635,8 +637,9 @@ public class FishermanQuest {
 
             FishSpec spec = getSpec();
 
-            info.addPara("Wanted: %s", initPad, tc, h,
-                    spec == null ? "the named species" : spec.getDisplayName());
+            String wanted = spec == null ? "the named species" : spec.getDisplayName();
+            LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
+            FishRequirement.highlight(wantedLine, getAsks(), wanted);
             info.addPara("In %s", 0f, tc, h, quest.systemName);
             info.addPara(quest.atPond ? "The mark is a rupture"
                     : "The mark is open space - lamp work", tc, 0f);
@@ -676,12 +679,14 @@ public class FishermanQuest {
             }
 
             if (quest.landed) {
-                info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
                         Misc.getHighlightColor(), Misc.ucFirst(name));
+                FishRequirement.highlight(landed, getAsks(), Misc.ucFirst(name));
             } else {
-                info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
+                LabelAPI request = info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
                                 + " in there until somebody lands it.", 10f,
                         Misc.getHighlightColor(), name, quest.systemName);
+                FishRequirement.highlight(request, getAsks(), name, quest.systemName);
 
                 info.addPara(quest.atPond
                                 ? "The mark is a rupture. Drop a rod down it."
