@@ -218,6 +218,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "sellUpTo":
                 return FishBuyer.sellUpTo(dialog, arg);
+            case "colorBulkSaleOptions":
+                return colorBulkSaleOptions(dialog);
 
             //---- the ladder
             case "point":
@@ -348,6 +350,27 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    /**
+     * Gives the two bulk-sale shortcuts the same rarity language as a specimen everywhere else.
+     * <p>
+     * The rule sheet owns both labels; this only colours their existing option ids after the
+     * Fisherman's sale menu has put them on the panel. {@link InteractionDialogAPI}
+     * colours an option as a whole, not a substring, so colouring just the rarity word is not an
+     * API capability.
+     */
+    protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
+        if (dialog == null || dialog.getOptionPanel() == null) return false;
+
+        dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
+        dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
+        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
+                FishBuyer.describeUpTo(FishRarity.COMMON));
+        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
+                FishBuyer.describeUpTo(FishRarity.UNCOMMON));
+
+        return true;
     }
 
     protected com.fs.starfarer.api.campaign.TextPanelAPI text(InteractionDialogAPI dialog) {
@@ -587,12 +610,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** The plugin the frame had before a panel took it, so closing can hand it straight back. */
     protected transient InteractionDialogPlugin behind;
 
-    /**
-     * Hands the frame to one of the machinery panels.
-     * <p>
-     * Options are cleared first - they would otherwise stand under the panel, and the hidden text
-     * panel drags them sideways with it.
-     */
+    /** A visual panel gets one hand-back, even if its dismissal is reported more than once. */
+    protected transient boolean panelOpen;
+
     /**
      * Leaves a fleet encounter the way vanilla's own Leave leaves one.
      * <p>
@@ -661,9 +681,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (dialog == null) return false;
 
         behind = dialog.getPlugin();
-        dialog.getOptionPanel().clearOptions();
 
         if (panel instanceof FishShopDialog shop) {
+            panelOpen = true;
             dialog.setPlugin(shop);
             shop.init(dialog);
 
@@ -671,6 +691,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
 
         if (panel instanceof FishermanSurveyDialog counter) {
+            panelOpen = true;
             dialog.setPlugin(counter);
             counter.init(dialog);
 
@@ -689,7 +710,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      * knowing a word of either.
      */
     protected void resume(InteractionDialogAPI dialog) {
-        if (dialog == null) return;
+        if (dialog == null || !panelOpen) return;
+
+        panelOpen = false;
 
         dialog.setBackgroundDimAmount(
                 catchrelease.campaign.fish.fisherman.FishermanConstants.DIALOG_DIM);
@@ -698,6 +721,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         dialog.showVisualPanel();
 
         if (behind != null) dialog.setPlugin(behind);
+
+        //FireAll PopulateOptions only adds rows. Start clean so a repeated UI callback cannot
+        //leave the Fisherman's menu duplicated, while the custom visual is already gone.
+        dialog.getOptionPanel().clearOptions();
 
         com.fs.starfarer.api.impl.campaign.rulecmd.FireBest.fire(null, dialog,
                 behind == null ? null : behind.getMemoryMap(), "CatchReleaseFisherResume");

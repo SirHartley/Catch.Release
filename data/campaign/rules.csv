@@ -1105,7 +1105,12 @@ CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
+$catchreleaseStage >= 6
+!$catchreleaseWork",,,50:catchrelease_fisherWork:Ask about work,
+catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage >= 6
+$catchreleaseWork",,,50:catchrelease_fisherWork:What did I need to fetch again?,
 catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
@@ -1131,7 +1136,7 @@ FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
 catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart mid-trip. The chart crews will catch up.""",,
-catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
+catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,CatchReleaseCMD colorBulkSaleOptions,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
 10:catchrelease_fisherSellCommon:Sell all unmarked commons
 20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon
 100:catchrelease_fisherBack:Continue",
@@ -1171,14 +1176,12 @@ He puts a finger against the recorded range.
 ""Wrong range. Still there last I heard.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
-!$catchreleaseRumor",,"""Nothing worth sending you after.""
-
-He glances at the plot.
-
-""Good month for it.""",100:catchrelease_fisherBack:Continue,
+!$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
-!$catchreleaseWork",CatchReleaseCMD rollWork,"""Got one.""
+!$catchreleaseWork","CatchReleaseCMD rollWork
+FireBest CatchReleaseWorkOffer",,,
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
 
 He sends over a range entry.
 
@@ -1211,7 +1214,7 @@ $catchreleaseWorkHandoffPaid",,"He studies the coherence plot, marks something i
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet",,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet",SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
 
 He checks the old mark.
 

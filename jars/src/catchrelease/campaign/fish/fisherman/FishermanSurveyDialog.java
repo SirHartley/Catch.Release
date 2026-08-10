@@ -74,6 +74,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
     protected InteractionDialogAPI dialog;
     protected final FishShopDialog.OnClose onClose;
+    protected boolean closed;
 
     public FishermanSurveyDialog(FishShopDialog.OnClose onClose) {
         this.onClose = onClose;
@@ -82,13 +83,31 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
     @Override
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
+        closed = false;
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
         dialog.hideTextPanel();
         dialog.setBackgroundDimAmount(0.6f);
 
+        //Custom visuals leave the interaction's option panel alone; clear it through the public
+        //API immediately before opening this counter so no dialogue rows show under the cards.
+        dialog.getOptionPanel().clearOptions();
         dialog.showCustomVisualDialog(WIDTH, HEIGHT, new Delegate());
+    }
+
+    /** Delivers the custom visual's dismissal once, regardless of which close control reached it. */
+    protected void close() {
+        if (closed || dialog == null) return;
+
+        closed = true;
+
+        if (onClose == null) {
+            dialog.dismiss();
+            return;
+        }
+
+        onClose.onShopClosed(dialog);
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin {
@@ -146,14 +165,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         /** Back to the boat - the shop's own hand-back, reused word for word. */
         @Override
         public void reportDismissed(int option) {
-            if (dialog == null) return;
-
-            if (onClose == null) {
-                dialog.dismiss();
-                return;
-            }
-
-            onClose.onShopClosed(dialog);
+            FishermanSurveyDialog.this.close();
         }
 
         @Override

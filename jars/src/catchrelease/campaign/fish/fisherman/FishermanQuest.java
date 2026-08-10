@@ -7,8 +7,11 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.jobs.camp.CampedSpot;
+import catchrelease.campaign.fish.map.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -28,6 +31,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
@@ -132,18 +137,19 @@ public class FishermanQuest {
     /**
      * Rolls one without committing to it, so the conversation can describe it before it is taken.
      * <p>
-     * Species first, then somewhere it could plausibly live - the fish is planted either way, but a
-     * chart-reading job that sends somebody to the one system its target could never be in reads as
-     * the trade not knowing its own business. Falls back to any legal system rather than to nothing.
+     * The specimen and its destination are chosen as one pair. A chart-reading job that sends
+     * somebody to the one system its target could never be in reads as the trade not knowing its
+     * own business; choosing pairs also lets the location itself be the reason a request is worth
+     * making.
      */
     public static Saved roll() {
         int round = getRound();
 
-        FishSpec spec = pickSpecies(round);
-        if (spec == null) return null;
+        Target target = pickTarget(round);
+        if (target == null) return null;
 
-        StarSystemAPI system = pickSystem(spec, round);
-        if (system == null) return null;
+        FishSpec spec = target.spec;
+        StarSystemAPI system = target.system;
 
         Saved quest = new Saved();
         quest.speciesId = spec.id;
@@ -174,51 +180,71 @@ public class FishermanQuest {
         return quest;
     }
 
-    /** Something the player has not landed, at the rung this round reaches for. */
-    protected static FishSpec pickSpecies(int round) {
+    /** A qualifying specimen and a system it naturally inhabits. */
+    protected static class Target {
+        public final FishSpec spec;
+        public final StarSystemAPI system;
+
+        public Target(FishSpec spec, StarSystemAPI system) {
+            this.spec = spec;
+            this.system = system;
+        }
+    }
+
+    /**
+     * A request is for something that asks more of the player than an ordinary catch: difficult
+     * water, a rare or epic specimen, a pulsar system, or something a camp is currently holding
+     * out of reach. The rarity ladder biases the roll instead of excluding other valid pairs, so
+     * the later rounds still lean upward without making a sparse sector run out of offers.
+     */
+    protected static Target pickTarget(int round) {
         int want = RUNG_BY_ROUND[Math.min(round, RUNG_BY_ROUND.length - 1)];
 
-        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+        float minLY = MIN_LY_BY_ROUND[Math.min(round, MIN_LY_BY_ROUND.length - 1)];
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
+
+        WeightedRandomPicker<Target> picker = new WeightedRandomPicker<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
 
-            //the rung is a target rather than a floor: one below it still counts, so a round late
-            //in the ladder is not unfillable once the legendaries are all caught
             int rung = spec.rarity.ordinal();
-            if (rung > want || rung < want - 1) continue;
+            float rarityWeight = rung == want ? 3f : rung == want - 1 ? 1f : 0.25f;
 
-            picker.add(spec, rung == want ? 3f : 1f);
+            for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                if (!isEligibleSystem(system, from, minLY)) continue;
+                if (!FishPresence.livesIn(spec, system)) continue;
+                if (!isChartRequest(spec, system)) continue;
+
+                picker.add(new Target(spec, system), rarityWeight);
+            }
         }
 
         return picker.pick();
     }
 
-    /** Somewhere far enough out for the round, and ideally somewhere the thing could live. */
-    protected static StarSystemAPI pickSystem(FishSpec spec, int round) {
-        float minLY = MIN_LY_BY_ROUND[Math.min(round, MIN_LY_BY_ROUND.length - 1)];
+    /** Existing range and theme protections, plus the current round's distance requirement. */
+    protected static boolean isEligibleSystem(StarSystemAPI system, Vector2f from, float minLY) {
+        if (system == null) return false;
+        if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
+        if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
+        if (system.getCenter() == null) return false;
 
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
+        return Misc.getDistanceLY(from, system.getLocation()) >= minLY;
+    }
 
-        WeightedRandomPicker<StarSystemAPI> plausible = new WeightedRandomPicker<>();
-        WeightedRandomPicker<StarSystemAPI> anywhere = new WeightedRandomPicker<>();
+    /** Whether this naturally possible pair has a reason to be a Chart Request. */
+    protected static boolean isChartRequest(FishSpec spec, StarSystemAPI system) {
+        if (spec.difficulty >= 65f) return true;
+        if (spec.rarity == FishRarity.RARE || spec.rarity == FishRarity.EPIC) return true;
+        if (Misc.getPulsarInSystem(system) != null) return true;
 
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (system.getCenter() == null) continue;
-
-            if (Misc.getDistanceLY(from, system.getLocation()) < minLY) continue;
-
-            anywhere.add(system, 1f);
-
-            if (FishPresence.livesIn(spec, system)) plausible.add(system, 1f);
+        for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+            if (spec.id.equals(CampedSpot.getCampedSpecies(pond))) return true;
         }
 
-        StarSystemAPI pick = plausible.pick();
-
-        return pick != null ? pick : anywhere.pick();
+        return false;
     }
 
     /** Taken. The mark goes up and the keeper starts putting the specimen back. */
@@ -625,10 +651,29 @@ public class FishermanQuest {
             FishSpec spec = getSpec();
             String name = spec == null ? "the named species" : spec.getDisplayName();
 
-            //the specimen itself at the top, where vanilla's missions put the poster's crest -
-            //still what the note is about once it is aboard, so it stays on both branches
-            info.addImage(spec == null || spec.icon == null || spec.icon.isEmpty()
-                    ? FishConstants.ITEM_ICON_FALLBACK : spec.icon, width, 80f, 10f);
+            //The specimen itself at the top, where vanilla's missions put the poster's crest.
+            //It has to use the shared knowledge-aware renderer: an accepted chart request tells
+            //the player a pattern's name and water, but not the finished art until it is landed.
+            if (spec == null) {
+                info.addImage(FishConstants.ITEM_ICON_FALLBACK, width, 80f, 10f);
+            } else {
+                info.addCustom(Global.getSettings().createCustom(width, 80f,
+                        new BaseCustomUIPanelPlugin() {
+                            private PositionAPI position;
+
+                            @Override
+                            public void positionChanged(PositionAPI newPosition) {
+                                position = newPosition;
+                            }
+
+                            @Override
+                            public void render(float alphaMult) {
+                                if (position == null) return;
+                                FishIcons.draw(spec, position.getCenterX(), position.getCenterY(),
+                                        80f, alphaMult);
+                            }
+                        }), 10f);
+            }
 
             if (quest.landed) {
                 info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,

@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -330,7 +331,7 @@ public class QuestPond {
     /** One that nobody else is using, or null if every pond here is already spoken for. */
     public static SectorEntityToken findFreePond(LocationAPI location) {
         for (SectorEntityToken pond : getPonds(location)) {
-            if (!isImportant(pond)) return pond;
+            if (!isImportant(pond) && !CampedSpot.isPondBlocked(pond)) return pond;
         }
 
         return null;
