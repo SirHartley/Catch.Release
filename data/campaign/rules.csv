@@ -1946,6 +1946,7 @@ He closes both.
 He points at the comm menu.
 
 ""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+5:catchrelease_introConservatory:""What's a breach conservatory?""
 10:catchrelease_introDeepGear:Continue
 100:catchrelease_introShopLater:""I'll look later.""","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
@@ -1982,6 +1983,13 @@ catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introSh
 He signals someone off-screen.
 
 ""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
+catchrelease_introConservatory,DialogOptionSelected,$option == catchrelease_introConservatory,,"""Public tanks. Local outfitter. Trade counter.""","0:catchrelease_introConservatoryGet:""How do I get one?""
+10:catchrelease_introShopLook:""What can I do with the outfitter?""
+20:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",
+catchrelease_introConservatoryGet,DialogOptionSelected,$option == catchrelease_introConservatoryGet,,"""Crablobab has the plans. Build it on a colony you own.""","10:catchrelease_introShopLook:""What can I do with the outfitter?""
+20:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",
 catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"A second transfer begins.
 
 The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.

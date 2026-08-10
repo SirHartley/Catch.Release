@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 453 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 455 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -268,6 +268,10 @@ The deep-gear explanation uses a conversation-local `CatchReleaseIntroDeepQuesti
 Each supplied answer records its own transient asked flag and repopulates only the unanswered
 questions; `What do you want caught?` appears after the lights, return trace, and weapon-safety
 answers have all been read. An interrupted handoff simply starts that three-question menu again.
+The live stage-3 hand-in also lets the player ask what a breach conservatory is, then how to get
+one. Those two short branches contain no grant or progression command: each reuses the existing
+outfitter hand-in choices, while the latter directs plans to Crablobab and construction to a
+player-owned colony.
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
 cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies
