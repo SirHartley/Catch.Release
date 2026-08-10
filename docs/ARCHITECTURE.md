@@ -609,7 +609,7 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 |---|---|
 | `FishingRigs.java` | One answer to "is any rig running" - lamps lit, swarm out, or a line in the water |
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall. The button stays active but disabled once only catch carriers are returning, since no drone remains to command |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |

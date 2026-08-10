@@ -108,7 +108,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         if (entity != null && entity.isPlayerFleet()) {
             FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
 
-            if (swarm != null && !swarm.isRecalling()) {
+            if (swarm != null && !swarm.isRecalling() && swarm.hasRecallableDrones()) {
                 swarm.recall();
                 playActivationSound();
                 return;
@@ -124,7 +124,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
         //swarm out: button is recall, usable regardless of cast cooldown; already recalling: nothing
         //to do until landed. Checked before pond lookup - a roaming screen has no pond nearby
-        if (swarm != null) return !swarm.isRecalling() && disableFrames <= 0;
+        if (swarm != null) {
+            return !swarm.isRecalling() && swarm.hasRecallableDrones() && disableFrames <= 0;
+        }
 
         SectorEntityToken pond = getPond();
 
@@ -191,7 +193,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
             }
 
             FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
-            if (swarm != null && !swarm.isRecalling()) {
+            if (swarm != null && !swarm.isRecalling() && swarm.hasRecallableDrones()) {
                 tooltip.addPara("Drones are out. Activate again to recall them.", highlight, pad);
             } else if (swarm != null) {
                 tooltip.addPara("Drones are on their way back.", gray, pad);
