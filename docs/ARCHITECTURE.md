@@ -1074,6 +1074,14 @@ at the other, because a mote swims to its target and expires there; one spawned 
 destination blinks out immediately. It always reads **barely holding**, forced in the minigame's
 roll — the request is a question about the water, not about the animal.
 
+**A chart request earns its chart before it is offered.** The offer is a fish-and-system pair, never
+a species picked first and pasted into an arbitrary destination: it must live in that system, clear
+the round's distance and theme limits, and be difficult, rare or epic, in pulsar water, or the
+species a current camp is holding. Camps remember that species on the blocked rupture itself, rather
+than on their planted mote, because catching the mote does not mean the people sitting on the water
+have stopped making it notable. The request still claims only a free rupture; an occupied one is
+evidence for the ask, never a destination that makes the ask impossible.
+
 **A patrol assignment could not be told to stay out of the way.** `PATROL_SYSTEM` wanders the whole
 system and will cut straight across an inhabited orbit getting anywhere, so the standing boats
 route themselves: `OuterReaches` defines a band from past the outermost inhabited world out to a

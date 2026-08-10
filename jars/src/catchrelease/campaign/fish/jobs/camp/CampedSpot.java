@@ -57,6 +57,9 @@ public class CampedSpot {
     /** Set on the rupture while its camper remains, for the ROD's fishing lock. */
     public static final String POND_BLOCKED_FLAG = "$catchrelease_campedPond";
 
+    /** The species that made this occupied rupture worth guarding. Kept on the pond, not its mote. */
+    public static final String CAMP_SPECIES_KEY = "$catchrelease_campedSpecies";
+
     /** How far off the water they sit - close enough to be sitting on it, not close enough to be in it. */
     public static final float OFFSET = 350f;
 
@@ -220,17 +223,36 @@ public class CampedSpot {
     }
 
     public static void setPondBlocked(SectorEntityToken pond, boolean blocked) {
+        setPondBlocked(pond, blocked, null);
+    }
+
+    /**
+     * Sets the fishing lock and, while it is held, remembers what the camp was sitting on.
+     * <p>
+     * The memory belongs to the rupture rather than the planted mote: the mote can be caught or
+     * expire before the camp goes away, but the camp is still a meaningful chart-request lead.
+     */
+    public static void setPondBlocked(SectorEntityToken pond, boolean blocked, String speciesId) {
         if (pond == null) return;
 
         if (blocked) {
             pond.getMemoryWithoutUpdate().set(POND_BLOCKED_FLAG, true);
+            if (speciesId != null) pond.getMemoryWithoutUpdate().set(CAMP_SPECIES_KEY, speciesId);
         } else {
             pond.getMemoryWithoutUpdate().unset(POND_BLOCKED_FLAG);
+            pond.getMemoryWithoutUpdate().unset(CAMP_SPECIES_KEY);
         }
     }
 
     public static boolean isPondBlocked(SectorEntityToken pond) {
         return pond != null && pond.getMemoryWithoutUpdate().getBoolean(POND_BLOCKED_FLAG);
+    }
+
+    /** The active camp's species, or null once the rupture has been released. */
+    public static String getCampedSpecies(SectorEntityToken pond) {
+        if (!isPondBlocked(pond)) return null;
+
+        return pond.getMemoryWithoutUpdate().getString(CAMP_SPECIES_KEY);
     }
 
     /**

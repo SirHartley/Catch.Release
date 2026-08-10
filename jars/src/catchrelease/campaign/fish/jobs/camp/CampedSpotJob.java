@@ -115,7 +115,7 @@ public abstract class CampedSpotJob extends FishJob {
         camper = CampedSpot.spawn(getType(), size, pond, random());
         if (camper == null) return;
 
-        CampedSpot.setPondBlocked(pond, true);
+        CampedSpot.setPondBlocked(pond, true, speciesId);
         QuestPond.claim(pond, REF_KEY);
         QuestPond.placeMote(pond, speciesId, REF_KEY);
 
@@ -197,7 +197,9 @@ public abstract class CampedSpotJob extends FishJob {
         if (!CampedSpot.isGone(camper)) {
             CampedSpot.updateWarningPursuit(camper, pond);
             CampedSpot.allowPlayerToLeave(camper, pond);
-            CampedSpot.setPondBlocked(pond, true);
+            //Refresh the pond-side memory for old saves too. The planted mote may be gone, but
+            //the camp is still on this species until it leaves.
+            CampedSpot.setPondBlocked(pond, true, speciesId);
             return;
         }
 
