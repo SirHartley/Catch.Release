@@ -1039,7 +1039,9 @@ and fires `CatchReleaseWorkOffer`; `catchrelease_workOfferText` then reads the s
 payment tokens. Keeping the supplied offer text on that second row means the range has been selected
 before token replacement, rather than printing the fallback token names from before the roll. Its
 `SetTextHighlights` call colours those three supplied terms, while the active-work reminder highlights
-only its fish and place: it never makes a second promise about payment.
+only its fish and place: it never makes a second promise about payment. The root menu keeps the
+`catchrelease_fisherWork` option id in both states, but its mutually exclusive producers label it
+`Ask about work` before a request and `What did I need to fetch again?` while one is active.
 
 **The ladder gates equipment, and equipment gates the world.** `unlockedAtStart` is off for all four
 abilities. A shelf needs two things before it is on the floor (`ShopGroup.isUnlocked`): the rig in
