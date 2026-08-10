@@ -34,12 +34,16 @@ import java.util.Map;
  */
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
-    /** Native box art is 80x80; these bounds cover the label before its perspective is applied. */
+    /** Native box art is 80x80; coordinates are measured from its upper-left corner. */
     public static final float BOX_ICON_GRID = 80f;
-    public static final float BOX_ICON_LEFT = 49f;
-    public static final float BOX_ICON_RIGHT = 69f;
-    public static final float BOX_ICON_TOP = 29f;
-    public static final float BOX_ICON_BOTTOM = 57f;
+    public static final float BOX_ICON_UL_X = 49f;
+    public static final float BOX_ICON_UL_Y = 35f;
+    public static final float BOX_ICON_LL_X = 49f;
+    public static final float BOX_ICON_LL_Y = 57f;
+    public static final float BOX_ICON_UR_X = 69f;
+    public static final float BOX_ICON_UR_Y = 29f;
+    public static final float BOX_ICON_LR_X = 69f;
+    public static final float BOX_ICON_LR_Y = 51f;
 
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -129,21 +133,28 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-    /** First lays the species art over the label's rectangular extent; the perspective fit is separate. */
+    /** Fits the species art to the four measured corners of the box label. */
     protected void renderBoxIcon(float x, float y, float w, float h, float alphaMult,
                                  float glowMult, FishSpec spec) {
 
         String path = spec == null || spec.icon == null || spec.icon.isEmpty()
                 ? FishConstants.ITEM_ICON_FALLBACK : spec.icon;
 
-        float left = x + w * BOX_ICON_LEFT / BOX_ICON_GRID;
-        float right = x + w * BOX_ICON_RIGHT / BOX_ICON_GRID;
-        float bottom = y + h * (BOX_ICON_GRID - BOX_ICON_BOTTOM) / BOX_ICON_GRID;
-        float top = y + h * (BOX_ICON_GRID - BOX_ICON_TOP) / BOX_ICON_GRID;
-
         FishItemRenderer.renderIconWithCorners(path,
-                left, bottom, left, top, right, top, right, bottom,
+                gridX(x, w, BOX_ICON_LL_X), gridY(y, h, BOX_ICON_LL_Y),
+                gridX(x, w, BOX_ICON_UL_X), gridY(y, h, BOX_ICON_UL_Y),
+                gridX(x, w, BOX_ICON_UR_X), gridY(y, h, BOX_ICON_UR_Y),
+                gridX(x, w, BOX_ICON_LR_X), gridY(y, h, BOX_ICON_LR_Y),
                 alphaMult, glowMult);
+    }
+
+    protected float gridX(float x, float w, float imageX) {
+        return x + w * imageX / BOX_ICON_GRID;
+    }
+
+    /** Converts the supplied top-left image grid to Starsector's bottom-left render space. */
+    protected float gridY(float y, float h, float imageY) {
+        return y + h * (BOX_ICON_GRID - imageY) / BOX_ICON_GRID;
     }
 
     /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */
