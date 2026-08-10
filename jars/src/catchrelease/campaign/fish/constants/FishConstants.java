@@ -288,6 +288,9 @@ public class FishConstants {
     /** Blank = no sound wired up yet, not a placeholder id waiting to be found. */
     public static final String SOUND_CAUGHT = "";
 
+    /** Played once when the fish escapes or the player abandons the catch. */
+    public static final String SOUND_FAILED = "";
+
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
 

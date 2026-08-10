@@ -55,6 +55,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected FishingMinigameLayout layout;
     protected boolean reeling = false;
     protected boolean reported = false;
+    protected boolean failedSoundPlayed = false;
 
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
@@ -113,6 +114,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
             advanceCaught(amount);
             return;
+        }
+
+        if (!failedSoundPlayed) {
+            failedSoundPlayed = true;
+            CatchCelebration.playHook(FishConstants.SOUND_FAILED);
         }
 
         //closes itself once the linger has elapsed
