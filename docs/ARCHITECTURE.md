@@ -174,19 +174,24 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 477 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
-The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
-gated on stage 6, while the question rows retain their own information-release gates.
+The Fisherman's `Ask about something else` submenu opens at stage 2, in the same `giveRod()` call
+that assigns the first tutorial target. The question rows retain their own information-release
+gates, so later subjects do not appear merely because the menu itself is available.
 His outfitter lesson and repeatable tackle/upgrade answers explain that jobs award schematics,
 schematics unlock purchases rather than grant hardware, and only the final two upgrade rungs need them.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
-topics stay in the root submenu; answered topics move to `Ask again`. Both panes page their
-topics six at a time, retain their current page after an answer returns, and hide a next-page
-option that has no topic left to show.
+and answered topics share the same submenu without a separate repeat-question state. Two dedicated
+rules triggers stream every relevant unasked topic first and every answered topic afterward; the
+command pages that ordered stream six at a time, so new questions occupy the first positions and
+answered questions fall to the final positions and page. Answered options use the canonical
+Common-rarity colour so they recede without disappearing. Labels and information-release gates stay
+in `rules.csv`; Java owns only the page arithmetic. Every rebuild appends Previous/Next as relevant,
+then the always-present back option and Escape shortcut, so no page can become a dead end.
 Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
 rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
@@ -194,7 +199,7 @@ the older `Ask about the fish they want` producer remains as a preserved row but
 When the stage-3 target is in the current system, the two continuity questions are root Fisherman
 menu options under the same target and deep-handoff gates that formerly nested them under that
 reminder. Each answer writes its own permanent campaign asked flag as it opens, removing only that
-root option thereafter; neither question enters the post-tutorial `Ask again` menu. Their existing
+root option thereafter; neither question enters the general question menu. Their existing
 answer chains return through `catchrelease_fisherBack` to the root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
@@ -203,7 +208,7 @@ seasonal line.
 Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
 offers a highlighted one-time question about what came up with the catch. Selecting it plays the
 existing explanation, consumes the pending state, and returns to the usual menu without entering
-`Ask again`.
+the general question list.
 The safety interception remains higher-scored and therefore still takes precedence.
 Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
@@ -279,8 +284,8 @@ outfitter hand-in choices, while the latter directs plans to Crablobab and const
 player-owned colony.
 The live outfitter explanation also offers tackle and upgrade definitions without naming future
 Harpoon or breach-light categories. Both intro answers set the same permanent topic flags as their
-post-tutorial Fisherman entries, moving the topic to the appropriate `Ask again` page; neither
-path carries a tutorial grant or advance.
+ordinary Fisherman entries. Answered and unanswered topics share the same question menu; there is
+no separate `Ask again` route, and neither intro path carries a tutorial grant or advance.
 The page-one outfitter-payment topic explains only the immediate barter transaction — trade buys
 catch, the Fisherman sells hardware, and fish avoid two invoices. It deliberately says nothing
 about what ultimately becomes of the catch.
@@ -404,7 +409,7 @@ explains how.
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost - weekly, and again the moment the player arrives, so a destroyed boat is back by the time anybody looks. `ensureBoat` takes the canonical live Fisherman of either schedule before posting, so a directed tutorial errand cannot place a standing boat beside a visitor |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds. `place()` is the one gate every boat placement goes through: clamped into the band in an inhabited system, unconstrained where there is nobody |
-| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins it non-hostile and un-fleeing, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
+| `FishermanBehavior.java` | The stay: yellow fan lamps, staged motes, the leaving. `keepStanding()` pins both sides of its player relationship non-hostile even when the Independents are enemies, blocks vanilla's separate friendly-fleet collision avoidance, clears any cached player-avoidance course, and puts it outside every other fleet's business in both directions; `keepPace()` holds it to burn 4 unless it is closing on somebody |
 | — | Talking to the boat is not a file. The encounter goes straight to comms (`catchrelease_fisherEncounter`), and the range-data counter, outfitter, buyer, rumours and chart requests are all rows under `$menuState == catchreleaseFisher` |
 | `FishermanShelf.java` | What range data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Hand-over uses the shared exact-specimen picker. Its `QuestIntel` is a `FishAsker`, shows the shared fish silhouette until its target has been landed, colours the named quarry by rarity, and carries the bullets vanilla's mission notes carry |
@@ -420,8 +425,8 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, the active rumor's system/type/stranger, and the bulk-sale rungs that currently have eligible fish), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot. Its `highlightJobText`, `highlightWorkText`, and `highlightIntroText` verbs mirror vanilla `Highlight` plus `SetTextHighlightColors`: fish names/rarity floors take their rarity colours while places and rewards remain yellow. Other panel verbs include `leaveEncounter`, `dropCutComm`, and `colorBulkSaleOptions`, which applies the canonical common/uncommon colours and exact cargo previews to eligible Fisherman bulk-sale choices. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
-| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, and the immutable whole-stack sale preview shared by labels, tooltips, confirmation and execution. Bulk sale confirms its exact fish/credit total, rebuilds the prompt instead of selling if the hold changed, leaves any container with a marked fish intact, and counts every copy in stacked identical containers. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, the active rumor's system/type/stranger, and the bulk-sale rungs that currently have eligible fish), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot. Its `highlightJobText`, `highlightWorkText`, and `highlightIntroText` verbs mirror vanilla `Highlight` plus `SetTextHighlightColors`: fish names/rarity floors take their rarity colours while places and rewards remain yellow. `beginFisherQuestions`/`addFisherQuestion`/`finishFisherQuestions` page the rules-authored unasked-then-answered stream and apply the canonical Common colour to its completed tail. Other panel verbs include `leaveEncounter`, `dropCutComm`, and `colorBulkSaleOptions`, which applies the canonical common/uncommon colours and exact, rarity-coloured cargo previews to eligible Fisherman bulk-sale choices. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
+| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, and the immutable whole-stack sale preview shared by labels, tooltips, confirmation and execution. Bulk tooltips render one row per species so every fish name carries its own rarity colour without substring collisions. Bulk sale confirms its exact fish/credit total, rebuilds the prompt instead of selling if the hold changed, leaves any container with a marked fish intact, and counts every copy in stacked identical containers. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
 
 ### `campaign/fish/tutorial`
 Learning to fish, in six lessons and one shortcut. **Entirely detached from the ordinary loop** — the
@@ -1045,8 +1050,12 @@ machinery and there is nothing for a sheet to say about it.
 
 **A work offer rolls before it speaks.** `catchrelease_workOffer` only rolls the pending chart request
 and fires `CatchReleaseWorkOffer`; `catchrelease_workOfferText` then reads the saved fish, place and
-payment tokens. Keeping the supplied offer text on that second row means the range has been selected
-before token replacement, rather than printing the fallback token names from before the roll. Its
+payment tokens after the roller has set the explicit `$catchreleaseWorkRolled` success token. RC8's
+rules parser does not implement `has` as a key-existence operator, so testing the fish-name string
+itself can never select an offer row. A mutually exclusive failure row says there is no marked work
+and returns to business, so an exhausted roller cannot leave an empty panel. Keeping the supplied
+offer text on the success row means the range has been selected before token replacement, rather
+than printing the fallback token names from before the roll. Its
 `SetTextHighlights` call colours those three supplied terms, while the active-work reminder highlights
 only its fish and place: it never makes a second promise about payment. The root menu keeps the
 `catchrelease_fisherWork` option id in both states, but its mutually exclusive producers label it

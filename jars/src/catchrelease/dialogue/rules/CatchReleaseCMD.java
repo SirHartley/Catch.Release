@@ -103,6 +103,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_WHERE = "$catchreleaseWorkWhere";
     public static final String WORK_PAY = "$catchreleaseWorkPay";
     public static final String WORK_POND = "$catchreleaseWorkPond";
+    public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
 
     /** Whether there is anything on the shelf, and anything in the hold. */
     public static final String SHELF = "$catchreleaseShelf";
@@ -126,34 +127,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** Whether the Fisherman still needs to name the player's first recovered treasure. */
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
-    /** Whether any completed Fisherman topic belongs in the repeat-question menu. */
-    public static final String FISHER_ASK_AGAIN = "$catchreleaseFisherAskAgain";
-
-    /** Whether the unasked Fisherman-topic menu has a second page of available topics. */
-    public static final String FISHER_ASK_PAGE_ONE = "$catchreleaseFisherAskPageOne";
-
-    /** Whether the repeat-question menu has a second page of completed topics. */
-    public static final String FISHER_ASK_AGAIN_PAGE_ONE = "$catchreleaseFisherAskAgainPageOne";
-
-    /**
-     * Campaign-long records of the repeatable Fisherman topics the player has actually opened.
-     * <p>
-     * The sheet writes these only on the answer rows, rather than on option production, so a
-     * newly-unlocked prompt remains new until the player has seen its answer.
-     */
-    protected static final String[] FISHER_ASKED_TOPICS = {
-            "$catchrelease_fisherAsked_howLong",
-            "$catchrelease_fisherAsked_baha",
-            "$catchrelease_fisherAsked_whyOut",
-            "$catchrelease_fisherAsked_looking",
-            "$catchrelease_fisherAsked_patterns",
-            "$catchrelease_fisherAsked_deepWater",
-            "$catchrelease_fisherAsked_fishBack",
-            "$catchrelease_fisherAsked_largest",
-            "$catchrelease_fisherAsked_tackle",
-            "$catchrelease_fisherAsked_upgrade",
-            "$catchrelease_fisherAsked_outfitterPayment"
-    };
+    /** Conversation-local paging state for the dynamically ordered Fisherman question list. */
+    protected static final String FISHER_ASK_PAGE = "$catchreleaseFisherAskPage";
+    protected static final String FISHER_ASK_COUNT = "$catchreleaseFisherAskCount";
+    protected static final int FISHER_ASK_PAGE_SIZE = 6;
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
@@ -230,6 +207,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return FishBuyer.sellUpTo(dialog, arg);
             case "colorBulkSaleOptions":
                 return colorBulkSaleOptions(dialog);
+            case "beginFisherQuestions":
+                return beginFisherQuestions(dialog, memoryMap);
+            case "addFisherQuestion":
+                return addFisherQuestion(dialog, params, memoryMap);
+            case "finishFisherQuestions":
+                return finishFisherQuestions(dialog, params, memoryMap);
             case "highlightJobText":
                 return highlightJobText(ruleId, dialog, params, memoryMap);
             case "highlightWorkText":
@@ -371,25 +354,94 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /**
      * Gives the two bulk-sale shortcuts the same rarity language as a specimen everywhere else.
      * <p>
-     * The rule sheet owns both labels; this only colours their existing option ids after the
-     * Fisherman's sale menu has put them on the panel. {@link InteractionDialogAPI}
-     * colours an option as a whole, not a substring, so colouring just the rarity word is not an
-     * API capability.
+     * The rule sheet owns both labels; this colours their existing option ids after the
+     * Fisherman's sale menu has put them on the panel, then lets {@link FishBuyer} render the exact
+     * cargo preview as tooltip rows whose fish names use their own rarity colours.
      */
     protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
         if (FishBuyer.countUpTo(FishRarity.COMMON) > 0) {
             dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
-            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
-                    FishBuyer.describeUpTo(FishRarity.COMMON));
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellCommon",
+                    FishRarity.COMMON);
         }
         if (FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0) {
             dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
-            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
-                    FishBuyer.describeUpTo(FishRarity.UNCOMMON));
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellUncommon",
+                    FishRarity.UNCOMMON);
         }
 
+        return true;
+    }
+
+    /** Starts one rules-authored question stream; the two trigger passes supply its order. */
+    protected boolean beginFisherQuestions(InteractionDialogAPI dialog,
+                                           Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
+        if (dialog == null || dialog.getOptionPanel() == null || local == null) return false;
+
+        dialog.getOptionPanel().clearOptions();
+        local.set(FISHER_ASK_COUNT, 0, 0);
+        return true;
+    }
+
+    /**
+     * Adds one relevant topic to the current page of the ordered stream.
+     * <p>
+     * The option id, label and asked state are parameters from rules.csv; Java owns only the page
+     * arithmetic and the canonical Common colour used to make completed topics recede.
+     */
+    protected boolean addFisherQuestion(InteractionDialogAPI dialog, List<Token> params,
+                                        Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
+        if (dialog == null || dialog.getOptionPanel() == null || local == null
+                || params.size() < 4) {
+            return false;
+        }
+
+        String optionId = params.get(1).getString(memoryMap);
+        String label = params.get(2).getString(memoryMap);
+        boolean asked = Boolean.parseBoolean(params.get(3).getString(memoryMap));
+        if (optionId == null || label == null) return false;
+
+        int index = local.getInt(FISHER_ASK_COUNT);
+        int page = Math.max(0, local.getInt(FISHER_ASK_PAGE));
+        int first = page * FISHER_ASK_PAGE_SIZE;
+
+        if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
+            dialog.getOptionPanel().addOption(label, optionId);
+            if (asked) dialog.setOptionColor(optionId, FishRarity.COMMON.color);
+        }
+
+        local.set(FISHER_ASK_COUNT, index + 1, 0);
+        return true;
+    }
+
+    /** Adds version-safe navigation after the topic stream, with every label still from rules. */
+    protected boolean finishFisherQuestions(InteractionDialogAPI dialog, List<Token> params,
+                                             Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
+        if (dialog == null || dialog.getOptionPanel() == null || local == null
+                || params.size() < 7) {
+            return false;
+        }
+
+        int page = Math.max(0, local.getInt(FISHER_ASK_PAGE));
+        int count = local.getInt(FISHER_ASK_COUNT);
+
+        String previousId = params.get(1).getString(memoryMap);
+        String previousLabel = params.get(2).getString(memoryMap);
+        String nextId = params.get(3).getString(memoryMap);
+        String nextLabel = params.get(4).getString(memoryMap);
+        String backId = params.get(5).getString(memoryMap);
+        String backLabel = params.get(6).getString(memoryMap);
+
+        if (page > 0) dialog.getOptionPanel().addOption(previousLabel, previousId);
+        if (count > (page + 1) * FISHER_ASK_PAGE_SIZE) {
+            dialog.getOptionPanel().addOption(nextLabel, nextId);
+        }
+        dialog.getOptionPanel().addOption(backLabel, backId);
         return true;
     }
 
@@ -649,12 +701,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
-        MemoryAPI global = Global.getSector().getMemoryWithoutUpdate();
-        local.set(FISHER_ASK_AGAIN, hasAskedFisherTopic(global), 0);
-        local.set(FISHER_ASK_PAGE_ONE, hasUnaskedFisherTopicFrom(global, 6), 0);
-        local.set(FISHER_ASK_AGAIN_PAGE_ONE,
-                hasAskedFisherTopicFrom(global, 6), 0);
-
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
@@ -689,27 +735,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             local.set(WORK_PAY, Misc.getDGSCredits(work.credits), 0);
             local.set(WORK_POND, work.atPond, 0);
         }
-    }
-
-    /** True once any repeatable Fisherman topic has been answered in this campaign. */
-    protected boolean hasAskedFisherTopic(MemoryAPI global) {
-        return hasAskedFisherTopicFrom(global, 0);
-    }
-
-    /** True when a completed repeatable topic exists at or after the supplied page boundary. */
-    protected boolean hasAskedFisherTopicFrom(MemoryAPI global, int first) {
-        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
-            if (global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
-        }
-        return false;
-    }
-
-    /** True when an unasked repeatable topic exists at or after the supplied page boundary. */
-    protected boolean hasUnaskedFisherTopicFrom(MemoryAPI global, int first) {
-        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
-            if (!global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
-        }
-        return false;
     }
 
     //---------------------------------------------------------------- panels
@@ -849,16 +874,19 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected static FishermanQuest.Saved pending;
 
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
+        if (local != null) local.set(WORK_ROLLED, false, 0);
+
         pending = FishermanQuest.roll();
         if (pending == null) return false;
 
-        MemoryAPI local = memoryMap.get("local");
         if (local == null) return true;
 
         local.set(WORK_FISH, FishermanQuest.describe(pending), 0);
         local.set(WORK_WHERE, pending.systemName, 0);
         local.set(WORK_PAY, Misc.getDGSCredits(pending.credits), 0);
         local.set(WORK_POND, pending.atPond, 0);
+        local.set(WORK_ROLLED, true, 0);
 
         return true;
     }

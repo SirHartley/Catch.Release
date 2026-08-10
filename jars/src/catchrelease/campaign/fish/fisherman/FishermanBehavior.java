@@ -15,7 +15,9 @@ import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -281,6 +283,21 @@ public class FishermanBehavior implements EveryFrameScript {
      * {@code NON_HOSTILE_OVERRIDES_MAKE_HOSTILE} is vanilla's own answer to that, and moves the
      * non-hostility to the front of the same method.
      * <p>
+     * There is a third, separate course change that does not mean hostility or flight at all:
+     * {@code TacticalModule} asks the navigation module to avoid even friendly fleets when their
+     * radii nearly touch. On a slow boat that short-lived collision course reads exactly like
+     * running, and none of the hostility flags reaches it. Vanilla's
+     * {@code DO_NOT_TRY_TO_AVOID_NEARBY_FLEETS} is the gate for that branch. The navigation module
+     * also remembers an avoidance request for half a day, so an old one for the player is removed
+     * directly instead of waiting for it to time out.
+     * <p>
+     * Hostility is reciprocal in the tactical scan: it asks whether either fleet considers the
+     * other hostile. The general non-hostile flag only answers the boat's half of that question.
+     * If the player is hostile to the Independents, their AI can still supply the hostile answer
+     * and send this all-civilian fleet into the full disengage branch. Vanilla's faction-specific
+     * non-hostility is checked from both directions, so the boat carries a permanent player entry
+     * as well.
+     * <p>
      * Written every frame rather than at spawn, because a boat already out there in somebody's save
      * never passed through the spawner - and if it is already running, this is what stops it.
      */
@@ -299,6 +316,11 @@ public class FishermanBehavior implements EveryFrameScript {
             memory.set(MemFlags.NON_HOSTILE_OVERRIDES_MAKE_HOSTILE, true);
         }
 
+        String playerTruce = MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE + "_" + Factions.PLAYER;
+        if (!memory.getBoolean(playerTruce)) {
+            Misc.makeNonHostileToFaction(fleet, Factions.PLAYER, -1f);
+        }
+
         //the boat is not a party to whatever the player has going with the Independents
         if (memory.getBoolean(MemFlags.MEMORY_KEY_MAKE_HOSTILE)) {
             memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE);
@@ -311,6 +333,15 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (memory.getBoolean(HarpoonOffence.FLEEING_FLAG)) {
             memory.unset(HarpoonOffence.FLEEING_FLAG);
+        }
+
+        if (!memory.getBoolean(MemFlags.DO_NOT_TRY_TO_AVOID_NEARBY_FLEETS)) {
+            memory.set(MemFlags.DO_NOT_TRY_TO_AVOID_NEARBY_FLEETS, true);
+        }
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player != null && fleet.getAI() instanceof ModularFleetAIAPI) {
+            ((ModularFleetAIAPI) fleet.getAI()).getNavModule().unavoidEntity(player);
         }
 
         keepOutOfEverybodysWay(memory);
