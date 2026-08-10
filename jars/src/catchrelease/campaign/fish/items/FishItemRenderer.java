@@ -49,6 +49,35 @@ public class FishItemRenderer {
     }
 
     /**
+     * Draws an icon into a four-corner surface, using the same normal and mouseover passes as a
+     * loose specimen. Vanilla's blueprint items use {@link SpriteAPI#renderWithCorners(float,
+     * float, float, float, float, float, float, float)} to lay art onto skewed cargo-icon faces;
+     * keeping that transform here lets a fish box use its label as the corresponding surface.
+     */
+    public static void renderIconWithCorners(String path,
+                                             float blX, float blY, float tlX, float tlY,
+                                             float trX, float trY, float brX, float brY,
+                                             float alphaMult, float glowMult) {
+
+        SpriteAPI sprite = SpriteLoader.loadSprite(path);
+        if (sprite == null || alphaMult <= 0f) return;
+
+        sprite.setColor(Color.WHITE);
+        sprite.setNormalBlend();
+        sprite.setAlphaMult(alphaMult);
+        sprite.renderWithCorners(blX, blY, tlX, tlY, trX, trY, brX, brY);
+
+        if (glowMult > 0f) {
+            sprite.setAdditiveBlend();
+            sprite.setAlphaMult(alphaMult * glowMult * FishConstants.ITEM_ICON_MOUSEOVER_MULT);
+            sprite.renderWithCorners(blX, blY, tlX, tlY, trX, trY, brX, brY);
+        }
+
+        sprite.setNormalBlend();
+        sprite.setAlphaMult(1f);
+    }
+
+    /**
      * One row across the top left of the icon: the species' rarity as a single unbroken bar three
      * pips long, then the specimen's grade as pips after it.
      */
