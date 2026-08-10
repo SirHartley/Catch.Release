@@ -341,7 +341,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `FishHandoffPicker.java` | Builds the eligible loose-fish cargo, validates an exact non-overlapping assignment against every ask (including same-species orders), and spends only the specimens the player selected |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
 | `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop and Blueprint. LocationData is the internal range-data reward; it carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff. The retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
-| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints |
+| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints. Equipment-gated tackle does not enter the reward pool before its prerequisite rig is in the player's hands |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
@@ -482,7 +482,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
 | `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
-| `ShopPricing.java` | Per-campaign seeded prices in credits and fish |
+| `ShopPricing.java` | Per-campaign seeded prices in credits and fish. The capability-changing Breach Coupler occupies the unique top tackle tier: 20,000 credits plus a tier-five named catch ask |
 | `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which only the outfitter asks; `isWanted` counts every `FishAsker` in the log too, which is what the dot means on every other screen, and is cached because it is asked per cell per frame |
 | `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
@@ -520,8 +520,8 @@ Modules bolted to a rig.
 
 | File | What it does |
 |---|---|
-| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play |
-| `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE` |
+| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play. `BREACH_COUPLER` is the drone rig's permission to use lamp-cut openings in open space |
+| `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE`. Gear-dependent modules stay off the shelf and out of rewards until their prerequisite is owned, while an already-owned module remains refittable for save compatibility |
 
 ### `campaign/fish/map`
 The sector-map fish filter.
@@ -609,11 +609,11 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 |---|---|
 | `FishingRigs.java` | One answer to "is any rig running" - lamps lit, swarm out, or a line in the water |
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond with the breach lamps lit, sends a roaming one instead. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall. The button stays active but disabled once only catch carriers are returning, since no drone remains to command |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond, a fitted Breach Coupler plus lit breach lamps sends a roaming one instead. Lit lamps disable the stock ROD rather than granting that mode for free. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall. The button stays active but disabled once only catch carriers are returning, since no drone remains to command |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
-| `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: a screen flying with the fleet, going after buried motes the breach lamps have **lit outright** and unearthing them on contact. A dent is not a hole — taking one is the harpoon's Fathom Head and nothing else |
+| `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: with a Breach Coupler fitted, a screen flying with the fleet goes after buried motes the breach lamps have **lit outright** and unearths them on contact. A dent is not a hole — taking one is the harpoon's Fathom Head and nothing else. Losing either the lamp opening or the coupler recalls the screen |
 | `rod/rendering/FishingRingRenderer.java` | The dashed ring showing the fishing radius |
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |

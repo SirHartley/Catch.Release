@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.tackle;
 
 import catchrelease.campaign.fish.data.FishLogEntry;
+import catchrelease.memory.upgrades.StatIds;
 import com.fs.starfarer.api.Global;
 
 import java.util.ArrayList;
@@ -75,21 +76,31 @@ public class TackleManager {
     }
 
     /**
-     * Everything that could go in a rig's slot, for a shop to list - what the shelf stocks, plus
-     * anything already owned however it was come by. Without the second half, a module bought
-     * somewhere other than the shop could never be taken off and put back on again.
+     * Everything that could go in a rig's slot, for a shop to list - unlocked stock, plus anything
+     * already owned however it was come by. Without the second half, a module bought somewhere
+     * other than the shop could never be taken off and put back on again.
      */
     public static List<Tackle> getOptions(Tackle.Fit rig) {
         List<Tackle> out = new ArrayList<>();
 
         for (Tackle tackle : Tackle.values()) {
             if (!tackle.fits(rig)) continue;
+            if (!isUnlocked(tackle) && !isOwned(tackle)) continue;
             if (!tackle.stocked && !isOwned(tackle)) continue;
 
             out.add(tackle);
         }
 
         return out;
+    }
+
+    /** Whether the module's prerequisite equipment has been introduced. Owned modules stay
+     * available through {@link #getOptions(Tackle.Fit)} even if a migrated save lacks that gear. */
+    public static boolean isUnlocked(Tackle tackle) {
+        if (tackle == null || !tackle.breachCoupling) return true;
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
+
+        return Global.getSector().getPlayerFleet().hasAbility(StatIds.LAMPS_ABILITY);
     }
 
     /**

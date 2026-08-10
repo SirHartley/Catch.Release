@@ -6,6 +6,8 @@ import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.abilities.rod.scripts.RoamingDroneSwarmScript;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.skillshot.SkillshotFramework;
@@ -27,7 +29,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     //Press once to unlock nearby pond
     //once unlocked, this ability changes to a targetted skillshot instead for the angler behaviour
-    //away from any pond, with the breach lamps lit, the press sends a roaming screen instead
+    //away from any pond, with the breach lamps lit and their coupler fitted, the press sends a
+    //roaming screen instead
     //while a swarm is out the press is the recall instead, and the ability reads as active until
     //the last drone is home
 
@@ -38,8 +41,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     /**
      * No-aim presses: dispatch a roaming screen, or force open a shut pond. Lamps checked first -
-     * the rod can't open a rupture while breach lamps are lit (the two rigs take turns), and roaming
-     * is preferred there since the lamps already cut windows to fish through.
+     * the rod can't open a rupture while breach lamps are lit (the two rigs take turns), and a
+     * fitted coupler lets roaming use the openings the lamps already cut.
      */
     @Override
     protected void onActivatedWithoutReticule() {
@@ -54,11 +57,15 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     /**
-     * True when breach lamps are lit - only then does a roaming screen have windows to fish through,
-     * and it's also when the rod can't open a rupture anyway (the two rigs take turns).
+     * True when breach lamps are lit and the drone rig has the coupler that lets its LINE use those
+     * temporary openings. The two rigs take turns; without the coupler, a lit lamp blocks the ROD.
      */
     public boolean isRoamingAvailable() {
-        return SearchlightAbilityPlugin.isBreaching();
+        return SearchlightAbilityPlugin.isBreaching() && hasBreachCoupler();
+    }
+
+    protected boolean hasBreachCoupler() {
+        return TackleManager.get(Tackle.Fit.DRONE).breachCoupling;
     }
 
     public void unlockClosestPond() {
@@ -128,6 +135,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
             return !swarm.isRecalling() && swarm.hasRecallableDrones() && disableFrames <= 0;
         }
 
+        //lamps replace the natural rupture with temporary openings the stock drone rig cannot use
+        if (SearchlightAbilityPlugin.isBreaching() && !hasBreachCoupler()) return false;
+
         SectorEntityToken pond = getPond();
 
         //an occupied rupture is the camp's leverage: leaving is allowed, fishing is not
@@ -175,9 +185,10 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         float pad = 10f;
         tooltip.addPara("Forces open a pond rupture.", pad);
 
-        tooltip.addPara("Away from any rupture, with the %s lit, sends a drone screen out around the"
-                + " fleet instead - it flies with you and goes through the beams' own windows after"
-                + " whatever they have found down there.", pad, highlight, "breach lamps");
+        tooltip.addPara("Away from any rupture, with a %s fitted and the %s lit, sends a drone screen"
+                        + " out around the fleet instead - it flies with you and goes through the"
+                        + " beams' own openings after whatever they have found down there.", pad,
+                highlight, Tackle.BREACH_COUPLER.name, "breach lamps");
 
         if (!Global.CODEX_TOOLTIP_MODE) {
             SectorEntityToken pond = getPond();
@@ -186,6 +197,10 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
             if (CampedSpot.isPondBlocked(pond)) {
                 tooltip.addPara("A fleet is sitting on this rupture. The ROD cannot be deployed here.",
                         Misc.getNegativeHighlightColor(), pad);
+            } else if (SearchlightAbilityPlugin.isBreaching() && !hasBreachCoupler()) {
+                tooltip.addPara("The breach lamps are lit, but the drone rig needs a %s to use their"
+                                + " openings.", pad, Misc.getNegativeHighlightColor(),
+                        Tackle.BREACH_COUPLER.name);
             } else if (isRoamingAvailable()) {
                 tooltip.addPara("The breach lamps are lit. The drones will roam.", highlight, pad);
             } else if (pond == null) {

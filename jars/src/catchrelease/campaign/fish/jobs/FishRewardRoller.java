@@ -97,11 +97,15 @@ public class FishRewardRoller {
         return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
     }
 
-    /** A module the player does not already own - owned once, fitted freely, so a duplicate is nothing. */
+    /** An unlocked module the player does not already own - owned once, fitted freely, so a
+     * duplicate is nothing. */
     protected static FishReward rollTackle(Random random) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
-            if (tackle != Tackle.NONE && !TackleManager.isOwned(tackle)) options.add(tackle);
+            if (tackle != Tackle.NONE && TackleManager.isUnlocked(tackle)
+                    && !TackleManager.isOwned(tackle)) {
+                options.add(tackle);
+            }
         }
 
         if (options.isEmpty()) return null;

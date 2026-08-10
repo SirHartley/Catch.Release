@@ -5,6 +5,8 @@ import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -18,10 +20,10 @@ import java.util.List;
  * lamps ({@link SearchlightAbilityPlugin}) have lit up as buried nearby, pulling it through on
  * contact and playing the same catch as any other rig.
  * <p>
- * Depends entirely on the lamps - a breach lamp burns a window a drone can pass through, which is
- * the only way anything buried is reachable, so this swarm is cast while the lights are on and
- * recalled the moment they go off. Drone count, reach, rarity priority, speed and steering are
- * unchanged from the normal swarm; only the search center and target type differ.
+ * Depends on the lamps and the drone rig's Breach Coupler - a breach lamp burns an opening and the
+ * coupler lets the LINE use it, so this swarm is recalled when either one is gone. Drone count,
+ * reach, rarity priority, speed and steering are unchanged from the normal swarm; only the search
+ * center and target type differ.
  */
 public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
@@ -135,6 +137,7 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
     protected boolean shouldRecall() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null || !SearchlightAbilityPlugin.isBreaching()) return true;
+        if (!TackleManager.get(Tackle.Fit.DRONE).breachCoupling) return true;
 
         for (SectorEntityToken drone : drones) {
             if (drone.getContainingLocation() != fleet.getContainingLocation()) return true;
