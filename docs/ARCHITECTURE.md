@@ -181,6 +181,8 @@ The rupture-interception twin for `catchrelease_introCurious` omits only the fin
 `Come alongside` sentence because the interception greeting has already delivered that same line.
 The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
 gated on stage 6, while the question rows retain their own information-release gates.
+His outfitter lesson and repeatable tackle/upgrade answers explain that jobs award schematics,
+schematics unlock purchases rather than grant hardware, and only the final two upgrade rungs need them.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
 topics stay in the root submenu; answered topics move to `Ask again`. Both panes page their
 topics six at a time, retain their current page after an answer returns, and hide a next-page

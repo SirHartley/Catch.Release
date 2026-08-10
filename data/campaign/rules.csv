@@ -1,7 +1,7 @@
 id,trigger,conditions,script,text,options,notes
 catchrelease_hitmanEncounter,BeginFleetEncounter,$catchrelease_harpoonHitman score:1200,"FleetDesc
-HailPlayer",,,"The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first."
-catchrelease_hitmanHail,OpenCommLink,$entity.catchrelease_harpoonHitman score:1600,"Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
+HailPlayer",,,The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first.
+catchrelease_hitmanHail,OpenCommLink,$entity.catchrelease_harpoonHitman score:1600,Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence,"The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
 
 ""$entity.catchrelease_harpoonHitmanClient placed the contract. You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code.""
 
@@ -948,7 +948,7 @@ CatchReleaseCMD castawayEligible score:1100","CatchReleaseCMD startCastaway
 $option = catchrelease_castawayPlanetOpen 0
 FireBest DialogOptionSelected",,,"Technical survey hook, shaped after gaIntro2surveyOpen: the planet remains the interaction target and the supplied scene opens before vanilla performs the survey."
 catchrelease_castawayReminder,PopulateOptions,"$market.catchrelease_castawayHost
-!$market.catchrelease_castawayRescued",,,catchrelease_castawayContact:Respond to the survivor's beacon,"The survey found a surface cache; leaving its scene open does not make the host planet disappear."
+!$market.catchrelease_castawayRescued",,,catchrelease_castawayContact:Respond to the survivor's beacon,The survey found a surface cache; leaving its scene open does not make the host planet disappear.
 catchrelease_castawayContact,DialogOptionSelected,$option == catchrelease_castawayContact,"$option = catchrelease_castawayPlanetOpen 0
 FireBest DialogOptionSelected",,,
 catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
@@ -958,7 +958,7 @@ The source is a prefabricated cache dug into the surface. Most of it is storage,
 The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
 10:catchrelease_ratingWho:Ask who he worked for
 20:catchrelease_ratingRescue:Offer passage
-100:catchrelease_castawayLeave:Leave","Technical routing twin for the planet-hosted survey flow; supplied scene text and sequencing remain verbatim."
+100:catchrelease_castawayLeave:Leave",Technical routing twin for the planet-hosted survey flow; supplied scene text and sequencing remain verbatim.
 catchrelease_castawayOpen,OpenInteractionDialog,$entity.tag:catchrelease_castaway score:1000,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
@@ -1120,14 +1120,14 @@ $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:"I just left you in another system.",
+!$global.catchrelease_fisherAsked_fourJumps",,,"60:catchrelease_intro_fourJumps:""I just left you in another system.""",
 catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:"Is this the same ship?",
+!$global.catchrelease_fisherAsked_sameHull",,,"70:catchrelease_introSameHull:""Is this the same ship?""",
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
@@ -1239,9 +1239,9 @@ They nod vaguely upward.
 A pause.
 
 ""Ask for the Fisherman.""",,
-catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:""Where do I find the trawler?"","Shared local menu: asked flags exist only for this bar conversation."
-catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:""What exactly is a rating?"",
-catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:""Fishing. In space."",
+catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,"0:catchrelease_ratingBarWhere:""""Where do I find the trawler?""""",Shared local menu: asked flags exist only for this bar conversation.
+catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,"10:catchrelease_ratingBarWhatRating:""""What exactly is a rating?""""",
+catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,"20:catchrelease_ratingBarFishing:""""Fishing. In space.""""",
 catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,"Always present, including after all three questions have been consumed, so the event never has an empty option panel."
 catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
 FireAll CatchReleaseRatingQuestions","""Ship's crew.""
@@ -1665,6 +1665,8 @@ catchrelease_ask_tackle,DialogOptionSelected,$option == catchrelease_ask_tackle,
 
 He taps the manifest.
 
+""Jobs turn up the schematics. Bring one back, and that tackle goes on the invoice.""
+
 ""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAsk
@@ -1675,6 +1677,8 @@ $catchreleaseFisherAskPage == 1
 catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
 
 He points at the entry.
+
+""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
 
 ""Improves the function listed on it.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
@@ -2048,18 +2052,24 @@ catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introSho
 
 He gestures at your manifest.
 
-""If the hardware isn't on your ship, it has no business on the invoice.""","0:catchrelease_introAskTackle:""What is tackle?""
+""If the hardware isn't on your ship, it has no business on the invoice.""
+
+""Some lines stay off it until a job turns up the schematic. A schematic opens the purchase. It isn't the hardware.""","0:catchrelease_introAskTackle:""What is tackle?""
 10:catchrelease_introAskUpgrade:""What is an upgrade?""
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
 
 He taps the manifest.
 
+""Jobs turn up the schematics. Bring one back, and that tackle goes on the invoice.""
+
 ""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:""What is an upgrade?""
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
 
 He points at the entry.
+
+""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
 
 ""Improves the function listed on it.""","0:catchrelease_introAskTackle:""What is tackle?""
 100:catchrelease_introDeepGear:Continue",
@@ -2118,12 +2128,12 @@ He considers the launcher.
 A beat.
 
 ""Don't shoot either one at people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
-catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,0:catchrelease_introLightQuestion:""The lights make a rupture?"",
-catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?"",
-catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,20:catchrelease_introWeaponQuestion:""This is a weapon."",
+catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,"0:catchrelease_introLightQuestion:""""The lights make a rupture?""""",
+catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,"10:catchrelease_introHarpoonQuestion:""""And the line behind the harpoon?""""",
+catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,"20:catchrelease_introWeaponQuestion:""""This is a weapon.""""",
 catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleaseIntroLightAsked
 $catchreleaseIntroHarpoonAsked
-$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:""What do you want caught?"",The assignment continuation appears after all three equipment and safety questions have been covered.
+$catchreleaseIntroWeaponAsked",,,"100:catchrelease_introDeepDone:""""What do you want caught?""""",The assignment continuation appears after all three equipment and safety questions have been covered.
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
@@ -2154,7 +2164,7 @@ The Fisherman gives you a look over the rim of his mug.
 
 When you wait for the rest, he puts the mug down.
 
-""That's enough answer for a chart.""",10:catchrelease_introPlannerAsk:""You want both of these?"",The optional survey-source answer returns to the required planner question rather than skipping it.
+""That's enough answer for a chart.""","10:catchrelease_introPlannerAsk:""""You want both of these?""""",The optional survey-source answer returns to the required planner question rather than skipping it.
 catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,,"""One of each.""
 
 He brings up your sector map and marks the fishing-planner control.
@@ -2791,7 +2801,7 @@ FireAll CatchReleaseCampOptions","""This spot's off limits.""
 
 The pirate glances toward the rupture.
 
-""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,"The first hail is the end of the camp's one-time intercept. The memory flag sends it back to its passive hold; later contacts fall through to the ordinary camp conversation."
+""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,The first hail is the end of the camp's one-time intercept. The memory flag sends it back to its passive hold; later contacts fall through to the ordinary camp conversation.
 catchrelease_campFirstHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
