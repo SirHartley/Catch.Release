@@ -12,6 +12,7 @@ import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
@@ -457,11 +458,45 @@ public class FishShopDialog implements InteractionDialogPlugin {
             list = panel.createUIElement(LIST_WIDTH, height, true);
 
             for (ShopEntry entry : getVisible()) {
-                list.addCustom(panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
-                        new ShopRowPlugin(entry, this)), 3f);
+                CustomPanelAPI row = panel.createCustomPanel(ROW_WIDTH, ROW_HEIGHT,
+                        new ShopRowPlugin(entry, this));
+                list.addCustom(row, 3f);
+
+                if (entry.isLocked()) {
+                    list.addTooltipTo(createLockedTooltip(entry), row,
+                            TooltipMakerAPI.TooltipLocation.BELOW);
+                }
             }
 
             listViewport = place(list, PAD, top);
+        }
+
+        protected TooltipMakerAPI.TooltipCreator createLockedTooltip(ShopEntry entry) {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    tooltip.addPara("Schematic required", Misc.getHighlightColor(), 0f);
+
+                    if (entry.isUpgrade()) {
+                        tooltip.addPara("Level %s is one of this ladder's final two rungs."
+                                        + " Fishing jobs can offer its schematic.", 6f,
+                                Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
+                        tooltip.addPara("Each schematic unlocks one rung for purchase; it does not"
+                                + " grant the upgrade.", Misc.getGrayColor(), 6f);
+                    } else {
+                        tooltip.addPara("Fishing jobs can offer the %s schematic.", 6f,
+                                Misc.getHighlightColor(), entry.getName());
+                        tooltip.addPara("It unlocks this tackle for purchase; it does not grant"
+                                + " the hardware.", Misc.getGrayColor(), 6f);
+                    }
+                }
+            };
         }
 
         protected void buildDetail() {

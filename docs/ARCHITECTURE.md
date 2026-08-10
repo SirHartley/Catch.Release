@@ -182,6 +182,8 @@ The rupture-interception twin for `catchrelease_introCurious` omits only the fin
 The Fisherman's `Ask about something else` submenu opens at stage 2, in the same `giveRod()` call
 that assigns the first tutorial target. The question rows retain their own information-release
 gates, so later subjects do not appear merely because the menu itself is available.
+His outfitter lesson and repeatable tackle/upgrade answers explain that jobs award schematics,
+schematics unlock purchases rather than grant hardware, and only the final two upgrade rungs need them.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
 and answered topics share the same submenu without a separate repeat-question state. Two dedicated
 rules triggers stream every relevant unasked topic first and every answered topic afterward; the
@@ -342,11 +344,11 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 
 | File | What it does |
 |---|---|
-| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. Hand-over opens an asynchronous exact-specimen picker, then fires the existing payout rows only after the chosen fish have been spent. Fish names and explicit rarity floors in its intel and picker wear their canonical rarity colours. A `FishAsker`, so its asks reach the wanted-fish marks |
+| `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. Offer rows can call back into it to inject item-style explanation cards for schematic rewards. Hand-over opens an asynchronous exact-specimen picker, then fires the existing payout rows only after the chosen fish have been spent. Fish names and explicit rarity floors in its intel and picker wear their canonical rarity colours. A `FishAsker`, so its asks reach the wanted-fish marks |
 | `FishHandoffPicker.java` | Builds the eligible loose-fish cargo, validates an exact non-overlapping assignment against every ask (including same-species orders), and spends only the specimens the player selected |
 | `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
-| `FishReward.java` | Reward base plus Credits, Upgrade, Tackle, LocationData, Backdrop and Blueprint. LocationData is the internal range-data reward; it carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff. The retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
-| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying upgrades, tackle or blueprints. Equipment-gated tackle does not enter the reward pool before its prerequisite rig is in the player's hands |
+| `FishReward.java` | Reward base plus Credits, old-save direct Upgrade/Tackle grants, UpgradeSchematic, TackleSchematic, LocationData, Backdrop and Blueprint. Schematic rewards provide their own 48px offer card, with the relevant tackle description or upgrade value change and an explicit purchase-only note. New gear rewards unlock one outfitter purchase rather than handing over hardware or a free level. LocationData is the internal range-data reward; it carries its rolled cash value and turns into that credit payment if the species' range becomes known before handoff. The retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
+| `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying blueprints. Stocked tackle and the next quest-gated upgrade rung enter as purchase-unlock schematics; known plans and plans promised by accepted, non-ending jobs are reserved out of the pool, including across both slots of one roll. Lower upgrade rungs remain ordinary outfitter purchases, and Crablobab's unstocked consumable head stays outside this pool |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
@@ -484,8 +486,8 @@ The outfitter: upgrades and tackle bought with fish.
 
 | File | What it does |
 |---|---|
-| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
-| `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy |
+| `FishShopDialog.java` | The dialog: tabs, list, detail pane, buy - the store/retrieve counter is gone. Locked rows explain their missing quest schematic on hover, including the purchase-only distinction and the final-two-rung rule. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
+| `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy, including the schematic lock that blocks purchase without hiding introduced stock |
 | `ShopGroup.java` | The shelves, and which stat ids and rigs belong to which |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish. The capability-changing Breach Coupler occupies the unique top tackle tier: 20,000 credits plus a tier-five named catch ask |
 | `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which only the outfitter asks; `isWanted` counts every `FishAsker` in the log too, which is what the dot means on every other screen, and is cached because it is asked per cell per frame |
@@ -493,6 +495,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
+| `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought |
 | `FishShopAbilityPlugin.java` | Hidden inert migration stub for the removed ability-bar shortcut; load cleanup removes it and its hotbar references from old saves |
 | `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
 | `ShopTabPlugin.java` | One tab button |
@@ -585,7 +588,7 @@ The pond, as terrain.
 | `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
-| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind |
+| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. An in-range open pond takes external viewport control on its first unobscured frame; the near-fleet handback threshold applies only while returning, so close openings cannot reset acquisition forever |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |
 | `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Current default |
 | `renderer/RippleData.java` | One ripple emitter, spawning ring renderers into LunaLib's list |

@@ -3,8 +3,12 @@ package catchrelease.campaign.fish.jobs.fleet;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
@@ -65,6 +69,9 @@ public class FleetQuest extends FishJob {
      * mission and no tokens. Handing the sentence over on the fleet's memory sidesteps all of it.
      */
     public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
+
+    /** Offer text counterpart to {@link #ASK_KEY}; also lets the sheet highlight the terms. */
+    public static final String REWARD_KEY = "$catchrelease_fleetQuestReward";
 
     /** Set once the player has agreed, so the opening pitch is not read out a second time. */
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
@@ -286,7 +293,13 @@ public class FleetQuest extends FishJob {
         addReward(FishReward.credits(worth));
 
         if (ask.minRarity != null && ask.minRarity.ordinal() >= FishRarity.RARE.ordinal()) {
-            addReward(FishReward.upgrade(StatIds.HARPOON_SPEED, 1));
+            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);
+            int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
+            String key = ShopSchematics.getKey(stat == null ? null : stat.id, targetLevel);
+            if (targetLevel > 0 && !ShopSchematics.has(stat, targetLevel)
+                    && !FishRewardRoller.isSchematicReserved(key)) {
+                addReward(FishReward.upgradeSchematic(stat.id, targetLevel));
+            }
         }
 
         // A clock, now that there is somewhere for it to end. The hull the job runs on is a copy
@@ -316,6 +329,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
         giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
+        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
 
         //a scavenger that decides mid-errand that the player looks like salvage is a scavenger the
         //player can no longer hand a fish to. Whatever else they were going to do out here, the one
@@ -340,6 +354,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
         giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
+        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
 
         //carried over rather than re-derived: the answer was given to the hull that is now gone, and
         //without it the copy would open by making the same offer over again
@@ -420,6 +435,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(QUEST_FLAG);
         giver.getMemoryWithoutUpdate().unset(PITCH_KEY);
         giver.getMemoryWithoutUpdate().unset(ASK_KEY);
+        giver.getMemoryWithoutUpdate().unset(REWARD_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
         giver.getMemoryWithoutUpdate().unset(REF_KEY);
 

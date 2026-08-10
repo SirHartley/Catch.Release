@@ -160,7 +160,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = entry.isDone() || (entry.isCurio() && !entry.isOn()) ? Misc.getGrayColor()
+        Color color = entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn()) ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
@@ -196,6 +196,11 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         if (entry.isDone()) {
             drawMark(entry.isUpgrade() ? "MAX" : "FITTED", Misc.getPositiveHighlightColor(),
                     right, y, height, alphaMult);
+            return;
+        }
+
+        if (entry.isLocked()) {
+            drawMark("LOCKED", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 

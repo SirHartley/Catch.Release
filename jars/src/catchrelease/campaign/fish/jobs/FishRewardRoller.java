@@ -6,10 +6,12 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
@@ -17,8 +19,10 @@ import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Rolls a job's payment fresh each time, rather than a fixed rate - jobs repeat, and a fixed payment
@@ -46,17 +50,24 @@ public class FishRewardRoller {
      */
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
         List<FishReward> rewards = new ArrayList<>();
+        Set<String> reserved = getReservedSchematicKeys();
         if (random == null) random = new Random();
 
         int value = vary(random, worth);
 
-        FishReward main = rollOne(random, value, allowCredits);
-        if (main != null) rewards.add(main);
+        FishReward main = rollOne(random, value, allowCredits, reserved);
+        if (main != null) {
+            rewards.add(main);
+            reserve(main, reserved);
+        }
 
         // A second, smaller reward on the better jobs.
         if (value > VALUE_PER_FISH * 3 && random.nextFloat() > 0.45f) {
-            FishReward extra = rollOne(random, value / 3, allowCredits);
-            if (extra != null) rewards.add(extra);
+            FishReward extra = rollOne(random, value / 3, allowCredits, reserved);
+            if (extra != null) {
+                rewards.add(extra);
+                reserve(extra, reserved);
+            }
         }
 
         // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
@@ -65,12 +76,13 @@ public class FishRewardRoller {
         return rewards;
     }
 
-    protected static FishReward rollOne(Random random, int value, boolean allowCredits) {
+    protected static FishReward rollOne(Random random, int value, boolean allowCredits,
+                                        Set<String> reserved) {
         float roll = random.nextFloat();
 
         if (allowCredits && roll < 0.34f) return FishReward.credits(creditPayout(value));
-        if (roll < 0.52f) return rollUpgrade(random);
-        if (roll < 0.66f) return rollTackle(random);
+        if (roll < 0.52f) return rollUpgrade(random, reserved);
+        if (roll < 0.66f) return rollTackle(random, reserved);
         if (roll < 0.78f) return rollLocationData(random, value);
         if (roll < 0.86f) return rollBackdrop(random);
         if (allowCredits && roll < 0.93f) return FishReward.credits(creditPayout(value));
@@ -78,8 +90,8 @@ public class FishRewardRoller {
         return rollBlueprint(random);
     }
 
-    /** A rung on something, chosen from the sheet rather than from a list kept here. */
-    protected static FishReward rollUpgrade(Random random) {
+    /** A purchase plan for the next gated rung, chosen from the sheet rather than a fixed list. */
+    protected static FishReward rollUpgrade(Random random, Set<String> reserved) {
         if (UpgradeManager.getInstance() == null) return null;
 
         List<UpgradeStat> open = new ArrayList<>();
@@ -87,30 +99,65 @@ public class FishRewardRoller {
             if (stat == null || stat.id == null) continue;
             if (stat.id.equalsIgnoreCase("example")) continue;
 
-            if (stat.maxLevel > 0 && stat.level >= stat.maxLevel) continue;
+            int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
+            if (targetLevel < 0 || ShopSchematics.has(stat, targetLevel)) continue;
+            if (reserved.contains(ShopSchematics.getKey(stat.id, targetLevel))) continue;
 
             open.add(stat);
         }
 
         if (open.isEmpty()) return null;
 
-        return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
+        UpgradeStat stat = open.get(random.nextInt(open.size()));
+
+        return FishReward.upgradeSchematic(stat.id, ShopSchematics.getNextRequiredLevel(stat));
     }
 
-    /** An unlocked module the player does not already own - owned once, fitted freely, so a
-     * duplicate is nothing. */
-    protected static FishReward rollTackle(Random random) {
+    /** A stocked module whose purchase schematic is not yet known. Equipment prerequisites still
+     * apply, so a reward cannot advertise a rig the introduction has not handed over. */
+    protected static FishReward rollTackle(Random random, Set<String> reserved) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
-            if (tackle != Tackle.NONE && TackleManager.isUnlocked(tackle)
-                    && !TackleManager.isOwned(tackle)) {
+            if (tackle != Tackle.NONE && tackle.stocked && TackleManager.isUnlocked(tackle)
+                    && !ShopSchematics.has(tackle)
+                    && !reserved.contains(ShopSchematics.getKey(tackle))) {
                 options.add(tackle);
             }
         }
 
         if (options.isEmpty()) return null;
 
-        return FishReward.tackle(options.get(random.nextInt(options.size())));
+        return FishReward.tackleSchematic(options.get(random.nextInt(options.size())));
+    }
+
+    /** Schematic rewards on accepted jobs are promises already made and stay out of new offers. */
+    public static Set<String> getReservedSchematicKeys() {
+        Set<String> reserved = new LinkedHashSet<>();
+        if (Global.getSector() == null || Global.getSector().getIntelManager() == null) {
+            return reserved;
+        }
+
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
+            if (!(intel instanceof FishJob)) continue;
+
+            FishJob job = (FishJob) intel;
+            if (job.isEnding() || job.isEnded()) continue;
+
+            for (FishReward reward : job.getRewards()) reserve(reward, reserved);
+        }
+
+        return reserved;
+    }
+
+    public static boolean isSchematicReserved(String key) {
+        return key != null && getReservedSchematicKeys().contains(key);
+    }
+
+    protected static void reserve(FishReward reward, Set<String> reserved) {
+        if (reward == null || reserved == null) return;
+
+        String key = reward.getSchematicKey();
+        if (key != null) reserved.add(key);
     }
 
     /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */

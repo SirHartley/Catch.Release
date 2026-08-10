@@ -134,6 +134,17 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
     }
 
+    /** Visible stock whose quest-earned purchase schematic is not known yet. */
+    public boolean isLocked() {
+        if (kind == Kind.TACKLE) return !ShopSchematics.has(tackle);
+        if (!isUpgrade()) return false;
+
+        int targetLevel = getLevel() + 1;
+
+        return ShopSchematics.requires(stat, targetLevel)
+                && !ShopSchematics.has(stat, targetLevel);
+    }
+
     /** Next purchase's price, or null if free / nothing left to buy. An owned module is free to re-fit. */
     public ShopPricing.Price getPrice() {
         if (isOwned()) return null;
@@ -152,6 +163,8 @@ public class ShopEntry {
     }
 
     public boolean canAfford() {
+        if (isLocked()) return false;
+
         ShopPricing.Price price = getPrice();
         if (price == null) return true;
 
@@ -180,7 +193,7 @@ public class ShopEntry {
      * @return false if it could not be paid for, in which case nothing changed
      */
     public boolean buy() {
-        if (isDone() || !canAfford()) return false;
+        if (isDone() || isLocked() || !canAfford()) return false;
 
         ShopPricing.Price price = getPrice();
         if (price != null) {
