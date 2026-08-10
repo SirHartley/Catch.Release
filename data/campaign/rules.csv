@@ -1206,7 +1206,8 @@ $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
-CatchReleaseCMD point","The rating hears you out, then turns the glass between both hands.
+CatchReleaseCMD point
+FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -1216,11 +1217,13 @@ They nod vaguely upward.
 
 A pause.
 
-""Ask for the Fisherman.""","0:catchrelease_ratingBarWhere:""Where do I find the trawler?""
-10:catchrelease_ratingBarWhatRating:""What exactly is a rating?""
-20:catchrelease_ratingBarFishing:""Fishing. In space.""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,,"""Ship's crew.""
+""Ask for the Fisherman.""",,
+catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:""Where do I find the trawler?"","Shared local menu: asked flags exist only for this bar conversation."
+catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:""What exactly is a rating?"",
+catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:""Fishing. In space."",
+catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,"Always present, including after all three questions have been consumed, so the event never has an empty option panel."
+catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
+FireAll CatchReleaseRatingQuestions","""Ship's crew.""
 
 The rating lifts one shoulder.
 
@@ -1228,19 +1231,20 @@ The rating lifts one shoulder.
 
 They take a drink.
 
-""Rating.""","0:catchrelease_ratingBarWhere:""And the fishing boat?""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,,"""That's what they call it.""
+""Rating.""",,
+catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,"$catchrelease_ratingAskedFishing = true 0
+FireAll CatchReleaseRatingQuestions","""That's what they call it.""
 
 The rating considers the objection.
 
-""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""","0:catchrelease_ratingBarWhere:""Where is this boat?""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,CatchReleaseCMD point,"""Past the last settled orbit. They don't berth much.""
+""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""",,
+catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,"CatchReleaseCMD point
+$catchrelease_ratingAskedWhere = true 0
+FireAll CatchReleaseRatingQuestions","""Past the last settled orbit. They don't berth much.""
 
 The rating gives you the relevant nav reference.
 
-""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",100:catchrelease_ratingBarBack:Go back to the bar,
+""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny

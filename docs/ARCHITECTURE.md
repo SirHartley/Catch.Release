@@ -205,6 +205,9 @@ The supplied second-return row remains verbatim but is dormant; its live routing
 species rather than asking for the first specimen again.
 Opening the bar rating's event sets `$global.catchrelease_metRating`; the two first-contact entry
 families use that flag to include the supplied rating-specific ROD option only after that meeting.
+The rating's three answers share a conversation-local option producer: each answer consumes only
+its own question, then returns to the remaining questions and the always-available bar exit, so
+the last answer cannot leave the event without a route out.
 Java is reached from a row in exactly one way, `CatchReleaseCMD <verb> [arg]`: in *conditions*,
 `tokens` writes the booleans and strings the rows branch on and always returns true, so it never
 changes whether a row matches; in *script*, a verb does the thing and returns whether it worked. The
