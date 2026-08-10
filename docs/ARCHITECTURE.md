@@ -580,7 +580,7 @@ The pond, as terrain.
 | `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
-| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind |
+| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. An in-range open pond takes external viewport control on its first unobscured frame; the near-fleet handback threshold applies only while returning, so close openings cannot reset acquisition forever |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |
 | `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Current default |
 | `renderer/RippleData.java` | One ripple emitter, spawning ring renderers into LunaLib's list |

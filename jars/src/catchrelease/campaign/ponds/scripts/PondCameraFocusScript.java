@@ -81,9 +81,10 @@ public class PondCameraFocusScript implements EveryFrameScript {
         start(fleet);
 
         boolean uiUp = isUiUp();
+        boolean focusRequested = shouldFocus(fleet);
 
         if (!uiUp) {
-            float target = shouldFocus(fleet) ? 1f : 0f;
+            float target = focusRequested ? 1f : 0f;
 
             focus = approach(focus, target, amount, getTimeConstant(target));
 
@@ -104,8 +105,12 @@ public class PondCameraFocusScript implements EveryFrameScript {
             return;
         }
 
-        //all the way back on the fleet - hand the camera over and leave it alone
-        if (Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
+        //Only use the proximity threshold on the way back. On the way in, a nearby pond can move
+        //the first eased centre by less than the threshold; resetting focus there every frame means
+        //external control is never acquired at all. An in-range pond owns the camera immediately,
+        //even while that first frame's centre is still effectively on the fleet.
+        if (!focusRequested
+                && Misc.getDistance(center, fleet.getLocation()) <= PondConstants.POND_FOCUS_HANDBACK_DISTANCE) {
             focus = 0f;
             releaseCamera();
 
