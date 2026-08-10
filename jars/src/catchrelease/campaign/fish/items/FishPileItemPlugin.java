@@ -27,8 +27,8 @@ import java.util.Map;
  * same - it is the hold's tidy-up. A campaign's fishing turns into a dozen crates that scroll, and
  * this is the one line they all go onto. There is only ever one; sweeping again folds into it.
  * <p>
- * Right-click puts it back the way it was: one crate per species, which is the tidy form somebody
- * would actually want to work from rather than a heap of loose specimens.
+ * Right-click puts it back into loose singletons and one crate per repeated species, which keeps a
+ * lone specimen visible without turning every repeated catch back into cargo clutter.
  * <p>
  * Structurally a crate without the one-species rule, which is what let every buyer, job and picker
  * take fish out of it without knowing it exists - see {@link FishItems#repack}.
@@ -101,7 +101,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         return true;
     }
 
-    /** Back to one crate per species, which is the shape somebody would want to work from. */
+    /** Loose when a species appears once; crated when it appears more than once. */
     @Override
     public void performRightClickAction(RightClickActionHelper helper) {
         List<FishCatch> contents = getContents();
@@ -112,8 +112,11 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             bySpecies.computeIfAbsent(entry.speciesId, id -> new ArrayList<>()).add(entry);
         }
 
-        for (List<FishCatch> crate : bySpecies.values()) {
-            helper.addItems(CargoItemType.SPECIAL, FishItems.toBundle(crate), 1);
+        for (List<FishCatch> species : bySpecies.values()) {
+            SpecialItemData unpacked = species.size() == 1
+                    ? FishItems.toItem(species.get(0)) : FishItems.toBundle(species);
+
+            helper.addItems(CargoItemType.SPECIAL, unpacked, 1);
         }
     }
 
@@ -196,7 +199,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("Right-click to break it back into one crate per species.",
+            tooltip.addPara("Right-click to unpack loose singles and crate repeated species.",
                     Misc.getGrayColor(), opad);
         }
     }

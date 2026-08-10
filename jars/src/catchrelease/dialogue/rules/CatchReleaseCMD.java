@@ -108,6 +108,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SHELF = "$catchreleaseShelf";
     public static final String HAS_FISH = "$catchreleaseHoldHasFish";
 
+    /** Whether either bulk-sale rung has an unmarked fish to take. */
+    public static final String SELL_COMMON = "$catchreleaseSellCommon";
+    public static final String SELL_UNCOMMON = "$catchreleaseSellUncommon";
+
     /** The hulk's hull, for the row that describes it. */
     public static final String WRECK_HULL = "$catchreleaseWreckHull";
 
@@ -375,12 +379,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
-        dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
-        dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
-        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
-                FishBuyer.describeUpTo(FishRarity.COMMON));
-        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
-                FishBuyer.describeUpTo(FishRarity.UNCOMMON));
+        if (FishBuyer.countUpTo(FishRarity.COMMON) > 0) {
+            dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
+            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
+                    FishBuyer.describeUpTo(FishRarity.COMMON));
+        }
+        if (FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0) {
+            dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
+            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
+                    FishBuyer.describeUpTo(FishRarity.UNCOMMON));
+        }
 
         return true;
     }
@@ -628,6 +636,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
+        local.set(SELL_COMMON, FishBuyer.countUpTo(FishRarity.COMMON) > 0, 0);
+        local.set(SELL_UNCOMMON, FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0, 0);
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
 

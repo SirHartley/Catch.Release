@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.items;
 
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -32,6 +33,17 @@ import java.util.Map;
  * cargo screen's own mass-transfer path before the item ever sees it.
  */
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
+
+    /** Native box art is 80x80; coordinates are measured from its upper-left corner. */
+    public static final float BOX_ICON_GRID = 80f;
+    public static final float BOX_ICON_UL_X = 49f;
+    public static final float BOX_ICON_UL_Y = 35f;
+    public static final float BOX_ICON_LL_X = 49f;
+    public static final float BOX_ICON_LL_Y = 57f;
+    public static final float BOX_ICON_UR_X = 69f;
+    public static final float BOX_ICON_UR_Y = 29f;
+    public static final float BOX_ICON_LR_X = 69f;
+    public static final float BOX_ICON_LR_Y = 51f;
 
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -101,12 +113,13 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         List<FishCatch> contents = getContents();
         if (contents.isEmpty()) return;
 
+        FishSpec spec = contents.get(0).getSpec();
+        renderBoxIcon(x, y, w, h, alphaMult, glowMult, spec);
+
         FishGrade best = FishGrade.TERRIBLE;
         for (FishCatch entry : contents) {
             if (entry.getGrade().ordinal() > best.ordinal()) best = entry.getGrade();
         }
-
-        FishSpec spec = contents.get(0).getSpec();
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
 
@@ -118,6 +131,30 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
                 break;
             }
         }
+    }
+
+    /** Fits the species art to the four measured corners of the box label. */
+    protected void renderBoxIcon(float x, float y, float w, float h, float alphaMult,
+                                 float glowMult, FishSpec spec) {
+
+        String path = spec == null || spec.icon == null || spec.icon.isEmpty()
+                ? FishConstants.ITEM_ICON_FALLBACK : spec.icon;
+
+        FishItemRenderer.renderIconWithCorners(path,
+                gridX(x, w, BOX_ICON_LL_X), gridY(y, h, BOX_ICON_LL_Y),
+                gridX(x, w, BOX_ICON_UL_X), gridY(y, h, BOX_ICON_UL_Y),
+                gridX(x, w, BOX_ICON_UR_X), gridY(y, h, BOX_ICON_UR_Y),
+                gridX(x, w, BOX_ICON_LR_X), gridY(y, h, BOX_ICON_LR_Y),
+                alphaMult, glowMult);
+    }
+
+    protected float gridX(float x, float w, float imageX) {
+        return x + w * imageX / BOX_ICON_GRID;
+    }
+
+    /** Converts the supplied top-left image grid to Starsector's bottom-left render space. */
+    protected float gridY(float y, float h, float imageY) {
+        return y + h * (BOX_ICON_GRID - imageY) / BOX_ICON_GRID;
     }
 
     /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */
