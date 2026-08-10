@@ -971,8 +971,8 @@ public class FishingIntro {
     }
 
     protected static void dropNote() {
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class)) {
+        for (IntelInfoPlugin intel : new ArrayList<>(Global.getSector().getIntelManager()
+                .getIntel(IntroIntel.class))) {
 
             Global.getSector().getIntelManager().removeIntel(intel);
         }
