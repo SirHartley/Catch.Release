@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 467 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -277,6 +277,9 @@ The live outfitter explanation also offers tackle and upgrade definitions withou
 Harpoon or breach-light categories. Both intro answers set the same permanent topic flags as their
 post-tutorial Fisherman entries, moving the topic to the appropriate `Ask again` page; neither
 path carries a tutorial grant or advance.
+The page-one outfitter-payment topic explains only the immediate barter transaction — trade buys
+catch, the Fisherman sells hardware, and fish avoid two invoices. It deliberately says nothing
+about what ultimately becomes of the catch.
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
 cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies

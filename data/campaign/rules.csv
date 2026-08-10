@@ -1666,6 +1666,15 @@ He points at the entry.
 
 ""Improves the function listed on it.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherOptAsk_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_outfitterPayment",,,"40:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
+catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true 0,"""Trade buys catch. I sell hardware.""
+
+""Fish settle both. No reason to write two invoices.""","0:catchrelease_fisherAskBack:Something else
+100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherAskAgain_howLong,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
 $catchreleaseFisherAskAgainPage == 0
 $global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
@@ -1696,6 +1705,9 @@ $global.catchrelease_fisherAsked_tackle",,,"20:catchrelease_ask_tackle:""What is
 catchrelease_fisherAskAgain_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
 $catchreleaseFisherAskAgainPage == 1
 $global.catchrelease_fisherAsked_upgrade",,,"30:catchrelease_ask_upgrade:""What is an upgrade?""",
+catchrelease_fisherAskAgain_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_outfitterPayment",,,"40:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
 catchrelease_fisherOptAskPageNext,PopulateOptions,"$menuState == catchreleaseFisherAsk
 $catchreleaseFisherAskPage == 0
 CatchReleaseCMD tokens

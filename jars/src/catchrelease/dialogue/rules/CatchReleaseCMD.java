@@ -141,7 +141,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             "$catchrelease_fisherAsked_fishBack",
             "$catchrelease_fisherAsked_largest",
             "$catchrelease_fisherAsked_tackle",
-            "$catchrelease_fisherAsked_upgrade"
+            "$catchrelease_fisherAsked_upgrade",
+            "$catchrelease_fisherAsked_outfitterPayment"
     };
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
