@@ -69,6 +69,9 @@ public class FleetQuest extends FishJob {
      */
     public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
 
+    /** Offer text counterpart to {@link #ASK_KEY}; also lets the sheet highlight the terms. */
+    public static final String REWARD_KEY = "$catchrelease_fleetQuestReward";
+
     /** Set once the player has agreed, so the opening pitch is not read out a second time. */
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
 
@@ -323,6 +326,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
         giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
+        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
 
         //a scavenger that decides mid-errand that the player looks like salvage is a scavenger the
         //player can no longer hand a fish to. Whatever else they were going to do out here, the one
@@ -347,6 +351,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
         giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
+        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
 
         //carried over rather than re-derived: the answer was given to the hull that is now gone, and
         //without it the copy would open by making the same offer over again
@@ -427,6 +432,7 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(QUEST_FLAG);
         giver.getMemoryWithoutUpdate().unset(PITCH_KEY);
         giver.getMemoryWithoutUpdate().unset(ASK_KEY);
+        giver.getMemoryWithoutUpdate().unset(REWARD_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
         giver.getMemoryWithoutUpdate().unset(REF_KEY);
 

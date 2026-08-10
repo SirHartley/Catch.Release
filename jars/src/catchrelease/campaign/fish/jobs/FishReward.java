@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -17,6 +18,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -27,11 +29,23 @@ import com.fs.starfarer.api.util.Misc;
  */
 public abstract class FishReward {
 
+    public static final String SCHEMATIC_ICON =
+            "graphics/catchrelease/icon/small_icon_catchrelease2.png";
+
     /** What the offer says out loud, as a noun phrase: "2,000 credits", "a Barbed Head". */
     public abstract String describe();
 
     /** Hands it over. Called once, when the job is paid out. */
     public abstract void grant();
+
+    /** Adds an offer-time visual explanation when a reward needs more than its noun phrase. */
+    public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
+        return false;
+    }
+
+    public boolean hasOfferDetails() {
+        return false;
+    }
 
     public static FishReward credits(int amount) {
         return new Credits(amount);
@@ -163,7 +177,7 @@ public abstract class FishReward {
         @Override
         public String describe() {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
-            String name = stat == null ? statId : catchrelease.campaign.fish.shop.ShopEntry.of(stat).getName();
+            String name = stat == null ? statId : ShopEntry.of(stat).getName();
 
             return "a schematic for " + name + " level " + targetLevel;
         }
@@ -171,6 +185,28 @@ public abstract class FishReward {
         @Override
         public void grant() {
             ShopSchematics.unlock(statId, targetLevel);
+        }
+
+        @Override
+        public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
+            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
+            if (tooltip == null || stat == null) return false;
+
+            ShopEntry entry = ShopEntry.of(stat);
+            TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
+            item.addPara(entry.getName() + " schematic — level " + targetLevel, 0f);
+            item.addPara(stat.description + " " + entry.getValueAt(targetLevel - 1) + " to "
+                    + entry.getValueAt(targetLevel) + ".", 3f);
+            item.addPara("Unlocks this rung for purchase at the Fishing Outfitter; it does not"
+                    + " grant the upgrade.", 3f);
+            tooltip.addImageWithText(pad);
+
+            return true;
+        }
+
+        @Override
+        public boolean hasOfferDetails() {
+            return true;
         }
     }
 
@@ -190,6 +226,25 @@ public abstract class FishReward {
         @Override
         public void grant() {
             ShopSchematics.unlock(tackle);
+        }
+
+        @Override
+        public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
+            if (tooltip == null) return false;
+
+            TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
+            item.addPara(tackle.name + " schematic", 0f);
+            item.addPara(tackle.description, 3f);
+            item.addPara("Unlocks this tackle for purchase at the Fishing Outfitter; it does not"
+                    + " grant the hardware.", 3f);
+            tooltip.addImageWithText(pad);
+
+            return true;
+        }
+
+        @Override
+        public boolean hasOfferDetails() {
+            return true;
         }
     }
 

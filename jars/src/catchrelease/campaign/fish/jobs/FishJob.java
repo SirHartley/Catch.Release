@@ -308,7 +308,29 @@ public abstract class FishJob extends HubMissionWithBarEvent
             return true;
         }
 
+        if ("showRewardDetails".equals(action)) {
+            showRewardDetails(dialog);
+
+            return true;
+        }
+
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    /** Item-style cards under an offer, only for rewards whose short name cannot explain them. */
+    protected void showRewardDetails(InteractionDialogAPI dialog) {
+        if (dialog == null || dialog.getTextPanel() == null) return;
+
+        TooltipMakerAPI tooltip = null;
+
+        for (FishReward reward : rewards) {
+            if (reward == null || !reward.hasOfferDetails()) continue;
+            if (tooltip == null) tooltip = dialog.getTextPanel().beginTooltip();
+
+            reward.addOfferDetails(tooltip, 10f);
+        }
+
+        if (tooltip != null) dialog.getTextPanel().addTooltip();
     }
 
     /** Opens the exact-specimen handoff and resumes the sheet only after a valid selection. */
