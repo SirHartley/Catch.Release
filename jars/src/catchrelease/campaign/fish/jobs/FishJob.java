@@ -18,6 +18,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -532,10 +533,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         bullet(info);
         for (FishRequirement ask : asks) {
-            // highlighted after the fact - ask.describe() has no %s placeholder for the count
-            LabelAPI line = info.addPara(Misc.ucFirst(ask.describe()), text, 0f);
-            line.setHighlightColor(highlight);
-            line.setHighlight(String.valueOf(ask.count));
+            String description = Misc.ucFirst(ask.describe());
+            LabelAPI line = info.addPara(description, text, 0f);
+            FishRequirement.highlight(line, Collections.singletonList(ask), description,
+                    String.valueOf(ask.count));
         }
 
         if (days > 0f) addDays(info, "remaining", getDaysLeft(), text);
@@ -553,16 +554,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
     /** The compact form, for the list down the side of the intel screen. */
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
-        Color highlight = Misc.getHighlightColor();
         Color text = getBulletColorForMode(mode);
 
         float pad = mode == ListInfoMode.IN_DESC ? 10f : 0f;
 
         LabelAPI line = info.addPara(Misc.ucFirst(describeAsks()), text, pad);
-        line.setHighlightColor(highlight);
-
-        // avoid highlighting on an empty asks list
-        if (!asks.isEmpty()) line.setHighlight(String.valueOf(asks.get(0).count));
+        FishRequirement.highlight(line, asks, Misc.ucFirst(describeAsks()),
+                asks.isEmpty() ? null : String.valueOf(asks.get(0).count));
 
         if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
     }
@@ -582,5 +580,16 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         return "Catch " + describeAsks() + ", then find " + person.getNameString()
                 + " on " + market.getName() + ".";
+    }
+
+    /** The base implementation cannot colour substrings in {@link #getNextStepText()}. */
+    @Override
+    public boolean addNextStepText(TooltipMakerAPI info, Color text, float pad) {
+        String next = getNextStepText();
+        if (next == null) return false;
+
+        LabelAPI line = info.addPara(next, text, pad);
+        FishRequirement.highlight(line, asks, describeAsks());
+        return true;
     }
 }

@@ -1,11 +1,9 @@
 package catchrelease.campaign.fish.jobs.camp;
 
-import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -15,6 +13,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -55,6 +54,7 @@ public abstract class CampedSpotJob extends FishJob {
     protected abstract CampType getType();
 
     protected CampSize size;
+    /** Retained only so older saves deserialize; receipt asks no longer name a species. */
     protected String speciesId;
     protected String systemName;
 
@@ -79,20 +79,13 @@ public abstract class CampedSpotJob extends FishJob {
         pond = QuestPond.findFreePond(system);
         if (pond == null) return false;
 
-        FishSpec spec = pickSpecies();
-        if (spec == null) return false;
-
         size = CampSize.roll(genRandom);
-        speciesId = spec.id;
+        speciesId = null;
         systemName = system.getName();
 
         days = DAYS;
 
-        FishRequirement ask = new FishRequirement();
-        ask.count = 1;
-        ask.speciesId = speciesId;
-
-        addAsk(ask);
+        setReceiptAsk();
         addRewards(FishRewardRoller.roll(genRandom, size.value, true));
 
         setUpSpine();
@@ -115,9 +108,9 @@ public abstract class CampedSpotJob extends FishJob {
         camper = CampedSpot.spawn(getType(), size, pond, random());
         if (camper == null) return;
 
-        CampedSpot.setPondBlocked(pond, true, speciesId);
+        setReceiptAsk();
+        CampedSpot.setPondBlocked(pond, true);
         QuestPond.claim(pond, REF_KEY);
-        QuestPond.placeMote(pond, speciesId, REF_KEY);
 
         //the map points at whoever is sitting on the water, which is where the player has to go
         //first regardless of how they intend to deal with it
@@ -153,23 +146,28 @@ public abstract class CampedSpotJob extends FishJob {
     }
 
     /**
-     * Something worth the trip.
-     * <p>
-     * Uncommon and up, because the specimen is a receipt rather than a reward and a receipt that
-     * could have been picked up anywhere proves nothing. The planted mote is what makes it findable
-     * at all; the rarity is what makes it credible that this pond was worth camping.
+     * One fish of any species, but only if its catch record names this exact rupture. Also repairs
+     * pre-change saves whose active camp still asks for the old planted species.
      */
-    protected FishSpec pickSpecies() {
-        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(genRandom);
+    protected void setReceiptAsk() {
+        if (pond == null || pond.getId() == null) return;
 
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (spec.rarity.ordinal() < 1) continue;
-
-            picker.add(spec, 1f);
+        if (asks.size() == 1) {
+            FishRequirement current = asks.get(0);
+            if (current != null && current.speciesId == null && "fish".equals(current.tag)
+                    && pond.getId().equals(current.sourceId)) {
+                return;
+            }
         }
 
-        return picker.pick();
+        FishRequirement receipt = new FishRequirement();
+        receipt.count = 1;
+        receipt.tag = "fish";
+        receipt.sourceId = pond.getId();
+
+        asks.clear();
+        asks.add(receipt);
+        speciesId = null;
     }
 
     //---------------------------------------------------------------- the two conditions
@@ -190,6 +188,7 @@ public abstract class CampedSpotJob extends FishJob {
      */
     @Override
     protected void advanceImpl(float amount) {
+        setReceiptAsk();
         super.advanceImpl(amount);
 
         if (cleared) return;
@@ -197,9 +196,8 @@ public abstract class CampedSpotJob extends FishJob {
         if (!CampedSpot.isGone(camper)) {
             CampedSpot.updateWarningPursuit(camper, pond);
             CampedSpot.allowPlayerToLeave(camper, pond);
-            //Refresh the pond-side memory for old saves too. The planted mote may be gone, but
-            //the camp is still on this species until it leaves.
-            CampedSpot.setPondBlocked(pond, true, speciesId);
+            //Refresh pond-side memory for old saves too, clearing their obsolete named species.
+            CampedSpot.setPondBlocked(pond, true);
             return;
         }
 
@@ -267,8 +265,11 @@ public abstract class CampedSpotJob extends FishJob {
                     Misc.getHighlightColor(), systemName);
         }
 
-        info.addPara("They want %s out of that rupture, and are offering %s.", pad,
-                Misc.getHighlightColor(), describeAsks(), describeRewards());
+        String ask = describeAsks();
+        String reward = describeRewards();
+        LabelAPI terms = info.addPara("They want %s out of that rupture, and are offering %s.", pad,
+                Misc.getHighlightColor(), ask, reward);
+        FishRequirement.highlight(terms, asks, ask, reward);
 
         //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {

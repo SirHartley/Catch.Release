@@ -238,6 +238,7 @@ public class CampedSpot {
         if (blocked) {
             pond.getMemoryWithoutUpdate().set(POND_BLOCKED_FLAG, true);
             if (speciesId != null) pond.getMemoryWithoutUpdate().set(CAMP_SPECIES_KEY, speciesId);
+            else pond.getMemoryWithoutUpdate().unset(CAMP_SPECIES_KEY);
         } else {
             pond.getMemoryWithoutUpdate().unset(POND_BLOCKED_FLAG);
             pond.getMemoryWithoutUpdate().unset(CAMP_SPECIES_KEY);

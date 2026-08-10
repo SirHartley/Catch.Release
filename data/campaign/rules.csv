@@ -401,10 +401,10 @@ catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
-catchrelease_jobRemindGeneric,catchreleaseJobRemind,,SetTextHighlights $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
+catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has a supplier list open on a slate and several empty lines under FRESH CATCH.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
-catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""Restaurants, private kitchens, two mess halls and somebody on the orbital who will pay extra if I stop asking what they do with it.""
+catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""Restaurants, private kitchens, two mess halls and somebody on the orbital who will pay extra if I stop asking what they do with it.""
 
 The provisioner turns the slate toward you.
 
@@ -416,7 +416,7 @@ catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchr
 
 Your comm ID is added to the supplier list.",,
 catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The provisioner closes the entry and moves to the next name.,,
-catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap. Same order.""",,
+catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same order.""",,
 catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_standingOrder
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The containers are checked against the manifest.
 
@@ -425,7 +425,7 @@ No questions follow.
 $catchreleaseRewardCap is transferred to your account.",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites is working through a menu revision with the expression of someone losing an argument to ingredients.,,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask about the menu.,
-catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I need three distinct catches for $catchreleaseDish.""
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I need three distinct catches for $catchreleaseDish.""
 
 The cook taps three empty lines on the slate.
 
@@ -435,7 +435,7 @@ The cook taps three empty lines on the slate.
 catchrelease_jobDecline:""Find another supplier.""",
 catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Keep the handling tags.""",,
 catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,The cook deletes your name and resumes scrolling through suppliers.,,
-catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap.""
+catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap.""
 
 A finger taps the three empty spaces.",,
 catchrelease_chef_paid,catchreleaseJobPaid,"$missionId == catchrelease_chef
@@ -448,7 +448,7 @@ The cook smells the first, prods the second, and stares at the third for several
 $catchreleaseReward is transferred.",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket is giving a presentation to a slate propped against an empty chair.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch.,
-catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""You fish. Good.""
+catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""You fish. Good.""
 
 He moves a sales projection aside.
 
@@ -470,14 +470,14 @@ catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease
 He turns back to the empty chair.
 
 ""Where were we?""",,
-catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,SetTextHighlights $catchreleaseAsk,"""Still need the demonstration shipment. $catchreleaseAskCap.""",,
+catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Still need the demonstration shipment. $catchreleaseAskCap.""",,
 catchrelease_startup_paid,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He photographs the containers, the handling seals, and you standing beside both.
 
 $catchreleaseReward is transferred immediately.",,
 catchrelease_startup_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
-$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The first shipment has apparently become a presentation.
+$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The first shipment has apparently become a presentation.
 
 ""I need the next run.""
 
@@ -486,7 +486,7 @@ He sends the new quantity.
 ""$catchreleaseAskCap. Same buyer, more tables.""",,
 catchrelease_startup_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
-!$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He stares at the signed delivery receipt.
+!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He stares at the signed delivery receipt.
 
 ""Repeat customer.""
 
@@ -495,7 +495,7 @@ Then, more quietly:
 ""Good.""",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink and the patient posture of someone paid to wait.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
-catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I purchase for a private household.""
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I purchase for a private household.""
 
 He does not volunteer the name.
 
@@ -511,7 +511,7 @@ catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_
 
 No contact details are exchanged. Your mission log nevertheless updates.",,
 catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Understood.""",,
-catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,SetTextHighlights $catchreleaseAsk,"""The requirement remains $catchreleaseAskCap.""",,
+catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""The requirement remains $catchreleaseAskCap.""",,
 catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the container seal, then the scale.
 
@@ -520,7 +520,7 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the containe
 $catchreleaseRewardCap changes hands.",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A woman with an academic lanyard and salt-damaged hands is annotating photographs of public aquaria.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
-catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I run a collection.""
+catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I run a collection.""
 
 She turns the slate around.
 
@@ -536,7 +536,7 @@ She points to the requested entry.
 catchrelease_jobDecline:Decline.",
 catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Keep the transport tank stable. The exhibit system can handle the rest.""",,
 catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,She goes back to the slate.,,
-catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap. Either condition.""",,
+catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Either condition.""",,
 catchrelease_curator_paid,catchreleaseJobPaid,"$missionId == catchrelease_curator
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The container is transferred directly to a waiting tank truck.
 
@@ -547,7 +547,7 @@ The curator checks the seal only after it is aboard.
 $catchreleaseReward is transferred.",,
 catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children occupy a corner table they are almost certainly not paying for. One has a bucket. The other has a handwritten tournament bracket.,,
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask about the tournament.,
-catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""We need two.""
+catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""We need two.""
 
 The child with the bracket speaks for both.
 
@@ -569,7 +569,7 @@ This appears to be binding.",,
 catchrelease_duel_declined,catchreleaseJobDeclined,$missionId == catchrelease_duel,,"""Fine.""
 
 Your ship's name is crossed out with unnecessary force.",,
-catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel score:100,SetTextHighlights $catchreleaseAsk,"""Got them?""
+catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Got them?""
 
 The other child checks the bucket.
 
@@ -584,7 +584,7 @@ The bracket is amended.
 $catchreleaseReward is paid in small denominations.",,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
-$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The better specimen settles the argument before it begins.
+$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The better specimen settles the argument before it begins.
 
 Both children stare.
 
@@ -606,7 +606,7 @@ FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men sit on either side of a transport tank far too expensive for the bar around it. A locked ampoule case rests between the drinks.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the tank.,
-catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""You bring stock,"" says $catchreleaseLeft.
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""You bring stock,"" says $catchreleaseLeft.
 
 ""We arrange the event.""
 
@@ -620,7 +620,7 @@ The first man gives you the terms.
 catchrelease_jobDecline:Leave the arrangement alone.",
 catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,Neither man writes your name down.,,
 catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,The tank remains between them. Their attention moves elsewhere.,,
-catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,SetTextHighlights $catchreleaseAsk,"""Still two.""",,
+catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Still two.""",,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The containers change hands.
 
@@ -628,7 +628,7 @@ $catchreleaseRewardCap is counted out on the tank lid.",,
 catchrelease_ring_paidWon,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid
 $catchreleaseHasWager score:100
-$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The tank is sealed. An unmarked ampoule empties into the water.
+$catchreleaseWon",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The tank is sealed. An unmarked ampoule empties into the water.
 
 The room closes around it.
 
@@ -638,7 +638,7 @@ You are paid $catchreleaseReward.",,
 catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid
 $catchreleaseHasWager score:100
-!$catchreleaseWon",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"The ampoule goes in.
+!$catchreleaseWon",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The ampoule goes in.
 
 The result is quick.
 
@@ -667,7 +667,7 @@ FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A woman at the end of the bar is dressed like a corporate liaison and drinking like she is not one.,,
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask what she wants.,
-catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I represent a private buyer.""
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I represent a private buyer.""
 
 She gives you the specification.
 
@@ -683,21 +683,21 @@ She gives you the payment.
 catchrelease_jobDecline:Decline.",
 catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discreet is sufficient. Secret creates paperwork.""",,
 catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""",,
-catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAsk. He has not revised the requirement.""",,
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAsk. He has not revised the requirement.""",,
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She weighs the sealed container without opening it.
 
 $catchreleaseRewardCap changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
-$catchreleaseBonus score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"She checks the scale again.
+$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"She checks the scale again.
 
 ""Comfortably over.""
 
 The bonus is added without negotiation.",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is sorting specimen telemetry into two piles. The larger pile is labelled CONTROL and appears to annoy her.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is studying.,
-catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I have enough stable specimens.""
+catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I have enough stable specimens.""
 
 She turns the slate around.
 
@@ -711,7 +711,7 @@ She scrolls through several images.
 catchrelease_jobDecline:Decline.",
 catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Keep the original retrieval log. That's more important than presentation.""",,
 catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,She returns to the telemetry.,,
-catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap. Poor coherence reading.""",,
+catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Poor coherence reading.""",,
 catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She checks the retrieval record before opening the container.
 
@@ -724,7 +724,7 @@ One result makes her repeat the calibration.
 $catchreleaseRewardCap is transferred.",,
 catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A man has converted one end of the bar into a small recording set: two lamps, a good lens, and a chair placed precisely where everyone needs to walk.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask about the recording.,
-catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"""I run a fishing feed.""
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""I run a fishing feed.""
 
 He points to the chair.
 
@@ -736,7 +736,7 @@ catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_t
 catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Fair.""
 
 The camera remains pointed at you for several seconds before he notices.",,
-catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseAskCap. Whenever you've got it.""
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Whenever you've got it.""
 
 He checks his posting schedule.
 
@@ -747,7 +747,7 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The specimen is record
 You are paid $catchreleaseReward from a box of small sponsor transfers.",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He watches the numbers update.
+$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He watches the numbers update.
 
 ""Fine.""
 
@@ -762,14 +762,14 @@ He looks toward your hold.
 ""$catchreleaseRewardCap.""",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-!$catchreleaseMore score:100",SetTextHighlights $catchreleaseAsk $catchreleaseReward,"He watches the playback.
+!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He watches the playback.
 
 ""That's the thumbnail.""
 
 The payment follows.",,
 catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,Three people in matching plain coats share a table. One drink has been ordered for all of them and remains untouched.,,
 catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask what they are waiting for.,
-catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,SetTextHighlights $catchreleaseAsk $catchreleaseReward,"One of them gives you a fish name.
+catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"One of them gives you a fish name.
 
 ""$catchreleaseSpecies.""
 
@@ -791,7 +791,7 @@ The credit chit disappears back into a coat pocket.",,
 catchrelease_cult_declined,catchreleaseJobDeclined,$missionId == catchrelease_cult,,"""All right.""
 
 They remain at the table.",,
-catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,SetTextHighlights $catchreleaseAsk,"""$catchreleaseSpecies.""",,
+catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseSpecies.""",,
 catchrelease_cult_paid,catchreleaseJobPaid,"$missionId == catchrelease_cult
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"They do not open the container.
 
@@ -805,7 +805,7 @@ FleetDesc
 HailPlayer",,,They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger.
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
-!$entity.isHostile",SetTextHighlights $entity.catchrelease_fleetQuestAsk,"""$entity.catchrelease_fleetQuestPitch""
+!$entity.isHostile",CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""$entity.catchrelease_fleetQuestPitch""
 
 Their request comes down to $entity.catchrelease_fleetQuestAsk.","0:catchrelease_fqAccept:""We'll see what we can find.""
 5:catchrelease_fqAcceptNoPromise:""No promises.""
@@ -823,7 +823,7 @@ catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline
 The channel closes.",,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
-!$entity.isHostile","SetTextHighlights $entity.catchrelease_fleetQuestAsk
+!$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk
 FireAll CatchReleaseFleetQuestTurnIn","The fleet is still where you left it.
 
 They still need $entity.catchrelease_fleetQuestAsk.",,
@@ -1184,7 +1184,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
 
 He sends over a range entry.
 
@@ -1217,7 +1217,7 @@ $catchreleaseWorkHandoffPaid",,"He studies the coherence plot, marks something i
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet",SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet",CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
 
 He checks the old mark.
 
@@ -1337,7 +1337,9 @@ Crablobab checks your credits, checks the crabs, then checks a pocket containing
 ""Next time!""",10:catchrelease_crabStall:Continue,
 catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
-""Celebrate responsibly.""","0:catchrelease_crabStall:Continue
+""Celebrate responsibly.""
+
+""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:10
 CatchReleaseCMD tokens
@@ -1376,7 +1378,11 @@ They are warm.
 
 Once fitted, the whispering is gone.
 
-Nothing else changes.","0:catchrelease_crabStall:Continue
+Nothing else changes.
+
+""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
+100:catchrelease_crabLeave:Leave",
+catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
@@ -1747,7 +1753,7 @@ $catchreleaseStage < 6
 !$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
-$catchreleaseTargetPond",,"""$catchreleaseTarget. Rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Rupture in $catchreleaseTargetWhere.""
 
 He checks the return.
 
@@ -1756,7 +1762,7 @@ catchrelease_askTargetOpenRod,DialogOptionSelected,"$option == catchrelease_askT
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
 
 He forwards the system data.
 
@@ -1769,12 +1775,12 @@ catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarg
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced",,"""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
 
 ""Use the lights until the return settles. Then the harpoon.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetCharted,DialogOptionSelected,"$option == catchrelease_askTarget score:6
 CatchReleaseCMD tokens
-!$catchreleaseTargetPlaced",,"""$catchreleaseTarget.""
+!$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""$catchreleaseTarget.""
 
 He taps the range entry.
 
@@ -2188,7 +2194,7 @@ The Fisherman leans back.
 catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 2
-$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Local rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Local rupture in $catchreleaseTargetWhere.""
 
 The Fisherman sends the mark.
 
@@ -2196,7 +2202,7 @@ The Fisherman sends the mark.
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
-$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
 
 He forwards the system data.
 
@@ -2208,7 +2214,7 @@ A pause.
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
-$catchreleaseTargetPlaced","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
 
 ""Use the breach lights until you have the return. Harpoon it. Bring it here.""
 
@@ -2217,7 +2223,7 @@ He sends the range mark.
 ""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
-$catchreleaseStage == 5","Highlight ""$catchreleaseTarget""","""Both range targets.""
+$catchreleaseStage == 5","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Both range targets.""
 
 The Fisherman sends the records again.
 
@@ -2225,7 +2231,7 @@ The Fisherman sends the records again.
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
-!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. $catchreleaseTargetWhere.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. $catchreleaseTargetWhere.""
 
 He checks your manifest.
 
@@ -2235,7 +2241,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 !$catchreleaseTargetHere
-!$catchreleaseDeepHandoff","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget's still in $catchreleaseTargetWhere.""
+!$catchreleaseDeepHandoff","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget's still in $catchreleaseTargetWhere.""
 
 A pause.
 
@@ -2243,13 +2249,13 @@ A pause.
 catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
-!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space, $catchreleaseTargetWhere.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space, $catchreleaseTargetWhere.""
 
 ""Lights first. Harpoon second. Try not to reverse those out of enthusiasm.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
-!$catchreleaseTargetMet","Highlight ""$catchreleaseTarget""","""Both of them.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Both of them.""
 
 He taps the two range entries.
 
@@ -2706,7 +2712,7 @@ catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,"A fisher is sit
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket is sitting very still, and every time the door opens he looks at it and then makes himself stop looking at it.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why she picked that seat.,
-catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Pirates found our rupture.""
+catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Pirates found our rupture.""
 
 The fisher turns the slate around.
 
@@ -2716,7 +2722,7 @@ A fleet identifier follows.
 
 ""Move them on and we can get the boats back out.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:""Find another rupture.""",
-catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Company hired security around our patch.""
+catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Company hired security around our patch.""
 
 The fisher shows you the contract boundary.
 
@@ -2726,7 +2732,7 @@ A fleet code appears.
 
 ""Get them to move.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:""Somebody is paying them. Somebody will pay the next lot too.""",
-catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,SetTextHighlights $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Pathers have been visiting the boats.""
+catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward,"""Pathers have been visiting the boats.""
 
 The fisher does not sound frightened so much as irritated.
 
@@ -2743,7 +2749,7 @@ catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrele
 catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
 !$catchreleaseCampCleared",,"""Still sitting there?"" He does not sound surprised. ""They would be. It is a nice quiet spot to park.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Rupture is clear, then."" He almost smiles. ""Bring me $catchreleaseAsk out of it and I will believe it properly.""",,
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Rupture is clear, then."" He almost smiles. ""Bring me $catchreleaseAsk out of it and I will believe it properly.""",,
 catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The camp answers almost immediately.
 
@@ -2759,7 +2765,7 @@ catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchreleas
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
 !$catchreleaseCampCleared",,"""They are still there,"" she says. It is not a question and she does not wait for an answer.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Gone."" She sits with that for a second. ""Then bring me $catchreleaseAsk out of it, and I will go back out.""",,
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Gone."" She sits with that for a second. ""Then bring me $catchreleaseAsk out of it, and I will go back out.""",,
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The exclusion zone disappears from the local plot.
 
@@ -2769,7 +2775,7 @@ catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchreleas
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 !$catchreleaseCampCleared",,"""They are still on it,"" she says, and looks at the door.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-$catchreleaseCampCleared",SetTextHighlights $catchreleaseAsk,"""Off my water."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Off my water."" She says it once, flatly, testing it. ""Then bring me $catchreleaseAsk out of it. I would like to see one.""",,
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The boats return to the rupture.
 

@@ -38,6 +38,9 @@ public class FishCatch {
     public FishLogEntry.Method method;
     public CatchImplement implement;
 
+    /** Exact rupture entity id this came from, or null for open-water and older catches. */
+    public String sourceId;
+
     public FishCatch() {
     }
 
@@ -144,8 +147,8 @@ public class FishCatch {
 
     /**
      * Encodes the specimen as a string for a special item to carry. Species first so a bundle can
-     * sort without decoding the rest; origin/method/implement are an optional tail appended after,
-     * so old saves (4 fields) and new ones (up to 7) both decode.
+     * sort without decoding the rest; origin/method/implement/source are an optional tail appended
+     * after, so every older form still decodes.
      */
     public String encode() {
         StringBuilder encoded = new StringBuilder(speciesId)
@@ -158,6 +161,7 @@ public class FishCatch {
                 origin == null ? "" : origin.name(),
                 method == null ? "" : method.name(),
                 implement == null ? "" : implement.name(),
+                sourceId == null ? "" : sourceId,
         };
 
         int last = -1;
@@ -185,6 +189,7 @@ public class FishCatch {
 
             entry.method = parseMethod(field(parts, 5));
             entry.implement = CatchImplement.parse(field(parts, 6));
+            entry.sourceId = field(parts, 7);
 
             return entry;
         } catch (NumberFormatException e) {

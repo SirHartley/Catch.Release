@@ -16,6 +16,9 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.jobs.FishJob;
+import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.Castaway;
@@ -35,6 +38,9 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.BaseCommandPlugin;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Misc.Token;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -224,6 +230,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return FishBuyer.sellUpTo(dialog, arg);
             case "colorBulkSaleOptions":
                 return colorBulkSaleOptions(dialog);
+            case "highlightJobText":
+                return highlightJobText(ruleId, dialog, params, memoryMap);
+            case "highlightWorkText":
+                return highlightWorkText(ruleId, dialog, params, memoryMap);
+            case "highlightIntroText":
+                return highlightIntroText(ruleId, dialog, params, memoryMap);
 
             //---- the ladder
             case "point":
@@ -378,6 +390,91 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                     FishBuyer.describeUpTo(FishRarity.UNCOMMON));
         }
 
+        return true;
+    }
+
+    /** Finds the active bar/fleet job and colours the rarity-bearing part of its ask. */
+    protected boolean highlightJobText(String ruleId, InteractionDialogAPI dialog,
+                                       List<Token> params, Map<String, MemoryAPI> memoryMap) {
+        if (memoryMap == null) return false;
+
+        FishJob job = null;
+        for (MemoryAPI memory : memoryMap.values()) {
+            if (memory == null) continue;
+            Object value = memory.get(FishJob.REF_KEY);
+            if (!(value instanceof FishJob)) value = memory.get(CampedSpotJob.REF_KEY);
+            if (value instanceof FishJob) {
+                job = (FishJob) value;
+                break;
+            }
+        }
+
+        return job != null && highlightQuestText(ruleId, dialog, params, memoryMap,
+                job.getAsks(), job.describeAsks());
+    }
+
+    /** The Fisherman's chart request is not a {@link FishJob}, but uses the same visual language. */
+    protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
+                                        List<Token> params, Map<String, MemoryAPI> memoryMap) {
+        FishermanQuest.Saved work = FishermanQuest.getActive();
+        if (work == null || work.speciesId == null) return false;
+
+        FishRequirement ask = new FishRequirement();
+        ask.speciesId = work.speciesId;
+        List<FishRequirement> asks = new ArrayList<>();
+        asks.add(ask);
+
+        return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
+                FishermanQuest.describe(work));
+    }
+
+    /** Every named target in the tutorial ladder, including the two-chart rung. */
+    protected boolean highlightIntroText(String ruleId, InteractionDialogAPI dialog,
+                                         List<Token> params, Map<String, MemoryAPI> memoryMap) {
+        FishingIntro.Target target = FishingIntro.getTarget();
+        if (target == null) return false;
+
+        List<FishRequirement> asks = new ArrayList<>();
+        if (!target.anySpecies) {
+            for (String speciesId : target.speciesIds) {
+                FishRequirement ask = new FishRequirement();
+                ask.speciesId = speciesId;
+                asks.add(ask);
+            }
+        }
+
+        return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
+                FishingIntro.describeTarget());
+    }
+
+    /**
+     * Mirrors vanilla Highlight plus SetTextHighlightColors, while replacing the full yellow ask
+     * with its species names (or rarity floor) in rarity colours. Other tokens remain yellow.
+     */
+    protected boolean highlightQuestText(String ruleId, InteractionDialogAPI dialog,
+                                         List<Token> params, Map<String, MemoryAPI> memoryMap,
+                                         List<FishRequirement> asks, String fullAsk) {
+        com.fs.starfarer.api.campaign.TextPanelAPI panel = text(dialog);
+        if (panel == null) return false;
+
+        List<FishRequirement.RarityHighlight> rarity = FishRequirement.getRarityHighlights(asks);
+        boolean hasRarity = !rarity.isEmpty();
+        Map<String, Color> highlights = new LinkedHashMap<>();
+
+        for (int i = 1; i < params.size(); i++) {
+            String value = params.get(i).getStringWithTokenReplacement(ruleId, dialog, memoryMap);
+            if (value == null || value.isEmpty()) continue;
+            if (hasRarity && (value.equals(fullAsk) || value.equals(Misc.ucFirst(fullAsk)))) continue;
+            highlights.putIfAbsent(value, Misc.getHighlightColor());
+        }
+
+        for (FishRequirement.RarityHighlight entry : rarity) {
+            highlights.put(entry.text, entry.rarity.color);
+        }
+        if (highlights.isEmpty()) return true;
+
+        panel.highlightInLastPara(highlights.keySet().toArray(new String[0]));
+        panel.setHighlightColorsInLastPara(highlights.values().toArray(new Color[0]));
         return true;
     }
 

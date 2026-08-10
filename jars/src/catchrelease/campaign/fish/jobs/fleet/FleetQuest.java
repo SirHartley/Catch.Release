@@ -22,6 +22,7 @@ import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -464,8 +465,11 @@ public class FleetQuest extends FishJob {
 
         info.addPara(type.note, pad);
 
-        info.addPara("They want %s, and are offering %s.", pad, Misc.getHighlightColor(),
-                describeAsks(), describeRewards());
+        String ask = describeAsks();
+        String reward = describeRewards();
+        LabelAPI terms = info.addPara("They want %s, and are offering %s.", pad,
+                Misc.getHighlightColor(), ask, reward);
+        FishRequirement.highlight(terms, asks, ask, reward);
 
         info.addPara("They are not going anywhere. Whatever else happens, they will be where you"
                 + " left them when you have it.", pad);
