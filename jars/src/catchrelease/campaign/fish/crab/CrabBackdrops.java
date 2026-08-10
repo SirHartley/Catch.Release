@@ -17,10 +17,10 @@ import java.util.Map;
  * The rolled-up scene under Crablobab's arm, and which one it is today.
  * <p>
  * Separate from {@link CrabWares} because it is a different kind of stock and the difference is the
- * whole behaviour. A ware is one named object sold once ever - the constant <i>is</i> the item, the
- * dialogue rows are written per constant, and once it is sold he never mentions it again. A backdrop
- * is stock: there are as many as the table has rows, he carries exactly one at a time, and which one
- * depends on where you happen to have run into him.
+ * whole behaviour. A permanent ware is one named object sold once ever - the constant <i>is</i> the
+ * item and the dialogue rows are written per constant. (The explosive charge is the explicit
+ * consumable exception.) A backdrop is stock: there are as many as the table has rows, he carries
+ * exactly one at a time, and which one depends on where you happen to have run into him.
  * <p>
  * <b>It is a rotation, not a roll.</b> He works down the table, one scene per port, and the port
  * remembers what he had there - so a man met twice on the same rock is carrying the same thing both

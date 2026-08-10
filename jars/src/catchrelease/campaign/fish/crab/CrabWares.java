@@ -20,15 +20,15 @@ import java.util.Set;
  * What Crablobab has in the coat, and what he wants for it.
  * <p>
  * Deliberately not shop stock. The outfitter sells the rig - things that make the gear better at
- * what the gear is for, priced off a ladder, restocked forever. These are objects sold once each by
- * one man who is not in the equipment business, and none of them makes the rig better: a novelty, a
- * charge that takes the harpoon's whole purpose away and replaces it, and the plans for a building.
+ * what the gear is for, priced off a ladder, restocked forever. These are objects sold by one man
+ * who is not in the equipment business, and none of them makes the rig better: novelties and plans
+ * sold once, plus a replaceable charge that takes the harpoon's whole purpose away and replaces it.
  * <p>
- * Three questions, not one, and they are not the same question asked three ways. Bought is his
- * business and never comes undone. Owned is where the thing is kept afterwards, which for a module
- * is the tackle system's problem and for a novelty is a line in the save. Switched on is the
- * player's, and only some wares have it - a module is switched off by taking it out of the slot,
- * so the only thing that needs a switch is something with no slot to leave.
+ * Three questions, not one, and they are not the same question asked three ways. For permanent
+ * wares, bought is his business and never comes undone. Owned is where a thing is kept afterwards;
+ * the repeatable explosive head asks only that live tackle state. Switched on is the player's, and
+ * only some wares have it - a module is switched off by taking it out of the slot, so the only thing
+ * that needs a switch is something with no slot to leave.
  */
 public enum CrabWares {
 
@@ -89,8 +89,8 @@ public enum CrabWares {
      * knows a running rig has to be stopped so it comes back up reading the module it now has.
      */
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
-            "A shaped charge behind the barb. Kept in the harpoon's own slot from here on, and taken"
-                    + " off there as well.") {
+            "A shaped charge behind the barb. Fitted in the harpoon's own slot until it goes off;"
+                    + " an unfired one can still be taken off and put back on.") {
         @Override
         public boolean isOwned() {
             return TackleManager.isOwned(Tackle.EXPLOSIVE_HEAD);

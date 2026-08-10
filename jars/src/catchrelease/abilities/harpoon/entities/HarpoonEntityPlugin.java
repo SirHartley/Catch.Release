@@ -303,6 +303,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 Entities.EXPLOSION, Factions.NEUTRAL, params);
         explosion.setLocation(at.x, at.y);
 
+        //The charge is the module. A miss brings it home unfired; a detonation consumes it, clears
+        //the slot, and makes Crablobab's ownership-gated offer available again.
+        TackleManager.consume(Tackle.EXPLOSIVE_HEAD);
+
         throwHead();
     }
 

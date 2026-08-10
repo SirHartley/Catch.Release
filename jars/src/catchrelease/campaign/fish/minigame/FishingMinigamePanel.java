@@ -55,6 +55,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected FishingMinigameLayout layout;
     protected boolean reeling = false;
     protected boolean reported = false;
+    protected boolean failedSoundPlayed = false;
 
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
@@ -67,6 +68,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Everything held onto during the catch, resolved once at the end. */
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
     protected boolean treasureResolved = false;
+
+    /** Per-pickup edge state for the live treasure sound hooks. */
+    protected MinigameTreasure soundTreasure;
+    protected boolean treasureCoveredLastFrame = false;
+    protected boolean treasureGotSoundPlayed = false;
 
     /** Held after a fish is lost so the result stays readable before the dialog closes itself. */
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
@@ -104,6 +110,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
+            advanceTreasureSoundHooks();
             return;
         }
 
@@ -115,6 +122,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
+        if (!failedSoundPlayed) {
+            failedSoundPlayed = true;
+            CatchCelebration.playHook(FishConstants.SOUND_FAILED);
+        }
+
         //closes itself once the linger has elapsed
         endLingerLeft -= amount;
         if (endLingerLeft > 0f) return;
@@ -122,9 +134,35 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         end(false);
     }
 
+    /** Sounds bar entry repeatedly after leaving, but the take itself only once for each pickup. */
+    protected void advanceTreasureSoundHooks() {
+        MinigameTreasure treasure = minigame.getTreasure();
+
+        if (treasure != soundTreasure) {
+            soundTreasure = treasure;
+            treasureCoveredLastFrame = false;
+            treasureGotSoundPlayed = false;
+        }
+
+        if (treasure == null) return;
+
+        boolean covered = treasure.isActive() && minigame.covers(treasure.position);
+        if (covered && !treasureCoveredLastFrame) {
+            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_HOVER);
+        }
+
+        if (treasure.isTaken() && !treasureGotSoundPlayed) {
+            treasureGotSoundPlayed = true;
+            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_GOT);
+        }
+
+        treasureCoveredLastFrame = covered;
+    }
+
     /** Puts up the readout and waits; does not close the dialog, the player does that. */
     protected void advanceCaught(float amount) {
         if (result == null) {
+            CatchCelebration.playHook(FishConstants.SOUND_CAUGHT);
             result = new CatchResultPanel(specimen, where, method);
 
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
@@ -179,6 +217,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
+                if (minigame.isRunning()) {
+                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE);
+                }
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {

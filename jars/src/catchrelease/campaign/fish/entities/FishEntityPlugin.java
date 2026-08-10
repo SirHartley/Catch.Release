@@ -511,6 +511,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
-
+        //Pond motes are drawn by their terrain plugin while its stencil is active; drawing them
+        //here as well would put an unmasked copy over the fabric. A surfaced buried mote has no
+        //pond and no terrain renderer, so it must draw itself or the harpoon visibly shoves an
+        //empty point after unearth() replaces the hidden entity.
+        if (!isFromPond()) externalRender(viewport);
     }
 }
