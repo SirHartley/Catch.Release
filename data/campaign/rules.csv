@@ -1174,7 +1174,9 @@ CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
-!$catchreleaseWork",CatchReleaseCMD rollWork,"""Got one.""
+!$catchreleaseWork","CatchReleaseCMD rollWork
+FireBest CatchReleaseWorkOffer",,,
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,,"""Got one.""
 
 He sends over a range entry.
 

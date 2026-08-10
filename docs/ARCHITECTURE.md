@@ -1034,6 +1034,11 @@ branch on and always returns true, and in a row's *script* a verb does the thing
 it worked. The panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is
 machinery and there is nothing for a sheet to say about it.
 
+**A work offer rolls before it speaks.** `catchrelease_workOffer` only rolls the pending chart request
+and fires `CatchReleaseWorkOffer`; `catchrelease_workOfferText` then reads the saved fish, place and
+payment tokens. Keeping the supplied offer text on that second row means the range has been selected
+before token replacement, rather than printing the fallback token names from before the roll.
+
 **The ladder gates equipment, and equipment gates the world.** `unlockedAtStart` is off for all four
 abilities. A shelf needs two things before it is on the floor (`ShopGroup.isUnlocked`): the rig in
 your hands, **and** the introduction's blessing. The lamp and harpoon shelves stay shut for one rung
