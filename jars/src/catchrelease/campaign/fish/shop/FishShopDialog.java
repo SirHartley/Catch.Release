@@ -234,6 +234,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                 List<Tackle> options = TackleManager.getOptions(rig);
                 options.remove(Tackle.NONE);
+                options.removeIf(tackle -> !ShopSchematics.has(tackle));
 
                 if (options.isEmpty()) continue;
 
@@ -482,19 +483,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                           Object tooltipParam) {
                     tooltip.addPara("Schematic required", Misc.getHighlightColor(), 0f);
-
-                    if (entry.isUpgrade()) {
-                        tooltip.addPara("Level %s is one of this ladder's final two rungs."
-                                        + " Fishing jobs can offer its schematic.", 6f,
-                                Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
-                        tooltip.addPara("Each schematic unlocks one rung for purchase; it does not"
-                                + " grant the upgrade.", Misc.getGrayColor(), 6f);
-                    } else {
-                        tooltip.addPara("Fishing jobs can offer the %s schematic.", 6f,
-                                Misc.getHighlightColor(), entry.getName());
-                        tooltip.addPara("It unlocks this tackle for purchase; it does not grant"
-                                + " the hardware.", Misc.getGrayColor(), 6f);
-                    }
+                    tooltip.addPara("Level %s is one of this ladder's final two rungs."
+                                    + " Fishing jobs can offer its schematic.", 6f,
+                            Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
+                    tooltip.addPara("Each schematic unlocks one rung for purchase; it does not"
+                            + " grant the upgrade.", Misc.getGrayColor(), 6f);
                 }
             };
         }

@@ -63,6 +63,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected static String pendingSpeciesId;
     protected static long pendingSpeciesSetAt;
 
+    /** Whether the codex asked to open the map for the parked species. The codex overlay fades
+     *  out asynchronously, so the tab switch must wait until its dismissal callback has run. */
+    protected static boolean pendingMapOpen;
+
     /** The map screen instance the button currently lives on. A new open means a new one. */
     protected Object mapScreen;
 
@@ -121,6 +125,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
     @Override
     public void advance(float amount) {
+        openPendingMapWhenCodexCloses();
+
         Object screen = findMapScreen();
 
         if (screen == null) {
@@ -493,6 +499,38 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         if (Global.getSector() != null) {
             Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
         }
+    }
+
+    /**
+     * Parks a species and asks the campaign UI to open its map after the codex has actually
+     * finished dismissing. Calling {@code showCoreUITab()} directly from the codex button races
+     * the overlay's fade-out and can leave the core UI on its previous tab.
+     */
+    public static void requestSpeciesFocusFromCodex(String speciesId) {
+        requestSpeciesFocus(speciesId);
+        pendingMapOpen = true;
+    }
+
+    /** Opens the requested map exactly once, after CodexDialog's dismissal delegate clears the
+     *  campaign state's codex flag. This runs while paused, as codex transitions do. */
+    protected void openPendingMapWhenCodexCloses() {
+        if (!pendingMapOpen) return;
+
+        if (!hasFreshPendingSpecies()) {
+            pendingMapOpen = false;
+            return;
+        }
+
+        if (Global.getSector() == null) return;
+
+        CampaignUIAPI ui = Global.getSector().getCampaignUI();
+        if (ui == null) return;
+
+        Object showing = ReflectionUtils.invokeIfExists(ui, "isShowingCodex");
+        if (Boolean.TRUE.equals(showing)) return;
+
+        pendingMapOpen = false;
+        ui.showCoreUITab(CoreUITabId.MAP);
     }
 
     protected static boolean hasFreshPendingSpecies() {
