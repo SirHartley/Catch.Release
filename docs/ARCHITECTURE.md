@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 473 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -507,8 +507,9 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell |
 
 ### `campaign/fish/crab`
-`rules.csv` (`catchrelease_crabBarAdd` and the rows under it); only the wares are Java.
-Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
+Crablobab's four wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
+wares are Java. Buying either switchable curio routes through the shared `Baha?` correction before
+returning to the stall; the switch itself lives in the Fisherman's outfitter.
 
 | File | What it does |
 |---|---|

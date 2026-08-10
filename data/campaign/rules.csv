@@ -1334,7 +1334,9 @@ Crablobab checks your credits, checks the crabs, then checks a pocket containing
 ""Next time!""",10:catchrelease_crabStall:Continue,
 catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
-""Celebrate responsibly.""","0:catchrelease_crabStall:Continue
+""Celebrate responsibly.""
+
+""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:10
 CatchReleaseCMD tokens
@@ -1373,7 +1375,11 @@ They are warm.
 
 Once fitted, the whispering is gone.
 
-Nothing else changes.","0:catchrelease_crabStall:Continue
+Nothing else changes.
+
+""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
+100:catchrelease_crabLeave:Leave",
+catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
