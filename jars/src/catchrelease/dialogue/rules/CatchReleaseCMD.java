@@ -587,12 +587,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** The plugin the frame had before a panel took it, so closing can hand it straight back. */
     protected transient InteractionDialogPlugin behind;
 
-    /**
-     * Hands the frame to one of the machinery panels.
-     * <p>
-     * Options are cleared first - they would otherwise stand under the panel, and the hidden text
-     * panel drags them sideways with it.
-     */
+    /** A visual panel gets one hand-back, even if its dismissal is reported more than once. */
+    protected transient boolean panelOpen;
+
     /**
      * Leaves a fleet encounter the way vanilla's own Leave leaves one.
      * <p>
@@ -661,9 +658,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (dialog == null) return false;
 
         behind = dialog.getPlugin();
-        dialog.getOptionPanel().clearOptions();
 
         if (panel instanceof FishShopDialog shop) {
+            panelOpen = true;
             dialog.setPlugin(shop);
             shop.init(dialog);
 
@@ -671,6 +668,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
 
         if (panel instanceof FishermanSurveyDialog counter) {
+            panelOpen = true;
             dialog.setPlugin(counter);
             counter.init(dialog);
 
@@ -689,7 +687,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      * knowing a word of either.
      */
     protected void resume(InteractionDialogAPI dialog) {
-        if (dialog == null) return;
+        if (dialog == null || !panelOpen) return;
+
+        panelOpen = false;
 
         dialog.setBackgroundDimAmount(
                 catchrelease.campaign.fish.fisherman.FishermanConstants.DIALOG_DIM);
@@ -698,6 +698,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         dialog.showVisualPanel();
 
         if (behind != null) dialog.setPlugin(behind);
+
+        //FireAll PopulateOptions only adds rows. Start clean so a repeated UI callback cannot
+        //leave the Fisherman's menu duplicated, while the custom visual is already gone.
+        dialog.getOptionPanel().clearOptions();
 
         com.fs.starfarer.api.impl.campaign.rulecmd.FireBest.fire(null, dialog,
                 behind == null ? null : behind.getMemoryMap(), "CatchReleaseFisherResume");

@@ -98,6 +98,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
     protected InteractionDialogAPI dialog;
     protected Delegate delegate;
+    protected boolean closed;
 
     /** Null for the outfitter opened on its own, which closes by closing the dialog. */
     protected final OnClose onClose;
@@ -113,6 +114,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     @Override
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
+        closed = false;
 
         //returns anything a save is still holding in shop storage - that button no longer exists
         ShopStorage.reclaim();
@@ -124,7 +126,24 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         delegate = new Delegate();
 
+        //Custom visuals do not suppress the interaction's option panel. This public API call is
+        //the safe equivalent, and belongs immediately beside the visual that needs the blank frame.
+        dialog.getOptionPanel().clearOptions();
         dialog.showCustomVisualDialog(WIDTH, HEIGHT, delegate);
+    }
+
+    /** Delivers the custom visual's dismissal once, regardless of which close control reached it. */
+    protected void close() {
+        if (closed || dialog == null) return;
+
+        closed = true;
+
+        if (onClose == null) {
+            dialog.dismiss();
+            return;
+        }
+
+        onClose.onShopClosed(dialog);
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
@@ -639,14 +658,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
          */
         @Override
         public void reportDismissed(int option) {
-            if (dialog == null) return;
-
-            if (onClose == null) {
-                dialog.dismiss();
-                return;
-            }
-
-            onClose.onShopClosed(dialog);
+            FishShopDialog.this.close();
         }
 
         /** Escape closes the dialog without confirmation. */
