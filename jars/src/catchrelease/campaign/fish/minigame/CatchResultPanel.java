@@ -62,6 +62,9 @@ public class CatchResultPanel {
     /** Whether this specimen set a personal best, from the log. Drives the mark and the banner. */
     protected boolean record = false;
 
+    /** Whether this was the first landed specimen of its species; takes precedence in the banner. */
+    protected boolean newSpecies = false;
+
     /** A bubble drifting up the card, in panel fractions so a card that grows keeps them. Motion is
      * a function of {@link #elapsed}, not stored state, so it needs no advancing of its own. */
     protected static class Bubble {
@@ -98,6 +101,7 @@ public class CatchResultPanel {
 
         //filed before anything is drawn, since the comparison is against what was there beforehand;
         //this is also where a species stops being unknown to the codex
+        newSpecies = !FishLog.isCaught(entry.speciesId);
         record = FishLog.record(entry, where, method);
 
         if (spec != null) {
@@ -423,7 +427,10 @@ public class CatchResultPanel {
             prompt.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
 
             if (record) {
-                recordText = font.createText(FishConstants.MINIGAME_RESULT_RECORD, Color.WHITE,
+                String heading = newSpecies ? FishConstants.MINIGAME_RESULT_NEW_SPECIES
+                        : FishConstants.MINIGAME_RESULT_RECORD;
+
+                recordText = font.createText(heading, Color.WHITE,
                         FishConstants.MINIGAME_RESULT_TEXT_SIZE);
                 recordText.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
             }

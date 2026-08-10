@@ -54,6 +54,7 @@ public class FishConstants {
     public static final String MINIGAME_RESULT_RECORD_MARK = "*";
     public static final float MINIGAME_RESULT_MARK_GAP = 4f;
     public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
+    public static final String MINIGAME_RESULT_NEW_SPECIES = "NEW SPECIES";
     public static final float MINIGAME_RESULT_RECORD_GAP = 8f;
     public static final float MINIGAME_RESULT_RECORD_BOUNCE = 3f;
     public static final float MINIGAME_RESULT_RECORD_BOUNCE_RATE = 4f;

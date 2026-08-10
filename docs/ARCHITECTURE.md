@@ -444,7 +444,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | `FishingMinigamePanel.java` | Draws the track, bar, fish and meter; handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
-| `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, best-ever banner |
+| `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers first-ever species discovery over the same catch's automatic personal record |
 | `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish |
 | `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
 
