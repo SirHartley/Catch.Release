@@ -371,23 +371,22 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /**
      * Gives the two bulk-sale shortcuts the same rarity language as a specimen everywhere else.
      * <p>
-     * The rule sheet owns both labels; this only colours their existing option ids after the
-     * Fisherman's sale menu has put them on the panel. {@link InteractionDialogAPI}
-     * colours an option as a whole, not a substring, so colouring just the rarity word is not an
-     * API capability.
+     * The rule sheet owns both labels; this colours their existing option ids after the
+     * Fisherman's sale menu has put them on the panel, then lets {@link FishBuyer} render the exact
+     * cargo preview as tooltip rows whose fish names use their own rarity colours.
      */
     protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
         if (FishBuyer.countUpTo(FishRarity.COMMON) > 0) {
             dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
-            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
-                    FishBuyer.describeUpTo(FishRarity.COMMON));
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellCommon",
+                    FishRarity.COMMON);
         }
         if (FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0) {
             dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
-            dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
-                    FishBuyer.describeUpTo(FishRarity.UNCOMMON));
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellUncommon",
+                    FishRarity.UNCOMMON);
         }
 
         return true;

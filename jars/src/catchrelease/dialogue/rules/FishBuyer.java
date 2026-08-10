@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate.CustomDialogCallback;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -87,6 +88,7 @@ public class FishBuyer {
     protected static class DescriptionSpecies {
         String name;
         int count;
+        FishRarity rarity;
     }
 
     public static boolean hasAnything() {
@@ -249,6 +251,44 @@ public class FishBuyer {
      * quantities whenever two identical crates stacked together in the cargo hold.
     */
     public static String describeUpTo(FishRarity cap) {
+        Map<String, DescriptionSpecies> counts = describeSpeciesUpTo(cap);
+
+        if (counts.isEmpty()) return "No matching unmarked fish.";
+
+        StringBuilder description = new StringBuilder("Will sell:");
+        for (DescriptionSpecies entry : counts.values()) {
+            description.append("\n").append(entry.count).append(" x ").append(entry.name);
+        }
+
+        return description.toString();
+    }
+
+    /**
+     * Adds the batch contents as real tooltip rows so every species name can carry its own rarity.
+     * A plain option tooltip can only colour matched substrings, which makes overlapping names
+     * ambiguous; one highlighted name per paragraph cannot colour the wrong span.
+     */
+    public static void addDescriptionTooltip(InteractionDialogAPI dialog, Object optionId,
+                                             FishRarity cap) {
+        if (dialog == null || dialog.getOptionPanel() == null) return;
+
+        List<DescriptionSpecies> species = new ArrayList<>(describeSpeciesUpTo(cap).values());
+        dialog.getOptionPanel().addOptionTooltipAppender(optionId,
+                new OptionPanelAPI.OptionTooltipCreator() {
+                    @Override
+                    public void createTooltip(TooltipMakerAPI tooltip, boolean hadOtherText) {
+                        tooltip.addPara("Will sell:", hadOtherText ? 10f : 0f);
+
+                        for (DescriptionSpecies entry : species) {
+                            tooltip.addPara(entry.count + " x %s", 3f, Misc.getTextColor(),
+                                    entry.rarity.color, entry.name);
+                        }
+                    }
+                });
+    }
+
+    /** The exact named contents behind both the plain description and the coloured tooltip. */
+    protected static Map<String, DescriptionSpecies> describeSpeciesUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = new LinkedHashMap<>();
 
         for (SaleEntry held : previewUpTo(cap).entries) {
@@ -266,14 +306,7 @@ public class FishBuyer {
             }
         }
 
-        if (counts.isEmpty()) return "No matching unmarked fish.";
-
-        StringBuilder description = new StringBuilder("Will sell:");
-        for (DescriptionSpecies entry : counts.values()) {
-            description.append("\n").append(entry.count).append(" x ").append(entry.name);
-        }
-
-        return description.toString();
+        return counts;
     }
 
     /** Builds the one source of truth used by the label, tooltip, confirmation and sale. */
@@ -413,6 +446,7 @@ public class FishBuyer {
         if (listed == null) {
             listed = new DescriptionSpecies();
             listed.name = fish.getDisplayName();
+            listed.rarity = fish.getSpec().rarity;
             counts.put(fish.speciesId, listed);
         }
 
