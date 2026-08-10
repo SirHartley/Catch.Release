@@ -218,6 +218,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "sellUpTo":
                 return FishBuyer.sellUpTo(dialog, arg);
+            case "colorBulkSaleOptions":
+                return colorBulkSaleOptions(dialog);
 
             //---- the ladder
             case "point":
@@ -348,6 +350,23 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    /**
+     * Gives the two bulk-sale shortcuts the same rarity language as a specimen everywhere else.
+     * <p>
+     * The rule sheet owns both labels; this only colours their existing option ids after the
+     * Fisherman's sale menu has put them on the panel. {@link InteractionDialogAPI}
+     * colours an option as a whole, not a substring, so colouring just the rarity word is not an
+     * API capability.
+     */
+    protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
+        if (dialog == null || dialog.getOptionPanel() == null) return false;
+
+        dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
+        dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
+
+        return true;
     }
 
     protected com.fs.starfarer.api.campaign.TextPanelAPI text(InteractionDialogAPI dialog) {

@@ -1136,7 +1136,7 @@ FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
 catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Shelf is bare. What I had, you bought, and I do not chart mid-trip. The chart crews will catch up.""",,
-catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
+catchrelease_fisherSell,DialogOptionSelected,$option == catchrelease_fisherSell,CatchReleaseCMD colorBulkSaleOptions,"""Market rate, no haggling. The market cannot hear you out here.""","0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells
 10:catchrelease_fisherSellCommon:Sell all unmarked commons
 20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon
 100:catchrelease_fisherBack:Continue",
