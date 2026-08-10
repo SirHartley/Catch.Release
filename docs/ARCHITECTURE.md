@@ -508,11 +508,11 @@ Fish in cargo.
 
 ### `campaign/fish/crab`
 `rules.csv` (`catchrelease_crabBarAdd` and the rows under it); only the wares are Java.
-Crablobab's three wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
+Crablobab's four wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
 
 | File | What it does |
 |---|---|
-| `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 | `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing twice and the next rock offers the next thing. Priced off rarity; anything already owned drops out of the rotation |
 
 ### `campaign/fish/tackle`
@@ -521,7 +521,7 @@ Modules bolted to a rig.
 | File | What it does |
 |---|---|
 | `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play. `BREACH_COUPLER` is the drone rig's permission to use lamp-cut openings in open space |
-| `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE`. Gear-dependent modules stay off the shelf and out of rewards until their prerequisite is owned, while an already-owned module remains refittable for save compatibility |
+| `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE`; `consume()` removes a consumable from both facts at once. Gear-dependent modules stay off the shelf and out of rewards until their prerequisite is owned, while an already-owned permanent module remains refittable for save compatibility |
 
 ### `campaign/fish/map`
 The sector-map fish filter.
@@ -785,8 +785,8 @@ cleanly and throws in the campaign. Whichever is used, pair it with the matching
 use `Fit.isRig()` or it will offer a shelf for a slot nobody owns.
 
 **Owning a module and wearing one are different questions.** `TackleManager.isOwned()` asks the
-first, `get(rig)` the second. A module is bought once and can be moved between slots for nothing
-after that, so anything that charges for tackle must ask `isOwned()` first — `ShopEntry.getPrice()`
+first, `get(rig)` the second. A permanent module is bought once and can be moved between slots for
+nothing after that, so anything that charges for tackle must ask `isOwned()` first — `ShopEntry.getPrice()`
 returns null for one already owned, which is what makes fitting it free. Anything that *grants* a
 module must `own()` it as well as `fit()` it, or the player pays for their own gift the first time
 they take it off. Saves predating ownership seed the owned set from whatever is in a slot.
@@ -807,7 +807,11 @@ The mod ships no `LunaSettings.csv` any more, so it has no page in LunaLib's men
 **Stocking a module and owning one are a third question.** `Tackle.stocked` says whether the
 outfitter carries it, and `TackleManager.getOptions()` lists what it stocks *plus anything already
 owned* — without the second half a module bought anywhere else could never be taken off and put back
-on. `Tackle.EXPLOSIVE_HEAD` is the only unstocked one; it comes out of Crablobab's coat.
+on. `Tackle.EXPLOSIVE_HEAD` is the only unstocked one; it comes out of Crablobab's coat. It is also
+the only consumable: a miss returns it unfired, while `detonate()` calls `TackleManager.consume()`
+to remove ownership and clear the harpoon slot. `CrabWares.EXPLOSIVE_HEAD` deliberately asks that
+live ownership state instead of a permanent bought flag, so the bar event and its existing
+credits-and-crabs purchase route become available again after every detonation.
 
 **Anything granted from outside the shop still goes through `ShopEntry.grant()`.** It is the only
 place that knows a running rig has to be stopped so it comes back up reading what it now has — see
@@ -815,8 +819,9 @@ the note on abilities reading their numbers once. `CrabWares.EXPLOSIVE_HEAD` gra
 exactly that reason, rather than calling `own()` and `fit()` itself.
 
 **An explosive head is a different ability, not a better harpoon.** It cannot land anything: the
-strike blows the mote up and throws the head off its own line, and `HarpoonEntityPlugin.BLASTED` is a
-terminal state that is not an arrival — nothing is reeled in and `land()` never runs. Against a hull
+strike blows the mote up, consumes the fitted charge, and throws the head off its own line, and
+`HarpoonEntityPlugin.BLASTED` is a terminal state that is not an arrival — nothing is reeled in and
+`land()` never runs. Against a hull
 it books the harpooning the ordinary way and then skips the crew's patience outright, which is the
 only caller of `HarpoonOffence.turnHostile()` that does not go through the hit count. The fireball is
 vanilla's `Entities.EXPLOSION`, which brings the shockwave, the sound and the fleet damage with it.
