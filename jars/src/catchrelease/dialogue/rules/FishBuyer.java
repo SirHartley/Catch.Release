@@ -4,13 +4,17 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.ShopMarks;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
+import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
+import com.fs.starfarer.api.campaign.CustomDialogDelegate.CustomDialogCallback;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -31,10 +35,52 @@ public class FishBuyer {
     /** One stack's worth: how many, their shared rarity, what they are worth together. */
     protected static class Stack {
         SpecialItemData data;
+        /** Number of special items represented by this cargo stack. */
+        int items;
         int count;
         FishRarity rarity;
         float value;
         boolean marked;
+    }
+
+    /**
+     * One exact cargo removal in a bulk-sale preview. The item data and quantity are enough to
+     * remove the same whole cargo stack later; containers are never opened or partly spent here.
+     */
+    protected static final class SaleEntry {
+        final SpecialItemData data;
+        final int items;
+        final int count;
+        final float value;
+
+        SaleEntry(Stack held) {
+            data = held.data;
+            items = held.items;
+            count = held.count;
+            value = held.value;
+        }
+    }
+
+    /**
+     * An immutable snapshot of a bulk sale, including the exact whole stacks it will consume.
+     * Its fingerprint lets the confirmation reject a hold that changed while the prompt was open.
+     */
+    protected static final class SalePreview {
+        final List<SaleEntry> entries;
+        final int count;
+        final float value;
+        final String fingerprint;
+
+        SalePreview(List<SaleEntry> entries, int count, float value, String fingerprint) {
+            this.entries = List.copyOf(entries);
+            this.count = count;
+            this.value = value;
+            this.fingerprint = fingerprint;
+        }
+
+        boolean matches(SalePreview other) {
+            return other != null && fingerprint.equals(other.fingerprint);
+        }
     }
 
     /** One named species in a batch-sale preview, keyed by its stable data id. */
@@ -59,12 +105,14 @@ public class FishBuyer {
 
             Stack held = new Stack();
             held.data = data;
+            held.items = (int) stack.getSize();
+            if (held.items <= 0) continue;
 
             if (FishItems.FISH.equals(data.getId())) {
                 FishCatch entry = FishCatch.decode(data.getData());
                 if (entry == null || entry.getSpec() == null) continue;
 
-                held.count = (int) stack.getSize();
+                held.count = held.items;
                 held.rarity = entry.getSpec().rarity;
                 held.value = entry.getValue() * held.count;
                 held.marked = ShopMarks.isMarked(entry);
@@ -87,6 +135,8 @@ public class FishBuyer {
                 }
 
                 held.rarity = worst;
+                held.count *= held.items;
+                held.value *= held.items;
             } else {
                 continue;
             }
@@ -167,78 +217,46 @@ public class FishBuyer {
         finish(dialog, sold, credits);
     }
 
-    /** Everything unmarked at or below the rung goes, for the market rate of each specimen. */
+    /**
+     * Opens a confirmation for everything unmarked at or below the rung. The actual removal is
+     * deliberately delayed until confirmation, then verified against a fresh hold snapshot.
+     */
     public static boolean sellUpTo(InteractionDialogAPI dialog, String rarityName) {
         FishRarity cap = CatchReleaseCMD.parseRarity(rarityName);
         if (cap == null) return false;
 
-        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+        SalePreview preview = previewUpTo(cap);
+        if (preview.count <= 0) return false;
 
-        int sold = 0;
-        float credits = 0f;
-
-        for (Stack held : read()) {
-            if (held.marked) continue;
-            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
-
-            //a container is one item however many swim in it
-            cargo.removeItems(CargoItemType.SPECIAL, held.data,
-                    FishItems.isContainer(held.data) ? 1 : held.count);
-
-            sold += held.count;
-            credits += held.value;
-        }
-
-        finish(dialog, sold, credits);
-
-        return sold > 0;
+        showBulkSaleConfirm(dialog, cap, preview);
+        return true;
     }
 
     /** What a batch option at this rung would take, so the sheet can price its own row. */
     public static int countUpTo(FishRarity cap) {
-        int total = 0;
-
-        for (Stack held : read()) {
-            if (held.marked) continue;
-            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
-
-            total += held.count;
-        }
-
-        return total;
+        return previewUpTo(cap).count;
     }
 
     public static float valueUpTo(FishRarity cap) {
-        float value = 0f;
-
-        for (Stack held : read()) {
-            if (held.marked) continue;
-            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
-
-            value += held.value;
-        }
-
-        return value;
+        return previewUpTo(cap).value;
     }
 
     /**
      * The exact specimens the current batch-sale route would take, in hold order.
      * <p>
-     * This deliberately walks the same {@link #read()} stacks as {@link #sellUpTo}. In
-     * particular, an identical-container stack is still one batch-sale item: that is how the
-     * transaction currently removes and counts it, and the preview must not promise more.
+     * This deliberately walks the same preview as {@link #sellUpTo}, including every copy in an
+     * identical-container stack. The old one-container assumption sold and described different
+     * quantities whenever two identical crates stacked together in the cargo hold.
     */
     public static String describeUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = new LinkedHashMap<>();
 
-        for (Stack held : read()) {
-            if (held.marked) continue;
-            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
+        for (SaleEntry held : previewUpTo(cap).entries) {
 
             if (FishItems.isContainer(held.data)) {
                 for (FishCatch entry : FishItems.decodeBundle(held.data.getData())) {
                     if (entry.getSpec() == null) continue;
-                    addDescriptionCount(counts, entry, 1);
+                    addDescriptionCount(counts, entry, held.items);
                 }
             } else {
                 FishCatch entry = FishCatch.decode(held.data.getData());
@@ -256,6 +274,137 @@ public class FishBuyer {
         }
 
         return description.toString();
+    }
+
+    /** Builds the one source of truth used by the label, tooltip, confirmation and sale. */
+    protected static SalePreview previewUpTo(FishRarity cap) {
+        List<SaleEntry> entries = new ArrayList<>();
+        int count = 0;
+        float value = 0f;
+        StringBuilder fingerprint = new StringBuilder();
+
+        for (Stack held : read()) {
+            if (held.marked) continue;
+            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
+
+            SaleEntry entry = new SaleEntry(held);
+            entries.add(entry);
+            count += entry.count;
+            value += entry.value;
+            appendFingerprint(fingerprint, entry);
+        }
+
+        return new SalePreview(entries, count, value, fingerprint.toString());
+    }
+
+    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key. */
+    protected static void appendFingerprint(StringBuilder out, SaleEntry entry) {
+        String id = entry.data.getId();
+        String data = entry.data.getData();
+        out.append(id == null ? -1 : id.length()).append(':').append(id)
+                .append(data == null ? -1 : data.length()).append(':').append(data)
+                .append(':').append(entry.items).append(';');
+    }
+
+    protected static void showBulkSaleConfirm(final InteractionDialogAPI dialog, final FishRarity cap,
+                                              final SalePreview expected) {
+        if (dialog == null) return;
+
+        dialog.showCustomDialog(360f, 100f, new BaseCustomDialogDelegate() {
+            @Override
+            public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+                TooltipMakerAPI text = panel.createUIElement(360f, 100f, false);
+                text.addPara("Sell " + expected.count + " fish for "
+                        + Misc.getDGSCredits(expected.value) + " credits?", 0f);
+                panel.addUIElement(text).inTL(0f, 0f);
+            }
+
+            @Override
+            public boolean hasCancelButton() {
+                return true;
+            }
+
+            @Override
+            public String getConfirmText() {
+                return "Sell";
+            }
+
+            @Override
+            public String getCancelText() {
+                return "Never mind";
+            }
+
+            @Override
+            public void customDialogConfirm() {
+                SalePreview current = previewUpTo(cap);
+                if (!expected.matches(current)) {
+                    if (current.count <= 0) {
+                        dialog.getTextPanel().addPara("No matching unmarked fish remain.",
+                                Misc.getNegativeHighlightColor());
+                        return;
+                    }
+
+                    //The hold (or a protection mark) changed under the prompt. Show the player
+                    //the new exact sale rather than silently spending a different set of fish.
+                    reopenBulkSaleConfirm(dialog, cap, current);
+                    return;
+                }
+
+                execute(dialog, current);
+            }
+        });
+    }
+
+    /**
+     * A custom dialog is still installed while its confirm callback runs, so Starsector ignores a
+     * second {@code showCustomDialog()} from that callback. RC8 invokes the callback before it
+     * dismisses the current dialog, so queue the fresh prompt for the following campaign update.
+     */
+    protected static void reopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap,
+                                                SalePreview preview) {
+        Global.getSector().addTransientScript(new ReopenBulkSaleConfirm(dialog, cap, preview));
+    }
+
+    protected static final class ReopenBulkSaleConfirm implements EveryFrameScript {
+        private final InteractionDialogAPI dialog;
+        private final FishRarity cap;
+        private final SalePreview preview;
+        private boolean done;
+
+        ReopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap, SalePreview preview) {
+            this.dialog = dialog;
+            this.cap = cap;
+            this.preview = preview;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() == dialog) {
+                showBulkSaleConfirm(dialog, cap, preview);
+            }
+            done = true;
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return true;
+        }
+    }
+
+    /** Performs only the already-confirmed, freshly recomputed transaction. */
+    protected static void execute(InteractionDialogAPI dialog, SalePreview preview) {
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+        for (SaleEntry entry : preview.entries) {
+            cargo.removeItems(CargoItemType.SPECIAL, entry.data, entry.items);
+        }
+
+        finish(dialog, preview.count, preview.value);
     }
 
     protected static void addDescriptionCount(Map<String, DescriptionSpecies> counts,
