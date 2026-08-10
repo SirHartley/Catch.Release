@@ -18,6 +18,7 @@ import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
+import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
@@ -114,6 +115,35 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Whether the Fisherman still needs to name the player's first recovered treasure. */
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
+
+    /** Whether any completed Fisherman topic belongs in the repeat-question menu. */
+    public static final String FISHER_ASK_AGAIN = "$catchreleaseFisherAskAgain";
+
+    /** Whether the unasked Fisherman-topic menu has a second page of available topics. */
+    public static final String FISHER_ASK_PAGE_ONE = "$catchreleaseFisherAskPageOne";
+
+    /** Whether the repeat-question menu has a second page of completed topics. */
+    public static final String FISHER_ASK_AGAIN_PAGE_ONE = "$catchreleaseFisherAskAgainPageOne";
+
+    /**
+     * Campaign-long records of the repeatable Fisherman topics the player has actually opened.
+     * <p>
+     * The sheet writes these only on the answer rows, rather than on option production, so a
+     * newly-unlocked prompt remains new until the player has seen its answer.
+     */
+    protected static final String[] FISHER_ASKED_TOPICS = {
+            "$catchrelease_fisherAsked_howLong",
+            "$catchrelease_fisherAsked_baha",
+            "$catchrelease_fisherAsked_whyOut",
+            "$catchrelease_fisherAsked_looking",
+            "$catchrelease_fisherAsked_patterns",
+            "$catchrelease_fisherAsked_deepWater",
+            "$catchrelease_fisherAsked_fishBack",
+            "$catchrelease_fisherAsked_largest",
+            "$catchrelease_fisherAsked_tackle",
+            "$catchrelease_fisherAsked_upgrade",
+            "$catchrelease_fisherAsked_outfitterPayment"
+    };
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
@@ -219,6 +249,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);
+            case "castawayEligible":
+                return dialog != null && dialog.getInteractionTarget()
+                        instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
+                        && Castaway.canStart(planet);
+            case "startCastaway":
+                return dialog != null && dialog.getInteractionTarget()
+                        instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
+                        && Castaway.start(planet);
 
             //---- the hulk
             case "carryFisherProperty":
@@ -481,6 +519,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
+        MemoryAPI global = Global.getSector().getMemoryWithoutUpdate();
+        local.set(FISHER_ASK_AGAIN, hasAskedFisherTopic(global), 0);
+        local.set(FISHER_ASK_PAGE_ONE, hasUnaskedFisherTopicFrom(global, 6), 0);
+        local.set(FISHER_ASK_AGAIN_PAGE_ONE,
+                hasAskedFisherTopicFrom(global, 6), 0);
+
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
@@ -515,6 +559,27 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             local.set(WORK_PAY, Misc.getDGSCredits(work.credits), 0);
             local.set(WORK_POND, work.atPond, 0);
         }
+    }
+
+    /** True once any repeatable Fisherman topic has been answered in this campaign. */
+    protected boolean hasAskedFisherTopic(MemoryAPI global) {
+        return hasAskedFisherTopicFrom(global, 0);
+    }
+
+    /** True when a completed repeatable topic exists at or after the supplied page boundary. */
+    protected boolean hasAskedFisherTopicFrom(MemoryAPI global, int first) {
+        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
+            if (global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
+        }
+        return false;
+    }
+
+    /** True when an unasked repeatable topic exists at or after the supplied page boundary. */
+    protected boolean hasUnaskedFisherTopicFrom(MemoryAPI global, int first) {
+        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
+            if (!global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
+        }
+        return false;
     }
 
     //---------------------------------------------------------------- panels
@@ -557,14 +622,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Gives the stranded rating a berth, removes the one-use cache, and closes the dialog. */
+    /** Gives the stranded rating a berth and completes whichever safe host delivered the scene. */
     protected boolean rescueCastaway(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
-        SectorEntityToken target = dialog.getInteractionTarget();
-        FishingIntro.point();
-
-        if (target != null) Misc.fadeAndExpire(target);
+        Castaway.rescue(dialog.getInteractionTarget());
         dialog.dismiss();
 
         return true;

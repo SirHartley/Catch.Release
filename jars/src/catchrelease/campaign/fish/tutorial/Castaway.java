@@ -2,14 +2,16 @@ package catchrelease.campaign.fish.tutorial;
 
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.listeners.SurveyPlanetListener;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
-import org.lazywizard.lazylib.MathUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The one crewman who was put off the boat, and what is left of him.
@@ -22,31 +24,24 @@ import org.lazywizard.lazylib.MathUtils;
  * Deliberately not the whole story. He does not explain what he saw and could not if he wanted to;
  * the only thing he can still do is point, and the pointing is the hook.
  * <p>
- * A beacon in tight orbit rather than an option bolted onto the survey screen: the survey is
- * vanilla's and stays vanilla's, and a beacon is a thing the player chooses to answer.
+ * The scene is injected into the planet's ordinary survey interaction, the same way the Academy's
+ * survey package interrupts a survey. The custom entity class remains only so old saves can load
+ * their beacon once, convert it to its host planet and retire it safely.
  */
 public class Castaway extends BaseCustomEntityPlugin {
 
-    /** Watches for the survey. Transient; the beacon is what persists. */
+    /** Performs legacy-beacon migration on load; new surveys are handled by rules.csv. */
     public static class Watcher implements SurveyPlanetListener {
 
         public static void register() {
             Global.getSector().getListenerManager().removeListenerOfClass(Watcher.class);
-            Global.getSector().getListenerManager().addListener(new Watcher(), true);
+            migrateLegacyBeacons();
         }
 
         @Override
         public void reportPlayerSurveyedPlanet(PlanetAPI planet) {
-            if (isPlaced()) return;
-            if (FishingIntro.isAtLeast(FishingIntro.RODDED)) return;
-
-            if (planet == null || planet.getStarSystem() == null) return;
-
-            //somewhere nobody lives: a man marooned four hundred metres from a spaceport is not
-            //marooned, he is loitering
-            if (OuterReaches.isPopulated(planet.getStarSystem())) return;
-
-            place(planet);
+            //New saves enter through the surveyPerform rules hook. Kept as a no-op listener
+            //implementation for binary compatibility with saves that serialised this watcher.
         }
     }
 
@@ -55,28 +50,71 @@ public class Castaway extends BaseCustomEntityPlugin {
                 .getBoolean(TutorialConstants.CASTAWAY_PLACED_KEY);
     }
 
-    protected static void place(PlanetAPI host) {
+    /** Whether this unsurveyed, uninhabited world may host the one remaining first-contact scene. */
+    public static boolean canStart(PlanetAPI host) {
+        return host != null
+                && host.getStarSystem() != null
+                && !isPlaced()
+                && !FishingIntro.isAtLeast(FishingIntro.POINTED)
+                && !OuterReaches.isPopulated(host.getStarSystem());
+    }
+
+    /** Records the host before the rules route into the preserved conversation. */
+    public static boolean start(PlanetAPI host) {
+        if (!canStart(host) || host.getMarket() == null) return false;
+
         Global.getSector().getMemoryWithoutUpdate()
                 .set(TutorialConstants.CASTAWAY_PLACED_KEY, true);
+        host.getMarket().getMemoryWithoutUpdate().set(TutorialConstants.CASTAWAY_HOST_KEY, true);
+        host.getMarket().getMemoryWithoutUpdate().unset(TutorialConstants.CASTAWAY_RESCUED_KEY);
 
-        StarSystemAPI system = host.getStarSystem();
+        return true;
+    }
 
-        SectorEntityToken beacon = system.addCustomEntity(Misc.genUID(),
-                TutorialConstants.CASTAWAY_NAME, TutorialConstants.CASTAWAY_ENTITY_ID, null, null);
+    /** Marks the planet-hosted scene complete without ever touching the planet entity itself. */
+    public static boolean rescue(SectorEntityToken target) {
+        FishingIntro.point();
 
-        beacon.setCircularOrbit(host, MathUtils.getRandomNumberInRange(0f, 360f),
-                host.getRadius() + TutorialConstants.CASTAWAY_SURFACE_PAD,
-                TutorialConstants.CASTAWAY_ORBIT_DAYS);
+        if (target instanceof PlanetAPI planet && planet.getMarket() != null) {
+            planet.getMarket().getMemoryWithoutUpdate()
+                    .set(TutorialConstants.CASTAWAY_RESCUED_KEY, true);
+            return true;
+        }
 
-        //discoverable, like everything else in a system that is not a star or a slipstream. The
-        //message below is what points the player at it, so the beacon does not also have to be
-        //visible from the edge of the system to be findable
-        beacon.setDiscoverable(true);
+        //Only the old beacon is allowed to fade. A planet is a campaign object, not a cache.
+        if (isCastaway(target)) Misc.fadeAndExpire(target);
 
-        Misc.makeImportant(beacon, "catchrelease_tutorial");
+        return true;
+    }
 
-        Global.getSector().getCampaignUI().addMessage("A survivor's beacon is transmitting from the"
-                + " surface of " + host.getName() + ".", Misc.getHighlightColor());
+    /**
+     * Converts the old orbiting beacon to a flag on its actual planet, then retires that beacon.
+     * A save which already advanced the tutorial only loses the obsolete object; it never receives
+     * a fresh scene or a new progression flag.
+     */
+    public static void migrateLegacyBeacons() {
+        if (Global.getSector() == null) return;
+
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            List<SectorEntityToken> candidates = new ArrayList<>(
+                    location.getEntitiesWithTag(TutorialConstants.CASTAWAY_TAG));
+
+            for (SectorEntityToken beacon : candidates) {
+                if (!isCastaway(beacon)) continue;
+
+                SectorEntityToken focus = beacon.getOrbitFocus();
+                if (!FishingIntro.isAtLeast(FishingIntro.POINTED)
+                        && focus instanceof PlanetAPI planet && planet.getMarket() != null) {
+
+                    Global.getSector().getMemoryWithoutUpdate()
+                            .set(TutorialConstants.CASTAWAY_PLACED_KEY, true);
+                    planet.getMarket().getMemoryWithoutUpdate()
+                            .set(TutorialConstants.CASTAWAY_HOST_KEY, true);
+                }
+
+                Misc.fadeAndExpire(beacon);
+            }
+        }
     }
 
     /** Whether an entity is the beacon, for the dialog router. */

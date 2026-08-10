@@ -92,12 +92,31 @@ public class FishermanBehavior implements EveryFrameScript {
 
         boolean watched = isPlayerHere();
 
+        //A visitor may have started packing up just before the tutorial selected its system. The
+        //reservation is an instruction to stay, so undo that pending departure before its short
+        //fade can consume the boat on the next frame.
+        if (isReservedForTutorial() && windingDown) {
+            windingDown = false;
+            windDownLeft = 0f;
+            litSoundPlayed = false;
+        }
+
+        //Old saves may hold two boats in one place. The reconciliation marks the redundant one
+        //while it is on screen, then this common lifecycle path removes it once nobody can watch it
+        //vanish. Every normal spawner excludes the mark, so it cannot become canonical again.
+        if (fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY) && !watched) {
+            fleet.despawn();
+            return;
+        }
+
         keepVisible(watched);
 
         //the stay is counted in days the player was not here for. A boat that vanishes while
         //somebody is standing next to it was never really there, and a fortnight spent fishing
         //alongside it is a fortnight of the visit the player gets none of
-        if (!watched && isVisiting()) daysOut += Global.getSector().getClock().convertToDays(amount);
+        if (!watched && isVisiting() && !isReservedForTutorial()) {
+            daysOut += Global.getSector().getClock().convertToDays(amount);
+        }
 
         keepWorking();
 
@@ -112,7 +131,8 @@ public class FishermanBehavior implements EveryFrameScript {
         if (!watched) {
             expireLamps(0f);
 
-            if (isVisiting() && daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
+            if (isVisiting() && !isReservedForTutorial()
+                    && daysOut >= FishermanConstants.STAY_DAYS) beginWindDown();
             return;
         }
 
@@ -134,6 +154,12 @@ public class FishermanBehavior implements EveryFrameScript {
      */
     protected boolean isVisiting() {
         return true;
+    }
+
+    /** A reused visitor stays available until the directed second lesson no longer needs it. */
+    protected boolean isReservedForTutorial() {
+        return fleet.getMemoryWithoutUpdate().get(FishermanConstants.TUTORIAL_TARGET_KEY)
+                instanceof String;
     }
 
     /** Lights out, the one departure sound, and a short grace for the fade before the boat goes. */

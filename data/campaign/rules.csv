@@ -942,6 +942,23 @@ Your crew lash it down.
 
 The service handshake still points to the Fisherman.",catchrelease_wreckLeave:Leave,
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,EndConversation,,,
+catchrelease_castawaySurvey,DialogOptionSelected,"$option == surveyPerform
+!$market.isSurveyed
+CatchReleaseCMD castawayEligible score:1100","CatchReleaseCMD startCastaway
+$option = catchrelease_castawayPlanetOpen 0
+FireBest DialogOptionSelected",,,"Technical survey hook, shaped after gaIntro2surveyOpen: the planet remains the interaction target and the supplied scene opens before vanilla performs the survey."
+catchrelease_castawayReminder,PopulateOptions,"$market.catchrelease_castawayHost
+!$market.catchrelease_castawayRescued",,,catchrelease_castawayContact:Respond to the survivor's beacon,"The survey found a surface cache; leaving its scene open does not make the host planet disappear."
+catchrelease_castawayContact,DialogOptionSelected,$option == catchrelease_castawayContact,"$option = catchrelease_castawayPlanetOpen 0
+FireBest DialogOptionSelected",,,
+catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
+
+The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
+
+The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
+10:catchrelease_ratingWho:Ask who he worked for
+20:catchrelease_ratingRescue:Offer passage
+100:catchrelease_castawayLeave:Leave","Technical routing twin for the planet-hosted survey flow; supplied scene text and sequencing remain verbatim."
 catchrelease_castawayOpen,OpenInteractionDialog,$entity.tag:catchrelease_castaway score:1000,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
@@ -1020,9 +1037,7 @@ A metallic impact follows from your left audio channel, though the trawler lies 
 He looks back to you.
 
 ""Captain. What can I do for you?""",,
-catchrelease_fisherBycatch,OpenCommLink,"$entity.catchrelease_fisherman score:1080
-CatchReleaseCMD tokens
-$catchreleaseBycatchPending","CatchReleaseCMD ackBycatch
+catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBycatch,"CatchReleaseCMD ackBycatch
 $menuState = catchreleaseFisher 0
 FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached to your catch log.
 
@@ -1091,6 +1106,23 @@ $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,50:catchrelease_fisherWork:Ask about work,
+catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
+catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetMet
+$catchreleaseTargetHere
+!$catchreleaseDeepHandoff
+!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:"I just left you in another system.",
+catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetMet
+$catchreleaseTargetHere
+!$catchreleaseDeepHandoff
+!$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:"Is this the same ship?",
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
@@ -1189,7 +1221,8 @@ $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
-CatchReleaseCMD point","The rating hears you out, then turns the glass between both hands.
+CatchReleaseCMD point
+FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -1199,11 +1232,13 @@ They nod vaguely upward.
 
 A pause.
 
-""Ask for the Fisherman.""","0:catchrelease_ratingBarWhere:""Where do I find the trawler?""
-10:catchrelease_ratingBarWhatRating:""What exactly is a rating?""
-20:catchrelease_ratingBarFishing:""Fishing. In space.""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,,"""Ship's crew.""
+""Ask for the Fisherman.""",,
+catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:""Where do I find the trawler?"","Shared local menu: asked flags exist only for this bar conversation."
+catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:""What exactly is a rating?"",
+catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:""Fishing. In space."",
+catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,"Always present, including after all three questions have been consumed, so the event never has an empty option panel."
+catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
+FireAll CatchReleaseRatingQuestions","""Ship's crew.""
 
 The rating lifts one shoulder.
 
@@ -1211,19 +1246,20 @@ The rating lifts one shoulder.
 
 They take a drink.
 
-""Rating.""","0:catchrelease_ratingBarWhere:""And the fishing boat?""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,,"""That's what they call it.""
+""Rating.""",,
+catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,"$catchrelease_ratingAskedFishing = true 0
+FireAll CatchReleaseRatingQuestions","""That's what they call it.""
 
 The rating considers the objection.
 
-""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""","0:catchrelease_ratingBarWhere:""Where is this boat?""
-100:catchrelease_ratingBarBack:Go back to the bar",
-catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,CatchReleaseCMD point,"""Past the last settled orbit. They don't berth much.""
+""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""",,
+catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,"CatchReleaseCMD point
+$catchrelease_ratingAskedWhere = true 0
+FireAll CatchReleaseRatingQuestions","""Past the last settled orbit. They don't berth much.""
 
 The rating gives you the relevant nav reference.
 
-""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",100:catchrelease_ratingBarBack:Go back to the bar,
+""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny
@@ -1475,14 +1511,30 @@ catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,60:catchrelease_fisherAsk:Ask about something else,
-catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$menuState = catchreleaseFisherAsk 0
+catchrelease_fisherOptAskAgain,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseFisherAskAgain",,,80:catchrelease_fisherAskAgain:Ask again,
+catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskAgainReturn = false 0
+$catchreleaseFisherAskAgainPage = 0 0
+$catchreleaseFisherAskPage = 0 0
+$menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions","They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
-catchrelease_fisherAskBack,DialogOptionSelected,$option == catchrelease_fisherAskBack,"$menuState = catchreleaseFisherAsk 0
+catchrelease_fisherAskBack,DialogOptionSelected,"$option == catchrelease_fisherAskBack
+!$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainReturn,DialogOptionSelected,"$option == catchrelease_fisherAskBack
+$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAskAgain 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgain,DialogOptionSelected,$option == catchrelease_fisherAskAgain,"$catchreleaseFisherAskAgainReturn = true 0
+$catchreleaseFisherAskAgainPage = 0 0
+$menuState = catchreleaseFisherAskAgain 0
 FireAll PopulateOptions",,,
 catchrelease_fisherOptAsk_howLong,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
-catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,,"""Fishing?""
+$catchreleaseStage >= 1
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true 0,"""Fishing?""
 
 He thinks about it.
 
@@ -1494,8 +1546,10 @@ Another moment.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"10:catchrelease_ask_baha:""Do you have a name?""",
-catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,,"""Registry says Baha.""
+$catchreleaseStage >= 1
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_baha",,,"10:catchrelease_ask_baha:""Do you have a name?""",
+catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,$global.catchrelease_fisherAsked_baha = true 0,"""Registry says Baha.""
 
 The Fisherman takes a drink.
 
@@ -1507,8 +1561,10 @@ He sets the mug down.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_why0ut,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 1",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
-catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,,"""Fabric's thick where people are.""
+$catchreleaseStage >= 1
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_whyOut",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
+catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,$global.catchrelease_fisherAsked_whyOut = true 0,"""Fabric's thick where people are.""
 
 He presses one palm flat against the table.
 
@@ -1520,8 +1576,10 @@ He lifts the hand.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 2",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
-catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,,"""They look.""
+$catchreleaseStage >= 2
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_looking",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
+catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,$global.catchrelease_fisherAsked_looking = true 0,"""They look.""
 
 He turns a control unit over in his hands.
 
@@ -1538,8 +1596,10 @@ He sets it down.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 3",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
-catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,,"""Ghost is an old spacer word. Pattern is what the instruments call it when the crossing gives them something they can measure.""
+$catchreleaseStage >= 3
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_patterns",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true 0,"""Ghost is an old spacer word. Pattern is what the instruments call it when the crossing gives them something they can measure.""
 
 He scratches at the stubble under his jaw.
 
@@ -1550,8 +1610,10 @@ catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_pa
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 4",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
-catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,,"""Not water.""
+$catchreleaseStage >= 4
+$catchreleaseFisherAskPage == 0
+!$global.catchrelease_fisherAsked_deepWater",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,$global.catchrelease_fisherAsked_deepWater = true 0,"""Not water.""
 
 There is no irritation in the correction.
 
@@ -1563,8 +1625,10 @@ He looks at you.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 5",,,"60:catchrelease_ask_fishBack:""Does anything out there fish back?""",
-catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,,"""Not with any tackle I'd sell you.""
+$catchreleaseStage >= 5
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_fishBack",,,"0:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,$global.catchrelease_fisherAsked_fishBack = true 0,"""Not with any tackle I'd sell you.""
 
 Behind him, a crewman reaches through a closed locker door and removes a wrench.
 
@@ -1572,12 +1636,102 @@ The Fisherman goes on cleaning the control unit.","0:catchrelease_fisherAskBack:
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
-$catchreleaseStage >= 6",,,"70:catchrelease_ask_largest:""What is the largest thing you have landed?""",
-catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
+$catchreleaseStage >= 6
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_largest",,,"10:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true 0,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherOptAsk_tackle,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_tackle",,,"20:catchrelease_ask_tackle:""What is tackle?""",
+catchrelease_ask_tackle,DialogOptionSelected,$option == catchrelease_ask_tackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
+
+He taps the manifest.
+
+""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_fisherAskBack:Something else
+100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherOptAsk_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_upgrade",,,"30:catchrelease_ask_upgrade:""What is an upgrade?""",
+catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+
+He points at the entry.
+
+""Improves the function listed on it.""","0:catchrelease_fisherAskBack:Something else
+100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherOptAsk_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAsk
+CatchReleaseCMD tokens
+$catchreleaseStage >= 3
+$catchreleaseFisherAskPage == 1
+!$global.catchrelease_fisherAsked_outfitterPayment",,,"40:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
+catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true 0,"""Trade buys catch. I sell hardware.""
+
+""Fish settle both. No reason to write two invoices.""","0:catchrelease_fisherAskBack:Something else
+100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherAskAgain_howLong,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_fisherAskAgain_baha,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_baha",,,"10:catchrelease_ask_baha:""Do you have a name?""",
+catchrelease_fisherAskAgain_whyOut,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_whyOut",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
+catchrelease_fisherAskAgain_looking,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_looking",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
+catchrelease_fisherAskAgain_patterns,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_patterns",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_fisherAskAgain_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+$global.catchrelease_fisherAsked_deepWater",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_fisherAskAgain_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_fishBack",,,"0:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_fisherAskAgain_largest,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_largest",,,"10:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_fisherAskAgain_tackle,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_tackle",,,"20:catchrelease_ask_tackle:""What is tackle?""",
+catchrelease_fisherAskAgain_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_upgrade",,,"30:catchrelease_ask_upgrade:""What is an upgrade?""",
+catchrelease_fisherAskAgain_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1
+$global.catchrelease_fisherAsked_outfitterPayment",,,"40:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
+catchrelease_fisherOptAskPageNext,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
+CatchReleaseCMD tokens
+$catchreleaseFisherAskPageOne",,,70:catchrelease_fisherAskPageNext:Next,
+catchrelease_fisherOptAskPagePrevious,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1",,,70:catchrelease_fisherAskPagePrevious:Previous,
+catchrelease_fisherAskPageNext,DialogOptionSelected,$option == catchrelease_fisherAskPageNext,"$catchreleaseFisherAskPage = 1 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskPagePrevious,DialogOptionSelected,$option == catchrelease_fisherAskPagePrevious,"$catchreleaseFisherAskPage = 0 0
+FireAll PopulateOptions",,,
+catchrelease_fisherOptAskAgainNext,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 0
+CatchReleaseCMD tokens
+$catchreleaseFisherAskAgainPageOne",,,80:catchrelease_fisherAskAgainNext:Next,
+catchrelease_fisherOptAskAgainPrevious,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
+$catchreleaseFisherAskAgainPage == 1",,,80:catchrelease_fisherAskAgainPrevious:Previous,
+catchrelease_fisherOptAskAgainBack,PopulateOptions,$menuState == catchreleaseFisherAskAgain,,,100:catchrelease_fisherAskAgainBack:Back,
+catchrelease_fisherAskAgainNext,DialogOptionSelected,$option == catchrelease_fisherAskAgainNext,"$catchreleaseFisherAskAgainPage = 1 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainPrevious,DialogOptionSelected,$option == catchrelease_fisherAskAgainPrevious,"$catchreleaseFisherAskAgainPage = 0 0
+FireAll PopulateOptions",,,
+catchrelease_fisherAskAgainBack,DialogOptionSelected,$option == catchrelease_fisherAskAgainBack,"$catchreleaseFisherAskAgainReturn = false 0
+$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions",,,
 catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:I've heard enough.,"The cut link is vanilla's convOptionLeave, a PopulateOptions row conditioned on $isPerson alone - so every FireAll PopulateOptions in this conversation collects it, this submenu included. The main menu drops it in catchrelease_fisherOptLeave and this is the same job for the same reason: the boat carries its own way out, and vanilla's lands the player back on the engage screen of a fleet nobody is fighting. Scripts run after the panel has been cleared and repopulated, so removing here removes what was just added."
 catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
@@ -1851,6 +2005,7 @@ He closes both.
 He points at the comm menu.
 
 ""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+5:catchrelease_introConservatory:""What's a breach conservatory?""
 10:catchrelease_introDeepGear:Continue
 100:catchrelease_introShopLater:""I'll look later.""","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
@@ -1881,12 +2036,33 @@ catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introSho
 
 He gestures at your manifest.
 
-""If the hardware isn't on your ship, it has no business on the invoice.""",catchrelease_introDeepGear:Continue,
+""If the hardware isn't on your ship, it has no business on the invoice.""","0:catchrelease_introAskTackle:""What is tackle?""
+10:catchrelease_introAskUpgrade:""What is an upgrade?""
+100:catchrelease_introDeepGear:Continue",
+catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
+
+He taps the manifest.
+
+""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:""What is an upgrade?""
+100:catchrelease_introDeepGear:Continue",
+catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+
+He points at the entry.
+
+""Improves the function listed on it.""","0:catchrelease_introAskTackle:""What is tackle?""
+100:catchrelease_introDeepGear:Continue",
 catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introShopLater,,"""Probably wise.""
 
 He signals someone off-screen.
 
 ""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
+catchrelease_introConservatory,DialogOptionSelected,$option == catchrelease_introConservatory,,"""Public tanks. Local outfitter. Trade counter.""","0:catchrelease_introConservatoryGet:""How do I get one?""
+10:catchrelease_introShopLook:""What can I do with the outfitter?""
+20:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",
+catchrelease_introConservatoryGet,DialogOptionSelected,$option == catchrelease_introConservatoryGet,,"""Crablobab has the plans. Build it on a colony you own.""","10:catchrelease_introShopLook:""What can I do with the outfitter?""
+20:catchrelease_introDeepGear:Continue
+100:catchrelease_introShopLater:""I'll look later.""",
 catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"A second transfer begins.
 
 The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.
@@ -2085,16 +2261,14 @@ The Fisherman is cleaning something narrow and metallic with a rag.
 
 He checks the local plot.
 
-""Rupture's holding. Good day for it.""","0:catchrelease_intro_fourJumps:""I just left you in another system.""
-10:catchrelease_introSameHull:""Is this the same ship?""
-100:catchrelease_fisherBack:Ask about the target",
-catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,,"""You left a boat there.""
+""Rupture's holding. Good day for it.""",100:catchrelease_fisherBack:Ask about the target,
+catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_fourJumps,$global.catchrelease_fisherAsked_fourJumps = true 0,"""You left a boat there.""
 
 The Fisherman folds the rag once.
 
 ""This one's here.""","0:catchrelease_introPressLocation:""That does not answer the question.""
 100:catchrelease_fisherBack:Let it go",
-catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,,"""If the registry asks.""
+catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,$global.catchrelease_fisherAsked_sameHull = true 0,"""If the registry asks.""
 
 He looks back toward the plot.
 

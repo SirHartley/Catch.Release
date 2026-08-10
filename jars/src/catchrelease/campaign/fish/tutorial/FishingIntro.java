@@ -9,6 +9,9 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
+import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
@@ -37,6 +40,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -218,11 +222,28 @@ public class FishingIntro {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (!target.systemId.equals(system.getId())) continue;
 
-            CampaignFleetAPI existing = CoreFisherSpawner.getBoat(system);
+            //The target can be picked in a system a visitor is already working. Looking only for
+            //standing boats used to post a second copy beside it; the existing boat is sufficient
+            //once it is reserved for this lesson.
             CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
 
-            if (existing == null && boat != null) {
-                boat.addScript(new TutorialBoatKeeper(boat, target.systemId));
+            if (boat != null) {
+                Object reserved = boat.getMemoryWithoutUpdate()
+                        .get(FishermanConstants.TUTORIAL_TARGET_KEY);
+                if (target.systemId.equals(reserved)) return;
+
+                //Only an uninhabited-system standing boat is the disposable directed posting.
+                //A visitor or an ordinary core trawler returns to its normal lifecycle afterwards.
+                boolean temporary = !FishermanSpawner.isVisiting(boat)
+                        && !OuterReaches.isPopulated(system);
+                boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TARGET_KEY,
+                        target.systemId);
+                if (temporary) {
+                    boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TEMPORARY_KEY,
+                            true);
+                }
+
+                boat.addScript(new TutorialBoatKeeper(boat, target.systemId, temporary));
             }
 
             return;
@@ -234,11 +255,13 @@ public class FishingIntro {
 
         private final CampaignFleetAPI boat;
         private final String systemId;
+        private final boolean temporary;
         private boolean done;
 
-        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId) {
+        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId, boolean temporary) {
             this.boat = boat;
             this.systemId = systemId;
+            this.temporary = temporary;
         }
 
         @Override
@@ -256,8 +279,12 @@ public class FishingIntro {
             if (player != null
                     && player.getContainingLocation() == boat.getContainingLocation()) return;
 
+            boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TARGET_KEY);
+            if (temporary) {
+                boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TEMPORARY_KEY);
+                boat.despawn();
+            }
             done = true;
-            boat.despawn();
         }
 
         @Override
@@ -476,7 +503,28 @@ public class FishingIntro {
         CatchImplement implement = target.needsDeepGear
                 ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
         FishSpec spec = pickSpecies(stage, system, implement);
-        if (spec == null) return null;
+        if (spec == null) {
+            StarSystemAPI fallbackSystem = pickFallbackSystem(stage, implement);
+            FishSpec fallbackSpec = pickFallbackSpecies(stage, fallbackSystem, implement);
+
+            if (fallbackSystem == null || fallbackSpec == null) {
+                Global.getLogger(FishingIntro.class).warn("No valid "
+                        + getMaxTargetRarity(stage).name().toLowerCase()
+                        + "-or-below tutorial target for stage " + stage
+                        + "; refusing to create an impossible target.");
+                return null;
+            }
+
+            Global.getLogger(FishingIntro.class).warn("No valid "
+                    + getMaxTargetRarity(stage).name().toLowerCase()
+                    + "-or-below tutorial target in " + system.getName()
+                    + " for stage " + stage + "; using deterministic fallback "
+                    + fallbackSpec.id + " in " + fallbackSystem.getName() + ".");
+            system = fallbackSystem;
+            target.systemId = system.getId();
+            target.systemName = system.getName();
+            spec = fallbackSpec;
+        }
         target.speciesIds.add(spec.id);
 
         //the lamp lesson is open water by definition; the others prefer a rupture and fall back
@@ -535,24 +583,95 @@ public class FishingIntro {
     }
 
     /**
-     * Commons all the way up, drawn only from what the destination's real spawn table permits.
-     * The ladder is in the gear and the water, not in assigning an animal that cannot live there.
+     * Draws only from what the destination's real spawn table permits and the current tutorial rung
+     * is allowed to ask for. The ladder is in the gear and the water, not in assigning an animal
+     * that cannot live there.
      */
     protected static FishSpec pickSpecies(int stage, StarSystemAPI system,
                                           CatchImplement implement) {
+        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
-        FishHabitat habitat = FishHabitat.of(system);
 
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
-            if (spec.rarity.ordinal() > FishRarity.UNCOMMON.ordinal()) continue;
-
+        for (FishSpec spec : candidates) {
             picker.add(spec, spec.spawnWeight
                     * (spec.rarity == FishRarity.COMMON ? 4f : 1f));
         }
 
         return picker.pick();
+    }
+
+    /** The first two target rungs are common-only; the following two may also ask for uncommon. */
+    protected static FishRarity getMaxTargetRarity(int stage) {
+        if (stage == RODDED || stage == FISH_ONE) return FishRarity.COMMON;
+        if (stage == FISH_TWO || stage == FISH_THREE) return FishRarity.UNCOMMON;
+        return FishRarity.COMMON;
+    }
+
+    /** All real-spawn candidates that match this lesson's habitat, implement and rarity cap. */
+    protected static List<FishSpec> getSpeciesCandidates(int stage, StarSystemAPI system,
+                                                          CatchImplement implement) {
+        List<FishSpec> candidates = new ArrayList<>();
+        if (system == null) return candidates;
+
+        FishHabitat habitat = FishHabitat.of(system);
+        FishRarity maximum = getMaxTargetRarity(stage);
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
+            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
+            if (spec.rarity.ordinal() > maximum.ordinal()) continue;
+
+            candidates.add(spec);
+        }
+
+        return candidates;
+    }
+
+    /** The first id-sorted valid specimen, used only when the initially selected system has none. */
+    protected static FishSpec pickFallbackSpecies(int stage, StarSystemAPI system,
+                                                  CatchImplement implement) {
+        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
+        candidates.sort(Comparator.comparing(spec -> spec.id));
+
+        return candidates.isEmpty() ? null : candidates.get(0);
+    }
+
+    /** A deterministic valid system if the normal target system has no capped real-spawn candidate. */
+    protected static StarSystemAPI pickFallbackSystem(int stage, CatchImplement implement) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        StarSystemAPI current = player == null ? null : asSystem(player.getContainingLocation());
+
+        //The first lesson is deliberately underfoot. If the current system cannot supply it,
+        //returning no target is safer than silently turning it into a travel assignment.
+        if (stage == RODDED) {
+            return getSpeciesCandidates(stage, current, implement).isEmpty() ? null : current;
+        }
+
+        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
+        List<StarSystemAPI> thin = new ArrayList<>();
+        List<StarSystemAPI> any = new ArrayList<>();
+
+        for (StarSystemAPI candidate : Global.getSector().getStarSystems()) {
+            if (candidate == null || candidate.getId() == null) continue;
+            if (candidate.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
+            if (candidate.hasTag(Tags.THEME_SPECIAL) || candidate.hasTag(Tags.THEME_HIDDEN)) continue;
+            if (candidate.getCenter() == null) continue;
+
+            float distance = Misc.getDistanceLY(from, candidate.getLocation());
+            if (distance < TutorialConstants.SECOND_MIN_LY) continue;
+            if (distance > TutorialConstants.SECOND_MAX_LY) continue;
+            if (getSpeciesCandidates(stage, candidate, implement).isEmpty()) continue;
+
+            any.add(candidate);
+            if (Aberration.baseAt(candidate.getLocation(), candidate)
+                    >= TutorialConstants.SECOND_MIN_DRIFT) {
+                thin.add(candidate);
+            }
+        }
+
+        thin.sort(Comparator.comparing(StarSystemAPI::getId));
+        any.sort(Comparator.comparing(StarSystemAPI::getId));
+        return !thin.isEmpty() ? thin.get(0) : any.isEmpty() ? null : any.get(0);
     }
 
     //---------------------------------------------------------------- the hand-in
@@ -899,6 +1018,11 @@ public class FishingIntro {
 
             Target target = getTarget();
             if (target == null) return;
+
+            //A save made during lesson two predates the boat reservation on older installs. This
+            //idempotent repair runs from the persistent target rather than relying on a transient
+            //arrival event, so loading cannot create a second boat or leave the target stranded.
+            if (target.stage == FISH_ONE) ensureTargetBoat(target);
 
             //asked before anything about where the player is, since the answer is about the hold
             //and travels with it. This is also the only thing that notices a catch at all - the

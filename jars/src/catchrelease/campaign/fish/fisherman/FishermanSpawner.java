@@ -14,6 +14,8 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
@@ -55,6 +57,7 @@ public class FishermanSpawner implements EveryFrameScript {
 
         //the first tick of a load is not an arrival - it is wherever the save was left
         if (!placed) {
+            reconcileLegacyFleets();
             placed = true;
             lastLocation = where;
             return;
@@ -136,19 +139,134 @@ public class FishermanSpawner implements EveryFrameScript {
                 Global.getSector().getClock().getTimestamp());
     }
 
-    /** The live boat if there is one anywhere, cleaned out of memory the moment it is not. */
+    /**
+     * The live visiting boat, recovered from the sector when an older save has lost its pointer.
+     * <p>
+     * The pointer is a cache, not the identity of a fleet: serialised object references are useful
+     * while they are valid, but a boat that survives a migration must still count as the visitor
+     * before this spawner is allowed to make another.
+     */
     protected CampaignFleetAPI getLiveFleet() {
         Object stored = Global.getSector().getMemoryWithoutUpdate()
                 .get(FishermanConstants.ACTIVE_KEY);
 
         if (stored instanceof CampaignFleetAPI) {
             CampaignFleetAPI fleet = (CampaignFleetAPI) stored;
-            if (!fleet.isExpired() && fleet.isAlive()) return fleet;
+            if (isLiveFisherman(fleet) && isVisiting(fleet)) return fleet;
+        }
+
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            for (CampaignFleetAPI fleet : location.getFleets()) {
+                if (!isLiveFisherman(fleet) || !isVisiting(fleet)) continue;
+
+                Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, fleet);
+                return fleet;
+            }
         }
 
         Global.getSector().getMemoryWithoutUpdate().unset(FishermanConstants.ACTIVE_KEY);
 
         return null;
+    }
+
+    /** All live trade boats in one location, excluding duplicates already scheduled to retire. */
+    public static List<CampaignFleetAPI> getLiveFishermen(LocationAPI location) {
+        List<CampaignFleetAPI> boats = new ArrayList<>();
+        if (location == null) return boats;
+
+        for (CampaignFleetAPI fleet : location.getFleets()) {
+            if (isLiveFisherman(fleet)) boats.add(fleet);
+        }
+
+        return boats;
+    }
+
+    /** A boat that can still be used as the system's Fisherman. */
+    public static boolean isLiveFisherman(CampaignFleetAPI fleet) {
+        return isFisherman(fleet)
+                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY)
+                && !fleet.isExpired() && fleet.isAlive();
+    }
+
+    /**
+     * Reconciles old saves that contain boats from before visiting and standing schedules were
+     * mutually exclusive. At most one visitor exists sector-wide; at most one boat exists in a
+     * system. A duplicate beside the player is marked now and despawned only after they leave, so
+     * migration never makes a fleet disappear in the middle of an encounter.
+     */
+    public static void reconcileLegacyFleets() {
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            reconcileSystem(system);
+        }
+
+        CampaignFleetAPI canonical = null;
+        Object stored = Global.getSector().getMemoryWithoutUpdate()
+                .get(FishermanConstants.ACTIVE_KEY);
+        if (stored instanceof CampaignFleetAPI fleet
+                && isLiveFisherman(fleet) && isVisiting(fleet)) {
+            canonical = fleet;
+        }
+
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            for (CampaignFleetAPI fleet : getLiveFishermen(location)) {
+                if (!isVisiting(fleet)) continue;
+                if (canonical == null) canonical = fleet;
+                else if (fleet != canonical) retireDuplicate(fleet);
+            }
+        }
+
+        if (canonical == null) {
+            Global.getSector().getMemoryWithoutUpdate().unset(FishermanConstants.ACTIVE_KEY);
+        } else {
+            Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, canonical);
+        }
+    }
+
+    /** Keeps the one boat appropriate to this system and retires only the other Fisherman boats here. */
+    public static void reconcileSystem(StarSystemAPI system) {
+        List<CampaignFleetAPI> boats = getLiveFishermen(system);
+        if (boats.size() < 2) return;
+
+        CampaignFleetAPI canonical = chooseSystemBoat(system, boats);
+        for (CampaignFleetAPI boat : boats) {
+            if (boat != canonical) retireDuplicate(boat);
+        }
+    }
+
+    /** The directed tutorial reservation wins; otherwise populated systems prefer a standing boat. */
+    public static CampaignFleetAPI chooseSystemBoat(StarSystemAPI system,
+                                                      List<CampaignFleetAPI> boats) {
+        if (boats == null || boats.isEmpty()) return null;
+
+        for (CampaignFleetAPI boat : boats) {
+            Object reserved = boat.getMemoryWithoutUpdate().get(FishermanConstants.TUTORIAL_TARGET_KEY);
+            if (system != null && system.getId().equals(reserved)) return boat;
+        }
+
+        boolean populated = system != null && OuterReaches.isPopulated(system);
+        for (CampaignFleetAPI boat : boats) {
+            if (isVisiting(boat) != populated) return boat;
+        }
+
+        return boats.get(0);
+    }
+
+    /**
+     * Does not pull a fleet out from under the player. Its own behavior completes removal on the
+     * first unwatched frame, and ordinary spawners ignore the marked fleet in the meantime.
+     */
+    public static void retireDuplicate(CampaignFleetAPI fleet) {
+        if (fleet == null || fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY)) {
+            return;
+        }
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || player.getContainingLocation() != fleet.getContainingLocation()) {
+            fleet.despawn();
+            return;
+        }
+
+        fleet.getMemoryWithoutUpdate().set(FishermanConstants.RETIRE_KEY, true);
     }
 
     /** Where the boat will and will not work. */
