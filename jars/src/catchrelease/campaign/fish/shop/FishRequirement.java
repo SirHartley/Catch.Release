@@ -62,6 +62,9 @@ public class FishRequirement {
     /** Catch implement required, or null for any; combines with {@link #method} to describe how a catch happened. */
     public CatchImplement implement = null;
 
+    /** Exact rupture required, or null for any; compared against the catch-time source id. */
+    public String sourceId = null;
+
     /**
      * Alternative ways to satisfy this ask (OR, unlike the other axes which AND). When non-empty,
      * the parent's own axes are ignored except {@link #count}.
@@ -102,6 +105,7 @@ public class FishRequirement {
         //unset method/implement (predates tracking) never satisfies a specific requirement
         if (method != null && entry.method != method) return false;
         if (implement != null && entry.implement != implement) return false;
+        if (sourceId != null && !sourceId.equals(entry.sourceId)) return false;
 
         if (lowCoherence) {
             if (entry.aberration < LOW_COHERENCE) return false;

@@ -141,6 +141,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return pond != null;
     }
 
+    /** The exact rupture this mote came from; nearest-pond lookup is ambiguous. */
+    public SectorEntityToken getPond() {
+        return pond;
+    }
+
     /** Asks the mote to look at itself again, for anything that changes what it is after it exists. */
     public void refreshColor() {
         this.color = resolveColor();

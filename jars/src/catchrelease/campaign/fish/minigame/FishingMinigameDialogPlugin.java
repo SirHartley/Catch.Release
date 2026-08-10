@@ -7,8 +7,10 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -134,6 +136,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         // must read off anchor before the catch resolves - the mote is gone afterward
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
+        this.specimen.sourceId = getSourceId(anchor);
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
@@ -145,6 +148,19 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         dialog.showCustomVisualDialog(FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_PANEL_HEIGHT,
                 delegate);
+    }
+
+    /** Resolves both drone catches (anchor is the pond) and harpoon catches (anchor is the mote). */
+    protected static String getSourceId(SectorEntityToken anchor) {
+        if (anchor == null) return null;
+
+        if (anchor.getCustomPlugin() instanceof FishEntityPlugin) {
+            SectorEntityToken pond = ((FishEntityPlugin) anchor.getCustomPlugin()).getPond();
+            return pond == null ? null : pond.getId();
+        }
+
+        return MaskedFishingPondTerrainPlugin.getPondPlugin(anchor) == null
+                ? null : anchor.getId();
     }
 
     /**

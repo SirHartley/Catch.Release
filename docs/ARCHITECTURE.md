@@ -318,7 +318,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | File | What it does |
 |---|---|
 | `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
-| `FishCatch.java` | One rolled specimen — length, weight, aberration, origin, and how it was taken; grades, values, encodes to a string |
+| `FishCatch.java` | One rolled specimen — length, weight, aberration, region, exact source rupture, and how it was taken; grades, values, encodes to a backward-compatible string |
 | `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour |
 | `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers |
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
@@ -360,10 +360,10 @@ A fisher whose one good rupture has somebody parked on it. Three bar events, thr
 
 | File | What it does |
 |---|---|
-| `CampedSpotJob.java` | The shared job. Two conditions rather than one — clearing the camp is the work, the specimen is only the receipt. Asks `CampedSpot.isGone` and nothing more specific, so it never has an opinion about how the player did it. The offer only chooses the rupture and terms; the physical camper, pond claim and planted specimen are created on acceptance so discarded bar-event rolls cannot leave fleets behind |
+| `CampedSpotJob.java` | The shared job. Two conditions rather than one — clearing the camp is the work, and any fish whose catch record names that exact rupture is the receipt. Asks `CampedSpot.isGone` and nothing more specific, so it never has an opinion about how the player did it. The offer only chooses the rupture and terms; the physical camper and pond claim are created on acceptance so discarded bar-event rolls cannot leave fleets behind. Active older saves repair their named-species ask to the pond receipt |
 | `CampType.java` | Who is out there: pirates (there for money, will take money), mercenaries (paid to be there, and say so), pathers (not selling anything, and the bribe does the least good). Mercenary rather than independent deliberately — see the note in the file |
 | `CampSize.java` | Small, medium, large, and the words the fisher uses for each. The estimate is honest; it is the only warning the player gets |
-| `CampedSpot.java` | Spawns the camper on the rupture. When the player first enters its location, the fleet intercepts until its one-time warning hail has fired; it then returns to a passive hold and always uses vanilla's allow-disengage flag. The rupture carries a separate live camp flag that blocks the ROD only until the camper is gone. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
+| `CampedSpot.java` | Spawns the camper on the rupture. When the player first enters its location, the fleet intercepts until its one-time warning hail has fired; it then returns to a passive hold and always uses vanilla's allow-disengage flag. The rupture carries a separate live camp flag that blocks the ROD only until the camper is gone; refreshing that flag clears the obsolete named-species memory from older camp jobs. Spawned rather than borrowed, because the job is about one specific pond and there is no fleet already parked on it |
 | `PirateCampJob.java` · `MercCampJob.java` · `PatherCampJob.java` | One per bar event, so each fisher gets their own pitch |
 
 ### `campaign/fish/jobs/fleet`
@@ -442,7 +442,7 @@ The catch itself. Rules are separated from rendering on purpose.
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. No GL, no input |
 | `FishingMinigamePanel.java` | Draws the track, bar, fish and meter; handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed |
-| `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls |
+| `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture on landed specimens from either drones or harpoons |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, best-ever banner |
 | `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish |
@@ -463,7 +463,7 @@ The two forms a fish takes in the world.
 
 | File | What it does |
 |---|---|
-| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow |
+| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow, and the exact source rupture retained for catch provenance |
 | `BuriedMoteEntityPlugin.java` | Invisible mote under the fabric; `unearth()` turns it into a real one |
 
 ### `campaign/fish/spawner`
@@ -486,7 +486,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `ShopMarks.java` | The shopping list: marked upgrades feed the route planner and hang the quest-yellow dot on every fish that would pay for them. `isMarked` is the marks alone, which only the outfitter asks; `isWanted` counts every `FishAsker` in the log too, which is what the dot means on every other screen, and is cached because it is asked per cell per frame |
 | `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
-| `FishRequirement.java` | An ask: count, rarity, grade, species, origin, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
+| `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `FishShopAbilityPlugin.java` | Hidden inert migration stub for the removed ability-bar shortcut; load cleanup removes it and its hotbar references from old saves |
 | `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
