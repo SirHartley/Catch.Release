@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 442 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 452 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -188,6 +188,9 @@ Its name question asks `Do you have a name?`; Baha is introduced by the Fisherma
 rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
 the older `Ask about the fish they want` producer remains as a preserved row but adds no option.
+When the stage-3 target is in the current system, the two continuity questions are root Fisherman
+menu options under the same target and deep-handoff gates that formerly nested them under that
+reminder; their existing answer chains return through `catchrelease_fisherBack` to that root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
 Landing treasure with a fish records the first bycatch recovery; the next ordinary Fisherman hail
