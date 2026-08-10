@@ -456,6 +456,18 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return recalling;
     }
 
+    /** Whether a button press can still tell any drone to come home. A catch carrier already on
+     * its return leg has no command left to receive; once it is the last drone out, the ROD stays
+     * active but disabled until that delivery reaches the fleet. */
+    public boolean hasRecallableDrones() {
+        for (SectorEntityToken drone : drones) {
+            FishingDroneEntityPlugin plugin = getPlugin(drone);
+            if (plugin != null && !plugin.isReturning()) return true;
+        }
+
+        return false;
+    }
+
     public boolean isMoteInRing() {
         return moteInRing;
     }

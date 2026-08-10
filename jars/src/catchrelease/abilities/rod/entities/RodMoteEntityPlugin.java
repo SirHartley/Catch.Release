@@ -54,6 +54,21 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    /** Whether a live opener is already travelling to, or resolving against, this rupture. The
+     * entity is the state: it covers the flight and the short delayed activation without putting a
+     * second flag on the pond that would need separate cleanup or save repair. */
+    public static boolean isOpening(SectorEntityToken pond) {
+        if (pond == null || pond.getContainingLocation() == null) return false;
+
+        for (SectorEntityToken token : pond.getContainingLocation().getEntitiesWithTag(ENTITY_ID)) {
+            if (token == null || token.isExpired()) continue;
+            if (!(token.getCustomPlugin() instanceof RodMoteEntityPlugin plugin)) continue;
+            if (plugin.target == pond) return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
         super.init(entity, pluginParams);

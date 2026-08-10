@@ -67,6 +67,14 @@ public enum Tackle {
         }
     },
 
+    BREACH_COUPLER("Breach Coupler", Fit.DRONE,
+            "Couples the LINE to openings cut by breach lamps, letting the drones work open space"
+                    + " around the fleet.") {
+        {
+            breachCoupling = true;
+        }
+    },
+
     //--- both
     CALIBRATED_GRADER("Calibrated Grader", Fit.BOTH,
             "Picks the better of what is there. Specimens come up nearer the top of their range.") {
@@ -174,6 +182,9 @@ public enum Tackle {
 
     public boolean shipTackle = false;
     public boolean sonar = false;
+
+    /** Whether the drone rig can pass through temporary openings cut by the breach lamps. */
+    public boolean breachCoupling = false;
 
     /**
      * Whether the head reaches below the fabric, not just across the water. Covers two cases: a

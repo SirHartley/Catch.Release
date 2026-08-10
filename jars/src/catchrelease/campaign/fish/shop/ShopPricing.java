@@ -85,6 +85,8 @@ public class ShopPricing {
 
     /** Tackle is tiered by what it does, and the ones that change what can come up cost the most. */
     protected static int getTackleTier(Tackle tackle) {
+        //the coupler replaces a whole natural rupture with lamp-made openings; it is the top tier
+        if (tackle.breachCoupling) return 4;
         if (tackle.shipTackle) return 3;
         if (tackle.sonar || tackle.rarityBias > 1f || tackle.lockTime > 0f) return 2;
 
