@@ -1037,7 +1037,9 @@ machinery and there is nothing for a sheet to say about it.
 **A work offer rolls before it speaks.** `catchrelease_workOffer` only rolls the pending chart request
 and fires `CatchReleaseWorkOffer`; `catchrelease_workOfferText` then reads the saved fish, place and
 payment tokens. Keeping the supplied offer text on that second row means the range has been selected
-before token replacement, rather than printing the fallback token names from before the roll.
+before token replacement, rather than printing the fallback token names from before the roll. Its
+`SetTextHighlights` call colours those three supplied terms, while the active-work reminder highlights
+only its fish and place: it never makes a second promise about payment.
 
 **The ladder gates equipment, and equipment gates the world.** `unlockedAtStart` is off for all four
 abilities. A shelf needs two things before it is on the floor (`ShopGroup.isUnlocked`): the rig in

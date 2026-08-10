@@ -1176,7 +1176,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,,"""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkFish has,SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
 
 He sends over a range entry.
 
@@ -1209,7 +1209,7 @@ $catchreleaseWorkHandoffPaid",,"He studies the coherence plot, marks something i
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet",,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet",SetTextHighlights $catchreleaseWorkFish $catchreleaseWorkWhere,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
 
 He checks the old mark.
 
