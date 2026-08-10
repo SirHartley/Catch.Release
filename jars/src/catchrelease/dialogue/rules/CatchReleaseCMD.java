@@ -365,6 +365,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
         dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
+        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellCommon",
+                FishBuyer.describeUpTo(FishRarity.COMMON));
+        dialog.getOptionPanel().setTooltip("catchrelease_fisherSellUncommon",
+                FishBuyer.describeUpTo(FishRarity.UNCOMMON));
 
         return true;
     }

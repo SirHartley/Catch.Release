@@ -15,7 +15,9 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Selling the catch at market price: the picker, the batch rungs, and the arithmetic.
@@ -33,6 +35,12 @@ public class FishBuyer {
         FishRarity rarity;
         float value;
         boolean marked;
+    }
+
+    /** One named species in a batch-sale preview, keyed by its stable data id. */
+    protected static class DescriptionSpecies {
+        String name;
+        int count;
     }
 
     public static boolean hasAnything() {
@@ -211,6 +219,55 @@ public class FishBuyer {
         }
 
         return value;
+    }
+
+    /**
+     * The exact specimens the current batch-sale route would take, in hold order.
+     * <p>
+     * This deliberately walks the same {@link #read()} stacks as {@link #sellUpTo}. In
+     * particular, an identical-container stack is still one batch-sale item: that is how the
+     * transaction currently removes and counts it, and the preview must not promise more.
+    */
+    public static String describeUpTo(FishRarity cap) {
+        Map<String, DescriptionSpecies> counts = new LinkedHashMap<>();
+
+        for (Stack held : read()) {
+            if (held.marked) continue;
+            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
+
+            if (FishItems.isContainer(held.data)) {
+                for (FishCatch entry : FishItems.decodeBundle(held.data.getData())) {
+                    if (entry.getSpec() == null) continue;
+                    addDescriptionCount(counts, entry, 1);
+                }
+            } else {
+                FishCatch entry = FishCatch.decode(held.data.getData());
+                if (entry != null && entry.getSpec() != null) {
+                    addDescriptionCount(counts, entry, held.count);
+                }
+            }
+        }
+
+        if (counts.isEmpty()) return "No matching unmarked fish.";
+
+        StringBuilder description = new StringBuilder("Will sell:");
+        for (DescriptionSpecies entry : counts.values()) {
+            description.append("\n").append(entry.count).append(" x ").append(entry.name);
+        }
+
+        return description.toString();
+    }
+
+    protected static void addDescriptionCount(Map<String, DescriptionSpecies> counts,
+                                              FishCatch fish, int count) {
+        DescriptionSpecies listed = counts.get(fish.speciesId);
+        if (listed == null) {
+            listed = new DescriptionSpecies();
+            listed.name = fish.getDisplayName();
+            counts.put(fish.speciesId, listed);
+        }
+
+        listed.count += count;
     }
 
     protected static void finish(InteractionDialogAPI dialog, int sold, float credits) {
