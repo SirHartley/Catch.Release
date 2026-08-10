@@ -75,7 +75,7 @@ public class ShopMarks {
 
     /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
     public static boolean isMarkable(ShopEntry entry) {
-        if (entry == null) return false;
+        if (entry == null || entry.isLocked()) return false;
 
         ShopPricing.Price price = entry.getPrice();
 
@@ -110,6 +110,7 @@ public class ShopMarks {
                 }
 
                 if (TackleManager.isOwned(tackle)) continue;
+                if (!ShopSchematics.has(tackle)) continue;
 
                 price = ShopPricing.getPrice(tackle);
             }
@@ -239,6 +240,7 @@ public class ShopMarks {
                 }
 
                 if (TackleManager.isOwned(tackle)) continue;
+                if (!ShopSchematics.has(tackle)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(tackle);
                 if (price != null && price.fish != null) {

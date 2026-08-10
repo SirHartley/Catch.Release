@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
@@ -97,20 +98,20 @@ public class FishRewardRoller {
         return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
     }
 
-    /** An unlocked module the player does not already own - owned once, fitted freely, so a
-     * duplicate is nothing. */
+    /** A stocked module whose purchase schematic is not yet known. Equipment prerequisites still
+     * apply, so a reward cannot advertise a rig the introduction has not handed over. */
     protected static FishReward rollTackle(Random random) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
-            if (tackle != Tackle.NONE && TackleManager.isUnlocked(tackle)
-                    && !TackleManager.isOwned(tackle)) {
+            if (tackle != Tackle.NONE && tackle.stocked && TackleManager.isUnlocked(tackle)
+                    && !ShopSchematics.has(tackle)) {
                 options.add(tackle);
             }
         }
 
         if (options.isEmpty()) return null;
 
-        return FishReward.tackle(options.get(random.nextInt(options.size())));
+        return FishReward.tackleSchematic(options.get(random.nextInt(options.size())));
     }
 
     /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */

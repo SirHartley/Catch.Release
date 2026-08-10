@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
@@ -42,6 +43,10 @@ public abstract class FishReward {
 
     public static FishReward tackle(Tackle tackle) {
         return new TackleReward(tackle);
+    }
+
+    public static FishReward tackleSchematic(Tackle tackle) {
+        return new TackleSchematic(tackle);
     }
 
     public static FishReward locationData(String speciesId, int fallbackCredits) {
@@ -138,6 +143,25 @@ public abstract class FishReward {
             //grants ownership, not just a fit - removing it later must not require buying it back
             TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
+        }
+    }
+
+    /** A purchase permission for one outfitter modifier; the hardware itself is still bought. */
+    public static class TackleSchematic extends FishReward {
+        public final Tackle tackle;
+
+        public TackleSchematic(Tackle tackle) {
+            this.tackle = tackle;
+        }
+
+        @Override
+        public String describe() {
+            return "a schematic for the " + tackle.name;
+        }
+
+        @Override
+        public void grant() {
+            ShopSchematics.unlock(tackle);
         }
     }
 
