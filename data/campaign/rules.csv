@@ -1171,11 +1171,7 @@ He puts a finger against the recorded range.
 ""Wrong range. Still there last I heard.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
-!$catchreleaseRumor",,"""Nothing worth sending you after.""
-
-He glances at the plot.
-
-""Good month for it.""",100:catchrelease_fisherBack:Continue,
+!$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
 !$catchreleaseWork",CatchReleaseCMD rollWork,"""Got one.""

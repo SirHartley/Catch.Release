@@ -196,6 +196,8 @@ root option thereafter; neither question enters the post-tutorial `Ask again` me
 answer chains return through `catchrelease_fisherBack` to the root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
+If the rumor roller has no lead, its reply ends there instead of appending the successful-rumor
+seasonal line.
 Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
 offers a highlighted one-time question about what came up with the catch. Selecting it plays the
 existing explanation, consumes the pending state, and returns to the usual menu without entering
