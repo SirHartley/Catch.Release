@@ -45,8 +45,6 @@ public class CatchCelebration {
 
     public CatchCelebration(FishSpec fish) {
         this.fish = fish;
-
-        playHook(FishConstants.SOUND_CATCH);
     }
 
     protected Confetto spawn(float x, float y, FishSpec fish) {

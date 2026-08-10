@@ -54,6 +54,7 @@ public class FishConstants {
     public static final String MINIGAME_RESULT_RECORD_MARK = "*";
     public static final float MINIGAME_RESULT_MARK_GAP = 4f;
     public static final String MINIGAME_RESULT_RECORD = "NEW RECORD";
+    public static final String MINIGAME_RESULT_NEW_SPECIES = "NEW SPECIES";
     public static final float MINIGAME_RESULT_RECORD_GAP = 8f;
     public static final float MINIGAME_RESULT_RECORD_BOUNCE = 3f;
     public static final float MINIGAME_RESULT_RECORD_BOUNCE_RATE = 4f;
@@ -285,7 +286,22 @@ public class FishConstants {
     public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
 
     /** Blank = no sound wired up yet, not a placeholder id waiting to be found. */
-    public static final String SOUND_CATCH = "";
+    public static final String SOUND_CAUGHT = "";
+
+    /** Played once when the fish escapes or the player abandons the catch. */
+    public static final String SOUND_FAILED = "";
+
+    /** Played when a live-catch click starts lifting the indicator. */
+    public static final String SOUND_INDICATOR_MOVE = "";
+
+    /** Played once when the treasure card begins its end-of-catch tally. */
+    public static final String SOUND_TREASURE_SUCCESS = "";
+
+    /** Played on each edge where the catch bar begins covering an active treasure. */
+    public static final String SOUND_TREASURE_HOVER = "";
+
+    /** Played once when the currently tracked treasure is fully taken. */
+    public static final String SOUND_TREASURE_GOT = "";
 
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
