@@ -41,6 +41,10 @@ public abstract class FishReward {
         return new Upgrade(statId, levels);
     }
 
+    public static FishReward upgradeSchematic(String statId, int targetLevel) {
+        return new UpgradeSchematic(statId, targetLevel);
+    }
+
     public static FishReward tackle(Tackle tackle) {
         return new TackleReward(tackle);
     }
@@ -143,6 +147,30 @@ public abstract class FishReward {
             //grants ownership, not just a fit - removing it later must not require buying it back
             TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
+        }
+    }
+
+    /** Permission to buy one of the final two rungs on an outfitter upgrade ladder. */
+    public static class UpgradeSchematic extends FishReward {
+        public final String statId;
+        public final int targetLevel;
+
+        public UpgradeSchematic(String statId, int targetLevel) {
+            this.statId = statId;
+            this.targetLevel = targetLevel;
+        }
+
+        @Override
+        public String describe() {
+            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
+            String name = stat == null ? statId : catchrelease.campaign.fish.shop.ShopEntry.of(stat).getName();
+
+            return "a schematic for " + name + " level " + targetLevel;
+        }
+
+        @Override
+        public void grant() {
+            ShopSchematics.unlock(statId, targetLevel);
         }
     }
 

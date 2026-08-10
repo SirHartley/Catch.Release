@@ -136,7 +136,13 @@ public class ShopEntry {
 
     /** Visible stock whose quest-earned purchase schematic is not known yet. */
     public boolean isLocked() {
-        return kind == Kind.TACKLE && !ShopSchematics.has(tackle);
+        if (kind == Kind.TACKLE) return !ShopSchematics.has(tackle);
+        if (!isUpgrade()) return false;
+
+        int targetLevel = getLevel() + 1;
+
+        return ShopSchematics.requires(stat, targetLevel)
+                && !ShopSchematics.has(stat, targetLevel);
     }
 
     /** Next purchase's price, or null if free / nothing left to buy. An owned module is free to re-fit. */

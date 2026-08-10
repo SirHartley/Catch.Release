@@ -79,7 +79,7 @@ public class FishRewardRoller {
         return rollBlueprint(random);
     }
 
-    /** A rung on something, chosen from the sheet rather than from a list kept here. */
+    /** A purchase plan for the next gated rung, chosen from the sheet rather than a fixed list. */
     protected static FishReward rollUpgrade(Random random) {
         if (UpgradeManager.getInstance() == null) return null;
 
@@ -88,14 +88,17 @@ public class FishRewardRoller {
             if (stat == null || stat.id == null) continue;
             if (stat.id.equalsIgnoreCase("example")) continue;
 
-            if (stat.maxLevel > 0 && stat.level >= stat.maxLevel) continue;
+            int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
+            if (targetLevel < 0 || ShopSchematics.has(stat, targetLevel)) continue;
 
             open.add(stat);
         }
 
         if (open.isEmpty()) return null;
 
-        return FishReward.upgrade(open.get(random.nextInt(open.size())).id, 1);
+        UpgradeStat stat = open.get(random.nextInt(open.size()));
+
+        return FishReward.upgradeSchematic(stat.id, ShopSchematics.getNextRequiredLevel(stat));
     }
 
     /** A stocked module whose purchase schematic is not yet known. Equipment prerequisites still

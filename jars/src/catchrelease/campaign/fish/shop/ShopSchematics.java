@@ -2,6 +2,8 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 
 import java.util.LinkedHashSet;
@@ -22,6 +24,11 @@ public class ShopSchematics {
         return tackle == null ? null : "tackle:" + tackle.name();
     }
 
+    public static String getKey(String statId, int targetLevel) {
+        return statId == null || targetLevel <= 0
+                ? null : "upgrade:" + statId + ":" + targetLevel;
+    }
+
     /** Empty slots and already-owned modules never need a plan shown to the player again. */
     public static boolean has(Tackle tackle) {
         if (tackle == null) return false;
@@ -33,6 +40,39 @@ public class ShopSchematics {
     public static void unlock(Tackle tackle) {
         String key = getKey(tackle);
         if (key != null && tackle != Tackle.NONE) getKnown().add(key);
+    }
+
+    /** The final two purchases on every upgrade ladder require their own sequential plans. */
+    public static boolean requires(UpgradeStat stat, int targetLevel) {
+        if (stat == null || stat.maxLevel <= 0) return false;
+
+        return targetLevel > 0 && targetLevel <= stat.maxLevel
+                && targetLevel >= Math.max(1, stat.maxLevel - 1);
+    }
+
+    /** A rung already bought implies its plan for migrated campaigns. Earlier rungs stay open. */
+    public static boolean has(UpgradeStat stat, int targetLevel) {
+        if (stat == null || targetLevel <= 0) return false;
+        if (stat.level >= targetLevel || !requires(stat, targetLevel)) return true;
+
+        return getKnown().contains(getKey(stat.id, targetLevel));
+    }
+
+    public static void unlock(String statId, int targetLevel) {
+        if (statId == null || Global.getSector() == null) return;
+
+        UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
+        String key = getKey(statId, targetLevel);
+        if (key != null && requires(stat, targetLevel)) getKnown().add(key);
+    }
+
+    /** The next rung, but only when the player has reached the schematic-gated end of the ladder. */
+    public static int getNextRequiredLevel(UpgradeStat stat) {
+        if (stat == null) return -1;
+
+        int target = Math.max(0, stat.level) + 1;
+
+        return requires(stat, target) ? target : -1;
     }
 
     @SuppressWarnings("unchecked")

@@ -96,6 +96,7 @@ public class ShopMarks {
             if (key.startsWith("stat:")) {
                 UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
                 if (stat == null || ShopPricing.isMaxed(stat)) continue;
+                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
 
                 price = ShopPricing.getPrice(stat);
             } else if (key.startsWith("tackle:")) {
@@ -223,6 +224,7 @@ public class ShopMarks {
             if (key.startsWith("stat:")) {
                 UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
                 if (stat == null || ShopPricing.isMaxed(stat)) continue;
+                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(stat);
                 if (price != null && price.fish != null) {

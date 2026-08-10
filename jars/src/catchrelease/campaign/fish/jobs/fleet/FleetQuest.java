@@ -4,7 +4,10 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
@@ -286,7 +289,11 @@ public class FleetQuest extends FishJob {
         addReward(FishReward.credits(worth));
 
         if (ask.minRarity != null && ask.minRarity.ordinal() >= FishRarity.RARE.ordinal()) {
-            addReward(FishReward.upgrade(StatIds.HARPOON_SPEED, 1));
+            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);
+            int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
+            if (targetLevel > 0 && !ShopSchematics.has(stat, targetLevel)) {
+                addReward(FishReward.upgradeSchematic(stat.id, targetLevel));
+            }
         }
 
         // A clock, now that there is somewhere for it to end. The hull the job runs on is a copy
