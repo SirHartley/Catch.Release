@@ -62,6 +62,9 @@ public class FishermanBehavior implements EveryFrameScript {
 
     /** The boat's mark on the system map. A real entity, so unlike the lamps it survives a save. */
     protected SectorEntityToken marker;
+    /** A load restores the entity reference but not this check, so old duplicate marks are healed
+     *  the first time the player can see the boat without re-scanning the location every frame. */
+    protected transient boolean markerReconciled = false;
     protected transient boolean litSoundPlayed = false;
 
     public FishermanBehavior(CampaignFleetAPI fleet) {
@@ -189,10 +192,8 @@ public class FishermanBehavior implements EveryFrameScript {
      * Applied every tick rather than at spawn: the modifier is keyed, so re-applying it is free and
      * it heals a boat that was already out there before any of this existed.
      * <p>
-     * The map mark is hung whether or not anybody is watching, and is the one thing here that is not
-     * about being seen in space - see {@link FishermanMapIcon}. It costs one entity and being
-     * already up is the difference between arriving to a marked system and arriving to an unmarked
-     * one that marks itself a frame later.
+     * The map mark is about being able to find the boat, not about rendering it in space, so it is
+     * only kept while the player is in this location. See {@link FishermanMapIcon}.
      */
     protected void keepVisible(boolean watched) {
         fleet.getStats().getDetectedRangeMod().modifyFlat(FishermanConstants.VISIBILITY_ID,
@@ -210,14 +211,26 @@ public class FishermanBehavior implements EveryFrameScript {
             fleet.getMemoryWithoutUpdate().set(FishermanConstants.VISITING_FLAG, true);
         }
 
-        if (marker == null || marker.getContainingLocation() != fleet.getContainingLocation()) {
-            marker = FishermanMapIcon.addTo(fleet);
-        }
-
+        keepMarker(watched);
         if (!watched) return;
 
         //a per-frame override rather than a setting, which is how vanilla's own faders are driven
         fleet.forceSensorFaderBrightness(1f);
+    }
+
+    /** The map marker is not sector knowledge: leave a system, and its mark leaves with the view. */
+    protected void keepMarker(boolean watched) {
+        if (!watched) {
+            dropMarker();
+            return;
+        }
+
+        if (!markerReconciled || marker == null
+                || marker.getContainingLocation() != fleet.getContainingLocation()) {
+
+            marker = FishermanMapIcon.findOrAdd(fleet);
+            markerReconciled = true;
+        }
     }
 
     /**
@@ -440,11 +453,17 @@ public class FishermanBehavior implements EveryFrameScript {
 
     /** Takes the mark down, for a boat that is leaving or gone. */
     protected void dropMarker() {
-        if (marker != null && marker.getContainingLocation() != null) {
-            marker.getContainingLocation().removeEntity(marker);
+        if (marker == null || marker.getContainingLocation() == null) {
+            marker = null;
+            markerReconciled = false;
+            return;
         }
 
+        //Most boats are unwatched most of the time. The location watcher has already swept old
+        //marks sector-wide, so only pay that full cleanup when this behaviour actually held one.
+        FishermanMapIcon.removeFor(fleet);
         marker = null;
+        markerReconciled = false;
     }
 
     /**

@@ -407,7 +407,7 @@ explains how.
 | `FishermanShelf.java` | What range data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Hand-over uses the shared exact-specimen picker. Its `QuestIntel` is a `FishAsker`, shows the shared fish silhouette until its target has been landed, and carries the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language. It clears the host interaction's options immediately before opening its custom visual, and hands the Fisherman's sheet back exactly once on every close route |
-| `FishermanMapIcon.java` | The boat's mark on the system map — drawn there and nowhere else, riding the fleet |
+| `FishermanMapIcon.java` | The boat's mark on the system map — one per boat while the player shares its location, with old-save duplicates and marks in departed locations reconciled away |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose and counts down against the rumor's own timestamp. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
@@ -418,8 +418,8 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, and the active rumor's system/type/stranger), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss), `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` — and `colorBulkSaleOptions`, which applies the canonical common/uncommon colours and exact cargo previews to the Fisherman's existing bulk-sale choices. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
-| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, the arithmetic, and the exact species/count preview for each batch rung. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, the active rumor's system/type/stranger, and the bulk-sale rungs that currently have eligible fish), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot: `leaveEncounter` (vanilla's battle teardown, then dismiss), `dropCutComm` — the latter needed once per menu state, since vanilla's `convOptionLeave` is conditioned on `$isPerson` alone and rejoins every `FireAll PopulateOptions` — and `colorBulkSaleOptions`, which applies the canonical common/uncommon colours and exact cargo previews to the Fisherman's eligible bulk-sale choices. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
+| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, and the immutable whole-stack sale preview shared by labels, tooltips, confirmation and execution. Bulk sale confirms its exact fish/credit total, rebuilds the prompt instead of selling if the hold changed, leaves any container with a marked fish intact, and counts every copy in stacked identical containers. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
 
 ### `campaign/fish/tutorial`
 Learning to fish, in six lessons and one shortcut. **Entirely detached from the ordinary loop** — the
@@ -1023,7 +1023,7 @@ talking to hangs off it. `FishermanIdentity` keeps the `PersonAPI` in sector
 memory and hands the same object back at every spawn, and the encounter shows the portrait rather
 than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
 `getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
-figure, not a specimen's jittered one), and the boat's name, the greeting, and the line under it all
+figure, not a specimen's jittered one), and the boat's name, the greeting, and its map-tooltip line all
 come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
 wrong the same way every time — the degradation is a fact about the water, not an animation.
 
@@ -1101,7 +1101,11 @@ out in space the boat is already lit, and a mark there says nothing the lamps di
 screen where it is one blip among forty, so `FishermanMapIcon` is a custom entity that rides the
 fleet with `showInCampaign` false and `showIconOnMap` true — the pair vanilla's own `base_intel_icon`
 is built from. It carries no sensor profile, so it is never a contact to be found; it is simply
-drawn, which is what makes the boat locatable while it is out of sight.
+drawn, which is what makes the boat locatable while it is out of sight. It exists only while the
+player is in the boat's location: the behaviour removes every mark for its fleet when unwatched,
+and `FishermanSpawner` strips all departed-location marks on the first frame of a load and every
+location transition. `findOrAdd()` keeps a watched boat to one mark and cleans duplicates that an
+older save may have carried.
 
 **The Fisherman's visit is counted in days the player was not there for.** He cannot despawn in
 front of anybody: the clock in `FishermanBehavior` only advances while the player is elsewhere, a
