@@ -294,6 +294,9 @@ public class FishConstants {
     /** Played when a live-catch click starts lifting the indicator. */
     public static final String SOUND_INDICATOR_MOVE = "";
 
+    /** Played once when the treasure card begins its end-of-catch tally. */
+    public static final String SOUND_TREASURE_SUCCESS = "";
+
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
 

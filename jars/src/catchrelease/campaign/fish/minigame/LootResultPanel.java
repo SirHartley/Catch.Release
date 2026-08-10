@@ -64,6 +64,7 @@ public class LootResultPanel {
 
     protected int shown = 0;
     protected boolean skipped = false;
+    protected boolean successSoundPlayed = false;
 
     /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
     protected static class Coin {
@@ -112,6 +113,11 @@ public class LootResultPanel {
     }
 
     public void advance(float amount) {
+        if (!successSoundPlayed) {
+            successSoundPlayed = true;
+            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SUCCESS);
+        }
+
         elapsed += amount;
 
         while (shown < rows.size()
