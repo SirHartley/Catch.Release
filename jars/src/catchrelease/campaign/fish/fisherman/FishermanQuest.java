@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
+import catchrelease.campaign.fish.map.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -30,6 +31,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
@@ -648,10 +651,29 @@ public class FishermanQuest {
             FishSpec spec = getSpec();
             String name = spec == null ? "the named species" : spec.getDisplayName();
 
-            //the specimen itself at the top, where vanilla's missions put the poster's crest -
-            //still what the note is about once it is aboard, so it stays on both branches
-            info.addImage(spec == null || spec.icon == null || spec.icon.isEmpty()
-                    ? FishConstants.ITEM_ICON_FALLBACK : spec.icon, width, 80f, 10f);
+            //The specimen itself at the top, where vanilla's missions put the poster's crest.
+            //It has to use the shared knowledge-aware renderer: an accepted chart request tells
+            //the player a pattern's name and water, but not the finished art until it is landed.
+            if (spec == null) {
+                info.addImage(FishConstants.ITEM_ICON_FALLBACK, width, 80f, 10f);
+            } else {
+                info.addCustom(Global.getSettings().createCustom(width, 80f,
+                        new BaseCustomUIPanelPlugin() {
+                            private PositionAPI position;
+
+                            @Override
+                            public void positionChanged(PositionAPI newPosition) {
+                                position = newPosition;
+                            }
+
+                            @Override
+                            public void render(float alphaMult) {
+                                if (position == null) return;
+                                FishIcons.draw(spec, position.getCenterX(), position.getCenterY(),
+                                        80f, alphaMult);
+                            }
+                        }), 10f);
+            }
 
             if (quest.landed) {
                 info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
