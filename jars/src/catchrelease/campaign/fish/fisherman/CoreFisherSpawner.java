@@ -71,7 +71,12 @@ public class CoreFisherSpawner implements EveryFrameScript {
             //to sell it to, so there is no boat
             if (catchrelease.campaign.fish.FishingTaboo.holds(system)) continue;
 
-            if (getBoat(system) != null) continue;
+            FishermanSpawner.reconcileSystem(system);
+
+            //A visiting boat in a populated system is a legacy arrival. It remains the system's
+            //only boat until it leaves; posting another here is the collision this sweep exists to
+            //repair, not repeat.
+            if (getAnyBoat(system) != null) continue;
 
             post(system);
         }
@@ -112,11 +117,9 @@ public class CoreFisherSpawner implements EveryFrameScript {
     public static CampaignFleetAPI getBoat(StarSystemAPI system) {
         if (system == null) return null;
 
-        for (CampaignFleetAPI fleet : system.getFleets()) {
-            if (!FishermanSpawner.isFisherman(fleet)) continue;
+        for (CampaignFleetAPI fleet : FishermanSpawner.getLiveFishermen(system)) {
             if (FishermanSpawner.isVisiting(fleet)) continue;
-
-            if (!fleet.isExpired() && fleet.isAlive()) return fleet;
+            return fleet;
         }
 
         return null;
@@ -130,9 +133,18 @@ public class CoreFisherSpawner implements EveryFrameScript {
      * the one-boat-per-system invariant and performs the standard placement and setup.
      */
     public static CampaignFleetAPI ensureBoat(StarSystemAPI system) {
-        CampaignFleetAPI existing = getBoat(system);
+        FishermanSpawner.reconcileSystem(system);
+        CampaignFleetAPI existing = getAnyBoat(system);
 
         return existing != null ? existing : post(system);
+    }
+
+    /** Any live trade boat in the system, selected with the same role priorities as migration. */
+    public static CampaignFleetAPI getAnyBoat(StarSystemAPI system) {
+        if (system == null) return null;
+
+        return FishermanSpawner.chooseSystemBoat(system,
+                FishermanSpawner.getLiveFishermen(system));
     }
 
     /**

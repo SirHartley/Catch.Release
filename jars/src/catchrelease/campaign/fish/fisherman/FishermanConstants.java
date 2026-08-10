@@ -18,6 +18,18 @@ public class FishermanConstants {
      */
     public static final String VISITING_FLAG = "$catchrelease_fisherman_visiting";
 
+    /**
+     * A second-lesson destination reserves the boat already in that system. The value is the
+     * system id rather than a bare boolean so a replacement target can never inherit an old hold.
+     */
+    public static final String TUTORIAL_TARGET_KEY = "$catchrelease_fisherman_tutorialTarget";
+
+    /** A directed boat created outside the populated-system posting sweep. */
+    public static final String TUTORIAL_TEMPORARY_KEY = "$catchrelease_fisherman_tutorialTemporary";
+
+    /** A legacy duplicate that waits to be out of sight before its ordinary scripts remove it. */
+    public static final String RETIRE_KEY = "$catchrelease_fisherman_retire";
+
     /** The core's standing boats: one to a populated system, working the outer reaches. */
     public static final String[] CORE_SHIPS = {
             "buffalo_Standard",

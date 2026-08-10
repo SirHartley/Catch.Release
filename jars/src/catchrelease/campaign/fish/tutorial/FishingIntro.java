@@ -9,6 +9,9 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
+import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.QuestPond;
@@ -218,11 +221,28 @@ public class FishingIntro {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (!target.systemId.equals(system.getId())) continue;
 
-            CampaignFleetAPI existing = CoreFisherSpawner.getBoat(system);
+            //The target can be picked in a system a visitor is already working. Looking only for
+            //standing boats used to post a second copy beside it; the existing boat is sufficient
+            //once it is reserved for this lesson.
             CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
 
-            if (existing == null && boat != null) {
-                boat.addScript(new TutorialBoatKeeper(boat, target.systemId));
+            if (boat != null) {
+                Object reserved = boat.getMemoryWithoutUpdate()
+                        .get(FishermanConstants.TUTORIAL_TARGET_KEY);
+                if (target.systemId.equals(reserved)) return;
+
+                //Only an uninhabited-system standing boat is the disposable directed posting.
+                //A visitor or an ordinary core trawler returns to its normal lifecycle afterwards.
+                boolean temporary = !FishermanSpawner.isVisiting(boat)
+                        && !OuterReaches.isPopulated(system);
+                boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TARGET_KEY,
+                        target.systemId);
+                if (temporary) {
+                    boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TEMPORARY_KEY,
+                            true);
+                }
+
+                boat.addScript(new TutorialBoatKeeper(boat, target.systemId, temporary));
             }
 
             return;
@@ -234,11 +254,13 @@ public class FishingIntro {
 
         private final CampaignFleetAPI boat;
         private final String systemId;
+        private final boolean temporary;
         private boolean done;
 
-        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId) {
+        public TutorialBoatKeeper(CampaignFleetAPI boat, String systemId, boolean temporary) {
             this.boat = boat;
             this.systemId = systemId;
+            this.temporary = temporary;
         }
 
         @Override
@@ -256,8 +278,12 @@ public class FishingIntro {
             if (player != null
                     && player.getContainingLocation() == boat.getContainingLocation()) return;
 
+            boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TARGET_KEY);
+            if (temporary) {
+                boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TEMPORARY_KEY);
+                boat.despawn();
+            }
             done = true;
-            boat.despawn();
         }
 
         @Override
@@ -899,6 +925,11 @@ public class FishingIntro {
 
             Target target = getTarget();
             if (target == null) return;
+
+            //A save made during lesson two predates the boat reservation on older installs. This
+            //idempotent repair runs from the persistent target rather than relying on a transient
+            //arrival event, so loading cannot create a second boat or leave the target stranded.
+            if (target.stage == FISH_ONE) ensureTargetBoat(target);
 
             //asked before anything about where the player is, since the answer is about the hold
             //and travels with it. This is also the only thing that notices a catch at all - the
