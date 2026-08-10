@@ -18,6 +18,7 @@ import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
+import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
@@ -242,6 +243,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);
+            case "castawayEligible":
+                return dialog != null && dialog.getInteractionTarget()
+                        instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
+                        && Castaway.canStart(planet);
+            case "startCastaway":
+                return dialog != null && dialog.getInteractionTarget()
+                        instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
+                        && Castaway.start(planet);
 
             //---- the hulk
             case "carryFisherProperty":
@@ -594,14 +603,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Gives the stranded rating a berth, removes the one-use cache, and closes the dialog. */
+    /** Gives the stranded rating a berth and completes whichever safe host delivered the scene. */
     protected boolean rescueCastaway(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
-        SectorEntityToken target = dialog.getInteractionTarget();
-        FishingIntro.point();
-
-        if (target != null) Misc.fadeAndExpire(target);
+        Castaway.rescue(dialog.getInteractionTarget());
         dialog.dismiss();
 
         return true;

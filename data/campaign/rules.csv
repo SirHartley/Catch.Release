@@ -942,6 +942,23 @@ Your crew lash it down.
 
 The service handshake still points to the Fisherman.",catchrelease_wreckLeave:Leave,
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,EndConversation,,,
+catchrelease_castawaySurvey,DialogOptionSelected,"$option == surveyPerform
+!$market.isSurveyed
+CatchReleaseCMD castawayEligible score:1100","CatchReleaseCMD startCastaway
+$option = catchrelease_castawayPlanetOpen 0
+FireBest DialogOptionSelected",,,"Technical survey hook, shaped after gaIntro2surveyOpen: the planet remains the interaction target and the supplied scene opens before vanilla performs the survey."
+catchrelease_castawayReminder,PopulateOptions,"$market.catchrelease_castawayHost
+!$market.catchrelease_castawayRescued",,,catchrelease_castawayContact:Respond to the survivor's beacon,"The survey found a surface cache; leaving its scene open does not make the host planet disappear."
+catchrelease_castawayContact,DialogOptionSelected,$option == catchrelease_castawayContact,"$option = catchrelease_castawayPlanetOpen 0
+FireBest DialogOptionSelected",,,
+catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
+
+The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
+
+The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
+10:catchrelease_ratingWho:Ask who he worked for
+20:catchrelease_ratingRescue:Offer passage
+100:catchrelease_castawayLeave:Leave","Technical routing twin for the planet-hosted survey flow; supplied scene text and sequencing remain verbatim."
 catchrelease_castawayOpen,OpenInteractionDialog,$entity.tag:catchrelease_castaway score:1000,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.

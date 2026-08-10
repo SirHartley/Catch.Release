@@ -63,14 +63,15 @@ public class TutorialConstants {
 
     //---------------------------------------------------------------- the rating
 
-    /** The same person, found two ways: marooned on a surveyed rock, or nursing a drink in a bar. */
+    /** The same person, found two ways: on a surveyed world's surface, or nursing a drink in a bar. */
     public static final String CASTAWAY_ENTITY_ID = "catchrelease_Castaway";
     public static final String CASTAWAY_PLACED_KEY = "$catchrelease_castawayPlaced";
     public static final String CASTAWAY_NAME = "Distress Beacon";
     public static final String CASTAWAY_TAG = "catchrelease_castaway";
 
-    public static final float CASTAWAY_SURFACE_PAD = 30f;
-    public static final float CASTAWAY_ORBIT_DAYS = 90f;
+    /** Planet-market flags for the survey-hosted scene and its one-way completion. */
+    public static final String CASTAWAY_HOST_KEY = "$catchrelease_castawayHost";
+    public static final String CASTAWAY_RESCUED_KEY = "$catchrelease_castawayRescued";
 
     /** How many markets the player has walked into, before the bar version turns up. */
     public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";

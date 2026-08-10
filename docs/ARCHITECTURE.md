@@ -149,9 +149,10 @@ hands out, and the reward roller leans on exactly those, so every row has a sour
 `386 x 168` visible, near enough `2.3:1` — so about `772 x 336` at 2x.
 
 **`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
-(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's two props
-(`catchrelease_TutorialWreck` → `TutorialWreck`, `catchrelease_Castaway` → `Castaway`). The pond is
-**not** here any more.
+(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's one live prop
+(`catchrelease_TutorialWreck` → `TutorialWreck`). `catchrelease_Castaway` remains registered only
+so legacy saves can deserialize and retire its old beacon during migration. The pond is **not** here
+any more.
 
 **`data/campaign/rules.csv`** — all dialogue. See the contract below. One row registers *behaviour*
 rather than words and is easy to miss when hunting for it in Java: `catchrelease_fisherEncounter`,
@@ -405,7 +406,7 @@ everything downstream. Not a word of what it says is in Java.
 |---|---|
 | `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon. Replacing a target explicitly updates the persistent intel destination; the two-chart rung returns no single map location, leaving its several destinations to the planner instead of falling through to the prior system's boat. Tutorial species are filtered through the same `FishHabitat` plus `CatchImplement` predicate as the real spawner, so a destination is never paired with a species that cannot occur there. Assigning the second lesson immediately reserves the canonical Fisherman already in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves, while a reused visitor is held then released back to its own lifecycle. `Keeper` re-applies that reservation from the saved target, making mid-lesson load repair idempotent. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability, and load migration removes that dev-era shortcut and its hotbar slots from existing saves. The shortcut grants the same 2 common/1 uncommon/1 rare range-data mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
 | `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
-| `Castaway.java` | A rating missed during a badly reconciled crew transfer, found on a survey; accepting him aboard fades the one-use cache and opens the Fisherman breadcrumb |
+| `Castaway.java` | A rating missed during a badly reconciled crew transfer, discovered by intercepting the host planet's ordinary survey selection and routing into the preserved rules dialogue. The host and rescue are persistent market flags; legacy orbiting beacons are recognised only by their stable type/tag, converted to their orbit planet if unfinished, and retired without ever touching a planet |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
 | `FishermanInterception.java` | The boat that is simply *there* when somebody nears a rupture unequipped - and the only thing that lets it off burn 4 while it closes. Its drop point is clamped into the reaches, so a rupture in the inner system no longer parks a trawler against the star |
 | `TutorialConstants.java` | Every number the above read |
