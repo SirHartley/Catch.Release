@@ -619,12 +619,24 @@ public class FishingIntro {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
             if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
+            if (!isHarpoonLessonCandidate(stage, spec)) continue;
             if (spec.rarity.ordinal() > maximum.ordinal()) continue;
 
             candidates.add(spec);
         }
 
         return candidates;
+    }
+
+    /**
+     * The deep-gear lesson is specifically the harpoon lesson, not merely an open-water errand.
+     * A breach-lamp-only species has no pond source; since drones only land pond fish, the harpoon
+     * is its sole live route. Empty {@code reachedBy} means either source and is not sufficient.
+     */
+    protected static boolean isHarpoonLessonCandidate(int stage, FishSpec spec) {
+        if (stage != FISH_TWO) return true;
+
+        return spec.reachedBy.size() == 1 && spec.reachedBy.contains(CatchImplement.BREACH_LAMP);
     }
 
     /** The first id-sorted valid specimen, used only when the initially selected system has none. */
