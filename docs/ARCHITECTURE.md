@@ -463,7 +463,7 @@ The two forms a fish takes in the world.
 
 | File | What it does |
 |---|---|
-| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow |
+| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow. Pond motes let the terrain draw that glow inside its stencil; pondless motes draw themselves, so a buried mote surfaced by a breach-lamp harpoon remains visible through the shove and catch |
 | `BuriedMoteEntityPlugin.java` | Invisible mote under the fabric; `unearth()` turns it into a real one |
 
 ### `campaign/fish/spawner`
