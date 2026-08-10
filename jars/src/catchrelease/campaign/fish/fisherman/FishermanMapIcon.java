@@ -1,11 +1,15 @@
 package catchrelease.campaign.fish.fisherman;
 
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CustomCampaignEntityAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import java.util.ArrayList;
 
 /**
  * A boat's mark on the system map, and nowhere else.
@@ -19,18 +23,41 @@ import com.fs.starfarer.api.util.Misc;
  * It has no sensor profile, so it is never a contact to be found - it is simply drawn, which is
  * what makes the boat locatable on the map while it is out of sight.
  * <p>
- * Rides the fleet rather than orbiting anything, and goes when the fleet does.
+ * Rides the fleet rather than orbiting anything, and appears only while the player shares its
+ * location. The marker is deliberately reconciled rather than blindly added: old saves can carry
+ * more than one from before that lifetime was tied to the player's location.
  */
 public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
 
-    /** Hangs a mark on a boat, in the location the boat is currently in. */
-    public static SectorEntityToken addTo(CampaignFleetAPI fleet) {
+    /**
+     * Finds this boat's one current-location mark, removing duplicate survivors from older saves,
+     * or creates it when the player has come alongside a boat with no mark yet.
+     */
+    public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
         if (fleet == null) return null;
 
         LocationAPI where = fleet.getContainingLocation();
         if (where == null) return null;
+
+        SectorEntityToken found = null;
+        for (CustomCampaignEntityAPI candidate : new ArrayList<>(where.getCustomEntities())) {
+            if (!ENTITY_ID.equals(candidate.getCustomEntityType())) continue;
+            if (!(candidate.getCustomPlugin() instanceof FishermanMapIcon)) continue;
+            if (!((FishermanMapIcon) candidate.getCustomPlugin()).isFor(fleet)) continue;
+
+            if (found == null) {
+                found = candidate;
+            } else {
+                where.removeEntity(candidate);
+            }
+        }
+
+        if (found != null) {
+            found.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+            return found;
+        }
 
         SectorEntityToken icon = where.addCustomEntity(Misc.genUID(), null, ENTITY_ID,
                 FishermanConstants.FACTION, fleet);
@@ -40,7 +67,46 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         return icon;
     }
 
+    /** Removes every surviving mark bound to this exact boat, wherever an old save left it. */
+    public static void removeFor(CampaignFleetAPI fleet) {
+        if (fleet == null) return;
+
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
+                if (!ENTITY_ID.equals(candidate.getCustomEntityType())) continue;
+                if (!(candidate.getCustomPlugin() instanceof FishermanMapIcon)) continue;
+                if (((FishermanMapIcon) candidate.getCustomPlugin()).isFor(fleet)) {
+                    location.removeEntity(candidate);
+                }
+            }
+        }
+    }
+
+    /**
+     * The player can only read a boat from the map of the place they are in. Remove every old
+     * marker from somewhere else immediately after a load or transition; the watched boat's own
+     * behaviour restores exactly one in the newly current location.
+     */
+    public static void removeOutside(LocationAPI playerLocation) {
+        for (LocationAPI location : Global.getSector().getAllLocations()) {
+            if (location == playerLocation) continue;
+
+            for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
+                if (ENTITY_ID.equals(candidate.getCustomEntityType())
+                        && candidate.getCustomPlugin() instanceof FishermanMapIcon) {
+
+                    location.removeEntity(candidate);
+                }
+            }
+        }
+    }
+
     protected CampaignFleetAPI fleet;
+
+    /** Object identity is the fleet identity here: plugin parameters serialize that exact hull. */
+    protected boolean isFor(CampaignFleetAPI other) {
+        return fleet == other;
+    }
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {

@@ -58,6 +58,7 @@ public class FishermanSpawner implements EveryFrameScript {
         //the first tick of a load is not an arrival - it is wherever the save was left
         if (!placed) {
             reconcileLegacyFleets();
+            FishermanMapIcon.removeOutside(where);
             placed = true;
             lastLocation = where;
             return;
@@ -65,6 +66,11 @@ public class FishermanSpawner implements EveryFrameScript {
 
         if (where == lastLocation) return;
         lastLocation = where;
+
+        //A custom entity is saved in the old location. Remove it at the transition rather than
+        //waiting for that location's boat script to receive a frame, so the sector map never
+        //shows a Fisherman the player has already left behind.
+        FishermanMapIcon.removeOutside(where);
 
         if (!(where instanceof StarSystemAPI)) return;
         StarSystemAPI system = (StarSystemAPI) where;
