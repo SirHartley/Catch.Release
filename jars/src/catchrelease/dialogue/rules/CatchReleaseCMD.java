@@ -119,6 +119,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** Whether any completed Fisherman topic belongs in the repeat-question menu. */
     public static final String FISHER_ASK_AGAIN = "$catchreleaseFisherAskAgain";
 
+    /** Whether the unasked Fisherman-topic menu has a second page of available topics. */
+    public static final String FISHER_ASK_PAGE_ONE = "$catchreleaseFisherAskPageOne";
+
     /** Whether the repeat-question menu has a second page of completed topics. */
     public static final String FISHER_ASK_AGAIN_PAGE_ONE = "$catchreleaseFisherAskAgainPageOne";
 
@@ -136,7 +139,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             "$catchrelease_fisherAsked_patterns",
             "$catchrelease_fisherAsked_deepWater",
             "$catchrelease_fisherAsked_fishBack",
-            "$catchrelease_fisherAsked_largest"
+            "$catchrelease_fisherAsked_largest",
+            "$catchrelease_fisherAsked_tackle",
+            "$catchrelease_fisherAsked_upgrade"
     };
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
@@ -515,9 +520,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         MemoryAPI global = Global.getSector().getMemoryWithoutUpdate();
         local.set(FISHER_ASK_AGAIN, hasAskedFisherTopic(global), 0);
+        local.set(FISHER_ASK_PAGE_ONE, hasUnaskedFisherTopicFrom(global, 6), 0);
         local.set(FISHER_ASK_AGAIN_PAGE_ONE,
-                global.getBoolean(FISHER_ASKED_TOPICS[6])
-                        || global.getBoolean(FISHER_ASKED_TOPICS[7]), 0);
+                hasAskedFisherTopicFrom(global, 6), 0);
 
         if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
@@ -557,8 +562,21 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** True once any repeatable Fisherman topic has been answered in this campaign. */
     protected boolean hasAskedFisherTopic(MemoryAPI global) {
-        for (String topic : FISHER_ASKED_TOPICS) {
-            if (global.getBoolean(topic)) return true;
+        return hasAskedFisherTopicFrom(global, 0);
+    }
+
+    /** True when a completed repeatable topic exists at or after the supplied page boundary. */
+    protected boolean hasAskedFisherTopicFrom(MemoryAPI global, int first) {
+        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
+            if (global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
+        }
+        return false;
+    }
+
+    /** True when an unasked repeatable topic exists at or after the supplied page boundary. */
+    protected boolean hasUnaskedFisherTopicFrom(MemoryAPI global, int first) {
+        for (int i = first; i < FISHER_ASKED_TOPICS.length; i++) {
+            if (!global.getBoolean(FISHER_ASKED_TOPICS[i])) return true;
         }
         return false;
     }

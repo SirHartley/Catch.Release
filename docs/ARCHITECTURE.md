@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 455 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 467 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -182,8 +182,9 @@ The rupture-interception twin for `catchrelease_introCurious` omits only the fin
 The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
 gated on stage 6, while the question rows retain their own information-release gates.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
-topics stay in the root submenu; answered topics move to `Ask again`, whose six-entry pages retain
-their current page after an answer returns to the menu.
+topics stay in the root submenu; answered topics move to `Ask again`. Both panes page their
+topics six at a time, retain their current page after an answer returns, and hide a next-page
+option that has no topic left to show.
 Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
 rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
@@ -272,6 +273,10 @@ The live stage-3 hand-in also lets the player ask what a breach conservatory is,
 one. Those two short branches contain no grant or progression command: each reuses the existing
 outfitter hand-in choices, while the latter directs plans to Crablobab and construction to a
 player-owned colony.
+The live outfitter explanation also offers tackle and upgrade definitions without naming future
+Harpoon or breach-light categories. Both intro answers set the same permanent topic flags as their
+post-tutorial Fisherman entries, moving the topic to the appropriate `Ask again` page; neither
+path carries a tutorial grant or advance.
 Rumors are tutorial-graduation content: both the option producer and Java command reject stages
 below 6. Graduation idempotently grants one immediate rumor/intel lead without checking the monthly
 cooldown; completed saves receive the same migration on load, and an already-active rumor satisfies
