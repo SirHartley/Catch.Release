@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.items;
 
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -32,6 +33,13 @@ import java.util.Map;
  * cargo screen's own mass-transfer path before the item ever sees it.
  */
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
+
+    /** Native box art is 80x80; these bounds cover the label before its perspective is applied. */
+    public static final float BOX_ICON_GRID = 80f;
+    public static final float BOX_ICON_LEFT = 49f;
+    public static final float BOX_ICON_RIGHT = 69f;
+    public static final float BOX_ICON_TOP = 29f;
+    public static final float BOX_ICON_BOTTOM = 57f;
 
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -101,12 +109,13 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         List<FishCatch> contents = getContents();
         if (contents.isEmpty()) return;
 
+        FishSpec spec = contents.get(0).getSpec();
+        renderBoxIcon(x, y, w, h, alphaMult, glowMult, spec);
+
         FishGrade best = FishGrade.TERRIBLE;
         for (FishCatch entry : contents) {
             if (entry.getGrade().ordinal() > best.ordinal()) best = entry.getGrade();
         }
-
-        FishSpec spec = contents.get(0).getSpec();
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
 
@@ -118,6 +127,23 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
                 break;
             }
         }
+    }
+
+    /** First lays the species art over the label's rectangular extent; the perspective fit is separate. */
+    protected void renderBoxIcon(float x, float y, float w, float h, float alphaMult,
+                                 float glowMult, FishSpec spec) {
+
+        String path = spec == null || spec.icon == null || spec.icon.isEmpty()
+                ? FishConstants.ITEM_ICON_FALLBACK : spec.icon;
+
+        float left = x + w * BOX_ICON_LEFT / BOX_ICON_GRID;
+        float right = x + w * BOX_ICON_RIGHT / BOX_ICON_GRID;
+        float bottom = y + h * (BOX_ICON_GRID - BOX_ICON_BOTTOM) / BOX_ICON_GRID;
+        float top = y + h * (BOX_ICON_GRID - BOX_ICON_TOP) / BOX_ICON_GRID;
+
+        FishItemRenderer.renderIconWithCorners(path,
+                left, bottom, left, top, right, top, right, bottom,
+                alphaMult, glowMult);
     }
 
     /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */
