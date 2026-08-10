@@ -70,6 +70,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     public void unlockClosestPond() {
         SectorEntityToken pond = getPond();
+        if (pond == null || isPondActive(pond) || RodMoteEntityPlugin.isOpening(pond)) return;
 
         SectorEntityToken t = entity.getContainingLocation().addCustomEntity(Misc.genUID(), null, RodMoteEntityPlugin.ENTITY_ID, null,
                 new RodMoteEntityPlugin.RodMoteEntityPluginData(entity.getLocation(), pond, Color.CYAN));
@@ -77,7 +78,11 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     public boolean closestPondActive() {
-        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(getPond());
+        return isPondActive(getPond());
+    }
+
+    protected boolean isPondActive(SectorEntityToken pond) {
+        MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
         return plugin != null && plugin.isActive();
     }
 
@@ -143,6 +148,9 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         //an occupied rupture is the camp's leverage: leaving is allowed, fishing is not
         if (CampedSpot.isPondBlocked(pond)) return false;
 
+        //the ability cooldown may end while its opener is still crossing the distance to the pond
+        if (!isPondActive(pond) && RodMoteEntityPlugin.isOpening(pond)) return false;
+
         //roaming needs no pond; otherwise falls back to requiring a pond in range
         if (!isRoamingAvailable() && pond == null) return false;
 
@@ -197,6 +205,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
             if (CampedSpot.isPondBlocked(pond)) {
                 tooltip.addPara("A fleet is sitting on this rupture. The ROD cannot be deployed here.",
                         Misc.getNegativeHighlightColor(), pad);
+            } else if (!isPondActive(pond) && RodMoteEntityPlugin.isOpening(pond)) {
+                tooltip.addPara("This rupture is already being forced open.", gray, pad);
             } else if (SearchlightAbilityPlugin.isBreaching() && !hasBreachCoupler()) {
                 tooltip.addPara("The breach lamps are lit, but the drone rig needs a %s to use their"
                                 + " openings.", pad, Misc.getNegativeHighlightColor(),
