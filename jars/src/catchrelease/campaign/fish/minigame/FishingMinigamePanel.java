@@ -186,6 +186,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
+                if (minigame.isRunning()) {
+                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE);
+                }
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {

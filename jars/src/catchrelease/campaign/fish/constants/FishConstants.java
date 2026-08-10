@@ -291,6 +291,9 @@ public class FishConstants {
     /** Played once when the fish escapes or the player abandons the catch. */
     public static final String SOUND_FAILED = "";
 
+    /** Played when a live-catch click starts lifting the indicator. */
+    public static final String SOUND_INDICATOR_MOVE = "";
+
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
 
