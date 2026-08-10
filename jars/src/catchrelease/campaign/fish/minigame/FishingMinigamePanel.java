@@ -125,6 +125,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Puts up the readout and waits; does not close the dialog, the player does that. */
     protected void advanceCaught(float amount) {
         if (result == null) {
+            CatchCelebration.playHook(FishConstants.SOUND_CAUGHT);
             result = new CatchResultPanel(specimen, where, method);
 
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);

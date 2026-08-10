@@ -286,7 +286,7 @@ public class FishConstants {
     public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
 
     /** Blank = no sound wired up yet, not a placeholder id waiting to be found. */
-    public static final String SOUND_CATCH = "";
+    public static final String SOUND_CAUGHT = "";
 
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
