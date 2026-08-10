@@ -76,6 +76,31 @@ public class TackleManager {
     }
 
     /**
+     * Uses up a module: removes it from ownership and empties every slot it occupied.
+     * <p>
+     * Ordinary tackle never comes through here; it remains permanent and freely refittable. This
+     * exists for consumables such as the explosive head, whose fitted state is the inventory item.
+     * Clearing the fit as well as ownership prevents a save with an already-created owned set from
+     * continuing to read a module that no longer exists.
+     *
+     * @return whether ownership or a fitted slot actually changed
+     */
+    public static boolean consume(Tackle tackle) {
+        if (tackle == null || tackle == Tackle.NONE) return false;
+
+        boolean changed = getOwned().remove(tackle.name());
+
+        for (Tackle.Fit rig : Tackle.Fit.values()) {
+            if (!rig.isRig() || get(rig) != tackle) continue;
+
+            getFitted().put(rig.name(), Tackle.NONE);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /**
      * Everything that could go in a rig's slot, for a shop to list - unlocked stock, plus anything
      * already owned however it was come by. Without the second half, a module bought somewhere
      * other than the shop could never be taken off and put back on again.
