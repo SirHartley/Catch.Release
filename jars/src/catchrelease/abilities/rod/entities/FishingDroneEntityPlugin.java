@@ -1,6 +1,7 @@
 package catchrelease.abilities.rod.entities;
 
 import catchrelease.abilities.rod.constants.RodConstants;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.helper.loading.SpriteLoader;
@@ -407,11 +408,24 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.mode = Mode.LAUNCHING;
     }
 
-    /** Send this one home. Pass the mote it caught, or null if it is coming back empty. */
+    /** Send this one home. Pass the mote it caught, or null if it is coming back empty. A carried
+     * mote is held for the whole return leg, which is the shared state every other retrieval rig
+     * asks before taking it. */
     public void recall(SectorEntityToken carried) {
+        if (this.carried != carried) setCarriedHeld(false);
+
         this.carried = carried;
+        setCarriedHeld(true);
         this.chaseTarget = null;
         this.mode = Mode.RETURNING;
+    }
+
+    protected void setCarriedHeld(boolean held) {
+        if (carried == null || !(carried.getCustomPlugin() instanceof FishEntityPlugin plugin)) {
+            return;
+        }
+
+        plugin.setHeld(held);
     }
 
     protected boolean isChaseTargetValid() {
@@ -422,7 +436,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         if (arrivedHome) return;
         arrivedHome = true;
 
-        //carried mote fades out with the drone - fish is landed
+        //carried mote stays held through the fade - it remains this drone's delivery until gone
         if (carried != null && !carried.isExpired()) Misc.fadeAndExpire(carried, 0.5f);
 
         Misc.fadeAndExpire(entity, 0.5f);
