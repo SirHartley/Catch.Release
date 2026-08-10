@@ -205,6 +205,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return FishBuyer.sellUpTo(dialog, arg);
             case "colorBulkSaleOptions":
                 return colorBulkSaleOptions(dialog);
+            case "colorAskedQuestion":
+                return colorAskedQuestion(dialog, arg);
             case "highlightJobText":
                 return highlightJobText(ruleId, dialog, params, memoryMap);
             case "highlightWorkText":
@@ -364,6 +366,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                     FishRarity.UNCOMMON);
         }
 
+        return true;
+    }
+
+    /** Makes a completed Fisherman topic recede using the exact colour of Common catch. */
+    protected boolean colorAskedQuestion(InteractionDialogAPI dialog, String optionId) {
+        if (dialog == null || optionId == null || dialog.getOptionPanel() == null
+                || !dialog.getOptionPanel().hasOption(optionId)) {
+            return false;
+        }
+
+        dialog.setOptionColor(optionId, FishRarity.COMMON.color);
         return true;
     }
 
