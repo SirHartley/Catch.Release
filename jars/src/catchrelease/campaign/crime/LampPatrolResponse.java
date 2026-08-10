@@ -51,10 +51,10 @@ public class LampPatrolResponse implements EveryFrameScript {
     /** Days one crew will keep after the player about it before giving up. */
     public static final float CHASE_DAYS = 8f;
 
-    /** Days after a stop ends before that faction sends anybody else. */
+    /** Days before that faction retries a stop that ended while the same burn remained active. */
     public static final float RETRY_DAYS = 3f;
 
-    /** Per-faction wait between stops, in sector memory so it survives a reload. */
+    /** Per-faction wait for an unresolved burn, in sector memory so it survives a reload. */
     public static final String RETRY_KEY = "$catchrelease_lampPatrolWait";
 
     /** Matches vanilla's own fleet-search cadence. */
@@ -179,6 +179,11 @@ public class LampPatrolResponse implements EveryFrameScript {
     protected void send(CampaignFleetAPI patrol) {
         MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
+        //The boolean is only the latch that says the current encounter has happened. Per-burn
+        //history lives in STOPPED_RUN_KEY. Clear an expired latch before a new run so the rules
+        //row can open again, including for old saves where its original 30-day timer remains.
+        mem.unset(LampOffence.STOPPED_KEY);
+
         //1-day flag, refreshed in maintain() while they still have eyes on the player; letting it
         //lapse is how a crew loses interest
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
@@ -258,12 +263,21 @@ public class LampPatrolResponse implements EveryFrameScript {
     /**
      * Calls the crew off. The assignment and tactical target go by hand since neither is on a clock
      * and would otherwise keep them flying at the player after the reason for it is gone.
+     * <p>
+     * Putting the lamps out also closes the current burn immediately. A later relight is therefore
+     * a fresh run which this same crew may object to without waiting for the normal unresolved-stop
+     * retry.
      */
     protected void end() {
         if (stopping == null) return;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         MemoryAPI mem = stopping.getMemoryWithoutUpdate();
+        boolean lampsStillBurning = SearchlightAbilityPlugin.isBreaching();
+
+        //Do not wait for the next interval sweep to notice the off transition. The player can put
+        //them out during the paused conversation and relight before look() gets an off frame.
+        if (!lampsStillBurning) lit = false;
 
         FleetAssignmentDataAPI assignment = stopping.getCurrentAssignment();
         if (assignment != null && assignment.getAssignment() == FleetAssignment.INTERCEPT
@@ -284,12 +298,17 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         String factionId = mem.getString(FACTION_KEY);
         if (factionId != null) {
-            Global.getSector().getMemoryWithoutUpdate().set(RETRY_KEY + factionId, true, RETRY_DAYS);
+            MemoryAPI sector = Global.getSector().getMemoryWithoutUpdate();
+            String retryKey = RETRY_KEY + factionId;
+
+            if (lampsStillBurning) sector.set(retryKey, true, RETRY_DAYS);
+            else sector.unset(retryKey);
         }
 
         mem.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
         mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
         mem.unset(LampOffence.SAW_KEY);
+        mem.unset(LampOffence.STOPPED_KEY);
         mem.unset(FACTION_KEY);
 
         stopping = null;

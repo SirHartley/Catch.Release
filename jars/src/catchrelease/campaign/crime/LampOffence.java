@@ -42,7 +42,7 @@ public class LampOffence {
     /** Set on a patrol that has seen the lamps lit somewhere they are not allowed. */
     public static final String SAW_KEY = "$catchrelease_sawLamps";
 
-    /** Set once a patrol has had the conversation, so one stop is one stop. */
+    /** Transient latch set when a patrol's current stop opens; per-burn history is below. */
     public static final String STOPPED_KEY = "$catchrelease_lampStopped";
 
     /**
