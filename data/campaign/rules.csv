@@ -1526,23 +1526,10 @@ catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,60:catchrelease_fisherAsk:Ask about something else,
-catchrelease_fisherOptAskAgain,PopulateOptions,"$menuState == catchreleaseFisherAsk
-CatchReleaseCMD tokens
-$catchreleaseFisherAskAgain",,,80:catchrelease_fisherAskAgain:Ask again,
-catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskAgainReturn = false 0
-$catchreleaseFisherAskAgainPage = 0 0
-$catchreleaseFisherAskPage = 0 0
+catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskPage = 0 0
 $menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions","They wait. Somewhere behind them a winch is running, and has been running the whole time.",,
-catchrelease_fisherAskBack,DialogOptionSelected,"$option == catchrelease_fisherAskBack
-!$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAsk 0
-FireAll PopulateOptions",,,
-catchrelease_fisherAskAgainReturn,DialogOptionSelected,"$option == catchrelease_fisherAskBack
-$catchreleaseFisherAskAgainReturn","$menuState = catchreleaseFisherAskAgain 0
-FireAll PopulateOptions",,,
-catchrelease_fisherAskAgain,DialogOptionSelected,$option == catchrelease_fisherAskAgain,"$catchreleaseFisherAskAgainReturn = true 0
-$catchreleaseFisherAskAgainPage = 0 0
-$menuState = catchreleaseFisherAskAgain 0
+catchrelease_fisherAskBack,DialogOptionSelected,$option == catchrelease_fisherAskBack,"$menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions",,,
 catchrelease_fisherOptAsk_howLong,PopulateOptions,"$menuState == catchreleaseFisherAsk
 CatchReleaseCMD tokens
@@ -1690,38 +1677,38 @@ catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_a
 
 ""Fish settle both. No reason to write two invoices.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
-catchrelease_fisherAskAgain_howLong,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_howLong,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_howLong",,,"0:catchrelease_ask_howLong:""How long have you been out here?""",
-catchrelease_fisherAskAgain_baha,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_baha,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_baha",,,"10:catchrelease_ask_baha:""Do you have a name?""",
-catchrelease_fisherAskAgain_whyOut,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_whyOut,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_whyOut",,,"20:catchrelease_ask_why0ut:""Why do your boats never go in past the last colony?""",
-catchrelease_fisherAskAgain_looking,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_looking,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_looking",,,"30:catchrelease_ask_looking:""What happens to somebody who looks at the catch?""",
-catchrelease_fisherAskAgain_patterns,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_patterns,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_patterns",,,"40:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
-catchrelease_fisherAskAgain_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
+catchrelease_fisherAsked_deepWater,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 0
 $global.catchrelease_fisherAsked_deepWater",,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
-catchrelease_fisherAskAgain_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1
+catchrelease_fisherAsked_fishBack,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1
 $global.catchrelease_fisherAsked_fishBack",,,"0:catchrelease_ask_fishBack:""Does anything out there fish back?""",
-catchrelease_fisherAskAgain_largest,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1
+catchrelease_fisherAsked_largest,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1
 $global.catchrelease_fisherAsked_largest",,,"10:catchrelease_ask_largest:""What is the largest thing you have landed?""",
-catchrelease_fisherAskAgain_tackle,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1
+catchrelease_fisherAsked_tackle,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1
 $global.catchrelease_fisherAsked_tackle",,,"20:catchrelease_ask_tackle:""What is tackle?""",
-catchrelease_fisherAskAgain_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1
+catchrelease_fisherAsked_upgrade,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1
 $global.catchrelease_fisherAsked_upgrade",,,"30:catchrelease_ask_upgrade:""What is an upgrade?""",
-catchrelease_fisherAskAgain_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1
+catchrelease_fisherAsked_outfitterPayment,PopulateOptions,"$menuState == catchreleaseFisherAsk
+$catchreleaseFisherAskPage == 1
 $global.catchrelease_fisherAsked_outfitterPayment",,,"40:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
 catchrelease_fisherOptAskPageNext,PopulateOptions,"$menuState == catchreleaseFisherAsk
 $catchreleaseFisherAskPage == 0
@@ -1732,20 +1719,6 @@ $catchreleaseFisherAskPage == 1",,,70:catchrelease_fisherAskPagePrevious:Previou
 catchrelease_fisherAskPageNext,DialogOptionSelected,$option == catchrelease_fisherAskPageNext,"$catchreleaseFisherAskPage = 1 0
 FireAll PopulateOptions",,,
 catchrelease_fisherAskPagePrevious,DialogOptionSelected,$option == catchrelease_fisherAskPagePrevious,"$catchreleaseFisherAskPage = 0 0
-FireAll PopulateOptions",,,
-catchrelease_fisherOptAskAgainNext,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 0
-CatchReleaseCMD tokens
-$catchreleaseFisherAskAgainPageOne",,,80:catchrelease_fisherAskAgainNext:Next,
-catchrelease_fisherOptAskAgainPrevious,PopulateOptions,"$menuState == catchreleaseFisherAskAgain
-$catchreleaseFisherAskAgainPage == 1",,,80:catchrelease_fisherAskAgainPrevious:Previous,
-catchrelease_fisherOptAskAgainBack,PopulateOptions,$menuState == catchreleaseFisherAskAgain,,,100:catchrelease_fisherAskAgainBack:Back,
-catchrelease_fisherAskAgainNext,DialogOptionSelected,$option == catchrelease_fisherAskAgainNext,"$catchreleaseFisherAskAgainPage = 1 0
-FireAll PopulateOptions",,,
-catchrelease_fisherAskAgainPrevious,DialogOptionSelected,$option == catchrelease_fisherAskAgainPrevious,"$catchreleaseFisherAskAgainPage = 0 0
-FireAll PopulateOptions",,,
-catchrelease_fisherAskAgainBack,DialogOptionSelected,$option == catchrelease_fisherAskAgainBack,"$catchreleaseFisherAskAgainReturn = false 0
-$menuState = catchreleaseFisherAsk 0
 FireAll PopulateOptions",,,
 catchrelease_fisherOptAskBack,PopulateOptions,$menuState == catchreleaseFisherAsk,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:I've heard enough.,"The cut link is vanilla's convOptionLeave, a PopulateOptions row conditioned on $isPerson alone - so every FireAll PopulateOptions in this conversation collects it, this submenu included. The main menu drops it in catchrelease_fisherOptLeave and this is the same job for the same reason: the boat carries its own way out, and vanilla's lands the player back on the engage screen of a fleet nobody is fighting. Scripts run after the panel has been cleared and repopulated, so removing here removes what was just added."

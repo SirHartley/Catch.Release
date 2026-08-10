@@ -174,7 +174,7 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 mod does on top of it.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 477 logical rules. Its supplied dialogue is kept verbatim except where a
+The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
@@ -182,9 +182,10 @@ The rupture-interception twin for `catchrelease_introCurious` omits only the fin
 The Fisherman's `Ask about something else` submenu is a post-tutorial menu: its root option is
 gated on stage 6, while the question rows retain their own information-release gates.
 Each repeatable topic records a campaign-long asked flag only when its answer opens. Unasked
-topics stay in the root submenu; answered topics move to `Ask again`. Both panes page their
-topics six at a time, retain their current page after an answer returns, and hide a next-page
-option that has no topic left to show.
+and answered topics share the same submenu, with mutually exclusive producers preserving every
+old-save flag without a separate repeat-question state. The menu pages topics six at a time,
+retains its current page after an answer returns, and hides the second page until one of its topics
+is relevant.
 Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
 rather than assumed by a player option before any scene has supplied it.
 During the tutorial the intro option is the single route for both target reminders and hand-ins;
@@ -192,7 +193,7 @@ the older `Ask about the fish they want` producer remains as a preserved row but
 When the stage-3 target is in the current system, the two continuity questions are root Fisherman
 menu options under the same target and deep-handoff gates that formerly nested them under that
 reminder. Each answer writes its own permanent campaign asked flag as it opens, removing only that
-root option thereafter; neither question enters the post-tutorial `Ask again` menu. Their existing
+root option thereafter; neither question enters the general question menu. Their existing
 answer chains return through `catchrelease_fisherBack` to the root menu.
 The Fisherman's fish-selling option is withheld until stage 3, after the first tutorial catch has
 been handed in; carrying fish before that point does not expose the general sales flow.
@@ -201,7 +202,7 @@ seasonal line.
 Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
 offers a highlighted one-time question about what came up with the catch. Selecting it plays the
 existing explanation, consumes the pending state, and returns to the usual menu without entering
-`Ask again`.
+the general question list.
 The safety interception remains higher-scored and therefore still takes precedence.
 Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
@@ -277,8 +278,8 @@ outfitter hand-in choices, while the latter directs plans to Crablobab and const
 player-owned colony.
 The live outfitter explanation also offers tackle and upgrade definitions without naming future
 Harpoon or breach-light categories. Both intro answers set the same permanent topic flags as their
-post-tutorial Fisherman entries, moving the topic to the appropriate `Ask again` page; neither
-path carries a tutorial grant or advance.
+ordinary Fisherman entries. Answered and unanswered topics share the same question menu; there is
+no separate `Ask again` route, and neither intro path carries a tutorial grant or advance.
 The page-one outfitter-payment topic explains only the immediate barter transaction — trade buys
 catch, the Fisherman sells hardware, and fish avoid two invoices. It deliberately says nothing
 about what ultimately becomes of the catch.
