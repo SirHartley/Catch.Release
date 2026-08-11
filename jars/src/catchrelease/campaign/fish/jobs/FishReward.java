@@ -7,18 +7,23 @@ import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.shop.ShopEntry;
+import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -204,7 +209,11 @@ public abstract class FishReward {
                     + entry.getValueAt(targetLevel) + ".", 3f);
             item.addPara("Unlocks this rung for purchase at the Fishing Outfitter; it does not"
                     + " grant the upgrade.", 3f);
-            tooltip.addImageWithText(pad);
+            UIPanelAPI card = tooltip.addImageWithText(pad);
+            CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f,
+                    new SchematicMarkOverlay(statId, targetLevel));
+            card.addComponent(mark).inLMid(0f);
+            card.bringComponentToTop(mark);
 
             return true;
         }
@@ -217,6 +226,32 @@ public abstract class FishReward {
         @Override
         public String getSchematicKey() {
             return ShopSchematics.getKey(statId, targetLevel);
+        }
+    }
+
+    /** Live overlay on a job's schematic image; it shares the exact key used by the shop ring. */
+    protected static class SchematicMarkOverlay extends BaseCustomUIPanelPlugin {
+        protected final String statId;
+        protected final int targetLevel;
+        protected PositionAPI pos;
+
+        protected SchematicMarkOverlay(String statId, int targetLevel) {
+            this.statId = statId;
+            this.targetLevel = targetLevel;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+            if (!ShopMarks.isMarkedUpgrade(statId, targetLevel)) return;
+
+            ShopMarks.drawDot(pos.getX() + pos.getWidth() - ShopMarks.DOT_INSET,
+                    pos.getY() + ShopMarks.DOT_INSET, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
 

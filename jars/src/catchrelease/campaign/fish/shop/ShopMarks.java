@@ -16,10 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The player's shopping list: wares - upgrades and tackle both - marked in the outfitter as
- * the thing being saved for, via the ring on their list rows. A mark follows the ware, not a
- * rung - the asks it stands for are always the current price, so buying a rung moves the mark
- * to the next one, and a finished or owned ware's mark expires on its own.
+ * The player's shopping list: purchases - exact upgrade rungs and tackle both - marked in the
+ * outfitter as the thing being saved for, via the ring on their list rows. Upgrade keys include
+ * the target level, so a schematic reward and its eventual fish price can point at the same rung.
  * <p>
  * What a mark does lives elsewhere and reads through the questions here, and there are two of
  * them, asked by different screens for different reasons. {@link #isMarked} is the shopping list
@@ -59,23 +58,93 @@ public class ShopMarks {
             return fresh;
         }
 
-        return (Set<String>) stored;
+        Set<String> marked = (Set<String>) stored;
+        migrateLegacyUpgradeKeys(marked);
+
+        return marked;
+    }
+
+    /** Exact shopping-list identity; the shelf identity deliberately remains ladder-wide. */
+    public static String getMarkKey(ShopEntry entry) {
+        if (entry == null) return null;
+
+        return entry.isUpgrade()
+                ? getUpgradeMarkKey(entry.stat.id, entry.getLevel() + 1)
+                : entry.getKey();
+    }
+
+    public static String getUpgradeMarkKey(String statId, int targetLevel) {
+        return statId == null || targetLevel <= 0
+                ? null : "stat:" + statId + ":" + targetLevel;
+    }
+
+    /** Old saves marked whole ladders; preserve their intent by pinning the then-current rung. */
+    protected static void migrateLegacyUpgradeKeys(Set<String> marked) {
+        if (marked == null || marked.isEmpty() || UpgradeManager.getInstance() == null) return;
+
+        boolean changed = false;
+
+        for (String key : new ArrayList<>(marked)) {
+            if (key == null || !key.startsWith("stat:")) continue;
+
+            String[] parts = key.split(":", 3);
+            if (parts.length != 2) continue;
+
+            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(parts[1]);
+            if (stat == null) continue;
+
+            marked.remove(key);
+            if (!ShopPricing.isMaxed(stat)) {
+                marked.add(getUpgradeMarkKey(stat.id, Math.max(0, stat.level) + 1));
+            }
+            changed = true;
+        }
+
+        if (changed) invalidateWantedCache();
     }
 
     public static boolean isMarked(String entryKey) {
         return entryKey != null && getMarkedKeys().contains(entryKey);
     }
 
+    public static boolean isMarked(ShopEntry entry) {
+        return isMarked(getMarkKey(entry));
+    }
+
+    public static boolean isMarkedUpgrade(String statId, int targetLevel) {
+        return isMarked(getUpgradeMarkKey(statId, targetLevel));
+    }
+
+    public static boolean mark(String entryKey) {
+        if (entryKey == null) return false;
+
+        boolean changed = getMarkedKeys().add(entryKey);
+        if (changed) invalidateWantedCache();
+        return changed;
+    }
+
+    public static boolean unmark(String entryKey) {
+        if (entryKey == null) return false;
+
+        boolean changed = getMarkedKeys().remove(entryKey);
+        if (changed) invalidateWantedCache();
+        return changed;
+    }
+
     public static void toggle(String entryKey) {
         if (entryKey == null) return;
 
-        Set<String> marked = getMarkedKeys();
-        if (!marked.remove(entryKey)) marked.add(entryKey);
+        if (!unmark(entryKey)) mark(entryKey);
+    }
+
+    public static void toggle(ShopEntry entry) {
+        toggle(getMarkKey(entry));
     }
 
     /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
     public static boolean isMarkable(ShopEntry entry) {
-        if (entry == null || entry.isPurchaseLocked()) return false;
+        if (entry == null) return false;
+        if (entry.isPurchaseLocked() && !entry.isUpgrade()) return false;
 
         ShopPricing.Price price = entry.getPrice();
 
@@ -94,11 +163,11 @@ public class ShopMarks {
             ShopPricing.Price price = null;
 
             if (key.startsWith("stat:")) {
-                UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
-                if (stat == null || ShopPricing.isMaxed(stat)) continue;
-                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
+                UpgradeMark mark = parseUpgradeMark(key);
+                if (mark == null || mark.targetLevel != mark.stat.level + 1) continue;
+                if (!ShopSchematics.has(mark.stat, mark.targetLevel)) continue;
 
-                price = ShopPricing.getPrice(stat);
+                price = ShopPricing.getPrice(mark.stat);
             } else if (key.startsWith("tackle:")) {
                 String[] parts = key.split(":", 3);
                 if (parts.length < 3) continue;
@@ -149,6 +218,11 @@ public class ShopMarks {
 
     protected static List<FishRequirement> wantedAskCache;
     protected static long wantedAskCacheTime;
+
+    protected static void invalidateWantedCache() {
+        wantedAskCache = null;
+        wantedAskCacheTime = 0L;
+    }
 
     /**
      * Every current ask - marked wares and everything in the log that is waiting on a fish - the
@@ -222,13 +296,14 @@ public class ShopMarks {
 
         for (String key : getMarkedKeys()) {
             if (key.startsWith("stat:")) {
-                UpgradeStat stat = UpgradeManager.getInstance().getAll().get(key.substring(5));
-                if (stat == null || ShopPricing.isMaxed(stat)) continue;
-                if (!ShopSchematics.has(stat, stat.level + 1)) continue;
+                UpgradeMark mark = parseUpgradeMark(key);
+                if (mark == null || mark.targetLevel != mark.stat.level + 1) continue;
+                if (!ShopSchematics.has(mark.stat, mark.targetLevel)) continue;
 
-                ShopPricing.Price price = ShopPricing.getPrice(stat);
+                ShopPricing.Price price = ShopPricing.getPrice(mark.stat);
                 if (price != null && price.fish != null) {
-                    out.add(new Ask(ShopEntry.of(stat).getName(), price.fish));
+                    out.add(new Ask(ShopEntry.of(mark.stat).getName() + " level "
+                            + mark.targetLevel, price.fish));
                 }
             } else if (key.startsWith("tackle:")) {
                 String[] parts = key.split(":", 3);
@@ -252,6 +327,35 @@ public class ShopMarks {
         }
 
         return out;
+    }
+
+    protected static UpgradeMark parseUpgradeMark(String key) {
+        if (key == null || UpgradeManager.getInstance() == null) return null;
+
+        String[] parts = key.split(":", 3);
+        if (parts.length != 3 || !"stat".equals(parts[0])) return null;
+
+        UpgradeStat stat = UpgradeManager.getInstance().getAll().get(parts[1]);
+        if (stat == null) return null;
+
+        try {
+            int targetLevel = Integer.parseInt(parts[2]);
+            if (targetLevel <= 0 || targetLevel > stat.maxLevel) return null;
+
+            return new UpgradeMark(stat, targetLevel);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    protected static class UpgradeMark {
+        final UpgradeStat stat;
+        final int targetLevel;
+
+        UpgradeMark(UpgradeStat stat, int targetLevel) {
+            this.stat = stat;
+            this.targetLevel = targetLevel;
+        }
     }
 
     /**

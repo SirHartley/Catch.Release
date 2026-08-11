@@ -119,7 +119,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
     /** Tells the pane whether the cursor is on this row's ring, so it can put a card up. */
     protected void reportMarkHover(float x, float y, float height) {
-        boolean hasRing = ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry);
+        boolean hasRing = ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry);
 
         if (hasRing && isMouseOverMark()) {
             host.setMarkHover(entry, x + ACCENT_WIDTH + MARK_SLOT * 0.5f, y + height * 0.5f);
@@ -131,7 +131,7 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
     /** The shopping-list ring: hollow until clicked, filled quest-yellow while marked. */
     protected void renderMarkRing(float x, float y, float height, float alphaMult) {
-        boolean marked = ShopMarks.isMarked(entry.getKey());
+        boolean marked = ShopMarks.isMarked(entry);
         if (!marked && !ShopMarks.isMarkable(entry)) return;
 
         float cx = x + ACCENT_WIDTH + MARK_SLOT * 0.5f;
@@ -245,8 +245,8 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
             //the ring's slot toggles the mark; everywhere else selects the row
             if (isInMarkSlot(event.getX()) &&
-                    (ShopMarks.isMarked(entry.getKey()) || ShopMarks.isMarkable(entry))) {
-                ShopMarks.toggle(entry.getKey());
+                    (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry))) {
+                ShopMarks.toggle(entry);
                 event.consume();
                 return;
             }
