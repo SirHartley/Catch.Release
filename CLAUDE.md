@@ -38,6 +38,9 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   map still describes the old shape.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
   sitting on the branch.
+- **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
+  a missing or invalid CLI login must never block PR creation, inspection, or merging when the app
+  is connected.
 
 ## Model assignments
 

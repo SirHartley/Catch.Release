@@ -17,6 +17,24 @@ public class HarpoonConstants {
     public static final Color LINE_COLOR = new Color(120, 220, 255);
     public static final Color CORE_COLOR = new Color(230, 250, 255);
 
+    /**
+     * A fitted charge must read before impact, not only once its fireball exists. Three nested
+     * passes give it a blood-red warning halo, a saturated head and a hot ignition point. The two
+     * incommensurate pulse rates keep it electrically uneasy rather than breathing like a beacon.
+     */
+    public static final Color EXPLOSIVE_HALO_COLOR = new Color(255, 20, 10);
+    public static final Color EXPLOSIVE_HEAD_COLOR = new Color(255, 55, 20);
+    public static final Color EXPLOSIVE_CORE_COLOR = new Color(255, 220, 155);
+    public static final float EXPLOSIVE_HALO_SIZE = 34f;
+    public static final float EXPLOSIVE_HEAD_SIZE = 19f;
+    public static final float EXPLOSIVE_CORE_SIZE = 8f;
+    public static final float EXPLOSIVE_HALO_ALPHA = 0.32f;
+    public static final float EXPLOSIVE_HEAD_ALPHA = 0.82f;
+    public static final float EXPLOSIVE_PULSE = 0.16f;
+    public static final float EXPLOSIVE_PULSE_RATE = 13f;
+    public static final float EXPLOSIVE_FLICKER = 0.07f;
+    public static final float EXPLOSIVE_FLICKER_RATE = 31f;
+
     /** Outbound speed and max range before giving up. */
     public static final float SPEED = 900f;
     public static final float RANGE = 1200f;

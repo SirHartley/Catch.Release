@@ -118,7 +118,12 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         mote.setLocation(loc.x, loc.y);
 
-        Misc.fadeAndExpire(entity, 0.1f);
+        //The ordinary mote is the same fish continuing from this exact point. Expire the buried
+        //representation immediately: leaving it to fade lets the searchlight impression renderer
+        //draw a stationary second fish while the harpoon visibly shoves the replacement away.
+        //setExpired defers collection cleanup to the engine, so this is safe while a tagged entity
+        //list is being inspected.
+        entity.setExpired(true);
 
         return mote;
     }
