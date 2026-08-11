@@ -606,6 +606,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
+            if (entry.isLocked()) {
+                info.addPara("Schematic required.", Misc.getNegativeHighlightColor(), 16f);
+                info.addPara("Fishing jobs can offer the schematic for this rung.",
+                        Misc.getGrayColor(), 4f);
+                return;
+            }
+
             ShopPricing.Price price = entry.getPrice();
             if (price == null) return; //defensive; the branches above cover the only null cases
 
