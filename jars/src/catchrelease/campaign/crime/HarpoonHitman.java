@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.ai.FleetAIFlags;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.AutoDespawnScript;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
@@ -116,6 +117,8 @@ public class HarpoonHitman implements EveryFrameScript {
      */
     public static boolean send(String hiredBy, String victimName, String originName,
                                boolean explosive, boolean bypassCooldown) {
+        if (!hasEstablishedColony(hiredBy)) return false;
+
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -146,6 +149,12 @@ public class HarpoonHitman implements EveryFrameScript {
 
         daysWaiting += Global.getSector().getClock().convertToDays(amount);
         if (daysWaiting < RESPONSE_DELAY_DAYS) return;
+
+        //A dead polity cannot still fund a private reprisal from an old booking.
+        if (!hasEstablishedColony(hiredBy)) {
+            finish();
+            return;
+        }
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return;
@@ -300,6 +309,24 @@ public class HarpoonHitman implements EveryFrameScript {
         String fleetType = memory.getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
         return !FleetTypes.PERSON_BOUNTY_FLEET.equals(fleetType)
                 && !memory.getBoolean(MAGIC_BOUNTY_TARGET_FLAG);
+    }
+
+    /**
+     * Whether the proposed client still has a public, established market in the economy.
+     * <p>
+     * Size three is the first normal colony size. Hidden and condition-only markets are not a
+     * political base capable of placing a contract, which naturally excludes Remnants and similar
+     * non-colonial factions without maintaining a brittle faction-id blacklist.
+     */
+    public static boolean hasEstablishedColony(String factionId) {
+        if (factionId == null || Global.getSector() == null) return false;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!market.isInEconomy() || market.isHidden() || market.getSize() < 3) continue;
+            if (factionId.equals(market.getFactionId())) return true;
+        }
+
+        return false;
     }
 
     /** Whether one is already out, so a second contract is not signed on top of the first. */
