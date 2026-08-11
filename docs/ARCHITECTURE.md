@@ -458,7 +458,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | `FishingMinigamePanel.java` | Draws the track, bar, fish and meter; handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration, plus the live-catch click-to-lift hook, treasure-cover enter edges, and once-per-pickup treasure-got hook |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture on landed specimens from either drones or harpoons |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
-| `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers first-ever species discovery over the same catch's automatic personal record |
+| `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also layers soft gold shafts from the top of the card under its ordinary bubbles; records keep bubbles alone |
 | `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; its success hook fires once when its delayed tally begins, after the fish readout finishes |
 | `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
 
@@ -596,7 +596,7 @@ The pond, as terrain.
 | `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
-| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. An in-range open pond takes external viewport control on its first unobscured frame; the near-fleet handback threshold applies only while returning, so close openings cannot reset acquisition forever |
+| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. Each external-control acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |
 | `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Current default |
 | `renderer/RippleData.java` | One ripple emitter, spawning ring renderers into LunaLib's list |
