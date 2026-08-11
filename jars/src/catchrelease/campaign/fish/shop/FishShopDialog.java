@@ -671,7 +671,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (!(free ? entry.devBuy() : entry.buy())) return;
 
-            if (receipt != null) purchases.add(receipt);
+            if (receipt != null) {
+                purchases.add(receipt);
+                ShopMarks.unmark(receipt.entryKey);
+            }
 
             Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
@@ -688,6 +691,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             final String entryKey;
             final List<Object[]> fishAboard;
             final float creditsAboard;
+            final boolean marked;
 
             final int statLevel;
             final boolean tackleOwned;
@@ -697,6 +701,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 entryKey = entry.getKey();
                 fishAboard = snapshotFish();
                 creditsAboard = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+                marked = ShopMarks.isMarked(entryKey);
 
                 statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
                 tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
@@ -749,6 +754,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 TackleManager.fit(entry.rig, receipt.fitted == null ? Tackle.NONE : receipt.fitted);
                 ShopEntry.stopAbility(entry.getRigAbilityId());
             }
+
+            if (receipt.marked) ShopMarks.mark(receipt.entryKey);
 
             selectedKey = receipt.entryKey;
             refreshWallet();

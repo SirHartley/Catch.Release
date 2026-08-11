@@ -66,11 +66,26 @@ public class ShopMarks {
         return entryKey != null && getMarkedKeys().contains(entryKey);
     }
 
+    public static boolean mark(String entryKey) {
+        if (entryKey == null) return false;
+
+        boolean changed = getMarkedKeys().add(entryKey);
+        if (changed) invalidateWantedCache();
+        return changed;
+    }
+
+    public static boolean unmark(String entryKey) {
+        if (entryKey == null) return false;
+
+        boolean changed = getMarkedKeys().remove(entryKey);
+        if (changed) invalidateWantedCache();
+        return changed;
+    }
+
     public static void toggle(String entryKey) {
         if (entryKey == null) return;
 
-        Set<String> marked = getMarkedKeys();
-        if (!marked.remove(entryKey)) marked.add(entryKey);
+        if (!unmark(entryKey)) mark(entryKey);
     }
 
     /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
@@ -149,6 +164,11 @@ public class ShopMarks {
 
     protected static List<FishRequirement> wantedAskCache;
     protected static long wantedAskCacheTime;
+
+    protected static void invalidateWantedCache() {
+        wantedAskCache = null;
+        wantedAskCacheTime = 0L;
+    }
 
     /**
      * Every current ask - marked wares and everything in the log that is waiting on a fish - the
