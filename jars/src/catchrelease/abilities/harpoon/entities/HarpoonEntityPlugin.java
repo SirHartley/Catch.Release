@@ -4,6 +4,7 @@ import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -561,6 +562,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      *  does nothing or drags the player into it; one mid-transition, in battle, hidden or
      *  despawning isn't a sane target either. */
     public static boolean canHook(CampaignFleetAPI other) {
+        //The Fisherman is the one fleet that is not a target at all. Reject it at collision
+        //eligibility (rather than suppressing the offence afterward), so ordinary and explosive
+        //heads both continue through the boat and may still strike something behind it.
+        if (FishermanSpawner.isFisherman(other)) return false;
+
         //second half only narrows down a target - a line already on a hull says nothing about
         //whether it's sane to haul, which is why the haul itself checks the first half alone
         return isHaulable(other)
