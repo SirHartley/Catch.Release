@@ -1364,11 +1364,19 @@ You are short.
 Crablobab checks your credits, checks the crabs, then checks a pocket containing neither.
 
 ""Next time!""",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
+catchrelease_crabBuyCelebration,DialogOptionSelected,"$option == catchrelease_crabBuyCelebration
+!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
 ""Celebrate responsibly.""
 
 ""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
+100:catchrelease_crabLeave:Leave",
+catchrelease_crabBuyCelebrationKnown,DialogOptionSelected,"$option == catchrelease_crabBuyCelebration
+$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
+
+""Celebrate responsibly.""
+
+""Toggle it in the outfitter. You know the drill.""","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:10
 CatchReleaseCMD tokens
@@ -1403,7 +1411,8 @@ Crablobab counts your payment twice.
 ""Almost!""
 
 The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyEarmuffs,DialogOptionSelected,$option == catchrelease_crabBuyEarmuffs,CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
+catchrelease_crabBuyEarmuffs,DialogOptionSelected,"$option == catchrelease_crabBuyEarmuffs
+!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
 
 They are warm.
 
@@ -1413,7 +1422,18 @@ Nothing else changes.
 
 ""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""
 100:catchrelease_crabLeave:Leave",
-catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""","0:catchrelease_crabStall:Continue
+catchrelease_crabBuyEarmuffsKnown,DialogOptionSelected,"$option == catchrelease_crabBuyEarmuffs
+$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
+
+They are warm.
+
+Once fitted, the whispering is gone.
+
+Nothing else changes.
+
+""Toggle them in the outfitter. You know the drill.""","0:catchrelease_crabStall:Continue
+100:catchrelease_crabLeave:Leave",
+catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,$global.catchrelease_crabAskedBaha = true 0,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
@@ -1513,7 +1533,7 @@ One of them is far enough away to require a light.
 
 ""Shop!""",,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
-catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
+catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabEarmuffsOwned,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
 catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
 catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
 catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,

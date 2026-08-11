@@ -524,9 +524,10 @@ Fish in cargo.
 ### `campaign/fish/crab`
 Crablobab's four wares. The stall dialogue, labels and ordered option stream live in `rules.csv`;
 `CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
-and highlighted credits-and-crabs tooltip. The ware state and prices are Java. Buying either
-switchable curio routes through the shared `Baha?` correction before
-returning to the stall; the switch itself lives in the Fisherman's outfitter. His full introduction
+and highlighted credits-and-crabs tooltip. The ware state and prices are Java. The first
+switchable-curio purchase routes through the shared `Baha?` correction; after that campaign-long
+answer, later switchable purchases give the short outfitter reminder directly. The switch itself
+lives in the Fisherman's outfitter. His full introduction
 records the first meeting when it opens; later bar visits use the established-customer greeting and
 retain routes to the merchandise, crab question and exit.
 Every displayed credits-and-crabs price in a ware pitch uses the rules engine's highlight colour,
