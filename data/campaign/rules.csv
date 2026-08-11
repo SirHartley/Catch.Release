@@ -1352,7 +1352,7 @@ He beams.
 ""Excellent for morale.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.","0:catchrelease_crabBuyCelebration:Pay him
-10:catchrelease_crabStall:Continue",
+10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareCelebrationShort,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"""Celebration charges. Paper everywhere. Colours. Excellent.""
@@ -1363,7 +1363,7 @@ You are short.
 
 Crablobab checks your credits, checks the crabs, then checks a pocket containing neither.
 
-""Next time!""",10:catchrelease_crabStall:Continue,
+""Next time!""",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
 ""Celebrate responsibly.""
@@ -1383,7 +1383,7 @@ He places them on the table.
 The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
 
 He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.","0:catchrelease_crabBuyEarmuffs:Pay him
-10:catchrelease_crabStall:Continue",
+10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareEarmuffsShort,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs.""
@@ -1402,7 +1402,7 @@ Crablobab counts your payment twice.
 
 ""Almost!""
 
-The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Continue,
+The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyEarmuffs,DialogOptionSelected,$option == catchrelease_crabBuyEarmuffs,CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
 
 They are warm.
@@ -1432,7 +1432,7 @@ Then, brightly:
 ""Single use!""
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.","0:catchrelease_crabBuyExplosive_head:Pay him
-10:catchrelease_crabStall:Continue",
+10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareExplosive_headShort,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!""
@@ -1455,7 +1455,7 @@ You do not have enough.
 
 ""Probably for the best.""
 
-Crablobab puts it into an inside pocket. The pocket flashes once.",10:catchrelease_crabStall:Continue,
+Crablobab puts it into an inside pocket. The pocket flashes once.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"The head comes out of the coat wrapped, tagged, and already entered against your ship's inventory.
 
 Your ops chief checks the timestamp.
@@ -1475,7 +1475,7 @@ He turns the chip over.
 ""Build one and your colony can keep catch on display and work the trade locally.""
 
 He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.","0:catchrelease_crabBuyConservatory:Pay him
-10:catchrelease_crabStall:Continue",
+10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareConservatoryShort,DialogOptionSelected,"$option == catchrelease_crabWareConservatory score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this.""
@@ -1494,7 +1494,7 @@ You are short.
 
 ""No trouble.""
 
-The chip goes into a pocket already occupied by his left hand.",10:catchrelease_crabStall:Continue,
+The chip goes into a pocket already occupied by his left hand.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands.
 
 Your ops chief signs it into inventory under COLONY INFRASTRUCTURE.
@@ -1533,7 +1533,7 @@ He steps back to inspect it.
 ""Good for the tank. Gives the fish somewhere to be from.""
 
 He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs.","0:catchrelease_crabBuyBackdrop:Pay him
-10:catchrelease_crabStall:Continue",
+10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareBackdropShort,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabBackdropAfford","SaveCurrentVisual
@@ -1542,7 +1542,7 @@ SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $
 
 ""$catchreleaseCrabBackdropName. Makes your aquarium look like an actual place, because nobody stands at a tank to look at water.""
 
-He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs. You are short, and he rolls it up again without hurrying about it.",10:catchrelease_crabStall:Continue,
+He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs. You are short, and he rolls it up again without hurrying about it.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls the backdrop, ties it, and hands it over.
 
 There is considerably less wall behind him afterward.","0:catchrelease_crabStall:Continue

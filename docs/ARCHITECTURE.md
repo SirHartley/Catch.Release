@@ -532,6 +532,8 @@ retain routes to the merchandise, crab question and exit.
 Every displayed credits-and-crabs price in a ware pitch uses the rules engine's highlight colour,
 matching the conservatory and backdrop price treatment. Insufficient-payment variants repeat the
 full ask before explaining the shortage, so price information never disappears behind affordability.
+Every merchandise pitch returns to the stall through an explicit `Another time.` decline; Continue
+is reserved for completed transactions and the one-time Baha correction.
 
 | File | What it does |
 |---|---|
