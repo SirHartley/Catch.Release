@@ -2,15 +2,20 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.ui.BaseTooltipCreator;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
@@ -78,6 +83,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
     /** The way out, bottom right. */
     public static final float LEAVE_WIDTH = 120f;
     public static final float LEAVE_HEIGHT = 26f;
+
+    /** This visit's purchase stack, taken back from newest to oldest at the lower left. */
+    public static final float UNDO_WIDTH = 200f;
+    public static final float UNDO_HEIGHT = 26f;
+    public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
 
     /**
      * What happens when the shop is closed.
@@ -171,6 +181,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
          * a scrollable element's external scroller wraps it, and only removing the wrapper works.
          */
         protected final List<UIComponentAPI> added = new ArrayList<>();
+
+        /**
+         * Paid purchases made since this visual opened. Closing drops the only references and
+         * makes every remaining receipt final; undo always removes the newest one.
+         */
+        protected final List<Receipt> purchases = new ArrayList<>();
 
         /** Right-hand pane, torn down and rebuilt whenever its content changes. */
         protected TooltipMakerAPI detail;
@@ -267,6 +283,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildTabs();
             buildList();
             buildDetail();
+            buildUndo();
             buildLeave();
         }
 
@@ -280,6 +297,32 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - LEAVE_HEIGHT);
             added.add(leave);
+        }
+
+        /** The newest purchase back out, matching the chart counter's lower-left convention. */
+        protected void buildUndo() {
+            TooltipMakerAPI footer = panel.createUIElement(UNDO_WIDTH, UNDO_HEIGHT, false);
+
+            CustomPanelAPI undo = panel.createCustomPanel(UNDO_WIDTH, UNDO_HEIGHT,
+                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(
+                            () -> "UNDO LAST PURCHASE", () -> !purchases.isEmpty(),
+                            this::undoClicked));
+            footer.addCustom(undo, 0f);
+            footer.addTooltipToPrevious(new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return 280f;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    tooltip.addPara("Takes back the newest purchase made this visit and restores"
+                            + " its credits and fish exactly as they were.", 0f);
+                }
+            }, TooltipMakerAPI.TooltipLocation.ABOVE);
+
+            place(footer, PAD, HEIGHT - PAD - UNDO_HEIGHT);
         }
 
         /**
@@ -454,7 +497,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void buildList() {
             float top = PAD + HEADER_HEIGHT + 10f + MAIN_TAB_HEIGHT + TAB_GAP
                     + CATEGORY_TAB_HEIGHT + 8f;
-            float height = HEIGHT - top - PAD;
+            float height = HEIGHT - top - PAD - UNDO_HEIGHT - 8f;
 
             list = panel.createUIElement(LIST_WIDTH, height, true);
 
@@ -616,12 +659,103 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected void buyClicked(ShopEntry entry, boolean free) {
+            Receipt receipt = !free && entry.getPrice() != null
+                    ? new Receipt(entry) : null;
+
             if (!(free ? entry.devBuy() : entry.buy())) return;
+
+            if (receipt != null) purchases.add(receipt);
 
             Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
             refreshWallet();
             rebuild(true);
+        }
+
+        /**
+         * One paid exchange before it happened. The spend is worst-first and may split crates, so
+         * the fish receipt is the whole fish inventory, not merely the price's count. LIFO undo
+         * makes restoring that snapshot safe across several purchases in one visit.
+         */
+        protected class Receipt {
+            final String entryKey;
+            final List<Object[]> fishAboard;
+            final float creditsAboard;
+
+            final int statLevel;
+            final boolean tackleOwned;
+            final Tackle fitted;
+
+            Receipt(ShopEntry entry) {
+                entryKey = entry.getKey();
+                fishAboard = snapshotFish();
+                creditsAboard = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+
+                statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
+                tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
+                        && TackleManager.isOwned(entry.tackle);
+                fitted = entry.kind == ShopEntry.Kind.TACKLE
+                        ? TackleManager.get(entry.rig) : null;
+            }
+        }
+
+        /** Every loose-fish and container stack aboard, preserving its exact item data and count. */
+        protected List<Object[]> snapshotFish() {
+            List<Object[]> stacks = new ArrayList<>();
+            CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+                if (!FishItems.FISH.equals(data.getId()) && !FishItems.isContainer(data)) continue;
+
+                stacks.add(new Object[]{data, (int) stack.getSize()});
+            }
+
+            return stacks;
+        }
+
+        protected void undoClicked() {
+            if (purchases.isEmpty()) return;
+
+            Receipt receipt = purchases.remove(purchases.size() - 1);
+            ShopEntry entry = findEntry(receipt.entryKey);
+            CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+                if (!FishItems.FISH.equals(data.getId()) && !FishItems.isContainer(data)) continue;
+
+                cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
+            }
+            for (Object[] stack : receipt.fishAboard) {
+                cargo.addSpecial((SpecialItemData) stack[0], (Integer) stack[1]);
+            }
+            cargo.getCredits().set(receipt.creditsAboard);
+
+            if (entry != null && entry.isUpgrade()) {
+                UpgradeManager.getInstance().setLevel(entry.stat.id, receipt.statLevel);
+                ShopEntry.stopAbility(StatIds.getAbilityId(entry.stat.id));
+            } else if (entry != null && entry.kind == ShopEntry.Kind.TACKLE) {
+                if (!receipt.tackleOwned) TackleManager.consume(entry.tackle);
+                TackleManager.fit(entry.rig, receipt.fitted == null ? Tackle.NONE : receipt.fitted);
+                ShopEntry.stopAbility(entry.getRigAbilityId());
+            }
+
+            selectedKey = receipt.entryKey;
+            refreshWallet();
+            rebuild(true);
+
+            Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
+        }
+
+        protected ShopEntry findEntry(String key) {
+            for (ShopEntry entry : entries) {
+                if (entry.getKey().equals(key)) return entry;
+            }
+
+            return null;
         }
 
         /** The selected entry, falling back to the first visible one if the selection is stale. */
