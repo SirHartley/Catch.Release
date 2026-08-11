@@ -36,8 +36,12 @@ public class PondCameraFocusScript implements EveryFrameScript {
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;
 
-    /** Camera's offset from the fleet when this started (free look); eased to zero rather than dropped. */
-    transient protected Vector2f carry = null;
+    /**
+     * Live viewport's displacement from the camera path when this hold was acquired. This is usually
+     * Free View, but treating it as a viewport displacement also covers load recovery and any other
+     * camera owner. Eased to zero rather than dropped.
+     */
+    transient protected Vector2f transitionOffset = null;
 
     public PondCameraFocusScript(SectorEntityToken pond) {
         this.pond = pond;
@@ -78,25 +82,43 @@ public class PondCameraFocusScript implements EveryFrameScript {
             return;
         }
 
-        start(fleet);
-
         boolean uiUp = isUiUp();
         boolean focusRequested = shouldFocus(fleet);
+
+        //Acquire only when the pond actually needs the camera. A pond script may remain alive after
+        //handback, and Free View can move anywhere before the fleet returns; every new hold must use
+        //that new live viewport rather than the spent offset from the previous hold.
+        if (!uiUp && focusRequested && !holdingCamera) acquireCamera(fleet);
+
+        //An inactive pond camera must not clear Free View merely because its script is still alive.
+        if (!holdingCamera) {
+            focus = 0f;
+
+            if (!focusRequested && isOutOfSight()) {
+                plugin.deactivate();
+                stop();
+            }
+
+            return;
+        }
 
         if (!uiUp) {
             float target = focusRequested ? 1f : 0f;
 
             focus = approach(focus, target, amount, getTimeConstant(target));
 
-            carry.x = approach(carry.x, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
-            carry.y = approach(carry.y, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
+            transitionOffset.x = approach(transitionOffset.x, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
+            transitionOffset.y = approach(transitionOffset.y, 0f, amount, PondConstants.POND_FOCUS_TIME_CONSTANT);
         }
 
         Vector2f center = getFocusedCenter(fleet.getLocation(), pond.getLocation());
-        center.x += carry.x;
-        center.y += carry.y;
-
         keepFleetOnScreen(center, fleet.getLocation());
+
+        //The clamp belongs to the destination, not the transition. Free View is allowed to have the
+        //fleet completely off-screen; clamping after adding this offset would turn that valid starting
+        //position into an immediate jump back toward the fleet.
+        center.x += transitionOffset.x;
+        center.y += transitionOffset.y;
 
         //dialog open (e.g. the catch minigame): freeze camera in place; only hold it if we already
         //do - a dialog is no reason to take over a camera we'd already given back
@@ -126,18 +148,30 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     /**
-     * Records the camera's offset from the fleet (free look) once, and clears free look - carrying
-     * the offset avoids a jump to the fleet position that clearing it alone would cause.
+     * Takes a fresh snapshot immediately before each external-control acquisition. The displacement
+     * is measured from the current clamped focus path, rather than from the fleet, so the first held
+     * frame remains continuous even if a save restored {@link #focus} without the transient viewport
+     * state. Free View is reset only after its exact visible result has been captured.
      */
-    protected void start(CampaignFleetAPI fleet) {
-        if (carry != null) return;
+    protected void acquireCamera(CampaignFleetAPI fleet) {
+        ViewportAPI viewport = Global.getSector().getViewport();
+        float zoom = Global.getSector().getCampaignUI().getZoomFactor();
 
-        Vector2f center = Global.getSector().getViewport().getCenter();
-        carry = new Vector2f(
-                center.x - fleet.getLocation().x,
-                center.y - fleet.getLocation().y);
+        Vector2f anchor = getFocusedCenter(fleet.getLocation(), pond.getLocation());
+        keepFleetOnScreen(anchor, fleet.getLocation());
+
+        Vector2f visibleCenter = viewport.getCenter();
+        transitionOffset = new Vector2f(
+                visibleCenter.x - anchor.x,
+                visibleCenter.y - anchor.y);
+
+        //While the game still owns the viewport, its size is the zoom-one size times the zoom.
+        widthAtZoomOne = zoom > 0f ? viewport.getVisibleWidth() / zoom : viewport.getVisibleWidth();
+        heightAtZoomOne = zoom > 0f ? viewport.getVisibleHeight() / zoom : viewport.getVisibleHeight();
 
         Global.getSector().getCampaignUI().resetViewOffset();
+        viewport.setExternalControl(true);
+        holdingCamera = true;
     }
 
     /** Whether anything is over the campaign view - a dialog, or one of the core UI tabs. */
@@ -224,15 +258,6 @@ public class PondCameraFocusScript implements EveryFrameScript {
         //which is what lets free look work again
         Global.getSector().getCampaignUI().resetViewOffset();
 
-        if (!holdingCamera) {
-            //while the game still owns the viewport, its size is the zoom-one size times the zoom
-            widthAtZoomOne = zoom > 0f ? viewport.getVisibleWidth() / zoom : viewport.getVisibleWidth();
-            heightAtZoomOne = zoom > 0f ? viewport.getVisibleHeight() / zoom : viewport.getVisibleHeight();
-
-            viewport.setExternalControl(true);
-            holdingCamera = true;
-        }
-
         float width = widthAtZoomOne * zoom;
         float height = heightAtZoomOne * zoom;
 
@@ -245,6 +270,9 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         Global.getSector().getViewport().setExternalControl(false);
         holdingCamera = false;
+        transitionOffset = null;
+        widthAtZoomOne = 0f;
+        heightAtZoomOne = 0f;
     }
 
     protected void stop() {
