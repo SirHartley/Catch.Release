@@ -3,7 +3,8 @@ catchrelease_hitmanEncounter,BeginFleetEncounter,"$catchrelease_harpoonHitman sc
 !$catchrelease_harpoonHitmanHailed","FleetDesc
 HailPlayer",,,The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first.
 catchrelease_hitmanHail,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1600
-!$entity.catchrelease_harpoonHitmanHailed","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
+!$entity.catchrelease_harpoonHitmanHailed
+!$entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
 $entity.catchrelease_harpoonHitmanHailed = true 30
 $entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
 
@@ -13,6 +14,20 @@ The officer closes the report.
 
 ""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
 100:cutCommLinkNoText:Cut the comm link","Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
+catchrelease_hitmanHailFromGrave,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1610
+!$entity.catchrelease_harpoonHitmanHailed
+$entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
+$entity.catchrelease_harpoonHitmanHailed = true 30
+$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
+
+""$entity.catchrelease_harpoonHitmanClient placed the contract. You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code.""
+
+The officer closes the report.
+
+""Client's gone. Escrow cleared before they did. We have the file under Call From The Grave.""
+
+""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
+100:cutCommLinkNoText:Cut the comm link","A funded contract survives the client faction. The mercenary names that fact in the same dry account language as the ordinary hail rather than changing into a separate horror voice."
 catchrelease_hitmanBribeAskSel,DialogOptionSelected,$option == catchrelease_hitmanBribeAsk,"Highlight $entity.catchrelease_harpoonHitmanBribeDGS
 FireAll CatchReleaseHitmanBribeOptions","The officer glances at the contract.
 
@@ -22,7 +37,7 @@ catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitm
 CatchReleaseCMD bribeHitman
 CatchReleaseCMD leaveEncounter","The transfer clears. The officer closes your file.
 
-""Contract cancelled.""",,,
+""Contract cancelled.""",,
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
