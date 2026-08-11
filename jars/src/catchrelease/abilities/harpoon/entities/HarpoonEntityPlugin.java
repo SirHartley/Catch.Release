@@ -195,11 +195,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         move(heading, getSpeed() * amount);
         distanceOut += getSpeed() * amount;
 
+        //Pond and breach-lamp targets both come back from here as the same ordinary mote. From
+        //this point onward there is one hit, hold and shove path; where the fish was rendered
+        //before impact cannot change how the harpoon moves it.
         SectorEntityToken hit = findMote();
-
-        //also try a mote still buried under the fabric; a successful strike surfaces it like
-        //any other mote, so the rest of the catch plays out identically
-        if (hit == null) hit = strikeBuried();
 
         if (hit != null) {
             //an explosive head never gets as far as the push: there is nothing to shove, nothing to
@@ -804,33 +803,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
     }
 
-    /** A mote the head reached while still under the fabric, brought through by the hit. Only
-     *  strikeable once a breach lamp has exposed it - this is the lamps' gameplay loop, sweep /
-     *  expose / harpoon, so it is not gated behind any upgrade. Unearths the buried entity rather
-     *  than hooking it directly, so nothing downstream has to treat it any differently. */
-    protected SectorEntityToken strikeBuried() {
-        //what the player's lamps exposed is the player's to take
-        if (owner != null) return null;
-
-        for (SectorEntityToken buried : entity.getContainingLocation()
-                .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-
-            if (buried.isExpired()) continue;
-            if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
-
-            if (Misc.getDistance(entity.getLocation(), buried.getLocation())
-                    > HarpoonConstants.CATCH_RADIUS) {
-                continue;
-            }
-
-            if (!canTake(buried)) continue;
-
-            return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
-        }
-
-        return null;
-    }
-
     /**
      * Whether a shot could take this target at all, leaving aside range. A buried mote needs
      * beam exposure, or - with deep-strike gear - just showing as a detected dent. An ordinary
@@ -854,11 +826,33 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
     }
 
+    /**
+     * One acquisition path for every fish-shaped target. Existing pond motes keep priority, as
+     * before; a player's line then checks exposed breach-lamp motes. A buried target is surfaced
+     * here, before the caller can hold or shove it, so every successful return value is the same
+     * ordinary mote implementation.
+     */
     protected SectorEntityToken findMote() {
-        for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+        SectorEntityToken mote = findMoteWithTag(FishEntityPlugin.MOTE_TAG);
+
+        //What the player's lamps exposed is the player's to take. NPC lines only fish ponds.
+        if (mote == null && owner == null) {
+            mote = findMoteWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
+        }
+
+        if (mote == null) return null;
+        if (!(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)) return mote;
+
+        return buried.unearth();
+    }
+
+    /** First takeable target of one representation within the head's collision radius. */
+    protected SectorEntityToken findMoteWithTag(String tag) {
+        for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
             if (!canTake(mote)) continue;
 
-            if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
+            if (Misc.getDistance(entity.getLocation(), mote.getLocation())
+                    <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
             }
         }
