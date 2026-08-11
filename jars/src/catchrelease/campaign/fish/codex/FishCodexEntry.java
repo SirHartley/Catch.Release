@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemRenderer;
+import catchrelease.campaign.fish.map.FishIcons;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -78,15 +79,20 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishCodexEntryState.resolve(speciesId);
     }
 
-    /** Generic category icon until the species is caught, not just surveyed. */
+    /** The species shape is visible with range data; colour remains locked until it is caught. */
     @Override
     public String getIcon() {
         FishCodexEntryState state = getState();
         FishSpec spec = state.spec;
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
 
-        return state.isCaught() ? FishCodex.getIcon(spec)
-                : FishConstants.CODEX_CATEGORY_ICON;
+        return state.isKnown() ? FishCodex.getIcon(spec) : FishConstants.CODEX_CATEGORY_ICON;
+    }
+
+    /** Vanilla creates a private sprite for a Codex row, so this tint cannot leak to other UI. */
+    @Override
+    public Color getIconColor() {
+        return getState().isRangeDataOnly() ? Color.BLACK : Color.WHITE;
     }
 
     @Override
@@ -152,7 +158,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         y += location.getPosition().getHeight() + BOX_GAP;
 
         float rightHeight = 0f;
-        UIPanelAPI card = buildIconCard(state.isCaught() ? spec : null, logged,
+        UIPanelAPI card = buildIconCard(state.isKnown() ? spec : null, logged,
                 width - leftWidth - BOX_GAP);
 
         if (card != null) {
@@ -400,14 +406,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             Disc.draw(x + size * 0.5f, y + size * 0.5f, size * 0.5f, spec.rarity.color,
                     0.3f * alphaMult, 0f, true);
 
-            SpriteAPI art = SpriteLoader.loadSprite(spec.icon);
-            if (art != null) {
-                art.setSize(artWidth, artHeight);
-                art.setColor(Color.WHITE);
-                art.setNormalBlend();
-                art.setAlphaMult(alphaMult);
-                art.renderAtCenter(Math.round(x + size * 0.5f), Math.round(y + size * 0.5f));
-            }
+            FishIcons.draw(spec, x + size * 0.5f, y + size * 0.5f,
+                    Math.max(artWidth, artHeight), alphaMult);
 
             if (grade != null) {
                 FishItemRenderer.render(x, y, size, size, alphaMult, spec.rarity, grade);

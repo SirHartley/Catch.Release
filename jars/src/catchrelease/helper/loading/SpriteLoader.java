@@ -83,4 +83,14 @@ public class SpriteLoader {
 
         return sprite;
     }
+
+    /**
+     * Returns a shared sprite to the neutral state promised by {@link #loadSprite(String)} after a
+     * caller has tinted, faded or resized it for a draw. Renderers that mutate a sprite must call
+     * this in a {@code finally} block; another screen may fetch the same object without going
+     * through this loader first.
+     */
+    public static void resetSprite(String path, SpriteAPI sprite) {
+        atNativeSize(path, sprite);
+    }
 }
