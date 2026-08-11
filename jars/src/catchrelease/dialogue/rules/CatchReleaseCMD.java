@@ -136,6 +136,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
+    public static final String CRAB_EXPLOSIVE_PENDING = "$catchreleaseCrabExplosivePending";
+    public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
 
     /**
      * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
@@ -313,6 +315,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return beginCrabOptions(dialog);
             case "addCrabOption":
                 return addCrabOption(dialog, params, memoryMap);
+            case "crabAcknowledgeExplosive":
+                CrabWares.acknowledgeExplosiveUse();
+                return true;
             case "crabBuyBackdrop":
                 return CrabBackdrops.buy(getMarket(dialog));
             case "crabShowBackdrop":
@@ -774,6 +779,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
+        local.set(CRAB_EXPLOSIVE_PENDING, CrabWares.hasUnmentionedExplosiveUse(), 0);
+        local.set(CRAB_EXPLOSIVE_TARGET, CrabWares.getLastExplosiveTarget(), 0);
         local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
 
         local.set(CRAB_BACKDROP, scene != null, 0);

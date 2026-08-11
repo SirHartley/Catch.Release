@@ -1304,8 +1304,29 @@ This is not a question.
 ""Excellent. You need things.""","0:catchrelease_crabStall:""What sort of things?""
 10:catchrelease_crabCrabs:""Why the crabs?""
 100:catchrelease_crabLeave:Decline whatever this is becoming",
+catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
+$global.catchrelease_metCrablobab
+CatchReleaseCMD tokens
+$catchreleaseCrabExplosivePending","CatchReleaseCMD crabAcknowledgeExplosive
+SetTextHighlights $catchreleaseCrabExplosiveTarget","""Back!""
+
+Crablobab points at you.
+
+""$catchreleaseCrabExplosiveTarget!""
+
+A pocket near his shoulder flashes once.
+
+""Explosive head worked, then. Excellent.""
+
+He looks expectantly at your empty hands.
+
+""You need things.""","0:catchrelease_crabStall:""Show me what you have""
+10:catchrelease_crabCrabs:""Why the crabs?""
+100:catchrelease_crabLeave:Leave",
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
-$global.catchrelease_metCrablobab",,"""Back!""
+$global.catchrelease_metCrablobab
+CatchReleaseCMD tokens
+!$catchreleaseCrabExplosivePending",,"""Back!""
 
 Crablobab says it with obvious satisfaction.
 
@@ -1534,7 +1555,7 @@ One of them is far enough away to require a light.
 ""Shop!""",,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
 catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabEarmuffsOwned,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
-catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
+catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,!$catchreleaseCrabExplosive_headOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
 catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
 catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,
 catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabLeave Leave,,,

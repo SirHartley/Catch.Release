@@ -537,10 +537,12 @@ Every merchandise pitch returns to the stall through an explicit `Another time.`
 is reserved for completed transactions and the one-time Baha correction.
 Celebration Charges leave the streamed stall menu as soon as their permanent bought flag is set;
 the transaction cannot be presented a second time.
+An explosive detonation records the struck species or fleet as a pending story; the next repeat
+greeting names that latest target once, acknowledges it, and then returns to the ordinary greeting.
 
 | File | What it does |
 |---|---|
-| `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabWares.java` | The four wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop; each actual blast also replaces the saved latest-target name and marks it for one acknowledgement at the next stall meeting. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 | `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing twice and the next rock offers the next thing. Priced off rarity; anything already owned drops out of the rotation |
 
 ### `campaign/fish/tackle`
@@ -648,7 +650,7 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
-| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering; an NPC-owned line skips the minigame and always lands |
+| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering; an NPC-owned line skips the minigame and always lands. An explosive impact records the mote's species name or struck fleet name before consuming the head |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |

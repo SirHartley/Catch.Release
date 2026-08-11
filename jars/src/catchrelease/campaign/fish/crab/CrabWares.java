@@ -142,6 +142,10 @@ public enum CrabWares {
      */
     public static final String OFF_KEY = "$catchrelease_crabWaresOff";
 
+    /** Last thing the player's explosive head actually detonated against, and whether he has said so. */
+    public static final String LAST_EXPLOSIVE_TARGET_KEY = "$catchrelease_crabLastExplosiveTarget";
+    public static final String EXPLOSIVE_TARGET_PENDING_KEY = "$catchrelease_crabExplosiveTargetPending";
+
     /**
      * What he calls it, what it costs, how many crabs go with that, and what it is.
      * <p>
@@ -255,6 +259,38 @@ public enum CrabWares {
         }
 
         return out;
+    }
+
+    /**
+     * Remembers the target at detonation, not at firing: a missed charge comes home and gives
+     * Crablobab nothing to have heard about. A later detonation replaces the standing story, so the
+     * next meeting always names the most recent use.
+     */
+    public static void recordExplosiveUse(String target) {
+        if (Global.getSector() == null) return;
+
+        String remembered = target == null || target.trim().isEmpty() ? "Something" : target.trim();
+        Global.getSector().getMemoryWithoutUpdate().set(LAST_EXPLOSIVE_TARGET_KEY, remembered);
+        Global.getSector().getMemoryWithoutUpdate().set(EXPLOSIVE_TARGET_PENDING_KEY, true);
+    }
+
+    public static boolean hasUnmentionedExplosiveUse() {
+        return Global.getSector() != null && Global.getSector().getMemoryWithoutUpdate()
+                .getBoolean(EXPLOSIVE_TARGET_PENDING_KEY);
+    }
+
+    public static String getLastExplosiveTarget() {
+        if (Global.getSector() == null) return "Something";
+
+        String target = Global.getSector().getMemoryWithoutUpdate()
+                .getString(LAST_EXPLOSIVE_TARGET_KEY);
+        return target == null || target.trim().isEmpty() ? "Something" : target;
+    }
+
+    public static void acknowledgeExplosiveUse() {
+        if (Global.getSector() == null) return;
+
+        Global.getSector().getMemoryWithoutUpdate().unset(EXPLOSIVE_TARGET_PENDING_KEY);
     }
 
     protected static boolean isBought(String id) {

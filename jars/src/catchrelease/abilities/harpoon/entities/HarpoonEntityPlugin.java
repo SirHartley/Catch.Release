@@ -3,6 +3,7 @@ package catchrelease.abilities.harpoon.entities;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -270,6 +271,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * damage to a fleet that happened to be nearby would be a rep hit with no conversation on it.
      */
     protected void blastMote(SectorEntityToken mote) {
+        String targetName = "Pattern";
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                && fish.getFishSpec() != null) {
+            targetName = fish.getFishSpec().getDisplayName();
+        }
+        CrabWares.recordExplosiveUse(targetName);
+
         Misc.fadeAndExpire(mote, 0.2f);
 
         detonate(ExplosionFleetDamage.NONE);
@@ -281,6 +289,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      * entirely, since there is no version of this where they wait to hear an explanation.
      */
     protected void blastFleet(CampaignFleetAPI struck) {
+        CrabWares.recordExplosiveUse(struck.getName());
+
         if (HarpoonOffence.record(struck, true)) HarpoonOffence.turnHostile(struck);
 
         detonate(ExplosionFleetDamage.MEDIUM);
