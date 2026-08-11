@@ -41,6 +41,7 @@ public class HarpoonWitness implements EveryFrameScript {
     protected String victimName;
     protected String originName;
     protected boolean explosive;
+    protected boolean hitmanEligible;
 
     protected float daysSpent = 0f;
     protected boolean done = false;
@@ -61,14 +62,16 @@ public class HarpoonWitness implements EveryFrameScript {
         String originName = origin == null ? "open space"
                 : origin instanceof StarSystemAPI
                 ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
+        boolean hitmanEligible = HarpoonHitman.isEligibleVictim(victim);
 
         //A charge in the hull with the player's own flag flying is not something anybody reports.
         //There is no patrol errand here: the recovered charge goes straight to the same 30% contract
         //roll, though any crew it produces still takes the ordinary response month to arrive.
-        if (explosive && identified) {
+        if (explosive && identified && hitmanEligible) {
             HarpoonHitman.send(factionId, victimName, originName, true, true);
             return;
         }
+        if (explosive && identified) return;
 
         if (victim.getMemoryWithoutUpdate().getBoolean(REPORTING_FLAG)) return;
 
@@ -76,7 +79,7 @@ public class HarpoonWitness implements EveryFrameScript {
 
         //nobody within reach to tell. Some of them let it go and some of them pay somebody
         if (patrol == null) {
-            if (identified) {
+            if (identified && hitmanEligible) {
                 HarpoonHitman.send(factionId, victimName, originName, explosive, false);
             }
             return;
@@ -90,12 +93,12 @@ public class HarpoonWitness implements EveryFrameScript {
 
         Global.getSector().addScript(
                 new HarpoonWitness(victim, patrol, factionId, identified,
-                        victimName, originName, explosive));
+                        victimName, originName, explosive, hitmanEligible));
     }
 
     public HarpoonWitness(CampaignFleetAPI victim, CampaignFleetAPI patrol, String factionId,
                           boolean identified, String victimName, String originName,
-                          boolean explosive) {
+                          boolean explosive, boolean hitmanEligible) {
 
         this.victim = victim;
         this.patrol = patrol;
@@ -104,6 +107,7 @@ public class HarpoonWitness implements EveryFrameScript {
         this.victimName = victimName;
         this.originName = originName;
         this.explosive = explosive;
+        this.hitmanEligible = hitmanEligible;
     }
 
     @Override
@@ -165,7 +169,7 @@ public class HarpoonWitness implements EveryFrameScript {
      * decide the matter is worth paying to settle.
      */
     protected void giveUp() {
-        if (identified) {
+        if (identified && hitmanEligible) {
             HarpoonHitman.send(factionId, victimName, originName, explosive, false);
         }
 

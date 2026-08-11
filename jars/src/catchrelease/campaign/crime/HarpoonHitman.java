@@ -52,6 +52,9 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final int BRIBE_MAX = 120_000;
     public static final int BRIBE_STEP = 5_000;
 
+    /** MagicLib's accepted-bounty marker; kept as data so this class has no library dependency. */
+    public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
+
     /** Kept on the sector so one refusal cannot buy the player an endless queue of these. */
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
     public static final float COOLDOWN_DAYS = 30f;
@@ -276,6 +279,27 @@ public class HarpoonHitman implements EveryFrameScript {
         }
 
         return true;
+    }
+
+    /**
+     * Whether damage to this fleet can support a private revenge contract.
+     * <p>
+     * Reputation-impact flags are the common contract: vanilla and mod missions use them to mark
+     * targets the player is already meant to fight. The explicit fleet-type and MagicLib checks
+     * cover bounty implementations even when they have not also set one of those generic flags.
+     */
+    public static boolean isEligibleVictim(CampaignFleetAPI victim) {
+        if (victim == null) return false;
+
+        MemoryAPI memory = victim.getMemoryWithoutUpdate();
+        if (memory.getBoolean(MemFlags.MEMORY_KEY_LOW_REP_IMPACT)
+                || memory.getBoolean(MemFlags.MEMORY_KEY_NO_REP_IMPACT)) {
+            return false;
+        }
+
+        String fleetType = memory.getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
+        return !FleetTypes.PERSON_BOUNTY_FLEET.equals(fleetType)
+                && !memory.getBoolean(MAGIC_BOUNTY_TARGET_FLAG);
     }
 
     /** Whether one is already out, so a second contract is not signed on top of the first. */
