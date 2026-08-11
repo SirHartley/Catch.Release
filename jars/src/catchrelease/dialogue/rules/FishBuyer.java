@@ -348,8 +348,13 @@ public class FishBuyer {
             @Override
             public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
                 TooltipMakerAPI text = panel.createUIElement(360f, 100f, false);
-                text.addPara("Sell " + expected.count + " fish for "
-                        + Misc.getDGSCredits(expected.value) + " credits?", 0f);
+                String credits = Misc.getDGSCredits(expected.value) + " credits";
+
+                //Vanilla confirmation prompts explicitly opt into the large Insignia paragraph
+                //face; a bare custom UI element otherwise reads like small tooltip copy.
+                text.setParaInsigniaLarge();
+                text.addPara("Sell " + expected.count + " fish for %s?", 0f,
+                        Misc.getHighlightColor(), credits);
                 panel.addUIElement(text).inTL(0f, 0f);
             }
 
