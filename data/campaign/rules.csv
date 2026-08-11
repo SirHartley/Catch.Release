@@ -1330,18 +1330,15 @@ Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the 
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabBackdrop",RestoreSavedVisual,"Crablobab opens his coat.
+$catchreleaseCrabBackdrop","RestoreSavedVisual
+CatchReleaseCMD beginCrabOptions
+FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
 
 The inside contains shelves.
 
 One of them is far enough away to require a light.
 
-""Shop!""","0:catchrelease_crabWareCelebration:Celebration Charges
-5:catchrelease_crabWareEarmuffs:Earmuffs
-10:catchrelease_crabWareExplosive_head:Explosive Head
-20:catchrelease_crabWareConservatory:Breach Conservatory Plans
-30:catchrelease_crabWareBackdrop:Ask about the roll under his arm
-100:catchrelease_crabLeave:Leave",
+""Shop!""",,
 catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"""Celebration charges.""
@@ -1506,17 +1503,21 @@ The category was already present.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStallBare,DialogOptionSelected,"$option == catchrelease_crabStall score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabBackdrop",RestoreSavedVisual,"Crablobab opens his coat.
+!$catchreleaseCrabBackdrop","RestoreSavedVisual
+CatchReleaseCMD beginCrabOptions
+FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
 
 The inside contains shelves.
 
 One of them is far enough away to require a light.
 
-""Shop!""","0:catchrelease_crabWareCelebration:Celebration Charges
-5:catchrelease_crabWareEarmuffs:Earmuffs
-10:catchrelease_crabWareExplosive_head:Explosive Head
-20:catchrelease_crabWareConservatory:Breach Conservatory Plans
-100:catchrelease_crabLeave:Leave",
+""Shop!""",,
+catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
+catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
+catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
+catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
+catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,
+catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabLeave Leave,,,
 catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabBackdropAfford","SaveCurrentVisual

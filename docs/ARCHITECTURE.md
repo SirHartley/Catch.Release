@@ -522,8 +522,10 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell, including a vanilla-blueprint-style four-corner icon pass for box labels |
 
 ### `campaign/fish/crab`
-Crablobab's four wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
-wares are Java. Buying either switchable curio routes through the shared `Baha?` correction before
+Crablobab's four wares. The stall dialogue, labels and ordered option stream live in `rules.csv`;
+`CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
+and highlighted credits-and-crabs tooltip. The ware state and prices are Java. Buying either
+switchable curio routes through the shared `Baha?` correction before
 returning to the stall; the switch itself lives in the Fisherman's outfitter. His full introduction
 records the first meeting when it opens; later bar visits use the established-customer greeting and
 retain routes to the merchandise, crab question and exit.
