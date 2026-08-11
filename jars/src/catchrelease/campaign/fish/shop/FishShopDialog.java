@@ -70,8 +70,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final String TOOLTIP_BODY = "Marks this as something you are saving for. Every"
             + " fish its price asks for wears a dot wherever it is shown - in the hold, on the"
             + " sector map, in the codex - and the route planner offers you the systems they swim"
-            + " in. The mark follows the ware rather than the price, so buying a rung moves it onto"
-            + " whatever the next one costs.";
+            + " in. A locked upgrade marks its matching schematic on a job offer first; once the"
+            + " plan is learned, its price fish take the dot. The mark belongs to this exact"
+            + " purchase and clears when it is bought.";
 
     public static final String TOOLTIP_SET = "Click the ring to add it to the list.";
     public static final String TOOLTIP_CLEAR = "Click the ring to take it off the list.";
@@ -673,7 +674,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (receipt != null) {
                 purchases.add(receipt);
-                ShopMarks.unmark(receipt.entryKey);
+                ShopMarks.unmark(receipt.markKey);
             }
 
             Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
@@ -689,6 +690,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
          */
         protected class Receipt {
             final String entryKey;
+            final String markKey;
             final List<Object[]> fishAboard;
             final float creditsAboard;
             final boolean marked;
@@ -699,9 +701,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             Receipt(ShopEntry entry) {
                 entryKey = entry.getKey();
+                markKey = ShopMarks.getMarkKey(entry);
                 fishAboard = snapshotFish();
                 creditsAboard = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
-                marked = ShopMarks.isMarked(entryKey);
+                marked = ShopMarks.isMarked(markKey);
 
                 statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
                 tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
@@ -755,7 +758,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 ShopEntry.stopAbility(entry.getRigAbilityId());
             }
 
-            if (receipt.marked) ShopMarks.mark(receipt.entryKey);
+            if (receipt.marked) ShopMarks.mark(receipt.markKey);
 
             selectedKey = receipt.entryKey;
             refreshWallet();
@@ -924,8 +927,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
          * clicked - the key carries the marked state for exactly that second reason.
          */
         protected void buildTooltip(ShopEntry entry) {
-            boolean marked = ShopMarks.isMarked(entry.getKey());
-            String key = entry.getKey() + ":" + marked;
+            boolean marked = ShopMarks.isMarked(entry);
+            String key = ShopMarks.getMarkKey(entry) + ":" + marked;
 
             if (key.equals(tipKey) && tipTitle != null) return;
 
