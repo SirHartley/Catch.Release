@@ -567,8 +567,9 @@ Codex pages for species.
 
 | File | What it does |
 |---|---|
-| `FishCodex.java` | Installs the category and per-species entries; opens the codex on a species |
-| `FishCodexEntry.java` | One page: description, catch data, record, location, art, and a staged jump to the pre-filtered hyperspace map |
+| `FishCodex.java` | Installs the category and per-species entries; owns every guarded custom/F2 link into a fish entry |
+| `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
+| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: description, catch data, record, location, art, and a staged jump to the pre-filtered hyperspace map |
 
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond

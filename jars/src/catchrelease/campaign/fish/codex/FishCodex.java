@@ -6,6 +6,7 @@ import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.impl.codex.CodexEntryV2;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 /**
  * The fish category in the game's codex, built by hand since fish specs (csv rows, not game data)
@@ -44,9 +45,23 @@ public class FishCodex {
         CodexDataV2.rebuildIdToEntryMap();
     }
 
-    /** Opens the codex on a species; a no-op if it's never been caught, since the entry hides itself. */
-    public static void show(String speciesId) {
+    /**
+     * Opens a known species. All hand-authored F2 handlers come through here so a direct Codex id
+     * can never bypass the entry's unlock policy.
+     */
+    public static boolean show(String speciesId) {
+        if (!FishCodexEntryState.resolve(speciesId).isKnown()) return false;
+
         Global.getSettings().showCodex(getEntryId(speciesId));
+        return true;
+    }
+
+    /** Gives a vanilla tooltip the same guarded fish-Codex link as the hand-authored F2 rows. */
+    public static boolean link(TooltipMakerAPI tooltip, String speciesId) {
+        if (tooltip == null || !FishCodexEntryState.resolve(speciesId).isKnown()) return false;
+
+        tooltip.setCodexEntryId(getEntryId(speciesId));
+        return true;
     }
 
     /** The species' icon, or the fallback if it has none. */

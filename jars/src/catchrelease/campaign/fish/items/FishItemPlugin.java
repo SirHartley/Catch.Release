@@ -150,7 +150,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         float opad = 10f;
 
         //vanilla resolves F2 to the generic "Fish" item spec; point it at this specimen's species instead
-        tooltip.setCodexEntryId(FishCodex.getEntryId(entry.speciesId));
+        FishCodex.link(tooltip, entry.speciesId);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
             tooltip.addTitle(entry.getDisplayName());

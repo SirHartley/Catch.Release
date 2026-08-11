@@ -74,13 +74,18 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishLog.get(speciesId);
     }
 
+    public FishCodexEntryState getState() {
+        return FishCodexEntryState.resolve(speciesId);
+    }
+
     /** Generic category icon until the species is caught, not just surveyed. */
     @Override
     public String getIcon() {
-        FishSpec spec = getSpec();
+        FishCodexEntryState state = getState();
+        FishSpec spec = state.spec;
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
 
-        return FishLog.isCaught(speciesId) ? FishCodex.getIcon(spec)
+        return state.isCaught() ? FishCodex.getIcon(spec)
                 : FishConstants.CODEX_CATEGORY_ICON;
     }
 
@@ -88,8 +93,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public boolean isVisible() {
         if (Global.getSector() == null) return false;
 
-        //bought range data earns an entry too, not just an actual catch
-        return FishLog.isCaught(speciesId) || FishLog.isLocationDataUnlocked(speciesId);
+        return getState().isKnown();
     }
 
     @Override
@@ -119,11 +123,9 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         this.panel = panel;
         this.codex = codex;
 
-        FishSpec spec = getSpec();
-        FishLogEntry logged = getLogged();
-
-        //range-only: everything but location is earned by actually landing one
-        boolean unseen = logged != null && logged.hintOnly;
+        FishCodexEntryState state = getState();
+        FishSpec spec = state.spec;
+        FishLogEntry logged = state.log;
 
         float width = panel.getPosition().getWidth();
         float leftWidth = width - RIGHT_WIDTH - 20f;
@@ -131,25 +133,27 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         float y = 0f;
 
         UIPanelAPI description = addBox(leftWidth, y, "Description",
-                box -> addDescription(box, spec, unseen));
+                box -> addDescription(box, state));
         y += description.getPosition().getHeight() + BOX_GAP;
 
         if (spec != null) {
-            UIPanelAPI box = addBox(leftWidth, y, "Catch data", b -> addCatchData(b, spec, logged));
+            UIPanelAPI box = addBox(leftWidth, y, "Catch data",
+                    b -> addCatchData(b, state));
             y += box.getPosition().getHeight() + BOX_GAP;
         }
 
-        if (logged != null && !logged.hintOnly) {
+        if (state.isCaught() && logged != null) {
             UIPanelAPI box = addBox(leftWidth, y, "Record", b -> addRecord(b, logged));
             y += box.getPosition().getHeight() + BOX_GAP;
         }
 
         UIPanelAPI location = addBox(leftWidth, y, "Catch location data",
-                b -> addLocationData(b, spec, logged));
+                b -> addLocationData(b, state));
         y += location.getPosition().getHeight() + BOX_GAP;
 
         float rightHeight = 0f;
-        UIPanelAPI card = buildIconCard(unseen ? null : spec, logged, width - leftWidth - BOX_GAP);
+        UIPanelAPI card = buildIconCard(state.isCaught() ? spec : null, logged,
+                width - leftWidth - BOX_GAP);
 
         if (card != null) {
             panel.addComponent(card).rightOfTop(description, BOX_GAP);
@@ -191,14 +195,15 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /** Type, rarity, and description text. */
-    protected void addDescription(TooltipMakerAPI text, FishSpec spec, boolean unseen) {
-        if (unseen) {
+    protected void addDescription(TooltipMakerAPI text, FishCodexEntryState state) {
+        if (!state.isCaught()) {
             text.addPara("Known only from range data. Nothing of this species has been seen"
                     + " aboard - only where to look, and what the instruments made of the way"
                     + " it moves.", Misc.getGrayColor(), BOX_GAP);
             return;
         }
 
+        FishSpec spec = state.spec;
         if (spec == null) {
             text.addPara("The table no longer has a row for this one.",
                     Misc.getNegativeHighlightColor(), BOX_GAP);
@@ -216,7 +221,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /** Difficulty, behaviour, and times caught. */
-    protected void addCatchData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
+    protected void addCatchData(TooltipMakerAPI text, FishCodexEntryState state) {
+        FishSpec spec = state.spec;
+        FishLogEntry logged = state.log;
+
         text.addPara("Difficulty: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 getDifficultyLabel(spec.difficulty));
 
@@ -225,7 +233,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                         + String.format("%.1fx", spec.motionSpeed)
                         + ", turns " + getRestlessnessLabel(spec.restlessness));
 
-        if (logged != null && !logged.hintOnly) {
+        if (state.isCaught() && logged != null) {
             text.addPara("Landed: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                     logged.caught + (logged.caught == 1 ? " specimen" : " specimens"));
         }
@@ -256,11 +264,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /** Location box: sealed until caught or range data is bought, then range summary + record system. */
-    protected void addLocationData(TooltipMakerAPI text, FishSpec spec, FishLogEntry logged) {
-        boolean open = logged != null
-                && (FishLog.isCaught(speciesId) || logged.locationDataUnlocked);
+    protected void addLocationData(TooltipMakerAPI text, FishCodexEntryState state) {
+        FishSpec spec = state.spec;
+        FishLogEntry logged = state.log;
 
-        if (!open) {
+        if (!state.hasRangeData()) {
             text.addPara("Sealed. Range data for this species can be bought from someone who has"
                     + " been where it lives.", Misc.getGrayColor(), BOX_GAP);
             return;
@@ -269,7 +277,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         text.addPara("Range: %s", BOX_GAP, Misc.getGrayColor(), Misc.getHighlightColor(),
                 FishLocationSummary.describe(spec));
 
-        if (logged.hintOnly) {
+        if (state.isRangeDataOnly()) {
             text.addPara("Nothing of this one has been landed. The range is on the map.",
                     Misc.getGrayColor(), 3f);
             return;
@@ -341,7 +349,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         float cardSize = Math.max(100f, Math.max(artWidth, artHeight) + CARD_PAD * 2f);
 
-        FishGrade best = logged == null || logged.hintOnly ? null
+        FishGrade best = logged == null || logged.caught <= 0 ? null
                 : new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
                         logged.recordAberration).getGrade();
 
