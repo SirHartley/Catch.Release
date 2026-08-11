@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -29,7 +30,7 @@ import org.lwjgl.util.vector.Vector2f;
  * {@link TransmitterTrapSpecial#makeFleetInterceptPlayer}, and handed an {@link AutoDespawnScript}
  * so it takes itself away rather than becoming a permanent resident.
  */
-public class HarpoonHitman {
+public class HarpoonHitman implements EveryFrameScript {
 
     /** Set on the hull, so one contract cannot be filled twice over and the encounter knows them. */
     public static final String HITMAN_FLAG = "$catchrelease_harpoonHitman";
@@ -45,6 +46,10 @@ public class HarpoonHitman {
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
     public static final float COOLDOWN_DAYS = 30f;
 
+    /** The booked contract, while its crew takes a month to reach the player. */
+    public static final String PENDING_KEY = "$catchrelease_harpoonHitmanPending";
+    public static final float RESPONSE_DELAY_DAYS = 30f;
+
     /** Combat strength bought, in fleet points. Enough to be a fight, not enough to be a raid. */
     public static final float FP_MIN = 25f;
     public static final float FP_MAX = 60f;
@@ -56,6 +61,21 @@ public class HarpoonHitman {
 
     /** The chance a crew with nobody to report to buys one instead. */
     public static final float CHANCE = 0.35f;
+
+    protected String hiredBy;
+    protected String victimName;
+    protected String originName;
+    protected boolean explosive;
+    protected float daysWaiting;
+    protected boolean done;
+
+    protected HarpoonHitman(String hiredBy, String victimName, String originName,
+                            boolean explosive) {
+        this.hiredBy = hiredBy;
+        this.victimName = victimName;
+        this.originName = originName;
+        this.explosive = explosive;
+    }
 
     /**
      * Puts a contract out on the player, if the buyer has grounds and the sector has room for one.
@@ -90,15 +110,38 @@ public class HarpoonHitman {
         LocationAPI location = player.getContainingLocation();
         if (location == null || location.isHyperspace()) return false;
 
-        if (isOut()) return false;
+        if (isOut() || isPending()) return false;
 
         if (!guaranteed
                 && Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) {
             return false;
         }
 
+        HarpoonHitman pending = new HarpoonHitman(
+                hiredBy, victimName, originName, explosive);
+
+        Global.getSector().getMemoryWithoutUpdate().set(PENDING_KEY, pending);
+        Global.getSector().addScript(pending);
+
+        return true;
+    }
+
+    /** Waits out the response month, then holds until the player is in a system that can host it. */
+    @Override
+    public void advance(float amount) {
+        if (done) return;
+
+        daysWaiting += Global.getSector().getClock().convertToDays(amount);
+        if (daysWaiting < RESPONSE_DELAY_DAYS) return;
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return;
+
+        LocationAPI location = player.getContainingLocation();
+        if (location == null || location.isHyperspace() || isOut()) return;
+
         CampaignFleetAPI fleet = create(player, hiredBy, victimName, originName, explosive);
-        if (fleet == null) return false;
+        if (fleet == null) return;
 
         Vector2f at = Misc.getPointAtRadius(player.getLocation(),
                 SPAWN_RANGE_MIN + (float) Math.random() * (SPAWN_RANGE_MAX - SPAWN_RANGE_MIN));
@@ -115,7 +158,24 @@ public class HarpoonHitman {
 
         Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
 
-        return true;
+        finish();
+    }
+
+    @Override
+    public boolean isDone() {
+        return done;
+    }
+
+    @Override
+    public boolean runWhilePaused() {
+        return false;
+    }
+
+    protected void finish() {
+        done = true;
+
+        Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);
+        if (pending == this) Global.getSector().getMemoryWithoutUpdate().unset(PENDING_KEY);
     }
 
     /** Mercenaries, running dark, at a strength somebody could plausibly have afforded. */
@@ -173,5 +233,11 @@ public class HarpoonHitman {
         }
 
         return false;
+    }
+
+    /** Whether another booked response is already serving its one-month delay. */
+    public static boolean isPending() {
+        Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);
+        return pending instanceof HarpoonHitman && !((HarpoonHitman) pending).isDone();
     }
 }
