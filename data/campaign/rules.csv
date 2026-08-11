@@ -1,7 +1,11 @@
 id,trigger,conditions,script,text,options,notes
-catchrelease_hitmanEncounter,BeginFleetEncounter,$catchrelease_harpoonHitman score:1200,"FleetDesc
+catchrelease_hitmanEncounter,BeginFleetEncounter,"$catchrelease_harpoonHitman score:1200
+!$catchrelease_harpoonHitmanHailed","FleetDesc
 HailPlayer",,,The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first.
-catchrelease_hitmanHail,OpenCommLink,$entity.catchrelease_harpoonHitman score:1600,Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence,"The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
+catchrelease_hitmanHail,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1600
+!$entity.catchrelease_harpoonHitmanHailed","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
+$entity.catchrelease_harpoonHitmanHailed = true 30
+$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
 
 ""$entity.catchrelease_harpoonHitmanClient placed the contract. You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code.""
 
