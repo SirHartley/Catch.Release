@@ -7,7 +7,6 @@ import catchrelease.campaign.fish.map.PaneWidgets;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.shop.ShopUi;
-import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
@@ -602,12 +601,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 float cx = x + w * 0.5f;
                 float discY = y + h - PAD - DISC_RADIUS;
 
-                //the minigame result box's stage: the rarity's colour fading out from the centre
-                Disc.draw(cx, discY, DISC_RADIUS, offer.spec.rarity.color,
-                        0.35f * alphaMult, 0f, true);
-
-                //the framework's silhouette - the shape is what is for sale
-                FishIcons.draw(offer.spec, cx, discY, ART_SIZE, alphaMult);
+                //the shared rarity stage and knowledge-aware face - the shape is what is for sale
+                FishIcons.drawBacklit(offer.spec, cx, discY, DISC_RADIUS, ART_SIZE, alphaMult);
 
                 if (name == null) {
                     name = small.createText(offer.spec.getDisplayName(), Color.WHITE,
