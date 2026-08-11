@@ -1512,7 +1512,7 @@ The inside contains shelves.
 One of them is far enough away to require a light.
 
 ""Shop!""",,
-catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
+catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
 catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
 catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
 catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,

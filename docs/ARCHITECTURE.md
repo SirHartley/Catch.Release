@@ -534,6 +534,8 @@ matching the conservatory and backdrop price treatment. Insufficient-payment var
 full ask before explaining the shortage, so price information never disappears behind affordability.
 Every merchandise pitch returns to the stall through an explicit `Another time.` decline; Continue
 is reserved for completed transactions and the one-time Baha correction.
+Celebration Charges leave the streamed stall menu as soon as their permanent bought flag is set;
+the transaction cannot be presented a second time.
 
 | File | What it does |
 |---|---|
