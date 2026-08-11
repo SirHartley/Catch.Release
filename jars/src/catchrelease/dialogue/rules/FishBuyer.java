@@ -28,8 +28,9 @@ import java.util.Map;
  * Selling the catch at market price: the picker, the batch rungs, and the arithmetic.
  * <p>
  * Machinery, not dialogue - the sheet says who is buying and why, and calls in here for the part
- * that involves counting a hold and driving vanilla's cargo picker. Marked fish are stepped around
- * by every batch route: they are being saved for something, and a bulk sale should not eat them.
+ * that involves counting a hold and driving vanilla's cargo picker. Wanted fish are stepped around
+ * by every batch route: whether a shop mark or an open errand put the yellow dot there, a bulk sale
+ * should not eat them.
  */
 public class FishBuyer {
 
@@ -41,7 +42,7 @@ public class FishBuyer {
         int count;
         FishRarity rarity;
         float value;
-        boolean marked;
+        boolean wanted;
     }
 
     /**
@@ -117,7 +118,7 @@ public class FishBuyer {
                 held.count = held.items;
                 held.rarity = entry.getSpec().rarity;
                 held.value = entry.getValue() * held.count;
-                held.marked = ShopMarks.isMarked(entry);
+                held.wanted = ShopMarks.isWanted(entry);
             } else if (FishItems.isContainer(data)) {
                 FishRarity worst = null;
 
@@ -133,7 +134,7 @@ public class FishBuyer {
                         worst = entry.getSpec().rarity;
                     }
 
-                    held.marked |= ShopMarks.isMarked(entry);
+                    held.wanted |= ShopMarks.isWanted(entry);
                 }
 
                 held.rarity = worst;
@@ -317,7 +318,7 @@ public class FishBuyer {
         StringBuilder fingerprint = new StringBuilder();
 
         for (Stack held : read()) {
-            if (held.marked) continue;
+            if (held.wanted) continue;
             if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
 
             SaleEntry entry = new SaleEntry(held);
