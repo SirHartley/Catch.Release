@@ -552,7 +552,7 @@ The sector-map fish filter.
 | `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget. Bare points, not systems, so it needs `openSpaceReading` to answer with the whole index; `ALPHA_CAP` is the layer's single ceiling and `HEAT_EASE` above 1 keeps the bottom of the range faint; bounds are the sector rectangle exactly, because past it `getAbyssalDepth` measures how far off the map you are rather than the water |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
-| `FishIcons.java` | A species' face by knowledge: the art once landed, its rimmed black silhouette while only surveyed. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR` |
+| `FishIcons.java` | A species' face by Codex knowledge: the art once landed, its rimmed black silhouette while only surveyed. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR`. Every draw restores the shared sprite's native size, white colour, full alpha and normal blend in `finally`, so a Codex silhouette cannot blacken cargo or result screens |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from every `FishAsker` in the log plus the shopping list, broad asks expanded to whatever could pay them; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot, built from the sidebar's own parts: search, chips, pick up to five, plot |
@@ -567,8 +567,9 @@ Codex pages for species.
 
 | File | What it does |
 |---|---|
-| `FishCodex.java` | Installs the category and per-species entries; opens the codex on a species |
-| `FishCodexEntry.java` | One page: description, catch data, record, location, art, and a staged jump to the pre-filtered hyperspace map |
+| `FishCodex.java` | Installs the category and per-species entries; owns every guarded custom/F2 link into a fish entry |
+| `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
+| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries use the real species outline as a black silhouette in both index and detail while full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
 
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond

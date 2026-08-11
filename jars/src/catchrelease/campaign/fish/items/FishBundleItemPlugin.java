@@ -171,7 +171,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         float opad = 10f;
 
         //without this, F2 resolves to the generic bundle item spec rather than the species it holds
-        tooltip.setCodexEntryId(FishCodex.getEntryId(contents.get(0).speciesId));
+        FishCodex.link(tooltip, contents.get(0).speciesId);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
             tooltip.addTitle(getName());

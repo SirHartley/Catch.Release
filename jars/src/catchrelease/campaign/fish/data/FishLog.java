@@ -29,7 +29,7 @@ public class FishLog {
         Map<String, FishLogEntry> log = getLog();
 
         FishLogEntry logged = log.get(entry.speciesId);
-        boolean first = logged == null;
+        boolean first = logged == null || logged.caught <= 0;
 
         if (first) {
             logged = new FishLogEntry(entry.speciesId);
@@ -72,7 +72,9 @@ public class FishLog {
     public static boolean isCaught(String speciesId) {
         FishLogEntry entry = get(speciesId);
 
-        return entry != null && !entry.hintOnly;
+        //caught is the save-stable proof. Old saves predate hintOnly and deserialize that boolean
+        //as false, so using its inverse would turn their range-data-only entries into catches.
+        return entry != null && entry.caught > 0;
     }
 
     /**
@@ -112,7 +114,7 @@ public class FishLog {
         FishLogEntry entry = get(speciesId);
         if (entry == null) return;
 
-        if (entry.hintOnly && entry.caught <= 0) {
+        if (entry.caught <= 0) {
             getLog().remove(speciesId);
             return;
         }
