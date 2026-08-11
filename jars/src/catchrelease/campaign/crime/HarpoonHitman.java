@@ -149,9 +149,11 @@ public class HarpoonHitman implements EveryFrameScript {
         location.addEntity(fleet);
         fleet.setLocation(at.x, at.y);
 
-        //aggressive and low rep impact, both for the same reason: this is a contract rather than a
-        //grievance, so they mean it, and beating them is not an incident with their faction
-        TransmitterTrapSpecial.makeFleetInterceptPlayer(fleet, true, true, INTERCEPT_DAYS);
+        //They mean the fight, but it belongs to the contract rather than the mercenary flag.
+        //Vanilla's low-impact switch still strains relations; no-impact is the separate promise
+        //that beating an unsanctioned hunter changes no faction reputation at all.
+        TransmitterTrapSpecial.makeFleetInterceptPlayer(fleet, true, false, INTERCEPT_DAYS);
+        Misc.makeNoRepImpact(fleet, "catchreleaseHarpoonHitman");
 
         fleet.addScript(new AutoDespawnScript(fleet));
         fleet.addAssignment(FleetAssignment.INTERCEPT, player, INTERCEPT_DAYS, "Hunting a mark");
