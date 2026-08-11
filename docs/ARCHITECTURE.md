@@ -527,6 +527,8 @@ wares are Java. Buying either switchable curio routes through the shared `Baha?`
 returning to the stall; the switch itself lives in the Fisherman's outfitter. His full introduction
 records the first meeting when it opens; later bar visits use the established-customer greeting and
 retain routes to the merchandise, crab question and exit.
+Every displayed credits-and-crabs price in a ware pitch uses the rules engine's highlight colour,
+matching the conservatory and backdrop price treatment.
 
 | File | What it does |
 |---|---|
