@@ -17,6 +17,13 @@ player-facing line follows. Read it before writing `rules.csv`, a species descri
 blurb, an intel note, colony text or UI copy. It also carries the settled unknowns the fiction must
 not explain.
 
+## Build layout
+
+The IntelliJ module compiles only `jars/src` into `out/production/catchrelease`; the artifact
+packages that module output as `jars/catchrelease.jar`. Compiler output must stay outside `jars/`:
+making the whole directory a source root recursively packages the artifact's own JAR and stale
+`production/` classes, allowing new data such as rules rows to run against old mission bytecode.
+
 ---
 
 ## Where a feature lives
