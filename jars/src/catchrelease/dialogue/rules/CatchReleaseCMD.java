@@ -428,7 +428,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     }
 
     /**
-     * Gives the two bulk-sale shortcuts the same rarity language as a specimen everywhere else.
+     * Gives the two bulk-sale shortcuts their intended menu language: the commons-only action is
+     * ordinary white option text, while the broader uncommon rung keeps its rarity colour.
      * <p>
      * The rule sheet owns both labels; this colours their existing option ids after the
      * Fisherman's sale menu has put them on the panel, then lets {@link FishBuyer} render the exact
@@ -438,7 +439,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
         if (FishBuyer.countUpTo(FishRarity.COMMON) > 0) {
-            dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
+            dialog.setOptionColor("catchrelease_fisherSellCommon", Misc.getTextColor());
             FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellCommon",
                     FishRarity.COMMON);
         }
