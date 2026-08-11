@@ -44,6 +44,7 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -354,8 +355,10 @@ public class FishermanQuest {
         letGo(quest);
         Global.getSector().getPersistentData().remove(STATE_KEY);
 
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(QuestIntel.class)) {
+        //IntelManager returns its backing repository list. removeIntel() mutates that same list,
+        //so iterate a snapshot; duplicate notes from an older save must all come out safely.
+        for (IntelInfoPlugin intel : new ArrayList<>(Global.getSector().getIntelManager()
+                .getIntel(QuestIntel.class))) {
 
             Global.getSector().getIntelManager().removeIntel(intel);
         }
