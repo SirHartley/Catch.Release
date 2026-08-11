@@ -11,7 +11,18 @@ $entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in 
 
 The officer closes the report.
 
-""We're here to settle the account.""",100:cutCommLinkNoText:Cut the comm link,"Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
+""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
+100:cutCommLinkNoText:Cut the comm link","Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
+catchrelease_hitmanBribeAskSel,DialogOptionSelected,$option == catchrelease_hitmanBribeAsk,"Highlight $entity.catchrelease_harpoonHitmanBribeDGS
+FireAll CatchReleaseHitmanBribeOptions","The officer glances at the contract.
+
+""Cancellation is permitted. $entity.catchrelease_harpoonHitmanBribeDGS credits. Cleared funds, now.""",100:cutCommLinkNoText:Cut the comm link,"The hired mercenaries treat the player as another party to the contract, following the vanilla Tri-Tachyon hired-command interaction while keeping this exchange short and transactional."
+catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,"Vanilla's affordability check leaves the price visible but greys it out and explains a shortfall."
+catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitmanBribePay,"AddCredits -$entity.catchrelease_harpoonHitmanBribe
+CatchReleaseCMD bribeHitman
+CatchReleaseCMD leaveEncounter","The transfer clears. The officer closes your file.
+
+""Contract cancelled.""",,,
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile

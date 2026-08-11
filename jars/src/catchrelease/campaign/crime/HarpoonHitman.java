@@ -6,6 +6,10 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.ai.FleetAIFlags;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.AutoDespawnScript;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -41,6 +45,16 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String VICTIM_NAME_KEY = "$catchrelease_harpoonHitmanVictim";
     public static final String ORIGIN_NAME_KEY = "$catchrelease_harpoonHitmanOrigin";
     public static final String OFFENCE_KEY = "$catchrelease_harpoonHitmanOffence";
+    public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
+    public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
+
+    /** A cancellation fee mercenaries might accept, rolled in tidy five-thousand-credit steps. */
+    public static final int BRIBE_MIN = 80_000;
+    public static final int BRIBE_MAX = 120_000;
+    public static final int BRIBE_STEP = 5_000;
+
+    /** MagicLib's accepted-bounty marker; kept as data so this class has no library dependency. */
+    public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
 
     /** Kept on the sector so one refusal cannot buy the player an endless queue of these. */
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
@@ -60,7 +74,7 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final float INTERCEPT_DAYS = 30f;
 
     /** The chance a crew with nobody to report to buys one instead. */
-    public static final float CHANCE = 0.35f;
+    public static final float CHANCE = 0.30f;
 
     protected String hiredBy;
     protected String victimName;
@@ -88,13 +102,12 @@ public class HarpoonHitman implements EveryFrameScript {
     }
 
     /**
-     * @param guaranteed skips the wait between contracts, for the case that is not a matter of
-     *                   chance - a charge in the hull under the player's own flag. It does not skip
-     *                   the one-at-a-time rule: "always sends somebody" is a promise about the
-     *                   consequence, not a licence to stack four fleets on one player
+     * @param bypassCooldown allows a fresh explosive incident to make its own 30% roll during the
+     *                       ordinary retry wait. It does not skip the one-at-a-time rule or the
+     *                       roll itself
      */
-    public static boolean send(String hiredBy, boolean guaranteed) {
-        return send(hiredBy, null, null, false, guaranteed);
+    public static boolean send(String hiredBy, boolean bypassCooldown) {
+        return send(hiredBy, null, null, false, bypassCooldown);
     }
 
     /**
@@ -103,7 +116,9 @@ public class HarpoonHitman implements EveryFrameScript {
      * @param explosive whether the recovered projectile was a Fathom Head rather than a harpoon
      */
     public static boolean send(String hiredBy, String victimName, String originName,
-                               boolean explosive, boolean guaranteed) {
+                               boolean explosive, boolean bypassCooldown) {
+        if (!hasEstablishedColony(hiredBy)) return false;
+
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -112,10 +127,11 @@ public class HarpoonHitman implements EveryFrameScript {
 
         if (isOut() || isPending()) return false;
 
-        if (!guaranteed
+        if (!bypassCooldown
                 && Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) {
             return false;
         }
+        if (Math.random() >= CHANCE) return false;
 
         HarpoonHitman pending = new HarpoonHitman(
                 hiredBy, victimName, originName, explosive);
@@ -133,6 +149,12 @@ public class HarpoonHitman implements EveryFrameScript {
 
         daysWaiting += Global.getSector().getClock().convertToDays(amount);
         if (daysWaiting < RESPONSE_DELAY_DAYS) return;
+
+        //A dead polity cannot still fund a private reprisal from an old booking.
+        if (!hasEstablishedColony(hiredBy)) {
+            finish();
+            return;
+        }
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return;
@@ -220,9 +242,91 @@ public class HarpoonHitman implements EveryFrameScript {
                 originName == null ? "open space" : originName, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(OFFENCE_KEY,
                 explosive ? "an explosive ROD charge" : "a ROD harpoon", INTERCEPT_DAYS);
+        int bribe = rollBribe();
+        fleet.getMemoryWithoutUpdate().set(BRIBE_KEY, bribe, INTERCEPT_DAYS);
+        fleet.getMemoryWithoutUpdate().set(BRIBE_TEXT_KEY, Misc.getWithDGS(bribe), INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, INTERCEPT_DAYS);
 
         return fleet;
+    }
+
+    protected static int rollBribe() {
+        int steps = (BRIBE_MAX - BRIBE_MIN) / BRIBE_STEP;
+        return BRIBE_MIN + (int) (Math.random() * (steps + 1)) * BRIBE_STEP;
+    }
+
+    /**
+     * Cancels the live contract and sends its fleet away.
+     * <p>
+     * Returning assignments alone are not sufficient: the intercept helper has also written a
+     * hostile flag, a tactical target, a last-known player location and this class has added an
+     * always-pursue override. Clear every source of the chase before asking the tactical module to
+     * reconsider, or a paid hunter can immediately reacquire the player after the dialog closes.
+     */
+    public static boolean acceptBribe(CampaignFleetAPI fleet) {
+        if (fleet == null || !fleet.getMemoryWithoutUpdate().getBoolean(HITMAN_FLAG)) return false;
+
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+        Misc.clearFlag(memory, MemFlags.MEMORY_KEY_MAKE_HOSTILE);
+        Misc.clearFlag(memory, MemFlags.MEMORY_KEY_MAKE_HOSTILE_WHILE_TOFF);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE_WHILE_TOFF);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE_ONE_BATTLE_ONLY);
+        memory.unset(MemFlags.MEMORY_KEY_PURSUE_PLAYER);
+        memory.unset(MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET);
+        memory.unset(FleetAIFlags.PLACE_TO_LOOK_FOR_TARGET);
+        memory.set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true, INTERCEPT_DAYS);
+        memory.set(MemFlags.MEMORY_KEY_MAKE_NON_AGGRESSIVE, true, INTERCEPT_DAYS);
+        memory.set(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY, true, INTERCEPT_DAYS);
+
+        Misc.giveStandardReturnToSourceAssignments(fleet, true);
+        if (fleet.getAI() instanceof ModularFleetAIAPI modular) {
+            modular.getTacticalModule().setTarget(null);
+            modular.getTacticalModule().forceTargetReEval();
+        }
+
+        return true;
+    }
+
+    /**
+     * Whether damage to this fleet can support a private revenge contract.
+     * <p>
+     * Reputation-impact flags are the common contract: vanilla and mod missions use them to mark
+     * targets the player is already meant to fight. The explicit fleet-type and MagicLib checks
+     * cover bounty implementations even when they have not also set one of those generic flags.
+     */
+    public static boolean isEligibleVictim(CampaignFleetAPI victim) {
+        if (victim == null) return false;
+
+        MemoryAPI memory = victim.getMemoryWithoutUpdate();
+        if (memory.getBoolean(MemFlags.MEMORY_KEY_LOW_REP_IMPACT)
+                || memory.getBoolean(MemFlags.MEMORY_KEY_NO_REP_IMPACT)) {
+            return false;
+        }
+
+        String fleetType = memory.getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
+        return !FleetTypes.PERSON_BOUNTY_FLEET.equals(fleetType)
+                && !memory.getBoolean(MAGIC_BOUNTY_TARGET_FLAG);
+    }
+
+    /**
+     * Whether the proposed client still has a public, established market in the economy.
+     * <p>
+     * Size three is the first normal colony size. Hidden and condition-only markets are not a
+     * political base capable of placing a contract, which naturally excludes Remnants and similar
+     * non-colonial factions without maintaining a brittle faction-id blacklist.
+     */
+    public static boolean hasEstablishedColony(String factionId) {
+        if (factionId == null || Global.getSector() == null) return false;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!market.isInEconomy() || market.isHidden() || market.getSize() < 3) continue;
+            if (factionId.equals(market.getFactionId())) return true;
+        }
+
+        return false;
     }
 
     /** Whether one is already out, so a second contract is not signed on top of the first. */
