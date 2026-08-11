@@ -636,8 +636,8 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
-| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state; an NPC-owned line skips the minigame and always lands |
-| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
+| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. An NPC-owned line skips the minigame and always lands |
+| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, plus the explosive head's red halo/core palette and pulse tuning |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |

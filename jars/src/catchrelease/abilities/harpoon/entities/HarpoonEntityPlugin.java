@@ -33,6 +33,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 import org.magiclib.plugins.MagicCampaignTrailPlugin;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,6 +131,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected float trailId;
 
     transient protected SpriteAPI headSprite;
+
+    /** Native dimensions of this entity's private sprite copy, restored after every render. */
+    transient protected float headSpriteWidth;
+    transient protected float headSpriteHeight;
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
@@ -1002,14 +1007,75 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void renderHead(float alpha) {
-        if (headSprite == null) headSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+        loadHeadSprite();
+        if (headSprite == null) return;
 
         Vector2f loc = entity.getLocation();
 
-        headSprite.setColor(HarpoonConstants.CORE_COLOR);
-        headSprite.setAdditiveBlend();
-        headSprite.setSize(HarpoonConstants.HEAD_SIZE, HarpoonConstants.HEAD_SIZE);
+        try {
+            headSprite.setAdditiveBlend();
+
+            //Only the player's line carries the player's fitted tackle. An NPC-owned harpoon
+            //must not turn red merely because the player happens to have a charge equipped.
+            if (owner == null && isExplosive()) {
+                renderExplosiveHead(loc, alpha);
+            } else {
+                headSprite.setColor(HarpoonConstants.CORE_COLOR);
+                headSprite.setSize(HarpoonConstants.HEAD_SIZE, HarpoonConstants.HEAD_SIZE);
+                headSprite.setAlphaMult(alpha);
+                headSprite.renderAtCenter(loc.x, loc.y);
+            }
+        } finally {
+            //Sprite state is sticky. This copy is private, but leaving it neutral also keeps a
+            //future refactor from turning a harmless optimization into a cross-render tint leak.
+            headSprite.setColor(Color.WHITE);
+            headSprite.setAlphaMult(1f);
+            headSprite.setNormalBlend();
+            headSprite.setSize(headSpriteWidth, headSpriteHeight);
+        }
+    }
+
+    /** Hot centre plus an irregular red pulse, visibly a charge rather than a recoloured barb. */
+    protected void renderExplosiveHead(Vector2f loc, float alpha) {
+        float pulse = 1f
+                + HarpoonConstants.EXPLOSIVE_PULSE
+                * (float) Math.sin(age * HarpoonConstants.EXPLOSIVE_PULSE_RATE)
+                + HarpoonConstants.EXPLOSIVE_FLICKER
+                * (float) Math.sin(age * HarpoonConstants.EXPLOSIVE_FLICKER_RATE);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_HALO_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_HALO_SIZE * pulse,
+                HarpoonConstants.EXPLOSIVE_HALO_SIZE * pulse);
+        headSprite.setAlphaMult(alpha * HarpoonConstants.EXPLOSIVE_HALO_ALPHA);
+        headSprite.renderAtCenter(loc.x, loc.y);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_HEAD_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_HEAD_SIZE,
+                HarpoonConstants.EXPLOSIVE_HEAD_SIZE);
+        headSprite.setAlphaMult(alpha * HarpoonConstants.EXPLOSIVE_HEAD_ALPHA);
+        headSprite.renderAtCenter(loc.x, loc.y);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_CORE_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_CORE_SIZE,
+                HarpoonConstants.EXPLOSIVE_CORE_SIZE);
         headSprite.setAlphaMult(alpha);
         headSprite.renderAtCenter(loc.x, loc.y);
+    }
+
+    /**
+     * Filename lookup deliberately creates a new underlying Sprite in 0.98a-RC8. Fetching the
+     * category sprite directly would only create a new API wrapper around the shared cached
+     * Sprite, letting this head's tint and size leak into every fusion-lamp glow in the campaign.
+     */
+    protected void loadHeadSprite() {
+        if (headSprite != null) return;
+
+        String filename = Global.getSettings().getSpriteName(
+                "campaignEntities", "fusion_lamp_glow");
+        headSprite = Global.getSettings().getSprite(filename);
+
+        if (headSprite == null) return;
+        headSpriteWidth = headSprite.getWidth();
+        headSpriteHeight = headSprite.getHeight();
     }
 }
