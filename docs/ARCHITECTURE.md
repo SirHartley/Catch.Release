@@ -477,8 +477,8 @@ The two forms a fish takes in the world.
 
 | File | What it does |
 |---|---|
-| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow, and the exact source rupture retained for catch provenance. Pond motes let the terrain draw that glow inside its stencil; pondless motes draw themselves, so a buried mote surfaced by a breach-lamp harpoon remains visible through the shove and catch |
-| `BuriedMoteEntityPlugin.java` | Invisible mote under the fabric; `unearth()` turns it into a real one |
+| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow, and the exact source rupture retained for catch provenance. Pond motes let the terrain draw that glow inside its stencil; pondless motes draw themselves |
+| `BuriedMoteEntityPlugin.java` | Invisible mote under the fabric; `unearth()` atomically replaces it with an ordinary mote, so the searchlight cannot leave a stationary impression behind while a harpoon shoves the surfaced fish |
 
 ### `campaign/fish/spawner`
 Which fish, where.
@@ -630,7 +630,7 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 | `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the escalation ladders. Armed crews turn on you at the second hit; unarmed ones are split by strength — a crew that is plainly outmatched (`isOutmatched`, vanilla's own 1.25× engage threshold) and has somebody to tell (`isCivilised`) runs on the *first* hole with an emergency burn and fetches a patrol, and everyone else works ignore → run you down for the bill → run and tell. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
 | `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down |
-| `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. One at a time; guaranteed for a charge fired under a live transponder. Their map name identifies the client faction, while their memory carries the original fleet, location and recovered ROD projectile into the encounter hail |
+| `HarpoonHitman.java` | Mercenaries, when there was nobody to report to. A booked contract waits one month before dispatch and then holds for the player's next ordinary system; only one may be pending or hunting at a time, and a charge fired under a live transponder guarantees the booking. Their map name identifies the client faction, while their memory carries the original fleet, location and recovered ROD projectile into a one-time forced hail; cutting it uses vanilla's no-text/no-Continue exit, and later uncoloured comm requests reach vanilla's denial. The hunters carry vanilla's full no-reputation-impact flag, not its reduced-impact flag |
 | `HarpoonedFleetFID.java` | Vanilla's encounter dialog plus one line, and a comm link highlighted only while the crew is actually owed something — `wasHarpooned` stays true for a month and colouring on it alone left a settled bill looking unsettled for weeks |
 | `CatchReleaseCampaignPlugin.java` | Hands harpooned fleets that dialog at the narrowest priority - the one custom encounter screen left |
 
@@ -652,8 +652,8 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
-| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering; an NPC-owned line skips the minigame and always lands. An explosive impact records the mote's species name or struck fleet name before consuming the head |
-| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params |
+| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. Fleet collision eligibility excludes only the Fisherman, so normal and explosive shots pass through his boat and can hit something beyond it. An explosive impact records the mote's species name or struck fleet name before consuming the head. An NPC-owned line skips the minigame and always lands |
+| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, plus the explosive head's red halo/core palette and pulse tuning |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |

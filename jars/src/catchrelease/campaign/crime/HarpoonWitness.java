@@ -62,8 +62,9 @@ public class HarpoonWitness implements EveryFrameScript {
                 : origin instanceof StarSystemAPI
                 ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
 
-        //a charge in the hull with the player's own flag flying is not something anybody reports and
-        //waits on. There is no patrol errand here - the money goes out the same day
+        //A charge in the hull with the player's own flag flying is not something anybody reports.
+        //There is no patrol errand here: the contract is guaranteed, though its crew still takes
+        //the ordinary response month to arrive.
         if (explosive && identified) {
             HarpoonHitman.send(factionId, victimName, originName, true, true);
             return;

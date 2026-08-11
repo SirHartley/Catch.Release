@@ -5,6 +5,7 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -34,6 +35,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 import org.magiclib.plugins.MagicCampaignTrailPlugin;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,6 +134,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     transient protected SpriteAPI headSprite;
 
+    /** Native dimensions of this entity's private sprite copy, restored after every render. */
+    transient protected float headSpriteWidth;
+    transient protected float headSpriteHeight;
+
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
         super.init(entity, pluginParams);
@@ -196,11 +202,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         move(heading, getSpeed() * amount);
         distanceOut += getSpeed() * amount;
 
+        //Pond and breach-lamp targets both come back from here as the same ordinary mote. From
+        //this point onward there is one hit, hold and shove path; where the fish was rendered
+        //before impact cannot change how the harpoon moves it.
         SectorEntityToken hit = findMote();
-
-        //also try a mote still buried under the fabric; a successful strike surfaces it like
-        //any other mote, so the rest of the catch plays out identically
-        if (hit == null) hit = strikeBuried();
 
         if (hit != null) {
             //an explosive head never gets as far as the push: there is nothing to shove, nothing to
@@ -567,6 +572,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
      *  does nothing or drags the player into it; one mid-transition, in battle, hidden or
      *  despawning isn't a sane target either. */
     public static boolean canHook(CampaignFleetAPI other) {
+        //The Fisherman is the one fleet that is not a target at all. Reject it at collision
+        //eligibility (rather than suppressing the offence afterward), so ordinary and explosive
+        //heads both continue through the boat and may still strike something behind it.
+        if (FishermanSpawner.isFisherman(other)) return false;
+
         //second half only narrows down a target - a line already on a hull says nothing about
         //whether it's sane to haul, which is why the haul itself checks the first half alone
         return isHaulable(other)
@@ -814,33 +824,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
     }
 
-    /** A mote the head reached while still under the fabric, brought through by the hit. Only
-     *  strikeable once a breach lamp has exposed it - this is the lamps' gameplay loop, sweep /
-     *  expose / harpoon, so it is not gated behind any upgrade. Unearths the buried entity rather
-     *  than hooking it directly, so nothing downstream has to treat it any differently. */
-    protected SectorEntityToken strikeBuried() {
-        //what the player's lamps exposed is the player's to take
-        if (owner != null) return null;
-
-        for (SectorEntityToken buried : entity.getContainingLocation()
-                .getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-
-            if (buried.isExpired()) continue;
-            if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin)) continue;
-
-            if (Misc.getDistance(entity.getLocation(), buried.getLocation())
-                    > HarpoonConstants.CATCH_RADIUS) {
-                continue;
-            }
-
-            if (!canTake(buried)) continue;
-
-            return ((BuriedMoteEntityPlugin) buried.getCustomPlugin()).unearth();
-        }
-
-        return null;
-    }
-
     /**
      * Whether a shot could take this target at all, leaving aside range. A buried mote needs
      * beam exposure, or - with deep-strike gear - just showing as a detected dent. An ordinary
@@ -864,11 +847,33 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
     }
 
+    /**
+     * One acquisition path for every fish-shaped target. Existing pond motes keep priority, as
+     * before; a player's line then checks exposed breach-lamp motes. A buried target is surfaced
+     * here, before the caller can hold or shove it, so every successful return value is the same
+     * ordinary mote implementation.
+     */
     protected SectorEntityToken findMote() {
-        for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+        SectorEntityToken mote = findMoteWithTag(FishEntityPlugin.MOTE_TAG);
+
+        //What the player's lamps exposed is the player's to take. NPC lines only fish ponds.
+        if (mote == null && owner == null) {
+            mote = findMoteWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
+        }
+
+        if (mote == null) return null;
+        if (!(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)) return mote;
+
+        return buried.unearth();
+    }
+
+    /** First takeable target of one representation within the head's collision radius. */
+    protected SectorEntityToken findMoteWithTag(String tag) {
+        for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
             if (!canTake(mote)) continue;
 
-            if (Misc.getDistance(entity.getLocation(), mote.getLocation()) <= HarpoonConstants.CATCH_RADIUS) {
+            if (Misc.getDistance(entity.getLocation(), mote.getLocation())
+                    <= HarpoonConstants.CATCH_RADIUS) {
                 return mote;
             }
         }
@@ -1018,14 +1023,75 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void renderHead(float alpha) {
-        if (headSprite == null) headSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+        loadHeadSprite();
+        if (headSprite == null) return;
 
         Vector2f loc = entity.getLocation();
 
-        headSprite.setColor(HarpoonConstants.CORE_COLOR);
-        headSprite.setAdditiveBlend();
-        headSprite.setSize(HarpoonConstants.HEAD_SIZE, HarpoonConstants.HEAD_SIZE);
+        try {
+            headSprite.setAdditiveBlend();
+
+            //Only the player's line carries the player's fitted tackle. An NPC-owned harpoon
+            //must not turn red merely because the player happens to have a charge equipped.
+            if (owner == null && isExplosive()) {
+                renderExplosiveHead(loc, alpha);
+            } else {
+                headSprite.setColor(HarpoonConstants.CORE_COLOR);
+                headSprite.setSize(HarpoonConstants.HEAD_SIZE, HarpoonConstants.HEAD_SIZE);
+                headSprite.setAlphaMult(alpha);
+                headSprite.renderAtCenter(loc.x, loc.y);
+            }
+        } finally {
+            //Sprite state is sticky. This copy is private, but leaving it neutral also keeps a
+            //future refactor from turning a harmless optimization into a cross-render tint leak.
+            headSprite.setColor(Color.WHITE);
+            headSprite.setAlphaMult(1f);
+            headSprite.setNormalBlend();
+            headSprite.setSize(headSpriteWidth, headSpriteHeight);
+        }
+    }
+
+    /** Hot centre plus an irregular red pulse, visibly a charge rather than a recoloured barb. */
+    protected void renderExplosiveHead(Vector2f loc, float alpha) {
+        float pulse = 1f
+                + HarpoonConstants.EXPLOSIVE_PULSE
+                * (float) Math.sin(age * HarpoonConstants.EXPLOSIVE_PULSE_RATE)
+                + HarpoonConstants.EXPLOSIVE_FLICKER
+                * (float) Math.sin(age * HarpoonConstants.EXPLOSIVE_FLICKER_RATE);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_HALO_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_HALO_SIZE * pulse,
+                HarpoonConstants.EXPLOSIVE_HALO_SIZE * pulse);
+        headSprite.setAlphaMult(alpha * HarpoonConstants.EXPLOSIVE_HALO_ALPHA);
+        headSprite.renderAtCenter(loc.x, loc.y);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_HEAD_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_HEAD_SIZE,
+                HarpoonConstants.EXPLOSIVE_HEAD_SIZE);
+        headSprite.setAlphaMult(alpha * HarpoonConstants.EXPLOSIVE_HEAD_ALPHA);
+        headSprite.renderAtCenter(loc.x, loc.y);
+
+        headSprite.setColor(HarpoonConstants.EXPLOSIVE_CORE_COLOR);
+        headSprite.setSize(HarpoonConstants.EXPLOSIVE_CORE_SIZE,
+                HarpoonConstants.EXPLOSIVE_CORE_SIZE);
         headSprite.setAlphaMult(alpha);
         headSprite.renderAtCenter(loc.x, loc.y);
+    }
+
+    /**
+     * Filename lookup deliberately creates a new underlying Sprite in 0.98a-RC8. Fetching the
+     * category sprite directly would only create a new API wrapper around the shared cached
+     * Sprite, letting this head's tint and size leak into every fusion-lamp glow in the campaign.
+     */
+    protected void loadHeadSprite() {
+        if (headSprite != null) return;
+
+        String filename = Global.getSettings().getSpriteName(
+                "campaignEntities", "fusion_lamp_glow");
+        headSprite = Global.getSettings().getSprite(filename);
+
+        if (headSprite == null) return;
+        headSpriteWidth = headSprite.getWidth();
+        headSpriteHeight = headSprite.getHeight();
     }
 }
