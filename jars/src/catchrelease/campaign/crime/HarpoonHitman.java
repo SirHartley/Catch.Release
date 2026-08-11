@@ -70,7 +70,7 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final float INTERCEPT_DAYS = 30f;
 
     /** The chance a crew with nobody to report to buys one instead. */
-    public static final float CHANCE = 0.35f;
+    public static final float CHANCE = 0.30f;
 
     protected String hiredBy;
     protected String victimName;
@@ -98,13 +98,12 @@ public class HarpoonHitman implements EveryFrameScript {
     }
 
     /**
-     * @param guaranteed skips the wait between contracts, for the case that is not a matter of
-     *                   chance - a charge in the hull under the player's own flag. It does not skip
-     *                   the one-at-a-time rule: "always sends somebody" is a promise about the
-     *                   consequence, not a licence to stack four fleets on one player
+     * @param bypassCooldown allows a fresh explosive incident to make its own 30% roll during the
+     *                       ordinary retry wait. It does not skip the one-at-a-time rule or the
+     *                       roll itself
      */
-    public static boolean send(String hiredBy, boolean guaranteed) {
-        return send(hiredBy, null, null, false, guaranteed);
+    public static boolean send(String hiredBy, boolean bypassCooldown) {
+        return send(hiredBy, null, null, false, bypassCooldown);
     }
 
     /**
@@ -113,7 +112,7 @@ public class HarpoonHitman implements EveryFrameScript {
      * @param explosive whether the recovered projectile was a Fathom Head rather than a harpoon
      */
     public static boolean send(String hiredBy, String victimName, String originName,
-                               boolean explosive, boolean guaranteed) {
+                               boolean explosive, boolean bypassCooldown) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -122,10 +121,11 @@ public class HarpoonHitman implements EveryFrameScript {
 
         if (isOut() || isPending()) return false;
 
-        if (!guaranteed
+        if (!bypassCooldown
                 && Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) {
             return false;
         }
+        if (Math.random() >= CHANCE) return false;
 
         HarpoonHitman pending = new HarpoonHitman(
                 hiredBy, victimName, originName, explosive);

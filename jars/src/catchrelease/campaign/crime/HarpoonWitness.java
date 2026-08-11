@@ -63,8 +63,8 @@ public class HarpoonWitness implements EveryFrameScript {
                 ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
 
         //A charge in the hull with the player's own flag flying is not something anybody reports.
-        //There is no patrol errand here: the contract is guaranteed, though its crew still takes
-        //the ordinary response month to arrive.
+        //There is no patrol errand here: the recovered charge goes straight to the same 30% contract
+        //roll, though any crew it produces still takes the ordinary response month to arrive.
         if (explosive && identified) {
             HarpoonHitman.send(factionId, victimName, originName, true, true);
             return;
@@ -76,7 +76,7 @@ public class HarpoonWitness implements EveryFrameScript {
 
         //nobody within reach to tell. Some of them let it go and some of them pay somebody
         if (patrol == null) {
-            if (identified && Math.random() < HarpoonHitman.CHANCE) {
+            if (identified) {
                 HarpoonHitman.send(factionId, victimName, originName, explosive, false);
             }
             return;
@@ -165,7 +165,7 @@ public class HarpoonWitness implements EveryFrameScript {
      * decide the matter is worth paying to settle.
      */
     protected void giveUp() {
-        if (identified && Math.random() < HarpoonHitman.CHANCE) {
+        if (identified) {
             HarpoonHitman.send(factionId, victimName, originName, explosive, false);
         }
 
