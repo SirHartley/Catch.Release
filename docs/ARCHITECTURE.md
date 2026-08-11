@@ -528,7 +528,8 @@ returning to the stall; the switch itself lives in the Fisherman's outfitter. Hi
 records the first meeting when it opens; later bar visits use the established-customer greeting and
 retain routes to the merchandise, crab question and exit.
 Every displayed credits-and-crabs price in a ware pitch uses the rules engine's highlight colour,
-matching the conservatory and backdrop price treatment.
+matching the conservatory and backdrop price treatment. Insufficient-payment variants repeat the
+full ask before explaining the shortage, so price information never disappears behind affordability.
 
 | File | What it does |
 |---|---|
