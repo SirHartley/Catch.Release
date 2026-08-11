@@ -4,6 +4,7 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.helper.loading.BackdropLoader;
@@ -16,8 +17,8 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 
 /**
- * One key that puts a campaign where a tester needs it: every rig in hand, the shop open, and a
- * spread of charts to read.
+ * One key that puts a campaign where a tester needs it: every rig in hand, the shop open, a spread
+ * of charts to read, every backdrop, and every outfitter schematic.
  * <p>
  * Nothing downstream of the introduction can be looked at until the introduction is behind you - the
  * shop only shelves gear that has been granted, no job of any kind is offered before the first
@@ -87,6 +88,11 @@ public class DevShortcut implements CampaignInputListener {
                 mem.set(key, 2);
             }
 
+            if (amt == 2) {
+                addSchematics();
+                mem.set(key, 3);
+            }
+
             return;
         }
     }
@@ -113,6 +119,15 @@ public class DevShortcut implements CampaignInputListener {
 
         Global.getSector().getCampaignUI().addMessage(
                 "Dev shortcut: All backdrops unlocked.",
+                Misc.getHighlightColor());
+    }
+
+    /** Every stocked tackle plan and every schematic-gated upgrade rung, without buying either. */
+    protected void addSchematics() {
+        ShopSchematics.unlockAll();
+
+        Global.getSector().getCampaignUI().addMessage(
+                "Dev shortcut: all tackle and upgrade schematics unlocked.",
                 Misc.getHighlightColor());
     }
 

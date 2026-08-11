@@ -91,7 +91,7 @@ Everything game-facing is wired from `ModPlugin.java`.
 18. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-19. `DevShortcut.register()` — the Ü key, as a transient `CampaignInputListener`; inert unless dev mode is on
+19. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -502,7 +502,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishCurrency.java` | Counts and spends fish as payment, worst specimens first |
 | `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
-| `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought |
+| `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought. Its bulk grant records every real outfitter permission without buying hardware or levels, for developer campaign setup |
 | `FishShopAbilityPlugin.java` | Hidden inert migration stub for the removed ability-bar shortcut; load cleanup removes it and its hotbar references from old saves |
 | `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
 | `ShopTabPlugin.java` | One tab button |
@@ -711,7 +711,7 @@ Shader and GL machinery.
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |
 | `helper/animation/ArchedTrajectoryFollowingMote.java` | A glowing mote drawn along that arc |
 | `reflection/ReflectionUtils.java` | Reflection via `MethodHandle`, to dodge the classloader ban |
-| `testing/DevShortcut.java` | The Ü key: skips the introduction, grants every rig and the shop, issues charts of every rung. A `CampaignInputListener` on the post-core pass, so anything with a text field has already eaten the key; matched on the typed character rather than a scancode. Dev mode only, read per press |
+| `testing/DevShortcut.java` | The J key in three presses: skips the introduction, grants every rig and the shop, and issues charts of every rung; then unlocks every backdrop; then records every tackle and upgrade schematic without buying either. A low-priority `CampaignInputListener` on the pre-core pass, matched on the typed character rather than a scancode. Dev mode only, read per press |
 | `testing/TestStencilRenderer.java` | Dev renderer. Commented out of `ModPlugin` |
 
 ---
