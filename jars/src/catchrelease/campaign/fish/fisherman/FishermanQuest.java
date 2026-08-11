@@ -675,8 +675,9 @@ public class FishermanQuest {
                             @Override
                             public void render(float alphaMult) {
                                 if (position == null) return;
-                                FishIcons.draw(spec, position.getCenterX(), position.getCenterY(),
-                                        80f, alphaMult);
+                                FishIcons.drawBacklit(spec,
+                                        position.getCenterX(), position.getCenterY(),
+                                        40f, 56f, alphaMult);
                             }
                         }), 10f);
             }

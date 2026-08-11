@@ -14,7 +14,6 @@ import catchrelease.campaign.fish.shop.ShopUi;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
-import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -404,11 +403,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
             ShopUi.drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
 
-            Disc.draw(x + size * 0.5f, y + size * 0.5f, size * 0.5f, spec.rarity.color,
-                    0.3f * alphaMult, 0f, true);
-
-            FishIcons.draw(spec, x + size * 0.5f, y + size * 0.5f,
-                    Math.max(artWidth, artHeight), alphaMult);
+            FishIcons.drawBacklit(spec, x + size * 0.5f, y + size * 0.5f,
+                    size * 0.5f, Math.max(artWidth, artHeight), alphaMult);
 
             if (grade != null) {
                 FishItemRenderer.render(x, y, size, size, alphaMult, spec.rarity, grade);

@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.codex.FishCodexEntryState;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 
 import java.awt.Color;
@@ -24,6 +25,9 @@ import java.awt.Color;
  * See {@link #RIM_COVER_FLOOR}.
  */
 public final class FishIcons {
+
+    /** Rarity-coloured light behind portraits in the Codex, chart shop, and Intel. */
+    public static final float BACKLIGHT_ALPHA = 0.35f;
 
     /** The rim: the silhouette's own shape in light, one pixel proud on each side. */
     public static final float RIM_ALPHA = 0.45f;
@@ -47,6 +51,20 @@ public final class FishIcons {
     public static final float RIM_COVER_FLOOR = 0.85f;
 
     private FishIcons() {
+    }
+
+    /**
+     * The complete portrait stage shared by screens that present one named species: rarity light
+     * behind the knowledge-aware face. Keeping the two draws together prevents a new surface from
+     * remembering the silhouette but losing the backlight (or inventing a slightly different one).
+     */
+    public static void drawBacklit(FishSpec spec, float centerX, float centerY,
+                                   float backlightRadius, float artSize, float alphaMult) {
+        if (spec == null || alphaMult <= 0f) return;
+
+        Disc.draw(centerX, centerY, backlightRadius, spec.rarity.color,
+                BACKLIGHT_ALPHA * alphaMult, 0f, true);
+        draw(spec, centerX, centerY, artSize, alphaMult);
     }
 
     /** The face at a centre point, fitted (never stretched) into a square of the given size. */
