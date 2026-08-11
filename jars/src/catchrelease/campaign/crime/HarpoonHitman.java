@@ -45,6 +45,7 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String VICTIM_NAME_KEY = "$catchrelease_harpoonHitmanVictim";
     public static final String ORIGIN_NAME_KEY = "$catchrelease_harpoonHitmanOrigin";
     public static final String OFFENCE_KEY = "$catchrelease_harpoonHitmanOffence";
+    public static final String CLIENT_GONE_KEY = "$catchrelease_harpoonHitmanClientGone";
     public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
 
@@ -150,12 +151,6 @@ public class HarpoonHitman implements EveryFrameScript {
         daysWaiting += Global.getSector().getClock().convertToDays(amount);
         if (daysWaiting < RESPONSE_DELAY_DAYS) return;
 
-        //A dead polity cannot still fund a private reprisal from an old booking.
-        if (!hasEstablishedColony(hiredBy)) {
-            finish();
-            return;
-        }
-
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return;
 
@@ -236,6 +231,11 @@ public class HarpoonHitman implements EveryFrameScript {
         fleet.getMemoryWithoutUpdate().set(HITMAN_FLAG, true, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(HIRED_BY_KEY, hiredBy, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(CLIENT_NAME_KEY, clientName, INTERCEPT_DAYS);
+        if (!hasEstablishedColony(hiredBy)) {
+            //The money and instructions were placed before the client disappeared. Mercenaries
+            //finish a funded contract; the hail names the unusual provenance instead.
+            fleet.getMemoryWithoutUpdate().set(CLIENT_GONE_KEY, true, INTERCEPT_DAYS);
+        }
         fleet.getMemoryWithoutUpdate().set(VICTIM_NAME_KEY,
                 victimName == null ? "one of their fleets" : victimName, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(ORIGIN_NAME_KEY,
