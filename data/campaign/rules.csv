@@ -1556,7 +1556,7 @@ One of them is far enough away to require a light.
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
 catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabEarmuffsOwned,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
 catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,!$catchreleaseCrabExplosive_headOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
-catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
+catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,!$catchreleaseCrabConservatoryOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
 catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,
 catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabLeave Leave,,,
 catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10

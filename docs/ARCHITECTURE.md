@@ -539,6 +539,8 @@ Celebration Charges leave the streamed stall menu as soon as their permanent bou
 the transaction cannot be presented a second time.
 An explosive detonation records the struck species or fleet as a pending story; the next repeat
 greeting names that latest target once, acknowledges it, and then returns to the ordinary greeting.
+The Conservatory-plans option is gated by the ware's combined sold-or-industry-known ownership
+predicate, so receiving the chip removes the offer before the player has to consume it.
 
 | File | What it does |
 |---|---|
