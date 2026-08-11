@@ -29,12 +29,14 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
+import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.rulecmd.BaseCommandPlugin;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Misc.Token;
 
@@ -134,6 +136,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
+    public static final String CRAB_EXPLOSIVE_PENDING = "$catchreleaseCrabExplosivePending";
+    public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
 
     /**
      * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
@@ -307,6 +311,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             //---- the man with the crate
             case "crabBuy":
                 return buyCrabWare(arg);
+            case "beginCrabOptions":
+                return beginCrabOptions(dialog);
+            case "addCrabOption":
+                return addCrabOption(dialog, params, memoryMap);
+            case "crabAcknowledgeExplosive":
+                CrabWares.acknowledgeExplosiveUse();
+                return true;
             case "crabBuyBackdrop":
                 return CrabBackdrops.buy(getMarket(dialog));
             case "crabShowBackdrop":
@@ -349,6 +360,68 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    /** Starts the rules-authored stall menu before its option rows stream in. */
+    protected boolean beginCrabOptions(InteractionDialogAPI dialog) {
+        if (dialog == null || dialog.getOptionPanel() == null) return false;
+
+        dialog.getOptionPanel().clearOptions();
+        return true;
+    }
+
+    /**
+     * Adds one rules-authored stall option immediately, then gives merchandise a structured cost
+     * tooltip. Static rule options are added only after the parent rule's script has finished, which
+     * is too late for that same script to attach a tooltip; direct addition keeps the label in the
+     * sheet while making the option available to decorate now.
+     */
+    protected boolean addCrabOption(InteractionDialogAPI dialog, List<Token> params,
+                                    Map<String, MemoryAPI> memoryMap) {
+        if (dialog == null || dialog.getOptionPanel() == null || params.size() < 3) return false;
+
+        String optionId = params.get(1).getString(memoryMap);
+        String label = params.get(2).getString(memoryMap);
+        String stock = params.size() > 3 ? params.get(3).getString(memoryMap) : null;
+        if (optionId == null || label == null) return false;
+
+        dialog.getOptionPanel().addOption(label, optionId);
+        if (stock == null || stock.isEmpty()) return true;
+
+        if ("BACKDROP".equalsIgnoreCase(stock)) {
+            Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
+            if (scene == null) return true;
+
+            addCrabCostTooltip(dialog.getOptionPanel(), optionId,
+                    "A rolled aquarium backdrop: " + scene.getDisplayName() + ".",
+                    CrabBackdrops.getCredits(scene), CrabBackdrops.getCrabs(scene));
+            return true;
+        }
+
+        try {
+            CrabWares ware = CrabWares.valueOf(stock.trim().toUpperCase());
+            addCrabCostTooltip(dialog.getOptionPanel(), optionId, ware.description,
+                    ware.credits, ware.crabs);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /** One paragraph of purpose and one exact, highlighted credits-and-crabs ask. */
+    protected void addCrabCostTooltip(OptionPanelAPI panel, Object optionId, String description,
+                                      int credits, int crabs) {
+        final String creditText = Misc.getDGSCredits(credits);
+        final String crabText = crabs + " crabs";
+
+        panel.addOptionTooltipAppender(optionId, new OptionPanelAPI.OptionTooltipCreator() {
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean hadOtherText) {
+                tooltip.addPara(description, hadOtherText ? 10f : 0f);
+                tooltip.addPara("Cost: %s and %s.", 10f, Misc.getTextColor(),
+                        Misc.getHighlightColor(), creditText, crabText);
+            }
+        });
     }
 
     /**
@@ -706,6 +779,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
+        local.set(CRAB_EXPLOSIVE_PENDING, CrabWares.hasUnmentionedExplosiveUse(), 0);
+        local.set(CRAB_EXPLOSIVE_TARGET, CrabWares.getLastExplosiveTarget(), 0);
         local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
 
         local.set(CRAB_BACKDROP, scene != null, 0);
