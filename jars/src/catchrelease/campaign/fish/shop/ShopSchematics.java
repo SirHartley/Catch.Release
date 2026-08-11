@@ -66,6 +66,23 @@ public class ShopSchematics {
         if (key != null && requires(stat, targetLevel)) getKnown().add(key);
     }
 
+    /** Every purchase permission the outfitter can learn, for developer campaign setup. */
+    public static void unlockAll() {
+        if (Global.getSector() == null) return;
+
+        for (Tackle tackle : Tackle.values()) {
+            if (tackle.stocked) unlock(tackle);
+        }
+
+        for (UpgradeStat stat : UpgradeManager.getInstance().getAll().values()) {
+            if (stat == null || stat.id == null || stat.id.equalsIgnoreCase("example")) continue;
+
+            for (int targetLevel = 1; targetLevel <= stat.maxLevel; targetLevel++) {
+                unlock(stat.id, targetLevel);
+            }
+        }
+    }
+
     /** The next rung, but only when the player has reached the schematic-gated end of the ladder. */
     public static int getNextRequiredLevel(UpgradeStat stat) {
         if (stat == null) return -1;
