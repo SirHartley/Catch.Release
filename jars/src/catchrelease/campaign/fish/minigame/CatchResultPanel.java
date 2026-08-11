@@ -321,7 +321,8 @@ public class CatchResultPanel {
         float bounce = (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_RECORD_BOUNCE_RATE)
                 * FishConstants.MINIGAME_RESULT_RECORD_BOUNCE;
 
-        recordText.setBaseColor(withAlpha(Misc.getPositiveHighlightColor(), alphaMult));
+        Color bannerColor = newSpecies ? Misc.getHighlightColor() : Misc.getPositiveHighlightColor();
+        recordText.setBaseColor(withAlpha(bannerColor, alphaMult));
         recordText.draw(layout.getBoxCenterX(),
                 layout.boxY + layout.boxSize + FishConstants.MINIGAME_RESULT_RECORD_GAP
                         + recordText.getHeight() + bounce);
