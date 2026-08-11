@@ -286,18 +286,17 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         if (state.isRangeDataOnly()) {
             text.addPara("Nothing of this one has been landed. The range is on the map.",
                     Misc.getGrayColor(), 3f);
-            return;
+        } else {
+            text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                    logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
         }
 
-        text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName);
-
-        addMapButton(text, spec);
+        addMapButton(text, state);
     }
 
-    /** Only shown in the campaign proper, and only if the species is still in the table. */
-    protected void addMapButton(TooltipMakerAPI text, FishSpec spec) {
-        if (spec == null || Global.getCurrentState() != GameState.CAMPAIGN) return;
+    /** Shown for every known range in the campaign proper, caught or range-data-only. */
+    protected void addMapButton(TooltipMakerAPI text, FishCodexEntryState state) {
+        if (!state.canShowOnMap() || Global.getCurrentState() != GameState.CAMPAIGN) return;
 
         mapButtonId = new Object();
 
@@ -314,6 +313,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         CodexDialogAPI shown = codex;
 
         try {
+            if (!getState().canShowOnMap()) return;
+
             FishMapFilterScript.requestSpeciesFocusFromCodex(speciesId);
 
             if (shown != null) {
