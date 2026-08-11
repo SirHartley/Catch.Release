@@ -6,6 +6,9 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.ai.FleetAIFlags;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.AutoDespawnScript;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -41,6 +44,13 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String VICTIM_NAME_KEY = "$catchrelease_harpoonHitmanVictim";
     public static final String ORIGIN_NAME_KEY = "$catchrelease_harpoonHitmanOrigin";
     public static final String OFFENCE_KEY = "$catchrelease_harpoonHitmanOffence";
+    public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
+    public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
+
+    /** A cancellation fee mercenaries might accept, rolled in tidy five-thousand-credit steps. */
+    public static final int BRIBE_MIN = 80_000;
+    public static final int BRIBE_MAX = 120_000;
+    public static final int BRIBE_STEP = 5_000;
 
     /** Kept on the sector so one refusal cannot buy the player an endless queue of these. */
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
@@ -220,9 +230,52 @@ public class HarpoonHitman implements EveryFrameScript {
                 originName == null ? "open space" : originName, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(OFFENCE_KEY,
                 explosive ? "an explosive ROD charge" : "a ROD harpoon", INTERCEPT_DAYS);
+        int bribe = rollBribe();
+        fleet.getMemoryWithoutUpdate().set(BRIBE_KEY, bribe, INTERCEPT_DAYS);
+        fleet.getMemoryWithoutUpdate().set(BRIBE_TEXT_KEY, Misc.getWithDGS(bribe), INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, INTERCEPT_DAYS);
 
         return fleet;
+    }
+
+    protected static int rollBribe() {
+        int steps = (BRIBE_MAX - BRIBE_MIN) / BRIBE_STEP;
+        return BRIBE_MIN + (int) (Math.random() * (steps + 1)) * BRIBE_STEP;
+    }
+
+    /**
+     * Cancels the live contract and sends its fleet away.
+     * <p>
+     * Returning assignments alone are not sufficient: the intercept helper has also written a
+     * hostile flag, a tactical target, a last-known player location and this class has added an
+     * always-pursue override. Clear every source of the chase before asking the tactical module to
+     * reconsider, or a paid hunter can immediately reacquire the player after the dialog closes.
+     */
+    public static boolean acceptBribe(CampaignFleetAPI fleet) {
+        if (fleet == null || !fleet.getMemoryWithoutUpdate().getBoolean(HITMAN_FLAG)) return false;
+
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+        Misc.clearFlag(memory, MemFlags.MEMORY_KEY_MAKE_HOSTILE);
+        Misc.clearFlag(memory, MemFlags.MEMORY_KEY_MAKE_HOSTILE_WHILE_TOFF);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_HOSTILE_WHILE_TOFF);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE);
+        memory.unset(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE_ONE_BATTLE_ONLY);
+        memory.unset(MemFlags.MEMORY_KEY_PURSUE_PLAYER);
+        memory.unset(MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET);
+        memory.unset(FleetAIFlags.PLACE_TO_LOOK_FOR_TARGET);
+        memory.set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true, INTERCEPT_DAYS);
+        memory.set(MemFlags.MEMORY_KEY_MAKE_NON_AGGRESSIVE, true, INTERCEPT_DAYS);
+        memory.set(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY, true, INTERCEPT_DAYS);
+
+        Misc.giveStandardReturnToSourceAssignments(fleet, true);
+        if (fleet.getAI() instanceof ModularFleetAIAPI modular) {
+            modular.getTacticalModule().setTarget(null);
+            modular.getTacticalModule().forceTargetReEval();
+        }
+
+        return true;
     }
 
     /** Whether one is already out, so a second contract is not signed on top of the first. */

@@ -1,6 +1,7 @@
 package catchrelease.dialogue.rules;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.crime.HarpoonHitman;
 import catchrelease.campaign.crime.LampOffence;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.FishingTaboo;
@@ -194,6 +195,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "leaveEncounter":
                 return leaveEncounter(dialog);
+            case "bribeHitman":
+                return bribeHitman(dialog);
 
             //---- panels. Machinery rather than dialogue, and the one thing not in the sheet
             case "openShop":
@@ -772,6 +775,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         dialog.dismiss();
 
         return true;
+    }
+
+    /** Clears every pursuit source before a paid contract hunter leaves the encounter. */
+    protected boolean bribeHitman(InteractionDialogAPI dialog) {
+        if (dialog == null || !(dialog.getInteractionTarget() instanceof CampaignFleetAPI fleet)) {
+            return false;
+        }
+
+        return HarpoonHitman.acceptBribe(fleet);
     }
 
     /** Gives the stranded rating a berth and completes whichever safe host delivered the scene. */
