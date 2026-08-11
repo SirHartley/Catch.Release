@@ -7,7 +7,7 @@ catchrelease_hitmanHail,OpenCommLink,$entity.catchrelease_harpoonHitman score:16
 
 The officer closes the report.
 
-""We're here to settle the account.""",100:cutCommLink:Cut the comm link,"Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
+""We're here to settle the account.""",100:cutCommLinkNoText:Cut the comm link,"Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
