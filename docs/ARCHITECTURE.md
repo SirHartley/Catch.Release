@@ -524,7 +524,9 @@ Fish in cargo.
 ### `campaign/fish/crab`
 Crablobab's four wares. The stall itself is `AddBarEvents` rows in `rules.csv` — no Java; only the
 wares are Java. Buying either switchable curio routes through the shared `Baha?` correction before
-returning to the stall; the switch itself lives in the Fisherman's outfitter.
+returning to the stall; the switch itself lives in the Fisherman's outfitter. His full introduction
+records the first meeting when it opens; later bar visits use the established-customer greeting and
+retain routes to the merchandise, crab question and exit.
 
 | File | What it does |
 |---|---|

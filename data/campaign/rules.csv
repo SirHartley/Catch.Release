@@ -1288,7 +1288,8 @@ catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
 $catchreleaseCrabAny
 $catchreleaseStage >= 6
 $catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
-catchrelease_crabBar,DialogOptionSelected,$option == catchrelease_crabBar,,"""Terrible!""
+catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
+!$global.catchrelease_metCrablobab",$global.catchrelease_metCrablobab = true 0,"""Terrible!""
 
 He says it with obvious satisfaction.
 
@@ -1303,6 +1304,20 @@ This is not a question.
 ""Excellent. You need things.""","0:catchrelease_crabStall:""What sort of things?""
 10:catchrelease_crabCrabs:""Why the crabs?""
 100:catchrelease_crabLeave:Decline whatever this is becoming",
+catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
+$global.catchrelease_metCrablobab",,"""Back!""
+
+Crablobab says it with obvious satisfaction.
+
+One of the crabs has got as far as the next stool. He returns it to the crate through a pocket in his coat.
+
+""Introductions already done. Saves time twice.""
+
+He looks expectantly at your empty hands.
+
+""You need things.""","0:catchrelease_crabStall:""Show me what you have""
+10:catchrelease_crabCrabs:""Why the crabs?""
+100:catchrelease_crabLeave:Leave",
 catchrelease_crabCrabs,DialogOptionSelected,$option == catchrelease_crabCrabs,,"""Crabs!""
 
 He looks down at the crate as if reminded.
