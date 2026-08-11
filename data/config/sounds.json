@@ -1,10 +1,7 @@
 {
+
 	"catchrelease_ui_searchlight_loop":[
 		{"file":"sounds/catchrelease/spotlight/spotlight_loop.ogg","pitch":1.0,"volume":0.8},
-	],
-
-	"catchrelease_coherence_whispers":[
-		{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":1,"volume":1},
 	],
 
 	"catchrelease_ui_searchlight_on":{
@@ -24,8 +21,51 @@
 		],
 	},
 
+	#fish cargo
+
+	"catchrelease_cargo_fish_pickup":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/fish_pickup_2.ogg","pitch":1,"volume":1},
+		],
+	},
+	"catchrelease_cargo_fish_drop":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/fish_drop_2.ogg","pitch":1,"volume":0.85},
+		],
+	},
+
+	"catchrelease_cargo_crate_pickup":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/drum_pickup.ogg","pitch":1,"volume":0.35},
+		],
+	},
+
+	"catchrelease_cargo_crate_drop":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/drum_drop.ogg","pitch":1,"volume":0.35},
+		],
+	},
+	"catchrelease_cargo_pile_pickup":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/pile_pickup.ogg","pitch":1,"volume":0.3},
+		],
+	},
+
+	"catchrelease_cargo_pile_drop":{
+		"sounds":[
+			{"file":"sounds/catchrelease/sfx/pile_drop.ogg","pitch":1,"volume":0.3},
+		],
+	},
+
+	#coherence,
+
+	"catchrelease_coherence_whispers":[
+	{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":1,"volume":1},
+	],
+
+	#UI
 	"skillshot_denied": [
-		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 1},
+		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 0.3},
 	],
 
 	"ui_char_increase_aptitude":{

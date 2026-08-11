@@ -1,8 +1,7 @@
 ---------------------
 
 todo
-    - The Ribcage fishing hub
-    - Main quest tie-in (fish the 4th drone for galatia)
+
     - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
@@ -10,63 +9,60 @@ todo
 scrapped
     - Fishing logistics ships
     - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate //irrelevant because selling fish on open market and storing fish doesnt matter. Trading in fish also doesn't matter...
+    - The Ribcage fishing hub
+    - Main quest tie-in (fish the 4th drone for galatia)
 
 ---------------------
 qa_
 
-Crabolabob
-- Tells you to go see Baha about the Outfitter when it comes to enabling or disabling things. Ask back - "Baha?" - Response: "Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?"
-
-Cargo
-- If a catch pile is undone, any fish you only have 1 unit of in the pile should unravelled as fish, not as fish boxes.
-
 General
-- Rename Coherence level: Settled to Unsettled
+- Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
 Aquarium
-- BG selector can only display 9 entries including "return" and doesn't have a "next/last page" button. Should have a paginated option set.
-
-Pond
-- Viewport snapper still unreliable, doesn't always lock when opening pond
-- ROD can double fire due to low CD - increase.
-
-QOL
-- LYNE-Drone auto dispatch (feels like a cheat...)
-
-Sound
-- Fish got wrong sounds - should be organs
-- Minigame lacks soundstrack
-- Celebration tush on catch & extra for treasure
-- "Got treasure" notif when successfully taking in treasure
-- Harpoon needs activation, catch and retract sounds
-
-Codex
-- open map from codex still broken
-
-Tutorial
-- Stages don't telegraph well
-- Text is a mess
-- Dialogue tree is a mess
-- Fisherman acts as if you were in another system when you are not
-- Half the dialogue lacks quest info
+- Common background text entries should be white in list
 
 Fisherman
-- Rumors don't tell you a rumor in text, it just gives you an intel. That's trash.
+- Ask about something else - if a question was asked and is correctly sorted to the back of the list, it should be "highlighted" grey like the "sell common catch" option
 
-Interaction
-- Fleets camping unstable fabric spots never engage and don't have dialogue - also don't lock out the spot.
-- Revenge fleets have zero origin info about them and also don't have dialogue
+Quests
+- All quests and tasks that the player acccepts should go into the "accepted" tab in intel.
+- "Schematic BP" tooltip needs some serious work
 
-Map
-- Coherence overlay to be an unlock?
+Shop
+- Remove Lamp Identify upgrade, redundant with latest changes
+- Un-purchaseable upgrades lines should have grey line background
+- Un-purchaseable upgrade rungs should be coloured grey instead of default blue
+
+Sound
+- Minigame lacks soundstrack
+- Celebration tush on catch & extra for treasure
+- "Got treasure" notif when successfully taking in treasure. Should be a fading label where the trasure was? Maybe add treasure icon below the minigame?
+- Harpoon needs activation, catch and retract sounds
+
+---------------------
+Impactful Upgrades
+
+The Radial Rig
+- Should probably feature a questline to get - scientist?
+
+The LYNE Breach Lamp Upgrade
+- Should probably also feature a questline to get - scientist?
+- Breach lamp ROD drone tackle should be unlocked for purchase by extremely hard fisherman quest, not purchaseable by default (possibly: bring a legendary)
+
+The LYNE drone Auto-Dispatcher
+- Should probably also feature a questline to get - scientist?
 
 ---------------------
 
 handed off_
 
+
 ---------------------
 
 self_
+- Industry icon
+- Fix fish crate display icon
+- fish heading all wrong
 - Adjust skillshot fleet dir indicator for size, arrow too large
 - fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
 - Icons
@@ -76,6 +72,28 @@ self_
 - box fish
 - radioactive fish
 - Suspicious lack of shark, turtle and whale
+
+---------------------
+
+Tutorial
+
+The Rating on the planet / in a bar should still be present and still send you to the local fisherman fleet.
+
+Once you interact with the fleet, the fisherman should still provide the Tutorial:
+Tutorial goes
+Sent by source ->
+Interact with fleet ->
+get tutorial ecnounter and be given ROD / LINE (same ability) ->
+Sent to local fishing pond to get one fish ->
+Return, get explanation of LINE drones. Get explanation of what fish are (patterns assumed by the ghosts). ->
+Get sent to another system close to the core with lower stability to get another fish ->
+Fisherman is present there, as well, and, when asked, doesn't really explain ->
+you bring him the fish and unlock the upgrade shop (NO entries for equipment you do not have! This means no entries for the Harpoon and the Breach Lights yet, neither upgrade nor tackle!) ->
+Once you bring the second fish, you get the harpoon and breach lights, an explanation on what they are, how to use them, and the third quest: Catch a fish with the breach lights & Harpoon, again, golden quest fish.
+Bring it to unlock the remaining entries in the shop and unlock the next quest ->
+You get two survey data entries of common fish for free, an explanation on what survey data is and how it works.
+You get a quest to bring back both of these fish. You also get an explanation of the fishing planner in the map section, because since there are now multiple targets, you should plan that trip properly. ->
+Once you bring those two back, you get rewarded with the survey purchasing screen being unlocked and four free additional surveys, two common, one uncommon, one rare.
 
 ---------------------
 
