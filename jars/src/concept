@@ -18,6 +18,10 @@ qa_
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
+Minigame
+- God rays look terrible, look at aquarium and do similar to that
+- Treasure card: very long names like blueprints should wrap around lines instead of making the screen extremely wide
+
 Aquarium
 - Common background text entries should be white in list
 
@@ -25,13 +29,14 @@ Fisherman
 - Ask about something else - if a question was asked and is correctly sorted to the back of the list, it should be "highlighted" grey like the "sell common catch" option
 
 Quests
-- All quests and tasks that the player acccepts should go into the "accepted" tab in intel.
+- All quests and tasks that th<e player acccepts should go into the "accepted" tab in intel.
 - "Schematic BP" tooltip needs some serious work
 
 Shop
+- Unlocked rungs should be light blue player colour, not yellow
 - Remove Lamp Identify upgrade, redundant with latest changes
 - Un-purchaseable upgrades lines should have grey line background
-- Un-purchaseable upgrade rungs should be coloured grey instead of default blue
+- Un-purchaseable upgrade rung square icons should be coloured grey instead of default blue
 
 Sound
 - Minigame lacks soundstrack
