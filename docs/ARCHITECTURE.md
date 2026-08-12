@@ -170,6 +170,13 @@ There is no plugin behind it — see the gotcha below.
 **`data/config/sounds.json`** — 6 ids of our own, merged into vanilla's ~600. Ability sounds are
 named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
+**`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to the
+loose `data.console.commands.AllFish` script and accepts one positive amount while on the campaign
+map or at a market. It reads the merged fish table, rolls that many real specimens of every species,
+and adds one species crate per row to player cargo. Console Commands remains optional: its own
+loader is the only code that loads the script, and it is deliberately not a `mod_info.json`
+dependency or part of the main module source root.
+
 ---
 
 ## The rules.csv contract
