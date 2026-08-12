@@ -1,2 +1,3 @@
 command,class,tags,syntax,help
 AllFish,data.console.commands.AllFish,"catchrelease,cheat,campaign,market",allfish <amount>,"Adds the specified number of every fish species to the player fleet's cargo."
+AddFish,data.console.commands.AddFish,"catchrelease,cheat,campaign,market",addfish <fish id or name> <amount>,"Adds a fish species by id or name. Partial names, typo correction, and autocomplete suggestions are supported."
