@@ -350,11 +350,6 @@ public class FishingIntro {
         FishRumors.ensureTutorialLead();
     }
 
-    /** Gives already-completed saves the same first lead as a live graduation hand-in. */
-    public static void ensureGraduationRumor() {
-        if (isAtLeast(DONE)) FishRumors.ensureTutorialLead();
-    }
-
     //---------------------------------------------------------------- the targets
 
     /** What the current errand wants, and where it is. */
@@ -854,43 +849,6 @@ public class FishingIntro {
         assignSlot(abilityId);
 
         if (text != null) AddRemoveCommodity.addAbilityGainText(abilityId, text);
-    }
-
-    /**
-     * One-way save migration for the dev-era outfitter ability.
-     * <p>
-     * The outfitter now opens only through a Fisherman or a colony conservatory. Remove both the
-     * owned ability and every hotbar reference so an upgraded save follows the same access rule.
-     */
-    public static void removeLegacyOutfitterAbility() {
-        String id = TutorialConstants.LEGACY_OUTFITTER;
-
-        if (Global.getSector().getCharacterData().getAbilities().contains(id)) {
-            Global.getSector().getCharacterData().removeAbility(id);
-        }
-
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player != null && player.hasAbility(id)) player.removeAbility(id);
-
-        Global.getSector().getCharacterData().getMemoryWithoutUpdate().unset("$ability:" + id);
-
-        AbilitySlotsAPI slots = Global.getSector().getUIData().getAbilitySlotsAPI();
-        if (slots == null) return;
-
-        int was = slots.getCurrBarIndex();
-
-        try {
-            for (int bar = 0; bar < 5; bar++) {
-                slots.setCurrBarIndex(bar);
-
-                for (AbilitySlotAPI slot : slots.getCurrSlotsCopy()) {
-                    if (id.equals(slot.getAbilityId())) slot.setAbilityId(null);
-                    if (id.equals(slot.getInHyperAbilityId())) slot.setInHyperAbilityId(null);
-                }
-            }
-        } finally {
-            slots.setCurrBarIndex(was);
-        }
     }
 
     protected static void assignSlot(String abilityId) {

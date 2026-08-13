@@ -22,9 +22,6 @@ public class TutorialConstants {
             "catchrelease_harpoon",
     };
 
-    /** Removed ability-bar outfitter id, retained for one-way cleanup of existing saves. */
-    public static final String LEGACY_OUTFITTER = "catchrelease_shop";
-
     /** Free charts handed out along the way: two to learn on, then the graduation package. */
     public static final int FREE_COMMONS = 2;
     public static final int[] GRADUATION_CHARTS = {2, 1, 1};
@@ -37,8 +34,6 @@ public class TutorialConstants {
     public static final String WRECK_ENTITY_ID = "catchrelease_TutorialWreck";
     public static final String WRECK_PLACED_KEY = "$catchrelease_wreckPlaced";
     public static final String WRECK_NAME = "Derelict Cruiser";
-    public static final String WRECK_TAG = "catchrelease_tutorial_wreck";
-
     /** Whether the player recovered the Fisherman's LYNE service assembly from the wreck. */
     public static final String FISHER_PROPERTY_KEY = "$catchrelease_fisherProperty";
 
@@ -75,8 +70,6 @@ public class TutorialConstants {
 
     /** How many markets the player has walked into, before the bar version turns up. */
     public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";
-    public static final int MARKETS_BEFORE_APPROACH = 2;
-
     //---------------------------------------------------------------- the interception
 
     public static final float INTERCEPT_SPAWN_DISTANCE = 2600f;

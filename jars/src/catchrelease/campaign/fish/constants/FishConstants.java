@@ -363,13 +363,6 @@ public class FishConstants {
     public static final float ITEM_MARK_BACKING_PAD = 1f;
     public static final float ITEM_MARK_BACKING_ALPHA = 0.6f;
 
-    /**
-     * A specimen shows its own species icon, so the item spec's icon must stay blank (the cargo
-     * view draws it first, before the plugin can draw anything). FALLBACK is used where there's
-     * no specimen to read a species from (the codex). MOUSEOVER_MULT matches the cargo view's
-     * own hover highlight.
-     */
-    public static final String ITEM_ICON_BLANK = "graphics/catchrelease/icon/blank.png";
     public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
     public static final float ITEM_ICON_INSET = 5f;
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
@@ -381,24 +374,6 @@ public class FishConstants {
      */
     public static final String CODEX_CATEGORY_TITLE = "Fish";
     public static final String CODEX_CATEGORY_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
-    public static final float CODEX_MAP_WIDTH = 320f;
-    public static final float CODEX_MAP_HEIGHT = 200f;
-    public static final float CODEX_MAP_PAD = 8f;
-    public static final float CODEX_MAP_DOT_SIZE = 1f;
-    public static final float CODEX_MAP_DOT_ALPHA = 0.75f;
-    public static final float CODEX_MAP_MARK_RADIUS = 14f;
-    public static final float CODEX_MAP_MARK_FILL_ALPHA = 0.18f;
-    public static final float CODEX_MAP_MARK_PULSE = 0.12f;
-    public static final float CODEX_MAP_MARK_PULSE_RATE = 2.4f;
-
-    /**
-     * Sector map intel entry. A marker means an actual catch was landed there; a lit system is
-     * only a hint from unconfirmed location data. The map is vanilla's own - only the sidebar
-     * geometry belongs to this side.
-     */
-    public static final String MAP_INTEL_TITLE = "Catch locations";
-    public static final float MAP_SIDEBAR_WIDTH = 240f;
-
     /**
      * Buried motes: hidden under the fabric until a searchlight impression reveals them, taken
      * through by harpoon. POPULATION is a standing count kept near the player, not a spawn rate.
