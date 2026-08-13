@@ -112,11 +112,30 @@ public class UpgradeManager {
         for (UpgradeStat stat : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) levelMap.put(stat.id, stat);
     }
 
+    /**
+     * Re-reads the sheet into the save on every load: sheet-owned figures refresh on stats the
+     * save already holds, and a stat that is in the sheet but not in the save is seeded fresh -
+     * without that, an upgrade added to {@code UpgradeData.csv} after a campaign began would
+     * never reach its outfitter, because the shop reads this map and not the sheet. Only the
+     * level itself belongs to the save. A stat the sheet no longer carries keeps its last-known
+     * figures rather than tripping over the missing row.
+     */
     public void updateBaseValues(){
-        for (UpgradeStat stat : levelMap.values()){
-            UpgradeStat loadedStat = UpgradeStatLoader.getUpgradeStat(stat.id);
-            stat.increasePerLevel = loadedStat.increasePerLevel;
-            stat.baseValue = loadedStat.baseValue;
+        for (UpgradeStat loaded : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) {
+            UpgradeStat held = levelMap.get(loaded.id);
+
+            if (held == null) {
+                levelMap.put(loaded.id, loaded);
+                continue;
+            }
+
+            held.baseValue = loaded.baseValue;
+            held.baseType = loaded.baseType;
+            held.increasePerLevel = loaded.increasePerLevel;
+            held.upgradeType = loaded.upgradeType;
+            held.maxLevel = loaded.maxLevel;
+            held.description = loaded.description;
+            held.category = loaded.category;
         }
     }
 }
