@@ -39,6 +39,15 @@ public enum FishRarity {
         this.wanderMult = wanderMult;
     }
 
+    /** The rung at this ladder position - {@link #rank}'s reverse, for tables indexed by rung. */
+    public static FishRarity ofRank(int rank) {
+        for (FishRarity rarity : values()) {
+            if (rarity.rank == rank) return rarity;
+        }
+
+        throw new IllegalArgumentException("No fish rarity at rank " + rank);
+    }
+
     public static FishRarity parse(String name, FishRarity fallback) {
         if (name == null) return fallback;
 

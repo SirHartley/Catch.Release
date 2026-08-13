@@ -251,7 +251,7 @@ public class FishermanShelf {
             offer.spec = spec;
 
             int rung = spec.rarity.rank;
-            offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.values()[rung - 1];
+            offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.ofRank(rung - 1);
             offer.costCount = rung == 0 ? 1 : FishermanConstants.SURVEY_COST;
 
             offers.add(offer);

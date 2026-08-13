@@ -169,7 +169,7 @@ public class FishingIntro {
         //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
         giveCharts(TutorialConstants.FREE_COMMONS, null);
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.values()[rung],
+            giveChartsOfRarity(FishRarity.ofRank(rung),
                     TutorialConstants.GRADUATION_CHARTS[rung]);
         }
 
@@ -341,7 +341,7 @@ public class FishingIntro {
         dropNote();
 
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.values()[rung], TutorialConstants.GRADUATION_CHARTS[rung]);
+            giveChartsOfRarity(FishRarity.ofRank(rung), TutorialConstants.GRADUATION_CHARTS[rung]);
         }
 
         rememberSeen();
