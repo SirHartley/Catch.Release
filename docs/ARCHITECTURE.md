@@ -424,8 +424,8 @@ The Breach Conservatory: the structure that brings the fishing trade to the play
 ### `campaign/fish/fisherman`
 The fishing trade. **One man, many boats** — a standing trawler in every inhabited system working the
 outer reaches off one shared shelf, and a visiting one that turns up in uninhabited water for a
-fortnight with a shelf of its own. Every one of them answers with the same face, and none of them
-explains how.
+fortnight with a shelf of its own. Every one of them answers as the same person, whose portrait
+follows the local five-rung coherence reading, and none of them explains how.
 
 | File | What it does |
 |---|---|
@@ -439,7 +439,7 @@ explains how.
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed - at which point the claim comes off the rupture, the planted specimen comes out of the water and the note turns into "take it back". Hand-over uses the shared exact-specimen picker, then removes every matching intel note from a snapshot because Starsector exposes the manager's live repository list. Its `QuestIntel` is a `FishAsker`, shows the shared rarity-backlit fish portrait (a silhouette until its target has been landed), colours the named quarry by rarity, and carries the bullets vanilla's mission notes carry |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language. It clears the host interaction's options immediately before opening its custom visual, and hands the Fisherman's sheet back exactly once on every close route |
 | `FishermanMapIcon.java` | The boat's mark on the system map — one per boat while the player shares its location, with old-save duplicates and marks in departed locations reconciled away |
-| `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin |
+| `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin. The five portraits follow `FishItemPlugin`'s canonical coherence bands; `preparePortrait` mutates the shared person only for the boat being hailed, immediately before vanilla draws the comm portrait, so off-screen boats cannot overwrite it |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose and counts down against the rumor's own timestamp. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
@@ -533,7 +533,7 @@ Fish in cargo.
 | File | What it does |
 |---|---|
 | `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes — and `unbox`, which expands crates and the pile into independently selectable specimens before a hand-off picker |
-| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Owns the shared coherence-label ladder used by cargo, catch results, ruptures and the terrain readout; its first non-stable rung is `unsettled` |
+| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Owns the shared five-band coherence ladder used by cargo, catch results, ruptures, the terrain readout and the Fisherman's portraits; its first non-stable rung is `unsettled` |
 | `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile, and the contained species' art is perspective-fitted to the four measured corners of the box label |
 | `FishPileItemPlugin.java` | Every fish aboard on one line; right-click restores lone species as loose specimens and repeated species as crates |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell, including a vanilla-blueprint-style four-corner icon pass for box labels |
@@ -1086,17 +1086,22 @@ which is a per-frame override rather than a setting and is how vanilla drives it
 re-applied each tick rather than set at spawn, so it heals a boat that predates it.
 
 **The Fisherman is one person, made once — and he is on every boat.** Every other fleet in the game
-is fresh hulls under a fresh officer with a fresh name; he deliberately is not, because the same face
-turning up four jumps and eight months later is the point of him. Standing boat or visiting one, the
-encounter shows the same portrait and says nothing about it. The flag that separates the two is
+is fresh hulls under a fresh officer with a fresh name; he deliberately is not, because the same
+person turning up four jumps and eight months later is the point of him. Standing boat or visiting
+one, the encounter shows the portrait belonging to the local coherence band and says nothing about
+it. The flag that separates the two is
 `$catchrelease_fisherman_visiting`, and it is about the *schedule* — nothing about who the player is
 talking to hangs off it. `FishermanIdentity` keeps the `PersonAPI` in sector
 memory and hands the same object back at every spawn, and the encounter shows the portrait rather
 than a fleet readout — a thing a hull list cannot say. What changes is how well he is holding:
 `getDrift()` reads the system's own instability through `Aberration.baseAt` (the deterministic
-figure, not a specimen's jittered one), and the boat's name, the greeting, and its map-tooltip line all
-come apart by degrees as it climbs. Letters are taken out by position, so the same system spells him
-wrong the same way every time — the degradation is a fact about the water, not an animation.
+figure, not a specimen's jittered one), and the boat's name, portrait, greeting, and map-tooltip line
+all come apart by degrees as it climbs. The portrait uses the complete five-rung specimen ladder;
+the existing rules greetings keep their coarser four bands. Since every boat shares the same mutable
+`PersonAPI`, `CatchReleaseCMD tokens` applies the hailed boat's portrait during `OpenCommLink`, before
+vanilla calls `showPersonInfo`; background boats never compete over it. Letters are taken out by
+position, so the same system spells him wrong the same way every time — the degradation is a fact
+about the water, not an animation.
 
 **All dialogue is in the sheet — all of it.** The Fisherman's whole conversation, the introduction's
 six lessons, the hulk, the castaway and the bar rating are rows in `rules.csv`. Java is reached only

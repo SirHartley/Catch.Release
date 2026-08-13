@@ -158,7 +158,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (fleet == null) return;
 
         tooltip.addTitle(fleet.getNameWithFaction());
-        int band = FishermanIdentity.getBand(FishermanIdentity.getDrift(fleet));
+        int band = FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(fleet));
         tooltip.addPara(FishermanIdentity.corrupt(SERVICE_LINE, band), Misc.getGrayColor(), 10f);
     }
 }
