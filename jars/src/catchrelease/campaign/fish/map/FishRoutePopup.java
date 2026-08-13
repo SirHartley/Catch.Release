@@ -162,7 +162,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         //the title carries the way out in its right corner
         CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                new TitlePlugin());
+                new PaneWidgets.TitleRow("FISHING PLANNER"));
         CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
                 new PaneWidgets.TextButton(() -> "X", () -> true, host::onPlannerClosed));
         titleRow.addComponent(close).inTR(0f, 0f);
@@ -200,7 +200,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         controls.addCustom(chipRow, 8f);
 
-        CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT, new ListHeaderPlugin());
+        CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT,
+                new PaneWidgets.ListHeader(() -> rows.isEmpty()
+                        ? "SPECIES - NONE MATCH" : "SPECIES - " + rows.size()));
         controls.addCustom(header, 8f);
         controls.addTooltipTo(createLegendTooltip(), header, TooltipMakerAPI.TooltipLocation.BELOW);
 
@@ -415,92 +417,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the sidebar. ---
-
-    /** The card's name, in the header hand the sidebar's sections write in. */
-    protected class TitlePlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI titlePos;
-
-        protected transient LazyFont.DrawableString text;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            titlePos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (titlePos == null || alphaMult <= 0f) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            float x = titlePos.getX();
-            float y = titlePos.getY();
-            float h = titlePos.getHeight();
-
-            if (text == null) {
-                text = ShopUi.createText(small, "FISHING PLANNER");
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
-            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-
-            ShopUi.drawQuad(x, y, titlePos.getWidth(), 1f, Misc.getDarkPlayerColor(),
-                    0.8f * alphaMult);
-        }
-    }
-
-    /** Line over the list: what it is, how many match, and the help mark - drawn live so the
-     *  count is never stale. */
-    protected class ListHeaderPlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI headerPos;
-
-        protected transient LazyFont.DrawableString text;
-        protected transient String written;
-        protected transient LazyFont.DrawableString help;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            headerPos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (headerPos == null || alphaMult <= 0f) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            float x = headerPos.getX();
-            float y = headerPos.getY();
-            float w = headerPos.getWidth();
-            float h = headerPos.getHeight();
-
-            String wanted = rows.isEmpty() ? "SPECIES - NONE MATCH" : "SPECIES - " + rows.size();
-
-            if (text == null || !wanted.equals(written)) {
-                written = wanted;
-                text = ShopUi.createText(small, wanted);
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
-            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-
-            if (help == null) {
-                help = ShopUi.createText(small, "?");
-                help.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
-            }
-
-            help.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-            help.draw(Math.round(x + w - 2f), Math.round(y + h * 0.5f + help.getHeight() * 0.5f));
-
-            ShopUi.drawQuad(x, y, w, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
-        }
-    }
 
     /** The answer-back line above the button, gone the moment there is nothing to answer. */
     protected class NoticePlugin extends BaseCustomUIPanelPlugin {

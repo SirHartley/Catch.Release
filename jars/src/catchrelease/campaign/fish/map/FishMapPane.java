@@ -261,7 +261,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 "Clear the picked species and return to shading whole categories."),
                 deselect, TooltipMakerAPI.TooltipLocation.BELOW);
 
-        CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT, new ListHeaderPlugin());
+        CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT,
+                new PaneWidgets.ListHeader(() -> shownCount == 0
+                        ? "SPECIES - NONE MATCH" : "SPECIES - " + shownCount));
         controls.addCustom(header, 8f);
         controls.addTooltipTo(createLegendTooltip(), header, TooltipMakerAPI.TooltipLocation.BELOW);
 
@@ -398,56 +400,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the planner. ---
-
-    /** Line over the list: what it is, how many match, and the help mark - drawn live so the
-     *  count is never stale. */
-    protected class ListHeaderPlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI headerPos;
-
-        protected transient LazyFont.DrawableString text;
-        protected transient String written;
-        protected transient LazyFont.DrawableString help;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            headerPos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (headerPos == null || alphaMult <= 0f) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            float x = headerPos.getX();
-            float y = headerPos.getY();
-            float w = headerPos.getWidth();
-            float h = headerPos.getHeight();
-
-            String wanted = shownCount == 0 ? "SPECIES - NONE MATCH" : "SPECIES - " + shownCount;
-
-            if (text == null || !wanted.equals(written)) {
-                written = wanted;
-                text = ShopUi.createText(small, wanted);
-                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
-            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-
-            if (help == null) {
-                help = ShopUi.createText(small, "?");
-                help.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
-            }
-
-            help.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-            help.draw(Math.round(x + w - 2f), Math.round(y + h * 0.5f + help.getHeight() * 0.5f));
-
-            ShopUi.drawQuad(x, y, w, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
-        }
-    }
 
     /** One species row: rarity-coloured accent bar, a circle marking caught (filled) vs
      *  range-only (hollow), and the name. Bar stays lit while its waters are on the map;

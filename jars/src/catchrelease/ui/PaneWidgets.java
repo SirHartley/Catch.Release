@@ -182,6 +182,149 @@ public final class PaneWidgets {
         }
     }
 
+    /** A pane's name, in the header hand the sidebar's sections write in: small caps at the
+     *  left, the quiet one-pixel rule along the bottom. */
+    public static class TitleRow extends BaseCustomUIPanelPlugin {
+
+        protected final String label;
+
+        protected PositionAPI titlePos;
+
+        protected transient LazyFont.DrawableString text;
+
+        public TitleRow(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            titlePos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (titlePos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = titlePos.getX();
+            float y = titlePos.getY();
+            float h = titlePos.getHeight();
+
+            if (text == null) {
+                text = ShopUi.createText(small, label);
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+
+            ShopUi.drawQuad(x, y, titlePos.getWidth(), 1f, Misc.getDarkPlayerColor(),
+                    0.8f * alphaMult);
+        }
+    }
+
+    /**
+     * Line over a list: what it is and how many match, with the help mark at the right end.
+     * The label is read every frame, so a count in it is never stale; the {@code ?} brightens
+     * under the mouse the way the standalone {@link HelpMark} does, since both wear a tooltip.
+     */
+    public static class ListHeader extends BaseCustomUIPanelPlugin {
+
+        protected final Supplier<String> label;
+
+        protected PositionAPI headerPos;
+
+        protected transient LazyFont.DrawableString text;
+        protected transient String written;
+        protected transient LazyFont.DrawableString help;
+
+        public ListHeader(Supplier<String> label) {
+            this.label = label;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            headerPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (headerPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = headerPos.getX();
+            float y = headerPos.getY();
+            float w = headerPos.getWidth();
+            float h = headerPos.getHeight();
+
+            String wanted = label.get();
+
+            if (text == null || !wanted.equals(written)) {
+                written = wanted;
+                text = ShopUi.createText(small, wanted);
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+
+            if (help == null) {
+                help = ShopUi.createText(small, "?");
+                help.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+            }
+
+            boolean hovered = ShopUi.contains(x + w - 2f - help.getWidth(), y,
+                    help.getWidth() + 2f, h,
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            help.setBaseColor(ShopUi.withAlpha(
+                    hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
+            help.draw(Math.round(x + w - 2f), Math.round(y + h * 0.5f + help.getHeight() * 0.5f));
+
+            ShopUi.drawQuad(x, y, w, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
+        }
+    }
+
+    /** A lone {@code ?} wearing an explanation as a hover: gray until the mouse asks. */
+    public static class HelpMark extends BaseCustomUIPanelPlugin {
+
+        protected PositionAPI markPos;
+
+        protected transient LazyFont.DrawableString mark;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            markPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (markPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            if (mark == null) {
+                mark = ShopUi.createText(small, "?");
+                mark.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            boolean hovered = ShopUi.contains(markPos.getX(), markPos.getY(),
+                    markPos.getWidth(), markPos.getHeight(),
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            mark.setBaseColor(ShopUi.withAlpha(
+                    hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
+            mark.draw(Math.round(markPos.getX() + (markPos.getWidth() - mark.getWidth()) * 0.5f),
+                    Math.round(markPos.getY() + markPos.getHeight() * 0.5f
+                            + mark.getHeight() * 0.5f));
+        }
+    }
+
     /**
      * A text button in the pane's manner: dark field, centred small-font label, brighter under
      * the mouse. Label and liveness are read every frame, so a button whose words carry a count
