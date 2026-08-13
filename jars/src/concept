@@ -18,6 +18,9 @@ qa_
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
+Cohesion
+- Cohesion should be increased by colonies. If there's a colony, cohesion must be Stable. Colonies should stabilize their surroundings within 5LY with a falloff - similar to a source of instability, these are a source of stability. Make sure the map accounts for this.
+
 Minigame
 - God rays look terrible, look at aquarium and do similar to that
 - Treasure card: very long names like blueprints should wrap around lines instead of making the screen extremely wide
