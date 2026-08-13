@@ -109,9 +109,9 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
             if (!event.isLMBDownEvent()) continue;
             if (!contains(event.getX(), event.getY())) continue;
 
-            event.consume();
             Global.getSoundPlayer().playUISound(PaneWidgets.CLICK_SOUND, 1f, 1f);
             onRowClick(event.getX(), event.getY());
+            event.consume();
 
             return;
         }
