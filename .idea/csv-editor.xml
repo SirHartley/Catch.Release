@@ -10,20 +10,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\campaign\backdrops.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\campaign\bar_events.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\campaign\fish.csv">
           <value>
             <Attribute>
@@ -31,42 +17,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\campaign\industries.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\data\campaign\rules.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\campaign\special_items.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\config\UpgradeData.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\config\version\version_files.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data\console\commands.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

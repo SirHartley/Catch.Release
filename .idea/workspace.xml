@@ -1,512 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
-  </component>
   <component name="ChangeListManager">
-    <list default="true" id="10ff71ca-4463-4735-88ed-e7d34ff715a3" name="Changes" comment="fisherman portraits">
-      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Run_Starsector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/Run_Starsector.xml" afterDir="false" />
+    <list default="true" id="96bbe5d3-7b0d-45a6-951f-64d3120120cb" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/catchrelease_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Run_Starsector.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catchrelease.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/console/commands.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/console/commands.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/console/commands/AddFish.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/commands/AddFish.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/console/commands/AllFish.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/commands/AllFish.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catchrelease.iml" beforeDir="false" afterPath="$PROJECT_DIR$/catchrelease.iml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;SirHartley&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/SirHartley/Catch.Release.git&quot;,
-    &quot;accountId&quot;: &quot;d912d041-a01d-4fc0-ab05-9eb4e33ec028&quot;
-  }
-}</component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/lwjgl.jar!/org/lwjgl/input/Keyboard.class" root0="SKIP_INSPECTION" />
-    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/SoundPlayerAPI.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/campaign/CargoAPI.java" root0="SKIP_INSPECTION" />
-    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/util/Misc.java" root0="SKIP_INSPECTION" />
-  </component>
-  <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
-  </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 3
-}</component>
-  <component name="ProjectId" id="2uLZFDNKcqyKJJjl0sXmPLoXxLe" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="3HsWqpJWLwaVwQ8DBiWwyv3Kdbh" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Application.Run Starsector.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Modding/Libs/MagicLib/src",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "Artifacts",
     "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie"
+    "project.structure.side.proportion": "0.2"
   }
 }]]></component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\helper\math" />
-      <recent name="D:\Starsector\mods\Catch.Release\data\config" />
-      <recent name="D:\Starsector\mods\Catch.Release\data\catchrelease\shaders" />
-      <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease" />
-      <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
-      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\skillshot" />
-      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease\skillshot" />
-      <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease" />
-    </key>
-    <key name="MoveMembersDialog.RECENTS_KEY">
-      <recent name="catchrelease.hyperrift.constants.PondConstants" />
-    </key>
-    <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="catchrelease.abilities.rod.entities" />
-      <recent name="catchrelease.abilities.rod.animation" />
-      <recent name="catchrelease.animation.particles" />
-      <recent name="catchrelease.campaign.ponds.entities" />
-      <recent name="catchrelease.entities" />
+      <recent name="C:\Modding\mods\Catch.Release\.idea" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="10ff71ca-4463-4735-88ed-e7d34ff715a3" name="Changes" comment="" />
-      <created>1742029708689</created>
+      <changelist id="96bbe5d3-7b0d-45a6-951f-64d3120120cb" name="Changes" comment="" />
+      <created>1786657451291</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1742029708689</updated>
+      <updated>1786657451291</updated>
     </task>
-    <task id="LOCAL-00001" summary="Smth broke">
-      <option name="closed" value="true" />
-      <created>1742032468672</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1742032468672</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Initial Commit">
-      <option name="closed" value="true" />
-      <created>1765720622686</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1765720622686</updated>
-    </task>
-    <task id="LOCAL-00003" summary="fishing spot alpha test">
-      <option name="closed" value="true" />
-      <created>1765755869548</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1765755869548</updated>
-    </task>
-    <task id="LOCAL-00004" summary="file structure&#10;basic fish pond spawning">
-      <option name="closed" value="true" />
-      <created>1766092211465</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1766092211465</updated>
-    </task>
-    <task id="LOCAL-00005" summary="parallax, pond visuals">
-      <option name="closed" value="true" />
-      <created>1766182250629</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1766182250629</updated>
-    </task>
-    <task id="LOCAL-00006" summary="shader-based render setup instead of stencil-based">
-      <option name="closed" value="true" />
-      <created>1766334208562</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1766334208562</updated>
-    </task>
-    <task id="LOCAL-00007" summary="fishing pond glow border">
-      <option name="closed" value="true" />
-      <created>1766359419546</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1766359419546</updated>
-    </task>
-    <task id="LOCAL-00008" summary="start on search lights&#10;search light soundwork">
-      <option name="closed" value="true" />
-      <created>1766443850490</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1766443850490</updated>
-    </task>
-    <task id="LOCAL-00009" summary="searchlight water ripple effect">
-      <option name="closed" value="true" />
-      <created>1766783045825</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1766783045825</updated>
-    </task>
-    <task id="LOCAL-00010" summary="more searchlights, stats">
-      <option name="closed" value="true" />
-      <created>1766862873966</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1766862873966</updated>
-    </task>
-    <task id="LOCAL-00011" summary="Restructured&#10;Pond ripple indicators&#10;ROD initial impl (no animations)&#10;Icon">
-      <option name="closed" value="true" />
-      <created>1766934729455</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1766934729455</updated>
-    </task>
-    <task id="LOCAL-00012" summary="ROD animation&#10;More moving things around">
-      <option name="closed" value="true" />
-      <created>1766940719945</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1766940719945</updated>
-    </task>
-    <task id="LOCAL-00013" summary="fish images">
-      <option name="closed" value="true" />
-      <created>1766962865932</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1766962865932</updated>
-    </task>
-    <task id="LOCAL-00014" summary="fish images">
-      <option name="closed" value="true" />
-      <created>1767051143546</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1767051143546</updated>
-    </task>
-    <task id="LOCAL-00015" summary="fish images">
-      <option name="closed" value="true" />
-      <created>1767130273390</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1767130273390</updated>
-    </task>
-    <task id="LOCAL-00016" summary="spotlight visuals, behaviour and sound">
-      <option name="closed" value="true" />
-      <created>1767191460314</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1767191460314</updated>
-    </task>
-    <task id="LOCAL-00017" summary="some more searchlight fiddling">
-      <option name="closed" value="true" />
-      <created>1767192477015</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1767192477015</updated>
-    </task>
-    <task id="LOCAL-00018" summary="Added skillshot framework">
-      <option name="closed" value="true" />
-      <created>1785594228093</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1785594228093</updated>
-    </task>
-    <task id="LOCAL-00019" summary="Added skillshot framework">
-      <option name="closed" value="true" />
-      <created>1785594236628</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1785594236628</updated>
-    </task>
-    <task id="LOCAL-00020" summary="adjusting constants">
-      <option name="closed" value="true" />
-      <created>1785598155320</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1785598155320</updated>
-    </task>
-    <task id="LOCAL-00021" summary="adjusted constants &amp; UI">
-      <option name="closed" value="true" />
-      <created>1785615432545</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1785615432545</updated>
-    </task>
-    <task id="LOCAL-00022" summary="adjusted constants &amp; UI">
-      <option name="closed" value="true" />
-      <created>1785622049865</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1785622049865</updated>
-    </task>
-    <task id="LOCAL-00023" summary="adjusted constants&#10;esc now closes minigame&#10;new drone sprite &amp; scaling&#10;removed drone flicker&#10;removed trajectory indicator from rod">
-      <option name="closed" value="true" />
-      <created>1785682355362</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1785682355362</updated>
-    </task>
-    <task id="LOCAL-00024" summary="fixed descriptions">
-      <option name="closed" value="true" />
-      <created>1785698744561</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1785698744561</updated>
-    </task>
-    <task id="LOCAL-00025" summary="vulcan fish">
-      <option name="closed" value="true" />
-      <created>1785698771985</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1785698771985</updated>
-    </task>
-    <task id="LOCAL-00026" summary="vulcan fish">
-      <option name="closed" value="true" />
-      <created>1785698775225</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1785698775225</updated>
-    </task>
-    <task id="LOCAL-00027" summary="constants, todo">
-      <option name="closed" value="true" />
-      <created>1785713434602</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1785713434602</updated>
-    </task>
-    <task id="LOCAL-00028" summary="todo updates, constant update">
-      <option name="closed" value="true" />
-      <created>1785799724105</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1785799724105</updated>
-    </task>
-    <task id="LOCAL-00029" summary="completely fucked up the treasure stuff">
-      <option name="closed" value="true" />
-      <created>1785876404440</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1785876404440</updated>
-    </task>
-    <task id="LOCAL-00030" summary="concept work">
-      <option name="closed" value="true" />
-      <created>1785891085413</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1785891085413</updated>
-    </task>
-    <task id="LOCAL-00031" summary="some adjustments">
-      <option name="closed" value="true" />
-      <created>1786046381108</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1786046381108</updated>
-    </task>
-    <task id="LOCAL-00032" summary="Colour adjustments to treasure rarity scale">
-      <option name="closed" value="true" />
-      <created>1786046631560</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1786046631560</updated>
-    </task>
-    <task id="LOCAL-00033" summary="Fixed crash with shop indicator due to consumed input being accessed">
-      <option name="closed" value="true" />
-      <created>1786057210393</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1786057210393</updated>
-    </task>
-    <task id="LOCAL-00034" summary="added libs">
-      <option name="closed" value="true" />
-      <created>1786126869696</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1786126869696</updated>
-    </task>
-    <task id="LOCAL-00035" summary="fixed dev input listener">
-      <option name="closed" value="true" />
-      <created>1786130330017</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1786130330017</updated>
-    </task>
-    <task id="LOCAL-00036" summary="concept update">
-      <option name="closed" value="true" />
-      <created>1786142475513</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1786142475513</updated>
-    </task>
-    <task id="LOCAL-00037" summary="whisper sfx&#10;aquarium BG&#10;minor changes to constants">
-      <option name="closed" value="true" />
-      <created>1786223238685</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1786223238685</updated>
-    </task>
-    <task id="LOCAL-00038" summary="whisper sfx&#10;tileable HS BG">
-      <option name="closed" value="true" />
-      <created>1786227093530</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1786227093530</updated>
-    </task>
-    <task id="LOCAL-00039" summary="icons">
-      <option name="closed" value="true" />
-      <created>1786231784536</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1786231784536</updated>
-    </task>
-    <task id="LOCAL-00040" summary="backdrop &amp; icon adjustments">
-      <option name="closed" value="true" />
-      <created>1786286414034</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1786286414034</updated>
-    </task>
-    <task id="LOCAL-00041" summary="amended devshortcut with way to get all backdrops on second press">
-      <option name="closed" value="true" />
-      <created>1786286997918</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1786286997918</updated>
-    </task>
-    <task id="LOCAL-00042" summary="minor fix">
-      <option name="closed" value="true" />
-      <created>1786287367324</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1786287367324</updated>
-    </task>
-    <task id="LOCAL-00043" summary="sound work">
-      <option name="closed" value="true" />
-      <created>1786488977057</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1786488977057</updated>
-    </task>
-    <task id="LOCAL-00044" summary="fisherman portraits">
-      <option name="closed" value="true" />
-      <created>1786576982503</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1786576982503</updated>
-    </task>
-    <option name="localTasksCounter" value="45" />
     <servers />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="some more searchlight fiddling" />
-    <MESSAGE value="Added skillshot framework" />
-    <MESSAGE value="adjusting constants" />
-    <MESSAGE value="adjusted constants &amp; UI" />
-    <MESSAGE value="adjusted constants&#10;esc now closes minigame&#10;new drone sprite &amp; scaling&#10;removed drone flicker&#10;removed trajectory indicator from rod" />
-    <MESSAGE value="fixed descriptions" />
-    <MESSAGE value="vulcan fish" />
-    <MESSAGE value="constants, todo" />
-    <MESSAGE value="todo updates, constant update" />
-    <MESSAGE value="completely fucked up the treasure stuff" />
-    <MESSAGE value="concept work" />
-    <MESSAGE value="some adjustments" />
-    <MESSAGE value="Colour adjustments to treasure rarity scale" />
-    <MESSAGE value="Fixed crash with shop indicator due to consumed input being accessed" />
-    <MESSAGE value="added libs" />
-    <MESSAGE value="fixed dev input listener" />
-    <MESSAGE value="concept update" />
-    <MESSAGE value="whisper sfx&#10;aquarium BG&#10;minor changes to constants" />
-    <MESSAGE value="whisper sfx&#10;tileable HS BG" />
-    <MESSAGE value="icons" />
-    <MESSAGE value="backdrop &amp; icon adjustments" />
-    <MESSAGE value="amended devshortcut with way to get all backdrops on second press" />
-    <MESSAGE value="minor fix" />
-    <MESSAGE value="sound work" />
-    <MESSAGE value="fisherman portraits" />
-    <option name="LAST_COMMIT_MESSAGE" value="fisherman portraits" />
   </component>
 </project>
