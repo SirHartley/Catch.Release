@@ -350,8 +350,8 @@ The data model: species, individual catches, the player's log, and the enums eve
 |---|---|
 | `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
 | `FishCatch.java` | One rolled specimen — length, weight, aberration, region, exact source rupture, and how it was taken; grades, values, encodes to a backward-compatible string |
-| `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour |
-| `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers |
+| `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour. `rank` is the explicit ladder position - comparisons never read `ordinal()` |
+| `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers. `rank` is the explicit ladder position every comparison and rarity-graded price reads - never `ordinal()`, so reordering the enum cannot silently reshuffle the ladder |
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
 | `FishLog.java` | Sector-persistent per-species record; unlocks location data for codex and map |
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
@@ -487,7 +487,7 @@ Optional loot found mid-catch.
 | `MinigameTreasure.java` | A stationary timed pickup that must be held over to be taken |
 | `TreasureRoller.java` | Rolls whether treasure appears and what is in it |
 | `TreasureAward.java` | What a roll granted, for the loot card |
-| `TreasureRarity.java` | Four-tier rarity with weight and colour |
+| `TreasureRarity.java` | Four-tier rarity with weight, colour and the explicit `rank` the loot card's best-of read uses |
 
 ### `campaign/fish/entities`
 The two forms a fish takes in the world.

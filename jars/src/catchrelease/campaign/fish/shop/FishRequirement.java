@@ -94,8 +94,8 @@ public class FishRequirement {
 
         if (speciesId != null && !speciesId.equals(entry.speciesId)) return false;
         if (speciesId == null && tag != null && !spec.tags.contains(tag)) return false;
-        if (minRarity != null && spec.rarity.ordinal() < minRarity.ordinal()) return false;
-        if (minGrade != null && entry.getGrade().ordinal() < minGrade.ordinal()) return false;
+        if (minRarity != null && spec.rarity.rank < minRarity.rank) return false;
+        if (minGrade != null && entry.getGrade().rank < minGrade.rank) return false;
 
         if (minLength > 0f && entry.length < minLength) return false;
         if (minWeight > 0f && entry.weight < minWeight) return false;
@@ -134,7 +134,7 @@ public class FishRequirement {
 
         if (speciesId != null) return speciesId.equals(spec.id);
         if (tag != null && !spec.tags.contains(tag)) return false;
-        if (minRarity != null && spec.rarity.ordinal() < minRarity.ordinal()) return false;
+        if (minRarity != null && spec.rarity.rank < minRarity.rank) return false;
         if (lowCoherence && spec.tags.contains("abyssal")) return false;
 
         return true;

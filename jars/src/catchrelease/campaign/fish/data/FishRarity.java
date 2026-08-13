@@ -13,11 +13,18 @@ import java.awt.Color;
  */
 public enum FishRarity {
 
-    COMMON(Color.GRAY, 1f, 1f),
-    UNCOMMON(Color.GREEN, 1.15f, 1.3f),
-    RARE(Color.BLUE, 1.35f, 1.7f),
-    EPIC(new Color(163, 53, 238), 1.6f, 2.2f),
-    LEGENDARY(new Color(235, 55, 50), 1.9f, 2.8f);
+    COMMON(0, Color.GRAY, 1f, 1f),
+    UNCOMMON(1, Color.GREEN, 1.15f, 1.3f),
+    RARE(2, Color.BLUE, 1.35f, 1.7f),
+    EPIC(3, new Color(163, 53, 238), 1.6f, 2.2f),
+    LEGENDARY(4, new Color(235, 55, 50), 1.9f, 2.8f);
+
+    /**
+     * Where this sits on the ladder, said outright rather than read off `ordinal()` - every
+     * "at least this rare" comparison and rarity-graded price in the mod goes through it, so
+     * reordering or inserting into the enum cannot silently reshuffle all of them.
+     */
+    public final int rank;
 
     public final Color color;
 
@@ -25,7 +32,8 @@ public enum FishRarity {
     public final float speedMult;
     public final float wanderMult;
 
-    FishRarity(Color color, float speedMult, float wanderMult) {
+    FishRarity(int rank, Color color, float speedMult, float wanderMult) {
+        this.rank = rank;
         this.color = color;
         this.speedMult = speedMult;
         this.wanderMult = wanderMult;

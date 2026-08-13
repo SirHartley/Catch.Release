@@ -615,7 +615,7 @@ public class FishingIntro {
             if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
             if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
             if (!isHarpoonLessonCandidate(stage, spec)) continue;
-            if (spec.rarity.ordinal() > maximum.ordinal()) continue;
+            if (spec.rarity.rank > maximum.rank) continue;
 
             candidates.add(spec);
         }

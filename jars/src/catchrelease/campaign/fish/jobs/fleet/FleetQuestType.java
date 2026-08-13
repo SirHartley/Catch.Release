@@ -111,7 +111,7 @@ public enum FleetQuestType {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (spec.rarity.ordinal() > FishRarity.UNCOMMON.ordinal()) continue;
+            if (spec.rarity.rank > FishRarity.UNCOMMON.rank) continue;
 
             picker.add(spec, 1f);
         }

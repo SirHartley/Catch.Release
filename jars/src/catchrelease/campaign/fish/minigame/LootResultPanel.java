@@ -324,7 +324,7 @@ public class LootResultPanel {
         TreasureRarity best = TreasureRarity.COMMON;
 
         for (TreasureAward award : awards) {
-            if (award.rarity.ordinal() > best.ordinal()) best = award.rarity;
+            if (award.rarity.rank > best.rank) best = award.rarity;
         }
 
         return best;

@@ -178,7 +178,7 @@ public class FishermanShelf {
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
             if (listed.contains(spec.id)) continue;
 
-            int rung = Math.min(spec.rarity.ordinal(),
+            int rung = Math.min(spec.rarity.rank,
                     FishermanConstants.SURVEY_RARITY_WEIGHTS.length - 1);
             picker.add(spec, FishermanConstants.SURVEY_RARITY_WEIGHTS[rung]);
         }
@@ -250,7 +250,7 @@ public class FishermanShelf {
             SurveyOffer offer = new SurveyOffer();
             offer.spec = spec;
 
-            int rung = spec.rarity.ordinal();
+            int rung = spec.rarity.rank;
             offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.values()[rung - 1];
             offer.costCount = rung == 0 ? 1 : FishermanConstants.SURVEY_COST;
 

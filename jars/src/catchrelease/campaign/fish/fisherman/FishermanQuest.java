@@ -211,7 +211,7 @@ public class FishermanQuest {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
 
-            int rung = spec.rarity.ordinal();
+            int rung = spec.rarity.rank;
             float rarityWeight = rung == want ? 3f : rung == want - 1 ? 1f : 0.25f;
 
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {

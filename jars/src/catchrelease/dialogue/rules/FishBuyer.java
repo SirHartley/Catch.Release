@@ -130,7 +130,7 @@ public class FishBuyer {
 
                     //a crate sells as its rarest content, so a mixed one is never quietly sold
                     //below what is in it
-                    if (worst == null || entry.getSpec().rarity.ordinal() > worst.ordinal()) {
+                    if (worst == null || entry.getSpec().rarity.rank > worst.rank) {
                         worst = entry.getSpec().rarity;
                     }
 
@@ -319,7 +319,7 @@ public class FishBuyer {
 
         for (Stack held : read()) {
             if (held.wanted) continue;
-            if (held.rarity == null || held.rarity.ordinal() > cap.ordinal()) continue;
+            if (held.rarity == null || held.rarity.rank > cap.rank) continue;
 
             SaleEntry entry = new SaleEntry(held);
             entries.add(entry);

@@ -199,7 +199,7 @@ public class FishRewardRoller {
             //the rarity ladder read backwards: a job is a plausible way to come by a reef and an
             //implausible way to come by the abyss. One he also sells is likelier still, since a
             //job is not the only way to that one and the pool should lean on what it alone gives
-            float weight = 1f / (1f + backdrop.rarity.ordinal() * 2f);
+            float weight = 1f / (1f + backdrop.rarity.rank * 2f);
 
             picker.add(backdrop, backdrop.crabStock ? weight * 0.5f : weight);
         }

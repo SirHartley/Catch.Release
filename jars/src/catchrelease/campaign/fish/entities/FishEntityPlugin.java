@@ -363,7 +363,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     protected boolean dives() {
         FishRarity rarity = getRarity();
 
-        return rarity != null && rarity.ordinal() >= DIVE_FROM.ordinal();
+        return rarity != null && rarity.rank >= DIVE_FROM.rank;
     }
 
     protected float getDiveInterval() {
