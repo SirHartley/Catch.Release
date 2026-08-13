@@ -90,6 +90,38 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
+    /** Quad with alpha interpolated bottom-to-top; colour stays constant. */
+    public static void drawVerticalGradient(float x, float y, float width, float height,
+                                            Color color, float bottomAlpha, float topAlpha) {
+        drawVerticalGradient(x, y, width, height, color, color, bottomAlpha, topAlpha);
+    }
+
+    /** Quad interpolating colour and alpha bottom-to-top - water wants both ends its own. */
+    public static void drawVerticalGradient(float x, float y, float width, float height,
+                                            Color bottom, Color top,
+                                            float bottomAlpha, float topAlpha) {
+        if (width <= 0f || height <= 0f) return;
+
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glColor4f(bottom.getRed() / 255f, bottom.getGreen() / 255f, bottom.getBlue() / 255f,
+                bottomAlpha * (bottom.getAlpha() / 255f));
+        GL11.glVertex2f(x, y);
+        GL11.glVertex2f(x + width, y);
+        GL11.glColor4f(top.getRed() / 255f, top.getGreen() / 255f, top.getBlue() / 255f,
+                topAlpha * (top.getAlpha() / 255f));
+        GL11.glVertex2f(x + width, y + height);
+        GL11.glVertex2f(x, y + height);
+        GL11.glEnd();
+
+        GL11.glPopAttrib();
+    }
+
     /**
      * The sidebar's dressing, the mod's one panel face: transparent black under a one-pixel
      * player-colour border at half strength, corners square.

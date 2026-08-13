@@ -241,7 +241,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
             if (offers.isEmpty()) {
                 CustomPanelAPI note = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                        new EmptyShelfPlugin());
+                        new PaneWidgets.Note("Nothing left on the shelf this visit."));
                 grid.addCustom(note, gridHeight * 0.4f);
             }
 
@@ -447,38 +447,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
 
         //---------------------------------------------------------------- the drawn controls
-
-        /** The bare shelf saying so, in the quiet voice. */
-        protected class EmptyShelfPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
-
-            protected PositionAPI notePos;
-
-            protected transient LazyFont.DrawableString note;
-
-            @Override
-            public void positionChanged(PositionAPI position) {
-                notePos = position;
-            }
-
-            @Override
-            public void render(float alphaMult) {
-                if (notePos == null || alphaMult <= 0f) return;
-
-                LazyFont small = ShopUi.getSmallFont();
-                if (small == null) return;
-
-                if (note == null) {
-                    note = ShopUi.createText(small, "Nothing left on the shelf this visit.");
-                    note.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                note.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-                note.draw(Math.round(notePos.getX()
-                                + (notePos.getWidth() - note.getWidth()) * 0.5f),
-                        Math.round(notePos.getY() + notePos.getHeight() * 0.5f
-                                + note.getHeight() * 0.5f));
-            }
-        }
 
         /**
          * One chart for sale, a chip at card scale: dark field that lights under the mouse, the

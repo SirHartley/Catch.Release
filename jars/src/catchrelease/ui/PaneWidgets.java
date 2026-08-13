@@ -182,6 +182,44 @@ public final class PaneWidgets {
         }
     }
 
+    /** The quiet centred line for a space with nothing in it - a bare shelf, an empty tank -
+     *  small and gray, saying so without making it news. */
+    public static void drawNote(String text, float x, float y, float width, float height,
+                                float alphaMult) {
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        LazyFont.DrawableString line = small.createText(text,
+                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), small.getBaseHeight());
+        line.draw(Math.round(x + (width - line.getWidth()) * 0.5f),
+                Math.round(y + (height + line.getHeight()) * 0.5f));
+    }
+
+    /** {@link #drawNote} as a component, for a note that fills a panel slot of its own. */
+    public static class Note extends BaseCustomUIPanelPlugin {
+
+        protected final String text;
+
+        protected PositionAPI notePos;
+
+        public Note(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            notePos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (notePos == null || alphaMult <= 0f) return;
+
+            drawNote(text, notePos.getX(), notePos.getY(),
+                    notePos.getWidth(), notePos.getHeight(), alphaMult);
+        }
+    }
+
     /** A pane's name, in the header hand the sidebar's sections write in: small caps at the
      *  left, the quiet one-pixel rule along the bottom. */
     public static class TitleRow extends BaseCustomUIPanelPlugin {
