@@ -159,9 +159,7 @@ public class CampedSpot {
                 ? null : Global.getSector().getPlayerFleet();
 
         boolean shouldChase = !mem.getBoolean(WARNED_FLAG)
-                && player != null
-                && fleet.getContainingLocation() != null
-                && fleet.getContainingLocation() == player.getContainingLocation();
+                && catchrelease.helper.CampaignHelper.isPlayerHere(fleet);
 
         if (!shouldChase) {
             endWarningPursuit(fleet, pond, player);

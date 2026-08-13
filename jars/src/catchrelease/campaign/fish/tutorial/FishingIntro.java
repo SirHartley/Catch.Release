@@ -277,9 +277,7 @@ public class FishingIntro {
             if (getStage() == FISH_ONE && target != null
                     && systemId.equals(target.systemId)) return;
 
-            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-            if (player != null
-                    && player.getContainingLocation() == boat.getContainingLocation()) return;
+            if (catchrelease.helper.CampaignHelper.isPlayerHere(boat)) return;
 
             boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TARGET_KEY);
             if (temporary) {

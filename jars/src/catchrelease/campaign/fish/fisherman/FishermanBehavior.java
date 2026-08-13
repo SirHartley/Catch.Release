@@ -405,10 +405,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
     /** Whether the player is in the same place as the boat, which is what holds the clock. */
     protected boolean isPlayerHere() {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-
-        return player != null && fleet != null
-                && player.getContainingLocation() == fleet.getContainingLocation();
+        return catchrelease.helper.CampaignHelper.isPlayerHere(fleet);
     }
 
     /**
