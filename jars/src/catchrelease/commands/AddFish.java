@@ -1,4 +1,4 @@
-package data.console.commands;
+package catchrelease.commands;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;

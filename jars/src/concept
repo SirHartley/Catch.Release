@@ -30,6 +30,7 @@ Aquarium
 
 Fisherman
 - Ask about something else - if a question was asked and is correctly sorted to the back of the list, it should be "highlighted" grey like the "sell common catch" option
+- hook up the custom portraits I added - one for each coherence level.
 
 Quests
 - All quests and tasks that th<e player acccepts should go into the "accepted" tab in intel.

@@ -4,8 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="sound work">
+    <list default="true" id="10ff71ca-4463-4735-88ed-e7d34ff715a3" name="Changes" comment="fisherman portraits">
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Run_Starsector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/Run_Starsector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catchrelease.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/console/commands.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/console/commands.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/console/commands/AddFish.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/commands/AddFish.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/console/commands/AllFish.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/commands/AllFish.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -35,6 +44,15 @@
     &quot;accountId&quot;: &quot;d912d041-a01d-4fc0-ab05-9eb4e33ec028&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/lwjgl.jar!/org/lwjgl/input/Keyboard.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/SoundPlayerAPI.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/campaign/CargoAPI.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../Libs/starsector-core/starfarer.api.zip!/com/fs/starfarer/api/util/Misc.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -46,22 +64,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Run Starsector.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/Games/Starsector 0.98/Starsector 098a-RC8 - Modding/starsector-core&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.grazie&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Run Starsector.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Modding/Libs/MagicLib/src",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.grazie"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\helper\math" />
@@ -70,9 +89,9 @@
       <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease" />
       <recent name="D:\Starsector\mods\Catch.Release\data\campaign" />
       <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease\skillshot" />
-      <recent name="D:\Starsector\mods\Catch.Release\jars\src\catchrelease" />
       <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease\skillshot" />
       <recent name="D:\Starsector\mods\Catch.Release\sounds\catchrelease" />
     </key>
@@ -90,7 +109,7 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="dd08cd5b-1289-44bd-a5dd-683c9d0f914b" name="Changes" comment="" />
+      <changelist id="10ff71ca-4463-4735-88ed-e7d34ff715a3" name="Changes" comment="" />
       <created>1742029708689</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -440,7 +459,15 @@
       <option name="project" value="LOCAL" />
       <updated>1786488977057</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="fisherman portraits">
+      <option name="closed" value="true" />
+      <created>1786576982503</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1786576982503</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -455,7 +482,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="spotlight visuals, behaviour and sound" />
     <MESSAGE value="some more searchlight fiddling" />
     <MESSAGE value="Added skillshot framework" />
     <MESSAGE value="adjusting constants" />
@@ -480,6 +506,7 @@
     <MESSAGE value="amended devshortcut with way to get all backdrops on second press" />
     <MESSAGE value="minor fix" />
     <MESSAGE value="sound work" />
-    <option name="LAST_COMMIT_MESSAGE" value="sound work" />
+    <MESSAGE value="fisherman portraits" />
+    <option name="LAST_COMMIT_MESSAGE" value="fisherman portraits" />
   </component>
 </project>
