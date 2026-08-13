@@ -123,6 +123,9 @@ hidden example. The old outfitter migration stub is gone — development assumes
 **`data/config/settings.json`** — `ruleCommandPackages`, listing vanilla's five packages **plus**
 `catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
 merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
+The `graphics.characters` additions also register all five Fisherman coherence portraits with the
+settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
+an unloaded raw path.
 
 **`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
@@ -1099,9 +1102,10 @@ figure, not a specimen's jittered one), and the boat's name, portrait, greeting,
 all come apart by degrees as it climbs. The portrait uses the complete five-rung specimen ladder;
 the existing rules greetings keep their coarser four bands. Since every boat shares the same mutable
 `PersonAPI`, `CatchReleaseCMD tokens` applies the hailed boat's portrait during `OpenCommLink`, before
-vanilla calls `showPersonInfo`; background boats never compete over it. Letters are taken out by
-position, so the same system spells him wrong the same way every time — the degradation is a fact
-about the water, not an animation.
+vanilla calls `showPersonInfo`; background boats never compete over it. The five paths are registered
+as `graphics.characters` sprite ids in `settings.json`, so every selected portrait has been loaded
+before the comm panel draws it. Letters are taken out by position, so the same system spells him
+wrong the same way every time — the degradation is a fact about the water, not an animation.
 
 **All dialogue is in the sheet — all of it.** The Fisherman's whole conversation, the introduction's
 six lessons, the hulk, the castaway and the bar rating are rows in `rules.csv`. Java is reached only

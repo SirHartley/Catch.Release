@@ -44,13 +44,13 @@ public class FishermanIdentity {
     /** What the registry still has them down as, from before. Nobody aboard uses it. */
     public static final String FORMER_NAME = "Baha";
 
-    /** The five coherence portraits, in the exact order of FishItemPlugin's shared ladder. */
-    private static final String[] PORTRAITS = {
-            "graphics/catchrelease/portraits/fisherman_1_stable.png",
-            "graphics/catchrelease/portraits/fisherman_2_unsettled.png",
-            "graphics/catchrelease/portraits/fisherman_3_slipping.png",
-            "graphics/catchrelease/portraits/fisherman_4_unstable.png",
-            "graphics/catchrelease/portraits/fisherman_5_barelyholding.png"
+    /** Sprite ids registered under {@code graphics.characters} in settings.json. */
+    private static final String[] PORTRAIT_IDS = {
+            "catchrelease_fisherman_stable",
+            "catchrelease_fisherman_unsettled",
+            "catchrelease_fisherman_slipping",
+            "catchrelease_fisherman_unstable",
+            "catchrelease_fisherman_barely_holding"
     };
 
     /**
@@ -74,7 +74,7 @@ public class FishermanIdentity {
         person.setFaction(FishermanConstants.FACTION);
         person.setGender(FullName.Gender.ANY);
         person.setName(new FullName(FIRST_NAME, LAST_NAME, FullName.Gender.ANY));
-        person.setPortraitSprite(PORTRAITS[0]);
+        person.setPortraitSprite(getPortrait(0f));
         person.setRankId(null);
         person.setPostId(null);
 
@@ -119,7 +119,8 @@ public class FishermanIdentity {
     /** The portrait belonging to the same five-rung coherence label used everywhere else. */
     public static String getPortrait(float drift) {
         int band = FishItemPlugin.getAberrationBand(drift);
-        return PORTRAITS[Math.max(0, Math.min(PORTRAITS.length - 1, band))];
+        String id = PORTRAIT_IDS[Math.max(0, Math.min(PORTRAIT_IDS.length - 1, band))];
+        return Global.getSettings().getSpriteName("characters", id);
     }
 
     /**
