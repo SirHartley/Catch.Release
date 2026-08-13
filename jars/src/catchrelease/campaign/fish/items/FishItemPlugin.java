@@ -193,14 +193,29 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
+    /**
+     * The canonical five-rung coherence ladder, low to high aberration. Kept as a numeric band so
+     * anything visualising the same reading - including the Fisherman - cannot quietly invent a
+     * second set of thresholds beside the labels shown to the player.
+     */
+    public static int getAberrationBand(float aberration) {
+        if (aberration >= 0.8f) return 4;
+        if (aberration >= 0.55f) return 3;
+        if (aberration >= 0.3f) return 2;
+        if (aberration >= 0.12f) return 1;
+
+        return 0;
+    }
+
     /** Said as how well it is holding rather than as a number, which is not a thing a crew would read off. */
     public static String getAberrationLabel(float aberration) {
-        if (aberration >= 0.8f) return "barely holding";
-        if (aberration >= 0.55f) return "unstable";
-        if (aberration >= 0.3f) return "slipping";
-        if (aberration >= 0.12f) return "unsettled";
-
-        return "stable";
+        return switch (getAberrationBand(aberration)) {
+            case 4 -> "barely holding";
+            case 3 -> "unstable";
+            case 2 -> "slipping";
+            case 1 -> "unsettled";
+            default -> "stable";
+        };
     }
 
     public static java.awt.Color getAberrationColor(float aberration) {

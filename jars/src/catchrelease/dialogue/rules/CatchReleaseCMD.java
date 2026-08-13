@@ -740,7 +740,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
-        local.set(DRIFT, FishermanIdentity.getBand(FishermanIdentity.getDrift(
+        //FleetInteractionDialogPluginImpl draws the commander's portrait after OpenCommLink's
+        //winning rule returns. Update the shared person from this hailed boat, never from the many
+        //off-screen Fisherman behaviours that all hold the same PersonAPI.
+        FishermanIdentity.preparePortrait(getOtherFleet(dialog));
+
+        local.set(DRIFT, FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(
                 target == null ? null : target.getContainingLocation())), 0);
 
         local.set(STAGE, FishingIntro.getStage(), 0);
