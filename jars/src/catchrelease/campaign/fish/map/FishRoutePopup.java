@@ -131,13 +131,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         float w = pos.getWidth();
         float h = pos.getHeight();
 
-        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
-
-        Color border = Misc.getBasePlayerColor();
-        ShopUi.drawQuad(x, y, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y, 1f, h, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, 0.55f * alphaMult);
+        ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
 
     /** Same hand-worked ghost text as the sidebar's field - there is no change callback. */

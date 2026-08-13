@@ -180,16 +180,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         float w = pos.getWidth();
         float h = pos.getHeight();
 
-        //transparent black, the way the screen's own panels sit on it - no colour wash
-        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
-
-        //between the two rejected extremes: dark player colour read as too dim beside the map,
-        //full base colour as too bright - the base colour at half strength sits with the chrome
-        Color border = Misc.getBasePlayerColor();
-        ShopUi.drawQuad(x, y, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y, 1f, h, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, 0.55f * alphaMult);
+        ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
 
     /** Text field has no change callback or placeholder, so both are worked by hand off
