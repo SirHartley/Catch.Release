@@ -10,19 +10,25 @@ import java.awt.Color;
  */
 public enum FishGrade {
 
-    TERRIBLE("Terrible", 0.15f, 0.55f),
-    POOR("Poor", 0.33f, 0.8f),
-    AVERAGE("Average", 0.67f, 1f),
-    FINE("Fine", 0.85f, 1.45f),
-    EXCEPTIONAL("Exceptional", 1f, 2.2f);
+    TERRIBLE("Terrible", 0, 0.15f, 0.55f),
+    POOR("Poor", 1, 0.33f, 0.8f),
+    AVERAGE("Average", 2, 0.67f, 1f),
+    FINE("Fine", 3, 0.85f, 1.45f),
+    EXCEPTIONAL("Exceptional", 4, 1f, 2.2f);
+
+    /** Where this sits on the ladder, said outright rather than read off `ordinal()` - the
+     *  grade pips and every "at least this good" comparison go through it, so reordering the
+     *  enum cannot silently reshuffle them. */
+    public final int rank;
 
     /** Top of this grade's share of the range, and what it does to the price. */
     public final String name;
     public final float ceiling;
     public final float valueMult;
 
-    FishGrade(String name, float ceiling, float valueMult) {
+    FishGrade(String name, int rank, float ceiling, float valueMult) {
         this.name = name;
+        this.rank = rank;
         this.ceiling = ceiling;
         this.valueMult = valueMult;
     }

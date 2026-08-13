@@ -216,12 +216,11 @@ public class ShopMarks {
     /** How long the wanted-ask cache is trusted before {@link #getWantedAsks} rebuilds it. */
     protected static final long WANTED_CACHE_MS = 250L;
 
-    protected static List<FishRequirement> wantedAskCache;
-    protected static long wantedAskCacheTime;
+    protected static final catchrelease.helper.cache.TimedValue<List<FishRequirement>> wantedAsks =
+            new catchrelease.helper.cache.TimedValue<>(WANTED_CACHE_MS);
 
     protected static void invalidateWantedCache() {
-        wantedAskCache = null;
-        wantedAskCacheTime = 0L;
+        wantedAsks.invalidate();
     }
 
     /**
@@ -232,29 +231,23 @@ public class ShopMarks {
      * dozens of times a frame.
      */
     protected static List<FishRequirement> getWantedAsks() {
-        long now = System.currentTimeMillis();
-        if (wantedAskCache != null && now - wantedAskCacheTime < WANTED_CACHE_MS) {
-            return wantedAskCache;
-        }
+        return wantedAsks.get(System.currentTimeMillis(), () -> {
+            List<FishRequirement> out = new ArrayList<>(getMarkedRequirements());
 
-        List<FishRequirement> out = new ArrayList<>(getMarkedRequirements());
+            if (Global.getSector() != null) {
+                for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
+                        : Global.getSector().getIntelManager().getIntel()) {
 
-        if (Global.getSector() != null) {
-            for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
-                    : Global.getSector().getIntelManager().getIntel()) {
+                    if (!(intel instanceof FishAsker asker)) continue;
 
-                if (!(intel instanceof FishAsker asker)) continue;
-
-                for (FishRequirement ask : asker.getAsks()) {
-                    if (ask != null) out.add(ask);
+                    for (FishRequirement ask : asker.getAsks()) {
+                        if (ask != null) out.add(ask);
+                    }
                 }
             }
-        }
 
-        wantedAskCache = out;
-        wantedAskCacheTime = now;
-
-        return out;
+            return out;
+        });
     }
 
     /** Whether anything at all - a marked ware or an open job - would take this specimen. */

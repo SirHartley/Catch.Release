@@ -287,12 +287,12 @@ public class FleetQuest extends FishJob {
         addAsk(ask);
 
         int worth = type.getBaseCredits() * Math.max(1, ask.count);
-        if (ask.minRarity != null) worth *= 1 + ask.minRarity.ordinal();
+        if (ask.minRarity != null) worth *= 1 + ask.minRarity.rank;
         if (ask.minGrade != null) worth *= 2;
 
         addReward(FishReward.credits(worth));
 
-        if (ask.minRarity != null && ask.minRarity.ordinal() >= FishRarity.RARE.ordinal()) {
+        if (ask.minRarity != null && ask.minRarity.rank >= FishRarity.RARE.rank) {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);
             int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
             String key = ShopSchematics.getKey(stat == null ? null : stat.id, targetLevel);

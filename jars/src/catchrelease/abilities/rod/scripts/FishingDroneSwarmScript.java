@@ -254,7 +254,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             spec = ((BuriedMoteEntityPlugin) mote.getCustomPlugin()).getFishSpec();
         }
 
-        return spec == null ? 0 : spec.rarity.ordinal();
+        return spec == null ? 0 : spec.rarity.rank;
     }
 
     /** The middle of the water being fished. Not always the cast point - a roaming swarm overrides

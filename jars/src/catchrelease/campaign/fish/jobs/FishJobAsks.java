@@ -136,7 +136,7 @@ public class FishJobAsks {
             if (spec.tags.contains("abyssal")) continue;
 
             if (type != null && !spec.tags.contains(type)) continue;
-            if (minRarity != null && spec.rarity.ordinal() < minRarity.ordinal()) continue;
+            if (minRarity != null && spec.rarity.rank < minRarity.rank) continue;
 
             out.add(spec);
         }

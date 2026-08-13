@@ -136,7 +136,7 @@ public class DevShortcut implements CampaignInputListener {
         FishingIntro.skip(null);
 
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            FishingIntro.giveChartsOfRarity(FishRarity.values()[rung],
+            FishingIntro.giveChartsOfRarity(FishRarity.ofRank(rung),
                     TutorialConstants.GRADUATION_CHARTS[rung]);
         }
 

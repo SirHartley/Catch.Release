@@ -87,11 +87,11 @@ public class CrabBackdrops {
     }
 
     public static int getCredits(Backdrop backdrop) {
-        return backdrop == null ? 0 : CREDITS_BY_RARITY[backdrop.rarity.ordinal()];
+        return backdrop == null ? 0 : CREDITS_BY_RARITY[backdrop.rarity.rank];
     }
 
     public static int getCrabs(Backdrop backdrop) {
-        return backdrop == null ? 0 : CRABS_BY_RARITY[backdrop.rarity.ordinal()];
+        return backdrop == null ? 0 : CRABS_BY_RARITY[backdrop.rarity.rank];
     }
 
     /** The crabs half of the price, as the same ask everything else in the mod is written in. */

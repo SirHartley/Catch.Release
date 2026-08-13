@@ -81,7 +81,7 @@ public class KidsJob extends FishJob {
     /** Bonus for specimen grade, not for the (consequence-free) loud/quiet choice. */
     @Override
     protected boolean payBonus(FishCatch offered) {
-        if (offered == null || offered.getGrade().ordinal() < BONUS_GRADE.ordinal()) return false;
+        if (offered == null || offered.getGrade().rank < BONUS_GRADE.rank) return false;
 
         for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {
             extra.grant();

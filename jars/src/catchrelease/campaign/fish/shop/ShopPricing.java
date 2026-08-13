@@ -160,7 +160,7 @@ public class ShopPricing {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
-            if (spec.rarity.ordinal() < FishRarity.RARE.ordinal()) continue;
+            if (spec.rarity.rank < FishRarity.RARE.rank) continue;
             if (spec.tags.contains("special")) continue;
 
             pool.add(spec);

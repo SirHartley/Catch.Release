@@ -121,7 +121,7 @@ public class FishItemRenderer {
                                      float alphaMult, FishGrade grade) {
 
         int steps = FishGrade.values().length;
-        int filled = grade.ordinal() + 1;
+        int filled = grade.rank + 1;
 
         backing(pipX, pipY, total, size, alphaMult);
 

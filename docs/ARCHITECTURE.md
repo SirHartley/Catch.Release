@@ -350,8 +350,8 @@ The data model: species, individual catches, the player's log, and the enums eve
 |---|---|
 | `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
 | `FishCatch.java` | One rolled specimen — length, weight, aberration, region, exact source rupture, and how it was taken; grades, values, encodes to a backward-compatible string |
-| `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour |
-| `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers |
+| `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour. `rank` is the explicit ladder position - comparisons never read `ordinal()` |
+| `FishRarity.java` | Rarity ladder with mote colour, speed and wander multipliers. `rank` is the explicit ladder position every comparison and rarity-graded price reads - never `ordinal()`, so reordering the enum cannot silently reshuffle the ladder |
 | `FishMotion.java` | Minigame movement archetypes (SMOOTH, DARTER, SINKER, FLOATER, MIXED) |
 | `FishLog.java` | Sector-persistent per-species record; unlocks location data for codex and map |
 | `FishLogEntry.java` | Per-species log data: counts, records, first/record location and time, capture method |
@@ -487,7 +487,7 @@ Optional loot found mid-catch.
 | `MinigameTreasure.java` | A stationary timed pickup that must be held over to be taken |
 | `TreasureRoller.java` | Rolls whether treasure appears and what is in it |
 | `TreasureAward.java` | What a roll granted, for the loot card |
-| `TreasureRarity.java` | Four-tier rarity with weight and colour |
+| `TreasureRarity.java` | Four-tier rarity with weight, colour and the explicit `rank` the loot card's best-of read uses |
 
 ### `campaign/fish/entities`
 The two forms a fish takes in the world.
@@ -751,6 +751,8 @@ Shader and GL machinery.
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
 | `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once. One object per path is shared by every caller, so it is handed back neutral - native size, white, full alpha, normal blend - and a caller that wants it otherwise says so |
+| `helper/CampaignHelper.java` | The small campaign questions asked from several corners: `isPlayerHere` - is the player fleet in this entity's location - for the boats' visit clocks, the tutorial's held postings and the camps' one warning chase |
+| `helper/cache/TimedValue.java` | The expensive-read-asked-every-frame cache: caller's own clock, a TTL in its units, an optional key that forces the read when it changes. Behind the shop's wanted-ask cache (wall millis), the coherence bar's reading (accumulated seconds) and the boats' names (game days + location). `Aberration`'s stamp cache stays hand-rolled on purpose - its invalidation check sits in the hottest read path and must not allocate |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |

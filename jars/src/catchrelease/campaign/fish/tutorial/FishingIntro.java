@@ -169,7 +169,7 @@ public class FishingIntro {
         //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
         giveCharts(TutorialConstants.FREE_COMMONS, null);
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.values()[rung],
+            giveChartsOfRarity(FishRarity.ofRank(rung),
                     TutorialConstants.GRADUATION_CHARTS[rung]);
         }
 
@@ -277,9 +277,7 @@ public class FishingIntro {
             if (getStage() == FISH_ONE && target != null
                     && systemId.equals(target.systemId)) return;
 
-            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-            if (player != null
-                    && player.getContainingLocation() == boat.getContainingLocation()) return;
+            if (catchrelease.helper.CampaignHelper.isPlayerHere(boat)) return;
 
             boat.getMemoryWithoutUpdate().unset(FishermanConstants.TUTORIAL_TARGET_KEY);
             if (temporary) {
@@ -343,7 +341,7 @@ public class FishingIntro {
         dropNote();
 
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.values()[rung], TutorialConstants.GRADUATION_CHARTS[rung]);
+            giveChartsOfRarity(FishRarity.ofRank(rung), TutorialConstants.GRADUATION_CHARTS[rung]);
         }
 
         rememberSeen();
@@ -617,7 +615,7 @@ public class FishingIntro {
             if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
             if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
             if (!isHarpoonLessonCandidate(stage, spec)) continue;
-            if (spec.rarity.ordinal() > maximum.ordinal()) continue;
+            if (spec.rarity.rank > maximum.rank) continue;
 
             candidates.add(spec);
         }

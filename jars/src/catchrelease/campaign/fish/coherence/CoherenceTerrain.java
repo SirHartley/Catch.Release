@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.coherence;
 
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.items.FishItemPlugin;
+import catchrelease.helper.cache.TimedValue;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -99,7 +100,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     public void advance(float amount) {
         super.advance(amount);
 
-        readingAge += amount;
+        readingClock += amount;
 
         idle = getLevel() > 0f ? 0f : idle + amount;
 
@@ -153,39 +154,37 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
      */
     public static final float READING_REFRESH = 1f;
 
-    protected transient boolean readingCached = false;
-    protected transient float readingAge = 0f;
-    protected transient float cachedAberration = 0f;
-    protected transient String cachedSource;
+    /** What one refresh reads: the two halves of the same expensive walk, taken together. */
+    protected record Reading(float aberration, String source) {
+    }
 
-    protected void refreshReading() {
-        if (readingCached && readingAge < READING_REFRESH) return;
+    /** Advanced in {@code advance} and never reset - the cache's clock, in real seconds. */
+    protected transient float readingClock = 0f;
+    protected transient TimedValue<Reading> reading;
 
-        readingCached = true;
-        readingAge = 0f;
+    protected Reading getReading() {
+        //lazily built - the field is transient, so a loaded save starts without one
+        if (reading == null) reading = new TimedValue<>(READING_REFRESH);
 
-        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        return reading.get(readingClock, () -> {
+            CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
 
-        if (fleet == null) {
-            cachedAberration = 0f;
-            cachedSource = null;
-            return;
-        }
+            if (fleet == null) return new Reading(0f, null);
 
-        cachedAberration = Aberration.baseAt(
-                fleet.getLocationInHyperspace(), fleet.getContainingLocation());
-        cachedSource = Aberration.dominantSourceAt(
-                fleet.getLocationInHyperspace(), fleet.getContainingLocation());
+            return new Reading(
+                    Aberration.baseAt(
+                            fleet.getLocationInHyperspace(), fleet.getContainingLocation()),
+                    Aberration.dominantSourceAt(
+                            fleet.getLocationInHyperspace(), fleet.getContainingLocation()));
+        });
     }
 
     protected float getAberration() {
-        refreshReading();
-        return cachedAberration;
+        return getReading().aberration;
     }
 
     protected String getSource() {
-        refreshReading();
-        return cachedSource;
+        return getReading().source;
     }
 
     @Override

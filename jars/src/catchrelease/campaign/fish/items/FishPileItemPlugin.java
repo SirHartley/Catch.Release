@@ -135,7 +135,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             FishSpec spec = entry.getSpec();
             if (spec == null) continue;
 
-            if (best == null || spec.rarity.ordinal() > best.ordinal()) best = spec.rarity;
+            if (best == null || spec.rarity.rank > best.rank) best = spec.rarity;
         }
 
         //no grade pip: a pile is not a specimen and has no single quality to report

@@ -40,7 +40,7 @@ public class StandingOrderJob extends FishJob {
         addAsk(ask);
 
         int worth = VALUE_PER_FISH * ask.count;
-        if (ask.minRarity != null) worth *= 1 + ask.minRarity.ordinal();
+        if (ask.minRarity != null) worth *= 1 + ask.minRarity.rank;
         if (ask.minGrade != null) worth *= 2;
         if (catchTermsAsked) worth *= 2;
 

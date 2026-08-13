@@ -118,7 +118,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         FishGrade best = FishGrade.TERRIBLE;
         for (FishCatch entry : contents) {
-            if (entry.getGrade().ordinal() > best.ordinal()) best = entry.getGrade();
+            if (entry.getGrade().rank > best.rank) best = entry.getGrade();
         }
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);

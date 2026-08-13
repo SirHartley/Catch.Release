@@ -93,7 +93,7 @@ public class PondFishSpawner {
         float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias + extraBias;
         if (bias == 1f || spec.rarity == null) return 1f;
 
-        return (float) Math.pow(bias, spec.rarity.ordinal());
+        return (float) Math.pow(bias, spec.rarity.rank);
     }
 
 }
