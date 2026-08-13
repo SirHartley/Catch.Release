@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;

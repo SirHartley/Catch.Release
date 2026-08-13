@@ -1,7 +1,7 @@
-package catchrelease.campaign.fish.map;
+package catchrelease.ui;
 
 import catchrelease.ModPlugin;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -13,7 +13,6 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -68,16 +67,18 @@ public final class PaneWidgets {
         return text == null || ghost.equals(text) ? "" : text;
     }
 
-    /** One type as a chip: a placeholder mark (category art doesn't exist yet) over the name,
-     *  lit in the type's colour while shown. Reads the filter, never writes it - the toggle is
-     *  the owner's to make. */
+    /** One filter category as a chip: a placeholder mark (category art doesn't exist yet)
+     *  over the name, lit in its own colour while on. Reads state, never writes it - the
+     *  toggle is the owner's to make, which is also what keeps this class ignorant of what
+     *  it is filtering. */
     public static class Chip extends BaseCustomUIPanelPlugin {
 
         public static final float ICON_SIZE = 16f;
 
-        protected final FishType type;
-        protected final FishPresence.Filter filter;
-        protected final Consumer<FishType> onToggle;
+        protected final String label;
+        protected final Color color;
+        protected final Supplier<Boolean> on;
+        protected final Runnable onToggle;
 
         protected PositionAPI chipPos;
 
@@ -85,9 +86,10 @@ public final class PaneWidgets {
         protected transient SpriteAPI icon;
         protected transient boolean iconChecked;
 
-        public Chip(FishType type, FishPresence.Filter filter, Consumer<FishType> onToggle) {
-            this.type = type;
-            this.filter = filter;
+        public Chip(String label, Color color, Supplier<Boolean> on, Runnable onToggle) {
+            this.label = label;
+            this.color = color;
+            this.on = on;
             this.onToggle = onToggle;
         }
 
@@ -105,18 +107,18 @@ public final class PaneWidgets {
             float w = chipPos.getWidth();
             float h = chipPos.getHeight();
 
-            boolean on = filter.types.contains(type);
+            boolean on = this.on.get();
             boolean hovered = ShopUi.contains(x, y, w, h,
                     Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
 
             if (on) {
-                ShopUi.drawQuad(x, y, w, h, type.color, (hovered ? 0.5f : 0.35f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.95f * alphaMult);
+                ShopUi.drawQuad(x, y, w, h, color, (hovered ? 0.5f : 0.35f) * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, color, 0.95f * alphaMult);
             } else {
                 //off is absence, not another colour - dark field with just the underline remembering
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered ? 0.35f : 0.18f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.35f * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, color, 0.35f * alphaMult);
             }
 
             SpriteAPI face = getIcon();
@@ -135,7 +137,7 @@ public final class PaneWidgets {
             if (tiny == null) return;
 
             if (text == null) {
-                text = ShopUi.createText(tiny, type.label);
+                text = ShopUi.createText(tiny, label);
                 text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
@@ -173,10 +175,191 @@ public final class PaneWidgets {
 
                 event.consume();
                 Global.getSoundPlayer().playUISound(CLICK_SOUND, 1f, 1f);
-                onToggle.accept(type);
+                onToggle.run();
 
                 return;
             }
+        }
+    }
+
+    /** The quiet centred line for a space with nothing in it - a bare shelf, an empty tank -
+     *  small and gray, saying so without making it news. */
+    public static void drawNote(String text, float x, float y, float width, float height,
+                                float alphaMult) {
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        LazyFont.DrawableString line = small.createText(text,
+                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), small.getBaseHeight());
+        line.draw(Math.round(x + (width - line.getWidth()) * 0.5f),
+                Math.round(y + (height + line.getHeight()) * 0.5f));
+    }
+
+    /** {@link #drawNote} as a component, for a note that fills a panel slot of its own. */
+    public static class Note extends BaseCustomUIPanelPlugin {
+
+        protected final String text;
+
+        protected PositionAPI notePos;
+
+        public Note(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            notePos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (notePos == null || alphaMult <= 0f) return;
+
+            drawNote(text, notePos.getX(), notePos.getY(),
+                    notePos.getWidth(), notePos.getHeight(), alphaMult);
+        }
+    }
+
+    /** A pane's name, in the header hand the sidebar's sections write in: small caps at the
+     *  left, the quiet one-pixel rule along the bottom. */
+    public static class TitleRow extends BaseCustomUIPanelPlugin {
+
+        protected final String label;
+
+        protected PositionAPI titlePos;
+
+        protected transient LazyFont.DrawableString text;
+
+        public TitleRow(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            titlePos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (titlePos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = titlePos.getX();
+            float y = titlePos.getY();
+            float h = titlePos.getHeight();
+
+            if (text == null) {
+                text = ShopUi.createText(small, label);
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+
+            ShopUi.drawQuad(x, y, titlePos.getWidth(), 1f, Misc.getDarkPlayerColor(),
+                    0.8f * alphaMult);
+        }
+    }
+
+    /**
+     * Line over a list: what it is and how many match, with the help mark at the right end.
+     * The label is read every frame, so a count in it is never stale; the {@code ?} brightens
+     * under the mouse the way the standalone {@link HelpMark} does, since both wear a tooltip.
+     */
+    public static class ListHeader extends BaseCustomUIPanelPlugin {
+
+        protected final Supplier<String> label;
+
+        protected PositionAPI headerPos;
+
+        protected transient LazyFont.DrawableString text;
+        protected transient String written;
+        protected transient LazyFont.DrawableString help;
+
+        public ListHeader(Supplier<String> label) {
+            this.label = label;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            headerPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (headerPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            float x = headerPos.getX();
+            float y = headerPos.getY();
+            float w = headerPos.getWidth();
+            float h = headerPos.getHeight();
+
+            String wanted = label.get();
+
+            if (text == null || !wanted.equals(written)) {
+                written = wanted;
+                text = ShopUi.createText(small, wanted);
+                text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
+            text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
+
+            if (help == null) {
+                help = ShopUi.createText(small, "?");
+                help.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+            }
+
+            boolean hovered = ShopUi.contains(x + w - 2f - help.getWidth(), y,
+                    help.getWidth() + 2f, h,
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            help.setBaseColor(ShopUi.withAlpha(
+                    hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
+            help.draw(Math.round(x + w - 2f), Math.round(y + h * 0.5f + help.getHeight() * 0.5f));
+
+            ShopUi.drawQuad(x, y, w, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
+        }
+    }
+
+    /** A lone {@code ?} wearing an explanation as a hover: gray until the mouse asks. */
+    public static class HelpMark extends BaseCustomUIPanelPlugin {
+
+        protected PositionAPI markPos;
+
+        protected transient LazyFont.DrawableString mark;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            markPos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (markPos == null || alphaMult <= 0f) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            if (mark == null) {
+                mark = ShopUi.createText(small, "?");
+                mark.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+            }
+
+            boolean hovered = ShopUi.contains(markPos.getX(), markPos.getY(),
+                    markPos.getWidth(), markPos.getHeight(),
+                    Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+
+            mark.setBaseColor(ShopUi.withAlpha(
+                    hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
+            mark.draw(Math.round(markPos.getX() + (markPos.getWidth() - mark.getWidth()) * 0.5f),
+                    Math.round(markPos.getY() + markPos.getHeight() * 0.5f
+                            + mark.getHeight() * 0.5f));
         }
     }
 

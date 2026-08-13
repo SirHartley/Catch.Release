@@ -1,4 +1,4 @@
-package catchrelease.campaign.fish.map;
+package catchrelease.ui;
 
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.codex.FishCodexEntryState;

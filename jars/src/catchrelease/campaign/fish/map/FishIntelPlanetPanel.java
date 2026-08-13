@@ -4,7 +4,7 @@ import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
 import catchrelease.rendering.helper.Disc;

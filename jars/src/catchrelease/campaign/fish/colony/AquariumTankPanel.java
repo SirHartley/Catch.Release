@@ -3,7 +3,8 @@ package catchrelease.campaign.fish.colony;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.PaneWidgets;
+import catchrelease.ui.ShopUi;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
@@ -344,14 +345,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        GL11.glBegin(GL11.GL_QUADS);
-        setColor(WATER_DEEP, body);
-        GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x + w, y);
-        setColor(WATER_SHALLOW, body);
-        GL11.glVertex2f(x + w, y + h);
-        GL11.glVertex2f(x, y + h);
-        GL11.glEnd();
+        ShopUi.drawVerticalGradient(x, y, w, h, WATER_DEEP, WATER_SHALLOW, body, body);
 
         //the caustic weave: soft bright bands sliding through the water at their own speeds,
         //which is most of what makes still water read as water
@@ -380,14 +374,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
         //the surface shimmer: a thin brighter band that breathes with the tank
         float shimmer = 0.16f + 0.05f * (float) Math.sin(time * 0.9f);
-        GL11.glBegin(GL11.GL_QUADS);
-        setColor(GLASS, shimmer * alphaMult);
-        GL11.glVertex2f(x, y + h - 5f);
-        GL11.glVertex2f(x + w, y + h - 5f);
-        setColor(GLASS, 0f);
-        GL11.glVertex2f(x + w, y + h - 14f);
-        GL11.glVertex2f(x, y + h - 14f);
-        GL11.glEnd();
+        ShopUi.drawVerticalGradient(x, y + h - 14f, w, 9f, GLASS, 0f, shimmer * alphaMult);
     }
 
     /** Shafts of surface light leaning through the water, wandering a little. Drawn over the
@@ -458,14 +445,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         //the bed itself, darker than any water above it
-        GL11.glBegin(GL11.GL_QUADS);
-        setColor(Color.BLACK, 0.5f * alphaMult);
-        GL11.glVertex2f(x, y);
-        GL11.glVertex2f(x + w, y);
-        setColor(Color.BLACK, 0f);
-        GL11.glVertex2f(x + w, y + 10f);
-        GL11.glVertex2f(x, y + 10f);
-        GL11.glEnd();
+        ShopUi.drawVerticalGradient(x, y, w, 10f, Color.BLACK, 0.5f * alphaMult, 0f);
 
         for (float[] stone : pebbles) {
             float shade = stone[2];
@@ -500,13 +480,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     protected void drawEmptyLine(float x, float y, float w, float h, float alphaMult) {
-        LazyFont font = ShopUi.getSmallFont();
-        if (font == null) return;
-
-        LazyFont.DrawableString line = font.createText("The tank is empty.",
-                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), font.getBaseHeight());
-        line.draw(Math.round(x + (w - line.getWidth()) * 0.5f),
-                Math.round(y + (h + line.getHeight()) * 0.5f));
+        PaneWidgets.drawNote("The tank is empty.", x, y, w, h, alphaMult);
     }
 
     /**

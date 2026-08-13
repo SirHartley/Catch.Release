@@ -2,11 +2,11 @@ package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.items.FishItems;
-import catchrelease.campaign.fish.map.FishIcons;
-import catchrelease.campaign.fish.map.PaneWidgets;
+import catchrelease.ui.FishIcons;
+import catchrelease.ui.PaneWidgets;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
@@ -191,10 +191,10 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             TooltipMakerAPI header = panel.createUIElement(innerWidth, TITLE_HEIGHT, false);
 
             CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                    new TitlePlugin());
+                    new PaneWidgets.TitleRow("RANGE DATA"));
 
             CustomPanelAPI help = panel.createCustomPanel(HELP_WIDTH, TITLE_HEIGHT,
-                    new HelpMarkPlugin());
+                    new PaneWidgets.HelpMark());
             titleRow.addComponent(help).inTR(CLOSE_WIDTH + 4f, 0f);
 
             CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
@@ -241,7 +241,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
             if (offers.isEmpty()) {
                 CustomPanelAPI note = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                        new EmptyShelfPlugin());
+                        new PaneWidgets.Note("Nothing left on the shelf this visit."));
                 grid.addCustom(note, gridHeight * 0.4f);
             }
 
@@ -447,110 +447,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
 
         //---------------------------------------------------------------- the drawn controls
-
-        /** The counter's name, in the header hand the sidebar's sections write in. */
-        protected class TitlePlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
-
-            protected PositionAPI titlePos;
-
-            protected transient LazyFont.DrawableString text;
-
-            @Override
-            public void positionChanged(PositionAPI position) {
-                titlePos = position;
-            }
-
-            @Override
-            public void render(float alphaMult) {
-                if (titlePos == null || alphaMult <= 0f) return;
-
-                LazyFont small = ShopUi.getSmallFont();
-                if (small == null) return;
-
-                float x = titlePos.getX();
-                float y = titlePos.getY();
-                float h = titlePos.getHeight();
-
-                if (text == null) {
-                    text = ShopUi.createText(small, "RANGE DATA");
-                    text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                text.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
-                text.draw(Math.round(x), Math.round(y + h * 0.5f + text.getHeight() * 0.5f));
-
-                ShopUi.drawQuad(x, y, titlePos.getWidth(), 1f, Misc.getDarkPlayerColor(),
-                        0.8f * alphaMult);
-            }
-        }
-
-        /** The ?, wearing the counter's explanation as a hover. */
-        protected class HelpMarkPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
-
-            protected PositionAPI markPos;
-
-            protected transient LazyFont.DrawableString mark;
-
-            @Override
-            public void positionChanged(PositionAPI position) {
-                markPos = position;
-            }
-
-            @Override
-            public void render(float alphaMult) {
-                if (markPos == null || alphaMult <= 0f) return;
-
-                LazyFont small = ShopUi.getSmallFont();
-                if (small == null) return;
-
-                if (mark == null) {
-                    mark = ShopUi.createText(small, "?");
-                    mark.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                boolean hovered = ShopUi.contains(markPos.getX(), markPos.getY(),
-                        markPos.getWidth(), markPos.getHeight(),
-                        Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
-
-                mark.setBaseColor(ShopUi.withAlpha(
-                        hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
-                mark.draw(Math.round(markPos.getX() + (markPos.getWidth() - mark.getWidth()) * 0.5f),
-                        Math.round(markPos.getY() + markPos.getHeight() * 0.5f
-                                + mark.getHeight() * 0.5f));
-            }
-        }
-
-        /** The bare shelf saying so, in the quiet voice. */
-        protected class EmptyShelfPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
-
-            protected PositionAPI notePos;
-
-            protected transient LazyFont.DrawableString note;
-
-            @Override
-            public void positionChanged(PositionAPI position) {
-                notePos = position;
-            }
-
-            @Override
-            public void render(float alphaMult) {
-                if (notePos == null || alphaMult <= 0f) return;
-
-                LazyFont small = ShopUi.getSmallFont();
-                if (small == null) return;
-
-                if (note == null) {
-                    note = ShopUi.createText(small, "Nothing left on the shelf this visit.");
-                    note.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                note.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-                note.draw(Math.round(notePos.getX()
-                                + (notePos.getWidth() - note.getWidth()) * 0.5f),
-                        Math.round(notePos.getY() + notePos.getHeight() * 0.5f
-                                + note.getHeight() * 0.5f));
-            }
-        }
 
         /**
          * One chart for sale, a chip at card scale: dark field that lights under the mouse, the

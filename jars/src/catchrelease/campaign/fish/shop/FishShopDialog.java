@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.ui.PaneWidgets;
+import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
@@ -291,7 +293,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         /** The way out, bottom right - the same door every panel in the mod has. */
         protected void buildLeave() {
             CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, LEAVE_HEIGHT,
-                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> "LEAVE",
+                    new catchrelease.ui.PaneWidgets.TextButton(() -> "LEAVE",
                             () -> true, () -> {
                                 if (callbacks != null) callbacks.dismissDialog();
                             }));
@@ -305,7 +307,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             TooltipMakerAPI footer = panel.createUIElement(UNDO_WIDTH, UNDO_HEIGHT, false);
 
             CustomPanelAPI undo = panel.createCustomPanel(UNDO_WIDTH, UNDO_HEIGHT,
-                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(
+                    new catchrelease.ui.PaneWidgets.TextButton(
                             () -> "UNDO LAST PURCHASE", () -> !purchases.isEmpty(),
                             this::undoClicked));
             footer.addCustom(undo, 0f);
@@ -652,13 +654,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     });
 
             CustomPanelAPI buy = panel.createCustomPanel(240f, 30f,
-                    new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> label,
+                    new catchrelease.ui.PaneWidgets.TextButton(() -> label,
                             entry::canAfford, () -> buyClicked(entry, false)));
             row.addComponent(buy).inTL(0f, 0f);
 
             if (dev) {
                 CustomPanelAPI grant = panel.createCustomPanel(70f, 30f,
-                        new catchrelease.campaign.fish.map.PaneWidgets.TextButton(() -> "DEV",
+                        new catchrelease.ui.PaneWidgets.TextButton(() -> "DEV",
                                 () -> true, () -> buyClicked(entry, true)));
                 row.addComponent(grant).inTL(250f, 0f);
             }

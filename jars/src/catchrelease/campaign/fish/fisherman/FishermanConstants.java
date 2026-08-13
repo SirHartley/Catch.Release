@@ -68,12 +68,6 @@ public class FishermanConstants {
     /** How the light's catch is staged: motes seeded under the fans, then harpooned. */
     public static final float MOTE_INTERVAL_MIN = 7f;
     public static final float MOTE_INTERVAL_MAX = 16f;
-    public static final float HARPOON_INTERVAL_MIN = 9f;
-    public static final float HARPOON_INTERVAL_MAX = 22f;
-
-    /** The least lit a mote has to be before the Fisherman bothers throwing at it. */
-    public static final float HARPOON_MIN_LIT = 0.15f;
-
     /**
      * Spawn pressure: the odds are the old ones, asked once when the player arrives somewhere.
      * <p>

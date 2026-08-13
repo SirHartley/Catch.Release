@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;

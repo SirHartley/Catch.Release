@@ -1,7 +1,7 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.ui.Alignment;
@@ -89,13 +89,6 @@ public class FishSystemPane extends BaseCustomUIPanelPlugin {
         float w = pos.getWidth();
         float h = pos.getHeight();
 
-        ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
-
-        //base colour at half strength - full read as too bright, dark as too dim
-        Color border = Misc.getBasePlayerColor();
-        ShopUi.drawQuad(x, y, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x, y, 1f, h, border, 0.55f * alphaMult);
-        ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, 0.55f * alphaMult);
+        ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
 }

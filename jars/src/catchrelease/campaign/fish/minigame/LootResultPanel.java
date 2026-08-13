@@ -13,7 +13,6 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +35,6 @@ public class LootResultPanel {
 
         transient LazyFont.DrawableString nameText;
         transient LazyFont.DrawableString countText;
-        transient SpriteAPI sprite;
-        transient boolean spriteChecked;
 
         Row(String name, String spriteName, int count, Color color) {
             this.name = name;
@@ -89,9 +86,6 @@ public class LootResultPanel {
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
     transient protected boolean fontsChecked = false;
-
-    transient protected SpriteAPI boxSprite;
-    transient protected boolean boxSpriteChecked = false;
 
     public LootResultPanel(List<TreasureAward> awards) {
         this.awards = awards == null ? new ArrayList<>() : awards;
@@ -423,36 +417,16 @@ public class LootResultPanel {
         }
     }
 
-    /** The row's cargo icon, loaded on first sight; the salvage marker when there is none to load. */
+    /** The row's cargo icon, through the shared loader so it arrives neutral and at its own
+     *  size; the salvage marker when there is none to load. */
     protected SpriteAPI getRowSprite(Row row) {
-        if (row.spriteChecked) return row.sprite;
-        row.spriteChecked = true;
+        SpriteAPI sprite = SpriteLoader.loadSprite(row.spriteName);
 
-        row.sprite = loadSprite(row.spriteName);
-        if (row.sprite == null) row.sprite = getBoxSprite();
-
-        return row.sprite;
+        return sprite == null ? getBoxSprite() : sprite;
     }
 
     protected SpriteAPI getBoxSprite() {
-        if (boxSpriteChecked) return boxSprite;
-        boxSpriteChecked = true;
-
-        boxSprite = SpriteLoader.loadSprite(FishConstants.TREASURE_ICON);
-
-        return boxSprite;
-    }
-
-    /** Sprite off a raw path - loadTexture makes modded art real before getSprite can find it. */
-    protected SpriteAPI loadSprite(String path) {
-        if (path == null || path.isEmpty()) return null;
-
-        try {
-            Global.getSettings().loadTexture(path);
-            return Global.getSettings().getSprite(path);
-        } catch (IOException | RuntimeException e) {
-            return null;
-        }
+        return SpriteLoader.loadSprite(FishConstants.TREASURE_ICON);
     }
 
     /** Loaded once and kept. A missing font costs the text and nothing else. */

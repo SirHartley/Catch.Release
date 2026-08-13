@@ -1,9 +1,10 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;

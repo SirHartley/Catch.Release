@@ -8,7 +8,7 @@ import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
-import catchrelease.campaign.fish.map.FishIcons;
+import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishRarity;

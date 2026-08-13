@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 220 Java files across eight top-level packages, plus
+What is where, and which file to open first. 230 Java files across ten top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -47,6 +47,7 @@ making the whole directory a source root recursively packages the artifact's own
 | An ability's behaviour | `abilities/<name>/ability/` |
 | An ability's tuning | `abilities/<name>/constants/` |
 | Aiming and reticules | `skillshot/` (has its own README) |
+| A pane, widget or list row on any screen but the minigame | `ui/` — the shared component framework |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
 | The low-coherence screen overlay | `campaign/fish/coherence/CoherenceOverlayScript.java` |
@@ -83,15 +84,19 @@ Everything game-facing is wired from `ModPlugin.java`.
    `FishingIntro.Keeper.register()` — the introduction's hooks and its errand keeper
 11. `ConservatoryOptionProvider.register()` — the conservatory's options on the colony screen
 12. `AquariumTankScript.register()` — the aquarium on the colony's main menu
-13. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save
-14. `SkillshotFramework.register()` — the aiming framework
-15. `FishMapFilterScript` as a transient script — the sector-map filter
-16. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-17. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-18. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+13. `Aberration.Watcher.register()` — the aberration index fills on arriving somewhere and on the
+   sector map opening; this is its only registration site
+14. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
+   stats missing from the save are seeded and every sheet-owned field of a held stat is refreshed,
+   so a save carries levels and nothing else that matters
+15. `SkillshotFramework.register()` — the aiming framework
+16. `FishMapFilterScript` as a transient script — the sector-map filter
+17. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+18. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+19. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-19. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
+20. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -104,16 +109,15 @@ are rebuilt every load because their state lives in sector memory rather than in
 
 Classes the game instantiates by name. Grep the data file, not the call sites — there aren't any.
 
-**`data/campaign/abilities.csv`** — 5 rows. Three live fishing abilities are
-`unlockedAtStart=FALSE` and granted by `FishingIntro`; `catchrelease_shop` is a hidden, inert
-one-release migration stub so old saves can deserialize before load cleanup removes it.
+**`data/campaign/abilities.csv`** — 4 rows. Three live fishing abilities are
+`unlockedAtStart=FALSE` and granted by `FishingIntro`; the fourth is the skillshot framework's
+hidden example. The old outfitter migration stub is gone — development assumes a new game.
 
 | Id | Class |
 |---|---|
 | `catchrelease_searchlights` | `abilities/searchlight/ability/SearchlightAbilityPlugin` |
 | `catchrelease_rod` | `abilities/rod/ability/PondInteractionAbilityPlugin` |
 | `catchrelease_harpoon` | `abilities/harpoon/ability/HarpoonAbilityPlugin` |
-| `catchrelease_shop` | `campaign/fish/shop/FishShopAbilityPlugin` (legacy migration stub) |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
 **`data/config/settings.json`** — `ruleCommandPackages`, listing vanilla's five packages **plus**
@@ -167,8 +171,10 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 6 ids of our own, merged into vanilla's ~600. Ability sounds are
-named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
+**`data/config/sounds.json`** — 14 ids at the top level, merged into vanilla's ~600: eleven of our
+own (the searchlight UI set, six cargo handling sounds, the coherence whispers), the skillshot
+framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
+Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to the
 loose `data.console.commands.AllFish` script and accepts one positive amount while on the campaign
@@ -453,7 +459,7 @@ everything downstream. Not a word of what it says is in Java.
 
 | File | What it does |
 |---|---|
-| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon; named quarry in that intel wears its rarity colour. Replacing a target explicitly updates the persistent intel destination; the two-chart rung returns no single map location, leaving its several destinations to the planner instead of falling through to the prior system's boat. Tutorial species are filtered through the same `FishHabitat` plus `CatchImplement` predicate as the real spawner, then capped common-only for the first two target rungs and common/uncommon for the next two, so a destination is never paired with an impossible or prematurely rare species. The Harpoon lesson further requires a species whose source metadata is exactly `BREACH_LAMP`: it cannot come from a pond, and drones only catch pond fish, so the live target can only be landed by harpoon. If a normal target system has no capped real-spawn candidate, the first lesson remains in the current system and later lessons use an id-sorted thin-first fallback that still obeys their 2–10 LY range; the fallback is logged, while an all-empty pool logs a warning and creates no impossible target. Assigning the second lesson immediately reserves the canonical Fisherman already in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves, while a reused visitor is held then released back to its own lifecycle. `Keeper` re-applies that reservation from the saved target, making mid-lesson load repair idempotent. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability, and load migration removes that dev-era shortcut and its hotbar slots from existing saves. The shortcut grants the same 2 common/1 uncommon/1 rare range-data mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. `dropNote` snapshots every old-save `IntroIntel` before removing it, so duplicate tutorial notes can be cleaned up safely. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
+| `FishingIntro.java` | The seven stages, the errand targets, the grants, the shortcut, and `IntroIntel` on vanilla's tutorial-mission icon; named quarry in that intel wears its rarity colour. Replacing a target explicitly updates the persistent intel destination; the two-chart rung returns no single map location, leaving its several destinations to the planner instead of falling through to the prior system's boat. Tutorial species are filtered through the same `FishHabitat` plus `CatchImplement` predicate as the real spawner, then capped common-only for the first two target rungs and common/uncommon for the next two, so a destination is never paired with an impossible or prematurely rare species. The Harpoon lesson further requires a species whose source metadata is exactly `BREACH_LAMP`: it cannot come from a pond, and drones only catch pond fish, so the live target can only be landed by harpoon. If a normal target system has no capped real-spawn candidate, the first lesson remains in the current system and later lessons use an id-sorted thin-first fallback that still obeys their 2–10 LY range; the fallback is logged, while an all-empty pool logs a warning and creates no impossible target. Assigning the second lesson immediately reserves the canonical Fisherman already in its target system; an uninhabited-system posting is held for that errand and despawns only after the lesson ends and the player leaves, while a reused visitor is held then released back to its own lifecycle. `Keeper` re-applies that reservation from the saved target, making mid-lesson load repair idempotent. The second-catch handoff introduces the Fisherman's outfitter before the deep rigs arrive and carries a pending flag so an interrupted conversation resumes correctly; it grants no shop ability - the dev-era ability-bar shortcut and its migration shims are gone, since development assumes a new game. The shortcut grants the same 2 common/1 uncommon/1 rare range-data mix as the full route. `Keeper` both plants the specimen and watches the hold for it: the first any-species lesson guarantees a specimen without reserving or marking its rupture, while named-location rungs claim theirs; landing one releases the rupture, takes the planted specimen back out of the fabric and re-points the note at the boat. `dropNote` snapshots every old-save `IntroIntel` before removing it, so duplicate tutorial notes can be cleaned up safely. A `FishAsker`, so the rung's quarry wears the wanted-fish mark |
 | `TutorialWreck.java` | A stripped auxiliary beside the first rupture seen out where nobody lives, carrying the Fisherman's damaged LYNE service assembly as a navigation breadcrumb rather than usable early gear |
 | `Castaway.java` | A rating missed during a badly reconciled crew transfer, discovered by intercepting the host planet's ordinary survey selection and routing into the preserved rules dialogue. The host and rescue are persistent market flags; legacy orbiting beacons are recognised only by their stable type/tag, converted to their orbit planet if unfinished, and retired without ever touching a planet |
 | `RatingBarEvent.java` | The port counter the sheet's bar version is gated on, and nothing else |
@@ -514,12 +520,12 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought. Its bulk grant records every real outfitter permission without buying hardware or levels, for developer campaign setup |
-| `FishShopAbilityPlugin.java` | Hidden inert migration stub for the removed ability-bar shortcut; load cleanup removes it and its hotbar references from old saves |
-| `ShopRowPlugin.java` | One clickable row, plus the shopping-list ring. Reports the ring's hover upwards rather than drawing its own card |
+| `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click, and its hover is reported upwards rather than drawn, because a card would be cut off by the list's scissor box |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
 | `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
-| `ShopUi.java` | Shared drawing helpers: fonts, quads, clipping, card placement, and `drawPanel` - the sidebar dressing every panel wears |
+
+The drawing helpers these plugins share (`ShopUi`) live in the top-level `ui` package.
 
 ### `campaign/fish/items`
 Fish in cargo.
@@ -579,11 +585,10 @@ The sector-map fish filter.
 | `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget. Bare points, not systems, so it needs `openSpaceReading` to answer with the whole index; `ALPHA_CAP` is the layer's single ceiling and `HEAT_EASE` above 1 keeps the bottom of the range faint; bounds are the sector rectangle exactly, because past it `getAbyssalDepth` measures how far off the map you are rather than the water |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
-| `FishIcons.java` | A species' face by Codex knowledge: the art once landed, its rimmed black silhouette while only surveyed. `drawBacklit` is the complete named-species portrait shared by the chart shop, Codex detail and Intel note, including the same rarity-coloured light. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR`. Every draw restores the shared sprite's native size, white colour, full alpha and normal blend in `finally`, so a Codex silhouette cannot blacken cargo or result screens |
+| `FishListRow.java` | The species row both panes' lists extend, on `ui/ListRow`: caught-circle, name, wanted dot, F2 to the codex; the planner's who-is-asking tag hangs off its `renderTag` hook |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from every `FishAsker` in the log plus the shopping list, broad asks expanded to whatever could pay them; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot, built from the sidebar's own parts: search, chips, pick up to five, plot |
-| `PaneWidgets.java` | The panes' shared widgets - type chip, text button, ghost-text tending - one face for sidebar and planner |
 | `FishTooltips.java` | The one species tooltip every fish icon answers a hover with |
 | `FishIntelPlanetPanel.java` | The intel Planets view's fish panel, beside the planet card |
 | `FishType.java` | Filter categories with colour and icon |
@@ -625,7 +630,7 @@ The pond, as terrain.
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
 | `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. Each external-control acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |
-| `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Current default |
+| `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Dormant: `PondConstants.POND_HOLE_LOOK` is off, so the shader swirl in the terrain plugin - the pond's rolled-back original look - is what draws |
 | `renderer/RippleData.java` | One ripple emitter, spawning ring renderers into LunaLib's list |
 | `renderer/UnstableFabricRippleTerrainRenderer.java` | Extra randomised ripples around the main one |
 | `constants/PondConstants.java` | Placement, camera timing, depth field, hole, opening distortion |
@@ -700,6 +705,18 @@ Reusable aim-and-fire framework. **Has its own README — read that first.**
 | `util/DelayedActionScriptRunWhilePaused.java` | A delayed action that ticks while paused |
 | `example/ExampleSkillshotAbility.java` | A working copy-paste starting point |
 
+### `ui`
+The shared component framework - the sidebar's visual language written once, worn by the map
+panes, the outfitter, the chart counter and the aquarium alike. The minigame is the deliberate
+exception: it is its own encapsulated universe and keeps its own dress.
+
+| File | What it does |
+|---|---|
+| `ShopUi.java` | Shared drawing helpers: fonts, quads, vertical gradients (constant colour with graded alpha, or both ends their own), clipping, pips, card placement, and `drawPanel` - the transparent-black, half-strength-border face every pane wears |
+| `PaneWidgets.java` | The shared widgets: type chip, text button, title row, list header with its help mark, the standalone help mark, the centred empty-space note, and the hand-worked ghost text a bare `TextFieldAPI` does not provide |
+| `ListRow.java` | The scrolling-list row skeleton every list row extends: cull against the list window, clip to it, the graded dark field, the accent strip, clicks that only land in view. `campaign/fish/map/FishListRow` and `campaign/fish/shop/ShopRowPlugin` build on it |
+| `FishIcons.java` | A species' face by Codex knowledge: the art once landed, its rimmed black silhouette while only surveyed. `drawBacklit` is the complete named-species portrait shared by the chart shop, Codex detail and Intel note, including the same rarity-coloured light. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR`. Every draw restores the shared sprite's native size, white colour, full alpha and normal blend in `finally`, so a Codex silhouette cannot blacken cargo or result screens |
+
 ### `rendering`
 Shader and GL machinery.
 
@@ -724,7 +741,7 @@ Shader and GL machinery.
 
 | File | What it does |
 |---|---|
-| `memory/upgrades/UpgradeManager.java` | Save-persisted levels. `getValue` is the single read entry point |
+| `memory/upgrades/UpgradeManager.java` | Save-persisted levels. `getValue` is the single read entry point; `updateBaseValues` re-walks the sheet each load, seeding stats the save predates and refreshing every sheet-owned field, so the save owns the levels and the sheet owns everything else |
 | `memory/upgrades/StatIds.java` | The ids joining code to `UpgradeData.csv` |
 | `memory/upgrades/UpgradeStat.java` | One row: base, FLAT/MULT per level, category, current value |
 | `memory/charges/ChargeManager.java` | Float charge pools that regenerate continuously |
@@ -1212,4 +1229,4 @@ do nothing.
 | `campaign/fish/shop/ShopStorage` | The store/retrieve/sell counter is gone. Kept only to hand back fish a save is still holding in it, once, on the next shop open |
 | `testing/DevShortcut` | Registered from `ModPlugin` as a transient listener; does nothing unless dev mode is on |
 | `testing/TestStencilRenderer` | Commented out of `ModPlugin` |
-| The pond's shader swirl | Dormant behind `PondConstants.POND_HOLE_LOOK`, which currently selects the stencil hole renderer |
+| `campaign/ponds/renderer/PondHoleRenderer` | Dormant behind `PondConstants.POND_HOLE_LOOK`, which currently selects the shader swirl - the pond's intended look, rolled back to after a trial of the stencil hole |

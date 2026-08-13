@@ -25,7 +25,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,8 +79,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Drives the icon's twitch; visual only, never affects where the bar has to be. */
     protected float jitterTime = 0f;
 
-    transient protected SpriteAPI fishSprite;
-    transient protected boolean fishSpriteChecked = false;
 
     /** Track backing and its warp; built on first use. */
     transient protected SpriteAPI backgroundSprite;
@@ -504,23 +501,16 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return SpriteLoader.loadSprite(FishConstants.MINIGAME_TRACK_ICON);
     }
 
-    /** Loaded on first use, for the celebration and the readout. */
+    /**
+     * For the celebration and the readout, fetched through the shared loader every time: the
+     * same icon is drawn tinted and resized by the map and the hold, one sprite object serves
+     * every caller of a path, and only the loader hands it back neutral and at its own size.
+     */
     protected SpriteAPI getFishSprite() {
-        if (fishSpriteChecked) return fishSprite;
-        fishSpriteChecked = true;
-
         FishSpec fish = minigame.getFish();
         if (fish.icon == null || fish.icon.isEmpty()) return null;
 
-        try {
-            Global.getSettings().loadTexture(fish.icon);
-            fishSprite = Global.getSettings().getSprite(fish.icon);
-        } catch (IOException e) {
-            Global.getLogger(FishingMinigamePanel.class).warn("No icon for fish " + fish.id + ": " + fish.icon);
-            fishSprite = null;
-        }
-
-        return fishSprite;
+        return SpriteLoader.loadSprite(fish.icon);
     }
 
     /** Quad with alpha interpolated bottom-to-top; colour stays constant. */
