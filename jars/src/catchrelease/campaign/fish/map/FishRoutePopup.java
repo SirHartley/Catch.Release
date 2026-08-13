@@ -440,148 +440,53 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** One species row in the sidebar's own dress - rarity accent, caught-mark circle, name,
-     *  the shopping-list dot - plus a tag for who is asking. Field stays lit while picked;
-     *  F2 opens the codex. */
-    protected class RowPlugin extends BaseCustomUIPanelPlugin {
-
-        public static final float PAD_SIDE = 8f;
-        public static final float ACCENT_WIDTH = 3f;
-        public static final float MARK_RADIUS = 3.5f;
-        public static final float MARK_GAP = 7f;
+    /** One species row in the shared dress, plus a tag for who is asking. Field stays lit
+     *  while picked. */
+    protected class RowPlugin extends FishListRow {
 
         protected final Row row;
-        protected PositionAPI rowPos;
 
-        protected transient LazyFont.DrawableString name;
         protected transient LazyFont.DrawableString reason;
 
         public RowPlugin(Row row) {
+            super(row.spec);
             this.row = row;
         }
 
         @Override
-        public void positionChanged(PositionAPI position) {
-            rowPos = position;
+        protected PositionAPI getViewport() {
+            return listViewport;
         }
 
         @Override
-        public void render(float alphaMult) {
-            if (rowPos == null || alphaMult <= 0f || listViewport == null) return;
-
-            float x = rowPos.getX();
-            float y = rowPos.getY();
-            float w = rowPos.getWidth();
-            float h = rowPos.getHeight();
-
-            if (y + h < listViewport.getY() || y > listViewport.getY() + listViewport.getHeight()) return;
-
-            ShopUi.startClip(listViewport.getX(), listViewport.getY(),
-                    listViewport.getWidth(), listViewport.getHeight());
-
-            FishSpec spec = row.spec;
-
-            boolean picked = selected.contains(spec.id);
-            boolean hovered = !picked && contains(Global.getSettings().getMouseX(),
-                    Global.getSettings().getMouseY());
-
-            float field = picked ? 0.4f : hovered ? 0.3f : 0.12f;
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), field * alphaMult);
-
-            float accent = picked ? 0.9f : hovered ? 0.6f : 0.3f;
-            ShopUi.drawQuad(x, y, ACCENT_WIDTH, h, spec.rarity.color, accent * alphaMult);
-
-            Color chrome = picked || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-
-            //filled = caught, hollow = range-only; a shape rather than a shade, since every
-            //shade here already means selection or rarity
-            boolean caught = FishLog.isCaught(spec.id);
-            float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
-            float markY = y + h * 0.5f;
-
-            if (caught) {
-                Disc.draw(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 0.9f * alphaMult, false);
-            }
-
-            //drawn over the fill too - the outline is what keeps a circle this small round
-            Disc.drawOutline(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 1.5f);
-
-            LazyFont body = ShopUi.getBodyFont();
-            if (body != null) {
-                if (name == null) {
-                    name = ShopUi.createText(body, spec.getDisplayName());
-                    name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                name.setBaseColor(ShopUi.withAlpha(chrome, alphaMult));
-                name.draw(Math.round(x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS * 2f + MARK_GAP),
-                        Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
-            }
-
-            boolean marked = ShopMarks.isWanted(spec);
-
-            //who is asking, right-aligned - the marked tag retired, the dot already says it
-            if (row.reason != null && !"marked".equals(row.reason)) {
-                LazyFont small = ShopUi.getSmallFont();
-                if (small != null) {
-                    if (reason == null) {
-                        reason = ShopUi.createText(small, row.reason);
-                        reason.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                    }
-
-                    reason.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
-                    reason.draw(Math.round(x + w - PAD_SIDE - reason.getWidth()
-                                    - (marked ? 12f : 0f)),
-                            Math.round(y + h * 0.5f + reason.getHeight() * 0.5f));
-                }
-            }
-
-            //the wanted dot at the row's right end, centred on the row's own midline
-            if (marked) {
-                ShopMarks.drawDot(x + w - 8f, y + h * 0.5f,
-                        ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
-            }
-
-            ShopUi.endClip();
+        protected boolean isSelected() {
+            return selected.contains(spec.id);
         }
 
         @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (rowPos == null) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed()) continue;
-
-                //the codex hotlink, the way the rest of the game's UI wears it
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
-                    if (!contains(Global.getSettings().getMouseX(), Global.getSettings().getMouseY())) {
-                        continue;
-                    }
-
-                    event.consume();
-                    FishCodex.show(row.spec.id);
-                    return;
-                }
-
-                if (!event.isLMBDownEvent()) continue;
-                if (!contains(event.getX(), event.getY())) continue;
-
-                event.consume();
-                Global.getSoundPlayer().playUISound(PaneWidgets.CLICK_SOUND, 1f, 1f);
-                onRowClicked(row.spec);
-
-                return;
-            }
+        protected void onRowClick(float pointX, float pointY) {
+            onRowClicked(spec);
         }
 
-        protected boolean contains(float pointX, float pointY) {
-            if (listViewport != null && !ShopUi.contains(listViewport.getX(), listViewport.getY(),
-                    listViewport.getWidth(), listViewport.getHeight(), pointX, pointY)) {
-                return false;
+        /** Who is asking, right-aligned - the marked tag retired, the dot already says it. */
+        @Override
+        protected void renderTag(float x, float y, float width, float height, boolean marked,
+                                 float alphaMult) {
+
+            if (row.reason == null || "marked".equals(row.reason)) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            if (reason == null) {
+                reason = ShopUi.createText(small, row.reason);
+                reason.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
-            return ShopUi.contains(rowPos.getX(), rowPos.getY(), rowPos.getWidth(),
-                    rowPos.getHeight(), pointX, pointY);
+            reason.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+            reason.draw(Math.round(x + width - PAD_SIDE - reason.getWidth()
+                            - (marked ? 12f : 0f)),
+                    Math.round(y + height * 0.5f + reason.getHeight() * 0.5f));
         }
     }
 }

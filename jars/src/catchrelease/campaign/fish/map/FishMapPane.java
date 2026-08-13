@@ -392,129 +392,27 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the planner. ---
 
-    /** One species row: rarity-coloured accent bar, a circle marking caught (filled) vs
-     *  range-only (hollow), and the name. Bar stays lit while its waters are on the map;
-     *  F2 opens the codex. */
-    protected class RowPlugin extends BaseCustomUIPanelPlugin {
-
-        public static final float PAD_SIDE = 8f;
-        public static final float ACCENT_WIDTH = 3f;
-        public static final float MARK_RADIUS = 3.5f;
-        public static final float MARK_GAP = 7f;
-
-        protected final FishSpec spec;
-        protected PositionAPI rowPos;
-
-        protected transient LazyFont.DrawableString name;
+    /** One species row in the shared dress; the field stays lit while its waters are on
+     *  the map. */
+    protected class RowPlugin extends FishListRow {
 
         public RowPlugin(FishSpec spec) {
-            this.spec = spec;
+            super(spec);
         }
 
         @Override
-        public void positionChanged(PositionAPI position) {
-            rowPos = position;
+        protected PositionAPI getViewport() {
+            return listViewport;
         }
 
         @Override
-        public void render(float alphaMult) {
-            if (rowPos == null || alphaMult <= 0f || listViewport == null) return;
-
-            float x = rowPos.getX();
-            float y = rowPos.getY();
-            float w = rowPos.getWidth();
-            float h = rowPos.getHeight();
-
-            if (y + h < listViewport.getY() || y > listViewport.getY() + listViewport.getHeight()) return;
-
-            ShopUi.startClip(listViewport.getX(), listViewport.getY(),
-                    listViewport.getWidth(), listViewport.getHeight());
-
-            boolean selected = selectedIds.contains(spec.id);
-            boolean hovered = !selected && contains(Global.getSettings().getMouseX(),
-                    Global.getSettings().getMouseY());
-
-            float field = selected ? 0.4f : hovered ? 0.3f : 0.12f;
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(), field * alphaMult);
-
-            float accent = selected ? 0.9f : hovered ? 0.6f : 0.3f;
-            ShopUi.drawQuad(x, y, ACCENT_WIDTH, h, spec.rarity.color, accent * alphaMult);
-
-            Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
-
-            //filled = caught, hollow = range-only; a shape rather than a shade, since every
-            //shade here already means selection or rarity
-            boolean caught = FishLog.isCaught(spec.id);
-            float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
-            float markY = y + h * 0.5f;
-
-            if (caught) {
-                Disc.draw(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 0.9f * alphaMult, false);
-            }
-
-            //drawn over the fill too - the outline is what keeps a circle this small round
-            Disc.drawOutline(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 1.5f);
-
-            LazyFont body = ShopUi.getBodyFont();
-            if (body != null) {
-                if (name == null) {
-                    name = ShopUi.createText(body, spec.getDisplayName());
-                    name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                name.setBaseColor(ShopUi.withAlpha(chrome, alphaMult));
-                name.draw(Math.round(x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS * 2f + MARK_GAP),
-                        Math.round(y + h * 0.5f + name.getHeight() * 0.5f));
-            }
-
-            //the wanted dot at the row's right end, centred on the row's own midline - asked of
-            //everything that wants a fish, errands included, not the shopping list alone
-            if (catchrelease.campaign.fish.shop.ShopMarks.isWanted(spec)) {
-                catchrelease.campaign.fish.shop.ShopMarks.drawDot(
-                        x + w - 8f, y + h * 0.5f,
-                        catchrelease.campaign.fish.shop.ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
-            }
-
-            ShopUi.endClip();
+        protected boolean isSelected() {
+            return selectedIds.contains(spec.id);
         }
 
         @Override
-        public void processInput(List<InputEventAPI> events) {
-            if (rowPos == null) return;
-
-            for (InputEventAPI event : events) {
-                if (event.isConsumed()) continue;
-
-                //the codex hotlink, the way the rest of the game's UI wears it
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_F2) {
-                    if (!contains(Global.getSettings().getMouseX(), Global.getSettings().getMouseY())) {
-                        continue;
-                    }
-
-                    event.consume();
-                    FishCodex.show(spec.id);
-                    return;
-                }
-
-                if (!event.isLMBDownEvent()) continue;
-                if (!contains(event.getX(), event.getY())) continue;
-
-                event.consume();
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-                onRowClicked(spec);
-
-                return;
-            }
-        }
-
-        protected boolean contains(float pointX, float pointY) {
-            if (listViewport != null && !ShopUi.contains(listViewport.getX(), listViewport.getY(),
-                    listViewport.getWidth(), listViewport.getHeight(), pointX, pointY)) {
-                return false;
-            }
-
-            return ShopUi.contains(rowPos.getX(), rowPos.getY(), rowPos.getWidth(),
-                    rowPos.getHeight(), pointX, pointY);
+        protected void onRowClick(float pointX, float pointY) {
+            onRowClicked(spec);
         }
     }
 }

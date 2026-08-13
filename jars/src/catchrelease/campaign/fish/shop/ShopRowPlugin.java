@@ -1,32 +1,26 @@
 package catchrelease.campaign.fish.shop;
 
-import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.ui.ListRow;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
-import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
-import java.util.List;
 
 /**
- * One line of the shelf list: the selection strip, the shopping-list ring, the name, and state
- * readable without selecting it (lit pips for a ladder, a price-coloured mark for a module,
- * MAX/FITTED said outright).
+ * One line of the shelf list, on the shared {@link ListRow} skeleton: the shopping-list ring,
+ * the name, and state readable without selecting it (lit pips for a ladder, a price-coloured
+ * mark for a module, MAX/FITTED said outright).
  * <p>
  * The ring is the mark-for-later toggle, lived-in rather than a button in the detail pane:
  * hollow until clicked, filled quest-yellow while the ware is on the shopping list. Every row
  * indents past the ring's slot whether or not it draws one, so the names stay in a column.
- * <p>
- * Drawn from live data every frame rather than assembled once, so a purchase never leaves a stale
- * row. Input handled by hand since a stock button can't give a hover glow, selection bar, and pips
- * their own regions within one row.
  */
-public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
+public class ShopRowPlugin extends ListRow {
 
     /** What a row needs from the pane it lives in. */
     public interface Host {
@@ -52,7 +46,6 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
     public static final float PIP_SIZE = 8f;
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
-    public static final float ACCENT_WIDTH = 3f;
 
     /** The shopping-list ring's slot, sitting between the strip and the name. */
     public static final float MARK_SLOT = 18f;
@@ -60,8 +53,6 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
     protected final ShopEntry entry;
     protected final Host host;
-
-    protected PositionAPI pos;
 
     protected transient LazyFont.DrawableString name;
     protected transient LazyFont.DrawableString mark;
@@ -73,53 +64,32 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
     }
 
     @Override
-    public void positionChanged(PositionAPI position) {
-        pos = position;
+    protected PositionAPI getViewport() {
+        return host.getListViewport();
     }
 
     @Override
-    public void render(float alphaMult) {
-        if (pos == null || alphaMult <= 0f) return;
-
-        PositionAPI view = host.getListViewport();
-        if (view == null) return;
-
-        float x = pos.getX();
-        float y = pos.getY();
-        float width = pos.getWidth();
-        float height = pos.getHeight();
-
-        //reported before the cull, so a row scrolled out from under the cursor takes its card with it
-        reportMarkHover(x, y, height);
-
-        //culled if scrolled out of the visible window
-        if (y + height < view.getY() || y > view.getY() + view.getHeight()) return;
-
-        ShopUi.startClip(view.getX(), view.getY(), view.getWidth(), view.getHeight());
-
-        boolean selected = host.isSelected(entry);
-        boolean hovered = !selected && isMouseOver();
-
-        float field = selected ? 0.5f : hovered ? 0.3f : 0.12f;
-        ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), field * alphaMult);
-
-        //every row wears its accent, graded by state - the sidebar rows' grammar, with the
-        //price's rarity as the identity colour
-        FishRarity tier = entry.getPriceRarity();
-        Color accent = tier == null ? Misc.getBasePlayerColor() : tier.color;
-
-        ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, accent,
-                (selected ? 0.9f : hovered ? 0.6f : 0.3f) * alphaMult);
-
-        renderMarkRing(x, y, height, alphaMult);
-        renderName(x, y, height, selected, alphaMult);
-        renderState(x, y, width, height, alphaMult);
-
-        ShopUi.endClip();
+    protected boolean isSelected() {
+        return host.isSelected(entry);
     }
 
-    /** Tells the pane whether the cursor is on this row's ring, so it can put a card up. */
-    protected void reportMarkHover(float x, float y, float height) {
+    /** A shade brighter than the panes' rows - the shelf sits on a busier ground. */
+    @Override
+    protected float getSelectedFieldAlpha() {
+        return 0.5f;
+    }
+
+    /** The price's rarity as the identity colour. */
+    @Override
+    protected Color getAccentColor() {
+        FishRarity tier = entry.getPriceRarity();
+        return tier == null ? Misc.getBasePlayerColor() : tier.color;
+    }
+
+    /** Reported before the cull, so a row scrolled out from under the cursor takes its card
+     *  with it. */
+    @Override
+    protected void beforeCull(float x, float y, float width, float height) {
         boolean hasRing = ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry);
 
         if (hasRing && isMouseOverMark()) {
@@ -128,6 +98,14 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         }
 
         host.clearMarkHover(entry);
+    }
+
+    @Override
+    protected void renderContent(float x, float y, float width, float height,
+                                 boolean selected, boolean hovered, float alphaMult) {
+        renderMarkRing(x, y, height, alphaMult);
+        renderName(x, y, height, selected, alphaMult);
+        renderState(x, y, width, height, alphaMult);
     }
 
     /** The shopping-list ring: hollow until clicked, filled quest-yellow while marked. */
@@ -234,29 +212,16 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
         mark.draw(Math.round(right), Math.round(y + height * 0.5f + mark.getHeight() * 0.5f));
     }
 
+    /** The ring's slot toggles the mark; everywhere else selects the row. */
     @Override
-    public void processInput(List<InputEventAPI> events) {
-        if (pos == null) return;
-
-        for (InputEventAPI event : events) {
-            if (event.isConsumed() || !event.isLMBDownEvent()) continue;
-            if (!contains(event.getX(), event.getY())) continue;
-
-            Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
-
-            //the ring's slot toggles the mark; everywhere else selects the row
-            if (isInMarkSlot(event.getX()) &&
-                    (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry))) {
-                ShopMarks.toggle(entry);
-                event.consume();
-                return;
-            }
-
-            event.consume();
-            host.onRowClicked(entry);
-
+    protected void onRowClick(float pointX, float pointY) {
+        if (isInMarkSlot(pointX) &&
+                (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry))) {
+            ShopMarks.toggle(entry);
             return;
         }
+
+        host.onRowClicked(entry);
     }
 
     protected boolean isInMarkSlot(float pointX) {
@@ -266,22 +231,5 @@ public class ShopRowPlugin extends BaseCustomUIPanelPlugin {
 
     protected boolean isMouseOverMark() {
         return isMouseOver() && isInMarkSlot(Global.getSettings().getMouseX());
-    }
-
-    /** Inside the row and inside the list - a row scrolled out of the window takes no clicks. */
-    protected boolean contains(float pointX, float pointY) {
-        PositionAPI view = host.getListViewport();
-
-        if (view != null && !ShopUi.contains(view.getX(), view.getY(),
-                view.getWidth(), view.getHeight(), pointX, pointY)) {
-            return false;
-        }
-
-        return ShopUi.contains(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                pointX, pointY);
-    }
-
-    protected boolean isMouseOver() {
-        return contains(Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
     }
 }
