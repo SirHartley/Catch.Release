@@ -2,11 +2,11 @@ package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.items.FishItems;
-import catchrelease.campaign.fish.map.FishIcons;
-import catchrelease.campaign.fish.map.PaneWidgets;
+import catchrelease.ui.FishIcons;
+import catchrelease.ui.PaneWidgets;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;

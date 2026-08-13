@@ -1,7 +1,7 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.ui.Alignment;

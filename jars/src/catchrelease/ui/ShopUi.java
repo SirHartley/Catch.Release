@@ -1,4 +1,4 @@
-package catchrelease.campaign.fish.shop;
+package catchrelease.ui;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.rendering.helper.RoundedBorder;

@@ -1,7 +1,7 @@
-package catchrelease.campaign.fish.map;
+package catchrelease.ui;
 
 import catchrelease.ModPlugin;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -13,7 +13,6 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -68,16 +67,18 @@ public final class PaneWidgets {
         return text == null || ghost.equals(text) ? "" : text;
     }
 
-    /** One type as a chip: a placeholder mark (category art doesn't exist yet) over the name,
-     *  lit in the type's colour while shown. Reads the filter, never writes it - the toggle is
-     *  the owner's to make. */
+    /** One filter category as a chip: a placeholder mark (category art doesn't exist yet)
+     *  over the name, lit in its own colour while on. Reads state, never writes it - the
+     *  toggle is the owner's to make, which is also what keeps this class ignorant of what
+     *  it is filtering. */
     public static class Chip extends BaseCustomUIPanelPlugin {
 
         public static final float ICON_SIZE = 16f;
 
-        protected final FishType type;
-        protected final FishPresence.Filter filter;
-        protected final Consumer<FishType> onToggle;
+        protected final String label;
+        protected final Color color;
+        protected final Supplier<Boolean> on;
+        protected final Runnable onToggle;
 
         protected PositionAPI chipPos;
 
@@ -85,9 +86,10 @@ public final class PaneWidgets {
         protected transient SpriteAPI icon;
         protected transient boolean iconChecked;
 
-        public Chip(FishType type, FishPresence.Filter filter, Consumer<FishType> onToggle) {
-            this.type = type;
-            this.filter = filter;
+        public Chip(String label, Color color, Supplier<Boolean> on, Runnable onToggle) {
+            this.label = label;
+            this.color = color;
+            this.on = on;
             this.onToggle = onToggle;
         }
 
@@ -105,18 +107,18 @@ public final class PaneWidgets {
             float w = chipPos.getWidth();
             float h = chipPos.getHeight();
 
-            boolean on = filter.types.contains(type);
+            boolean on = this.on.get();
             boolean hovered = ShopUi.contains(x, y, w, h,
                     Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
 
             if (on) {
-                ShopUi.drawQuad(x, y, w, h, type.color, (hovered ? 0.5f : 0.35f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.95f * alphaMult);
+                ShopUi.drawQuad(x, y, w, h, color, (hovered ? 0.5f : 0.35f) * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, color, 0.95f * alphaMult);
             } else {
                 //off is absence, not another colour - dark field with just the underline remembering
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered ? 0.35f : 0.18f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, type.color, 0.35f * alphaMult);
+                ShopUi.drawQuad(x, y, w, 2f, color, 0.35f * alphaMult);
             }
 
             SpriteAPI face = getIcon();
@@ -135,7 +137,7 @@ public final class PaneWidgets {
             if (tiny == null) return;
 
             if (text == null) {
-                text = ShopUi.createText(tiny, type.label);
+                text = ShopUi.createText(tiny, label);
                 text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
@@ -173,7 +175,7 @@ public final class PaneWidgets {
 
                 event.consume();
                 Global.getSoundPlayer().playUISound(CLICK_SOUND, 1f, 1f);
-                onToggle.accept(type);
+                onToggle.run();
 
                 return;
             }

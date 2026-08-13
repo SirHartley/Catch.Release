@@ -1,10 +1,11 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.ui.PaneWidgets;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import catchrelease.campaign.fish.shop.ShopUi;
+import catchrelease.ui.ShopUi;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -190,7 +191,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         for (int i = 0; i < types.length; i++) {
             FishType type = types[i];
             CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT,
-                    new PaneWidgets.Chip(type, filter, this::onChipToggled));
+                    new PaneWidgets.Chip(type.label, type.color,
+                            () -> filter.types.contains(type), () -> onChipToggled(type)));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
             controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
