@@ -7,6 +7,7 @@ import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
+import catchrelease.helper.cache.TimedValue;
 import catchrelease.helper.math.CircularArc;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -374,9 +375,8 @@ public class FishermanBehavior implements EveryFrameScript {
         }
     }
 
-    /** Where the boat's name was last read, and when - the drift read is the expensive part. */
-    protected transient LocationAPI namedFor;
-    protected transient long namedStamp;
+    /** The boat's held name - keyed by location, re-read daily. The drift read is the cost. */
+    protected transient TimedValue<String> named;
 
     /**
      * The boat wears the name the local water lets it wear.
@@ -388,19 +388,19 @@ public class FishermanBehavior implements EveryFrameScript {
      * (slipstreams shift with the season; nothing else in the reading moves at all).
      */
     protected void keepNamed() {
-        long now = Global.getSector().getClock().getTimestamp();
+        //lazily built - the field is transient, so a loaded save starts without one
+        if (named == null) named = new TimedValue<>(1f);
 
-        if (namedFor == fleet.getContainingLocation()
-                && Global.getSector().getClock().convertToDays(now - namedStamp) < 1f) {
-            return;
-        }
+        double nowDays = Global.getSector().getClock()
+                .convertToDays(Global.getSector().getClock().getTimestamp());
 
-        namedFor = fleet.getContainingLocation();
-        namedStamp = now;
+        named.get(nowDays, fleet.getContainingLocation(), () -> {
+            String name = FishermanIdentity.getDisplayName(FishermanIdentity.getDrift(fleet));
 
-        String name = FishermanIdentity.getDisplayName(FishermanIdentity.getDrift(fleet));
+            if (!name.equals(fleet.getName())) fleet.setName(name);
 
-        if (!name.equals(fleet.getName())) fleet.setName(name);
+            return name;
+        });
     }
 
     /** Whether the player is in the same place as the boat, which is what holds the clock. */

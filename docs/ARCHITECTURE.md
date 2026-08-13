@@ -751,6 +751,7 @@ Shader and GL machinery.
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
 | `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, cached, misses logged once. One object per path is shared by every caller, so it is handed back neutral - native size, white, full alpha, normal blend - and a caller that wants it otherwise says so |
+| `helper/cache/TimedValue.java` | The expensive-read-asked-every-frame cache: caller's own clock, a TTL in its units, an optional key that forces the read when it changes. Behind the shop's wanted-ask cache (wall millis), the coherence bar's reading (accumulated seconds) and the boats' names (game days + location). `Aberration`'s stamp cache stays hand-rolled on purpose - its invalidation check sits in the hottest read path and must not allocate |
 | `helper/math/TrigHelper.java` | Circle intersection and fitting, smoothing, normal distribution |
 | `helper/math/Circle.java` · `CircularArc.java` | Point/angle helpers and arc traversal |
 | `helper/animation/BaseCircleTrajectoryFollowingParticle.java` | Position and facing along a circular arc between two points |
