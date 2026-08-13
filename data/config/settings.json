@@ -11,6 +11,14 @@
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
     },
 
+    "characters": {
+      "catchrelease_fisherman_stable": "graphics/catchrelease/portraits/fisherman_1_stable.png",
+      "catchrelease_fisherman_unsettled": "graphics/catchrelease/portraits/fisherman_2_unsettled.png",
+      "catchrelease_fisherman_slipping": "graphics/catchrelease/portraits/fisherman_3_slipping.png",
+      "catchrelease_fisherman_unstable": "graphics/catchrelease/portraits/fisherman_4_unstable.png",
+      "catchrelease_fisherman_barely_holding": "graphics/catchrelease/portraits/fisherman_5_barelyholding.png",
+    },
+
     "fx": {
       "skillshot_direction_reticule": "graphics/catchrelease/fx/skillshot_direction_reticule.png",
       "skillshot_arrow": "graphics/catchrelease/fx/skillshot_arrow.png",
