@@ -68,20 +68,24 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         if (clicked == null || helper == null) return;
 
         List<FishCatch> stowed = new ArrayList<>();
+        List<SpecialItemData> looseData = new ArrayList<>();
+        List<Integer> looseCounts = new ArrayList<>();
+        SpecialItemData clickedData = stack.getSpecialDataIfSpecial();
 
         if (isBulkDown()) {
-            //every one of the species, the clicked stack included
+            //Snapshot before changing anything: the replacement has to be written into the
+            //clicked cell before the other source cells are emptied.
             for (CargoStackAPI other : FishItems.getFishStacks(stack.getCargo(), clicked.speciesId)) {
                 SpecialItemData data = other.getSpecialDataIfSpecial();
                 FishCatch entry = FishCatch.decode(data.getData());
                 int count = (int) other.getSize();
 
                 for (int i = 0; i < count; i++) stowed.add(entry);
-                helper.removeFromAnyStack(CargoItemType.SPECIAL, data, count);
+                looseData.add(data);
+                looseCounts.add(count);
             }
         } else {
             stowed.add(clicked);
-            helper.removeFromClickedStackFirst(1);
         }
 
         if (stowed.isEmpty()) return;
@@ -90,13 +94,28 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         //Exactly one crate is taken: identical crates stack, and taking the whole stack to put a
         //single merged crate back would throw away the contents of every crate but one
         CargoStackAPI existing = FishItems.getBundleStack(stack.getCargo(), clicked.speciesId);
+        SpecialItemData existingData = null;
         if (existing != null) {
-            SpecialItemData data = existing.getSpecialDataIfSpecial();
-            stowed.addAll(FishItems.decodeBundle(data.getData()));
-            helper.removeFromAnyStack(CargoItemType.SPECIAL, data, 1);
+            existingData = existing.getSpecialDataIfSpecial();
+            stowed.addAll(FishItems.decodeBundle(existingData.getData()));
         }
 
+        //Vanilla fills the first empty cargo cell. Put the replacement in the clicked cell before
+        //removing any other source, otherwise the whole packed block jumps to the earliest hole.
+        int clickedCount = isBulkDown() ? (int) stack.getSize() : 1;
+        helper.removeFromClickedStackFirst(clickedCount);
         helper.addItems(CargoItemType.SPECIAL, FishItems.toBundle(stowed), 1);
+
+        if (isBulkDown()) {
+            for (int i = 0; i < looseData.size(); i++) {
+                if (looseData.get(i).equals(clickedData)) continue;
+                helper.removeFromAnyStack(CargoItemType.SPECIAL, looseData.get(i), looseCounts.get(i));
+            }
+        }
+
+        if (existingData != null) {
+            helper.removeFromAnyStack(CargoItemType.SPECIAL, existingData, 1);
+        }
     }
 
     @Override

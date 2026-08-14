@@ -537,9 +537,9 @@ Fish in cargo.
 | File | What it does |
 |---|---|
 | `FishItems.java` | Ids and the encode/decode used by all three item kinds, plus `stow` — where a landed fish actually goes — and `unbox`, which expands crates and the pile into independently selectable specimens before a hand-off picker |
-| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Owns the shared five-band coherence ladder used by cargo, catch results, ruptures, the terrain readout and the Fisherman's portraits; its first non-stable rung is `unsettled` |
-| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks, ctrl sweeps the hold into the pile, and the contained species' art is perspective-fitted to the four measured corners of the box label |
-| `FishPileItemPlugin.java` | Every fish aboard on one line; right-click restores lone species as loose specimens and repeated species as crates |
+| `FishItemPlugin.java` | One landed specimen; right-click stows it into a bundle. Packing snapshots every source, removes the clicked source and writes the replacement first, then clears the other sources, so vanilla fills the clicked cargo cell instead of moving the result to the earliest vacated cell. Owns the shared five-band coherence ladder used by cargo, catch results, ruptures, the terrain readout and the Fisherman's portraits; its first non-stable rung is `unsettled` |
+| `FishBundleItemPlugin.java` | A crate of one species; right-click unpacks with the first specimen inheriting the crate's cell, ctrl sweeps the hold into a pile anchored in the clicked cell, and the contained species' art is perspective-fitted to the four measured corners of the box label |
+| `FishPileItemPlugin.java` | Every fish aboard on one line; right-click explicitly removes the pile before adding its contents so the first restored loose specimen or crate inherits that cell. Existing cargo cells stay fixed while the remaining outputs append |
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell, including a vanilla-blueprint-style four-corner icon pass for box labels |
 
 ### `campaign/fish/crab`
