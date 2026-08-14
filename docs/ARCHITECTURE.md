@@ -24,13 +24,6 @@ packages that module output as `jars/catchrelease.jar`. Compiler output must sta
 making the whole directory a source root recursively packages the artifact's own JAR and stale
 `production/` classes, allowing new data such as rules rows to run against old mission bytecode.
 
-The project and module share the single `corretto-17` project SDK; the module inherits it rather
-than naming a second SDK. Console Commands is the one repo-relative module library, resolved
-directly from `lib/lw_Console.jar`; the established Starsector and mandatory-mod application
-libraries remain external development inputs. `.idea/workspace.xml` is ignored machine-local
-state and must never be committed, since pulling another machine's changelists, account ids and
-IDE selections can corrupt an otherwise valid project import.
-
 ---
 
 ## Where a feature lives
