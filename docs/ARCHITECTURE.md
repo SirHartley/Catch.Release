@@ -646,7 +646,7 @@ What harpooning a fleet costs, and what running the breach lamps over somebody's
 | File | What it does |
 |---|---|
 | `LampOffence.java` | Where the lamps may be run and what a stop costs, plus the burn counter — a stop settles the burn it was about, so putting the lamps out and lighting them again is a fresh offence rather than a continuation of the settled one. System-bound like the transponder law — a flag polices systems it holds something in; inside those, everybody objects near an inhabited world and the Church and the Path object anywhere. Four rungs: warning, fine, inspection, guns, the last only reached by doing it again inside a month |
-| `LampPatrolResponse.java` | Patrols coming over about the lit lamps. Nothing is booked and nothing is dispatched — the sweep asks only whether they are burning, whether this is somebody's space, and whether anybody is looking. Once a patrol sees the offence it clears its current work and takes an explicit intercept assignment, while vanilla's pursuit flags keep the tactical AI committed; patrols already in battle are never pulled out. Putting the lamps out ends that burn immediately and clears the transient encounter/retry latches; lighting them again starts a fresh run which even the same patrol may confront at once. The three-day faction retry applies only when a stop ends while the same burn is still active |
+| `LampPatrolResponse.java` | Patrols coming over about the lit lamps. Nothing is dispatched — the initial sweep asks whether they are burning, whether this is somebody's space, and whether anybody is looking. Once a patrol sees the offence it clears its current work and takes an explicit intercept assignment, while vanilla's pursuit flags keep the tactical AI committed; patrols already in battle are never pulled out. Putting the lamps out ends that burn but does not cancel a committed stop, so the existing warning/consequence ladder is still booked when the hail opens. Relighting after lights-out starts a fresh run once that encounter is settled. The three-day faction retry applies only when a stop ends while lamps are burning |
 | `HarpoonOffence.java` | Incident history, outstanding debts, evasions, rep loss, and the escalation ladders. Armed crews turn on you at the second hit; unarmed ones are split by strength — a crew that is plainly outmatched (`isOutmatched`, vanilla's own 1.25× engage threshold) and has somebody to tell (`isCivilised`) runs on the *first* hole with an emergency burn and fetches a patrol, and everyone else works ignore → run you down for the bill → run and tell. `isPlayerIdentified()` is the transponder, and is what decides whether anybody can name you |
 | `HarpoonPatrolResponse.java` | Sends one patrol at a time after the player. Any faction **not hostile to the offended one** will take it — the infraction belongs to the space, not to a flag |
 | `HarpoonWitness.java` | An unarmed crew flying to a patrol to report it. The report lands on arrival, so it can be outrun, jumped away from, or shot down; it snapshots whether the original victim permits a private revenge contract so a failed report cannot turn a bounty or no-impact target into one later |
@@ -1033,14 +1033,15 @@ Two things deliberately stay outside the rule because they are not survey finds 
 
 **The lamp response is the transponder's shape, not the harpoon patrol's.** A harpooning is an
 incident on a faction's books that a patrol is sent about days later; lit lamps are something the
-player is doing right now that anybody in line of sight can see. So `LampPatrolResponse` books
-nothing and dispatches nothing — it re-asks the three questions every tick and calls the stop off the
-moment any of them turns false, which is why turning the lamps out makes the whole thing go away.
-The persistent state is the sector-wide rung count and each crew's last handled **burn number**, not
-the rules row's temporary stopped boolean. Lights-out establishes the run boundary immediately and
-clears both that encounter latch and the faction retry; relighting is a new burn which the same crew
-may confront at once. A continuous burn keeps one number, so it still cannot produce a queue of
-identical stops.
+player is doing right now that anybody in line of sight can see. `LampPatrolResponse` therefore
+dispatches nothing: it asks the three questions only while choosing a patrol. Once a patrol sees the
+offence, the stop is committed in the same way a transponder violation remains seen after the switch
+is flipped. Lights-out establishes the run boundary immediately but does not clear that patrol's
+intercept, so the first encounter still books the warning and later encounters apply the existing
+fine/inspection/guns ladder. The persistent state is the sector-wide rung count and each crew's last
+handled **burn number**, not the rules row's temporary stopped boolean. Relighting after lights-out
+starts a new burn once the committed encounter is settled. A continuous burn keeps one number, so it
+still cannot produce a queue of identical stops.
 
 **The loot card has two clocks, and only one of them is the readout's.** Its list is held back
 until the specimen has finished being tallied, so `elapsed` is zero for the whole of the first

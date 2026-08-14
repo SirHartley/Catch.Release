@@ -25,10 +25,10 @@ import java.util.List;
  * The shape is vanilla's transponder response and not the harpoon patrol's, because the offence is
  * the same shape as the transponder's: not an incident on somebody's books that a patrol is sent
  * about days later, but a thing the player is doing <i>right now</i> that anybody in line of sight
- * can see them doing. So there is nothing to remember and nothing to dispatch about - the sweep asks
- * only whether the lamps are burning, whether this is somebody's space, and whether anybody is
- * looking. Turn them off before the patrol arrives and the whole thing goes away, which is the
- * point.
+ * can see them doing. So there is nothing to dispatch about - the sweep asks only whether the lamps
+ * are burning, whether this is somebody's space, and whether anybody is looking. Once somebody has
+ * seen it, however, the stop is committed. Putting the lamps out ends that burn, not the patrol's
+ * approach; the warning or consequence still has to be delivered.
  * <p>
  * One at a time, like the harpoon patrol, so a busy system does not produce a queue of crews all
  * wanting the same conversation. What they actually say, and what the ladder costs, is
@@ -210,13 +210,18 @@ public class LampPatrolResponse implements EveryFrameScript {
     }
 
     /**
-     * Ends the stop on death, hostility, expiry, hyperspace, a location split, the conversation
-     * having happened, or - the one this response has and the harpoon patrol does not - the lamps
-     * simply going out.
+     * Ends the stop on death, hostility, expiry, hyperspace, a location split, or the conversation
+     * having happened. The lamps going out is deliberately not on that list: like a patrol that has
+     * already seen the transponder violation, this crew still comes over to settle what it saw.
      */
     protected void maintain() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         MemoryAPI mem = stopping.getMemoryWithoutUpdate();
+
+        //Lights-out is still the boundary between burns, even though it no longer calls off a stop
+        //which has already been committed. If they are relit before this crew arrives, leave this
+        //false; look() will start the new run after the current encounter is settled.
+        if (!SearchlightAbilityPlugin.isBreaching()) lit = false;
 
         //first, before isAlive(): refusing turns them hostile and the fight happens inside the same
         //paused dialog, so by the time the script looks again the crew may already be dead
@@ -254,16 +259,6 @@ public class LampPatrolResponse implements EveryFrameScript {
             return;
         }
 
-        //the lamps put out, or the player having flown somewhere this crew has no say over. Nothing
-        //is charged for it: what they came about has stopped happening, which is what they wanted
-        String factionId = mem.getString(FACTION_KEY);
-        if (!SearchlightAbilityPlugin.isBreaching()
-                || factionId == null || !LampOffence.isIllegalHere(player, factionId)) {
-
-            end();
-            return;
-        }
-
         if (player.getVisibilityLevelTo(stopping) != VisibilityLevel.NONE) {
             Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
         }
@@ -273,9 +268,8 @@ public class LampPatrolResponse implements EveryFrameScript {
      * Calls the crew off. The assignment and tactical target go by hand since neither is on a clock
      * and would otherwise keep them flying at the player after the reason for it is gone.
      * <p>
-     * Putting the lamps out also closes the current burn immediately. A later relight is therefore
-     * a fresh run which this same crew may object to without waiting for the normal unresolved-stop
-     * retry.
+     * Putting the lamps out closes the current burn immediately without closing the committed stop.
+     * A later relight is therefore a fresh run after this encounter has been settled.
      */
     protected void end() {
         if (stopping == null) return;
