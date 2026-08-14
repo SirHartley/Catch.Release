@@ -1,25 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/out/production/catchrelease" />
-    <output-test url="file://$MODULE_DIR$/out/test/catchrelease" />
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/out" />
+    <output-test url="file://$MODULE_DIR$/out/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/jars/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/out" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="corretto-17" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="commons-compiler-jdk" level="application" />
-    <orderEntry type="module-library">
-      <library name="lw_Console">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/lw_Console.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="lw_Console" level="application" />
     <orderEntry type="library" name="Graphics" level="application" />
     <orderEntry type="library" name="LazyLib" level="application" />
     <orderEntry type="library" name="LunaLib" level="application" />
