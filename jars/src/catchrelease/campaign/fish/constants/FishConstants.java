@@ -497,6 +497,16 @@ public class FishConstants {
     public static final float ABERRATION_ENGINE_WEIGHT = 0.3f;
     public static final float ABERRATION_ENGINE_LY = 1f;
 
+    /**
+     * How far an inhabited colony steadies the fabric around its system.
+     * <p>
+     * A colony is the inverse of the sources above: full strength in its own system, falling to
+     * nothing at this distance with the same curve they use. Every inhabited market gets the same
+     * reach; size is deliberately not a multiplier, because the requirement is categorical - if
+     * people have made a colony there, that system reads Stable.
+     */
+    public static final float COHESION_COLONY_REACH_LY = 5f;
+
     public static final float ABERRATION_SPREAD = 0.05f;
 
     /**
