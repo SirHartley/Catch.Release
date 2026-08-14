@@ -137,7 +137,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
-    public static final String CRAB_EXPLOSIVE_PENDING = "$catchreleaseCrabExplosivePending";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
     public static final String CRAB_BASS_NAME = "$catchreleaseCrabBassName";
     public static final String CRAB_BASS_PRICE = "$catchreleaseCrabBassPrice";
@@ -320,6 +319,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return buyCrabWare(arg);
             case "crabBuyBass":
                 return CrabWares.buyFallbackBass();
+            case "crabExplosivePending":
+                return CrabWares.hasUnmentionedExplosiveUse();
+            case "crabExplosiveSettled":
+                return !CrabWares.hasUnmentionedExplosiveUse();
             case "beginCrabOptions":
                 return beginCrabOptions(dialog);
             case "addCrabOption":
@@ -801,7 +804,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
-        local.set(CRAB_EXPLOSIVE_PENDING, CrabWares.hasUnmentionedExplosiveUse(), 0);
         local.set(CRAB_EXPLOSIVE_TARGET, CrabWares.getLastExplosiveTarget(), 0);
         local.set(CRAB_BASS_NAME, CrabWares.getFallbackBassName(), 0);
         local.set(CRAB_BASS_PRICE, Misc.getDGSCredits(CrabWares.FALLBACK_BASS_CREDITS), 0);

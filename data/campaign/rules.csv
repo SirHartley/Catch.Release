@@ -1336,7 +1336,7 @@ This is not a question.
 catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-$catchreleaseCrabExplosivePending","CatchReleaseCMD crabAcknowledgeExplosive
+CatchReleaseCMD crabExplosivePending","CatchReleaseCMD crabAcknowledgeExplosive
 SetTextHighlights $catchreleaseCrabExplosiveTarget","""Back!""
 
 Crablobab points at you.
@@ -1355,7 +1355,7 @@ He looks expectantly at your empty hands.
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-!$catchreleaseCrabExplosivePending",,"""Back!""
+CatchReleaseCMD crabExplosiveSettled",,"""Back!""
 
 Crablobab says it with obvious satisfaction.
 
