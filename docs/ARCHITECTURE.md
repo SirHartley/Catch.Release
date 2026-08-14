@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 230 Java files across ten top-level packages, plus
+What is where, and which file to open first. 237 Java files across ten top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -93,10 +93,12 @@ Everything game-facing is wired from `ModPlugin.java`.
 16. `FishMapFilterScript` as a transient script — the sector-map filter
 17. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
 18. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-19. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+19. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
+   and fed every black-hole star in the current system by its small Catch.Release adapter
+20. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-20. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
+21. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -125,7 +127,9 @@ hidden example. The old outfitter migration stub is gone — development assumes
 merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
 The `graphics.characters` additions also register all five Fisherman coherence portraits with the
 settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
-an unloaded raw path.
+an unloaded raw path. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
+world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
+the renderer.
 
 **`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
@@ -742,6 +746,8 @@ Shader and GL machinery.
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
 | `plugins/WarpedRectRenderer.java` | A sprite warped per-vertex by a grid, no shader |
+| `spiral/CircularSpiralWarpRenderer.java` | Portable circular campaign post-process recovered from the pond's rolled-back centre whirlpool. A host supplies cached live world locations; the renderer owns the bounded spiral shader, screen copies, source composition and world-to-screen conversion. Its config exposes range and shader/tuning seams without coupling the pass to black holes or Catch.Release state |
+| `spiral/BlackHoleSpiralWarp.java` | Catch.Release adapter and lifecycle: caches every black-hole star in the current system (including secondary stars), registers the generic pass transiently on load, and reads `catchreleaseBlackHoleSpiralWarpRange` from merged settings, default `6000` world units |
 | `renderers/FleetMarkerRenderer.java` | A small icon off a fleet's corner, in vanilla's own geometry and whoever's colour — the quest offer's cyan `!` |
 | `renderers/RippleRingRenderer.java` | One growing, fading ring, pinned to one location |
 | `renderers/SimpleRippleDataRunner.java` | Advances and expires a `RippleData` |

@@ -1,4 +1,6 @@
 {
+  "catchreleaseBlackHoleSpiralWarpRange": 6000,
+
   "graphics": {
     "catchrelease": {
           "hs_bg":"graphics/catchrelease/background/hyperspace_bg_cool_tileable.jpg",
