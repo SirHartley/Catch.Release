@@ -179,16 +179,17 @@ own (the searchlight UI set, six cargo handling sounds, the coherence whispers),
 framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
-**`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to the
-loose `data.console.commands.AllFish` script and accepts one positive amount while on the campaign
-map or at a market. It reads the merged fish table, rolls that many real specimens of every species,
-and adds one species crate per row to player cargo. `AddFish` accepts a positive amount after a
-fish id or multi-word display name, resolves exact and unique partial matches before using Console
-Commands' typo-correction matcher, and reports ambiguous partials instead of silently choosing.
-Its native autocomplete exposes both ids and display names, with word-by-word continuation for
-manually typed names. Console Commands remains optional: its own
-loader is the only code that loads the script, and it is deliberately not a `mod_info.json`
-dependency or part of the main module source root.
+**`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
+`catchrelease.commands.AllFish` — compiled into the jar since the commands moved out of the loose
+`data/console` scripts, which makes `lib/lw_Console.jar` a compile dependency — and accepts one
+positive amount while on the campaign map or at a market. It reads the merged fish table, rolls
+that many real specimens of every species, and adds one species crate per row to player cargo.
+`AddFish` accepts a positive amount after a fish id or multi-word display name, resolves exact and
+unique partial matches before using Console Commands' typo-correction matcher, and reports
+ambiguous partials instead of silently choosing. Its native autocomplete exposes both ids and
+display names, with word-by-word continuation for manually typed names. Console Commands remains
+runtime-optional: its own loader is the only code that ever loads these classes, so the mod runs
+without the console installed, and it is deliberately not a `mod_info.json` dependency.
 
 ---
 
