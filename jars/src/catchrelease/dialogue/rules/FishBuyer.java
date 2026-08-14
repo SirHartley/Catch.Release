@@ -20,6 +20,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,9 +171,14 @@ public class FishBuyer {
         return out;
     }
 
-    /** The vanilla cargo picker over a copy of the hold that only carries fish. */
+    /** The vanilla cargo picker over a copy of the hold that only carries fish. The containers
+     *  opened for the picker are put back afterwards, minus whatever sold - the unpacking is the
+     *  picker's need, not a lasting rearrangement of the hold. */
     public static boolean show(final InteractionDialogAPI dialog) {
         if (dialog == null) return false;
+
+        final List<ContainerSnapshot> boxed =
+                snapshotContainers(Global.getSector().getPlayerFleet().getCargo());
 
         FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
 
@@ -188,10 +194,12 @@ public class FishBuyer {
                     @Override
                     public void pickedCargo(CargoAPI picked) {
                         sellPicked(dialog, picked);
+                        restoreContainers(boxed);
                     }
 
                     @Override
                     public void cancelledCargoSelection() {
+                        restoreContainers(boxed);
                     }
 
                     @Override
@@ -238,6 +246,80 @@ public class FishBuyer {
         }
 
         finish(dialog, sold, credits);
+    }
+
+    /** One container as it stood before the picker's unboxing: its id, contents and stack count. */
+    protected static final class ContainerSnapshot {
+        final String id;
+        final List<FishCatch> contents;
+        final int items;
+
+        ContainerSnapshot(String id, List<FishCatch> contents, int items) {
+            this.id = id;
+            this.contents = List.copyOf(contents);
+            this.items = items;
+        }
+    }
+
+    /** The hold's containers as they stand, taken immediately before {@code unbox} opens them. */
+    protected static List<ContainerSnapshot> snapshotContainers(CargoAPI cargo) {
+        List<ContainerSnapshot> out = new ArrayList<>();
+        if (cargo == null) return out;
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isContainer(data)) continue;
+
+            out.add(new ContainerSnapshot(data.getId(),
+                    FishItems.decodeBundle(data.getData()), (int) stack.getSize()));
+        }
+
+        return out;
+    }
+
+    /**
+     * Puts the picker's unboxing back the way it stood, minus whatever sold: each snapshotted
+     * container reclaims its own specimens from the loose fish - matched by their exact encoded
+     * form, the same string {@code unbox} put them out under - and repacks under its own id.
+     * A specimen that is no longer aboard was sold, and simply stays out of the rebuilt box.
+     */
+    protected static void restoreContainers(List<ContainerSnapshot> boxed) {
+        if (boxed == null || boxed.isEmpty()) return;
+        if (Global.getSector().getPlayerFleet() == null) return;
+
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+        //what is loose right now, as a countable pool keyed by encoded specimen
+        Map<String, Integer> loose = new HashMap<>();
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null || !FishItems.FISH.equals(data.getId())) continue;
+
+            loose.merge(data.getData(), (int) stack.getSize(), Integer::sum);
+        }
+
+        for (ContainerSnapshot box : boxed) {
+            for (int i = 0; i < box.items; i++) {
+                List<FishCatch> reclaimed = new ArrayList<>();
+
+                for (FishCatch fish : box.contents) {
+                    String key = fish.encode();
+                    Integer held = loose.get(key);
+                    if (held == null || held <= 0) continue;
+
+                    loose.put(key, held - 1);
+                    reclaimed.add(fish);
+                }
+
+                if (reclaimed.isEmpty()) continue;
+
+                for (FishCatch fish : reclaimed) {
+                    cargo.removeItems(CargoItemType.SPECIAL, FishItems.toItem(fish), 1);
+                }
+
+                cargo.addSpecial(FishItems.repack(box.id, reclaimed), 1);
+            }
+        }
     }
 
     /**
