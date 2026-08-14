@@ -18,62 +18,14 @@ qa_
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
-Cohesion
-- Cohesion should be increased by colonies. If there's a colony, cohesion must be Stable. Colonies should stabilize their surroundings within 5LY with a falloff - similar to a source of instability, these are a source of stability. Make sure the map accounts for this.
-
-Minigame
-- God rays look terrible, look at aquarium and do similar to that
-- Treasure card: very long names like blueprints should wrap around lines instead of making the screen extremely wide
-
-Aquarium
-- Common background text entries should be white in list
-
 Fleet interaction
 - Paying the fine immediately closes the dialogue. There should be a "leave" button there.
 - Actually, most fleet dialogues have this issue.
 - Hitting a civ fleet with a harpoon makes it hostile but doesn't cause it to engage you. It should engage you or run depending on if it's bigger than you.
 
-Lamp Interaction
-- Patrols with other assignments like standing down ect should immediately stop doing what they were doing and move to confront about lights. Check how it's handled for vanilla transponder interactions.
-- Turning off the lights while tracked by patrol should still make that patrol engage you and warn you about consequences next time. If you're on your second+ time, it's consequence time.
-
-Crabolabob
-- Once he sold a backdrop, he does not sell one in that location again for 2 months.
-- Needs dialogue if he got nothing to sell. Will sell you an overpriced, crappy quality bass if he got nothing. Tooltip should say so.
-- previous Explosive Head target dialogue not firing
-
 Fisherman
 - Ask about something else - if a question was asked and is correctly sorted to the back of the list, it should be "highlighted" grey like the "sell common catch" option
 - At stability "barely holding", add one-time option "are you okay" to the main menu. Answer: Never better, thank you for asking. -> R1: Okay then... R2: Are you sure? Got a mirror? -> Fabric's playing tricks, don't mind it. -> R1: If you say so. R2: This is another one of these knots, isn't it? -> A terribly frayed one, especially here. R3: Your beard is tentacles -> Ask me in a more... stable place.
-
-Quests
-- All quests and tasks that th<e player acccepts should go into the "accepted" tab in intel.
-- "Schematic BP" tooltip needs some serious work
-- Cultist interaction quest target not highlighted
-- all intel entries should have a button to open the preconfigured fishing map (including category requests)
-
-Shop
-- Unlocked rungs should be light blue player colour, not yellow
-- Remove Lamp Identify upgrade, redundant with latest changes
-- Un-purchaseable upgrades lines should have grey line background
-- Un-purchaseable upgrade rung square icons should be coloured grey instead of default blue
-
-Sell Fish
-- Missing options to sell up to rare and up to epic
-- After engaging in sell fish option all fish in cargo are unpacked from their last state. and in inventory as single items.
-- If all fish are in the big pile the sell all up to x options don't work because it thinks everythign is important.
-- Return buttons says continue - should be return
-
-Map
-- Fishing planner important mark shouldn't have text beside it in the list
-- f2 to open codex while hovering a range data entry no longer works anywhere
-
-Codex
-- Small icons in side list don't use silhouette renderer when range data available - they are just black. Should be silhouette while in range data mode
-
-Cargo
-- Right-clicking any fish or crate for packing resets cargo grid, which is terrible for UX - should be static
-- Cargo tooltip not telling me why fish is marked
 
 Sound
 - Minigame lacks soundstrack
@@ -97,6 +49,58 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
+
+Lamp Interaction
+- Patrols with other assignments like standing down ect should immediately stop doing what they were doing and move to confront about lights. Check how it's handled for vanilla transponder interactions.
+- Turning off the lights while tracked by patrol should still make that patrol engage you and warn you about consequences next time. If you're on your second+ time, it's consequence time.
+
+Cargo
+- Right-clicking any fish or crate for packing resets cargo grid, which is terrible for UX - should be static
+- Cargo tooltip not telling me why fish is marked
+
+Codex
+- Small icons in side list don't use silhouette renderer when range data available - they are just black. Should be silhouette while in range data mode
+
+Crabolabob
+- Once he sold a backdrop, he does not sell one in that location again for 2 months.
+- Needs dialogue if he got nothing to sell. Will sell you an overpriced, crappy quality bass if he got nothing. Tooltip should say so.
+- previous Explosive Head target dialogue not firing
+
+Aquarium
+- Common background text entries should be white in list
+
+Minigame
+- God rays look terrible, look at aquarium and do similar to that
+- Treasure card: very long names like blueprints should wrap around lines instead of making the screen extremely wide
+
+Cohesion
+- Cohesion should be increased by colonies. If there's a colony, cohesion must be Stable. Colonies should stabilize their surroundings within 5LY with a falloff - similar to a source of instability, these are a source of stability. Make sure the map accounts for this.
+
+Shop
+- Unlocked rungs should be light blue player colour, not yellow
+- Remove Lamp Identify upgrade, redundant with latest changes
+- Un-purchaseable upgrades lines should have grey line background
+- Un-purchaseable upgrade rung square icons should be coloured grey instead of default blue
+- double-check if marking a schematic rung will show the mark on the quest reward tooltip in the bar quest
+- Add to mark tooltip what happens when you mark a schematic rung
+- Move & unify the "mark" tooltip to the vanilla framework - it's currently manual render. Shorten it substantially.
+- Fitted items should show green instead of grey
+
+Range Data seller
+- cost label runs into newline, should use tooltip for "have" portion
+- Cost label should use correct colour for common/uncommen ect
+- Needs a leave label just like shop
+
+Sell Fish
+- Missing options to sell up to rare and up to epic
+- After engaging in sell fish option all fish in cargo are unpacked from their last state. and in inventory as single items.
+- If all fish are in the big pile the sell all up to x options don't work because it thinks everythign is important.
+- Return buttons says continue - should be return
+
+Map
+- Fishing planner important mark shouldn't have text beside it in the list
+- f2 to open codex while hovering a range data entry no longer works anywhere
+- route planner: Fish icons on the map should be stacked into a circle as best they can. for instance: 3 should be a triangle, 4 should be in a square (2 rows, 2 per img) ect so they can be normal-size while keeping whitespace in bubble low.
 
 
 ---------------------

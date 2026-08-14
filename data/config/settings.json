@@ -26,15 +26,7 @@
     },
   },
 
-  # the one rule command package the mod ships - see catchrelease.dialogue.rules.CatchReleaseCMD.
-  # this key is read once from merged settings and REPLACES rather than merges, so vanilla's own
-  # five packages have to be re-listed here. Dropping any of them breaks every rule in the game.
   "ruleCommandPackages":[
-    "com.fs.starfarer.api.impl.campaign.rulecmd",
-    "com.fs.starfarer.api.impl.campaign.rulecmd.salvage",
-    "com.fs.starfarer.api.impl.campaign.rulecmd.newgame",
-    "com.fs.starfarer.api.impl.campaign.rulecmd.missions",
-    "com.fs.starfarer.api.impl.campaign.rulecmd.academy",
     "catchrelease.dialogue.rules",
   ],
 }

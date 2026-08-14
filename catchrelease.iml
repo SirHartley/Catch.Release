@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <output url="file://$MODULE_DIR$/out" />
-    <output-test url="file://$MODULE_DIR$/out/test" />
+    <output url="file:///production/catchrelease" />
+    <output-test url="file:///test/catchrelease" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/jars/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="corretto-17" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="corretto-19" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="commons-compiler-jdk" level="application" />
-    <orderEntry type="library" name="lw_Console" level="application" />
+    <orderEntry type="library" name="commons-compiler" level="application" />
     <orderEntry type="library" name="Graphics" level="application" />
     <orderEntry type="library" name="LazyLib" level="application" />
     <orderEntry type="library" name="LunaLib" level="application" />
+    <orderEntry type="library" name="lw_Console" level="application" />
     <orderEntry type="library" name="MagicLib" level="application" />
   </component>
 </module>
