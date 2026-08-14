@@ -112,9 +112,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SHELF = "$catchreleaseShelf";
     public static final String HAS_FISH = "$catchreleaseHoldHasFish";
 
-    /** Whether either bulk-sale rung has an unmarked fish to take. */
+    /** Whether each bulk-sale rung has an unmarked fish to take. */
     public static final String SELL_COMMON = "$catchreleaseSellCommon";
     public static final String SELL_UNCOMMON = "$catchreleaseSellUncommon";
+    public static final String SELL_RARE = "$catchreleaseSellRare";
+    public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
     /** The hulk's hull, for the row that describes it. */
     public static final String WRECK_HULL = "$catchreleaseWreckHull";
@@ -448,6 +450,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellUncommon",
                     FishRarity.UNCOMMON);
         }
+        if (FishBuyer.countUpTo(FishRarity.RARE) > 0) {
+            dialog.setOptionColor("catchrelease_fisherSellRare", FishRarity.RARE.color);
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellRare",
+                    FishRarity.RARE);
+        }
+        if (FishBuyer.countUpTo(FishRarity.EPIC) > 0) {
+            dialog.setOptionColor("catchrelease_fisherSellEpic", FishRarity.EPIC.color);
+            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellEpic",
+                    FishRarity.EPIC);
+        }
 
         return true;
     }
@@ -772,6 +784,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
         local.set(SELL_COMMON, FishBuyer.countUpTo(FishRarity.COMMON) > 0, 0);
         local.set(SELL_UNCOMMON, FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0, 0);
+        local.set(SELL_RARE, FishBuyer.countUpTo(FishRarity.RARE) > 0, 0);
+        local.set(SELL_EPIC, FishBuyer.countUpTo(FishRarity.EPIC) > 0, 0);
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
 
