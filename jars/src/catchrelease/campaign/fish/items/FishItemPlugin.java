@@ -197,10 +197,10 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
         }
 
-        //who is asking for this exact specimen: marked gear and open jobs both
+        //The explicit legend for the yellow dot drawn on this cargo icon.
         java.util.List<String> requiredBy = ShopMarks.getRequiredBy(entry);
         if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
                     Misc.getHighlightColor(), String.join(", ", requiredBy));
         }
 

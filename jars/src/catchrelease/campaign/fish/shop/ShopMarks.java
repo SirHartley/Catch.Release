@@ -216,7 +216,7 @@ public class ShopMarks {
     /** How long the wanted-ask cache is trusted before {@link #getWantedAsks} rebuilds it. */
     protected static final long WANTED_CACHE_MS = 250L;
 
-    protected static final catchrelease.helper.cache.TimedValue<List<FishRequirement>> wantedAsks =
+    protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
             new catchrelease.helper.cache.TimedValue<>(WANTED_CACHE_MS);
 
     protected static void invalidateWantedCache() {
@@ -224,24 +224,27 @@ public class ShopMarks {
     }
 
     /**
-     * Every current ask - marked wares and everything in the log that is waiting on a fish - the
-     * same data {@link #getRequiredBy} reads, minus the names. Cached for
+     * Every current ask - marked wares and everything in the log that is waiting on a fish - with
+     * the name the cargo tooltip gives as its reason. Cached for
      * {@link #WANTED_CACHE_MS}: {@link #isWanted} is asked per cargo cell per frame, and
      * collecting the asks walks the whole intel manager, which a full hold would otherwise do
-     * dozens of times a frame.
+     * dozens of times a frame. The dot and its explanation deliberately consume this same list,
+     * so one can never outlive the other during the cache window.
      */
-    protected static List<FishRequirement> getWantedAsks() {
+    protected static List<Ask> getWantedAsks() {
         return wantedAsks.get(System.currentTimeMillis(), () -> {
-            List<FishRequirement> out = new ArrayList<>(getMarkedRequirements());
+            List<Ask> out = new ArrayList<>(getMarkedAsks());
 
             if (Global.getSector() != null) {
                 for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
                         : Global.getSector().getIntelManager().getIntel()) {
 
                     if (!(intel instanceof FishAsker asker)) continue;
+                    String name = asker.getAskerName();
+                    if (name == null || name.isEmpty()) continue;
 
-                    for (FishRequirement ask : asker.getAsks()) {
-                        if (ask != null) out.add(ask);
+                    for (FishRequirement requirement : asker.getAsks()) {
+                        if (requirement != null) out.add(new Ask(name, requirement));
                     }
                 }
             }
@@ -254,8 +257,8 @@ public class ShopMarks {
     public static boolean isWanted(FishCatch entry) {
         if (entry == null) return false;
 
-        for (FishRequirement ask : getWantedAsks()) {
-            if (ask.matches(entry)) return true;
+        for (Ask ask : getWantedAsks()) {
+            if (ask.requirement.matches(entry)) return true;
         }
 
         return false;
@@ -265,8 +268,8 @@ public class ShopMarks {
     public static boolean isWanted(FishSpec spec) {
         if (spec == null) return false;
 
-        for (FishRequirement ask : getWantedAsks()) {
-            if (ask.couldBeSatisfiedBy(spec)) return true;
+        for (Ask ask : getWantedAsks()) {
+            if (ask.requirement.couldBeSatisfiedBy(spec)) return true;
         }
 
         return false;
@@ -359,13 +362,11 @@ public class ShopMarks {
         List<String> out = new ArrayList<>();
         if (spec == null) return out;
 
-        for (Ask ask : getMarkedAsks()) {
+        for (Ask ask : getWantedAsks()) {
             if (ask.requirement.couldBeSatisfiedBy(spec) && !out.contains(ask.name)) {
                 out.add(ask.name);
             }
         }
-
-        addAskingJobs(out, ask -> ask.couldBeSatisfiedBy(spec));
 
         return out;
     }
@@ -375,35 +376,13 @@ public class ShopMarks {
         List<String> out = new ArrayList<>();
         if (entry == null) return out;
 
-        for (Ask ask : getMarkedAsks()) {
+        for (Ask ask : getWantedAsks()) {
             if (ask.requirement.matches(entry) && !out.contains(ask.name)) {
                 out.add(ask.name);
             }
         }
 
-        addAskingJobs(out, ask -> ask.matches(entry));
-
         return out;
-    }
-
-    /** Everything in the log whose asks pass the test, each named once. */
-    protected static void addAskingJobs(List<String> out,
-                                        java.util.function.Predicate<FishRequirement> test) {
-        if (Global.getSector() == null) return;
-
-        for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
-                : Global.getSector().getIntelManager().getIntel()) {
-
-            if (!(intel instanceof FishAsker asker)) continue;
-
-            for (FishRequirement ask : asker.getAsks()) {
-                if (ask == null || !test.test(ask)) continue;
-
-                String name = asker.getAskerName();
-                if (name != null && !out.contains(name)) out.add(name);
-                break;
-            }
-        }
     }
 
     /** The quest-yellow dot a needed fish wears - bottom right on cargo icons, placed to fit the

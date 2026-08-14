@@ -207,7 +207,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         }
 
         if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
                     Misc.getHighlightColor(), String.join(", ", requiredBy));
         }
 
