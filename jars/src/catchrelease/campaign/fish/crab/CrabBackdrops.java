@@ -39,6 +39,10 @@ public class CrabBackdrops {
     /** How far down the table he has got. Advances once per port that asks. */
     public static final String TURN_KEY = "$catchrelease_crabBackdropTurn";
 
+    /** Last completed backdrop sale at each port. A sale empties that local roll for two months. */
+    public static final String SOLD_AT_KEY = "$catchrelease_crabBackdropSoldAt";
+    public static final float RESTOCK_DAYS = 60f;
+
     /**
      * What he wants for one, by rarity. Steeper than the ladder the fish are priced on, because a
      * scene is worth exactly what somebody will pay for a picture and he knows it.
@@ -55,6 +59,7 @@ public class CrabBackdrops {
      */
     public static Backdrop getOffer(MarketAPI market) {
         if (market == null || Global.getSector() == null) return null;
+        if (isRestocking(market)) return null;
 
         List<Backdrop> pool = getPool();
         if (pool.isEmpty()) return null;
@@ -130,8 +135,29 @@ public class CrabBackdrops {
         }
 
         Backdrops.own(offer.id);
+        getSaleTimes().put(market.getId(), Global.getSector().getClock().getTimestamp());
 
         return true;
+    }
+
+    /**
+     * Whether this port's backdrop slot is still empty after a sale. The timestamp is redeemed on
+     * ask rather than by a campaign script: no ticking object is needed for stock that matters only
+     * while the stall is open, and a save loaded after the deadline repairs itself immediately.
+     */
+    public static boolean isRestocking(MarketAPI market) {
+        if (market == null || Global.getSector() == null) return false;
+
+        Map<String, Long> soldAt = getSaleTimes();
+        Long timestamp = soldAt.get(market.getId());
+        if (timestamp == null) return false;
+
+        if (Global.getSector().getClock().getElapsedDaysSince(timestamp) < RESTOCK_DAYS) {
+            return true;
+        }
+
+        soldAt.remove(market.getId());
+        return false;
     }
 
     protected static int getTurn() {
@@ -153,5 +179,18 @@ public class CrabBackdrops {
         data.put(OFFER_KEY, held);
 
         return held;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static Map<String, Long> getSaleTimes() {
+        Map<String, Object> data = Global.getSector().getPersistentData();
+
+        Object stored = data.get(SOLD_AT_KEY);
+        if (stored instanceof Map) return (Map<String, Long>) stored;
+
+        Map<String, Long> soldAt = new LinkedHashMap<>();
+        data.put(SOLD_AT_KEY, soldAt);
+
+        return soldAt;
     }
 }
