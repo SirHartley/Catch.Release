@@ -1319,7 +1319,6 @@ The rating gives you the relevant nav reference.
 ""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
-$catchreleaseCrabAny
 $catchreleaseStage >= 6
 $catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
 catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
@@ -1341,7 +1340,7 @@ This is not a question.
 catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-$catchreleaseCrabExplosivePending","CatchReleaseCMD crabAcknowledgeExplosive
+CatchReleaseCMD crabExplosivePending","CatchReleaseCMD crabAcknowledgeExplosive
 SetTextHighlights $catchreleaseCrabExplosiveTarget","""Back!""
 
 Crablobab points at you.
@@ -1360,7 +1359,7 @@ He looks expectantly at your empty hands.
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-!$catchreleaseCrabExplosivePending",,"""Back!""
+CatchReleaseCMD crabExplosiveSettled",,"""Back!""
 
 Crablobab says it with obvious satisfaction.
 
@@ -1383,8 +1382,24 @@ He pats the lid.
 
 Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the merchandise
 100:catchrelease_crabLeave:Leave",
+catchrelease_crabStallEmpty,DialogOptionSelected,"$option == catchrelease_crabStall score:20
+CatchReleaseCMD tokens
+!$catchreleaseCrabAny","RestoreSavedVisual
+CatchReleaseCMD beginCrabOptions
+FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
+
+The shelves are empty.
+
+He checks one pocket, then another. A crab checks the first one again.
+
+""Nothing.""
+
+He considers this.
+
+""Except bass.""",,
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
 CatchReleaseCMD tokens
+$catchreleaseCrabAny
 $catchreleaseCrabBackdrop","RestoreSavedVisual
 CatchReleaseCMD beginCrabOptions
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
@@ -1578,6 +1593,7 @@ The category was already present.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStallBare,DialogOptionSelected,"$option == catchrelease_crabStall score:5
 CatchReleaseCMD tokens
+$catchreleaseCrabAny
 !$catchreleaseCrabBackdrop","RestoreSavedVisual
 CatchReleaseCMD beginCrabOptions
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
@@ -1592,6 +1608,7 @@ catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabE
 catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,!$catchreleaseCrabExplosive_headOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
 catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,!$catchreleaseCrabConservatoryOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
 catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,
+catchrelease_crabOptionBass,CatchReleaseCrabStallOptions,!$catchreleaseCrabAny,"CatchReleaseCMD addCrabOption catchrelease_crabWareBass ""Buy the bass"" BASS",,,
 catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabLeave Leave,,,
 catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10
 CatchReleaseCMD tokens
@@ -1621,6 +1638,33 @@ He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCra
 catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls the backdrop, ties it, and hands it over.
 
 There is considerably less wall behind him afterward.","0:catchrelease_crabStall:Continue
+100:catchrelease_crabLeave:Leave",
+catchrelease_crabWareBass,DialogOptionSelected,"$option == catchrelease_crabWareBass score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabBassAfford","SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice","Crablobab lifts a shallow tray from an inside pocket.
+
+On it is a $catchreleaseCrabBassName of emphatically terrible quality.
+
+""Bass.""
+
+He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.","0:catchrelease_crabBuyBass:Pay him
+10:catchrelease_crabStall:Another time.",
+catchrelease_crabWareBassShort,DialogOptionSelected,"$option == catchrelease_crabWareBass score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabBassAfford","SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice","Crablobab lifts a shallow tray from an inside pocket.
+
+On it is a $catchreleaseCrabBassName of emphatically terrible quality.
+
+""Bass.""
+
+He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.
+
+You are short.
+
+He returns the tray to a pocket shallower than the fish.",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyBass,DialogOptionSelected,$option == catchrelease_crabBuyBass,CatchReleaseCMD crabBuyBass,"He hands over the tray.
+
+The fish is entered into your hold as a purchase rather than a catch. The distinction costs more than the fish.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,"RestoreSavedVisual
 BarCMD returnFromEvent false","""Of course!""

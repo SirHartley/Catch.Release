@@ -86,14 +86,17 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         //the tidy-up rather than the unpack: everything aboard onto one line
         if (isBulkDown()) {
-            FishPileItemPlugin.sweep(helper, stack.getCargo());
+            FishPileItemPlugin.sweep(helper, stack.getCargo(), stack.getSpecialDataIfSpecial(),
+                    (int) stack.getSize());
             return;
         }
 
         helper.removeFromClickedStackFirst(1);
 
-        for (FishCatch entry : contents) {
-            helper.addItems(CargoItemType.SPECIAL, FishItems.toItem(entry), 1);
+        //The first unpacked specimen takes the crate's cell; later specimens are appended. This
+        //keeps every pre-existing cargo cell in place while the crate expands.
+        for (int i = 0; i < contents.size(); i++) {
+            helper.addItems(CargoItemType.SPECIAL, FishItems.toItem(contents.get(i)), 1);
         }
     }
 
@@ -199,7 +202,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
             }
         }
         if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
                     Misc.getHighlightColor(), String.join(", ", requiredBy));
         }
 

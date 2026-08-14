@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -65,12 +66,16 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
      *
      * @return whether there was anything to gather
      */
-    public static boolean sweep(RightClickActionHelper helper, com.fs.starfarer.api.campaign.CargoAPI cargo) {
+    public static boolean sweep(RightClickActionHelper helper,
+                                com.fs.starfarer.api.campaign.CargoAPI cargo,
+                                SpecialItemData clickedData, int clickedCount) {
         if (helper == null || cargo == null) return false;
 
         List<FishCatch> gathered = new ArrayList<>();
+        List<SpecialItemData> sourceData = new ArrayList<>();
+        List<Integer> sourceCounts = new ArrayList<>();
 
-        for (com.fs.starfarer.api.campaign.CargoStackAPI stack : cargo.getStacksCopy()) {
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (!FishItems.isCatch(data)) continue;
 
@@ -79,13 +84,21 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             //a loose stack can be several of the same specimen; a container is one item however
             //many swim in it, and its whole list comes across each time
             for (int i = 0; i < count; i++) gathered.addAll(FishItems.read(data));
-
-            helper.removeFromAnyStack(CargoItemType.SPECIAL, data, count);
+            sourceData.add(data);
+            sourceCounts.add(count);
         }
 
         if (gathered.isEmpty()) return false;
 
+        //Reserve the cell the player acted on before emptying the rest of the hold. Vanilla's add
+        //then fills that exact hole, so filtering and transaction mirrors continue to work.
+        helper.removeFromClickedStackFirst(clickedCount);
         helper.addItems(CargoItemType.SPECIAL, FishItems.toPile(gathered), 1);
+
+        for (int i = 0; i < sourceData.size(); i++) {
+            if (sourceData.get(i).equals(clickedData)) continue;
+            helper.removeFromAnyStack(CargoItemType.SPECIAL, sourceData.get(i), sourceCounts.get(i));
+        }
 
         return true;
     }
@@ -95,10 +108,10 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-    /** The pile is one item and always goes entirely, so the frame can take it. */
+    /** Removal is explicit so the first unpacked item can inherit the pile's cargo cell. */
     @Override
     public boolean shouldRemoveOnRightClickAction() {
-        return true;
+        return false;
     }
 
     /** Loose when a species appears once; crated when it appears more than once. */
@@ -111,6 +124,8 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         for (FishCatch entry : contents) {
             bySpecies.computeIfAbsent(entry.speciesId, id -> new ArrayList<>()).add(entry);
         }
+
+        helper.removeFromClickedStackFirst(1);
 
         for (List<FishCatch> species : bySpecies.values()) {
             SpecialItemData unpacked = species.size() == 1
@@ -192,7 +207,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         }
 
         if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Required by: %s", opad, Misc.getGrayColor(),
+            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
                     Misc.getHighlightColor(), String.join(", ", requiredBy));
         }
 

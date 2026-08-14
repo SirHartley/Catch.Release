@@ -73,17 +73,23 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_BUBBLE_SIZE_MAX = 5f;
 
     /**
-     * First-species backdrop, in the aquarium's manner: parallel gold shafts, narrow and
-     * brightest at the top edge, widening, leaning and fading to nothing by the floor.
-     * Widths and lean are panel fractions so a content-wide card keeps the composition.
+     * First-species backdrop: the aquarium's three restrained surface-light shafts, scaled to the
+     * result card. A single blue-white quad per shaft drifts slowly and fades through the water.
      */
+    public static final Color MINIGAME_RESULT_GOD_RAY_COLOR = new Color(120, 200, 230);
     public static final int MINIGAME_RESULT_GOD_RAYS = 3;
-    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA = 0.07f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SWING = 0.025f;
-    public static final float MINIGAME_RESULT_GOD_RAY_WANDER = 0.06f;
-    public static final float MINIGAME_RESULT_GOD_RAY_HALF_WIDTH = 0.045f;
-    public static final float MINIGAME_RESULT_GOD_RAY_WIDEN = 2.2f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ANCHOR_START = 0.2f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ANCHOR_STEP = 0.3f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY = 0.06f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_RATE = 0.17f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_PHASE_STEP = 2.3f;
+    public static final float MINIGAME_RESULT_GOD_RAY_TOP_HALF_WIDTH = 0.045f;
+    public static final float MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MULT = 2.2f;
     public static final float MINIGAME_RESULT_GOD_RAY_LEAN = 0.07f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA = 0.05f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA_SWING = 0.02f;
+    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_RATE = 0.4f;
+    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_PHASE_STEP = 1.3f;
 
     //minigame - panel. Wide enough for the playfield and its dressing, and no wider
     public static final float MINIGAME_PANEL_WIDTH = 140f;
@@ -145,10 +151,8 @@ public class FishConstants {
     //minigame - the loot card, beside the track on the side the catch card is not
     public static final String MINIGAME_LOOT_TITLE = "Recovered";
     public static final float MINIGAME_LOOT_LINE_HEIGHT = 30f;
-
-    /** The widest a name may make the card; anything longer wraps and its row grows instead. */
-    public static final float MINIGAME_LOOT_NAME_MAX = 240f;
-    public static final float MINIGAME_LOOT_WRAP_PAD = 8f;
+    /** Breathing room between a wrapped name and the next treasure row. */
+    public static final float MINIGAME_LOOT_ROW_PAD = 4f;
     public static final float MINIGAME_LOOT_ICON = 24f;
     public static final float MINIGAME_LOOT_ICON_GAP = 8f;
     public static final float MINIGAME_LOOT_COUNT_GAP = 12f;
@@ -472,6 +476,16 @@ public class FishConstants {
      */
     public static final float ABERRATION_ENGINE_WEIGHT = 0.3f;
     public static final float ABERRATION_ENGINE_LY = 1f;
+
+    /**
+     * How far an inhabited colony steadies the fabric around its system.
+     * <p>
+     * A colony is the inverse of the sources above: full strength in its own system, falling to
+     * nothing at this distance with the same curve they use. Every inhabited market gets the same
+     * reach; size is deliberately not a multiplier, because the requirement is categorical - if
+     * people have made a colony there, that system reads Stable.
+     */
+    public static final float COHESION_COLONY_REACH_LY = 5f;
 
     public static final float ABERRATION_SPREAD = 0.05f;
 
