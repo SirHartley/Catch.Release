@@ -11,8 +11,9 @@ import java.awt.Color;
 /**
  * The coherence heat map: how well the fabric is holding, painted over the hyperspace map as a
  * gradient - clear where it holds, purple where it runs thin, leaning hot where it is barely
- * there. What it shows is {@link Aberration#baseAt}, the same reading every specimen and the
- * thin-fabric terrain already answer to.
+ * there. Colonies cut clear, five-light-year stabilizing basins into that field through the same
+ * centralized reading. What it shows is {@link Aberration#baseAt}, the same reading every specimen
+ * and the thin-fabric terrain already answer to.
  * <p>
  * The reading is a walk of the whole sector's sources, so the field is sampled onto a
  * one-light-year grid on a budget - a few hundred nodes per rendered frame - and sweeps in as a

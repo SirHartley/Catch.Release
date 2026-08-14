@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
@@ -25,9 +26,11 @@ import java.util.Map;
  * How badly a specimen holds to reality, from where it was taken - the inverse of the coherence the
  * player is shown on it.
  * <p>
- * Several things thin the local fabric, taken at their strongest rather than summed. What they are,
- * how far each reaches and how hard it pulls is {@link AberrationSource}; this is the arithmetic and
- * the bookkeeping.
+ * Several things thin the local fabric, taken at their strongest rather than summed. Colonies push
+ * the other way: the strongest colony field is subtracted from the strongest destabilizer, and a
+ * system containing a colony is Stable without exception. What thins the fabric, how far each
+ * source reaches and how hard it pulls is {@link AberrationSource}; this is the arithmetic and the
+ * bookkeeping for both directions.
  *
  * <h2>Why this is not a set of loops over the sector</h2>
  *
@@ -43,11 +46,11 @@ import java.util.Map;
  * terrain that changes on the scale of a cycle. So the crawl happens once and is kept:
  *
  * <ul>
- * <li><b>The index</b> ({@link #marks()}) is one pass over the sector producing a flat list of
- *     sources with their positions, reaches and weights already resolved. Rebuilt when the day
- *     rolls over or the gates switch on, and not otherwise; a mark whose source died inside a day
- *     drops out on its own ({@link Mark#isLive}). Evaluating a point against it is a loop over a
- *     few hundred floats.
+ * <li><b>The indexes</b> ({@link #marks()} and {@link #colonyMarks()}) are one pass over the sector
+ *     producing flat lists of destabilizers and inhabited systems with their positions and reaches
+ *     already resolved. Rebuilt when the day rolls over, the gates switch on or the economy gains
+ *     or loses a market; a mark whose destabilizer died inside a day drops out on its own
+ *     ({@link Mark#isLive}). Evaluating a point against them is a loop over a few hundred floats.
  * <li><b>A slipstream is not a point</b> and does not go in as one. It is a ribbon tens of
  *     light-years long, so it enters the index as its own segments, walked at a fixed stride - see
  *     {@link #addStream}. Indexing it at its anchor, which is what this used to do, put a
@@ -107,6 +110,10 @@ public class Aberration {
      * @param location   the system itself, for the abyssal tag its own terrain carries
      */
     public static float at(Vector2f locInHyper, LocationAPI location) {
+        //"Stable" in a colony system is categorical, not a low number that specimen jitter may
+        //nudge upward. This also makes catches there exactly coherent rather than merely labelled so.
+        if (isColonySystem(location)) return 0f;
+
         //two specimens out of the same rupture should not read identically
         return MathUtils.clamp(baseAt(locInHyper, location)
                 + MathUtils.getRandomNumberInRange(-FishConstants.ABERRATION_SPREAD,
@@ -320,7 +327,7 @@ public class Aberration {
             blame = mark.source;
         }
 
-        return new Reading(MathUtils.clamp(worst, 0f, 1f), blame);
+        return stabilized(worst, blame, colonyShareAt(at, system));
     }
 
     /**
@@ -356,7 +363,89 @@ public class Aberration {
             blame = mark.source;
         }
 
-        return new Reading(MathUtils.clamp(worst, 0f, 1f), blame);
+        return stabilized(worst, blame, colonyShareAt(locInHyper, location));
+    }
+
+    //---------------------------------------------------------------- what holds a place together
+
+    /** One inhabited system, indexed as the inverse of an aberration mark. */
+    protected static class ColonyMark {
+
+        protected final Vector2f inHyper;
+        protected final String systemId;
+        protected final float reachSq;
+
+        protected ColonyMark(StarSystemAPI system) {
+            this.inHyper = new Vector2f(system.getLocation());
+            this.systemId = system.getId();
+
+            float reachWorld = FishConstants.COHESION_COLONY_REACH_LY
+                    * Misc.getUnitsPerLightYear();
+            this.reachSq = reachWorld * reachWorld;
+        }
+
+        protected float shareAt(Vector2f locInHyper) {
+            float dx = locInHyper.x - inHyper.x;
+            float dy = locInHyper.y - inHyper.y;
+
+            float distSq = dx * dx + dy * dy;
+            if (distSq >= reachSq) return 0f;
+
+            return falloff((float) Math.sqrt(distSq) / Misc.getUnitsPerLightYear(),
+                    FishConstants.COHESION_COLONY_REACH_LY);
+        }
+    }
+
+    /**
+     * The strongest stabilizing field at a point.
+     * <p>
+     * Colony fields do not stack, for the same reason aberration sources do not: the strongest
+     * local fact wins. A colony's own system is explicitly full strength rather than relying on
+     * two independently obtained copies of its hyperspace coordinate comparing as exact floats.
+     */
+    protected static float colonyShareAt(Vector2f locInHyper, LocationAPI location) {
+        if (locInHyper == null) return 0f;
+
+        String systemId = location instanceof StarSystemAPI system ? system.getId() : null;
+        float strongest = 0f;
+
+        for (ColonyMark colony : colonyMarks()) {
+            if (systemId != null && systemId.equals(colony.systemId)) return 1f;
+
+            strongest = Math.max(strongest, colony.shareAt(locInHyper));
+        }
+
+        return strongest;
+    }
+
+    /** The inverse fields meet here: strongest destabilizer minus strongest stabilizer. */
+    protected static Reading stabilized(float aberration, AberrationSource blame,
+                                        float stability) {
+
+        float level = MathUtils.clamp(aberration - stability, 0f, 1f);
+        if (level <= 0f) return NOTHING;
+
+        return new Reading(level, blame);
+    }
+
+    /** A real inhabited market, not a condition-only shell, makes its system a colony system. */
+    protected static boolean isColony(MarketAPI market) {
+        return market != null
+                && market.isInEconomy()
+                && !market.isPlanetConditionMarketOnly()
+                && market.getSize() > 0
+                && market.getStarSystem() != null
+                && market.getLocationInHyperspace() != null;
+    }
+
+    protected static boolean isColonySystem(LocationAPI location) {
+        if (!(location instanceof StarSystemAPI system)) return false;
+
+        for (MarketAPI market : Global.getSector().getEconomy().getMarkets(system)) {
+            if (isColony(market)) return true;
+        }
+
+        return false;
     }
 
     /**
@@ -501,6 +590,7 @@ public class Aberration {
     }
 
     protected static List<Mark> index = null;
+    protected static List<ColonyMark> colonyIndex = null;
 
     /**
      * What the index was built against.
@@ -511,6 +601,7 @@ public class Aberration {
      */
     protected static long stampDate = Long.MIN_VALUE;
     protected static boolean stampGates = false;
+    protected static int stampMarkets = Integer.MIN_VALUE;
 
     /** The sector's sources, crawled once. */
     protected static List<Mark> marks() {
@@ -521,12 +612,19 @@ public class Aberration {
         return index;
     }
 
+    /** Colony marks are built in the same crawl and share its invalidation. */
+    protected static List<ColonyMark> colonyMarks() {
+        marks();
+
+        return colonyIndex;
+    }
+
     /**
      * Drops everything the moment the world it was measured from stops matching.
      * <p>
-     * Called on the way into every read, so it has to be free: two field comparisons and no
-     * allocation. It is the whole of the invalidation - there is nothing to subscribe to, because
-     * nothing on the list moves on its own.
+     * Called on the way into every read, so it has to be free: the date, gate switch and economy's
+     * market count, with no list allocation. It is the whole of the invalidation - destabilizers do
+     * not move on their own, and a colony entering or leaving the economy changes the count.
      */
     protected static void checkStamp() {
         long date = Global.getSector().getClock().getCycle() * 10000L
@@ -534,13 +632,16 @@ public class Aberration {
                 + Global.getSector().getClock().getDay();
 
         boolean gates = AberrationSource.gatesLit();
+        int markets = Global.getSector().getEconomy().getNumMarkets();
 
-        if (date == stampDate && gates == stampGates) return;
+        if (date == stampDate && gates == stampGates && markets == stampMarkets) return;
 
         stampDate = date;
         stampGates = gates;
+        stampMarkets = markets;
 
         index = null;
+        colonyIndex = null;
         readings.clear();
         known.clear();
     }
@@ -554,6 +655,8 @@ public class Aberration {
      */
     protected static List<Mark> crawl() {
         List<Mark> out = new ArrayList<>();
+
+        colonyIndex = crawlColonies();
 
         for (AberrationSource source : AberrationSource.values()) {
             switch (source.find) {
@@ -590,6 +693,20 @@ public class Aberration {
                     //a field, with nothing to mark - see abyssShare
                     break;
             }
+        }
+
+        return out;
+    }
+
+    /** One mark per inhabited system; several markets in one system do not stack the field. */
+    protected static List<ColonyMark> crawlColonies() {
+        List<ColonyMark> out = new ArrayList<>();
+
+        for (StarSystemAPI system : Global.getSector().getEconomy().getStarSystemsWithMarkets()) {
+            if (system == null || system.getLocation() == null) continue;
+            if (!isColonySystem(system)) continue;
+
+            out.add(new ColonyMark(system));
         }
 
         return out;
