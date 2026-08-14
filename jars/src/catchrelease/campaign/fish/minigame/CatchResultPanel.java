@@ -77,21 +77,6 @@ public class CatchResultPanel {
 
     protected final List<Bubble> bubbles = new ArrayList<>();
 
-    /** One discovery shaft, stored in panel fractions so content-driven width changes do not
-     *  stretch its animation state out of shape. */
-    protected static class GodRay {
-        float sourceX;
-        float targetX;
-        float topWidth;
-        float bottomWidth;
-        float length;
-        float phase;
-        float swayRate;
-        float strength;
-    }
-
-    protected final List<GodRay> godRays = new ArrayList<>();
-
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
@@ -244,102 +229,54 @@ public class CatchResultPanel {
         dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
     }
 
-    /** Gold shafts entering from the panel's top edge, layered to soften their sides. They sit
-     * below the bubbles and content, and exist only for the first landed specimen of a species. */
+    /**
+     * Gold shafts leaning through the card - the aquarium's surface light wearing the
+     * discovery's colour. One gradient quad each: narrow and brightest at the top edge,
+     * widening and leaning the same way as they fade to nothing by the card's floor, the
+     * whole family parallel so it reads as light through water rather than searchlights.
+     * Only for the first landed specimen of a species.
+     */
     protected void renderGodRays(FishingMinigameLayout layout, float alphaMult) {
-        if (godRays.isEmpty()) spawnGodRays();
-
         Color color = Misc.getHighlightColor();
-        float topY = layout.panelY + layout.panelHeight;
 
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT
-                | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_LIGHTING_BIT);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-        GL11.glShadeModel(GL11.GL_SMOOTH);
-
-        for (GodRay ray : godRays) {
-            float topHalf = ray.topWidth * layout.panelWidth * 0.5f;
-            float bottomHalf = ray.bottomWidth * layout.panelWidth * 0.5f;
-
-            float topX = layout.panelX + ray.sourceX * layout.panelWidth;
-            topX = MathUtils.clamp(topX, layout.panelX + topHalf,
-                    layout.panelX + layout.panelWidth - topHalf);
-
-            float sway = (float) Math.sin(elapsed * ray.swayRate + ray.phase)
-                    * FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY * layout.panelWidth;
-            float bottomX = layout.panelX + ray.targetX * layout.panelWidth + sway;
-            bottomX = MathUtils.clamp(bottomX, layout.panelX + bottomHalf,
-                    layout.panelX + layout.panelWidth - bottomHalf);
-
-            float bottomY = topY - ray.length * layout.panelHeight;
-            float pulse = FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_BASE
-                    + FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_SWING
-                    * (float) Math.sin(elapsed * ray.swayRate
-                            * FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_RATE_MULT + ray.phase);
-            float alpha = FishConstants.MINIGAME_RESULT_GOD_RAY_ALPHA
-                    * ray.strength * pulse * alphaMult;
-
-            drawGodRay(topX, bottomX, topY, bottomY,
-                    topHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_WIDTH,
-                    bottomHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_WIDTH,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_ALPHA);
-            drawGodRay(topX, bottomX, topY, bottomY, topHalf, bottomHalf,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_MID_ALPHA);
-            drawGodRay(topX, bottomX, topY, bottomY,
-                    topHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_WIDTH,
-                    bottomHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_WIDTH,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_ALPHA);
-        }
-
-        GL11.glPopAttrib();
-    }
-
-    protected static void drawGodRay(float topX, float bottomX, float topY, float bottomY,
-                                     float topHalf, float bottomHalf, Color color, float alpha) {
+        float x = layout.panelX;
+        float y = layout.panelY;
+        float w = layout.panelWidth;
+        float h = layout.panelHeight;
 
         float r = color.getRed() / 255f;
         float g = color.getGreen() / 255f;
         float b = color.getBlue() / 255f;
 
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glColor4f(r, g, b, alpha);
-        GL11.glVertex2f(topX - topHalf, topY);
-        GL11.glVertex2f(topX + topHalf, topY);
-        GL11.glColor4f(r, g, b, 0f);
-        GL11.glVertex2f(bottomX + bottomHalf, bottomY);
-        GL11.glVertex2f(bottomX - bottomHalf, bottomY);
-        GL11.glEnd();
-    }
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
 
-    protected void spawnGodRays() {
         for (int i = 0; i < FishConstants.MINIGAME_RESULT_GOD_RAYS; i++) {
-            GodRay ray = new GodRay();
+            //anchored across the card the way the tank spaces its shafts, wandering slowly
+            float anchor = x + w * (0.2f + 0.3f * i)
+                    + (float) Math.sin(elapsed * 0.17f + i * 2.3f)
+                    * w * FishConstants.MINIGAME_RESULT_GOD_RAY_WANDER;
 
-            float inset = FishConstants.MINIGAME_RESULT_GOD_RAY_SOURCE_INSET;
-            ray.sourceX = MathUtils.getRandomNumberInRange(inset, 1f - inset);
-            ray.targetX = MathUtils.clamp(ray.sourceX + MathUtils.getRandomNumberInRange(
-                    -FishConstants.MINIGAME_RESULT_GOD_RAY_TARGET_OFFSET,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TARGET_OFFSET), inset, 1f - inset);
-            ray.topWidth = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MAX);
-            ray.bottomWidth = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MAX);
-            ray.length = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_LENGTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_LENGTH_MAX);
-            ray.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
-            ray.swayRate = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MAX);
-            ray.strength = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_STRENGTH_MIN, 1f);
+            float half = w * FishConstants.MINIGAME_RESULT_GOD_RAY_HALF_WIDTH;
+            float lean = w * FishConstants.MINIGAME_RESULT_GOD_RAY_LEAN;
+            float strength = FishConstants.MINIGAME_RESULT_GOD_RAY_ALPHA
+                    + FishConstants.MINIGAME_RESULT_GOD_RAY_SWING
+                    * (float) Math.sin(elapsed * 0.4f + i * 1.3f);
 
-            godRays.add(ray);
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glColor4f(r, g, b, strength * alphaMult);
+            GL11.glVertex2f(anchor - half, y + h);
+            GL11.glVertex2f(anchor + half, y + h);
+            GL11.glColor4f(r, g, b, 0f);
+            GL11.glVertex2f(anchor + half * FishConstants.MINIGAME_RESULT_GOD_RAY_WIDEN + lean, y);
+            GL11.glVertex2f(anchor - half * FishConstants.MINIGAME_RESULT_GOD_RAY_WIDEN + lean, y);
+            GL11.glEnd();
         }
+
+        GL11.glPopAttrib();
     }
 
     /** Faint outlines rising bottom to top, swaying and wrapping round. Drawn purely from
