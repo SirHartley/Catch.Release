@@ -67,6 +67,9 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
     /** The undo button, lower left, dim until there is a purchase to take back. */
     public static final float UNDO_WIDTH = 200f;
     public static final float UNDO_HEIGHT = 26f;
+
+    /** The way out, bottom right - same size as the outfitter's. */
+    public static final float LEAVE_WIDTH = 120f;
     public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
 
     //---------------------------------------------------------------- the panel
@@ -224,6 +227,12 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     TooltipMakerAPI.TooltipLocation.ABOVE);
 
             panel.addUIElement(footer).inTL(PAD, HEIGHT - PAD - UNDO_HEIGHT);
+
+            //the way out, bottom right - the same door every panel in the mod has
+            CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, UNDO_HEIGHT,
+                    new PaneWidgets.TextButton(() -> "LEAVE", () -> true,
+                            () -> callbacks.dismissDialog()));
+            panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - UNDO_HEIGHT);
         }
 
         /** The shelf as cards, three to a row - rebuilt whenever the stock changes. */
@@ -510,14 +519,17 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 name.draw(Math.round(cx - name.getWidth() * 0.5f),
                         Math.round(discY - DISC_RADIUS - 8f));
 
-                String cost = describeCost(offer) + " (have " + have + ")";
+                //the price alone - what is aboard lives in the tooltip, where it cannot wrap
+                //the label onto a second line
+                String cost = describeCost(offer);
                 if (price == null || !cost.equals(pricedAs)) {
                     pricedAs = cost;
                     price = small.createText(cost, Color.WHITE, small.getBaseHeight(), w - 12f);
                     price.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
                 }
 
-                price.setBaseColor(ShopUi.withAlpha(afford ? Misc.getTextColor()
+                //the cost speaks in the rarity it is asking for; red stays what can't be paid
+                price.setBaseColor(ShopUi.withAlpha(afford ? offer.costRarity.color
                         : Misc.getNegativeHighlightColor(), alphaMult));
                 price.draw(Math.round(cx - price.getWidth() * 0.5f),
                         Math.round(y + PAD + 14f));
