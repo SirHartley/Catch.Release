@@ -139,6 +139,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_PENDING = "$catchreleaseCrabExplosivePending";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
+    public static final String CRAB_BASS_NAME = "$catchreleaseCrabBassName";
+    public static final String CRAB_BASS_PRICE = "$catchreleaseCrabBassPrice";
+    public static final String CRAB_BASS_CRAB_PRICE = "$catchreleaseCrabBassCrabPrice";
+    public static final String CRAB_BASS_AFFORD = "$catchreleaseCrabBassAfford";
 
     /**
      * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
@@ -314,6 +318,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             //---- the man with the crate
             case "crabBuy":
                 return buyCrabWare(arg);
+            case "crabBuyBass":
+                return CrabWares.buyFallbackBass();
             case "beginCrabOptions":
                 return beginCrabOptions(dialog);
             case "addCrabOption":
@@ -401,6 +407,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             return true;
         }
 
+        if ("BASS".equalsIgnoreCase(stock)) {
+            addCrabCostTooltip(dialog.getOptionPanel(), optionId,
+                    CrabWares.getFallbackBassDescription(), CrabWares.FALLBACK_BASS_CREDITS,
+                    CrabWares.FALLBACK_BASS_CRABS);
+            return true;
+        }
+
         try {
             CrabWares ware = CrabWares.valueOf(stock.trim().toUpperCase());
             addCrabCostTooltip(dialog.getOptionPanel(), optionId, ware.description,
@@ -415,7 +428,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected void addCrabCostTooltip(OptionPanelAPI panel, Object optionId, String description,
                                       int credits, int crabs) {
         final String creditText = Misc.getDGSCredits(credits);
-        final String crabText = crabs + " crabs";
+        final String crabText = crabs == 1 ? "1 crab" : crabs + " crabs";
 
         panel.addOptionTooltipAppender(optionId, new OptionPanelAPI.OptionTooltipCreator() {
             @Override
@@ -790,6 +803,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
         local.set(CRAB_EXPLOSIVE_PENDING, CrabWares.hasUnmentionedExplosiveUse(), 0);
         local.set(CRAB_EXPLOSIVE_TARGET, CrabWares.getLastExplosiveTarget(), 0);
+        local.set(CRAB_BASS_NAME, CrabWares.getFallbackBassName(), 0);
+        local.set(CRAB_BASS_PRICE, Misc.getDGSCredits(CrabWares.FALLBACK_BASS_CREDITS), 0);
+        local.set(CRAB_BASS_CRAB_PRICE,
+                CrabWares.FALLBACK_BASS_CRABS == 1
+                        ? "1 crab" : CrabWares.FALLBACK_BASS_CRABS + " crabs", 0);
+        local.set(CRAB_BASS_AFFORD, CrabWares.canAffordFallbackBass(), 0);
         local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
 
         local.set(CRAB_BACKDROP, scene != null, 0);

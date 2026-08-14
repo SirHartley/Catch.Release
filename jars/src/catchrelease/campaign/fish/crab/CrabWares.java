@@ -1,11 +1,15 @@
 package catchrelease.campaign.fish.crab;
 
 import catchrelease.campaign.fish.colony.BreachConservatory;
+import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
@@ -146,6 +150,11 @@ public enum CrabWares {
     public static final String LAST_EXPLOSIVE_TARGET_KEY = "$catchrelease_crabLastExplosiveTarget";
     public static final String EXPLOSIVE_TARGET_PENDING_KEY = "$catchrelease_crabExplosiveTargetPending";
 
+    /** The emergency stock: an intentionally awful specimen at a price no fish justifies. */
+    public static final String FALLBACK_BASS_ID = "bass";
+    public static final int FALLBACK_BASS_CREDITS = 10000;
+    public static final int FALLBACK_BASS_CRABS = 1;
+
     /**
      * What he calls it, what it costs, how many crabs go with that, and what it is.
      * <p>
@@ -248,6 +257,56 @@ public enum CrabWares {
         }
 
         return false;
+    }
+
+    /** The crabs half of the fallback price, in the same currency shape as the regular wares. */
+    public static FishRequirement getFallbackBassCatch() {
+        FishRequirement req = new FishRequirement();
+        req.tag = "crab";
+        req.count = FALLBACK_BASS_CRABS;
+        return req;
+    }
+
+    public static boolean canAffordFallbackBass() {
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
+
+        return Global.getSector().getPlayerFleet().getCargo().getCredits().get()
+                >= FALLBACK_BASS_CREDITS
+                && FishCurrency.count(getFallbackBassCatch()) >= FALLBACK_BASS_CRABS;
+    }
+
+    /**
+     * The smallest possible Green Bass, which puts both size axes at zero and therefore fixes the
+     * grade at Terrible. It is made only when paid for: repeatedly opening the empty shelf does not
+     * manufacture cargo or preserve a random roll in the save.
+     */
+    public static FishCatch createFallbackBass() {
+        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_BASS_ID);
+        if (bass == null) return null;
+
+        return new FishCatch(bass.id, bass.lengthMin, bass.weightMin, 0f);
+    }
+
+    public static String getFallbackBassName() {
+        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_BASS_ID);
+        return bass == null ? "bass" : bass.getDisplayName();
+    }
+
+    public static String getFallbackBassDescription() {
+        return "A terrible-quality " + getFallbackBassName()
+                + ". It is extravagantly overpriced.";
+    }
+
+    /** Takes the same two-part payment as the real stock, then puts the bad fish in the hold. */
+    public static boolean buyFallbackBass() {
+        FishCatch bass = createFallbackBass();
+        if (bass == null || !canAffordFallbackBass()) return false;
+        if (!FishCurrency.spend(getFallbackBassCatch())) return false;
+
+        Global.getSector().getPlayerFleet().getCargo().getCredits()
+                .subtract(FALLBACK_BASS_CREDITS);
+        FishItems.addToPlayerCargo(bass);
+        return true;
     }
 
     /** Everything bought that has a switch on it, for the shop shelf that holds them. */
