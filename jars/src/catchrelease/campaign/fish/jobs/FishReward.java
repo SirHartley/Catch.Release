@@ -70,19 +70,6 @@ public abstract class FishReward {
         item.addPara("This unlocks %s for purchase at the Fishing Outfitter. It does not include"
                         + " the %s itself.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 thing, thing);
-
-        if (price == null) return;
-
-        String credits = Misc.getDGSCredits(price.credits);
-        item.addPara("Purchase price after unlock: %s credits.", 6f, Misc.getGrayColor(),
-                Misc.getHighlightColor(), credits);
-
-        if (price.fish != null) {
-            String ask = price.fish.describe();
-            LabelAPI catchLine = item.addPara("Catch required as well: %s.", 3f,
-                    Misc.getGrayColor(), Misc.getHighlightColor(), ask);
-            FishRequirement.highlight(catchLine, Collections.singletonList(price.fish), ask);
-        }
     }
 
     /** Player-facing name for the hardware a tackle schematic can be fitted to. */

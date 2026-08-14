@@ -94,7 +94,7 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
         //the recovered pond whirlpool, now a portable post-process around collapsed stars
-        BlackHoleSpiralWarp.install();
+        //BlackHoleSpiralWarp.install();
 
         //housekeeping, once, before anything is looked at
         sweepPondClaims();

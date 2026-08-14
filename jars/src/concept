@@ -18,6 +18,18 @@ qa_
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
+Codex
+- Side list silhouette renderer now completely broken - sometimes shows slightly transparent full icon, sometimes shows blacked out one. Just draw the outline on the sprite and render it it's not that hard
+
+Shop
+- Get rid of the gray backing for "locked" entries.
+- The unlocked rungs should always be blue, not gray, even if the other rungs on the entry are locked.
+- Any rungs that are locked because they require a schematic should be grey. I'm talking about the small, square icons. This means that the icon, while you do not have a schematic, should be grey, and when you have one, should be like normal atm, and when unlocked, light blue like atm.
+
+Crabolabob
+- Why the crabs? Should only be available once?
+- Change bass to crab. He should sell you 1 common or uncommon crab for 1 crab and 10k
+
 Fleet interaction
 - Paying the fine immediately closes the dialogue. There should be a "leave" button there.
 - Actually, most fleet dialogues have this issue.
