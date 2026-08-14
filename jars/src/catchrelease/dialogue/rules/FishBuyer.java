@@ -46,8 +46,9 @@ public class FishBuyer {
     }
 
     /**
-     * One exact cargo removal in a bulk-sale preview. The item data and quantity are enough to
-     * remove the same whole cargo stack later; containers are never opened or partly spent here.
+     * One exact cargo removal in a bulk-sale preview. A whole-stack entry removes the stack as it
+     * stands; a partial one opens a container, sells the eligible specimens and repacks the rest -
+     * which is what lets one wanted fish in the pile protect itself instead of the whole pile.
      */
     protected static final class SaleEntry {
         final SpecialItemData data;
@@ -55,11 +56,30 @@ public class FishBuyer {
         final int count;
         final float value;
 
+        /** The container's split, or null for a stack sold whole. */
+        final List<FishCatch> sell;
+        final List<FishCatch> keep;
+
         SaleEntry(Stack held) {
             data = held.data;
             items = held.items;
             count = held.count;
             value = held.value;
+            sell = null;
+            keep = null;
+        }
+
+        SaleEntry(Stack held, List<FishCatch> sell, List<FishCatch> keep) {
+            this.data = held.data;
+            this.items = held.items;
+            this.sell = List.copyOf(sell);
+            this.keep = List.copyOf(keep);
+
+            float each = 0f;
+            for (FishCatch entry : sell) each += entry.getValue();
+
+            count = sell.size() * items;
+            value = each * items;
         }
     }
 
@@ -294,7 +314,11 @@ public class FishBuyer {
 
         for (SaleEntry held : previewUpTo(cap).entries) {
 
-            if (FishItems.isContainer(held.data)) {
+            if (held.sell != null) {
+                for (FishCatch entry : held.sell) {
+                    addDescriptionCount(counts, entry, held.items);
+                }
+            } else if (FishItems.isContainer(held.data)) {
                 for (FishCatch entry : FishItems.decodeBundle(held.data.getData())) {
                     if (entry.getSpec() == null) continue;
                     addDescriptionCount(counts, entry, held.items);
@@ -310,7 +334,12 @@ public class FishBuyer {
         return counts;
     }
 
-    /** Builds the one source of truth used by the label, tooltip, confirmation and sale. */
+    /**
+     * Builds the one source of truth used by the label, tooltip, confirmation and sale.
+     * <p>
+     * Containers are read specimen by specimen: the eligible contents sell and the rest repack,
+     * so a single wanted fish - or one rare over the rung - keeps itself, not the whole pile.
+     */
     protected static SalePreview previewUpTo(FishRarity cap) {
         List<SaleEntry> entries = new ArrayList<>();
         int count = 0;
@@ -318,10 +347,30 @@ public class FishBuyer {
         StringBuilder fingerprint = new StringBuilder();
 
         for (Stack held : read()) {
-            if (held.wanted) continue;
-            if (held.rarity == null || held.rarity.rank > cap.rank) continue;
+            SaleEntry entry;
 
-            SaleEntry entry = new SaleEntry(held);
+            if (FishItems.isContainer(held.data)) {
+                List<FishCatch> sell = new ArrayList<>();
+                List<FishCatch> keep = new ArrayList<>();
+
+                for (FishCatch fish : FishItems.decodeBundle(held.data.getData())) {
+                    boolean eligible = fish.getSpec() != null
+                            && !ShopMarks.isWanted(fish)
+                            && fish.getSpec().rarity.rank <= cap.rank;
+
+                    (eligible ? sell : keep).add(fish);
+                }
+
+                if (sell.isEmpty()) continue;
+
+                entry = keep.isEmpty() ? new SaleEntry(held) : new SaleEntry(held, sell, keep);
+            } else {
+                if (held.wanted) continue;
+                if (held.rarity == null || held.rarity.rank > cap.rank) continue;
+
+                entry = new SaleEntry(held);
+            }
+
             entries.add(entry);
             count += entry.count;
             value += entry.value;
@@ -331,13 +380,16 @@ public class FishBuyer {
         return new SalePreview(entries, count, value, fingerprint.toString());
     }
 
-    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key. */
+    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key.
+     *  Count and value ride along so a partial container whose split moved - a mark flipped
+     *  while the prompt was open - reads as a different sale. */
     protected static void appendFingerprint(StringBuilder out, SaleEntry entry) {
         String id = entry.data.getId();
         String data = entry.data.getData();
         out.append(id == null ? -1 : id.length()).append(':').append(id)
                 .append(data == null ? -1 : data.length()).append(':').append(data)
-                .append(':').append(entry.items).append(';');
+                .append(':').append(entry.items)
+                .append(':').append(entry.count).append(':').append(entry.value).append(';');
     }
 
     protected static void showBulkSaleConfirm(final InteractionDialogAPI dialog, final FishRarity cap,
@@ -441,6 +493,13 @@ public class FishBuyer {
 
         for (SaleEntry entry : preview.entries) {
             cargo.removeItems(CargoItemType.SPECIAL, entry.data, entry.items);
+
+            //a partly-sold container goes back with what it kept, under its own id - a crate
+            //stays a crate and the pile stays the pile
+            if (entry.keep != null) {
+                SpecialItemData rest = FishItems.repack(entry.data.getId(), entry.keep);
+                for (int i = 0; i < entry.items; i++) cargo.addSpecial(rest, 1);
+            }
         }
 
         finish(dialog, preview.count, preview.value);
