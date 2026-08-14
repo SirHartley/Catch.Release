@@ -151,6 +151,7 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (faction == null || faction.isPlayerFaction()) return false;
 
         if (curr.isStationMode()) return false;
+        if (curr.getBattle() != null) return false;
         if (curr.isHostileTo(player)) return false;
 
         MemoryAPI mem = curr.getMemoryWithoutUpdate();
@@ -196,6 +197,14 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         mem.set(LampOffence.SAW_KEY, true, CHASE_DAYS);
         mem.set(FACTION_KEY, patrol.getFaction().getId(), CHASE_DAYS);
+
+        //Vanilla's pursuit flags tell the tactical AI that it may pick the player, but an active
+        //assignment such as STANDING_DOWN can still keep the assignment module in charge of the
+        //course. This stop is already committed, so replace the patrol's work with the intercept;
+        //its route AI will supply ordinary patrol work again after the stop is cleaned up.
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        patrol.clearAssignments();
+        patrol.addAssignment(FleetAssignment.INTERCEPT, player, CHASE_DAYS);
 
         stopping = patrol;
     }
