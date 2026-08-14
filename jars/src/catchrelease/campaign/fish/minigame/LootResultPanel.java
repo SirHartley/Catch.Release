@@ -172,7 +172,8 @@ public class LootResultPanel {
         return widest;
     }
 
-    /** Box top to last row's bottom, counted off the full list - the mirror of the readout's measure. */
+    /** Box top to last row's bottom, counted off the full list - the mirror of the readout's
+     *  measure. Row by row rather than a multiple, since a wrapped name makes its row taller. */
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -181,7 +182,7 @@ public class LootResultPanel {
                     + FishConstants.MINIGAME_RESULT_TITLE_GAP;
         }
 
-        height += rows.size() * FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
+        for (Row row : rows) height += getRowHeight(row);
 
         return height;
     }
@@ -345,7 +346,6 @@ public class LootResultPanel {
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
-        float rowHeight = FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
         float iconSize = FishConstants.MINIGAME_LOOT_ICON;
         float right = layout.lootX + layout.lootWidth;
 
@@ -354,6 +354,8 @@ public class LootResultPanel {
 
             Row row = rows.get(i);
             build(row);
+
+            float rowHeight = getRowHeight(row);
 
             float age = elapsed - (i + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY;
             float alpha = skipped
@@ -403,11 +405,22 @@ public class LootResultPanel {
                 + row.nameText.getWidth();
     }
 
-    /** Built on first sight rather than up front, so a row that is never shown is never made. */
+    /** One line's worth for a one-line name; a wrapped name grows its own row and nothing else. */
+    protected float getRowHeight(Row row) {
+        if (row.nameText == null) return FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
+
+        return Math.max(FishConstants.MINIGAME_LOOT_LINE_HEIGHT,
+                row.nameText.getHeight() + FishConstants.MINIGAME_LOOT_WRAP_PAD);
+    }
+
+    /** Built on first sight rather than up front, so a row that is never shown is never made.
+     *  Names wrap at {@link FishConstants#MINIGAME_LOOT_NAME_MAX} - a blueprint's paragraph of a
+     *  name grows its row downward instead of dragging the whole card wide. */
     protected void build(Row row) {
         if (row.nameText != null) return;
 
-        row.nameText = font.createText(row.name, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+        row.nameText = font.createText(row.name, Color.WHITE,
+                FishConstants.MINIGAME_RESULT_TEXT_SIZE, FishConstants.MINIGAME_LOOT_NAME_MAX);
         row.nameText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
 
         if (row.count > 1) {
