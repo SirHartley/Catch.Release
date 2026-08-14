@@ -524,7 +524,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought. Its bulk grant records every real outfitter permission without buying hardware or levels, for developer campaign setup |
-| `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click, and its hover is reported upwards rather than drawn, because a card would be cut off by the list's scissor box |
+| `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click. The ring's explanation is a stock tooltip the pane hangs off a transparent hotspot over the slot - see the gotcha on hand-drawn controls |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
 | `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
@@ -1056,13 +1056,14 @@ to be found again every time a container is added. Anything taking fish out of o
 remainder back with `FishItems.repack(id, …)` rather than `toBundle`: a part-spent pile rebuilt as a
 crate would file every species in it under whichever happened to be first.
 
-**A hand-drawn control has no tooltip, and cannot grow one where it lives.** The shopping-list ring
-is painted by `ShopRowPlugin` inside the list's scissor box, so a card drawn there would be sliced
-off at the edge of the list — and it is not a `ButtonAPI`, so there is nothing to hang a stock
-tooltip on. The row reports the hover to the pane, which draws the card from its own
-`CustomUIPanelPlugin.render()`; that runs *after* the panel's children, which is what puts it on top
-of everything. The card's `DrawableString`s are rebuilt only when the hovered ring or its marked
-state changes — each one is a display list.
+**A hand-drawn control grows a stock tooltip through a hotspot, not a hand-drawn card.** The
+shopping-list ring is painted by `ShopRowPlugin`, not a `ButtonAPI`, so there is nothing to hang a
+tooltip on directly — but `TooltipMakerAPI.addTooltipTo` accepts any component, including one
+nested inside another custom panel. The outfitter drops a transparent `CustomPanelAPI` over the
+ring's slot in each row and attaches the tooltip to that, which scopes it to the ring and lets
+vanilla own placement, clipping and timing. (The old fear that a card in the scrolling list would
+be sliced off by the scissor box only applied to hand-drawn cards; stock tooltips render above the
+whole screen and never did — the locked-row tooltip in the same list proved it.)
 
 **A fleet quest never spawns a fleet, and until it is accepted it never touches one either.** The
 offer is two memory keys and a `FleetQuestMarker` hung on a civilian hull already in the player's

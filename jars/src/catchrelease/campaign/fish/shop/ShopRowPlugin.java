@@ -22,7 +22,8 @@ import java.awt.Color;
  */
 public class ShopRowPlugin extends ListRow {
 
-    /** What a row needs from the pane it lives in. */
+    /** What a row needs from the pane it lives in. The ring's explanation is not on the list:
+     *  the pane hangs a stock tooltip off a hotspot over the ring's slot instead. */
     public interface Host {
         boolean isSelected(ShopEntry entry);
 
@@ -30,17 +31,6 @@ public class ShopRowPlugin extends ListRow {
 
         /** The list's own rectangle, which is what rows clip and click against. */
         PositionAPI getListViewport();
-
-        /**
-         * Told by a row while the cursor is on its ring, and told again the moment it is not.
-         * <p>
-         * Reported upwards rather than drawn here because a row paints inside the list's scissor
-         * box, and a card that explains the ring would be cut off at the edge of the list. The pane
-         * draws it over everything instead, once it knows which ring is being asked about.
-         */
-        void setMarkHover(ShopEntry entry, float x, float y);
-
-        void clearMarkHover(ShopEntry entry);
     }
 
     public static final float PIP_SIZE = 8f;
@@ -92,20 +82,6 @@ public class ShopRowPlugin extends ListRow {
     @Override
     protected Color getFieldColor() {
         return entry.isLocked() ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
-    }
-
-    /** Reported before the cull, so a row scrolled out from under the cursor takes its card
-     *  with it. */
-    @Override
-    protected void beforeCull(float x, float y, float width, float height) {
-        boolean hasRing = ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry);
-
-        if (hasRing && isMouseOverMark()) {
-            host.setMarkHover(entry, x + ACCENT_WIDTH + MARK_SLOT * 0.5f, y + height * 0.5f);
-            return;
-        }
-
-        host.clearMarkHover(entry);
     }
 
     @Override

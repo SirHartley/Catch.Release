@@ -206,26 +206,6 @@ public class ShopUi {
         dress(x, y, width, height, alphaMult);
     }
 
-    /**
-     * Keeps a card on screen. Placed up and to the right of what it is about, and folded back over
-     * the other side rather than off the edge - a card the player cannot read is worse than none.
-     *
-     * @return {x, y} for the bottom-left corner
-     */
-    public static float[] placeCard(float atX, float atY, float width, float height, float gap) {
-        float screenWidth = Global.getSettings().getScreenWidth();
-        float screenHeight = Global.getSettings().getScreenHeight();
-
-        float x = atX + gap;
-        if (x + width > screenWidth - gap) x = atX - gap - width;
-        if (x < gap) x = gap;
-
-        float y = atY + gap;
-        if (y + height > screenHeight - gap) y = screenHeight - gap - height;
-        if (y < gap) y = gap;
-
-        return new float[]{x, y};
-    }
 
     public static boolean contains(float x, float y, float width, float height,
                                    float pointX, float pointY) {

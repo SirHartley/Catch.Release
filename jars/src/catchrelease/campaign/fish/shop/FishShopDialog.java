@@ -11,6 +11,7 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -61,23 +62,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     /** Purchase chime; named once here since the sound id isn't checked until first played. */
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
 
-    /** The card that explains the shopping-list ring, which is hand-drawn and has no tooltip of its own. */
     public static final float TOOLTIP_WIDTH = 320f;
-    public static final float TOOLTIP_PAD = 10f;
-    public static final float TOOLTIP_GAP = 8f;
-    public static final float TOOLTIP_OFFSET = 14f;
-
-    public static final String TOOLTIP_TITLE = "Shopping list";
-
-    public static final String TOOLTIP_BODY = "Marks this as something you are saving for. Every"
-            + " fish its price asks for wears a dot wherever it is shown - in the hold, on the"
-            + " sector map, in the codex - and the route planner offers you the systems they swim"
-            + " in. A locked upgrade marks its matching schematic on a job offer first; once the"
-            + " plan is learned, its price fish take the dot. The mark belongs to this exact"
-            + " purchase and clears when it is bought.";
-
-    public static final String TOOLTIP_SET = "Click the ring to add it to the list.";
-    public static final String TOOLTIP_CLEAR = "Click the ring to take it off the list.";
 
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
@@ -196,22 +181,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected PositionAPI listViewport;
         protected PositionAPI pos;
 
-        /**
-         * The shopping-list ring the cursor is on, and where it is - written by the rows as they
-         * draw, read here once they all have. The ring is hand-drawn rather than a stock button, so
-         * there is no tooltip to hang off it and no way to hang one that would survive the list's
-         * scissor box; this pane draws the card over everything instead.
-         */
-        protected ShopEntry markHover;
-        protected float markHoverX;
-        protected float markHoverY;
-
-        /** Built when the hovered ring changes rather than every frame - a DrawableString is a
-         *  display list, and three of them sixty times a second is a lot of display lists. */
-        protected transient String tipKey;
-        protected transient LazyFont.DrawableString tipTitle;
-        protected transient LazyFont.DrawableString tipBody;
-        protected transient LazyFont.DrawableString tipAction;
 
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
@@ -512,6 +481,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 if (entry.isLocked()) {
                     list.addTooltipTo(createLockedTooltip(entry), row,
                             TooltipMakerAPI.TooltipLocation.BELOW);
+                    continue;
+                }
+
+                //the ring's explanation rides a transparent hotspot over its slot, so the stock
+                //tooltip machinery scopes it to the ring rather than the whole row
+                if (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry)) {
+                    CustomPanelAPI ring = panel.createCustomPanel(ShopRowPlugin.MARK_SLOT,
+                            ROW_HEIGHT, new BaseCustomUIPanelPlugin() {
+                            });
+                    row.addComponent(ring).inTL(ShopRowPlugin.ACCENT_WIDTH, 0f);
+
+                    list.addTooltipTo(createMarkTooltip(entry), ring,
+                            TooltipMakerAPI.TooltipLocation.BELOW);
                 }
             }
 
@@ -534,6 +516,31 @@ public class FishShopDialog implements InteractionDialogPlugin {
                             Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
                     tooltip.addPara("Each schematic unlocks one rung for purchase; it does not"
                             + " grant the upgrade.", Misc.getGrayColor(), 6f);
+                    tooltip.addPara("Marking this rung dots its schematic on job offers until"
+                            + " the plan is learned.", Misc.getGrayColor(), 6f);
+                }
+            };
+        }
+
+        /** What the ring is for - the stock tooltip face, short, read live at hover time. */
+        protected TooltipMakerAPI.TooltipCreator createMarkTooltip(ShopEntry entry) {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    boolean marked = ShopMarks.isMarked(entry);
+
+                    tooltip.addPara("Shopping list", Misc.getHighlightColor(), 0f);
+                    tooltip.addPara(marked ? "On the list - click the ring to clear it."
+                            : "Click the ring to save for this purchase.", 6f);
+                    tooltip.addPara("Fish that would pay for it wear the %s everywhere, and the"
+                                    + " route planner offers their waters.", 6f,
+                            Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
                 }
             };
         }
@@ -871,88 +878,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void render(float alphaMult) {
-            renderMarkTooltip(alphaMult);
         }
 
-        @Override
-        public void setMarkHover(ShopEntry entry, float x, float y) {
-            markHover = entry;
-            markHoverX = x;
-            markHoverY = y;
-        }
-
-        /** Only the row that owns the card can take it down, so a row drawn later cannot clear it. */
-        @Override
-        public void clearMarkHover(ShopEntry entry) {
-            if (markHover == entry) markHover = null;
-        }
-
-        /**
-         * What the ring is for, said where the ring is.
-         * <p>
-         * Drawn from the pane rather than from the row: a plugin's own {@code render} paints over
-         * its children, and a row paints inside the list's scissor box - a card explaining the ring
-         * on the last visible row would have been sliced off at the edge of the list.
-         */
-        protected void renderMarkTooltip(float alphaMult) {
-            if (markHover == null || alphaMult <= 0f) return;
-
-            buildTooltip(markHover);
-            if (tipTitle == null) return;
-
-            float width = TOOLTIP_WIDTH;
-            float height = TOOLTIP_PAD * 2f + tipTitle.getHeight() + TOOLTIP_GAP
-                    + tipBody.getHeight() + TOOLTIP_GAP + tipAction.getHeight();
-
-            float[] at = ShopUi.placeCard(markHoverX, markHoverY, width, height, TOOLTIP_OFFSET);
-
-            //the sidebar's dressing at card opacity, square-cornered like everything else now
-            ShopUi.drawPanel(at[0], at[1], width, height, 0.92f, alphaMult);
-
-            float textX = Math.round(at[0] + TOOLTIP_PAD);
-            float textY = Math.round(at[1] + height - TOOLTIP_PAD);
-
-            tipTitle.setBaseColor(ShopUi.withAlpha(Misc.getBrightPlayerColor(), alphaMult));
-            tipTitle.draw(textX, textY);
-            textY -= tipTitle.getHeight() + TOOLTIP_GAP;
-
-            tipBody.setBaseColor(ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult));
-            tipBody.draw(textX, textY);
-            textY -= tipBody.getHeight() + TOOLTIP_GAP;
-
-            tipAction.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
-            tipAction.draw(textX, textY);
-        }
-
-        /**
-         * The card's three strings, rebuilt only when the ring under the cursor changes or is
-         * clicked - the key carries the marked state for exactly that second reason.
-         */
-        protected void buildTooltip(ShopEntry entry) {
-            boolean marked = ShopMarks.isMarked(entry);
-            String key = ShopMarks.getMarkKey(entry) + ":" + marked;
-
-            if (key.equals(tipKey) && tipTitle != null) return;
-
-            LazyFont body = ShopUi.getBodyFont();
-            LazyFont small = ShopUi.getSmallFont();
-            if (body == null || small == null) return;
-
-            tipKey = key;
-
-            tipTitle = ShopUi.createText(body, TOOLTIP_TITLE);
-
-            tipBody = ShopUi.createText(small, TOOLTIP_BODY);
-            tipBody.setMaxWidth(TOOLTIP_WIDTH - TOOLTIP_PAD * 2f);
-
-            tipAction = ShopUi.createText(small, marked ? TOOLTIP_CLEAR : TOOLTIP_SET);
-            tipAction.setMaxWidth(TOOLTIP_WIDTH - TOOLTIP_PAD * 2f);
-
-            for (LazyFont.DrawableString line
-                    : new LazyFont.DrawableString[]{tipTitle, tipBody, tipAction}) {
-                line.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-        }
     }
 
     @Override
