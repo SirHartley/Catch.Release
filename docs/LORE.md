@@ -1856,6 +1856,9 @@ Crablobab can enthusiastically repeat a product name.
 
 A frightened bureaucrat may repeat a regulation number.
 
+The three plain-coated buyers repeat the requested species verbatim when the player asks what it
+is for. The name, not a paraphrase of it, is the point of the exchange.
+
 Do not have every character repeat the player's question before answering.
 
 ---

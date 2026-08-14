@@ -383,7 +383,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |
 | `ChefJob.java` | Three *different* types for a dish; sometimes FINE grade |
 | `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
-| `CultJob.java` | One specific named species, no credits |
+| `CultJob.java` | One specific named species, no credits. Its deliberately repeated species token sits in the last offer paragraph so the shared rarity highlighter can colour the actual target instead of searching for the longer generated ask |
 | `CuratorJob.java` | Several fish, accepting either fine-grade or low-coherence uncommon+ |
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
