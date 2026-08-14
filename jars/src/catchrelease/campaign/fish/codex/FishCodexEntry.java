@@ -88,10 +88,18 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return state.isKnown() ? FishCodex.getIcon(spec) : FishConstants.CODEX_CATEGORY_ICON;
     }
 
-    /** Vanilla creates a private sprite for a Codex row, so this tint cannot leak to other UI. */
+    /**
+     * Vanilla creates a private sprite for a Codex row, so this tint cannot leak to other UI.
+     * <p>
+     * The list icon is the one place the {@code FishIcons} rimmed silhouette cannot draw: the
+     * codex renders an entry's icon as a single multiply-tinted sprite with no compositing hook
+     * (only hardcoded param types - hulls, planets, weapons - get richer renderers). Pure black
+     * vanished into the row, so range data wears the dark player colour instead: the shape as a
+     * monochrome shadow, readable, with the art's colours still withheld until it is caught.
+     */
     @Override
     public Color getIconColor() {
-        return getState().isRangeDataOnly() ? Color.BLACK : Color.WHITE;
+        return getState().isRangeDataOnly() ? Misc.getDarkPlayerColor() : Color.WHITE;
     }
 
     @Override

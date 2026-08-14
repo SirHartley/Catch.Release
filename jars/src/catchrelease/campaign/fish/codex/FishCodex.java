@@ -50,7 +50,12 @@ public class FishCodex {
      * can never bypass the entry's unlock policy.
      */
     public static boolean show(String speciesId) {
-        if (!FishCodexEntryState.resolve(speciesId).isKnown()) return false;
+        //dev mode shows every species in the map panes (FishPresence.isKnown), so the jump has
+        //to answer to the same authority - without this, F2 dies on rows dev mode conjured up
+        if (!Global.getSettings().isDevMode()
+                && !FishCodexEntryState.resolve(speciesId).isKnown()) {
+            return false;
+        }
 
         Global.getSettings().showCodex(getEntryId(speciesId));
         return true;
