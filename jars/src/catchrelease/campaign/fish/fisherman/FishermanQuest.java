@@ -728,6 +728,7 @@ public class FishermanQuest {
             Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
             tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
             tags.add(FishermanConstants.FACTION);
 
             return tags;
