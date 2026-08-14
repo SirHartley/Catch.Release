@@ -1856,6 +1856,9 @@ Crablobab can enthusiastically repeat a product name.
 
 A frightened bureaucrat may repeat a regulation number.
 
+The three plain-coated buyers repeat the requested species verbatim when the player asks what it
+is for. The name, not a paraphrase of it, is the point of the exchange.
+
 Do not have every character repeat the player's question before answering.
 
 ---
@@ -2060,9 +2063,20 @@ Flavor comes second.
 
 Do not bury mechanics inside atmosphere.
 
+Fishing Outfitter schematic cards lead with the exact upgrade rung or tackle they unlock. They
+state the mechanical change or compatible rig, say plainly that the schematic is purchase
+permission rather than the item itself, and show the later credit-and-catch price while the player
+is deciding whether to accept the job.
+
 ## Intel
 
 Intel is normally more precise than casual dialogue.
+
+Every live fishing quest, task and rumor carries the same **Open fishing map** action. Its hover
+first says what will happen: a fish request opens the map narrowed to known compatible species
+ranges, while a place-only rumor opens the fishing overlay centered on the reported system. The
+request hover must also say that size, grade, origin and catch-method terms still apply to the
+individual specimen; a geographic range is not a promise that every catch there will qualify.
 
 Use:
 

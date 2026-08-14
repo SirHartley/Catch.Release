@@ -34,7 +34,13 @@ public class FishPresence {
         public String search = "";
         public final Set<FishType> types = new LinkedHashSet<>();
 
+        /** Optional job/intel constraint. Empty ordinarily means unrestricted; the separate flag
+         * lets an accepted request with no currently known matches deliberately show no rows. */
+        public boolean speciesRestricted = false;
+        public final Set<String> allowedSpeciesIds = new LinkedHashSet<>();
+
         public boolean accepts(FishSpec spec) {
+            if (speciesRestricted && !allowedSpeciesIds.contains(spec.id)) return false;
             if (!types.isEmpty() && !types.contains(FishType.of(spec))) return false;
             if (search == null || search.trim().isEmpty()) return true;
 
@@ -133,6 +139,19 @@ public class FishPresence {
             if (FishType.of(spec) != type) continue;
             if (!isKnown(spec) || !showsRegions(spec)) continue;
 
+            hosts.addAll(getHostLocations(spec));
+        }
+
+        return new ArrayList<>(hosts);
+    }
+
+    /** The category union after an intel request has narrowed the species list. */
+    public static List<Vector2f> getTypeHostLocations(FishType type, Filter filter) {
+        if (filter == null || !filter.speciesRestricted) return getTypeHostLocations(type);
+
+        Set<Vector2f> hosts = new LinkedHashSet<>();
+        for (FishSpec spec : getShown(filter)) {
+            if (FishType.of(spec) != type || !showsRegions(spec)) continue;
             hosts.addAll(getHostLocations(spec));
         }
 

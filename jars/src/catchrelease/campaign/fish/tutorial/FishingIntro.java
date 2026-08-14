@@ -14,6 +14,7 @@ import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -33,6 +34,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -1248,6 +1250,18 @@ public class FishingIntro {
             }
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
+            FishIntelMapButton.add(info, width, target == null ? null : getAsks());
+        }
+
+        @Override
+        public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            Target target = getTarget();
+            List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = target == null
+                    ? null : getAsks();
+            SectorEntityToken center = target == null ? getMapLocation(null) : null;
+
+            if (FishIntelMapButton.handle(buttonId, ui, mapAsks, center, null)) return;
+            super.buttonPressConfirmed(buttonId, ui);
         }
 
         /** Vanilla's own tutorial-mission icon, which is exactly what this is. */
@@ -1266,6 +1280,7 @@ public class FishingIntro {
             Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
             tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
 
             return tags;
         }

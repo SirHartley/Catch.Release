@@ -4,6 +4,8 @@ import catchrelease.ui.PaneWidgets;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.ui.ShopUi;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
@@ -120,7 +122,17 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
      * Existing picks stay, since a selection is a route being planned.
      */
     public void showSpecies(String speciesId) {
-        if (speciesId == null || selectedIds.contains(speciesId)) return;
+        if (speciesId == null) return;
+
+        //A later Codex jump is an ordinary species selection, not a continuation of an intel
+        //request's category constraint. The same pane can survive beneath the Codex overlay.
+        boolean wasRestricted = filter.speciesRestricted;
+        filter.speciesRestricted = false;
+        filter.allowedSpeciesIds.clear();
+        if (selectedIds.contains(speciesId)) {
+            if (wasRestricted && panel != null) rebuildList();
+            return;
+        }
 
         //the codex asked, so room is made: the oldest pick retires rather than the request failing
         if (selectedIds.size() >= MAX_SELECTED) {
@@ -128,6 +140,72 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
 
         selectedIds.add(speciesId);
+        if (wasRestricted && panel != null) rebuildList();
+    }
+
+    /**
+     * Replaces the pane's old state with one intel request. Exact named asks use the normal
+     * multi-species view; category/quality asks use a constrained survey union so every known
+     * species which could supply the order is represented, not merely the first three.
+     */
+    public void showRequirements(List<FishRequirement> asks) {
+        selectedIds.clear();
+        filter.search = "";
+        filter.types.clear();
+        filter.allowedSpeciesIds.clear();
+        filter.speciesRestricted = true;
+
+        LinkedHashSet<String> exact = new LinkedHashSet<>();
+        boolean exactOnly = asks != null && !asks.isEmpty();
+
+        if (asks != null) {
+            for (FishRequirement ask : asks) {
+                if (ask == null || ask.speciesId == null || !ask.anyOf.isEmpty()) {
+                    exactOnly = false;
+                    continue;
+                }
+                exact.add(ask.speciesId);
+            }
+        }
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || !FishPresence.isKnown(spec)) continue;
+            if (!couldSupplyAny(asks, spec)) continue;
+
+            filter.allowedSpeciesIds.add(spec.id);
+            filter.types.add(FishType.of(spec));
+        }
+
+        if (exactOnly && exact.size() <= MAX_SELECTED) {
+            for (String id : exact) {
+                if (filter.allowedSpeciesIds.contains(id)) selectedIds.add(id);
+            }
+        }
+
+        if (searchField != null) searchField.setText(SEARCH_GHOST);
+        rebuildList();
+    }
+
+    /** Fresh un-narrowed survey view, used by intel that points at a place rather than a quarry. */
+    public void showOverview() {
+        selectedIds.clear();
+        filter.search = "";
+        filter.types.clear();
+        filter.allowedSpeciesIds.clear();
+        filter.speciesRestricted = false;
+        for (FishType type : FishType.values()) filter.types.add(type);
+
+        if (searchField != null) searchField.setText(SEARCH_GHOST);
+        rebuildList();
+    }
+
+    protected boolean couldSupplyAny(List<FishRequirement> asks, FishSpec spec) {
+        if (asks == null || asks.isEmpty()) return true;
+
+        for (FishRequirement ask : asks) {
+            if (ask != null && ask.couldBeSatisfiedBy(spec)) return true;
+        }
+        return false;
     }
 
     /** Builds the controls and the first list into the pane's own panel. Call once. */

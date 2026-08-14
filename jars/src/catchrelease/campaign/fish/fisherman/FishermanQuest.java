@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
@@ -33,6 +34,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -705,6 +707,13 @@ public class FishermanQuest {
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
+            FishIntelMapButton.add(info, width, getAsks());
+        }
+
+        @Override
+        public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            if (FishIntelMapButton.handle(buttonId, ui, getAsks(), null, null)) return;
+            super.buttonPressConfirmed(buttonId, ui);
         }
 
         @Override
@@ -728,6 +737,7 @@ public class FishermanQuest {
             Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
             tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
             tags.add(FishermanConstants.FACTION);
 
             return tags;

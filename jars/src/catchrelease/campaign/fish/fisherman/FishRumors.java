@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.map.FishPresence;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -13,6 +14,7 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
+import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import org.lazywizard.lazylib.MathUtils;
 
@@ -284,6 +286,22 @@ public class FishRumors {
             info.addPara(describe(rumor), 10f);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
+            FishIntelMapButton.add(info, width, getMapAsks());
+        }
+
+        protected List<catchrelease.campaign.fish.shop.FishRequirement> getMapAsks() {
+            if (rumor.type != TYPE_STRANGER) return null;
+            return FishIntelMapButton.forSpecies(rumor.strangerId);
+        }
+
+        @Override
+        public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = getMapAsks();
+            com.fs.starfarer.api.campaign.SectorEntityToken center = mapAsks == null
+                    ? getMapLocation(null) : null;
+
+            if (FishIntelMapButton.handle(buttonId, ui, mapAsks, center, rumor.systemId)) return;
+            super.buttonPressConfirmed(buttonId, ui);
         }
 
         @Override

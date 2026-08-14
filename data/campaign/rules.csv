@@ -811,7 +811,7 @@ $catchreleasePaid
 The payment follows.",,
 catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,Three people in matching plain coats share a table. One drink has been ordered for all of them and remains untouched.,,
 catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask what they are waiting for.,
-catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies
 Call $catchrelease_jobRef showRewardDetails","One of them gives you a fish name.
 
 ""$catchreleaseSpecies.""
@@ -826,7 +826,7 @@ You ask how many.
 
 You ask what it is for.
 
-The first speaker repeats the name, apparently assuming you misheard.","catchrelease_jobAccept:Agree to bring it.
+The first speaker repeats ""$catchreleaseSpecies,"" apparently assuming you misheard.","catchrelease_jobAccept:Agree to bring it.
 catchrelease_jobDecline:Decline.",
 catchrelease_cult_accepted,catchreleaseJobAccepted,$missionId == catchrelease_cult,,"""Good.""
 
@@ -834,7 +834,7 @@ The credit chit disappears back into a coat pocket.",,
 catchrelease_cult_declined,catchreleaseJobDeclined,$missionId == catchrelease_cult,,"""All right.""
 
 They remain at the table.",,
-catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseSpecies.""",,
+catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,CatchReleaseCMD highlightJobText $catchreleaseSpecies,"""$catchreleaseSpecies.""",,
 catchrelease_cult_paid,catchreleaseJobPaid,"$missionId == catchrelease_cult
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"They do not open the container.
 

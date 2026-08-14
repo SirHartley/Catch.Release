@@ -117,9 +117,9 @@ public class FishRequirement {
 
     /**
      * Whether a specimen of this species could ever satisfy the ask - the species-level echo of
-     * {@link #matches}, for screens that show species rather than catches. Only the axes a
-     * species decides are tested; grade, size, origin and coherence are the individual fish's
-     * business, except that abyssal species can never read as low coherence.
+     * {@link #matches}, for screens that show species rather than catches. Species metadata can
+     * rule out a size floor or catch method, but a true result never promises the individual fish
+     * will meet its grade, size, origin or coherence terms.
      */
     public boolean couldBeSatisfiedBy(FishSpec spec) {
         if (spec == null) return false;
@@ -132,10 +132,26 @@ public class FishRequirement {
             return false;
         }
 
-        if (speciesId != null) return speciesId.equals(spec.id);
-        if (tag != null && !spec.tags.contains(tag)) return false;
+        if (speciesId != null && !speciesId.equals(spec.id)) return false;
+        if (speciesId == null && tag != null && !spec.tags.contains(tag)) return false;
         if (minRarity != null && spec.rarity.rank < minRarity.rank) return false;
         if (lowCoherence && spec.tags.contains("abyssal")) return false;
+        if (minLength > 0f && spec.lengthMax < minLength) return false;
+        if (minWeight > 0f && spec.weightMax < minWeight) return false;
+
+        CatchImplement methodImplement = null;
+        if (method == FishLogEntry.Method.DRONE) methodImplement = CatchImplement.POND;
+        if (method == FishLogEntry.Method.HARPOON) methodImplement = CatchImplement.BREACH_LAMP;
+
+        //Method determines the opening it can be used at. Contradictory clauses can never be met,
+        //and a method-only ask still has to exclude species confined to the other kind of water.
+        if (implement != null && methodImplement != null && implement != methodImplement) {
+            return false;
+        }
+
+        CatchImplement requiredImplement = implement == null ? methodImplement : implement;
+        if (requiredImplement != null && !spec.reachedBy.isEmpty()
+                && !spec.reachedBy.contains(requiredImplement)) return false;
 
         return true;
     }

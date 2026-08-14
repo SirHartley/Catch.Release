@@ -64,9 +64,20 @@ public class ShopPricing {
     public static Price getPrice(UpgradeStat stat) {
         if (stat == null || isMaxed(stat)) return null;
 
-        int tier = Math.max(0, stat.level)
+        return getPrice(stat, stat.level + 1);
+    }
+
+    /**
+     * Price of one exact rung, used by a schematic promised before that rung can be bought. Unlike
+     * {@link #getPrice(UpgradeStat)}, this does not depend on the player's current level changing
+     * between accepting and completing the job.
+     */
+    public static Price getPrice(UpgradeStat stat, int targetLevel) {
+        if (stat == null || targetLevel < 1 || targetLevel > stat.maxLevel) return null;
+
+        int tier = targetLevel - 1
                 + (PREMIUM_STATS.contains(stat.id) ? PREMIUM_TIER_BUMP : 0);
-        boolean last = stat.maxLevel > 0 && stat.level == stat.maxLevel - 1;
+        boolean last = targetLevel == stat.maxLevel;
 
         int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
 
