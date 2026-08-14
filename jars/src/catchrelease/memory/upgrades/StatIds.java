@@ -14,7 +14,6 @@ public class StatIds {
             SEARCHLIGHT_COUNT = "searchlight_count",
             SEARCHLIGHT_RARE_CHANCE = "searchlight_rare_chance",
             SEARCHLIGHT_TRACK_TIME = "searchlight_track_time",
-            SEARCHLIGHT_IDENTIFY = "searchlight_identify",
             SEARCHLIGHT_DETECT_RADIUS = "searchlight_detect_radius",
             SEARCHLIGHT_SLOW = "searchlight_slow";
 
@@ -65,7 +64,7 @@ public class StatIds {
 
     protected static final String[] LAMPS = {
             SEARCHLIGHT_AREA, SEARCHLIGHT_SPEED, SEARCHLIGHT_COUNT, SEARCHLIGHT_RARE_CHANCE,
-            SEARCHLIGHT_TRACK_TIME, SEARCHLIGHT_IDENTIFY, SEARCHLIGHT_DETECT_RADIUS,
+            SEARCHLIGHT_TRACK_TIME, SEARCHLIGHT_DETECT_RADIUS,
             SEARCHLIGHT_SLOW,
     };
 

@@ -397,19 +397,6 @@ public class FishConstants {
     public static final float IMPRESSION_PULSE = 0.12f;
     public static final float IMPRESSION_PULSE_RATE = 2.2f;
 
-    /** Ring's blend toward the rarity colour at identify-upgrade level 1 - partial, so level 2
-     *  still has something to add. */
-    public static final float IMPRESSION_IDENTIFY_HINT_BLEND = 0.5f;
-
-    /**
-     * Identify upgrade's glow: a wash of the ring's colour, bright enough to name a colour at a
-     * glance (recolouring the ring/dent alone is too faint to read at campaign zoom - it ignores
-     * the beam's resting alpha for that reason). SIZE multiplies the dent size; HINT_MULT is
-     * level 1's share of the full glow.
-     */
-    public static final float IMPRESSION_GLOW_SIZE = 3.2f;
-    public static final float IMPRESSION_GLOW_ALPHA = 0.4f;
-    public static final float IMPRESSION_GLOW_HINT_MULT = 0.45f;
 
     /**
      * Reveal: under a beam showing hyperspace, the mote is drawn as its pond self instead of a
