@@ -79,11 +79,19 @@ public class ShopRowPlugin extends ListRow {
         return 0.5f;
     }
 
-    /** The price's rarity as the identity colour. */
+    /** The price's rarity as the identity colour; a rung that cannot be bought goes grey. */
     @Override
     protected Color getAccentColor() {
+        if (entry.isLocked()) return Misc.getGrayColor();
+
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
+    }
+
+    /** A locked rung's whole line sits on grey, so the shelf reads at a glance. */
+    @Override
+    protected Color getFieldColor() {
+        return entry.isLocked() ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
     }
 
     /** Reported before the cull, so a row scrolled out from under the cursor takes its card
@@ -139,7 +147,10 @@ public class ShopRowPlugin extends ListRow {
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn()) ? Misc.getGrayColor()
+        //fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
+        Color color = entry.isFitted() ? Misc.getPositiveHighlightColor()
+                : entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn())
+                ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
@@ -157,9 +168,11 @@ public class ShopRowPlugin extends ListRow {
         if (entry.isUpgrade() && !entry.isMaxed()) {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
 
+            //bought rungs in the player's own colour - yellow is the shopping list's, not the
+            //ladder's - and grey on a ladder whose next rung cannot be bought
             ShopUi.drawPips(Math.round(right - pipsWidth), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
-                    Misc.getHighlightColor(), alphaMult);
+                    entry.isLocked() ? Misc.getGrayColor() : Misc.getBasePlayerColor(), alphaMult);
             return;
         }
 
