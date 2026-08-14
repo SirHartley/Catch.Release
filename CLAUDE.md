@@ -69,6 +69,9 @@ Compiles against the game and library jars:
   install's `starsector-core`
 - `Graphics.jar` (GraphicsLib), `LazyLib.jar`, `LunaLib.jar`, `MagicLib.jar` - the declared
   dependencies in `mod_info.json`, each inside its zip in `lib/`
+- `lw_Console.jar` - Console Commands, in `lib/` directly. A compile dependency only since the
+  console commands moved into `jars/src`; the mod itself still runs without the console installed,
+  because nothing but the console's own loader ever loads those classes
 - `lwjgl-2.9.3.jar`, `lwjgl_util-2.9.3.jar`, `json-20140107.jar`, `log4j-1.2.17.jar` - needed
   for `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json` and `Global.getLogger`
 
