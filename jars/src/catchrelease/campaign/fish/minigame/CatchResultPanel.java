@@ -77,21 +77,6 @@ public class CatchResultPanel {
 
     protected final List<Bubble> bubbles = new ArrayList<>();
 
-    /** One discovery shaft, stored in panel fractions so content-driven width changes do not
-     *  stretch its animation state out of shape. */
-    protected static class GodRay {
-        float sourceX;
-        float targetX;
-        float topWidth;
-        float bottomWidth;
-        float length;
-        float phase;
-        float swayRate;
-        float strength;
-    }
-
-    protected final List<GodRay> godRays = new ArrayList<>();
-
     transient protected LazyFont font;
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
@@ -244,12 +229,10 @@ public class CatchResultPanel {
         dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
     }
 
-    /** Gold shafts entering from the panel's top edge, layered to soften their sides. They sit
-     * below the bubbles and content, and exist only for the first landed specimen of a species. */
+    /** The aquarium's surface-light treatment, scaled to the result card. Three blue-white shafts
+     * sit below the bubbles and content, and exist only for the first landed specimen of a species. */
     protected void renderGodRays(FishingMinigameLayout layout, float alphaMult) {
-        if (godRays.isEmpty()) spawnGodRays();
-
-        Color color = Misc.getHighlightColor();
+        Color color = FishConstants.MINIGAME_RESULT_GOD_RAY_COLOR;
         float topY = layout.panelY + layout.panelHeight;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT
@@ -257,40 +240,23 @@ public class CatchResultPanel {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-        GL11.glShadeModel(GL11.GL_SMOOTH);
+        for (int i = 0; i < FishConstants.MINIGAME_RESULT_GOD_RAYS; i++) {
+            float anchor = layout.panelX + layout.panelWidth
+                    * (FishConstants.MINIGAME_RESULT_GOD_RAY_ANCHOR_START
+                    + FishConstants.MINIGAME_RESULT_GOD_RAY_ANCHOR_STEP * i)
+                    + (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_RATE
+                    + i * FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_PHASE_STEP)
+                    * layout.panelWidth * FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY;
+            float topHalf = layout.panelWidth * FishConstants.MINIGAME_RESULT_GOD_RAY_TOP_HALF_WIDTH;
+            float bottomHalf = topHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MULT;
+            float lean = layout.panelWidth * FishConstants.MINIGAME_RESULT_GOD_RAY_LEAN;
+            float strength = FishConstants.MINIGAME_RESULT_GOD_RAY_ALPHA
+                    + FishConstants.MINIGAME_RESULT_GOD_RAY_ALPHA_SWING
+                    * (float) Math.sin(elapsed * FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_RATE
+                    + i * FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_PHASE_STEP);
 
-        for (GodRay ray : godRays) {
-            float topHalf = ray.topWidth * layout.panelWidth * 0.5f;
-            float bottomHalf = ray.bottomWidth * layout.panelWidth * 0.5f;
-
-            float topX = layout.panelX + ray.sourceX * layout.panelWidth;
-            topX = MathUtils.clamp(topX, layout.panelX + topHalf,
-                    layout.panelX + layout.panelWidth - topHalf);
-
-            float sway = (float) Math.sin(elapsed * ray.swayRate + ray.phase)
-                    * FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY * layout.panelWidth;
-            float bottomX = layout.panelX + ray.targetX * layout.panelWidth + sway;
-            bottomX = MathUtils.clamp(bottomX, layout.panelX + bottomHalf,
-                    layout.panelX + layout.panelWidth - bottomHalf);
-
-            float bottomY = topY - ray.length * layout.panelHeight;
-            float pulse = FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_BASE
-                    + FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_SWING
-                    * (float) Math.sin(elapsed * ray.swayRate
-                            * FishConstants.MINIGAME_RESULT_GOD_RAY_PULSE_RATE_MULT + ray.phase);
-            float alpha = FishConstants.MINIGAME_RESULT_GOD_RAY_ALPHA
-                    * ray.strength * pulse * alphaMult;
-
-            drawGodRay(topX, bottomX, topY, bottomY,
-                    topHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_WIDTH,
-                    bottomHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_WIDTH,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_SOFT_ALPHA);
-            drawGodRay(topX, bottomX, topY, bottomY, topHalf, bottomHalf,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_MID_ALPHA);
-            drawGodRay(topX, bottomX, topY, bottomY,
-                    topHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_WIDTH,
-                    bottomHalf * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_WIDTH,
-                    color, alpha * FishConstants.MINIGAME_RESULT_GOD_RAY_CORE_ALPHA);
+            drawGodRay(anchor, anchor + lean, topY, layout.panelY,
+                    topHalf, bottomHalf, color, strength * alphaMult);
         }
 
         GL11.glPopAttrib();
@@ -311,35 +277,6 @@ public class CatchResultPanel {
         GL11.glVertex2f(bottomX + bottomHalf, bottomY);
         GL11.glVertex2f(bottomX - bottomHalf, bottomY);
         GL11.glEnd();
-    }
-
-    protected void spawnGodRays() {
-        for (int i = 0; i < FishConstants.MINIGAME_RESULT_GOD_RAYS; i++) {
-            GodRay ray = new GodRay();
-
-            float inset = FishConstants.MINIGAME_RESULT_GOD_RAY_SOURCE_INSET;
-            ray.sourceX = MathUtils.getRandomNumberInRange(inset, 1f - inset);
-            ray.targetX = MathUtils.clamp(ray.sourceX + MathUtils.getRandomNumberInRange(
-                    -FishConstants.MINIGAME_RESULT_GOD_RAY_TARGET_OFFSET,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TARGET_OFFSET), inset, 1f - inset);
-            ray.topWidth = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MAX);
-            ray.bottomWidth = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MAX);
-            ray.length = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_LENGTH_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_LENGTH_MAX);
-            ray.phase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
-            ray.swayRate = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MIN,
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MAX);
-            ray.strength = MathUtils.getRandomNumberInRange(
-                    FishConstants.MINIGAME_RESULT_GOD_RAY_STRENGTH_MIN, 1f);
-
-            godRays.add(ray);
-        }
     }
 
     /** Faint outlines rising bottom to top, swaying and wrapping round. Drawn purely from

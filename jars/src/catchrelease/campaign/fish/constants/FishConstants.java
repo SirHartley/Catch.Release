@@ -73,32 +73,23 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_BUBBLE_SIZE_MAX = 5f;
 
     /**
-     * First-species backdrop: soft gold shafts rooted along the panel's top edge, widening and
-     * fading as they descend. Width, length and sway are panel fractions so a content-wide card
-     * keeps the same composition as the default-width one.
+     * First-species backdrop: the aquarium's three restrained surface-light shafts, scaled to the
+     * result card. A single blue-white quad per shaft drifts slowly and fades through the water.
      */
-    public static final int MINIGAME_RESULT_GOD_RAYS = 5;
-    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA = 0.08f;
-    public static final float MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MIN = 0.008f;
-    public static final float MINIGAME_RESULT_GOD_RAY_TOP_WIDTH_MAX = 0.025f;
-    public static final float MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MIN = 0.07f;
-    public static final float MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MAX = 0.14f;
-    public static final float MINIGAME_RESULT_GOD_RAY_LENGTH_MIN = 0.52f;
-    public static final float MINIGAME_RESULT_GOD_RAY_LENGTH_MAX = 0.92f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SOURCE_INSET = 0.12f;
-    public static final float MINIGAME_RESULT_GOD_RAY_TARGET_OFFSET = 0.12f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SWAY = 0.035f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MIN = 0.35f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_RATE_MAX = 0.75f;
-    public static final float MINIGAME_RESULT_GOD_RAY_STRENGTH_MIN = 0.72f;
-    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_BASE = 0.82f;
-    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_SWING = 0.18f;
-    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_RATE_MULT = 0.7f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SOFT_WIDTH = 1.55f;
-    public static final float MINIGAME_RESULT_GOD_RAY_SOFT_ALPHA = 0.22f;
-    public static final float MINIGAME_RESULT_GOD_RAY_MID_ALPHA = 0.42f;
-    public static final float MINIGAME_RESULT_GOD_RAY_CORE_WIDTH = 0.52f;
-    public static final float MINIGAME_RESULT_GOD_RAY_CORE_ALPHA = 0.72f;
+    public static final Color MINIGAME_RESULT_GOD_RAY_COLOR = new Color(120, 200, 230);
+    public static final int MINIGAME_RESULT_GOD_RAYS = 3;
+    public static final float MINIGAME_RESULT_GOD_RAY_ANCHOR_START = 0.2f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ANCHOR_STEP = 0.3f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY = 0.06f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_RATE = 0.17f;
+    public static final float MINIGAME_RESULT_GOD_RAY_SWAY_PHASE_STEP = 2.3f;
+    public static final float MINIGAME_RESULT_GOD_RAY_TOP_HALF_WIDTH = 0.045f;
+    public static final float MINIGAME_RESULT_GOD_RAY_BOTTOM_WIDTH_MULT = 2.2f;
+    public static final float MINIGAME_RESULT_GOD_RAY_LEAN = 0.07f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA = 0.05f;
+    public static final float MINIGAME_RESULT_GOD_RAY_ALPHA_SWING = 0.02f;
+    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_RATE = 0.4f;
+    public static final float MINIGAME_RESULT_GOD_RAY_PULSE_PHASE_STEP = 1.3f;
 
     //minigame - panel. Wide enough for the playfield and its dressing, and no wider
     public static final float MINIGAME_PANEL_WIDTH = 140f;
@@ -160,6 +151,8 @@ public class FishConstants {
     //minigame - the loot card, beside the track on the side the catch card is not
     public static final String MINIGAME_LOOT_TITLE = "Recovered";
     public static final float MINIGAME_LOOT_LINE_HEIGHT = 30f;
+    /** Breathing room between a wrapped name and the next treasure row. */
+    public static final float MINIGAME_LOOT_ROW_PAD = 4f;
     public static final float MINIGAME_LOOT_ICON = 24f;
     public static final float MINIGAME_LOOT_ICON_GAP = 8f;
     public static final float MINIGAME_LOOT_COUNT_GAP = 12f;

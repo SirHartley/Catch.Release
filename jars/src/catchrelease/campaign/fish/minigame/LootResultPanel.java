@@ -149,7 +149,7 @@ public class LootResultPanel {
         renderRows(layout, y, alphaMult);
     }
 
-    /** The widest row, measured up front so the card never grows while it is being read out. */
+    /** The widest wrapped row, measured up front so the card never changes while it reads out. */
     protected float getContentWidth() {
         float widest = 0f;
 
@@ -172,7 +172,7 @@ public class LootResultPanel {
         return widest;
     }
 
-    /** Box top to last row's bottom, counted off the full list - the mirror of the readout's measure. */
+    /** Box top to last row's bottom, including extra height claimed by wrapped names. */
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -181,7 +181,10 @@ public class LootResultPanel {
                     + FishConstants.MINIGAME_RESULT_TITLE_GAP;
         }
 
-        height += rows.size() * FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
+        for (Row row : rows) {
+            build(row);
+            height += getRowHeight(row);
+        }
 
         return height;
     }
@@ -345,7 +348,6 @@ public class LootResultPanel {
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
-        float rowHeight = FishConstants.MINIGAME_LOOT_LINE_HEIGHT;
         float iconSize = FishConstants.MINIGAME_LOOT_ICON;
         float right = layout.lootX + layout.lootWidth;
 
@@ -354,6 +356,7 @@ public class LootResultPanel {
 
             Row row = rows.get(i);
             build(row);
+            float rowHeight = getRowHeight(row);
 
             float age = elapsed - (i + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY;
             float alpha = skipped
@@ -403,18 +406,42 @@ public class LootResultPanel {
                 + row.nameText.getWidth();
     }
 
+    /** A wrapped name can claim more than the ordinary one-line row, with a small gutter below it. */
+    protected float getRowHeight(Row row) {
+        return Math.max(FishConstants.MINIGAME_LOOT_LINE_HEIGHT,
+                row.nameText.getHeight() + FishConstants.MINIGAME_LOOT_ROW_PAD);
+    }
+
+    /**
+     * Names wrap inside the default card instead of asking {@link FishingMinigameLayout} to grow
+     * towards the screen edge. A count, when present, keeps its own right-aligned column.
+     */
+    protected float getNameMaxWidth(Row row) {
+        float width = FishConstants.MINIGAME_RESULT_WIDTH
+                - FishConstants.MINIGAME_RESULT_PAD * 2f
+                - FishConstants.MINIGAME_LOOT_ICON
+                - FishConstants.MINIGAME_LOOT_ICON_GAP;
+
+        if (row.countText != null) {
+            width -= FishConstants.MINIGAME_LOOT_COUNT_GAP + row.countText.getWidth();
+        }
+
+        return width;
+    }
+
     /** Built on first sight rather than up front, so a row that is never shown is never made. */
     protected void build(Row row) {
         if (row.nameText != null) return;
-
-        row.nameText = font.createText(row.name, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
-        row.nameText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
 
         if (row.count > 1) {
             row.countText = font.createText("x" + row.count, Color.WHITE,
                     FishConstants.MINIGAME_RESULT_TEXT_SIZE);
             row.countText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
         }
+
+        row.nameText = font.createText(row.name, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+        row.nameText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+        row.nameText.setMaxWidth(getNameMaxWidth(row));
     }
 
     /** The row's cargo icon, through the shared loader so it arrives neutral and at its own
