@@ -359,15 +359,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     3f, highlight, Misc.getRoundedValue(lock) + " seconds");
         }
 
-        int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
-        if (identify == 1) {
-            tooltip.addPara("A mark carries some hint of how rare the thing under it is.",
-                    Misc.getGrayColor(), 3f);
-        } else if (identify > 1) {
-            tooltip.addPara("A mark is coloured by exactly how rare the thing under it is.",
-                    Misc.getGrayColor(), 3f);
-        }
-
         float rare = UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
         if (rare > 0f) {
             tooltip.addPara("Rarer species are more likely to be down there to begin with.",

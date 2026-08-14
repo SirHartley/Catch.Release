@@ -191,8 +191,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         //the beams' own resting alpha, so a dent removes about as much light as a beam puts in
         float alpha = 0.12f - 0.04f * flicker.getBrightness();
 
-        //kept apart from the beam alpha - the identify glow takes the fade but not the resting
-        //alpha (see renderImpression)
+        //kept apart from the beam alpha - the reveal takes the fade but not the resting alpha
         float fadeMult = 1f;
         if (fading) {
             float fadeT = fadeDuration > 0f ? 1f - (fadeElapsed / fadeDuration) : 0f;
@@ -200,12 +199,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
             alpha *= fadeMult;
         }
         if (alpha <= 0f) return;
-
-        int identify = Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_IDENTIFY, 0f));
-
-        //no glow unbought, a held-down fraction at the first level, the full thing at the second
-        float glowLevel = identify <= 0 ? 0f
-                : identify == 1 ? FishConstants.IMPRESSION_GLOW_HINT_MULT : 1f;
 
         if (Global.getSector() == null) return;
         LocationAPI location = Global.getSector().getCurrentLocation();
@@ -227,8 +220,9 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
             if (dent <= 0f && reveal <= 0f) continue;
 
+            //a dent says only that something is there; the reveal window says what. The old
+            //identify ladder that coloured dents by rarity is gone - the window does it for free
             renderImpression(buried.getLocation(), dent * alpha,
-                    mark * fadeMult * glowLevel, ringColor(buried, identify),
                     reveal, reveal * fadeMult, revealColor(buried));
         }
     }
@@ -268,27 +262,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return strongest * FishConstants.IMPRESSION_NEAR_DENT_MAX;
     }
 
-    /** Ring/glow colour by identify level: beam orange at 0, blended partway toward the
-     *  rarity's colour at 1 (a hint, not a name), the rarity colour outright at 2. */
-    protected Color ringColor(SectorEntityToken buried, int identify) {
-        if (identify <= 0) return Searchlight.COLOR;
-
-        if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
-            return Searchlight.COLOR;
-        }
-
-        Color rarity = mote.getRarity().color;
-
-        if (identify == 1) {
-            return Misc.interpolateColor(Searchlight.COLOR, rarity,
-                    FishConstants.IMPRESSION_IDENTIFY_HINT_BLEND);
-        }
-
-        return rarity;
-    }
-
-    /** Colour a revealed mote draws in: its own rarity colour, not run through the identify
-     *  ladder - the window just shows it, there's nothing left to read. */
+    /** Colour a revealed mote draws in: its own rarity colour - the window just shows it,
+     *  there's nothing left to read. */
     protected Color revealColor(SectorEntityToken buried) {
         if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
             return Searchlight.COLOR;
@@ -308,7 +283,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
      * @param reveal     how much of a live beam is on the mote through a window; trades the core away
      * @param revealMult reveal with the fade applied, for the drawn body
      */
-    protected void renderImpression(Vector2f at, float alphaMult, float glowMult, Color ringColor,
+    protected void renderImpression(Vector2f at, float alphaMult,
                                     float reveal, float revealMult, Color revealColor) {
         if (alphaMult <= 0f) return;
 
@@ -353,20 +328,12 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
         //standing wave, the part that reads as displacing something
         sprite.setAdditiveBlend();
-        sprite.setColor(ringColor);
+        sprite.setColor(Searchlight.COLOR);
         sprite.setSize(coreSize * FishConstants.IMPRESSION_RING_SIZE,
                 coreSize * FishConstants.IMPRESSION_RING_SIZE);
         sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_RING_ALPHA);
         sprite.renderAtCenter(at.x, at.y);
 
-        //identify glow, sized off the dent so all three passes breathe together
-        if (glowMult > 0f) {
-            sprite.setColor(ringColor);
-            sprite.setSize(coreSize * FishConstants.IMPRESSION_GLOW_SIZE,
-                    coreSize * FishConstants.IMPRESSION_GLOW_SIZE);
-            sprite.setAlphaMult(glowMult * FishConstants.IMPRESSION_GLOW_ALPHA);
-            sprite.renderAtCenter(at.x, at.y);
-        }
     }
 
     public void loadSpritesIfNeeded() {

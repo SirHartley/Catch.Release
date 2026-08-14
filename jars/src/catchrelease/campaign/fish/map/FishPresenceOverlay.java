@@ -229,10 +229,17 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             int count = Math.max(1, stop.fishIds.size());
 
-            //the ring hugs the row's far corner plus breathing room, never tighter than the base
-            float rowWidth = count * ROUTE_ICON + (count - 1) * ROUTE_ICON_GAP;
-            float radius = Math.max(ROUTE_BADGE_RADIUS, (float) Math.hypot(
-                    rowWidth * 0.5f, ROUTE_ICON * 0.5f) + ROUTE_BADGE_PAD);
+            //full-size icons packed as a cluster - pair, triangle, square, pentagon - so the
+            //ring hugs the cluster's reach plus breathing room, never tighter than the base
+            float[][] offsets = clusterOffsets(count, ROUTE_ICON + ROUTE_ICON_GAP);
+
+            float reach = 0f;
+            for (float[] at : offsets) {
+                reach = Math.max(reach, (float) Math.hypot(at[0], at[1]));
+            }
+
+            float radius = Math.max(ROUTE_BADGE_RADIUS, reach
+                    + (float) Math.hypot(ROUTE_ICON * 0.5f, ROUTE_ICON * 0.5f) + ROUTE_BADGE_PAD);
             float bx = sx;
             float by = sy + ROUTE_BADGE_LIFT + radius;
 
@@ -243,21 +250,54 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             Disc.draw(bx, by, radius, Color.BLACK, 0.85f * alphaMult, 0.85f * alphaMult, false);
             Disc.drawOutline(bx, by, radius, player, 0.9f * alphaMult, 1.5f);
 
-            //the fish, in a row across the badge
-            float iconX = bx - (stop.fishIds.size() - 1) * (ROUTE_ICON + ROUTE_ICON_GAP) * 0.5f;
-
+            int slot = 0;
             for (String id : stop.fishIds) {
+                float[] at = offsets[Math.min(slot++, offsets.length - 1)];
+
                 FishSpec spec = FishPresence.getSpec(id);
                 if (spec == null) continue;
 
                 //the art once landed, its rimmed silhouette while only surveyed
-                FishIcons.draw(spec, iconX, by, ROUTE_ICON, alphaMult);
-
-                iconX += ROUTE_ICON + 2f;
+                FishIcons.draw(spec, bx + at[0], by + at[1], ROUTE_ICON, alphaMult);
             }
         }
 
         renderCloseLabel(alphaMult);
+    }
+
+    /**
+     * Icon centres for a badge cluster, spaced one icon apart: one in the middle, a pair side by
+     * side, a two-by-two square at four (the ring's diamond wastes its corners), and otherwise a
+     * ring just wide enough that neighbours sit a spacing apart - triangle at three, pentagon at
+     * five - so the icons stay full-size and the badge stays as small as they allow.
+     */
+    protected static float[][] clusterOffsets(int count, float spacing) {
+        float[][] out = new float[count][2];
+        if (count == 1) return out;
+
+        if (count == 2) {
+            out[0][0] = -spacing * 0.5f;
+            out[1][0] = spacing * 0.5f;
+            return out;
+        }
+
+        if (count == 4) {
+            float half = spacing * 0.5f;
+            out[0] = new float[]{-half, half};
+            out[1] = new float[]{half, half};
+            out[2] = new float[]{-half, -half};
+            out[3] = new float[]{half, -half};
+            return out;
+        }
+
+        float radius = (float) (spacing / (2.0 * Math.sin(Math.PI / count)));
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 0.5 + i * 2.0 * Math.PI / count;
+            out[i][0] = (float) (Math.cos(angle) * radius);
+            out[i][1] = (float) (Math.sin(angle) * radius);
+        }
+
+        return out;
     }
 
     /** "X - CLOSE ROUTE", top centre of the map, the only way a route ever goes away. */

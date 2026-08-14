@@ -1186,10 +1186,14 @@ CatchReleaseCMD colorBulkSaleOptions","""Market rate, no haggling. The market ca
 catchrelease_fisherSellOptionPick,CatchReleaseFisherSellOptions,,,,0:catchrelease_fisherSellPick:Open the fish buyer - pick what sells,
 catchrelease_fisherSellOptionCommon,CatchReleaseFisherSellOptions,$catchreleaseSellCommon,,,10:catchrelease_fisherSellCommon:Sell all unmarked commons,
 catchrelease_fisherSellOptionUncommon,CatchReleaseFisherSellOptions,$catchreleaseSellUncommon,,,20:catchrelease_fisherSellUncommon:Sell all unmarked up to uncommon,
-catchrelease_fisherSellOptionBack,CatchReleaseFisherSellOptions,,,,100:catchrelease_fisherBack:Continue,
+catchrelease_fisherSellOptionRare,CatchReleaseFisherSellOptions,$catchreleaseSellRare,,,30:catchrelease_fisherSellRare:Sell all unmarked up to rare,
+catchrelease_fisherSellOptionEpic,CatchReleaseFisherSellOptions,$catchreleaseSellEpic,,,40:catchrelease_fisherSellEpic:Sell all unmarked up to epic,
+catchrelease_fisherSellOptionBack,CatchReleaseFisherSellOptions,,,,100:catchrelease_fisherBack:Return,
 catchrelease_fisherSellPick,DialogOptionSelected,$option == catchrelease_fisherSellPick,CatchReleaseCMD openBuyer,,,
 catchrelease_fisherSellCommon,DialogOptionSelected,$option == catchrelease_fisherSellCommon,CatchReleaseCMD sellUpTo COMMON,,,
 catchrelease_fisherSellUncommon,DialogOptionSelected,$option == catchrelease_fisherSellUncommon,CatchReleaseCMD sellUpTo UNCOMMON,,,
+catchrelease_fisherSellRare,DialogOptionSelected,$option == catchrelease_fisherSellRare,CatchReleaseCMD sellUpTo RARE,,,
+catchrelease_fisherSellEpic,DialogOptionSelected,$option == catchrelease_fisherSellEpic,CatchReleaseCMD sellUpTo EPIC,,,
 catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
 catchrelease_fisherRumorYes,DialogOptionSelected,"$option == catchrelease_fisherRumor score:10

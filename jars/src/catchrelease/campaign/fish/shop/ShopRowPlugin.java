@@ -22,7 +22,8 @@ import java.awt.Color;
  */
 public class ShopRowPlugin extends ListRow {
 
-    /** What a row needs from the pane it lives in. */
+    /** What a row needs from the pane it lives in. The ring's explanation is not on the list:
+     *  the pane hangs a stock tooltip off a hotspot over the ring's slot instead. */
     public interface Host {
         boolean isSelected(ShopEntry entry);
 
@@ -30,17 +31,6 @@ public class ShopRowPlugin extends ListRow {
 
         /** The list's own rectangle, which is what rows clip and click against. */
         PositionAPI getListViewport();
-
-        /**
-         * Told by a row while the cursor is on its ring, and told again the moment it is not.
-         * <p>
-         * Reported upwards rather than drawn here because a row paints inside the list's scissor
-         * box, and a card that explains the ring would be cut off at the edge of the list. The pane
-         * draws it over everything instead, once it knows which ring is being asked about.
-         */
-        void setMarkHover(ShopEntry entry, float x, float y);
-
-        void clearMarkHover(ShopEntry entry);
     }
 
     public static final float PIP_SIZE = 8f;
@@ -79,25 +69,19 @@ public class ShopRowPlugin extends ListRow {
         return 0.5f;
     }
 
-    /** The price's rarity as the identity colour. */
+    /** The price's rarity as the identity colour; a rung that cannot be bought goes grey. */
     @Override
     protected Color getAccentColor() {
+        if (entry.isLocked()) return Misc.getGrayColor();
+
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
     }
 
-    /** Reported before the cull, so a row scrolled out from under the cursor takes its card
-     *  with it. */
+    /** A locked rung's whole line sits on grey, so the shelf reads at a glance. */
     @Override
-    protected void beforeCull(float x, float y, float width, float height) {
-        boolean hasRing = ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry);
-
-        if (hasRing && isMouseOverMark()) {
-            host.setMarkHover(entry, x + ACCENT_WIDTH + MARK_SLOT * 0.5f, y + height * 0.5f);
-            return;
-        }
-
-        host.clearMarkHover(entry);
+    protected Color getFieldColor() {
+        return entry.isLocked() ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
     }
 
     @Override
@@ -139,7 +123,10 @@ public class ShopRowPlugin extends ListRow {
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn()) ? Misc.getGrayColor()
+        //fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
+        Color color = entry.isFitted() ? Misc.getPositiveHighlightColor()
+                : entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn())
+                ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
@@ -157,9 +144,11 @@ public class ShopRowPlugin extends ListRow {
         if (entry.isUpgrade() && !entry.isMaxed()) {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
 
+            //bought rungs in the player's own colour - yellow is the shopping list's, not the
+            //ladder's - and grey on a ladder whose next rung cannot be bought
             ShopUi.drawPips(Math.round(right - pipsWidth), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
-                    Misc.getHighlightColor(), alphaMult);
+                    entry.isLocked() ? Misc.getGrayColor() : Misc.getBasePlayerColor(), alphaMult);
             return;
         }
 

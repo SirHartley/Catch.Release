@@ -20,6 +20,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,9 @@ public class FishBuyer {
     }
 
     /**
-     * One exact cargo removal in a bulk-sale preview. The item data and quantity are enough to
-     * remove the same whole cargo stack later; containers are never opened or partly spent here.
+     * One exact cargo removal in a bulk-sale preview. A whole-stack entry removes the stack as it
+     * stands; a partial one opens a container, sells the eligible specimens and repacks the rest -
+     * which is what lets one wanted fish in the pile protect itself instead of the whole pile.
      */
     protected static final class SaleEntry {
         final SpecialItemData data;
@@ -55,11 +57,30 @@ public class FishBuyer {
         final int count;
         final float value;
 
+        /** The container's split, or null for a stack sold whole. */
+        final List<FishCatch> sell;
+        final List<FishCatch> keep;
+
         SaleEntry(Stack held) {
             data = held.data;
             items = held.items;
             count = held.count;
             value = held.value;
+            sell = null;
+            keep = null;
+        }
+
+        SaleEntry(Stack held, List<FishCatch> sell, List<FishCatch> keep) {
+            this.data = held.data;
+            this.items = held.items;
+            this.sell = List.copyOf(sell);
+            this.keep = List.copyOf(keep);
+
+            float each = 0f;
+            for (FishCatch entry : sell) each += entry.getValue();
+
+            count = sell.size() * items;
+            value = each * items;
         }
     }
 
@@ -150,9 +171,14 @@ public class FishBuyer {
         return out;
     }
 
-    /** The vanilla cargo picker over a copy of the hold that only carries fish. */
+    /** The vanilla cargo picker over a copy of the hold that only carries fish. The containers
+     *  opened for the picker are put back afterwards, minus whatever sold - the unpacking is the
+     *  picker's need, not a lasting rearrangement of the hold. */
     public static boolean show(final InteractionDialogAPI dialog) {
         if (dialog == null) return false;
+
+        final List<ContainerSnapshot> boxed =
+                snapshotContainers(Global.getSector().getPlayerFleet().getCargo());
 
         FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
 
@@ -168,10 +194,12 @@ public class FishBuyer {
                     @Override
                     public void pickedCargo(CargoAPI picked) {
                         sellPicked(dialog, picked);
+                        restoreContainers(boxed);
                     }
 
                     @Override
                     public void cancelledCargoSelection() {
+                        restoreContainers(boxed);
                     }
 
                     @Override
@@ -218,6 +246,80 @@ public class FishBuyer {
         }
 
         finish(dialog, sold, credits);
+    }
+
+    /** One container as it stood before the picker's unboxing: its id, contents and stack count. */
+    protected static final class ContainerSnapshot {
+        final String id;
+        final List<FishCatch> contents;
+        final int items;
+
+        ContainerSnapshot(String id, List<FishCatch> contents, int items) {
+            this.id = id;
+            this.contents = List.copyOf(contents);
+            this.items = items;
+        }
+    }
+
+    /** The hold's containers as they stand, taken immediately before {@code unbox} opens them. */
+    protected static List<ContainerSnapshot> snapshotContainers(CargoAPI cargo) {
+        List<ContainerSnapshot> out = new ArrayList<>();
+        if (cargo == null) return out;
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isContainer(data)) continue;
+
+            out.add(new ContainerSnapshot(data.getId(),
+                    FishItems.decodeBundle(data.getData()), (int) stack.getSize()));
+        }
+
+        return out;
+    }
+
+    /**
+     * Puts the picker's unboxing back the way it stood, minus whatever sold: each snapshotted
+     * container reclaims its own specimens from the loose fish - matched by their exact encoded
+     * form, the same string {@code unbox} put them out under - and repacks under its own id.
+     * A specimen that is no longer aboard was sold, and simply stays out of the rebuilt box.
+     */
+    protected static void restoreContainers(List<ContainerSnapshot> boxed) {
+        if (boxed == null || boxed.isEmpty()) return;
+        if (Global.getSector().getPlayerFleet() == null) return;
+
+        CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+        //what is loose right now, as a countable pool keyed by encoded specimen
+        Map<String, Integer> loose = new HashMap<>();
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null || !FishItems.FISH.equals(data.getId())) continue;
+
+            loose.merge(data.getData(), (int) stack.getSize(), Integer::sum);
+        }
+
+        for (ContainerSnapshot box : boxed) {
+            for (int i = 0; i < box.items; i++) {
+                List<FishCatch> reclaimed = new ArrayList<>();
+
+                for (FishCatch fish : box.contents) {
+                    String key = fish.encode();
+                    Integer held = loose.get(key);
+                    if (held == null || held <= 0) continue;
+
+                    loose.put(key, held - 1);
+                    reclaimed.add(fish);
+                }
+
+                if (reclaimed.isEmpty()) continue;
+
+                for (FishCatch fish : reclaimed) {
+                    cargo.removeItems(CargoItemType.SPECIAL, FishItems.toItem(fish), 1);
+                }
+
+                cargo.addSpecial(FishItems.repack(box.id, reclaimed), 1);
+            }
+        }
     }
 
     /**
@@ -294,7 +396,11 @@ public class FishBuyer {
 
         for (SaleEntry held : previewUpTo(cap).entries) {
 
-            if (FishItems.isContainer(held.data)) {
+            if (held.sell != null) {
+                for (FishCatch entry : held.sell) {
+                    addDescriptionCount(counts, entry, held.items);
+                }
+            } else if (FishItems.isContainer(held.data)) {
                 for (FishCatch entry : FishItems.decodeBundle(held.data.getData())) {
                     if (entry.getSpec() == null) continue;
                     addDescriptionCount(counts, entry, held.items);
@@ -310,7 +416,12 @@ public class FishBuyer {
         return counts;
     }
 
-    /** Builds the one source of truth used by the label, tooltip, confirmation and sale. */
+    /**
+     * Builds the one source of truth used by the label, tooltip, confirmation and sale.
+     * <p>
+     * Containers are read specimen by specimen: the eligible contents sell and the rest repack,
+     * so a single wanted fish - or one rare over the rung - keeps itself, not the whole pile.
+     */
     protected static SalePreview previewUpTo(FishRarity cap) {
         List<SaleEntry> entries = new ArrayList<>();
         int count = 0;
@@ -318,10 +429,30 @@ public class FishBuyer {
         StringBuilder fingerprint = new StringBuilder();
 
         for (Stack held : read()) {
-            if (held.wanted) continue;
-            if (held.rarity == null || held.rarity.rank > cap.rank) continue;
+            SaleEntry entry;
 
-            SaleEntry entry = new SaleEntry(held);
+            if (FishItems.isContainer(held.data)) {
+                List<FishCatch> sell = new ArrayList<>();
+                List<FishCatch> keep = new ArrayList<>();
+
+                for (FishCatch fish : FishItems.decodeBundle(held.data.getData())) {
+                    boolean eligible = fish.getSpec() != null
+                            && !ShopMarks.isWanted(fish)
+                            && fish.getSpec().rarity.rank <= cap.rank;
+
+                    (eligible ? sell : keep).add(fish);
+                }
+
+                if (sell.isEmpty()) continue;
+
+                entry = keep.isEmpty() ? new SaleEntry(held) : new SaleEntry(held, sell, keep);
+            } else {
+                if (held.wanted) continue;
+                if (held.rarity == null || held.rarity.rank > cap.rank) continue;
+
+                entry = new SaleEntry(held);
+            }
+
             entries.add(entry);
             count += entry.count;
             value += entry.value;
@@ -331,13 +462,16 @@ public class FishBuyer {
         return new SalePreview(entries, count, value, fingerprint.toString());
     }
 
-    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key. */
+    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key.
+     *  Count and value ride along so a partial container whose split moved - a mark flipped
+     *  while the prompt was open - reads as a different sale. */
     protected static void appendFingerprint(StringBuilder out, SaleEntry entry) {
         String id = entry.data.getId();
         String data = entry.data.getData();
         out.append(id == null ? -1 : id.length()).append(':').append(id)
                 .append(data == null ? -1 : data.length()).append(':').append(data)
-                .append(':').append(entry.items).append(';');
+                .append(':').append(entry.items)
+                .append(':').append(entry.count).append(':').append(entry.value).append(';');
     }
 
     protected static void showBulkSaleConfirm(final InteractionDialogAPI dialog, final FishRarity cap,
@@ -441,6 +575,13 @@ public class FishBuyer {
 
         for (SaleEntry entry : preview.entries) {
             cargo.removeItems(CargoItemType.SPECIAL, entry.data, entry.items);
+
+            //a partly-sold container goes back with what it kept, under its own id - a crate
+            //stays a crate and the pile stays the pile
+            if (entry.keep != null) {
+                SpecialItemData rest = FishItems.repack(entry.data.getId(), entry.keep);
+                for (int i = 0; i < entry.items; i++) cargo.addSpecial(rest, 1);
+            }
         }
 
         finish(dialog, preview.count, preview.value);

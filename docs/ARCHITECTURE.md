@@ -453,8 +453,8 @@ The one rule command the mod ships, and the only place the sheet reaches into Ja
 
 | File | What it does |
 |---|---|
-| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, the active rumor's system/type/stranger, the bulk-sale rungs that currently have eligible fish, and Crablobab's live regular-or-empty stock state), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot. Its `highlightJobText`, `highlightWorkText`, and `highlightIntroText` verbs mirror vanilla `Highlight` plus `SetTextHighlightColors`: fish names/rarity floors take their rarity colours while places and rewards remain yellow. `beginFisherQuestions`/`addFisherQuestion`/`finishFisherQuestions` page the rules-authored unasked-then-answered stream and apply the canonical Common colour to its completed tail. The Crablobab option stream attaches structured cost cards to regular wares, backdrops, and the terrible fallback bass; its explosive-pending and settled predicates read the saved use record directly so greeting selection does not depend on a token write during condition evaluation. Other panel verbs include `leaveEncounter`, `dropCutComm`, and `colorBulkSaleOptions`, which keeps the commons-only sale in ordinary white option text, gives the uncommon rung its rarity colour, and attaches exact rarity-coloured cargo previews to both. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
-| `FishBuyer.java` | Selling the catch: the picker, the batch rungs, and the immutable whole-stack sale preview shared by labels, tooltips, confirmation and execution. Bulk tooltips render one row per species so every fish name carries its own rarity colour without substring collisions. Its confirmation uses vanilla's large Insignia prompt face and highlights the full credit amount. Bulk sale rebuilds that prompt instead of selling if the hold changed, and protects every yellow-dotted specimen requested by either marked shop gear or any active `FishAsker`; a container holding even one such fish remains intact. It counts every copy in stacked identical containers. Opening the picker unboxes first so crates and the pile do not force an all-or-nothing sale |
+| `CatchReleaseCMD.java` | `CatchReleaseCMD <verb> [arg]` — writes the branch tokens (including stage-gated Fisherman outfitter access, local-target location, interrupted deep-gear handoff, pending first-bycatch explanation, the active rumor's system/type/stranger, the bulk-sale rungs that currently have eligible fish, and Crablobab's live regular-or-empty stock state), opens the panels, walks the ladder, resolves the one-use castaway rescue, and reaches into the encounter screen where a row cannot. Its `highlightJobText`, `highlightWorkText`, and `highlightIntroText` verbs mirror vanilla `Highlight` plus `SetTextHighlightColors`: fish names/rarity floors take their rarity colours while places and rewards remain yellow. `beginFisherQuestions`/`addFisherQuestion`/`finishFisherQuestions` page the rules-authored unasked-then-answered stream and apply the canonical Common colour to its completed tail. The Crablobab option stream attaches structured cost cards to regular wares, backdrops, and the terrible fallback bass; its explosive-pending and settled predicates read the saved use record directly so greeting selection does not depend on a token write during condition evaluation. Other panel verbs include `leaveEncounter`, `dropCutComm`, and `colorBulkSaleOptions`, which keeps the commons-only sale in ordinary white option text, gives the uncommon, rare and epic rungs their rarity colours, and attaches exact rarity-coloured cargo previews to all four. A panel return restores the Fisherman's plugin then clears and rebuilds its options once, so custom-visual dismissal cannot duplicate or lose the sheet |
+| `FishBuyer.java` | Selling the catch: the picker, four batch rungs (common through epic), and the immutable sale preview shared by labels, tooltips, confirmation and execution. Bulk tooltips render one row per species so every fish name carries its own rarity colour without substring collisions. Its confirmation uses vanilla's large Insignia prompt face and highlights the full credit amount. Bulk sale rebuilds that prompt instead of selling if the hold changed, and protects every yellow-dotted specimen requested by either marked shop gear or any active `FishAsker` - containers are read specimen by specimen, so a wanted fish keeps itself while the eligible rest sell and repack under the container's own id. It counts every copy in stacked identical containers. Opening the picker unboxes first so every specimen is independently selectable, then snapshots and rebuilds the containers on the way out, minus whatever sold |
 
 ### `campaign/fish/tutorial`
 Learning to fish, in six lessons and one shortcut. **Entirely detached from the ordinary loop** — the
@@ -524,7 +524,7 @@ The outfitter: upgrades and tackle bought with fish.
 | `FishRequirement.java` | An ask: count, rarity, grade, species, region, exact source rupture, coherence — how to describe it, identify its exact rarity-bearing substrings, and apply their canonical colours to UI labels |
 | `ShopStorage.java` | Migration only — returns fish left in the removed store/retrieve counter. See Dead or dormant |
 | `ShopSchematics.java` | Persistent quest-earned purchase permissions for stocked tackle and each of an upgrade ladder's final two rungs. Ownership/current level counts as permission for migrated saves; gated upgrade plans become eligible sequentially when the preceding rung has been bought. Its bulk grant records every real outfitter permission without buying hardware or levels, for developer campaign setup |
-| `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click, and its hover is reported upwards rather than drawn, because a card would be cut off by the list's scissor box |
+| `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click. The ring's explanation is a stock tooltip the pane hangs off a transparent hotspot over the slot - see the gotcha on hand-drawn controls |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
 | `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
@@ -590,11 +590,11 @@ The sector-map fish filter.
 | `FishMapPane.java` | The side panel: planner button, search, type chips, species list, the coherence toggle on its floor |
 | `FishPresence.java` | What the player is allowed to see, and where |
 | `FishPresenceField.java` | Builds merged organic blobs — metaball field, marching triangles, smoothing |
-| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges, the close-route label, and the coherence heat map under it all |
+| `FishPresenceOverlay.java` | Draws the blobs through a stencil, striped where they overlap; route badges - full-size fish icons clustered pair/triangle/square/pentagon inside a ring sized to the cluster - the close-route label, and the coherence heat map under it all |
 | `CoherenceHeatField.java` | The sector's stability as a gradient - Aberration sampled onto a light-year grid on a per-frame budget, including the clear five-light-year basins colonies cut into unstable water. Bare points, not systems, so it needs `openSpaceReading` to answer with both complete indexes; `ALPHA_CAP` is the layer's single ceiling and `HEAT_EASE` above 1 keeps the bottom of the range faint; bounds are the sector rectangle exactly, because past it `getAbyssalDepth` measures how far off the map you are rather than the water |
 | `FishSystemPane.java` | The system view's sidebar: the viewed system's catch as holder cells, same map hand-over as the big pane |
 | `FishHolderPlugin.java` | One round fish holder - rarity ring, art/mark/question - shared by every screen that lines fish up in circles |
-| `FishListRow.java` | The species row both panes' lists extend, on `ui/ListRow`: caught-circle, name, wanted dot, F2 to the codex; the planner's who-is-asking tag hangs off its `renderTag` hook |
+| `FishListRow.java` | The species row both panes' lists extend, on `ui/ListRow`: caught-circle, name, wanted dot, F2 to the codex. The dot is the whole who-wants-it story - the tooltip names the askers |
 | `FishRoute.java` | The saved route: ordered stops in the save, until closed by hand |
 | `FishRoutePlanner.java` | Suggestions from every `FishAsker` in the log plus the shopping list, broad asks expanded to whatever could pay them; cover + exact ordering, stability- and slipstream-aware |
 | `FishRoutePopup.java` | The planner in the sidebar's slot, built from the sidebar's own parts: search, chips, pick up to five, plot |
@@ -610,7 +610,7 @@ Codex pages for species.
 |---|---|
 | `FishCodex.java` | Installs the category and per-species entries; owns every guarded custom/F2 link into a fish entry |
 | `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
-| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries use the real species outline as a black silhouette in both index and detail while full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
+| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the species outline - the FishIcons rimmed silhouette in the detail, a dark-player-colour shadow in the index list, whose single-tint icon hook cannot composite the rim - while full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
 
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
@@ -1064,13 +1064,14 @@ to be found again every time a container is added. Anything taking fish out of o
 remainder back with `FishItems.repack(id, …)` rather than `toBundle`: a part-spent pile rebuilt as a
 crate would file every species in it under whichever happened to be first.
 
-**A hand-drawn control has no tooltip, and cannot grow one where it lives.** The shopping-list ring
-is painted by `ShopRowPlugin` inside the list's scissor box, so a card drawn there would be sliced
-off at the edge of the list — and it is not a `ButtonAPI`, so there is nothing to hang a stock
-tooltip on. The row reports the hover to the pane, which draws the card from its own
-`CustomUIPanelPlugin.render()`; that runs *after* the panel's children, which is what puts it on top
-of everything. The card's `DrawableString`s are rebuilt only when the hovered ring or its marked
-state changes — each one is a display list.
+**A hand-drawn control grows a stock tooltip through a hotspot, not a hand-drawn card.** The
+shopping-list ring is painted by `ShopRowPlugin`, not a `ButtonAPI`, so there is nothing to hang a
+tooltip on directly — but `TooltipMakerAPI.addTooltipTo` accepts any component, including one
+nested inside another custom panel. The outfitter drops a transparent `CustomPanelAPI` over the
+ring's slot in each row and attaches the tooltip to that, which scopes it to the ring and lets
+vanilla own placement, clipping and timing. (The old fear that a card in the scrolling list would
+be sliced off by the scissor box only applied to hand-drawn cards; stock tooltips render above the
+whole screen and never did — the locked-row tooltip in the same list proved it.)
 
 **A fleet quest never spawns a fleet, and until it is accepted it never touches one either.** The
 offer is two memory keys and a `FleetQuestMarker` hung on a civilian hull already in the player's

@@ -97,9 +97,10 @@ public class FishItems {
      * Opens every crate and pile in a cargo hold into loose specimen items.
      * <p>
      * Cargo pickers select stacks, not objects inside a special item's encoded payload. Expanding
-     * containers before opening one is what makes each specimen independently selectable. The
-     * change is intentionally kept if the picker is cancelled: the player has asked for a screen
-     * where individual fish can be managed, and silently re-boxing them would hide them again.
+     * containers before opening one is what makes each specimen independently selectable. A
+     * caller whose picker is transactional - the fish buyer - snapshots its containers first and
+     * restores them afterwards; the hand-off pickers leave the hold opened, since the player
+     * asked for a screen where individual fish can be managed.
      *
      * @return number of specimens taken out of containers
      */

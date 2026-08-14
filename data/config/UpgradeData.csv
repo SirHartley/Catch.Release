@@ -7,7 +7,6 @@ fishing_bar_size,120,INT,20,FLAT,4,CAMPAIGN,The size of the catch bar in the fis
 searchlight_count,2,INT,1,FLAT,3,CAMPAIGN,How many lamps sweep at once.
 searchlight_rare_chance,0,DOUBLE,0.05,FLAT,4,CAMPAIGN,Added chance for a rarer species to be under the fabric where the lamps are looking.
 searchlight_track_time,0,DOUBLE,2,FLAT,4,CAMPAIGN,Seconds a mote stays exposed after a lamp has passed over it.
-searchlight_identify,0,INT,1,FLAT,2,CAMPAIGN,Whether an unexposed dent gives away roughly how rare the thing making it is.
 searchlight_detect_radius,400,INT,200,FLAT,3,CAMPAIGN,How far off a beam a lamp still betrays what is under the fabric as a dent.
 searchlight_slow,0,DOUBLE,0.25,FLAT,2,CAMPAIGN,How much anything swimming through a beam is slowed while the light is on it.
 drone_speed,300,INT,0.12,MULT,4,CAMPAIGN,How fast a drone flies.
