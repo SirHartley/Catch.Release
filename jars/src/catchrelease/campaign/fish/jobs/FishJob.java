@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
@@ -13,6 +14,7 @@ import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.LabelAPI;
+import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -571,6 +573,20 @@ public abstract class FishJob extends HubMissionWithBarEvent
             info.addPara(Misc.ucFirst(reward.describe()), text, 0f);
         }
         unindent(info);
+    }
+
+    /** Mount after the stage text so specialized descriptions and short-lived end states keep it. */
+    @Override
+    public void addDescriptionForCurrentStage(TooltipMakerAPI info, float width, float height) {
+        super.addDescriptionForCurrentStage(info, width, height);
+        FishIntelMapButton.add(info, width, asks);
+    }
+
+    /** Every accepted fish request can open the map already narrowed to compatible species. */
+    @Override
+    public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+        if (FishIntelMapButton.handle(buttonId, ui, asks, null, null)) return;
+        super.buttonPressConfirmed(buttonId, ui);
     }
 
     /** The compact form, for the list down the side of the intel screen. */

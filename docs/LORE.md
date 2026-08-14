@@ -2072,6 +2072,12 @@ is deciding whether to accept the job.
 
 Intel is normally more precise than casual dialogue.
 
+Every live fishing quest, task and rumor carries the same **Open fishing map** action. Its hover
+first says what will happen: a fish request opens the map narrowed to known compatible species
+ranges, while a place-only rumor opens the fishing overlay centered on the reported system. The
+request hover must also say that size, grade, origin and catch-method terms still apply to the
+individual specimen; a geographic range is not a promise that every catch there will qualify.
+
 Use:
 
 - rupture;

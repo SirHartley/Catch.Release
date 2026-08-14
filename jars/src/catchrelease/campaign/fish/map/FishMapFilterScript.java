@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -61,7 +62,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     /** Species someone outside asked the map to focus (the codex's "show on the sector map").
      *  Static, since the asker's dialog is gone before the map exists. */
     protected static String pendingSpeciesId;
-    protected static long pendingSpeciesSetAt;
+    protected static List<FishRequirement> pendingRequirements;
+    protected static boolean pendingOverview;
+    protected static String pendingSystemId;
+    protected static long pendingFocusSetAt;
 
     /** Whether the codex asked to open the map for the parked species. The codex overlay fades
      *  out asynchronously, so the tab switch must wait until its dismissal callback has run. */
@@ -161,7 +165,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             //attach, and the codex may have opened over a map already up with the filter off.
             //It also flips to the hyper view up front: the pane only stands there now, and a
             //request that waited for the pane while the pane waited for the view would wait forever
-            if (hasFreshPendingSpecies()) {
+            if (hasFreshPendingFocus()) {
                 if (!fishButton.isChecked()) fishButton.setChecked(true);
 
                 if (!isHyperViewShown()) {
@@ -193,7 +197,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             //leaves the pane gone with neither branch above ever firing again
             if (applied && wantPane && popupPanel == null) ensurePaneStanding();
 
-            if (applied && pendingSpeciesId != null) applyPendingSpecies();
+            if (applied && hasPendingFocus()) applyPendingFocus();
 
             syncRouteArrows();
         } catch (Throwable t) {
@@ -490,11 +494,43 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
     /**
      * Parks a species and flags the filter to come on next frame (same frame, if the map's
-     * already open). Applied in {@link #applyPendingSpecies()} once a pane exists.
+     * already open). Applied in {@link #applyPendingFocus()} once a pane exists.
      */
     public static void requestSpeciesFocus(String speciesId) {
         pendingSpeciesId = speciesId;
-        pendingSpeciesSetAt = System.currentTimeMillis();
+        pendingRequirements = null;
+        pendingOverview = false;
+        pendingSystemId = null;
+        pendingFocusSetAt = System.currentTimeMillis();
+
+        if (Global.getSector() != null) {
+            Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
+        }
+    }
+
+    /** Parks a complete accepted ask; category requests remain unions rather than being truncated
+     * to the three individually selectable species the ordinary map UI permits. */
+    public static void requestRequirementsFocus(List<FishRequirement> asks) {
+        pendingMapOpen = false;
+        pendingSpeciesId = null;
+        pendingRequirements = asks == null ? new ArrayList<>() : new ArrayList<>(asks);
+        pendingOverview = false;
+        pendingSystemId = null;
+        pendingFocusSetAt = System.currentTimeMillis();
+
+        if (Global.getSector() != null) {
+            Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
+        }
+    }
+
+    /** Parks an all-category survey centered on a reported system. */
+    public static void requestOverviewFocus(String systemId) {
+        pendingMapOpen = false;
+        pendingSpeciesId = null;
+        pendingRequirements = null;
+        pendingOverview = true;
+        pendingSystemId = systemId;
+        pendingFocusSetAt = System.currentTimeMillis();
 
         if (Global.getSector() != null) {
             Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
@@ -516,7 +552,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected void openPendingMapWhenCodexCloses() {
         if (!pendingMapOpen) return;
 
-        if (!hasFreshPendingSpecies()) {
+        if (!hasFreshPendingFocus()) {
             pendingMapOpen = false;
             return;
         }
@@ -533,9 +569,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         ui.showCoreUITab(CoreUITabId.MAP);
     }
 
-    protected static boolean hasFreshPendingSpecies() {
-        return pendingSpeciesId != null
-                && System.currentTimeMillis() - pendingSpeciesSetAt <= PENDING_SPECIES_MILLIS;
+    protected static boolean hasPendingFocus() {
+        return pendingSpeciesId != null || pendingRequirements != null || pendingOverview;
+    }
+
+    protected static boolean hasFreshPendingFocus() {
+        return hasPendingFocus()
+                && System.currentTimeMillis() - pendingFocusSetAt <= PENDING_SPECIES_MILLIS;
     }
 
     /**
@@ -543,15 +583,19 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
      * re-cuts the waters, and points the map like a row click would. Consumed up front, so a
      * failed request doesn't retry on the next open.
      */
-    protected void applyPendingSpecies() {
-        boolean fresh = hasFreshPendingSpecies();
+    protected void applyPendingFocus() {
+        boolean fresh = hasFreshPendingFocus();
         String id = pendingSpeciesId;
+        List<FishRequirement> asks = pendingRequirements;
+        boolean overview = pendingOverview;
+        String systemId = pendingSystemId;
         pendingSpeciesId = null;
+        pendingRequirements = null;
+        pendingOverview = false;
+        pendingSystemId = null;
 
         if (!fresh) return;
-
-        FishSpec spec = FishPresence.getSpec(id);
-        if (spec == null || pane == null) return;
+        if (pane == null) return;
 
         //waters are in hyperspace coordinates; flip to the hyper view first (same method the
         //game calls on a location change), so the focus point means something once there
@@ -562,9 +606,41 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             //the flip is a nicety - on the system view the pane still opens on the species
         }
 
-        pane.showSpecies(id);
+        FishSpec spec = FishPresence.getSpec(id);
+        if (id != null && spec != null) {
+            pane.showSpecies(id);
+        } else if (asks != null) {
+            pane.showRequirements(asks);
+        } else if (overview) {
+            pane.showOverview();
+        }
+
         rebuildBlobs();
-        onSpeciesFocused(spec);
+        if (spec != null) {
+            onSpeciesFocused(spec);
+        } else if (asks != null) {
+            for (String selected : pane.getSelectedIds()) {
+                FishSpec first = FishPresence.getSpec(selected);
+                if (first != null) onSpeciesFocused(first);
+                break;
+            }
+        }
+
+        if (systemId != null) centerOnSystem(systemId);
+    }
+
+    protected void centerOnSystem(String systemId) {
+        if (mapScreen == null || systemId == null || Global.getSector() == null) return;
+
+        try {
+            for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                if (!systemId.equals(system.getId()) || system.getLocation() == null) continue;
+                ReflectionUtils.invoke(mapScreen, "centerOn", system.getLocation());
+                return;
+            }
+        } catch (Throwable ignored) {
+            //the system's ordinary intel marker still points at it if centering is unavailable
+        }
     }
 
     /** The sector map screen if it is on the glass right now, else null. */
@@ -812,14 +888,17 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             for (FishType type : FishType.values()) {
                 if (!pane.getFilter().types.contains(type)) continue;
 
-                FishPresenceField.Mesh mesh = meshCache.get("type:" + type.name());
+                boolean constrained = pane.getFilter().speciesRestricted;
+                FishPresenceField.Mesh mesh = constrained
+                        ? null : meshCache.get("type:" + type.name());
 
                 if (mesh == null) {
-                    List<Vector2f> hosts = FishPresence.getTypeHostLocations(type);
+                    List<Vector2f> hosts = FishPresence.getTypeHostLocations(type,
+                            pane.getFilter());
                     if (hosts.isEmpty()) continue;
 
                     mesh = FishPresenceField.build(hosts, BLOB_RADIUS);
-                    meshCache.put("type:" + type.name(), mesh);
+                    if (!constrained) meshCache.put("type:" + type.name(), mesh);
                 }
 
                 if (mesh.isEmpty()) continue;
