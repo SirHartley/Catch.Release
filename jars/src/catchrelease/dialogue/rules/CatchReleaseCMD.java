@@ -679,6 +679,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             LampOffence.applyRepLoss(factionId, LampOffence.REP_LOSS, text(dialog));
         }
 
+        //The patrol committed while the lamps were lit, so powering them down during the approach
+        //does not change the stop. Bridge that state into the unchanged faction/rung dialogue which
+        //OpenComms fires immediately after this command.
+        if (!SearchlightAbilityPlugin.isBreaching()) {
+            text(dialog).addParagraph("The lamps are already dark. The patrol has the earlier "
+                    + "sensor return on display and proceeds with the stop.");
+        }
+
         return true;
     }
 
