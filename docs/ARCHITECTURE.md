@@ -480,7 +480,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture on landed specimens from either drones or harpoons |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
-| `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; its success hook fires once when its delayed tally begins, after the fish readout finishes |
+| `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; item names wrap inside its default width and rows grow vertically instead of stretching the screen for long blueprint names. Its success hook fires once when the delayed tally begins, after the fish readout finishes |
 | `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
 
 ### `campaign/fish/treasure`

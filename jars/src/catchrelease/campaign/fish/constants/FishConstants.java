@@ -151,6 +151,8 @@ public class FishConstants {
     //minigame - the loot card, beside the track on the side the catch card is not
     public static final String MINIGAME_LOOT_TITLE = "Recovered";
     public static final float MINIGAME_LOOT_LINE_HEIGHT = 30f;
+    /** Breathing room between a wrapped name and the next treasure row. */
+    public static final float MINIGAME_LOOT_ROW_PAD = 4f;
     public static final float MINIGAME_LOOT_ICON = 24f;
     public static final float MINIGAME_LOOT_ICON_GAP = 8f;
     public static final float MINIGAME_LOOT_COUNT_GAP = 12f;
