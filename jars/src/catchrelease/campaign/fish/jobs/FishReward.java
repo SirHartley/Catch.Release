@@ -6,8 +6,10 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopMarks;
+import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -21,10 +23,13 @@ import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import java.util.Collections;
 
 /**
  * A job's payout: an abstract thing that can describe and hand itself over.
@@ -55,6 +60,42 @@ public abstract class FishReward {
     /** Stable identity for quest-pool reservation; null for rewards that are not schematics. */
     public String getSchematicKey() {
         return null;
+    }
+
+    /** Shared bottom half of both schematic cards: what earning it does and what buying costs. */
+    protected static void addSchematicPurchase(TooltipMakerAPI item, ShopPricing.Price price,
+                                               String thing) {
+        if (item == null) return;
+
+        item.addPara("This unlocks %s for purchase at the Fishing Outfitter. It does not include"
+                        + " the %s itself.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                thing, thing);
+
+        if (price == null) return;
+
+        String credits = Misc.getDGSCredits(price.credits);
+        item.addPara("Purchase price after unlock: %s credits.", 6f, Misc.getGrayColor(),
+                Misc.getHighlightColor(), credits);
+
+        if (price.fish != null) {
+            String ask = price.fish.describe();
+            LabelAPI catchLine = item.addPara("Catch required as well: %s.", 3f,
+                    Misc.getGrayColor(), Misc.getHighlightColor(), ask);
+            FishRequirement.highlight(catchLine, Collections.singletonList(price.fish), ask);
+        }
+    }
+
+    /** Player-facing name for the hardware a tackle schematic can be fitted to. */
+    protected static String describeFit(Tackle.Fit fit) {
+        if (fit == null) return "fishing rig";
+
+        switch (fit) {
+            case DRONE: return "LYNE drone rig";
+            case HARPOON: return "harpoon line";
+            case SEARCHLIGHT: return "breach lamp rig";
+            case BOTH: return "LYNE drone rig or harpoon line";
+            default: return "fishing rig";
+        }
     }
 
     public static FishReward credits(int amount) {
@@ -204,11 +245,14 @@ public abstract class FishReward {
 
             ShopEntry entry = ShopEntry.of(stat);
             TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
-            item.addPara(entry.getName() + " schematic — level " + targetLevel, 0f);
-            item.addPara(stat.description + " " + entry.getValueAt(targetLevel - 1) + " to "
-                    + entry.getValueAt(targetLevel) + ".", 3f);
-            item.addPara("Unlocks this rung for purchase at the Fishing Outfitter; it does not"
-                    + " grant the upgrade.", 3f);
+            item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
+            item.addPara("%s — level %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
+                    entry.getName(), String.valueOf(targetLevel));
+            item.addPara(stat.description, 6f);
+            item.addPara("This rung: %s → %s", 3f, Misc.getGrayColor(),
+                    Misc.getPositiveHighlightColor(), entry.getValueAt(targetLevel - 1),
+                    entry.getValueAt(targetLevel));
+            addSchematicPurchase(item, ShopPricing.getPrice(stat, targetLevel), "upgrade rung");
             UIPanelAPI card = tooltip.addImageWithText(pad);
             CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f,
                     new SchematicMarkOverlay(statId, targetLevel));
@@ -278,10 +322,12 @@ public abstract class FishReward {
             if (tooltip == null) return false;
 
             TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
-            item.addPara(tackle.name + " schematic", 0f);
-            item.addPara(tackle.description, 3f);
-            item.addPara("Unlocks this tackle for purchase at the Fishing Outfitter; it does not"
-                    + " grant the hardware.", 3f);
+            item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
+            item.addPara(tackle.name, Misc.getTextColor(), 3f);
+            item.addPara("Fits: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                    describeFit(tackle.fit));
+            item.addPara(tackle.description, 6f);
+            addSchematicPurchase(item, ShopPricing.getPrice(tackle), "tackle");
             tooltip.addImageWithText(pad);
 
             return true;

@@ -2060,6 +2060,11 @@ Flavor comes second.
 
 Do not bury mechanics inside atmosphere.
 
+Fishing Outfitter schematic cards lead with the exact upgrade rung or tackle they unlock. They
+state the mechanical change or compatible rig, say plainly that the schematic is purchase
+permission rather than the item itself, and show the later credit-and-catch price while the player
+is deciding whether to accept the job.
+
 ## Intel
 
 Intel is normally more precise than casual dialogue.
