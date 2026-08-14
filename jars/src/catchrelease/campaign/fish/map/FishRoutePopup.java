@@ -440,17 +440,13 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** One species row in the shared dress, plus a tag for who is asking. Field stays lit
-     *  while picked. */
+    /** One species row in the shared dress; the field stays lit while picked. The dot is the
+     *  whole of the who-wants-it story here - the job/errand tag that used to sit beside it is
+     *  the tooltip's to tell (its Required-by section already names the askers). */
     protected class RowPlugin extends FishListRow {
-
-        protected final Row row;
-
-        protected transient LazyFont.DrawableString reason;
 
         public RowPlugin(Row row) {
             super(row.spec);
-            this.row = row;
         }
 
         @Override
@@ -466,27 +462,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         @Override
         protected void onRowClick(float pointX, float pointY) {
             onRowClicked(spec);
-        }
-
-        /** Who is asking, right-aligned - the marked tag retired, the dot already says it. */
-        @Override
-        protected void renderTag(float x, float y, float width, float height, boolean marked,
-                                 float alphaMult) {
-
-            if (row.reason == null || "marked".equals(row.reason)) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            if (reason == null) {
-                reason = ShopUi.createText(small, row.reason);
-                reason.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-            }
-
-            reason.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
-            reason.draw(Math.round(x + width - PAD_SIDE - reason.getWidth()
-                            - (marked ? 12f : 0f)),
-                    Math.round(y + height * 0.5f + reason.getHeight() * 0.5f));
         }
     }
 }
