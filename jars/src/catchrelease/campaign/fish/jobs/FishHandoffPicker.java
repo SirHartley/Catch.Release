@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -35,24 +36,42 @@ public final class FishHandoffPicker {
     /** An exact, non-overlapping assignment of selected specimens to every outstanding ask. */
     public static final class Selection {
         protected final List<SpecialItemData> items;
+        protected final List<FishCatch> contents;
         protected final FishCatch bestForFirstAsk;
 
-        protected Selection(List<SpecialItemData> items, FishCatch bestForFirstAsk) {
+        /** Whether the fish may still be boxed - an auto-pick reaches into crates and the pile,
+         *  where the picker's fish were all loose by construction. */
+        protected final boolean boxed;
+
+        protected Selection(List<SpecialItemData> items, List<FishCatch> contents,
+                            FishCatch bestForFirstAsk, boolean boxed) {
             this.items = items;
+            this.contents = contents;
             this.bestForFirstAsk = bestForFirstAsk;
+            this.boxed = boxed;
         }
 
         public FishCatch getBestForFirstAsk() {
             return bestForFirstAsk;
         }
 
-        /** Removes exactly the selected items, after confirming every stack is still aboard. */
+        /** The exact specimens this hand-in takes, for a confirmation to read out. */
+        public List<FishCatch> getContents() {
+            return contents;
+        }
+
+        /** Removes exactly the selected specimens, after confirming they are still aboard. */
         public boolean spend() {
             if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) {
                 return false;
             }
 
             CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+            return boxed ? spendBoxed(cargo) : spendLoose(cargo);
+        }
+
+        protected boolean spendLoose(CargoAPI cargo) {
             Map<SpecialItemData, Integer> quantities = new LinkedHashMap<>();
 
             for (SpecialItemData item : items) quantities.merge(item, 1, Integer::sum);
@@ -64,6 +83,46 @@ public final class FishHandoffPicker {
 
             for (Map.Entry<SpecialItemData, Integer> entry : quantities.entrySet()) {
                 cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, entry.getKey(), entry.getValue());
+            }
+
+            return true;
+        }
+
+        /** By encoded identity, loose stacks before containers, all verified before any removal. */
+        protected boolean spendBoxed(CargoAPI cargo) {
+            Map<String, Integer> need = new LinkedHashMap<>();
+            for (FishCatch fish : contents) need.merge(fish.encode(), 1, Integer::sum);
+
+            Map<String, Integer> aboard = new LinkedHashMap<>();
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                SpecialItemData data = stack.getSpecialDataIfSpecial();
+                if (data == null) continue;
+
+                if (FishItems.FISH.equals(data.getId())) {
+                    aboard.merge(data.getData(), (int) stack.getSize(), Integer::sum);
+                } else if (FishItems.isContainer(data)) {
+                    for (FishCatch fish : FishItems.decodeBundle(data.getData())) {
+                        aboard.merge(fish.encode(), (int) stack.getSize(), Integer::sum);
+                    }
+                }
+            }
+
+            for (Map.Entry<String, Integer> entry : need.entrySet()) {
+                Integer have = aboard.get(entry.getKey());
+                if (have == null || have < entry.getValue()) return false;
+            }
+
+            for (Map.Entry<String, Integer> entry : need.entrySet()) {
+                final String key = entry.getKey();
+
+                int left = FishCurrency.spendMatching(cargo,
+                        fish -> key.equals(fish.encode()), entry.getValue(), false);
+                if (left > 0) {
+                    left = FishCurrency.spendMatching(cargo,
+                            fish -> key.equals(fish.encode()), left, true);
+                }
+
+                if (left > 0) return false;
             }
 
             return true;
@@ -159,6 +218,79 @@ public final class FishHandoffPicker {
         return true;
     }
 
+    /**
+     * Picks the minimum hand-in without a picker: every matching specimen aboard - loose or
+     * boxed - offered worst-first to the same slot assignment the manual picker validates
+     * with, so the auto path never takes a better fish than the order needs and never takes
+     * one it does not. Null when the hold cannot cover the asks.
+     */
+    public static Selection autoSelect(List<FishRequirement> asks, Eligibility eligibility) {
+        if (asks == null || asks.isEmpty()) return null;
+        if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return null;
+
+        List<Candidate> candidates = new ArrayList<>();
+        for (CargoStackAPI stack
+                : Global.getSector().getPlayerFleet().getCargo().getStacksCopy()) {
+
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null) continue;
+
+            List<FishCatch> held = new ArrayList<>();
+            if (FishItems.FISH.equals(data.getId())) {
+                FishCatch fish = FishCatch.decode(data.getData());
+                if (fish != null) held.add(fish);
+            } else if (FishItems.isContainer(data)) {
+                held.addAll(FishItems.decodeBundle(data.getData()));
+            }
+
+            for (FishCatch fish : held) {
+                if (fish.getSpec() == null || !matchesAny(fish, asks)) continue;
+                if (eligibility != null && !eligibility.accepts(fish)) continue;
+
+                for (int i = 0; i < (int) stack.getSize(); i++) {
+                    candidates.add(new Candidate(FishItems.toItem(fish), fish));
+                }
+            }
+        }
+
+        //worst-first, so the assignment reaches for the cheapest fish that still qualifies
+        candidates.sort(java.util.Comparator.comparingDouble(c -> c.fish.getValue()));
+
+        int required = requiredCount(asks);
+        if (candidates.size() < required) return null;
+
+        int[] slots = new int[required];
+        int at = 0;
+        for (int ask = 0; ask < asks.size(); ask++) {
+            for (int i = 0; i < Math.max(0, asks.get(ask).count); i++) slots[at++] = ask;
+        }
+
+        int[] assignment = new int[required];
+        boolean[] used = new boolean[candidates.size()];
+        int[] assignedPerAsk = new int[asks.size()];
+        String[] speciesPerAsk = new String[asks.size()];
+
+        if (!assign(0, slots, assignment, used, assignedPerAsk, speciesPerAsk,
+                candidates, asks)) return null;
+
+        List<SpecialItemData> items = new ArrayList<>();
+        List<FishCatch> contents = new ArrayList<>();
+        FishCatch best = null;
+
+        for (int slot = 0; slot < assignment.length; slot++) {
+            Candidate candidate = candidates.get(assignment[slot]);
+            items.add(candidate.item);
+            contents.add(candidate.fish);
+
+            if (slots[slot] == 0 && (best == null
+                    || candidate.fish.getSizeFraction() > best.getSizeFraction())) {
+                best = candidate.fish;
+            }
+        }
+
+        return new Selection(items, contents, best, true);
+    }
+
     protected static Selection match(CargoAPI picked, List<FishRequirement> asks) {
         List<Candidate> candidates = readLoose(picked);
         int required = requiredCount(asks);
@@ -179,11 +311,13 @@ public final class FishHandoffPicker {
                 candidates, asks)) return null;
 
         List<SpecialItemData> items = new ArrayList<>();
+        List<FishCatch> contents = new ArrayList<>();
         FishCatch best = null;
 
         for (int slot = 0; slot < assignment.length; slot++) {
             Candidate candidate = candidates.get(assignment[slot]);
             items.add(candidate.item);
+            contents.add(candidate.fish);
 
             if (slots[slot] == 0 && (best == null
                     || candidate.fish.getSizeFraction() > best.getSizeFraction())) {
@@ -191,7 +325,7 @@ public final class FishHandoffPicker {
             }
         }
 
-        return new Selection(items, best);
+        return new Selection(items, contents, best, false);
     }
 
     protected static boolean assign(int slot, int[] slots, int[] assignment, boolean[] used,

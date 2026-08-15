@@ -132,8 +132,8 @@ public class FishCurrency {
      * Removes matching specimens, loose stacks or bundles as asked. A bundle that is partly taken
      * from is put back with what is left in it, since a bundle's contents are its identity.
      */
-    protected static int spendMatching(CargoAPI cargo, java.util.function.Predicate<FishCatch> matches,
-                                       int amount, boolean bundles) {
+    public static int spendMatching(CargoAPI cargo, java.util.function.Predicate<FishCatch> matches,
+                                    int amount, boolean bundles) {
 
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             if (amount <= 0) break;
