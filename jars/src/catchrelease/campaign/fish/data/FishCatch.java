@@ -41,6 +41,11 @@ public class FishCatch {
     /** Exact rupture entity id this came from, or null for open-water and older catches. */
     public String sourceId;
 
+    /** Quest provenance, appended to the encoded tail so every older specimen still decodes. */
+    public long caughtAt;
+    public String caughtSystemId;
+    public String questTargetId;
+
     public FishCatch() {
     }
 
@@ -148,7 +153,8 @@ public class FishCatch {
     /**
      * Encodes the specimen as a string for a special item to carry. Species first so a bundle can
      * sort without decoding the rest; origin/method/implement/source are an optional tail appended
-     * after, so every older form still decodes.
+     * after, so every older form still decodes. Quest provenance is the final optional tail and is
+     * absent on ordinary catches as well as specimens from older saves.
      */
     public String encode() {
         StringBuilder encoded = new StringBuilder(speciesId)
@@ -162,6 +168,9 @@ public class FishCatch {
                 method == null ? "" : method.name(),
                 implement == null ? "" : implement.name(),
                 sourceId == null ? "" : sourceId,
+                caughtAt <= 0L ? "" : String.valueOf(caughtAt),
+                caughtSystemId == null ? "" : caughtSystemId,
+                questTargetId == null ? "" : questTargetId,
         };
 
         int last = -1;
@@ -190,6 +199,9 @@ public class FishCatch {
             entry.method = parseMethod(field(parts, 5));
             entry.implement = CatchImplement.parse(field(parts, 6));
             entry.sourceId = field(parts, 7);
+            entry.caughtAt = parseLong(field(parts, 8));
+            entry.caughtSystemId = field(parts, 9);
+            entry.questTargetId = field(parts, 10);
 
             return entry;
         } catch (NumberFormatException e) {
@@ -211,6 +223,15 @@ public class FishCatch {
             return FishLogEntry.Method.valueOf(name.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return null;
+        }
+    }
+
+    protected static long parseLong(String value) {
+        if (value == null) return 0L;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException ignored) {
+            return 0L;
         }
     }
 
