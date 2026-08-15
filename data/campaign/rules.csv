@@ -820,37 +820,47 @@ catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
-catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A woman at the end of the bar is dressed like a corporate liaison and drinking like she is not one.,,
-catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask what she wants.,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A woman in a conservative suit has a private purchase contract open beside a nearly finished drink. The buyer field is masked; the specification is not.,,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract.,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I represent a private buyer.""
+Call $catchrelease_jobRef showRewardDetails
+$menuState = catchreleaseClientOffer 0
+FireAll PopulateOptions","""I represent a private buyer. One specimen.""
 
-She gives you the specification.
+She turns the specification toward you.
 
 ""$catchreleaseAskCap. The stated figure is the minimum.""
 
-You ask what the buyer intends to do with it.
+""Forty days. $catchreleaseRewardCap on delivery. A separate premium applies if it falls in the upper two-fifths of its recorded size range.""",,
+catchrelease_client_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseClientOffer
+!$catchreleaseClientAskedPurpose",,,10:catchrelease_client_purpose:What does the buyer want it for?,
+catchrelease_client_offerAcceptOption,PopulateOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
+catchrelease_client_offerDeclineOption,PopulateOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_client_purpose,DialogOptionSelected,$option == catchrelease_client_purpose,"$catchreleaseClientAskedPurpose = true 0
+$menuState = catchreleaseClientOffer 0
+FireAll PopulateOptions","""He intends to buy it.""
 
-""He intends to buy it.""
+She scrolls past the masked buyer field to the handling section.
 
-She gives you the payment.
+""I need the container sealed and the mass legible. Beyond that, I don't have instructions.""",,
+catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Good. Discreet is sufficient. Secret creates paperwork.""",,
+catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""
 
-""$catchreleaseRewardCap. More for exceeding the specification.""","catchrelease_jobAccept:Take the contract.
-catchrelease_jobDecline:Decline.",
-catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discreet is sufficient. Secret creates paperwork.""",,
-catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""",,
-catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAsk. He has not revised the requirement.""",,
+She closes the contract and reopens her supplier list.",,
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same forty-day contract. The buyer has not revised it.""",,
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She weighs the sealed container without opening it.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She weighs the sealed container, signs the receipt and closes the contract.
 
 $catchreleaseRewardCap changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
 $catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"She checks the scale again.
 
-""Comfortably over.""
+She checks the specimen's recorded size range against the premium schedule.
 
-The bonus is added without negotiation.",,
+""Upper two-fifths.""
+
+$catchreleaseRewardCap changes hands.",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is comparing retrieval logs against sensor plots. Every confirmed match goes into the smaller of two piles.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is studying.,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward

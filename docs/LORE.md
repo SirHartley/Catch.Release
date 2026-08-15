@@ -1577,6 +1577,18 @@ handling or catch method because those are purchasing terms.
 They do not investigate the trade's larger logistics. A shortage means another empty supplier line,
 not an invitation to discover why the industry does not add up.
 
+## Private-buyer liaisons
+
+Private-buyer liaisons are contract-minded, discreet and unromantic. They know the minimum mass,
+delivery window, handling instructions, payment schedule and any measurable premium. The client's
+purpose is outside their brief.
+
+Put the boundary in the paperwork: a masked buyer field beside an unmasked specification, a sealed
+container, a legible mass and a signed receipt. They do not tease a secret or invite speculation.
+
+When the contract says discretion, they mean fewer people and fewer forms. They do not know anything
+about the catch beyond what the purchase schedule requires.
+
 ## The household under-butler
 
 The buyer in the Butler job is not the household's butler. He keeps that butler's rooms and

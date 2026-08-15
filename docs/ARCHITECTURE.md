@@ -221,7 +221,7 @@ choice in vanilla's unquoted option-panel style, including the introduction, job
 follow-up questions.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current sheet is 522 logical rules. Its supplied dialogue is kept verbatim except where a
+The current sheet is 526 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 
@@ -427,7 +427,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `AcademyJob.java` | Wants one to three low-coherence specimens at Galatia or a large Independent market. Its rules-authored researcher insists on original retrieval records, states the sixty-day commission and records contradictory measurements instead of explaining them |
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor. Its rules-authored offer uses a conversation-local who/purpose/terms submenu: optional answers return to the remaining questions, decline is always available, and acceptance appears only after the generated specification and reward have been stated. The giver serves the household's own butler; controlled distance, restricted household access and delegated handling carry his contempt without an insult |
 | `ChefJob.java` | Three different type requirements for one dish, each asking for one or two specimens and sometimes Fine grade. Its rules-authored cook treats them as separate prep lines, states the forty-day menu deadline and checks handling tags before payment |
-| `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
+| `CompanionJob.java` | Hegemony-only private contract for one specimen over a rolled mass floor, with a bonus at the upper two-fifths of its species range. Its rules-authored liaison states the forty-day term and premium before a small hub; the optional purpose answer returns with accept and decline still available |
 | `CultJob.java` | One specific named species for a non-credit reward. Its rules-authored three-person offer states species, consideration, quantity and fifty-five-day deadline before a small hub; asking purpose makes all three repeat the exact species, then returns with accept and decline still available |
 | `CuratorJob.java` | One to three Uncommon-or-higher specimens, each accepted if Fine grade or low coherence. Its rules-authored public curator separates DISPLAY from RECORD accession value, states the seventy-day window and checks provenance before payment |
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
