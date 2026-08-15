@@ -1345,9 +1345,7 @@ The rating gives you the relevant nav reference.
 
 ""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
-catchrelease_crabBarAdd,AddBarEvents,"CatchReleaseCMD tokens
-$catchreleaseStage >= 6
-$catchreleaseFishWelcome","AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
+catchrelease_crabBarAdd,AddBarEvents,CatchReleaseCMD crabBarAvailable,"AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
 catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
 !$global.catchrelease_metCrablobab","CatchReleaseCMD showCrabPortrait
 $global.catchrelease_metCrablobab = true 0","""Terrible!""
