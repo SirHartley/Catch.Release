@@ -381,9 +381,15 @@ public class FishermanQuest {
         }
 
         if (text != null) {
-            text.addPara("Paid %s, and the shelf is one chart wider from now on.",
-                    Misc.getTextColor(), Misc.getHighlightColor(),
-                    Misc.getDGSCredits(quest.credits));
+            //Vanilla reward/loss notices use small Insignia type, a positive/negative face, and
+            //yellow only for the value inside the line. Keep both permanent rewards in that face.
+            text.setFontSmallInsignia();
+            String credits = Misc.getDGSCredits(quest.credits);
+            text.addPara("Gained " + credits, Misc.getPositiveHighlightColor());
+            text.highlightLastInLastPara(credits, Misc.getHighlightColor());
+            text.addPara("The Fisherman now stocks an additional range data entry.",
+                    Misc.getPositiveHighlightColor());
+            text.setFontInsignia();
         }
 
         return true;
