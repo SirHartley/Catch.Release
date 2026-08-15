@@ -74,6 +74,9 @@ public abstract class CampedSpotJob extends FishJob {
     /** Mirrors whether a qualifying receipt is currently in cargo; drives the marker and intel. */
     protected boolean receiptAboard = false;
 
+    /** Campaign timestamp when the player accepted; pre-existing cargo cannot serve as proof. */
+    protected long acceptedAt = 0L;
+
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
         if (!setGlobalReference(REF_KEY, IN_PROGRESS_KEY)) return false;
@@ -114,6 +117,8 @@ public abstract class CampedSpotJob extends FishJob {
     @Override
     public void acceptImpl(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         super.acceptImpl(dialog, memoryMap);
+
+        acceptedAt = Global.getSector().getClock().getTimestamp();
 
         camper = CampedSpot.spawn(getType(), size, pond, random());
         if (camper == null) return;
@@ -162,10 +167,17 @@ public abstract class CampedSpotJob extends FishJob {
     protected void setReceiptAsk() {
         if (pond == null || pond.getId() == null) return;
 
+        //An accepted old save cannot reveal its historical acceptance instant. Starting its proof
+        //window now is the only repair that cannot bless a fish which predates the agreement.
+        if (acceptedAt <= 0L && currentStage != null) {
+            acceptedAt = Global.getSector().getClock().getTimestamp();
+        }
+
         if (asks.size() == 1) {
             FishRequirement current = asks.get(0);
             if (current != null && current.speciesId == null && "fish".equals(current.tag)
-                    && pond.getId().equals(current.sourceId)) {
+                    && pond.getId().equals(current.sourceId)
+                    && current.minCaughtAt == acceptedAt) {
                 return;
             }
         }
@@ -174,6 +186,7 @@ public abstract class CampedSpotJob extends FishJob {
         receipt.count = 1;
         receipt.tag = "fish";
         receipt.sourceId = pond.getId();
+        receipt.minCaughtAt = acceptedAt;
 
         asks.clear();
         asks.add(receipt);

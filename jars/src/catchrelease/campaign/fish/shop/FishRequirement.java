@@ -65,6 +65,9 @@ public class FishRequirement {
     /** Exact rupture required, or null for any; compared against the catch-time source id. */
     public String sourceId = null;
 
+    /** Earliest accepted catch timestamp, inclusive; zero accepts catches from any time. */
+    public long minCaughtAt = 0L;
+
     /**
      * Alternative ways to satisfy this ask (OR, unlike the other axes which AND). When non-empty,
      * the parent's own axes are ignored except {@link #count}.
@@ -106,6 +109,7 @@ public class FishRequirement {
         if (method != null && entry.method != method) return false;
         if (implement != null && entry.implement != implement) return false;
         if (sourceId != null && !sourceId.equals(entry.sourceId)) return false;
+        if (minCaughtAt > 0L && entry.caughtAt < minCaughtAt) return false;
 
         if (lowCoherence) {
             if (entry.aberration < LOW_COHERENCE) return false;
