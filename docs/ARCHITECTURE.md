@@ -221,7 +221,7 @@ choice in vanilla's unquoted option-panel style, including the introduction, job
 follow-up questions.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current sheet is 518 logical rules. Its supplied dialogue is kept verbatim except where a
+The current sheet is 522 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 
@@ -428,7 +428,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor. Its rules-authored offer uses a conversation-local who/purpose/terms submenu: optional answers return to the remaining questions, decline is always available, and acceptance appears only after the generated specification and reward have been stated. The giver serves the household's own butler; controlled distance, restricted household access and delegated handling carry his contempt without an insult |
 | `ChefJob.java` | Three different type requirements for one dish, each asking for one or two specimens and sometimes Fine grade. Its rules-authored cook treats them as separate prep lines, states the forty-day menu deadline and checks handling tags before payment |
 | `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
-| `CultJob.java` | One specific named species, no credits. Its deliberately repeated species token sits in the last offer paragraph so the shared rarity highlighter can colour the actual target instead of searching for the longer generated ask |
+| `CultJob.java` | One specific named species for a non-credit reward. Its rules-authored three-person offer states species, consideration, quantity and fifty-five-day deadline before a small hub; asking purpose makes all three repeat the exact species, then returns with accept and decline still available |
 | `CuratorJob.java` | Several fish, accepting either fine-grade or low-coherence uncommon+ |
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |

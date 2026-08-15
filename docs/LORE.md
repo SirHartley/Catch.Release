@@ -1659,6 +1659,18 @@ after handling is not equivalent to one logged that way when it came aboard.
 When a measurement disagrees with itself, they preserve both results and calibrate again. They do
 not turn the disagreement into a theory of reality.
 
+## The plain-coated buyers
+
+Three people in matching plain coats occasionally commission exactly one named specimen and offer a
+non-credit consideration. They divide the terms between them: species, consideration, quantity and
+deadline.
+
+They state the requested species precisely. If asked what it is for, all three repeat that exact
+species rather than explain or paraphrase the purpose.
+
+Keep them calm, literal and coordinated. Do not turn the exchange into a sinister sermon, give them
+fabric theory or imply that their reward is a credit payment.
+
 ## Patrols
 
 Know:
