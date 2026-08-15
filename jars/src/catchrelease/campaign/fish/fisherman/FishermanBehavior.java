@@ -221,9 +221,13 @@ public class FishermanBehavior implements EveryFrameScript {
         fleet.forceSensorFaderBrightness(1f);
     }
 
-    /** The map marker is not sector knowledge: leave a system, and its mark leaves with the view. */
+    /**
+     * The map marker is not sector knowledge: leave a system, and its mark leaves with the view.
+     * It also yields to the fleet's own sensor contact once the boat is detectable; drawing both
+     * at the same coordinates makes the finder obscure the thing it has finished finding.
+     */
     protected void keepMarker(boolean watched) {
-        if (!watched) {
+        if (!watched || fleet.isVisibleToPlayerFleet()) {
             dropMarker();
             return;
         }
