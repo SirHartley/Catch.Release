@@ -1568,6 +1568,16 @@ May know:
 
 Do not make them ontologists.
 
+## The TriTuber
+
+The TriTuber is the setting's equivalent of an insufferable short-form video producer. His working attention span is six seconds long. He speaks in hooks, reveals, retention cliffs, thumbnails, sponsor pools, comments, replays and follows. Even a private exchange becomes a performance for the feed; the person in front of him is a guest, prop and reaction shot before they are a person.
+
+His intimacy is synthetic and immediate. He addresses an imagined audience in the middle of conversations, stages reactions before anything has happened, turns refusal into content and treats confusion as a resource. He wants the first frame to make a promise, the next to contradict it and the comments to fight over the gap. He is exhausting because the production never switches off.
+
+Keep him diegetic. He may say `feed`, `clip`, `post`, `comments`, `retention`, `thumbnail`, `sponsor` and `follow`; he should not mention YouTube, TikTok, Gen Z or contemporary real-world memes. His speech is aggressively compressed and promotional, not random slang.
+
+He understands visible specimens, practical coherence readings and what performs on camera. He does not understand the fabric, the Fisherman's nature or why low-coherence fish behave as they do. To him, reality breaking is valuable because people replay it.
+
 ## Cooks
 
 Treat catch as ingredients.
