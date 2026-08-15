@@ -247,6 +247,7 @@ public class ShopEntry {
         //to it - paid, dev grant, a quest handing gear over - comes through here. Cleared before
         //the level moves, while getMarkKey still names the rung being bought
         ShopMarks.unmark(ShopMarks.getMarkKey(this));
+        ShopSchematics.clearFresh(this);
 
         //a curio is not handed over, it is flipped - it was already bought before the shop saw it
         if (isCurio()) {

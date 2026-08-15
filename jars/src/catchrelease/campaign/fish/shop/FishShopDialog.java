@@ -137,6 +137,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         closed = true;
 
+        //the New! tags are first-visit news, and this visit has now seen them
+        ShopSchematics.clearAllFresh();
+
         if (onClose == null) {
             dialog.dismiss();
             return;

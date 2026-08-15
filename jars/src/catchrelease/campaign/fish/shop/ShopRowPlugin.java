@@ -47,6 +47,7 @@ public class ShopRowPlugin extends ListRow {
     protected transient LazyFont.DrawableString name;
     protected transient LazyFont.DrawableString mark;
     protected transient String markText;
+    protected transient LazyFont.DrawableString fresh;
 
     public ShopRowPlugin(ShopEntry entry, Host host) {
         this.entry = entry;
@@ -129,9 +130,27 @@ public class ShopRowPlugin extends ListRow {
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
 
-    /** The right-hand end of the row: pips for a ladder, a mark or a price tag for a module. */
+    /** The right-hand end of the row: pips for a ladder, a mark or a price tag for a module -
+     *  and the gold New! tag at the far edge while a freshly learned schematic waits unseen. */
     protected void renderState(float x, float y, float width, float height, float alphaMult) {
         float right = x + width - PAD_SIDE;
+
+        if (ShopSchematics.isFresh(entry)) {
+            LazyFont small = ShopUi.getSmallFont();
+
+            if (small != null) {
+                if (fresh == null) {
+                    fresh = ShopUi.createText(small, "New!");
+                    fresh.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+                }
+
+                fresh.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+                fresh.draw(Math.round(right), Math.round(y + height * 0.5f + fresh.getHeight() * 0.5f));
+
+                //the indicators step left so the tag sits to their right, as promised
+                right -= fresh.getWidth() + 6f;
+            }
+        }
 
         if (entry.isUpgrade() && !entry.isMaxed()) {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);

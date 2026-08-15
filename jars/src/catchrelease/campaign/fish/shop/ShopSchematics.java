@@ -20,6 +20,9 @@ public class ShopSchematics {
 
     public static final String KEY = "$catchrelease_shop_schematics";
 
+    /** Schematics learned but not yet seen in the outfitter - what the New! tag reads. */
+    public static final String FRESH_KEY = "$catchrelease_shop_schematics_fresh";
+
     public static String getKey(Tackle tackle) {
         return tackle == null ? null : "tackle:" + tackle.name();
     }
@@ -39,7 +42,7 @@ public class ShopSchematics {
 
     public static void unlock(Tackle tackle) {
         String key = getKey(tackle);
-        if (key != null && tackle != Tackle.NONE) getKnown().add(key);
+        if (key != null && tackle != Tackle.NONE && getKnown().add(key)) getFresh().add(key);
     }
 
     /** The final two purchases on every upgrade ladder require their own sequential plans. */
@@ -63,7 +66,9 @@ public class ShopSchematics {
 
         UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
         String key = getKey(statId, targetLevel);
-        if (key != null && requires(stat, targetLevel)) getKnown().add(key);
+        if (key != null && requires(stat, targetLevel) && getKnown().add(key)) {
+            getFresh().add(key);
+        }
     }
 
     /** Every purchase permission the outfitter can learn, for developer campaign setup. */
@@ -81,6 +86,38 @@ public class ShopSchematics {
                 unlock(stat.id, targetLevel);
             }
         }
+
+        //a dev grant of everything is setup, not news
+        clearAllFresh();
+    }
+
+    /**
+     * Whether this entry's next purchase rides a schematic the outfitter has not shown yet -
+     * the New! tag's question. Cleared by {@code ShopEntry.grant}, by marking the entry, and
+     * wholesale when the shop closes: first-visit news, told once.
+     */
+    public static boolean isFresh(ShopEntry entry) {
+        if (entry == null) return false;
+
+        String key = entry.isUpgrade()
+                ? getKey(entry.stat.id, entry.getLevel() + 1)
+                : entry.kind == ShopEntry.Kind.TACKLE ? getKey(entry.tackle) : null;
+
+        return key != null && getFresh().contains(key);
+    }
+
+    public static void clearFresh(ShopEntry entry) {
+        if (entry == null) return;
+
+        if (entry.isUpgrade()) {
+            getFresh().remove(getKey(entry.stat.id, entry.getLevel() + 1));
+        } else if (entry.kind == ShopEntry.Kind.TACKLE) {
+            getFresh().remove(getKey(entry.tackle));
+        }
+    }
+
+    public static void clearAllFresh() {
+        getFresh().clear();
     }
 
     /** The next rung, but only when the player has reached the schematic-gated end of the ladder. */
@@ -90,6 +127,20 @@ public class ShopSchematics {
         int target = Math.max(0, stat.level) + 1;
 
         return requires(stat, target) ? target : -1;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getFresh() {
+        if (Global.getSector() == null) return new LinkedHashSet<>();
+
+        Map<String, Object> data = Global.getSector().getPersistentData();
+        Object stored = data.get(FRESH_KEY);
+        if (stored instanceof Set) return (Set<String>) stored;
+
+        Set<String> fresh = new LinkedHashSet<>();
+        data.put(FRESH_KEY, fresh);
+
+        return fresh;
     }
 
     @SuppressWarnings("unchecked")

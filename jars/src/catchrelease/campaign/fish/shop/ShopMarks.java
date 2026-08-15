@@ -138,6 +138,9 @@ public class ShopMarks {
     }
 
     public static void toggle(ShopEntry entry) {
+        //marking is engaging with the ware, which is all the New! tag was waiting for
+        ShopSchematics.clearFresh(entry);
+
         toggle(getMarkKey(entry));
     }
 
