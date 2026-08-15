@@ -3144,10 +3144,10 @@ catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is 
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask about the account.,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
 catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask about the claim.,
-catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with her back to the wall and the door in view. Her drink has gone warm untouched.,,
-catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket sits facing the door. Each time it opens, his hand stops halfway to his drink.",,
-catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
-catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why the fisher is staying ashore.,
+catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
+catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits facing the door with a damaged power coupler beside the licence slate. Each time the door opens, the inspection of the coupler stops.",,
+catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
+catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask what happened to the equipment.,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Pirates found our rupture. Now they collect protection on it.""
 
@@ -3175,15 +3175,17 @@ The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMa
 ""Seventy days. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the boats.""
+Call $catchrelease_jobRef showRewardDetails","""Pathers. First they came to preach. Then they cut power to the drone rack.""
 
-The fisher turns the slate toward you.
+The fisher puts the damaged component down.
 
-""First they preached. Then they cut power to a drone rack. Yesterday one of them stood on my launch gantry screaming that we were feeding Moloch through a wound in creation. Said the next sermon came with rifles.""
+""Yesterday one stood on the launch gantry shouting that we were feeding Moloch through a wound in creation. Said if we worked the rupture again, the next sermon came with rifles.""
 
-A transponder record appears.
+The transponder record shows $catchreleaseCampMany in the $catchreleaseCampWhere system.
 
-""We need them stopped. When they're gone, pull anything from that same rupture and bring it back. I need to know I can work it.""","catchrelease_jobAccept:Agree to go and see them.
+""Once we're agreed, get them away from the rupture first. After they're gone, catch any fish from that exact rupture and bring it back. Nothing you already have aboard counts. I need to know the spot can be worked again before I send crews out.""
+
+""Seventy days. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"The camp coordinates and pirate transponder codes are transferred.
 
@@ -3231,24 +3233,28 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She attaches the retri
 ""That's evidence I can use.""
 
 Received: $catchreleaseReward.",,
-catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Fine by me how.""",,
-catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"She nods once.
+catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"The fisher checks the door before sending the camp coordinates and transponder record.
 
-""No. Nobody is.""
+""How you move them is your business. Just get them away from the boats.""",,
+catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"The fisher nods and deletes the transfer request.
 
-The transponder record disappears.",,
+The damaged component goes back into a tool bag.",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-!$catchreleaseCampCleared",,"""They are still on it,"" she says, and looks at the door.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+!$catchreleaseCampCleared",,"""Still there.""
+
+The fisher checks a message from the yard crew.
+
+""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Off my water.""
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""They're gone.""
 
-She looks at the cleared marker for a moment.
+The fisher checks the cleared marker once more.
 
-""Then bring me $catchreleaseAsk out of it. I want to see one come back.""",,
+""Bring me $catchreleaseAsk out of that rupture. I want a catch from after they left before I put a deck crew back on the rack.""",,
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The boats return to the rupture.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The fisher checks the retrieval record and sends a launch order to the waiting boats.
 
-Someone has already started repairing the damaged rack.
+Someone at the yard is already signing off the repaired rack.
 
 Received: $catchreleaseReward.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000

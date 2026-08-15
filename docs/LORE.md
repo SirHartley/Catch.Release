@@ -250,6 +250,11 @@ Mercenary pressure is a boundary dispute made physical. The fisher thinks in fil
 numbers, exclusion notices and contract language. They prefer a negotiated departure because hired
 professionals can leave when the contract changes, but they are not helpless if negotiation fails.
 
+Pather pressure is personal intimidation after sabotage. Show the fear through watched doors,
+damaged hardware and reluctance to put crews back aboard. Pathers may be quoted raging about
+Moloch, wounds in creation and defilement; the fisher treats that as a threat, not as technical
+knowledge about the fabric.
+
 When the fleet leaves, the intel update says so and immediately names the remaining work: catch
 any fish from the marked rupture. It must not leave the player inferring that the old fleet marker
 or the original clearing instruction is still current.
