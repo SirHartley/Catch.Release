@@ -19,21 +19,6 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Icons
-- hook up the two new icons to fisherman fleet and terrain respectively
-
-Codex
-- Side list silhouette renderer now completely broken - sometimes shows slightly transparent full icon, sometimes shows blacked out one. Just draw the outline on the sprite and render it used to work just fine.
-- I suspect all the sprite issues we're having are caused by you re-using the same texture. Just get a new spriteAPI and modify that one if you're having trouble with one tex in memory.
-
-Crabolabob
-- Should use portrait in portraits folder, load via settings eg fisherman portrait
-
-Fleet interaction
-- Paying the fine immediately closes the dialogue. There should be a "leave" button there.
-- Actually, most fleet dialogues have this issue.
-- Hitting a civ fleet with a harpoon makes it hostile but doesn't cause it to engage you. It should engage you or run depending on if it's bigger than you.
-
 Sound
 - Minigame lacks soundstrack
 - Celebration tush on catch & extra for treasure
@@ -56,6 +41,11 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
+
+Fleet interaction
+- Paying the fine immediately closes the dialogue. There should be a "leave" button there.
+- Actually, most fleet dialogues have this issue.
+- Hitting a civ fleet with a harpoon makes it hostile but doesn't cause it to engage you. It should engage you or run depending on if it's bigger than you.
 
 Shop
 - Get rid of the gray backing for "locked" entries.

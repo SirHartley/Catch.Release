@@ -120,7 +120,7 @@
 		"icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
 		"iconWidth":22,
 		"iconHeight":22,
-		"iconColor":[255,180,50,255],
+		#"iconColor":[255,180,50,255],
 		"renderCircleIndicator":false,
 		"interactable":false,
 		"tags":["catchrelease_fisher_icon"],
