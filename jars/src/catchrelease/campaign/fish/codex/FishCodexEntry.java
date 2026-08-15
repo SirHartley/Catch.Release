@@ -89,17 +89,14 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     /**
-     * Vanilla creates a private sprite for a Codex row, so this tint cannot leak to other UI.
-     * <p>
-     * The list icon is the one place the {@code FishIcons} rimmed silhouette cannot draw: the
-     * codex renders an entry's icon as a single multiply-tinted sprite with no compositing hook
-     * (only hardcoded param types - hulls, planets, weapons - get richer renderers). Pure black
-     * vanished into the row, so range data wears the dark player colour instead: the shape as a
-     * monochrome shadow, readable, with the art's colours still withheld until it is caught.
+     * Vanilla builds the row's icon as its own fresh sprite instance and multiply-tints it once
+     * with this, so the tint neither leaks out nor takes on other screens' state. Opaque black
+     * is the silhouette body; the dark-player-colour experiment carried the faction colour's
+     * alpha and washed out under the row's hover glow.
      */
     @Override
     public Color getIconColor() {
-        return getState().isRangeDataOnly() ? Misc.getDarkPlayerColor() : Color.WHITE;
+        return getState().isRangeDataOnly() ? Color.BLACK : Color.WHITE;
     }
 
     @Override
