@@ -260,16 +260,19 @@ public abstract class CampedSpotJob extends FishJob {
 
             info.addPara("Kill them, pay them off, or talk them out of it - nobody has asked for it"
                     + " to be done a particular way.", pad);
+
+            info.addPara("After the camp is gone, catch any fish from this exact rupture and bring"
+                    + " it back as proof that the spot can be worked again.", pad);
         } else {
-            info.addPara("The rupture in %s is clear. What is left is the proof.", pad,
+            info.addPara("The rupture in %s is clear. Catch any fish from this exact rupture and"
+                            + " bring it back as proof.", pad,
                     Misc.getHighlightColor(), systemName);
         }
 
-        String ask = describeAsks();
         String reward = describeRewards();
-        LabelAPI terms = info.addPara("They want %s out of that rupture, and are offering %s.", pad,
-                Misc.getHighlightColor(), ask, reward);
-        FishRequirement.highlight(terms, asks, ask, reward);
+        LabelAPI terms = info.addPara("The promised payment is %s.", pad,
+                Misc.getHighlightColor(), reward);
+        terms.setHighlight(reward);
 
         //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {

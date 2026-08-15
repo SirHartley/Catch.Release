@@ -237,6 +237,11 @@ Independent fishers are real.
 
 They own or work a rupture. Pirates may squeeze them for protection. Mercenaries may deny them access. The Path may sabotage their equipment.
 
+When a fisher asks the player to clear one of these camps, the specimen is a receipt rather than
+the work itself. The terms must say plainly that, after the fleet is gone, **any fish caught from
+that exact rupture** will prove the spot can be worked again. A fish already in the hold is not
+proof of what happened after the agreement.
+
 They sincerely believe they are members of a larger profession.
 
 They are not pretending.

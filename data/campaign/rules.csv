@@ -2828,7 +2828,9 @@ The fisher turns the slate around.
 
 A fleet identifier follows.
 
-""Move them on and we can get the boats back out.""","catchrelease_jobAccept:Agree to clear the spot.
+""Move them on and we can get the boats back out.""
+
+""Once they're gone, take any fish from that same rupture. Bring it back so I know the spot works.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Find another rupture.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Company hired security around our patch.""
@@ -2839,7 +2841,7 @@ The fisher shows you the contract boundary.
 
 A fleet code appears.
 
-""Get them to move.""","catchrelease_jobAccept:Agree to move them off.
+""Get them to move. Then fish it. Anything from that same rupture will do. Bring one back as proof.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Somebody is paying them. Somebody will pay the next lot too.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the boats.""
@@ -2850,7 +2852,7 @@ The fisher does not sound frightened so much as irritated.
 
 A transponder record appears.
 
-""We need them stopped.""","catchrelease_jobAccept:Agree to go and see them.
+""We need them stopped. When they're gone, pull anything from that same rupture and bring it back. I need to know I can work it.""","catchrelease_jobAccept:Agree to go and see them.
 catchrelease_jobDecline:Not against the Path.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Good.""
 
