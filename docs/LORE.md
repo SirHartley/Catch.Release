@@ -242,6 +242,19 @@ the work itself. The terms must say plainly that, after the fleet is gone, **any
 that exact rupture** will prove the spot can be worked again. A fish already in the hold is not
 proof of what happened after the agreement.
 
+Pirate pressure is commercial extortion. Write the fisher as a working operator angry about
+protection payments, idle boats, repair costs and narrowing margins, not as someone generically
+afraid of pirates. The occupation matters because every paid week makes the next one more expensive.
+
+Mercenary pressure is a boundary dispute made physical. The fisher thinks in filed charts, claim
+numbers, exclusion notices and contract language. They prefer a negotiated departure because hired
+professionals can leave when the contract changes, but they are not helpless if negotiation fails.
+
+Pather pressure is personal intimidation after sabotage. Show the fear through watched doors,
+damaged hardware and reluctance to put crews back aboard. Pathers may be quoted raging about
+Moloch, wounds in creation and defilement; the fisher treats that as a threat, not as technical
+knowledge about the fabric.
+
 When the fleet leaves, the intel update says so and immediately names the remaining work: catch
 any fish from the marked rupture. It must not leave the player inferring that the old fleet marker
 or the original clearing instruction is still current.
@@ -1554,6 +1567,41 @@ At this point the player understands enough to explore the system independently.
 
 This boundary matters enormously.
 
+## Children and tournament jobs
+
+Children treat fishing as an ordinary part of Sector life. Their games may accumulate elaborate
+rules, brackets, titles and disputes without anyone needing to explain where fish come from.
+
+Write them as children taking invented procedure completely seriously, not as miniature procurement
+officers and not as indiscriminate comic noise. Their rules may be arbitrary but must remain
+internally consistent: who chooses first, whether swaps are allowed, what counts as final and who
+is permitted to settle a dispute.
+
+The two tournament children have complementary roles. The louder child negotiates and argues the
+case. The quieter child keeps the bracket and remembers the wording. When they appoint an outside
+captain to allocate two selected fish, that decision becomes binding playground diplomacy.
+
+They know ordinary visible qualities such as size and grade. They do not know fabric theory,
+pattern ontology or anything the Fisherman alone should understand.
+
+## Betting-ring brokers
+
+Ferro and Vasque broker private fish bouts. Ferro handles entrants, supplier terms and settlement.
+Vasque assigns the delivered pair, maintains the line and handles the numbered tank ampoules.
+
+Keep them quiet and procedural. They are not broad mobsters, theatrical gangsters or sinister
+exposition devices. Their status appears through what is already arranged: an expensive transport
+tank in an ordinary bar, locked treatment stock, contracts without surnames and a house line stated
+without apology.
+
+The player may take a guaranteed supplier consideration or replace it with a wager. Vasque prices
+each assigned specimen against the other using visible size. Equal entrants still favour the house;
+he regards that as the ordinary cost of making a market.
+
+They accept fish fighting as an ordinary commercial event. They may discuss grade, species, length,
+handling and observed results. They do not know why patterns hold or fail to hold shape and do not
+possess fabric theory.
+
 ## Ordinary buyers
 
 May know:
@@ -1567,6 +1615,27 @@ May know:
 - price.
 
 Do not make them ontologists.
+
+## Provisioners
+
+Local provisioners treat catch as inventory. They think in open orders, supplier lists, manifests,
+delivery windows and whether a shipment satisfies the written line. They may specify grade, rarity,
+handling or catch method because those are purchasing terms.
+
+They do not investigate the trade's larger logistics. A shortage means another empty supplier line,
+not an invitation to discover why the industry does not add up.
+
+## Private-buyer liaisons
+
+Private-buyer liaisons are contract-minded, discreet and unromantic. They know the minimum mass,
+delivery window, handling instructions, payment schedule and any measurable premium. The client's
+purpose is outside their brief.
+
+Put the boundary in the paperwork: a masked buyer field beside an unmasked specification, a sealed
+container, a legible mass and a signed receipt. They do not tease a secret or invite speculation.
+
+When the contract says discretion, they mean fewer people and fewer forms. They do not know anything
+about the catch beyond what the purchase schedule requires.
 
 ## The household under-butler
 
@@ -1605,11 +1674,14 @@ He understands visible specimens, practical coherence readings and what performs
 
 ## Cooks
 
-Treat catch as ingredients.
+Cooks care about the plate, prep and service. Distinct catch requirements are separate ingredient
+lines, not taxonomic arguments. They leave handling tags attached so the prep crew can match each
+container to the right part of the dish.
 
-They may be particular.
+They may be exacting about grade, quantity and variety. A deadline is often the date after which
+they change the menu rather than wait for a supplier.
 
-They are not secretly studying hyperspace.
+They are not secretly studying hyperspace and do not derive fabric theory from flavour or handling.
 
 ## Independent fishermen
 
@@ -1639,6 +1711,37 @@ They should not say:
 > "Reality is rewriting the specimen."
 
 That conclusion belongs to the Fisherman.
+
+Academy field researchers care about provenance as much as the result. They compare original
+retrieval records, coherence readings, mass return and structural variance; a specimen relabelled
+after handling is not equivalent to one logged that way when it came aboard.
+
+When a measurement disagrees with itself, they preserve both results and calibrate again. They do
+not turn the disagreement into a theory of reality.
+
+## Public curators
+
+Public curators think in accession numbers, provenance, display condition, transport and
+comparative records. Fine specimens may fill display gaps; low-coherence specimens may fill the
+record. Either can be institutionally useful without one being called the prettier answer.
+
+They keep transport and retrieval records with each container because an unlabelled specimen cannot
+be catalogued. Their work is public-facing and practical: tanks, visitors, grants, missing entries
+and collection vehicles.
+
+They may record measured anomalies. They do not explain the fabric behind them.
+
+## The plain-coated buyers
+
+Three people in matching plain coats occasionally commission exactly one named specimen and offer a
+non-credit consideration. They divide the terms between them: species, consideration, quantity and
+deadline.
+
+They state the requested species precisely. If asked what it is for, all three repeat that exact
+species rather than explain or paraphrase the purpose.
+
+Keep them calm, literal and coordinated. Do not turn the exchange into a sinister sermon, give them
+fabric theory or imply that their reward is a credit payment.
 
 ## Patrols
 

@@ -5,17 +5,21 @@ import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
+import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Two children who claim their fish will fight; a job for two specimens and a flavour-only choice
- * of which kid gets the better one. No credits reward - items only, since children don't have money.
+ * Two children running a fiercely serious fish tournament. The player first chooses the exact two
+ * contenders, then decides which child receives the better specimen. No credits reward - items
+ * only, since children do not have money.
  */
 public class KidsJob extends FishJob {
 
@@ -31,6 +35,9 @@ public class KidsJob extends FishJob {
 
     /** Which of them ends up with the better fish. Flavour, and the only thing the choice moves. */
     protected boolean toLoud = true;
+
+    /** Dialog-only selection; nothing leaves cargo until the player confirms its allocation. */
+    protected transient FishHandoffPicker.Selection pendingSelection;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -67,15 +74,76 @@ public class KidsJob extends FishJob {
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
+        if ("chooseContenders".equals(action)) {
+            showContenderPicker(dialog, memoryMap);
+
+            return true;
+        }
+
         if ("turnInLoud".equals(action) || "turnInQuiet".equals(action)) {
             toLoud = "turnInLoud".equals(action);
 
-            showHandOverPicker(dialog, memoryMap);
+            finishContenders(dialog, memoryMap);
+
+            return true;
+        }
+
+        if ("cancelContenders".equals(action)) {
+            pendingSelection = null;
 
             return true;
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    protected void showContenderPicker(final InteractionDialogAPI dialog,
+                                       final Map<String, MemoryAPI> memoryMap) {
+
+        pendingSelection = null;
+
+        boolean opened = FishHandoffPicker.show(dialog, "Select two contenders", "Choose", asks,
+                new FishHandoffPicker.Listener() {
+                    @Override
+                    public void picked(FishHandoffPicker.Selection selection) {
+                        pendingSelection = selection;
+
+                        MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+                        updateTokens(mem);
+
+                        FireBest.fire(null, dialog, memoryMap,
+                                "CatchReleaseDuelAllocationReady");
+                        FireAll.fire(null, dialog, memoryMap,
+                                "CatchReleaseDuelAllocationOptions");
+                    }
+
+                    @Override
+                    public void cancelled() {
+                        pendingSelection = null;
+                        afterPickerCancelled(dialog, memoryMap);
+                    }
+                });
+
+        if (!opened) afterPickerCancelled(dialog, memoryMap);
+    }
+
+    protected void finishContenders(InteractionDialogAPI dialog,
+                                    Map<String, MemoryAPI> memoryMap) {
+
+        if (pendingSelection == null) {
+            showContenderPicker(dialog, memoryMap);
+            return;
+        }
+
+        FishHandoffPicker.Selection selection = pendingSelection;
+
+        if (handOver(selection, dialog, memoryMap)) {
+            afterPickerPaid(dialog, memoryMap);
+        } else {
+            afterPickerCancelled(dialog, memoryMap);
+        }
+
+        pendingSelection = null;
     }
 
     /** Bonus for specimen grade, not for the (consequence-free) loud/quiet choice. */
@@ -94,8 +162,44 @@ public class KidsJob extends FishJob {
     @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseKid", toLoud ? "the loud one" : "the quiet one");
+        token(mem, "$catchreleaseKidCap", toLoud ? "The loud one" : "The quiet one");
         token(mem, "$catchreleaseOther", toLoud ? "the quiet one" : "the loud one");
         token(mem, "$catchreleaseOtherCap", toLoud ? "The quiet one" : "The loud one");
+
+        FishCatch better = null;
+        FishCatch other = null;
+
+        if (pendingSelection != null) {
+            List<FishCatch> selected = pendingSelection.getContents();
+            if (selected != null && selected.size() >= 2) {
+                int betterIndex = 0;
+                for (int i = 1; i < selected.size(); i++) {
+                    if (selected.get(i).getSizeFraction()
+                            > selected.get(betterIndex).getSizeFraction()) {
+                        betterIndex = i;
+                    }
+                }
+
+                better = selected.get(betterIndex);
+                other = selected.get(betterIndex == 0 ? 1 : 0);
+            }
+        }
+
+        token(mem, "$catchreleaseDuelSelectionReady", pendingSelection != null
+                && pendingSelection.getContents() != null
+                && pendingSelection.getContents().size() >= 2);
+        token(mem, "$catchreleaseDuelBetterFish",
+                describeContender(better, "the better specimen"));
+        token(mem, "$catchreleaseDuelOtherFish",
+                describeContender(other, "the other specimen"));
+    }
+
+    protected static String describeContender(FishCatch fish, String fallback) {
+        if (fish == null) return fallback;
+
+        return "the " + fish.getGrade().name.toLowerCase()
+                + " " + fish.getDisplayName()
+                + " (" + Misc.getRoundedValue(fish.length) + " m)";
     }
 
     @Override

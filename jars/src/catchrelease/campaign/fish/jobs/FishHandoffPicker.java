@@ -148,9 +148,23 @@ public final class FishHandoffPicker {
         return show(dialog, title, asks, null, listener);
     }
 
+    /** Same exact-specimen picker with a caller-specific confirmation verb. */
+    public static boolean show(InteractionDialogAPI dialog, String title, String confirmText,
+                               final List<FishRequirement> asks, final Listener listener) {
+
+        return show(dialog, title, confirmText, asks, null, listener);
+    }
+
     public static boolean show(InteractionDialogAPI dialog, String title,
                                final List<FishRequirement> asks, final Eligibility eligibility,
                                final Listener listener) {
+
+        return show(dialog, title, "Hand over", asks, eligibility, listener);
+    }
+
+    protected static boolean show(InteractionDialogAPI dialog, String title, String confirmText,
+                                  final List<FishRequirement> asks,
+                                  final Eligibility eligibility, final Listener listener) {
 
         if (dialog == null || listener == null || asks == null || asks.isEmpty()) return false;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
@@ -172,8 +186,11 @@ public final class FishHandoffPicker {
         offer.sort();
 
         final int required = requiredCount(asks);
+        final String confirm = confirmText == null || confirmText.trim().isEmpty()
+                ? "Hand over"
+                : confirmText;
 
-        dialog.showCargoPickerDialog(title, "Hand over", "Never mind", false, 350f, offer,
+        dialog.showCargoPickerDialog(title, confirm, "Never mind", false, 350f, offer,
                 new CargoPickerListener() {
                     @Override
                     public void pickedCargo(CargoAPI picked) {
@@ -199,7 +216,7 @@ public final class FishHandoffPicker {
                                     Misc.getNegativeHighlightColor());
                         }
 
-                        show(dialog, title, asks, eligibility, listener);
+                        show(dialog, title, confirm, asks, eligibility, listener);
                     }
 
                     @Override
