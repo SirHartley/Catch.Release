@@ -24,7 +24,6 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
-import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -140,10 +139,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
-    public static final String CRAB_BASS_NAME = "$catchreleaseCrabBassName";
-    public static final String CRAB_BASS_PRICE = "$catchreleaseCrabBassPrice";
-    public static final String CRAB_BASS_CRAB_PRICE = "$catchreleaseCrabBassCrabPrice";
-    public static final String CRAB_BASS_AFFORD = "$catchreleaseCrabBassAfford";
+    public static final String CRAB_CRAB_NAME = "$catchreleaseCrabBassName";
+    public static final String CRAB_CRAB_PRICE = "$catchreleaseCrabBassPrice";
+    public static final String CRAB_CRAB_CRAB_PRICE = "$catchreleaseCrabBassCrabPrice";
+    public static final String CRAB_CRAB_AFFORD = "$catchreleaseCrabBassAfford";
 
     /**
      * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
@@ -414,8 +413,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if ("BASS".equalsIgnoreCase(stock)) {
             addCrabCostTooltip(dialog.getOptionPanel(), optionId,
-                    CrabWares.getFallbackBassDescription(), CrabWares.FALLBACK_BASS_CREDITS,
-                    CrabWares.FALLBACK_BASS_CRABS);
+                    CrabWares.getFallbackBassDescription(), CrabWares.FALLBACK_CRAB_CREDITS,
+                    CrabWares.FALLBACK_CRAB_CRABS);
             return true;
         }
 
@@ -827,12 +826,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
         local.set(CRAB_EXPLOSIVE_TARGET, CrabWares.getLastExplosiveTarget(), 0);
-        local.set(CRAB_BASS_NAME, CrabWares.getFallbackBassName(), 0);
-        local.set(CRAB_BASS_PRICE, Misc.getDGSCredits(CrabWares.FALLBACK_BASS_CREDITS), 0);
-        local.set(CRAB_BASS_CRAB_PRICE,
-                CrabWares.FALLBACK_BASS_CRABS == 1
-                        ? "1 crab" : CrabWares.FALLBACK_BASS_CRABS + " crabs", 0);
-        local.set(CRAB_BASS_AFFORD, CrabWares.canAffordFallbackBass(), 0);
+        local.set(CRAB_CRAB_NAME, CrabWares.getFallbackBassName(), 0);
+        local.set(CRAB_CRAB_PRICE, Misc.getDGSCredits(CrabWares.FALLBACK_CRAB_CREDITS), 0);
+        local.set(CRAB_CRAB_CRAB_PRICE,
+                CrabWares.FALLBACK_CRAB_CRABS == 1
+                        ? "1 crab" : CrabWares.FALLBACK_CRAB_CRABS + " crabs", 0);
+        local.set(CRAB_CRAB_AFFORD, CrabWares.canAffordFallbackBass(), 0);
         local.set(FISH_WELCOME, !FishingTaboo.isTaboo(getMarket(dialog)), 0);
 
         local.set(CRAB_BACKDROP, scene != null, 0);

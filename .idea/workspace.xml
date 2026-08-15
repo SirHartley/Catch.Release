@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Fixed my shit AGAIN">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="removed black hole effect&#10;corrected tooltip for reward">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/ModPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/crab/CrabWares.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/crab/CrabWares.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/dialogue/rules/CatchReleaseCMD.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/dialogue/rules/CatchReleaseCMD.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -15,21 +17,21 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="SWAP_SIDES_IN_COMPARE_BRANCHES" value="true" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "SirHartley"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;SirHartley&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/SirHartley/Catch.Release.git",
-    "accountId": "0c00102b-fcf7-458d-bdd4-3869d58b8f99"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SirHartley/Catch.Release.git&quot;,
+    &quot;accountId&quot;: &quot;0c00102b-fcf7-458d-bdd4-3869d58b8f99&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3HvMZ9LpfWs98lzo5yMx8n3Iyh0" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -46,6 +48,7 @@
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.jshint": "true",
     "node.js.selected.package.jshint": "",
+    "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.1484375",
     "project.structure.side.proportion": "0.2",
@@ -80,7 +83,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Fixed my shit AGAIN" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed my shit AGAIN" />
+    <MESSAGE value="removed black hole effect&#10;corrected tooltip for reward" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed black hole effect&#10;corrected tooltip for reward" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

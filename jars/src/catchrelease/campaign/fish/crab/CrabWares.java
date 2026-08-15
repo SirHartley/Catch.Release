@@ -151,9 +151,9 @@ public enum CrabWares {
     public static final String EXPLOSIVE_TARGET_PENDING_KEY = "$catchrelease_crabExplosiveTargetPending";
 
     /** The emergency stock: an intentionally awful specimen at a price no fish justifies. */
-    public static final String FALLBACK_BASS_ID = "bass";
-    public static final int FALLBACK_BASS_CREDITS = 10000;
-    public static final int FALLBACK_BASS_CRABS = 1;
+    public static final String FALLBACK_CRAB_ID = "crab";
+    public static final int FALLBACK_CRAB_CREDITS = 10000;
+    public static final int FALLBACK_CRAB_CRABS = 1;
 
     /**
      * What he calls it, what it costs, how many crabs go with that, and what it is.
@@ -263,7 +263,7 @@ public enum CrabWares {
     public static FishRequirement getFallbackBassCatch() {
         FishRequirement req = new FishRequirement();
         req.tag = "crab";
-        req.count = FALLBACK_BASS_CRABS;
+        req.count = FALLBACK_CRAB_CRABS;
         return req;
     }
 
@@ -271,8 +271,8 @@ public enum CrabWares {
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
 
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get()
-                >= FALLBACK_BASS_CREDITS
-                && FishCurrency.count(getFallbackBassCatch()) >= FALLBACK_BASS_CRABS;
+                >= FALLBACK_CRAB_CREDITS
+                && FishCurrency.count(getFallbackBassCatch()) >= FALLBACK_CRAB_CRABS;
     }
 
     /**
@@ -281,15 +281,15 @@ public enum CrabWares {
      * manufacture cargo or preserve a random roll in the save.
      */
     public static FishCatch createFallbackBass() {
-        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_BASS_ID);
+        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_CRAB_ID);
         if (bass == null) return null;
 
         return new FishCatch(bass.id, bass.lengthMin, bass.weightMin, 0f);
     }
 
     public static String getFallbackBassName() {
-        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_BASS_ID);
-        return bass == null ? "bass" : bass.getDisplayName();
+        FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_CRAB_ID);
+        return bass == null ? "crab" : bass.getDisplayName();
     }
 
     public static String getFallbackBassDescription() {
@@ -304,7 +304,7 @@ public enum CrabWares {
         if (!FishCurrency.spend(getFallbackBassCatch())) return false;
 
         Global.getSector().getPlayerFleet().getCargo().getCredits()
-                .subtract(FALLBACK_BASS_CREDITS);
+                .subtract(FALLBACK_CRAB_CREDITS);
         FishItems.addToPlayerCargo(bass);
         return true;
     }

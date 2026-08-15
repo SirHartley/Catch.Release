@@ -27,12 +27,12 @@ The officer closes the report.
 ""Client's gone. Escrow cleared before they did. We have the file under Call From The Grave.""
 
 ""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
-100:cutCommLinkNoText:Cut the comm link","A funded contract survives the client faction. The mercenary names that fact in the same dry account language as the ordinary hail rather than changing into a separate horror voice."
+100:cutCommLinkNoText:Cut the comm link",A funded contract survives the client faction. The mercenary names that fact in the same dry account language as the ordinary hail rather than changing into a separate horror voice.
 catchrelease_hitmanBribeAskSel,DialogOptionSelected,$option == catchrelease_hitmanBribeAsk,"Highlight $entity.catchrelease_harpoonHitmanBribeDGS
 FireAll CatchReleaseHitmanBribeOptions","The officer glances at the contract.
 
 ""Cancellation is permitted. $entity.catchrelease_harpoonHitmanBribeDGS credits. Cleared funds, now.""",100:cutCommLinkNoText:Cut the comm link,"The hired mercenaries treat the player as another party to the contract, following the vanilla Tri-Tachyon hired-command interaction while keeping this exchange short and transactional."
-catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,"Vanilla's affordability check leaves the price visible but greys it out and explains a shortfall."
+catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,Vanilla's affordability check leaves the price visible but greys it out and explains a shortfall.
 catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitmanBribePay,"AddCredits -$entity.catchrelease_harpoonHitmanBribe
 CatchReleaseCMD bribeHitman
 CatchReleaseCMD leaveEncounter","The transfer clears. The officer closes your file.
@@ -1396,7 +1396,7 @@ He checks one pocket, then another. A crab checks the first one again.
 
 He considers this.
 
-""Except bass.""",,
+""Except crabs.""",,
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabAny
@@ -1641,30 +1641,30 @@ There is considerably less wall behind him afterward.","0:catchrelease_crabStall
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabWareBass,DialogOptionSelected,"$option == catchrelease_crabWareBass score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabBassAfford","SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice","Crablobab lifts a shallow tray from an inside pocket.
+$catchreleaseCrabBassAfford",SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab lifts a shallow tray from an inside pocket.
 
 On it is a $catchreleaseCrabBassName of emphatically terrible quality.
 
-""Bass.""
+""Crab.""
 
 He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.","0:catchrelease_crabBuyBass:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareBassShort,DialogOptionSelected,"$option == catchrelease_crabWareBass score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabBassAfford","SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice","Crablobab lifts a shallow tray from an inside pocket.
+!$catchreleaseCrabBassAfford",SetTextHighlights $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab lifts a shallow tray from an inside pocket.
 
 On it is a $catchreleaseCrabBassName of emphatically terrible quality.
 
-""Bass.""
+""Crab.""
 
 He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.
 
 You are short.
 
-He returns the tray to a pocket shallower than the fish.",10:catchrelease_crabStall:Another time.,
+He returns the tray to a pocket shallower than the crab.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyBass,DialogOptionSelected,$option == catchrelease_crabBuyBass,CatchReleaseCMD crabBuyBass,"He hands over the tray.
 
-The fish is entered into your hold as a purchase rather than a catch. The distinction costs more than the fish.","0:catchrelease_crabStall:Continue
+The crab is entered into your hold as a purchase rather than a catch.","0:catchrelease_crabStall:Continue
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,"RestoreSavedVisual
 BarCMD returnFromEvent false","""Of course!""
