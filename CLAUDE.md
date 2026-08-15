@@ -42,6 +42,12 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   package gains or loses a file - any change that moves what a file does, what registers it,
   or how the pieces fit lands in the map in the same commit. A change is not done while the
   map still describes the old shape.
+- **Never sync or modify a live/local mod copy or another checkout unless the user explicitly
+  requests it.** Work is written only in the current task repository. External installs and
+  checkouts - including `C:\Modding\mods\Catch.Release` - may be inspected read-only for
+  pre-merge auditing, but never pulled, copied into, checked out, cleaned, or otherwise changed
+  as an automatic post-merge step. After a successful merge, leave every external copy untouched;
+  the user owns deployment and synchronization unless they explicitly delegate it.
 - **Always open a pull request and merge it** once work is done. Do not leave finished work
   sitting on the branch.
 - **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
