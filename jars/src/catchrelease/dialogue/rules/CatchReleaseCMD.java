@@ -573,6 +573,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
                                         List<Token> params, Map<String, MemoryAPI> memoryMap) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
+        //The offer has been rolled but is deliberately not active until the player accepts it.
+        //Using only getActive() made the pitch's fish and rewards stay plain even though reminders
+        //after acceptance used the same verb correctly.
+        if (work == null) work = pending;
         if (work == null || work.speciesId == null) return false;
 
         FishRequirement ask = new FishRequirement();

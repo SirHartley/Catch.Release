@@ -1245,7 +1245,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay ""another chart on the shelf"","""Got one.""
 
 He sends over a range entry.
 
