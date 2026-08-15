@@ -566,32 +566,70 @@ $catchreleasePaid
 Then, more quietly:
 
 ""Good.""",,
-catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink. He checks the room occasionally and never the time.,,
-catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
-catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I purchase for a private household.""
+catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,"An impeccably dressed man has selected the least conspicuous table in the bar. The glassware is arranged in exact alignment, though none of it has been touched.",,
+catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask whether the household requires something.,
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
+FireAll PopulateOptions","The man rises before you reach the table and inclines his head by the smallest useful degree.
 
-He does not volunteer the name.
+""Captain. I am given to understand that you can obtain unusual live specimens.""
 
-""The request is $catchreleaseAsk.""
+He straightens a cuff that was already straight.
 
-He checks the wording once.
+""I have been instructed to engage a supplier on behalf of a private household.""",,
+catchrelease_butler_offerWhoOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerAskedWho",,,10:catchrelease_butler_who:Who do you serve?,
+catchrelease_butler_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerAskedPurpose",,,20:catchrelease_butler_purpose:What is the specimen for?,
+catchrelease_butler_offerTermsOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerTerms",,,30:catchrelease_butler_terms:State the commission.,
+catchrelease_butler_offerAcceptOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+$catchreleaseButlerTerms",,,30:catchrelease_jobAccept:Accept the commission.,
+catchrelease_butler_offerDeclineOption,PopulateOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_butler_who,DialogOptionSelected,$option == catchrelease_butler_who,"$catchreleaseButlerAskedWho = true 0
+FireAll PopulateOptions","""The First Butler, Captain.""
 
-""It is for display, not the kitchen. Condition matters less than meeting the specification.""
+He allows the title its proper weight.
 
-""$catchreleaseRewardCap on presentation.""","catchrelease_jobAccept:Accept the commission.
-catchrelease_jobDecline:Decline.",
-catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good.""
+""I am his butler. He is the household's. Direct attendance upon the principal is handled by another office.""",,
+catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
+FireAll PopulateOptions","""A secondary breakfast pavilion is being refitted.""
 
-No contact details are exchanged. Your mission log nevertheless updates.",,
-catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Understood.""",,
-catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""The requirement remains $catchreleaseAskCap.""",,
+He opens an architectural plan. The aquarium has its own service lift, pressure lock and staff station.
+
+""One display niche remains underfurnished. Species and condition are immaterial. Mass is a matter of proportion.""",,
+catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_terms,"$catchreleaseButlerTerms = true 0
+CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+FireAll PopulateOptions","He places a blank-faced slate between you.
+
+""The commission is $catchreleaseAsk.""
+
+""Species and condition are immaterial, provided the specimen possesses the required presence.""
+
+He indicates the consideration: $catchreleaseReward.
+
+""Payment on presentation. The expense is filed under incidental furnishings.""",,
+catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good, Captain. I shall advise the First Butler that the matter is in hand.""
+
+No contact details are exchanged. Your mission log nevertheless updates under HOUSEHOLD — INCIDENTAL.",,
+catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Of course, Captain.""
+
+He inclines his head.
+
+""I shall advise the First Butler that the market could not furnish the requirement.""",,
+catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""The First Butler has not revised the requirement: $catchreleaseAskCap.""
+
+""The pavilion remains usable. It is merely unfinished.""",,
 catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the container seal, then the scale.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the container seal, then the scale. A fractional nod.
 
-""That will do.""
+""Yes. It has sufficient presence.""
 
-$catchreleaseRewardCap changes hands.",,
+He sends a one-line message: SECONDARY BREAKFAST PAVILION — FURNISHED.
+
+$catchreleaseRewardCap changes hands.
+
+""The First Butler will be pleased, Captain. The household need not be troubled.""",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A woman with an academic lanyard and salt-damaged hands is annotating photographs of public aquaria.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
