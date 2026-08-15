@@ -1851,7 +1851,7 @@ He gives the question some thought.
 
 Another moment.
 
-""Been at it longer than that sounds.""","0:catchrelease_fisherAskBack:Something else
+""Been fishing longer.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_baha,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 1
 !$global.catchrelease_fisherAsked_baha","CatchReleaseCMD addFisherQuestion catchrelease_ask_baha ""Do you have a name?"" false",,,
@@ -1883,7 +1883,7 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 
 He turns a control unit over in his hands.
 
-""That much you can trust. Don't mistake it for seeing you.""","0:catchrelease_ask_lookingFollow:What's the difference?
+""Don't mistake it for seeing you.""","0:catchrelease_ask_lookingFollow:What's the difference?
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_lookingFollow,DialogOptionSelected,$option == catchrelease_ask_lookingFollow,,"The Fisherman stops turning the control unit.
@@ -1896,14 +1896,14 @@ He sets it down.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_patterns,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 3
 !$global.catchrelease_fisherAsked_patterns","CatchReleaseCMD addFisherQuestion catchrelease_ask_patterns ""The patterns. What are they, actually?"" false",,,
-catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true 0,"""Ghost is the old spacer word. Pattern is what the instruments call it once the crossing gives them something they can measure.""
+catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true 0,"""Ghost is the old spacer word. Pattern is what the instruments call it once the crossing gives it something to hold onto.""
 
 He turns the display slightly toward you.
 
 ""Fish is what everybody calls it once they're buying or selling.""","0:catchrelease_ask_patternsWhy:Why fish?
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
-catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""Never found an answer that made the rig work any better.""","0:catchrelease_fisherAskBack:Something else
+catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""Never found an answer that improved the fishing.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_deepWater,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_deepWater","CatchReleaseCMD addFisherQuestion catchrelease_ask_deepWater ""Why is the deep water worse?"" false",,,
@@ -2133,22 +2133,22 @@ CatchReleaseCMD tokens","The Fisherman sends over a handling manifest.
 
 Your ops chief reads the mass figure twice.
 
-A cargo boom unfolds from the trawler and the first LYNE drone comes across on external clamps. It is the size of a light fighter, built around a blunt ROD assembly and surrounded by maneuvering hardware. A second follows. Then the launch rack, control package, and enough supporting machinery to occupy a respectable section of working deck.
+A cargo boom unfolds from the trawler and the LYNE drone comes across on external clamps. It is the size of a light fighter, built around a blunt ROD assembly and surrounded by maneuvering hardware. A launch rack follows, then the control package and enough supporting machinery to occupy a respectable section of working deck.
 
 Nothing involved could reasonably be carried by a person.
 
-""That's the line,"" the Fisherman says while your crew find somewhere to bolt it down. ""Two drones to start. Treat them like boats, not missiles. Give the deck crew room when they launch.""
+""That's the line,"" the Fisherman says while your crew find somewhere to bolt it down. ""One drone to start. Treat it well. Give the deck crew room for the launch, these run hot.""
 
 He sends your helm a local nav mark.
 
 ""Open rupture nearby. Take one fish. Nothing ambitious. Bring it back and we'll go over the return.""","0:catchrelease_introRodOperate:Anything I should know before I use it?
 10:catchrelease_introRodTrust:You give this equipment to every stranger who asks?
 100:catchrelease_introRodGo:I'll bring you a fish.",
-catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,,"""Point the fleet at the rupture. Start the rig and let the drones work.""
+catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,,"""Point the fleet at the rupture. Start the rig and let the drone work.""
 
 He brings up the return trace.
 
-""Watch this more than the picture. If it starts getting ugly, stop and bring the drones home.""
+""Watch this more than the picture. If it starts getting ugly, stop and bring the drone home.""
 
 He closes the display.
 
@@ -2157,7 +2157,7 @@ catchrelease_introRodTrust,DialogOptionSelected,$option == catchrelease_introRod
 
 He gives your fleet readout another look.
 
-""I give it to captains I think will bring the drones back.""
+""I give it to captains I think will not squander them.""
 
 A small nod.
 
