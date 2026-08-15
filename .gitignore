@@ -2,3 +2,6 @@
 /jars/production
 /jars/catchrelease.jar
 /out
+
+# baked at runtime by SilhouetteBaker - regenerated whenever the source art is newer
+/graphics/catchrelease/generated
