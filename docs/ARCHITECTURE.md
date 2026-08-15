@@ -617,7 +617,7 @@ Codex pages for species.
 |---|---|
 | `FishCodex.java` | Installs the category and per-species entries; owns every guarded custom/F2 link into a fish entry |
 | `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
-| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the species outline - the FishIcons rimmed silhouette in the detail, a dark-player-colour shadow in the index list, whose single-tint icon hook cannot composite the rim - while full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
+| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the rimmed species silhouette in list and detail both - the detail draws it live through FishIcons, the list hands vanilla a pre-baked silhouette texture from SilhouetteBaker, since the row's icon hook takes only a path and one tint - while full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
 
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
@@ -769,6 +769,7 @@ Shader and GL machinery.
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
 | `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
 | `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
+| `helper/loading/SilhouetteBaker.java` | Pre-baked silhouette PNGs for vanilla surfaces that take an icon path and draw it themselves - the codex list row. Composes exactly what FishIcons draws live (the art faint at four offsets under an opaque black lid) into `graphics/catchrelease/generated/`, rebaking when the source art is newer, and hands back a path `loadTexture` has already accepted |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, a fresh instance per ask - the engine mints a new `SpriteAPI` around the shared GL texture on every `getSprite`, so instance state is always the caller's own. Only the loaded-or-missing fact per path is cached, so a texture uploads once and a missing file logs once. The old shared-instance-plus-reset model is gone; it was the root of every cross-screen sprite leak |
 | `helper/CampaignHelper.java` | The small campaign questions asked from several corners: `isPlayerHere` - is the player fleet in this entity's location - for the boats' visit clocks, the tutorial's held postings and the camps' one warning chase |
 | `helper/cache/TimedValue.java` | The expensive-read-asked-every-frame cache: caller's own clock, a TTL in its units, an optional key that forces the read when it changes. Behind the shop's wanted-ask cache (wall millis), the coherence bar's reading (accumulated seconds) and the boats' names (game days + location). `Aberration`'s stamp cache stays hand-rolled on purpose - its invalidation check sits in the hottest read path and must not allocate |
