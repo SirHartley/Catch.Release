@@ -136,7 +136,8 @@ the renderer.
 **`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
 like the rest. The two bar encounters that are *not* jobs — Crablobab and the rating — are
-`AddBarEvents` rows in `rules.csv` instead, with no Java at all. **Three of the job ids do not match
+`AddBarEvents` rows in `rules.csv` instead. Crablobab's entry rows call the shared command bridge
+only to mount his settings-registered portrait. **Three of the job ids do not match
 their class name:**
 
 | Id | Class | | Id | Class |
@@ -556,7 +557,10 @@ Fish in cargo.
 ### `campaign/fish/crab`
 Crablobab's four regular wares, rotating backdrop, and empty-shelf bass. The stall dialogue, labels and ordered option stream live in `rules.csv`;
 `CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
-and highlighted credits-and-crabs tooltip. The ware state and prices are Java. The first
+and highlighted credits-and-crabs tooltip. The same bridge mounts the campaign-persistent
+`CrablobabIdentity` person card on every entry path; its portrait is resolved from the
+`graphics.characters` registration in `settings.json`, never from a hard-coded asset path. The ware
+state and prices are Java. The first
 switchable-curio purchase routes through the shared `Baha?` correction; after that campaign-long
 answer, later switchable purchases give the short outfitter reminder directly. The switch itself
 lives in the Fisherman's outfitter. His full introduction
@@ -581,6 +585,7 @@ inflated credits-and-crabs price. Its hover card states both the Terrible qualit
 
 | File | What it does |
 |---|---|
+| `CrablobabIdentity.java` | The campaign-persistent person shown by all three bar-entry greetings. It resolves `crabolabob.png` through the registered `graphics.characters` sprite id and mounts the minimal vanilla person card without adding him to a market's permanent people or comm directory |
 | `CrabWares.java` | The four regular wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. It also constructs and sells the empty-shelf fallback as the Green Bass row's exact minimum-size Terrible specimen for 10,000 credits and one crab. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop; each actual blast also replaces the saved latest-target name and marks it for one acknowledgement at the next stall meeting. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 | `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing until it sells and the next rock offers the next thing. A completed sale leaves that port's backdrop slot empty for 60 days before the next scene is assigned. Priced off rarity; anything already owned drops out of the rotation |
 
