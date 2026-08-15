@@ -117,7 +117,7 @@
 		"showNameOnMap":false,
 		"scaleNameWithZoom":false,
 		"scaleIconWithZoom":true,
-		"icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
+		"icon":"graphics/catchrelease/ui/fisherman.png",
 		"iconWidth":22,
 		"iconHeight":22,
 		"iconColor":[255,180,50,255],
