@@ -313,8 +313,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "lampRefused":
                 return chargeLampStanding(dialog, true);
             case "lampForgive":
-                LampOffence.forgive();
-                return true;
+                return forgiveLampStop(dialog);
             case "seizeFish":
                 return seizeFish(dialog);
 
@@ -679,9 +678,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         String factionId = mem.getString(LampPatrolResponse.FACTION_KEY);
         if (factionId == null && patrol.getFaction() != null) factionId = patrol.getFaction().getId();
 
-        //read before record(), which is what moves the ladder on
-        int rung = LampOffence.getRung();
-        LampOffence.record();
+        //read before record(), which is what moves this faction's ladder in this system on
+        int rung = LampOffence.getRung(player, factionId);
+        LampOffence.record(player, factionId);
 
         mem.set(LAMP_CONV, true, 0);
         mem.set(LAMP_RUNG, rung, 1f);
@@ -731,6 +730,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         LampOffence.applyRepLoss(patrol.getFaction().getId(),
                 refused ? LampOffence.REP_REFUSE : LampOffence.REP_LOSS, text(dialog));
 
+        return true;
+    }
+
+    /** Removes this stop from this faction's ladder in this system after a story-point escape. */
+    protected boolean forgiveLampStop(InteractionDialogAPI dialog) {
+        CampaignFleetAPI patrol = getOtherFleet(dialog);
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (patrol == null || player == null || patrol.getFaction() == null) return false;
+
+        LampOffence.forgive(player, patrol.getFaction().getId());
         return true;
     }
 
