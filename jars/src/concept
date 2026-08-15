@@ -30,8 +30,25 @@ Quests
 - Quest hand-in should always offer two options: "Hand in your catch" (with confirmation prompt showing what the picker will hand in for you - picker will always pick whatever meets the minimum condition of the quest to avoid over-fulfilling) & "Pick what to hand in" with cargo picker.
 - Change quest hand in cargo picker to show on the side if the prerequisites for each item required by the quest is met by what was handed in. Only unlock the confirm button once every condition is met.
 
+Pond Camper quest
+- Doesn't properly communicate that they need any fish from the pond as proof
+- making the fleet leave doesn't update the intel to say that it left and that you need to get a fish
+- getting a fish doesn't advance intel state and doesn't clear the pond quest mark
+- handing fish in doesn't respect the "must be from that specific pond after quest accepted timestamp" rule
+- Reward isn't communicated via text panel - should say smth along lines of "received: STUFF"
+
 Chart request
 - Intel doesn't seem to recognize catch when caught with harpoon? Might be a general problem.
+
+Fisherman
+- Map indictaor should vanish when you are close enough to see the fleet on the map so it doesn't overlap - reappear when you are no longer in range
+- map indicator should use UcFirst styling "The Fisherman" instead of all lowercase
+- Should have no "rank"
+
+Crabolabob
+- Should have custom rank "Crab Merchant"
+- Should only spawn in every single bar in devmode - otherwise, roll for it like bar encounter, but once rolled, keep present until re-roll or 2 months
+- Can be present in multiple bars at once
 
 Map
 - Coherence overlay should vanish when fish filter is disabled

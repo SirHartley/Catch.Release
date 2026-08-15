@@ -2844,11 +2844,11 @@ Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the b
 
 The fisher does not sound frightened so much as irritated.
 
-""First they preached. Then they cut power to a drone rack. Yesterday they told us the ROD was an offence against Ludd and the next visit would involve tools.""
+""First they preached. Then they cut power to a drone rack. Yesterday they told us the ROD was an offence against Ludd and the next visit would involve weapons.""
 
 A transponder record appears.
 
-""We need the work stopped.""","catchrelease_jobAccept:Agree to go and see them.
+""We need them stopped.""","catchrelease_jobAccept:Agree to go and see them.
 catchrelease_jobDecline:Not against the Path.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Good.""
 
@@ -2966,13 +2966,11 @@ catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_
 catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLink:Cut the comm link,"Vanilla's own option and vanilla's own handler. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
 catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
 $entity.catchrelease_campCleared = true
-MakeOtherFleetGoAway true
-ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The transfer clears.
+ShowDefaultVisual","The transfer clears.
 
 ""Pleasure.""
 
-The formation begins to come about.",,
+The formation begins to come about.",0:catchrelease_campCloseDialogue:Leave,
 catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
@@ -2987,3 +2985,5 @@ Eventually:
 ""We were moving on anyway.""
 
 The formation comes about.",,
+catchrelease_campCloseDialogue,DialogOptionSelected,$option == catchrelease_campCloseDialogue,"MakeOtherFleetGoAway true
+CatchReleaseCMD leaveEncounter",,,
