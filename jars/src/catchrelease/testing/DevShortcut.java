@@ -127,7 +127,7 @@ public class DevShortcut implements CampaignInputListener {
         ShopSchematics.unlockAll();
 
         Global.getSector().getCampaignUI().addMessage(
-                "Dev shortcut: all tackle and upgrade schematics unlocked.",
+                "Dev shortcut: all module and upgrade tier schematics unlocked.",
                 Misc.getHighlightColor());
     }
 

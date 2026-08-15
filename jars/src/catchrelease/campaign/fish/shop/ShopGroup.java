@@ -16,9 +16,9 @@ public enum ShopGroup {
     DRONES("Drones", "Drones", "catchrelease_rod"),
     HARPOON("Harpoon", "Harpoon", "catchrelease_harpoon"),
     THE_CATCH("The catch", "Catch"),
-    DRONE_TACKLE("Drone tackle", "Drone rig", "catchrelease_rod"),
-    HARPOON_TIPS("Harpoon tips", "Harpoon", "catchrelease_harpoon"),
-    SEARCHLIGHT_RIG("Lamp rig", "Lamp rig", "catchrelease_searchlights");
+    DRONE_TACKLE("Drone cores", "Drone cores", "catchrelease_rod"),
+    HARPOON_TIPS("Harpoon tips", "Harpoon tips", "catchrelease_harpoon"),
+    SEARCHLIGHT_RIG("Lens arrays", "Lens arrays", "catchrelease_searchlights");
 
     public final String title;
 
@@ -99,6 +99,22 @@ public enum ShopGroup {
             case HARPOON: return HARPOON_TIPS;
             case SEARCHLIGHT: return SEARCHLIGHT_RIG;
             default: return null;
+        }
+    }
+
+    /**
+     * The noun player-facing copy uses for a modifier on this rig. Tackle remains the internal
+     * serialized type; keeping the display vocabulary here prevents shop and reward text drifting
+     * back toward that implementation name.
+     */
+    public static String getModuleType(Tackle.Fit rig) {
+        if (rig == null) return "rig module";
+
+        switch (rig) {
+            case DRONE: return "drone core";
+            case HARPOON: return "harpoon tip";
+            case SEARCHLIGHT: return "lens array";
+            default: return "rig module";
         }
     }
 }

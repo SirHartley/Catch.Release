@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopEntry;
+import catchrelease.campaign.fish.shop.ShopGroup;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.campaign.fish.shop.ShopSchematics;
@@ -314,7 +315,8 @@ public abstract class FishReward {
             item.addPara("Fits: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                     describeFit(tackle.fit));
             item.addPara(tackle.description, 6f);
-            addSchematicPurchase(item, ShopPricing.getPrice(tackle), "tackle");
+            addSchematicPurchase(item, ShopPricing.getPrice(tackle),
+                    ShopGroup.getModuleType(tackle.fit));
             tooltip.addImageWithText(pad);
 
             return true;

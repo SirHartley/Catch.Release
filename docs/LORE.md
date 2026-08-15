@@ -2085,6 +2085,10 @@ state the mechanical change or compatible rig, say plainly that the schematic is
 permission rather than the item itself, and show the later credit-and-catch price while the player
 is deciding whether to accept the job.
 
+`Tackle` is implementation vocabulary, never player vocabulary. Display modifier categories as
+**Harpoon Tips**, **Drone Cores**, and **Lens Arrays**. When copy genuinely spans more than one
+category, use **rig module** or **module**.
+
 ## Intel
 
 Intel is normally more precise than casual dialogue.
