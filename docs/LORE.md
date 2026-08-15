@@ -1568,6 +1568,15 @@ May know:
 
 Do not make them ontologists.
 
+## Provisioners
+
+Local provisioners treat catch as inventory. They think in open orders, supplier lists, manifests,
+delivery windows and whether a shipment satisfies the written line. They may specify grade, rarity,
+handling or catch method because those are purchasing terms.
+
+They do not investigate the trade's larger logistics. A shortage means another empty supplier line,
+not an invitation to discover why the industry does not add up.
+
 ## The household under-butler
 
 The buyer in the Butler job is not the household's butler. He keeps that butler's rooms and

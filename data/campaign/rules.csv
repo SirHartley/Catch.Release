@@ -471,26 +471,24 @@ FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
-catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has a supplier list open on a slate and several empty lines under FRESH CATCH.,,
+catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Restaurants, private kitchens, two mess halls and somebody on the orbital who will pay extra if I stop asking what they do with it.""
+Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing.""
 
-The provisioner turns the slate toward you.
+The provisioner turns the open order toward you.
 
-""$catchreleaseAskCap.""
+""$catchreleaseAskCap. Meet the line as written.""
 
-""$catchreleaseRewardCap on delivery. Same rate no matter where you found it.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:I'll pass.",
+""Sixty days. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:Decline.",
 catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good.""
 
-Your comm ID is added to the supplier list.",,
-catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The provisioner closes the entry and moves to the next name.,,
-catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same order.""",,
+Your comm ID goes into the next empty line under FRESH CATCH.",,
+catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The provisioner closes the entry and opens the next name on the supplier list.,,
+catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same sixty-day order.""",,
 catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_standingOrder
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The containers are checked against the manifest.
-
-No questions follow.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The provisioner checks the containers against the manifest and closes the order.
 
 $catchreleaseRewardCap is transferred to your account.",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three versions of a menu open on a slate. Ingredients are being crossed out faster than they are added.,,
