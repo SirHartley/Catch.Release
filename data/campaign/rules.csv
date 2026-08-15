@@ -861,32 +861,26 @@ $catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk 
 ""Comfortably over.""
 
 The bonus is added without negotiation.",,
-catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is sorting specimen telemetry into two piles. The larger pile is labelled CONTROL and appears to annoy her.,,
+catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is comparing retrieval logs against sensor plots. Every confirmed match goes into the smaller of two piles.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is studying.,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I have enough stable specimens.""
+Call $catchrelease_jobRef showRewardDetails","""Low-coherence retrievals. I have plenty of stable controls.""
 
-She turns the slate around.
+She turns the current request toward you.
 
-""I need $catchreleaseAskCap with a poor coherence reading. Deformation, inconsistent mass return, failure to maintain bilateral structure - any of it.""
+""$catchreleaseAskCap. Sixty days. I need the original retrieval records with the shipment.""
 
-She scrolls through several images.
+She indicates three columns: coherence, mass return, structural variance.
 
-""I can measure the result. I cannot reproduce the conditions.""
-
-""$catchreleaseRewardCap if you bring me one that was logged that way at retrieval.""","catchrelease_jobAccept:Take the research commission.
+""$catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the research commission.
 catchrelease_jobDecline:Decline.",
-catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Keep the original retrieval log. That's more important than presentation.""",,
-catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,She returns to the telemetry.,,
-catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Poor coherence reading.""",,
+catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Good. Keep each retrieval record with its container. A port relabel is useless to me.""",,
+catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,She returns to matching retrieval logs against the plots.,,
+catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, with the original retrieval records. Same sixty-day commission.""",,
 catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She checks the retrieval record before opening the container.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She checks the retrieval records before opening a container.
 
-Several measurements are taken.
-
-One result makes her repeat the calibration.
-
-""Good.""
+One measurement is taken twice. She enters the second result beside the first rather than replacing it.
 
 $catchreleaseRewardCap is transferred.",,
 catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A man has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. He is recording the same six-second introduction for the fourth time.",,

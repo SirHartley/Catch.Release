@@ -1649,6 +1649,13 @@ They should not say:
 
 That conclusion belongs to the Fisherman.
 
+Academy field researchers care about provenance as much as the result. They compare original
+retrieval records, coherence readings, mass return and structural variance; a specimen relabelled
+after handling is not equivalent to one logged that way when it came aboard.
+
+When a measurement disagrees with itself, they preserve both results and calibrate again. They do
+not turn the disagreement into a theory of reality.
+
 ## Patrols
 
 Know:
