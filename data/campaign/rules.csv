@@ -2867,7 +2867,7 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The camp answers almos
 
 ""Saw them leave.""
 
-Payment follows.",,
+Received: $catchreleaseReward.",,
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try talking first.""
 
 A beat.
@@ -2881,7 +2881,9 @@ $catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""G
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The exclusion zone disappears from the local plot.
 
-""That'll do.""",,
+""That'll do.""
+
+Received: $catchreleaseReward.",,
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Fine by me how.""",,
 catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"She nods, as though you have confirmed something. ""No. Nobody is.""",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
@@ -2891,7 +2893,9 @@ $catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""O
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The boats return to the rupture.
 
-Someone has already started repairing the damaged rack.",,
+Someone has already started repairing the damaged rack.
+
+Received: $catchreleaseReward.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
 HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."

@@ -251,6 +251,9 @@ aboard. If the fleet is already gone, it directs the player back to the fisher; 
 camp as the remaining objective. Losing the specimen before hand-in puts the rupture marker and
 the catch instruction back.
 
+The hand-in ends by naming what changed in the player's possession or knowledge: **Received:
+REWARD.** Do not leave payment implied by narration such as "Payment follows."
+
 They sincerely believe they are members of a larger profession.
 
 They are not pretending.
