@@ -1586,17 +1586,23 @@ pattern ontology or anything the Fisherman alone should understand.
 
 ## Betting-ring brokers
 
-Ferro and Vasque broker private fish bouts. Ferro handles entrants, supplier terms and settlement.
-Vasque assigns the delivered pair, maintains the line and handles the numbered tank ampoules.
+Salvatore and Enzo run a protected private fish-fighting book. Salvatore is the older man: he finds
+suppliers, settles the house's obligations and remembers what people agreed to. Enzo handles the
+tank, assigns the delivered pair, writes the odds and keeps the numbered ampoules.
 
-Keep them quiet and procedural. They are not broad mobsters, theatrical gangsters or sinister
-exposition devices. Their status appears through what is already arranged: an expensive transport
-tank in an ordinary bar, locked treatment stock, contracts without surnames and a house line stated
-without apology.
+They should read unmistakably as organized criminals before either man names the organization.
+Show it through ownership and deference: the best table kept clear in a crowded bar, a bartender who
+arrives without being called, a room available because Salvatore knows its owner, and debts discussed
+as things that will simply be remembered. Salvatore speaks in favors, understandings and what is owed.
+Enzo speaks like a bookmaker who has already priced the evening.
 
-The player may take a guaranteed supplier consideration or replace it with a wager. Vasque prices
-each assigned specimen against the other using visible size. Equal entrants still favour the house;
-he regards that as the ordinary cost of making a market.
+Do not turn them into broad mobsters, theatrical gangsters or a collection of real-world film quotes.
+They are calm because the room already accommodates them. A threat is stronger when nobody bothers
+to make it. Their Italian first names are enough; neither supplies a surname.
+
+The player may take the sure payment or leave it in Enzo's book as a wager. Enzo prices each assigned
+specimen against the other using where its size falls inside its species range. Equal entrants still
+favour the house; he states the missing percentage as his share, not as an apology.
 
 They accept fish fighting as an ordinary commercial event. They may discuss grade, species, length,
 handling and observed results. They do not know why patterns hold or fail to hold shape and do not
