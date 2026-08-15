@@ -678,34 +678,28 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"A dock porter places t
 $catchreleaseRewardCap changes hands.
 
 The porter receives a routing code: HOUSEHOLD BUTLER — PRIVATE ROOMS. The man has already turned to his next entry.",,
-catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A woman with an academic lanyard and salt-damaged hands is annotating photographs of public aquaria.,,
+catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A curator with an academic lanyard is updating accession records beside photographs of a public aquarium. Several entries are marked DISPLAY; others are marked RECORD.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I run a collection.""
+Call $catchrelease_jobRef showRewardDetails","""I'm filling gaps in a public collection.""
 
-She turns the slate around.
+She turns an accession list toward you.
 
-""Public-facing, grant-funded, technically conservation.""
+""$catchreleaseAskCap.""
 
-She points to the requested entry.
+""Fine-grade specimens can go on display. Low-coherence specimens go into the comparative record. Either qualifies.""
 
-""$catchreleaseAsk.""
-
-""A clean specimen is useful for the display. A badly deformed one is useful for the records. I'm not going to reject either because it failed to look picturesque.""
-
-""$catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to supply the exhibit.
+""Seventy days. $catchreleaseRewardCap on accession.""","catchrelease_jobAccept:Agree to supply the collection.
 catchrelease_jobDecline:Decline.",
-catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Keep the transport tank stable. The exhibit system can handle the rest.""",,
-catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,She goes back to the slate.,,
-catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Either condition.""",,
+catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Good. Keep the transport and retrieval records with the containers. I can work with either condition; I can't catalogue an unlabelled specimen.""",,
+catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,She returns to the accession records and moves to the next blank entry.,,
+catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Fine grade or low coherence. Same seventy-day commission.""",,
 catchrelease_curator_paid,catchreleaseJobPaid,"$missionId == catchrelease_curator
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The container is transferred directly to a waiting tank truck.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She matches each seal to an accession entry before the first container is moved to the collection transport.
 
-The curator checks the seal only after it is aboard.
+""Good. That's enough for the record.""
 
-""Good. Thank you.""
-
-$catchreleaseReward is transferred.",,
+$catchreleaseRewardCap is transferred.",,
 catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children occupy a corner table they are almost certainly not paying for. One has a bucket. The other has a handwritten tournament bracket.,,
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask about the tournament.,
 catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward

@@ -1659,6 +1659,18 @@ after handling is not equivalent to one logged that way when it came aboard.
 When a measurement disagrees with itself, they preserve both results and calibrate again. They do
 not turn the disagreement into a theory of reality.
 
+## Public curators
+
+Public curators think in accession numbers, provenance, display condition, transport and
+comparative records. Fine specimens may fill display gaps; low-coherence specimens may fill the
+record. Either can be institutionally useful without one being called the prettier answer.
+
+They keep transport and retrieval records with each container because an unlabelled specimen cannot
+be catalogued. Their work is public-facing and practical: tanks, visitors, grants, missing entries
+and collection vehicles.
+
+They may record measured anomalies. They do not explain the fabric behind them.
+
 ## The plain-coated buyers
 
 Three people in matching plain coats occasionally commission exactly one named specimen and offer a

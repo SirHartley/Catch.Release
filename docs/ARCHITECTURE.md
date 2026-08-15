@@ -429,7 +429,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `ChefJob.java` | Three different type requirements for one dish, each asking for one or two specimens and sometimes Fine grade. Its rules-authored cook treats them as separate prep lines, states the forty-day menu deadline and checks handling tags before payment |
 | `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
 | `CultJob.java` | One specific named species for a non-credit reward. Its rules-authored three-person offer states species, consideration, quantity and fifty-five-day deadline before a small hub; asking purpose makes all three repeat the exact species, then returns with accept and decline still available |
-| `CuratorJob.java` | Several fish, accepting either fine-grade or low-coherence uncommon+ |
+| `CuratorJob.java` | One to three Uncommon-or-higher specimens, each accepted if Fine grade or low coherence. Its rules-authored public curator separates DISPLAY from RECORD accession value, states the seventy-day window and checks provenance before payment |
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
 | `StartupJob.java` | Three rounds of growing quantity, no time limit. Its rules-authored pitch is a compact demand/operations/terms submenu: optional due-diligence questions return to the remaining topics, terms unlock acceptance, and decline is always available. A read-only round token lets the hand-in dialogue distinguish pilot, scale-up and production while preserving the existing three-delivery mechanic |
