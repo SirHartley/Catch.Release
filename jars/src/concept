@@ -19,6 +19,23 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
+Shop
+- Buying the last upgrade rung before a locked rung does not clear the marked state
+- "Unlocked X" top message does not correctly reflect the action (fit, unlock, switch on/Off)
+- There should be a similar message for refund (applies to shop & range data seller
+- The first time after the player unlocked a schematic for a rung or upgrade, there should be a small, gold label saying "New!" to the right of the upgrade indicators. If the shop is closed or the rung bought or marked, the label vanishes.
+
+Quests
+- Quests must not offer schematic rewards for equipment you do not have yet.
+- Quest hand-in should always offer two options: "Hand in your catch" (with confirmation prompt showing what the picker will hand in for you - picker will always pick whatever meets the minimum condition of the quest to avoid over-fulfilling) & "Pick what to hand in" with cargo picker.
+- Change quest hand in cargo picker to show on the side if the prerequisites for each item required by the quest is met by what was handed in. Only unlock the confirm button once every condition is met.
+
+Chart request
+- Intel doesn't seem to recognize catch when caught with harpoon? Might be a general problem.
+
+Map
+- Coherence overlay should vanish when fish filter is disabled
+
 Sound
 - Minigame lacks soundstrack
 - Celebration tush on catch & extra for treasure

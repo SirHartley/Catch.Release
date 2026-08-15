@@ -101,7 +101,7 @@ public class FishermanConstants {
     public static final float SPAWN_DISTANCE_MIN = 4000f;
     public static final float SPAWN_DISTANCE_SPREAD = 3000f;
 
-    /** Range data costs fish one rung below the species' own rarity; commons cost a common. */
+    /** Range data costs 2 fish one rung below the species' own rarity */
     public static final int SURVEY_COST = 2;
 
     /** A visiting boat's shelf: rolled once per visit, sold down, gone when it leaves. */

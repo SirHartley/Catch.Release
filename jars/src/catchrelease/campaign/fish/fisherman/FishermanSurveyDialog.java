@@ -334,7 +334,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     tooltip.addPara(offer.spec.getDisplayName(), offer.spec.rarity.color, 0f);
                     tooltip.addPara(offer.spec.getTypeName(), Misc.getGrayColor(), 2f);
 
-                    tooltip.addPara("Charts this species' range on your map.", 8f);
+                    tooltip.addPara("Charts this species' habitat on your map.", 8f);
 
                     int have = FishCurrency.count(offer.costRarity);
                     boolean afford = have >= offer.costCount;

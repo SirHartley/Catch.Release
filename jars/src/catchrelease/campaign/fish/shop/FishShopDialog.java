@@ -539,7 +539,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     tooltip.addPara(marked ? "On the list - click the ring to clear it."
                             : "Click the ring to save for this purchase.", 6f);
                     tooltip.addPara("Fish that would pay for it wear the %s everywhere, and the"
-                                    + " route planner offers their waters.", 6f,
+                                    + " route planner lists the entry at the top.", 6f,
                             Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
                 }
             };

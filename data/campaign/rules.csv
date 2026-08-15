@@ -1089,7 +1089,11 @@ FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached
 
 He taps the entry once.
 
-""Wreckage. Lost cargo. Whatever the retrieval rig brings up with the pattern.""",,
+""Wreckage. Lost cargo, or a memory thereof. Whatever the retrieval rig brings up with the pattern.""
+
+He waits, then decides to expand on that.
+
+""The LYNE can only carry so much. If you want to have any chance of dredging up something bigger, you'll need a modified clamp. Ask around in bars, someone may be willing to give you the schematics.""",,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
