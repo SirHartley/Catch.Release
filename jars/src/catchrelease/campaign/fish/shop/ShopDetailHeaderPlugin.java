@@ -121,9 +121,11 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         int level = entry.getLevel();
         int max = entry.getMaxLevel();
 
-        //bought rungs in the player's own colour - yellow is the shopping list's, not the ladder's
+        //bought rungs in the player's own colour; schematic-gated rungs grey until their plan
         ShopUi.drawPips(x, top - PIP_SIZE, PIP_SIZE, PIP_GAP, level, max,
-                Misc.getBasePlayerColor(), alphaMult);
+                Misc.getBasePlayerColor(), alphaMult,
+                rung -> ShopSchematics.requires(entry.stat, rung)
+                        && !ShopSchematics.has(entry.stat, rung));
 
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;

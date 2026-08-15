@@ -69,19 +69,11 @@ public class ShopRowPlugin extends ListRow {
         return 0.5f;
     }
 
-    /** The price's rarity as the identity colour; a rung that cannot be bought goes grey. */
+    /** The price's rarity as the identity colour. */
     @Override
     protected Color getAccentColor() {
-        if (entry.isLocked()) return Misc.getGrayColor();
-
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
-    }
-
-    /** A locked rung's whole line sits on grey, so the shelf reads at a glance. */
-    @Override
-    protected Color getFieldColor() {
-        return entry.isLocked() ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
     }
 
     @Override
@@ -144,11 +136,13 @@ public class ShopRowPlugin extends ListRow {
         if (entry.isUpgrade() && !entry.isMaxed()) {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
 
-            //bought rungs in the player's own colour - yellow is the shopping list's, not the
-            //ladder's - and grey on a ladder whose next rung cannot be bought
+            //bought rungs always in the player's own colour; an unbought rung is grey only
+            //while its schematic is missing, and an ordinary dark square once it can be bought
             ShopUi.drawPips(Math.round(right - pipsWidth), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
-                    entry.isLocked() ? Misc.getGrayColor() : Misc.getBasePlayerColor(), alphaMult);
+                    Misc.getBasePlayerColor(), alphaMult,
+                    rung -> ShopSchematics.requires(entry.stat, rung)
+                            && !ShopSchematics.has(entry.stat, rung));
             return;
         }
 
