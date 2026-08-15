@@ -507,7 +507,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         String optionId = params.get(1).getString(memoryMap);
         String label = params.get(2).getString(memoryMap);
-        boolean asked = Boolean.parseBoolean(params.get(3).getString(memoryMap));
+        boolean asked = params.get(3).getBoolean(memoryMap);
         if (optionId == null || label == null) return false;
 
         int index = local.getInt(FISHER_ASK_COUNT);
@@ -515,8 +515,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         int first = page * FISHER_ASK_PAGE_SIZE;
 
         if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
-            dialog.getOptionPanel().addOption(label, optionId);
-            if (asked) dialog.setOptionColor(optionId, FishRarity.COMMON.color);
+            if (asked) {
+                //Colour is part of option creation. A follow-up mutation could lose to the
+                //surrounding FireAll option batch on some dialog rebuilds.
+                dialog.getOptionPanel().addOption(label, optionId, FishRarity.COMMON.color, null);
+            } else {
+                dialog.getOptionPanel().addOption(label, optionId);
+            }
         }
 
         local.set(FISHER_ASK_COUNT, index + 1, 0);
