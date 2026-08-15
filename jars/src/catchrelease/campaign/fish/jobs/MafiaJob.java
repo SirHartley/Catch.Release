@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * Delivery job for a fish-fighting ring. The player chooses the exact pair first, sees one randomly
- * assigned to each handler with odds based on their relative size, then takes the fee or backs one.
+ * assigned to each handler with odds based on within-species size, then takes the fee or backs one.
  * The only job in the mod where the reward can come to nothing.
  */
 public class MafiaJob extends FishJob {
@@ -41,8 +41,8 @@ public class MafiaJob extends FishJob {
     /** What a winning bet is worth against the flat fee. */
     public static final float WIN_MULT = 2f;
 
-    protected String left = "Ferro";
-    protected String right = "Vasque";
+    protected String left = "Salvatore";
+    protected String right = "Enzo";
 
     /** Dialog-only pair; nothing leaves cargo until the player confirms fee or wager. */
     protected transient FishHandoffPicker.Selection pendingSelection;
