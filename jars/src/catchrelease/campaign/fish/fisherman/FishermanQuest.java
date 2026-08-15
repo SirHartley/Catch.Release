@@ -73,6 +73,8 @@ public class FishermanQuest {
 
     public static final String STATE_KEY = "$catchrelease_fisherQuest";
     public static final String ROUND_KEY = "$catchrelease_fisherQuestRound";
+    public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
+    public static final float COOLDOWN_DAYS = 90f;
 
     /** Set on the specimen this quest planted, so the catch pipeline knows to force the water. */
     public static final String QUEST_FISH_FLAG = "$catchrelease_questFish";
@@ -141,6 +143,15 @@ public class FishermanQuest {
         return Global.getSector().getMemoryWithoutUpdate().getInt(ROUND_KEY);
     }
 
+    /** Three campaign months after the previous hand-in; the first request has no wait. */
+    public static boolean isAvailable() {
+        if (getActive() != null) return false;
+
+        Object last = Global.getSector().getPersistentData().get(LAST_COMPLETED_KEY);
+        return !(last instanceof Long) || Global.getSector().getClock()
+                .getElapsedDaysSince((Long) last) >= COOLDOWN_DAYS;
+    }
+
     //---------------------------------------------------------------- the offer
 
     /**
@@ -152,6 +163,8 @@ public class FishermanQuest {
      * making.
      */
     public static Saved roll() {
+        if (!isAvailable()) return null;
+
         int round = getRound();
 
         Target target = pickTarget(round);
@@ -368,6 +381,8 @@ public class FishermanQuest {
         FishermanShelf.widen(SLOTS_PER_JOB);
 
         Global.getSector().getMemoryWithoutUpdate().set(ROUND_KEY, quest.round + 1);
+        Global.getSector().getPersistentData().put(LAST_COMPLETED_KEY,
+                Global.getSector().getClock().getTimestamp());
 
         letGo(quest);
         Global.getSector().getPersistentData().remove(STATE_KEY);

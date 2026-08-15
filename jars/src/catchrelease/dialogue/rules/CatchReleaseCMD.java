@@ -100,6 +100,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** The chart requests, which are the ordinary work and nothing to do with the ladder. */
     public static final String WORK = "$catchreleaseWork";
+    public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
     public static final String WORK_MET = "$catchreleaseWorkMet";
     public static final String WORK_FISH = "$catchreleaseWorkFish";
     public static final String WORK_WHERE = "$catchreleaseWorkWhere";
@@ -857,6 +858,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         FishermanQuest.Saved work = FishermanQuest.getActive();
 
         local.set(WORK, work != null, 0);
+        local.set(WORK_AVAILABLE, work == null && FishermanQuest.isAvailable(), 0);
         local.set(WORK_MET, work != null && FishermanQuest.isSatisfied(), 0);
 
         if (work != null) {

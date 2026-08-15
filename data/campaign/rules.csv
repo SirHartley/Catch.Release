@@ -1150,7 +1150,8 @@ $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
-!$catchreleaseWork",,,50:catchrelease_fisherWork:Ask about work,
+!$catchreleaseWork
+$catchreleaseWorkAvailable",,,50:catchrelease_fisherWork:Ask about work,
 catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
