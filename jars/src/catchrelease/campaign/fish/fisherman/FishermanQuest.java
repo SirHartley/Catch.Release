@@ -73,9 +73,12 @@ public class FishermanQuest {
 
     public static final String STATE_KEY = "$catchrelease_fisherQuest";
     public static final String ROUND_KEY = "$catchrelease_fisherQuestRound";
+    public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
+    public static final float COOLDOWN_DAYS = 90f;
 
     /** Set on the specimen this quest planted, so the catch pipeline knows to force the water. */
     public static final String QUEST_FISH_FLAG = "$catchrelease_questFish";
+    public static final String QUEST_TARGET_ID_KEY = "$catchrelease_questTargetId";
 
     /** Rarity the ladder reaches for at each round, clamped to what exists. */
     public static final int[] RUNG_BY_ROUND = {1, 2, 2, 3, 3, 4};
@@ -105,6 +108,10 @@ public class FishermanQuest {
 
         public int round;
         public int credits;
+
+        /** Identity and start of this exact request; zero/null are healed for an older active save. */
+        public String targetFishId;
+        public long acceptedAt;
 
         /**
          * Whether the hold has the specimen, as opposed to the request being finished.
@@ -136,6 +143,15 @@ public class FishermanQuest {
         return Global.getSector().getMemoryWithoutUpdate().getInt(ROUND_KEY);
     }
 
+    /** Three campaign months after the previous hand-in; the first request has no wait. */
+    public static boolean isAvailable() {
+        if (getActive() != null) return false;
+
+        Object last = Global.getSector().getPersistentData().get(LAST_COMPLETED_KEY);
+        return !(last instanceof Long) || Global.getSector().getClock()
+                .getElapsedDaysSince((Long) last) >= COOLDOWN_DAYS;
+    }
+
     //---------------------------------------------------------------- the offer
 
     /**
@@ -147,6 +163,8 @@ public class FishermanQuest {
      * making.
      */
     public static Saved roll() {
+        if (!isAvailable()) return null;
+
         int round = getRound();
 
         Target target = pickTarget(round);
@@ -255,6 +273,8 @@ public class FishermanQuest {
     public static void accept(Saved quest) {
         if (quest == null) return;
 
+        ensureIdentity(quest);
+
         Global.getSector().getPersistentData().put(STATE_KEY, quest);
         Global.getSector().getIntelManager().addIntel(new QuestIntel(quest));
     }
@@ -273,7 +293,12 @@ public class FishermanQuest {
         ask.speciesId = quest.speciesId;
 
         boolean opened = FishHandoffPicker.show(dialog, "Select the requested specimen",
-                java.util.Collections.singletonList(ask), new FishHandoffPicker.Listener() {
+                java.util.Collections.singletonList(ask), new FishHandoffPicker.Eligibility() {
+                    @Override
+                    public boolean accepts(FishCatch fish) {
+                        return isEligible(quest, fish);
+                    }
+                }, new FishHandoffPicker.Listener() {
                     @Override
                     public void picked(FishHandoffPicker.Selection selection) {
                         if (turnIn(dialog == null ? null : dialog.getTextPanel(), selection)) {
@@ -301,16 +326,18 @@ public class FishermanQuest {
         return opened;
     }
 
-    /** Whether the hold has the named species aboard, loose or crated. */
+    /** Whether the hold has this request's exact post-acceptance specimen aboard. */
     public static boolean isSatisfied() {
         Saved quest = getActive();
         if (quest == null) return false;
 
-        return findAboard(quest.speciesId) != null;
+        ensureIdentity(quest);
+
+        return findAboard(quest) != null;
     }
 
     /** The specimen itself, so the hand-in can take exactly the one that was asked for. */
-    protected static FishCatch findAboard(String speciesId) {
+    protected static FishCatch findAboard(Saved quest) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
@@ -319,7 +346,7 @@ public class FishermanQuest {
             if (!FishItems.isCatch(data)) continue;
 
             for (FishCatch entry : FishItems.read(data)) {
-                if (speciesId.equals(entry.speciesId)) return entry;
+                if (isEligible(quest, entry)) return entry;
             }
         }
 
@@ -334,14 +361,15 @@ public class FishermanQuest {
      */
     public static boolean turnIn(TextPanelAPI text) {
         Saved quest = getActive();
-        if (quest == null || !spend(quest.speciesId)) return false;
+        if (quest == null || !spend(quest)) return false;
 
         return finishTurnIn(quest, text);
     }
 
     protected static boolean turnIn(TextPanelAPI text, FishHandoffPicker.Selection selection) {
         Saved quest = getActive();
-        if (quest == null || selection == null || !selection.spend()) return false;
+        FishCatch selected = selection == null ? null : selection.getBestForFirstAsk();
+        if (quest == null || !isEligible(quest, selected) || !selection.spend()) return false;
 
         return finishTurnIn(quest, text);
     }
@@ -353,6 +381,8 @@ public class FishermanQuest {
         FishermanShelf.widen(SLOTS_PER_JOB);
 
         Global.getSector().getMemoryWithoutUpdate().set(ROUND_KEY, quest.round + 1);
+        Global.getSector().getPersistentData().put(LAST_COMPLETED_KEY,
+                Global.getSector().getClock().getTimestamp());
 
         letGo(quest);
         Global.getSector().getPersistentData().remove(STATE_KEY);
@@ -366,16 +396,22 @@ public class FishermanQuest {
         }
 
         if (text != null) {
-            text.addPara("Paid %s, and the shelf is one chart wider from now on.",
-                    Misc.getTextColor(), Misc.getHighlightColor(),
-                    Misc.getDGSCredits(quest.credits));
+            //Vanilla reward/loss notices use small Insignia type, a positive/negative face, and
+            //yellow only for the value inside the line. Keep both permanent rewards in that face.
+            text.setFontSmallInsignia();
+            String credits = Misc.getDGSCredits(quest.credits);
+            text.addPara("Gained " + credits, Misc.getPositiveHighlightColor());
+            text.highlightLastInLastPara(credits, Misc.getHighlightColor());
+            text.addPara("The Fisherman now stocks an additional range data entry.",
+                    Misc.getPositiveHighlightColor());
+            text.setFontInsignia();
         }
 
         return true;
     }
 
-    /** Takes one of the named species out of the hold, repacking whatever it came out of. */
-    protected static boolean spend(String speciesId) {
+    /** Takes only this request's exact specimen, repacking whatever it came out of. */
+    protected static boolean spend(Saved quest) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -389,7 +425,7 @@ public class FishermanQuest {
 
             int found = -1;
             for (int i = 0; i < contents.size(); i++) {
-                if (speciesId.equals(contents.get(i).speciesId)) {
+                if (isEligible(quest, contents.get(i))) {
                     found = i;
                     break;
                 }
@@ -458,6 +494,43 @@ public class FishermanQuest {
         return mote != null && mote.getMemoryWithoutUpdate().getBoolean(QUEST_FISH_FLAG);
     }
 
+    /** Carries the planted mote's exact request identity into the item that reaches cargo. */
+    public static void markCatch(FishCatch fish, SectorEntityToken mote) {
+        if (fish == null || !isQuestFish(mote)) return;
+
+        Saved quest = getActive();
+        if (quest == null) return;
+        ensureIdentity(quest);
+
+        String targetId = mote.getMemoryWithoutUpdate().getString(QUEST_TARGET_ID_KEY);
+        if (!quest.targetFishId.equals(targetId)) return;
+
+        fish.questTargetId = targetId;
+        fish.caughtAt = Global.getSector().getClock().getTimestamp();
+        fish.caughtSystemId = mote.getContainingLocation() == null
+                ? null : mote.getContainingLocation().getId();
+    }
+
+    protected static boolean isEligible(Saved quest, FishCatch fish) {
+        if (quest == null || fish == null) return false;
+        ensureIdentity(quest);
+
+        return quest.speciesId != null && quest.speciesId.equals(fish.speciesId)
+                && quest.targetFishId.equals(fish.questTargetId)
+                && fish.caughtAt >= quest.acceptedAt
+                && quest.systemId != null && quest.systemId.equals(fish.caughtSystemId);
+    }
+
+    /** Save-compatible identity repair for requests accepted before exact provenance was recorded. */
+    protected static void ensureIdentity(Saved quest) {
+        if (quest.targetFishId == null || quest.targetFishId.isEmpty()) {
+            quest.targetFishId = Misc.genUID();
+        }
+        if (quest.acceptedAt <= 0L) {
+            quest.acceptedAt = Global.getSector().getClock().getTimestamp();
+        }
+    }
+
     /**
      * Puts the specimen back wherever it is meant to be.
      * <p>
@@ -497,7 +570,9 @@ public class FishermanQuest {
 
         if (mote == null) return;
 
+        ensureIdentity(quest);
         mote.getMemoryWithoutUpdate().set(QUEST_FISH_FLAG, true);
+        mote.getMemoryWithoutUpdate().set(QUEST_TARGET_ID_KEY, quest.targetFishId);
 
         QuestPond.markPlanted(mote, STATE_KEY);
     }

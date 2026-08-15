@@ -27,6 +27,11 @@ public final class FishHandoffPicker {
         void cancelled();
     }
 
+    /** Optional stricter provenance gate for requests that want one particular specimen. */
+    public interface Eligibility {
+        boolean accepts(FishCatch fish);
+    }
+
     /** An exact, non-overlapping assignment of selected specimens to every outstanding ask. */
     public static final class Selection {
         protected final List<SpecialItemData> items;
@@ -81,6 +86,13 @@ public final class FishHandoffPicker {
     public static boolean show(InteractionDialogAPI dialog, String title,
                                final List<FishRequirement> asks, final Listener listener) {
 
+        return show(dialog, title, asks, null, listener);
+    }
+
+    public static boolean show(InteractionDialogAPI dialog, String title,
+                               final List<FishRequirement> asks, final Eligibility eligibility,
+                               final Listener listener) {
+
         if (dialog == null || listener == null || asks == null || asks.isEmpty()) return false;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
 
@@ -93,7 +105,8 @@ public final class FishHandoffPicker {
             if (data == null || !FishItems.FISH.equals(data.getId())) continue;
 
             FishCatch fish = FishCatch.decode(data.getData());
-            if (fish == null || !matchesAny(fish, asks)) continue;
+            if (fish == null || !matchesAny(fish, asks)
+                    || eligibility != null && !eligibility.accepts(fish)) continue;
 
             offer.addItems(CargoAPI.CargoItemType.SPECIAL, data, stack.getSize());
         }

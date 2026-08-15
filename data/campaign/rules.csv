@@ -1150,7 +1150,8 @@ $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
 catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
-!$catchreleaseWork",,,50:catchrelease_fisherWork:Ask about work,
+!$catchreleaseWork
+$catchreleaseWorkAvailable",,,50:catchrelease_fisherWork:Ask about work,
 catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
@@ -1158,6 +1159,10 @@ $catchreleaseWork",,,50:catchrelease_fisherWork:What did I need to fetch again?,
 catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
+catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseDrift == 3
+!$global.catchrelease_fisherAsked_okay",,,58:catchrelease_fisherOkay:Are you okay?,
 catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -1196,6 +1201,15 @@ catchrelease_fisherSellRare,DialogOptionSelected,$option == catchrelease_fisherS
 catchrelease_fisherSellEpic,DialogOptionSelected,$option == catchrelease_fisherSellEpic,CatchReleaseCMD sellUpTo EPIC,,,
 catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
+catchrelease_fisherOkay,DialogOptionSelected,$option == catchrelease_fisherOkay,$global.catchrelease_fisherAsked_okay = true 0,"""Never better, thank you for asking.""","0:catchrelease_fisherOkayThen:Okay then...
+10:catchrelease_fisherOkayMirror:Are you sure? Got a mirror?",
+catchrelease_fisherOkayThen,DialogOptionSelected,$option == catchrelease_fisherOkayThen,"$menuState = catchreleaseFisher 0
+FireAll PopulateOptions",,,
+catchrelease_fisherOkayMirror,DialogOptionSelected,$option == catchrelease_fisherOkayMirror,,"""Fabric's playing tricks, don't mind it.""","0:catchrelease_fisherOkaySaySo:If you say so.
+10:catchrelease_fisherOkayKnot:This is another one of these knots, isn't it?",
+catchrelease_fisherOkaySaySo,DialogOptionSelected,$option == catchrelease_fisherOkaySaySo,"$menuState = catchreleaseFisher 0
+FireAll PopulateOptions",,,
+catchrelease_fisherOkayKnot,DialogOptionSelected,$option == catchrelease_fisherOkayKnot,,"""A terribly frayed one, especially here.""",100:catchrelease_fisherBack:Return,
 catchrelease_fisherRumorYes,DialogOptionSelected,"$option == catchrelease_fisherRumor score:10
 CatchReleaseCMD tokens
 $catchreleaseRumor","CatchReleaseCMD rumor
@@ -1232,7 +1246,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay,"""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay ""another chart on the shelf"","""Got one.""
 
 He sends over a range entry.
 

@@ -137,6 +137,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
         this.specimen.sourceId = getSourceId(anchor);
+        catchrelease.campaign.fish.fisherman.FishermanQuest.markCatch(this.specimen, anchor);
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
