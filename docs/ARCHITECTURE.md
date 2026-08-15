@@ -122,9 +122,9 @@ hidden example. The old outfitter migration stub is gone — development assumes
 | `catchrelease_harpoon` | `abilities/harpoon/ability/HarpoonAbilityPlugin` |
 | `skillshot_example` | `skillshot/example/ExampleSkillshotAbility` |
 
-**`data/config/settings.json`** — `ruleCommandPackages`, listing vanilla's five packages **plus**
-`catchrelease.dialogue.rules`. The key is read once from merged settings and **replaces** rather than
-merges, so vanilla's have to be re-listed; dropping any of them breaks every rule in the game.
+**`data/config/settings.json`** — `ruleCommandPackages`, listing only
+`catchrelease.dialogue.rules`: settings arrays merge across mods, so the mod's entry adds to
+vanilla's five packages rather than replacing them.
 The `graphics.characters` additions also register all five Fisherman coherence portraits with the
 settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
 an unloaded raw path. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
