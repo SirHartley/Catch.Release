@@ -108,7 +108,7 @@ public class CatchResultPanel {
             lines.add(new Line("Species", Misc.ucFirst(spec.rarity.name().toLowerCase()), spec.rarity.color));
         }
 
-        lines.add(new Line("Specimen", grade.name, grade.getColor()));
+        lines.add(new Line("Quality", grade.name, grade.getColor()));
         Line length = new Line("Length", String.format("%.2f m", entry.length), Misc.getHighlightColor());
         length.record = record;
         lines.add(length);

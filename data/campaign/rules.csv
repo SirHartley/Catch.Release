@@ -1246,7 +1246,7 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay ""another chart on the shelf"","""Got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay """"another chart on the shelf""""","""Got one.""
 
 He sends over a range entry.
 
@@ -1923,10 +1923,10 @@ $global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
-""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
-10:catchrelease_introCurious:""I want to know what you're doing out here.""
-20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
-100:catchrelease_fisherBack:""Not today.""",
+""You want to fish.""","0:catchrelease_introWantWork:I'm looking for work.
+10:catchrelease_introCurious:I want to know what you're doing out here.
+20:catchrelease_introRodQuestion:The rating said something about a ROD.
+100:catchrelease_fisherBack:Not today.",
 catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
@@ -1935,9 +1935,9 @@ $catchreleaseStage < 2
 
 The Fisherman glances over a manifest.
 
-""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
-10:catchrelease_introCurious:""I want to know what you're doing out here.""
-100:catchrelease_fisherBack:""Not today.""",Technical routing twin for players who reached the Fisherman without the bar rating.
+""You want to fish.""","0:catchrelease_introWantWork:I'm looking for work.
+10:catchrelease_introCurious:I want to know what you're doing out here.
+100:catchrelease_fisherBack:Not today.",Technical routing twin for players who reached the Fisherman without the bar rating.
 catchrelease_introHelloFromPropertyRating,DialogOptionSelected,"$option == catchrelease_introHello
 $global.catchrelease_metRating",,"""So.""
 
@@ -2026,8 +2026,8 @@ The Fisherman checks the ROD telemetry first.
 Only then does he look at what you brought back.
 
 ""First one usually is.""","0:catchrelease_introFirstContinue:Continue
-10:catchrelease_introFirstProud:""Not bad for a first catch.""
-20:catchrelease_introFirstQuestion:""What did I actually catch?""",
+10:catchrelease_introFirstProud:Not bad for a first catch, eh?
+20:catchrelease_introFirstQuestion:What did I actually catch?",
 catchrelease_introFirstProud,DialogOptionSelected,$option == catchrelease_introFirstProud,,"The corner of his mouth moves.
 
 ""Still got all the drones.""
@@ -2039,7 +2039,7 @@ catchrelease_introFirstQuestion,DialogOptionSelected,$option == catchrelease_int
 
 He turns the specimen container slightly.
 
-""Fish is fine if you're buying supper. Pattern's the careful word.""","catchrelease_introFirstContinue:""""And the careful answer?""""",
+""Fish is fine if you're buying supper. Pattern's the careful word.""",catchrelease_introFirstContinue:And the careful answer?,
 catchrelease_introFirstContinue,DialogOptionSelected,$option == catchrelease_introFirstContinue,,"The Fisherman brings up the deployment record.
 
 ""LYNE drones carry the ROD through the rupture. That's the part you're calling the line. Drone goes through, gets a return, brings the pattern back across.""
@@ -2050,9 +2050,9 @@ He zooms the display until the ROD trace fills it.
 
 He closes the plot.
 
-""Usually looks like a fish.""","0:catchrelease_intro_ghosts:""Why a fish?""
-10:catchrelease_introGhostWord:""A ghost?""
-100:catchrelease_introFirstDone:""What's next?""",
+""Usually looks like a fish.""","0:catchrelease_intro_ghosts:Why a fish?
+10:catchrelease_introGhostWord:A ghost?
+100:catchrelease_introFirstDone:What's next?",
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,,"""Don't know.""
 
 The Fisherman scratches under his jaw.
@@ -2295,7 +2295,7 @@ The Fisherman leans back.
 catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 2
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Local rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring me $catchreleaseTarget from a local rupture in $catchreleaseTargetWhere.""
 
 The Fisherman sends the mark.
 
@@ -2303,7 +2303,7 @@ The Fisherman sends the mark.
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget from $catchreleaseTargetWhere.""
 
 He forwards the system data.
 
@@ -2315,7 +2315,7 @@ A pause.
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Now, get me $catchreleaseTarget. It roams the open space in $catchreleaseTargetWhere.""
 
 ""Use the breach lights until you have the return. Harpoon it. Bring it here.""
 
@@ -2324,7 +2324,7 @@ He sends the range mark.
 ""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
-$catchreleaseStage == 5","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Both range targets.""
+$catchreleaseStage == 5","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Get me both range targets.""
 
 The Fisherman sends the records again.
 
