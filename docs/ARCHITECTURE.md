@@ -151,6 +151,10 @@ their class name:**
 | `catchrelease_ring` | **`MafiaJob`** | | | |
 | `catchrelease_client` | **`CompanionJob`** | | | |
 
+**`data/world/factions/default_ranks.json`** — contributes the `catchrelease_crabMerchant`
+rank label used by Crablobab's person card. The person remains Independent; the merged default-rank
+registry supplies only the custom `Crab Merchant` display string.
+
 **`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`,
 `catchrelease_coherence_field` → `CoherenceTerrain`. Carries the plugin class only; name, radius,
 layers, tags and the live pond's unstable-fabric map icon all come from the plugin — including the
@@ -592,7 +596,7 @@ inflated credits-and-crabs price. Its hover card states both the Terrible qualit
 
 | File | What it does |
 |---|---|
-| `CrablobabIdentity.java` | The campaign-persistent person shown by all three bar-entry greetings. It resolves `crabolabob.png` through the registered `graphics.characters` sprite id and mounts the minimal vanilla person card without adding him to a market's permanent people or comm directory |
+| `CrablobabIdentity.java` | The campaign-persistent `Crab Merchant` shown by all three bar-entry greetings. It resolves `crabolabob.png` through the registered `graphics.characters` sprite id, refreshes the data-registered custom rank for old saves, and mounts the minimal vanilla person card without adding him to a market's permanent people or comm directory |
 | `CrabWares.java` | The four regular wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. It also constructs and sells the empty-shelf fallback as the Green Bass row's exact minimum-size Terrible specimen for 10,000 credits and one crab. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop; each actual blast also replaces the saved latest-target name and marks it for one acknowledgement at the next stall meeting. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 | `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing until it sells and the next rock offers the next thing. A completed sale leaves that port's backdrop slot empty for 60 days before the next scene is assigned. Priced off rarity; anything already owned drops out of the rotation |
 
