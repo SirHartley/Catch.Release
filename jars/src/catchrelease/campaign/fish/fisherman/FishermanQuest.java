@@ -361,7 +361,7 @@ public class FishermanQuest {
      */
     public static boolean turnIn(TextPanelAPI text) {
         Saved quest = getActive();
-        if (quest == null || !spend(quest.speciesId)) return false;
+        if (quest == null || !spend(quest)) return false;
 
         return finishTurnIn(quest, text);
     }
@@ -410,8 +410,8 @@ public class FishermanQuest {
         return true;
     }
 
-    /** Takes one of the named species out of the hold, repacking whatever it came out of. */
-    protected static boolean spend(String speciesId) {
+    /** Takes only this request's exact specimen, repacking whatever it came out of. */
+    protected static boolean spend(Saved quest) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -425,7 +425,7 @@ public class FishermanQuest {
 
             int found = -1;
             for (int i = 0; i < contents.size(); i++) {
-                if (speciesId.equals(contents.get(i).speciesId)) {
+                if (isEligible(quest, contents.get(i))) {
                     found = i;
                     break;
                 }
