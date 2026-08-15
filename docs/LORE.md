@@ -1614,11 +1614,14 @@ He understands visible specimens, practical coherence readings and what performs
 
 ## Cooks
 
-Treat catch as ingredients.
+Cooks care about the plate, prep and service. Distinct catch requirements are separate ingredient
+lines, not taxonomic arguments. They leave handling tags attached so the prep crew can match each
+container to the right part of the dish.
 
-They may be particular.
+They may be exacting about grade, quantity and variety. A deadline is often the date after which
+they change the menu rather than wait for a supplier.
 
-They are not secretly studying hyperspace.
+They are not secretly studying hyperspace and do not derive fabric theory from flavour or handling.
 
 ## Independent fishermen
 

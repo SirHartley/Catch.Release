@@ -491,30 +491,26 @@ catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The provisioner checks the containers against the manifest and closes the order.
 
 $catchreleaseRewardCap is transferred to your account.",,
-catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three versions of a menu open on a slate. Ingredients are being crossed out faster than they are added.,,
+catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three ingredient cards laid beneath the name of one dish. Two supplier names have already been crossed out.,,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask about the menu.,
 catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I need three distinct catches for $catchreleaseDish.""
+Call $catchrelease_jobRef showRewardDetails","""I'm putting $catchreleaseDish on the menu. It needs three different catch components.""
 
-The cook taps three empty lines on the slate.
+The cook taps the three ingredient cards.
 
-""$catchreleaseAsk. Different means different. If two taste the same after the sauce, one of us has wasted a trip.""
+""$catchreleaseAsk. Each line is separate.""
 
-""$catchreleaseRewardCap when they reach my kitchen.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:Find another supplier.",
-catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Keep the handling tags.""",,
-catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,The cook deletes your name and resumes scrolling through suppliers.,,
-catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap.""
-
-A finger taps the three empty spaces.",,
+""Forty days. After that I change the dish. $catchreleaseRewardCap when the full order reaches my kitchen.""","catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:Decline.",
+catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Leave the handling tags on. I don't want the prep crew guessing which line is which.""",,
+catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,The cook removes your name from the supplier list and returns to the three ingredient cards.,,
+catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. All three lines. Same forty-day order.""",,
 catchrelease_chef_paid,catchreleaseJobPaid,"$missionId == catchrelease_chef
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"Each container is opened in turn.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The cook matches each handling tag to an ingredient card before handing the containers to the prep crew.
 
-The cook smells the first, prods the second, and stares at the third for several seconds.
+""Good. That's the plate.""
 
-""Yes.""
-
-$catchreleaseReward is transferred.",,
+$catchreleaseRewardCap is transferred.",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on his slate. A half-finished drink sits at one corner of the table.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch.,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
