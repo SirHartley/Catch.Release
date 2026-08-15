@@ -3140,8 +3140,8 @@ ShowDefaultVisual
 CatchReleaseCMD leaveEncounter","You cut the link. The lamps keep burning.
 
 Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."
-catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is checking the same account balance often enough that the number is unlikely to have improved.,,
-catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask him what the slate is telling him.,
+catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
+catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask about the account.,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has a claim form open between him and a clerk. The clerk has pushed it back across the counter.,,
 catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask what the clerk is not writing down.,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with her back to the wall and the door in view. Her drink has gone warm untouched.,,
@@ -3149,18 +3149,18 @@ catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.i
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask why the fisher is staying ashore.,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Pirates found our rupture.""
+Call $catchrelease_jobRef showRewardDetails","""Pirates found our rupture. Now they collect protection on it.""
 
-The fisher turns the slate around.
+The fisher turns the account sheet around.
 
-""They don't work it. They charge us for working it.""
+""First payment bought us a week. Then they raised the rate because we kept working.""
 
-A fleet identifier follows.
+The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 
-""Move them on and we can get the boats back out.""
+""Once we're agreed, get them off the rupture first. Pay them, scare them, fight them; I don't care. After they're gone, catch any fish from that exact rupture and bring it back. Nothing already in your hold proves the spot works.""
 
-""Once they're gone, take any fish from that same rupture. Bring it back so I know the spot works.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:Find another rupture.",
+""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+catchrelease_jobDecline:Decline.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Company hired security around our patch.""
 
@@ -3183,26 +3183,26 @@ A transponder record appears.
 
 ""We need them stopped. When they're gone, pull anything from that same rupture and bring it back. I need to know I can work it.""","catchrelease_jobAccept:Agree to go and see them.
 catchrelease_jobDecline:Decline.",
-catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Good.""
+catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"The camp coordinates and pirate transponder codes are transferred.
 
-The camp coordinates and pirate transponder codes are transferred.",,
-catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,The fisher nods and puts the slate away.,,
+""Whatever gets them off it. Just don't leave me owing them afterward.""",,
+catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,The fisher closes the job entry and moves another maintenance payment into next month.,,
 catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
 !$catchreleaseCampCleared",,"""Still there.""
 
 The fisher checks the camp marker.
 
-""Nice quiet spot to park.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+""Raised the weekly number again, too.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Rupture's clear.""
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Camp's gone. Good.""
 
-He taps the mark.
+He taps the rupture marker.
 
-""Bring me $catchreleaseAsk out of it. Then I know the spot works.""",,
+""Now bring me $catchreleaseAsk out of that spot. I need a catch from after it was cleared.""",,
 catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The camp answers almost immediately.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the retrieval record, then deletes the protection payment from next month's accounts.
 
-""Saw them leave.""
+""Good. Boats go back out next shift.""
 
 Received: $catchreleaseReward.",,
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try talking first.""

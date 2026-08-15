@@ -242,6 +242,10 @@ the work itself. The terms must say plainly that, after the fleet is gone, **any
 that exact rupture** will prove the spot can be worked again. A fish already in the hold is not
 proof of what happened after the agreement.
 
+Pirate pressure is commercial extortion. Write the fisher as a working operator angry about
+protection payments, idle boats, repair costs and narrowing margins, not as someone generically
+afraid of pirates. The occupation matters because every paid week makes the next one more expensive.
+
 When the fleet leaves, the intel update says so and immediately names the remaining work: catch
 any fish from the marked rupture. It must not leave the player inferring that the old fleet marker
 or the original clearing instruction is still current.
