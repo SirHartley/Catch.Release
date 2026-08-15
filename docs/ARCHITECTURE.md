@@ -227,13 +227,23 @@ rows are routing twins and interrupted-conversation resumes needed to make that 
 
 **Dialogue voice is governed by `LORE.md`, then checked against vanilla faction usage.** Patrols
 describe only the law, sensor return, damage, and prohibited equipment they can observe: they do not
-recognise fabric mechanics or explain an anomaly. Hegemony lines stay procedural, Tri-Tachyon lines
-contractual, Church lines sincerely protective, Path lines direct and doctrinal, League lines legally
-competent, Diktat lines formally administrative, Independents practical, and pirates concerned with
-cost and leverage. Fisherman and Crablobab scenes likewise present physical contradictions without
-adding a narrator's interpretation or prescribing the player's reaction. Voice-only passes may
-change the `text` column and displayed option labels, but preserve rule ids, triggers, conditions,
-scripts, notes, option ids/order, memory tokens, mechanical facts, and every return route.
+recognise fabric mechanics or explain an anomaly. Hegemony lines carry blunt command, Tri-Tachyon
+lines polished corporate menace, Church lines vivid and sincere stewardship, League lines legally
+confident commerce, Diktat lines offended state authority, Independents practical local judgement,
+and pirates humour sharpened by cost and leverage. Path dialogue normally follows its authored
+scene, but breach-lamp escalation and the hostile fishing camp are intentionally full-throated:
+Moloch, defilement, base appetite and violence against creation, screamed without accurate fabric
+physics. Institutional vocabulary must not flatten any of these into placeholder procedure.
+
+The Fisherman and Crablobab never share a cadence. The former is a warm, patient old captain in
+presentation with a colder strategic calculus underneath; he teaches in full human beats, then
+chooses where an explanation must stop. The latter is low coherence becoming exuberant merchant
+caricature, shaping his shop's reality like clay while the transaction remains perfectly legible.
+Both scenes demonstrate physical contradictions without narrating their meaning or prescribing the
+player's reaction. Voice-only passes may change the `text` column, displayed option labels and the
+quoted prose literal of an `AddText` command, but preserve rule ids, triggers, conditions, all
+non-dialogue script commands, notes, option ids/order, memory tokens, mechanical facts and every
+return route.
 
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
