@@ -19,13 +19,12 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Codex
-- Side list silhouette renderer now completely broken - sometimes shows slightly transparent full icon, sometimes shows blacked out one. Just draw the outline on the sprite and render it it's not that hard
+Icons
+- hook up the two new icons to fisherman fleet and terrain respectively
 
-Shop
-- Get rid of the gray backing for "locked" entries.
-- The unlocked rungs should always be blue, not gray, even if the other rungs on the entry are locked.
-- Any rungs that are locked because they require a schematic should be grey. I'm talking about the small, square icons. This means that the icon, while you do not have a schematic, should be grey, and when you have one, should be like normal atm, and when unlocked, light blue like atm.
+Codex
+- Side list silhouette renderer now completely broken - sometimes shows slightly transparent full icon, sometimes shows blacked out one. Just draw the outline on the sprite and render it used to work just fine.
+- I suspect all the sprite issues we're having are caused by you re-using the same texture. Just get a new spriteAPI and modify that one if you're having trouble with one tex in memory.
 
 Crabolabob
 - Should use portrait in portraits folder, load via settings eg fisherman portrait
@@ -34,10 +33,6 @@ Fleet interaction
 - Paying the fine immediately closes the dialogue. There should be a "leave" button there.
 - Actually, most fleet dialogues have this issue.
 - Hitting a civ fleet with a harpoon makes it hostile but doesn't cause it to engage you. It should engage you or run depending on if it's bigger than you.
-
-Fisherman
-- Ask about something else - if a question was asked and is correctly sorted to the back of the list, it should be "highlighted" grey like the "sell common catch" option
-- At stability "barely holding", add one-time option "are you okay" to the main menu. Answer: Never better, thank you for asking. -> R1: Okay then... R2: Are you sure? Got a mirror? -> Fabric's playing tricks, don't mind it. -> R1: If you say so. R2: This is another one of these knots, isn't it? -> A terribly frayed one, especially here. R3: Your beard is tentacles -> Ask me in a more... stable place.
 
 Sound
 - Minigame lacks soundstrack
@@ -61,6 +56,21 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
+
+Shop
+- Get rid of the gray backing for "locked" entries.
+- The unlocked rungs should always be blue, not gray, even if the other rungs on the entry are locked.
+- Any rungs that are locked because they require a schematic should be grey. I'm talking about the small, square icons. This means that the icon, while you do not have a schematic, should be grey, and when you have one, should be like normal atm, and when unlocked, light blue like atm.
+
+Fisherman
+- At stability "barely holding", add one-time option "are you okay" to the main menu. Answer: Never better, thank you for asking. -> R1: Okay then... R2: Are you sure? Got a mirror? -> Fabric's playing tricks, don't mind it. -> R1: If you say so. R2: This is another one of these knots, isn't it? -> A terribly frayed one, especially here.
+- Ask about work - Should send the player after a _specific_ fish. You can't just hand in any random fish you got in cargo, it has to be target fish id caught after quest received timestamp in the target system
+- Ask about work - Quest dialogue does not highlight fish in rarity colour or rewards as important
+- Ask about work - Hand in dialogue should show "The Fisherman now stocks an additional range data entry." in green - quest reward. Small letters, as is vanilla standard.
+- Ask about work - Should only be available every 3 months after completion
+- Range Data seller - Should roll chances for rarity of sold range data (check if this isn't already the case...)
+- Sell fish - add "pack into crates" button to the left side of the cargo picker. Pressing it reloads panel with all fish packed into crates for easier selling.
+- "Ask about something else" - entries you have clicked once should be coloured grey in addition to being moved to the back
 
 Lamp Interaction
 - Patrols with other assignments like standing down ect should immediately stop doing what they were doing and move to confront about lights. Check how it's handled for vanilla transponder interactions.
