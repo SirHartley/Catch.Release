@@ -11,6 +11,7 @@ public final class CrablobabIdentity {
 
     public static final String PERSON_KEY = "$catchrelease_crablobab_person";
     public static final String PORTRAIT_ID = "catchrelease_crabolabob";
+    public static final String RANK_ID = "catchrelease_crabMerchant";
 
     private CrablobabIdentity() {
     }
@@ -23,7 +24,7 @@ public final class CrablobabIdentity {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
         if (stored instanceof PersonAPI) {
             PersonAPI person = (PersonAPI) stored;
-            refreshPortrait(person);
+            refresh(person);
             return person;
         }
 
@@ -32,9 +33,7 @@ public final class CrablobabIdentity {
         person.setFaction(Factions.INDEPENDENT);
         person.setGender(FullName.Gender.MALE);
         person.setName(new FullName("Crablobab", "", FullName.Gender.MALE));
-        person.setRankId(null);
-        person.setPostId(null);
-        refreshPortrait(person);
+        refresh(person);
 
         Global.getSector().getMemoryWithoutUpdate().set(PERSON_KEY, person);
         return person;
@@ -48,7 +47,11 @@ public final class CrablobabIdentity {
         return true;
     }
 
-    private static void refreshPortrait(PersonAPI person) {
+    /** Refreshes data-owned presentation too, so an existing save receives the custom rank. */
+    private static void refresh(PersonAPI person) {
+        person.setRankId(RANK_ID);
+        person.setPostId(null);
+
         String portrait = Global.getSettings().getSpriteName("characters", PORTRAIT_ID);
         if (!portrait.equals(person.getPortraitSprite())) person.setPortraitSprite(portrait);
     }

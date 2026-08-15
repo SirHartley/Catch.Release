@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.crab.CrabBackdrops;
 import catchrelease.campaign.fish.crab.CrabWares;
+import catchrelease.campaign.fish.crab.CrablobabBarPresence;
 import catchrelease.campaign.fish.crab.CrablobabIdentity;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
@@ -318,6 +319,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return seizeFish(dialog);
 
             //---- the man with the crate
+            case "crabBarAvailable":
+                return CrablobabBarPresence.isAvailable(dialog);
             case "showCrabPortrait":
                 return CrablobabIdentity.show(dialog);
             case "crabBuy":
