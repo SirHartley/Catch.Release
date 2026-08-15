@@ -76,41 +76,36 @@ public final class FishIcons {
         SpriteAPI icon = SpriteLoader.loadSprite(path);
         if (icon == null || icon.getWidth() <= 0f || icon.getHeight() <= 0f) return;
 
-        try {
             float scale = Math.min(size / icon.getWidth(), size / icon.getHeight());
-            icon.setSize(icon.getWidth() * scale, icon.getHeight() * scale);
-            icon.setNormalBlend();
+        icon.setSize(icon.getWidth() * scale, icon.getHeight() * scale);
+        icon.setNormalBlend();
 
-            int x = Math.round(centerX);
-            int y = Math.round(centerY);
+        int x = Math.round(centerX);
+        int y = Math.round(centerY);
 
-            if (FishCodexEntryState.resolve(spec.id).isCaught()) {
-                icon.setColor(Color.WHITE);
-                icon.setAlphaMult(alphaMult);
-                icon.renderAtCenter(x, y);
-                return;
-            }
-
-            //the rim first, then the shape over it - but only while the shape is opaque enough to
-            //be a lid rather than a tint. See RIM_COVER_FLOOR: these four draws are the artwork
-            float rim = RIM_ALPHA * alphaMult * coverShare(alphaMult);
-
-            if (rim > 0f) {
-                icon.setColor(Color.WHITE);
-                icon.setAlphaMult(rim);
-                icon.renderAtCenter(x - RIM_OFFSET, y);
-                icon.renderAtCenter(x + RIM_OFFSET, y);
-                icon.renderAtCenter(x, y - RIM_OFFSET);
-                icon.renderAtCenter(x, y + RIM_OFFSET);
-            }
-
-            icon.setColor(Color.BLACK);
+        if (FishCodexEntryState.resolve(spec.id).isCaught()) {
+            icon.setColor(Color.WHITE);
             icon.setAlphaMult(alphaMult);
             icon.renderAtCenter(x, y);
-        } finally {
-            //the sprite object is shared across the Codex, map, cargo and result screens
-            SpriteLoader.resetSprite(path, icon);
+            return;
         }
+
+        //the rim first, then the shape over it - but only while the shape is opaque enough to
+        //be a lid rather than a tint. See RIM_COVER_FLOOR: these four draws are the artwork
+        float rim = RIM_ALPHA * alphaMult * coverShare(alphaMult);
+
+        if (rim > 0f) {
+            icon.setColor(Color.WHITE);
+            icon.setAlphaMult(rim);
+            icon.renderAtCenter(x - RIM_OFFSET, y);
+            icon.renderAtCenter(x + RIM_OFFSET, y);
+            icon.renderAtCenter(x, y - RIM_OFFSET);
+            icon.renderAtCenter(x, y + RIM_OFFSET);
+        }
+
+        icon.setColor(Color.BLACK);
+        icon.setAlphaMult(alphaMult);
+        icon.renderAtCenter(x, y);
     }
 
     /**
