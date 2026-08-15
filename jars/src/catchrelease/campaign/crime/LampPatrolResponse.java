@@ -45,6 +45,9 @@ public class LampPatrolResponse implements EveryFrameScript {
     /** Which faction this crew is stopping the player on behalf of. */
     public static final String FACTION_KEY = "$catchrelease_lampPatrolFaction";
 
+    /** The system whose law produced this stop, retained if the fleet or player leaves it. */
+    public static final String SYSTEM_KEY = "$catchrelease_lampPatrolSystem";
+
     /** How far from the player a patrol can be and still notice. */
     public static final float SEARCH_RANGE = 2500f;
 
@@ -54,7 +57,7 @@ public class LampPatrolResponse implements EveryFrameScript {
     /** Days before that faction retries a stop that ended while the same burn remained active. */
     public static final float RETRY_DAYS = 3f;
 
-    /** Per-faction wait for an unresolved burn, in sector memory so it survives a reload. */
+    /** Per-system-and-faction wait key stem for an unresolved burn. */
     public static final String RETRY_KEY = "$catchrelease_lampPatrolWait";
 
     /** Matches vanilla's own fleet-search cadence. */
@@ -162,8 +165,9 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (LampOffence.hasBeenTold(mem)) return false;
         if (!mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
 
-        if (Global.getSector().getMemoryWithoutUpdate()
-                .getBoolean(RETRY_KEY + faction.getId())) return false;
+        String retryKey = retryKey(player.getContainingLocation(), faction.getId());
+        if (retryKey != null
+                && Global.getSector().getMemoryWithoutUpdate().getBoolean(retryKey)) return false;
 
         if (curr.getAI() instanceof ModularFleetAIAPI) {
             ModularFleetAIAPI ai = (ModularFleetAIAPI) curr.getAI();
@@ -197,6 +201,7 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         mem.set(LampOffence.SAW_KEY, true, CHASE_DAYS);
         mem.set(FACTION_KEY, patrol.getFaction().getId(), CHASE_DAYS);
+        mem.set(SYSTEM_KEY, patrol.getContainingLocation().getId(), CHASE_DAYS);
 
         //Vanilla's pursuit flags tell the tactical AI that it may pick the player, but an active
         //assignment such as STANDING_DOWN can still keep the assignment module in charge of the
@@ -300,9 +305,10 @@ public class LampPatrolResponse implements EveryFrameScript {
                 REASON, false, 0f);
 
         String factionId = mem.getString(FACTION_KEY);
-        if (factionId != null) {
+        String systemId = mem.getString(SYSTEM_KEY);
+        String retryKey = retryKey(systemId, factionId);
+        if (retryKey != null) {
             MemoryAPI sector = Global.getSector().getMemoryWithoutUpdate();
-            String retryKey = RETRY_KEY + factionId;
 
             if (lampsStillBurning) sector.set(retryKey, true, RETRY_DAYS);
             else sector.unset(retryKey);
@@ -313,8 +319,19 @@ public class LampPatrolResponse implements EveryFrameScript {
         mem.unset(LampOffence.SAW_KEY);
         mem.unset(LampOffence.STOPPED_KEY);
         mem.unset(FACTION_KEY);
+        mem.unset(SYSTEM_KEY);
 
         stopping = null;
+    }
+
+    /** One retry slot per enforcing faction per system; neither dimension may leak into another. */
+    protected static String retryKey(LocationAPI location, String factionId) {
+        return location == null ? null : retryKey(location.getId(), factionId);
+    }
+
+    protected static String retryKey(String systemId, String factionId) {
+        if (systemId == null || factionId == null) return null;
+        return RETRY_KEY + "_" + systemId + "_" + factionId;
     }
 
     @Override

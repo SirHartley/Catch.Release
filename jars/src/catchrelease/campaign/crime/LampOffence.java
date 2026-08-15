@@ -35,7 +35,11 @@ import com.fs.starfarer.api.util.Misc;
  */
 public class LampOffence {
 
-    /** How many times the player has been stopped for this, and when the last one was. */
+    /**
+     * Per-system history key stems. Each system center keeps one pair per enforcing faction.
+     * The old sector-global values used these bare keys; they are deliberately no longer read,
+     * because assigning that shared history to any one system or faction would preserve the leak.
+     */
     public static final String COUNT_KEY = "$catchrelease_lampOffences";
     public static final String LAST_KEY = "$catchrelease_lampLast";
 
@@ -180,13 +184,37 @@ public class LampOffence {
     //---------------------------------------------------------------- the ladder
 
     /**
-     * How many times this has happened, forgetting the whole business after long enough.
+     * The system-local memory that owns an offence history.
+     * <p>
+     * A system center is persistent and unique to the location, while the faction suffix below
+     * keeps co-located authorities from inheriting one another's warning ladder.
+     */
+    protected static MemoryAPI getHistoryMemory(CampaignFleetAPI player) {
+        if (player == null || !(player.getContainingLocation() instanceof StarSystemAPI)) {
+            return null;
+        }
+
+        SectorEntityToken center = ((StarSystemAPI) player.getContainingLocation()).getCenter();
+        return center == null ? null : center.getMemoryWithoutUpdate();
+    }
+
+    /** A faction's slot inside one system's history memory. */
+    protected static String historyKey(String stem, String factionId) {
+        return stem + "_" + factionId;
+    }
+
+    /**
+     * How many times this faction has stopped the player in this system, forgetting the whole
+     * business after long enough.
      * <p>
      * Read rather than ticked: nothing has to run on a clock for a count that is only ever asked
      * about during a conversation, and the arithmetic is the same either way.
      */
-    public static int getCount() {
-        Object last = Global.getSector().getMemoryWithoutUpdate().get(LAST_KEY);
+    public static int getCount(CampaignFleetAPI player, String factionId) {
+        MemoryAPI history = getHistoryMemory(player);
+        if (history == null || factionId == null) return 0;
+
+        Object last = history.get(historyKey(LAST_KEY, factionId));
 
         if (last instanceof Long
                 && Global.getSector().getClock().getElapsedDaysSince((Long) last) > FORGET_DAYS) {
@@ -194,12 +222,15 @@ public class LampOffence {
             return 0;
         }
 
-        return Global.getSector().getMemoryWithoutUpdate().getInt(COUNT_KEY);
+        return history.getInt(historyKey(COUNT_KEY, factionId));
     }
 
-    /** Whether the last stop was recent enough that this one counts as "again, this month". */
-    public static boolean isRepeatWithinMonth() {
-        Object last = Global.getSector().getMemoryWithoutUpdate().get(LAST_KEY);
+    /** Whether this faction's last local stop was recent enough to count as "again, this month". */
+    public static boolean isRepeatWithinMonth(CampaignFleetAPI player, String factionId) {
+        MemoryAPI history = getHistoryMemory(player);
+        if (history == null || factionId == null) return false;
+
+        Object last = history.get(historyKey(LAST_KEY, factionId));
 
         return last instanceof Long
                 && Global.getSector().getClock().getElapsedDaysSince((Long) last) <= REPEAT_DAYS;
@@ -211,24 +242,27 @@ public class LampOffence {
      * The fourth is only reached by doing it again inside a month. Anything slower than that holds
      * at the third rung rather than escalating forever - they want the lamps off, not a war.
      */
-    public static int getRung() {
-        int count = getCount();
+    public static int getRung(CampaignFleetAPI player, String factionId) {
+        int count = getCount(player, factionId);
 
         if (count <= 0) return 1;
         if (count == 1) return 2;
         if (count == 2) return 3;
 
-        return isRepeatWithinMonth() ? 4 : 3;
+        return isRepeatWithinMonth(player, factionId) ? 4 : 3;
     }
 
-    /** Books this stop, which is what moves the ladder on. */
-    public static void record() {
+    /** Books this faction's stop in this system, which is what moves its local ladder on. */
+    public static void record(CampaignFleetAPI player, String factionId) {
+        MemoryAPI history = getHistoryMemory(player);
+        if (history == null || factionId == null) return;
+
         //read before the timestamp is moved, since getCount() decides on the old one whether the
         //whole business has lapsed
-        int next = getCount() + 1;
+        int next = getCount(player, factionId) + 1;
 
-        Global.getSector().getMemoryWithoutUpdate().set(COUNT_KEY, next);
-        Global.getSector().getMemoryWithoutUpdate().set(LAST_KEY,
+        history.set(historyKey(COUNT_KEY, factionId), next);
+        history.set(historyKey(LAST_KEY, factionId),
                 Global.getSector().getClock().getTimestamp());
     }
 
@@ -263,8 +297,12 @@ public class LampOffence {
      * does not undo the encounter - the lamps still go out - but it does buy the crew deciding not
      * to file it, and a rung that stayed climbed after that would make the point worthless.
      */
-    public static void forgive() {
-        Global.getSector().getMemoryWithoutUpdate().set(COUNT_KEY, Math.max(0, getCount() - 1));
+    public static void forgive(CampaignFleetAPI player, String factionId) {
+        MemoryAPI history = getHistoryMemory(player);
+        if (history == null || factionId == null) return;
+
+        history.set(historyKey(COUNT_KEY, factionId),
+                Math.max(0, getCount(player, factionId) - 1));
     }
 
     /**
