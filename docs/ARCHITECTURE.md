@@ -221,9 +221,20 @@ choice in vanilla's unquoted option-panel style, including the introduction, job
 follow-up questions.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
+The current sheet is 502 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
+
+**Dialogue voice is governed by `LORE.md`, then checked against vanilla faction usage.** Patrols
+describe only the law, sensor return, damage, and prohibited equipment they can observe: they do not
+recognise fabric mechanics or explain an anomaly. Hegemony lines stay procedural, Tri-Tachyon lines
+contractual, Church lines sincerely protective, Path lines direct and doctrinal, League lines legally
+competent, Diktat lines formally administrative, Independents practical, and pirates concerned with
+cost and leverage. Fisherman and Crablobab scenes likewise present physical contradictions without
+adding a narrator's interpretation or prescribing the player's reaction. Voice-only passes may
+change the `text` column and displayed option labels, but preserve rule ids, triggers, conditions,
+scripts, notes, option ids/order, memory tokens, mechanical facts, and every return route.
+
 The rupture-interception twin for `catchrelease_introCurious` omits only the final supplied
 `Come alongside` sentence because the interception greeting has already delivered that same line.
 The Fisherman's `Ask about something else` submenu opens at stage 2, in the same `giveRod()` call
