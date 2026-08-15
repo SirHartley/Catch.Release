@@ -442,7 +442,7 @@ The provisioner turns the slate toward you.
 ""$catchreleaseAskCap.""
 
 ""$catchreleaseRewardCap on delivery. Same rate no matter where you found it.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:""I'll pass.""",
+catchrelease_jobDecline:I'll pass.",
 catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good.""
 
 Your comm ID is added to the supplier list.",,
@@ -464,7 +464,7 @@ The cook taps three empty lines on the slate.
 ""$catchreleaseAsk. Different means different. If two taste the same after the sauce, one of us has wasted a trip.""
 
 ""$catchreleaseRewardCap when they reach my kitchen.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:""Find another supplier.""",
+catchrelease_jobDecline:Find another supplier.",
 catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Keep the handling tags.""",,
 catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,The cook deletes your name and resumes scrolling through suppliers.,,
 catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap.""
@@ -492,7 +492,7 @@ He shows you the first order.
 ""$catchreleaseAskCap. One demonstration shipment.""
 
 ""$catchreleaseRewardCap. If it arrives when you say it will, I can sell the second run before the first is unpacked.""","catchrelease_jobAccept:Agree to the trial shipment.
-catchrelease_jobDecline:""Find another boat.""",
+catchrelease_jobDecline:Find another boat.",
 catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent.""
 
 He sends an invoice template.
@@ -599,7 +599,7 @@ You point out that fish are not generally known for organized combat.
 ""That's why we need good ones.""
 
 The offered payment is $catchreleaseReward. Between them, it appears to be all the money they have.","catchrelease_jobAccept:Agree to find two.
-catchrelease_jobDecline:""No fish fighting.""",
+catchrelease_jobDecline:No fish fighting.",
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The bracket receives your ship's name.
 
 This appears to be binding.",,
@@ -851,8 +851,8 @@ catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score
 !$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
 Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestPitch""
 
-Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:""We'll see what we can find.""
-5:catchrelease_fqAcceptNoPromise:""No promises.""
+Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
+5:catchrelease_fqAcceptNoPromise:No promises.
 10:catchrelease_fqDecline:Decline",Two acceptance phrasings intentionally converge
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
 CatchReleaseCMD leaveEncounter","They transmit their logs and the local range references.
@@ -1019,7 +1019,7 @@ He sees your expression.
 
 He points to the beacon.
 
-""By the time anyone worked it out, I wasn't on their route anymore.""","0:catchrelease_ratingWho:""What boat?""
+""By the time anyone worked it out, I wasn't on their route anymore.""","0:catchrelease_ratingWho:What boat?
 100:catchrelease_castawayBack:Something else",
 catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,,"""Fishing crew.""
 
@@ -1169,14 +1169,14 @@ $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_fourJumps",,,"60:catchrelease_intro_fourJumps:""I just left you in another system.""",
+!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:I just left you in another system.,
 catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_sameHull",,,"70:catchrelease_introSameHull:""Is this the same ship?""",
+!$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:Is this the same ship?,
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
@@ -1304,9 +1304,9 @@ They nod vaguely upward.
 A pause.
 
 ""Ask for the Fisherman.""",,
-catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,"0:catchrelease_ratingBarWhere:""""Where do I find the trawler?""""",Shared local menu: asked flags exist only for this bar conversation.
-catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,"10:catchrelease_ratingBarWhatRating:""""What exactly is a rating?""""",
-catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,"20:catchrelease_ratingBarFishing:""""Fishing. In space.""""",
+catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,Shared local menu: asked flags exist only for this bar conversation.
+catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:What exactly is a rating?,
+catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:Fishing. In space.,
 catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,"Always present, including after all three questions have been consumed, so the event never has an empty option panel."
 catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
 FireAll CatchReleaseRatingQuestions","""Ship's crew.""
@@ -1349,8 +1349,8 @@ One crab has worked a claw through the side of its crate. Crablobab gently pushe
 
 This is not a question.
 
-""Excellent. You need things.""","0:catchrelease_crabStall:""What sort of things?""
-10:catchrelease_crabCrabs:""Why the crabs?""
+""Excellent. You need things.""","0:catchrelease_crabStall:What sort of things?
+10:catchrelease_crabCrabs:Why the crabs?
 100:catchrelease_crabLeave:Decline whatever this is becoming",
 catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
@@ -1369,7 +1369,7 @@ A pocket near his shoulder flashes once.
 
 He looks expectantly at your empty hands.
 
-""You need things.""","0:catchrelease_crabStall:""Show me what you have""
+""You need things.""","0:catchrelease_crabStall:Show me what you have
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
@@ -1384,7 +1384,7 @@ One of the crabs has got as far as the next stool. He returns it to the crate th
 
 He looks expectantly at your empty hands.
 
-""You need things.""","0:catchrelease_crabStall:""Show me what you have""
+""You need things.""","0:catchrelease_crabStall:Show me what you have
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabCrabs,DialogOptionSelected,$option == catchrelease_crabCrabs,,"""Crabs!""
 
@@ -1453,7 +1453,7 @@ catchrelease_crabBuyCelebration,DialogOptionSelected,"$option == catchrelease_cr
 
 ""Celebrate responsibly.""
 
-""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""",
+""Baha handles on and off. Outfitter.""",0:catchrelease_crabBaha:Baha?,
 catchrelease_crabBuyCelebrationKnown,DialogOptionSelected,"$option == catchrelease_crabBuyCelebration
 $global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
@@ -1502,7 +1502,7 @@ Once fitted, the whispering is gone.
 
 Nothing else changes.
 
-""Baha handles on and off. Outfitter.""","0:catchrelease_crabBaha:""Baha?""",
+""Baha handles on and off. Outfitter.""",0:catchrelease_crabBaha:Baha?,
 catchrelease_crabBuyEarmuffsKnown,DialogOptionSelected,"$option == catchrelease_crabBuyEarmuffs
 $global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
 
@@ -1740,7 +1740,7 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 
 He turns a control unit over in his hands.
 
-""Don't mistake that for seeing you.""","0:catchrelease_ask_lookingFollow:""What's the difference?""
+""Don't mistake that for seeing you.""","0:catchrelease_ask_lookingFollow:What's the difference?
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_lookingFollow,DialogOptionSelected,$option == catchrelease_ask_lookingFollow,,"The Fisherman stops turning the control unit.
@@ -1757,7 +1757,7 @@ catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patte
 
 He scratches at the stubble under his jaw.
 
-""Fish is what everybody calls it once there's money involved.""","0:catchrelease_ask_patternsWhy:""Why fish?""
+""Fish is what everybody calls it once there's money involved.""","0:catchrelease_ask_patternsWhy:Why fish?
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""Never found a useful answer.""","0:catchrelease_fisherAskBack:Something else
@@ -1784,7 +1784,7 @@ The Fisherman goes on cleaning the control unit.","0:catchrelease_fisherAskBack:
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_largest,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 6
 !$global.catchrelease_fisherAsked_largest","CatchReleaseCMD addFisherQuestion catchrelease_ask_largest ""What is the largest thing you have landed?"" false",,,
-catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true 0,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
+catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true 0,"""One I didn't land.""","0:catchrelease_ask_largestFollow:How large?
 10:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""","0:catchrelease_fisherAskBack:Something else
@@ -1890,9 +1890,9 @@ Behind him, somebody calls for a crane crew. Another voice answers from somewher
 
 The Fisherman does not react.
 
-""Wondered where that got to.""","0:catchrelease_introHarpoonReturn:""You want it back?""
-10:catchrelease_introHarpoonAsk:""What is it?""
-100:catchrelease_fisherBack:""I only came to return it.""",
+""Wondered where that got to.""","0:catchrelease_introHarpoonReturn:You want it back?
+10:catchrelease_introHarpoonAsk:What is it?
+100:catchrelease_fisherBack:I only came to return it.",
 catchrelease_introHarpoonReturn,DialogOptionSelected,$option == catchrelease_introHarpoonReturn,,"""If you've no use for half a docking rack and a dead transponder.""
 
 A cargo boom unfolds from the trawler.
@@ -1908,7 +1908,7 @@ When the crane clears your hull, the Fisherman is still on the channel.
 He scratches at the grey along his jaw.
 
 ""Might as well learn the trade.""","0:catchrelease_introHello:Ask about fishing
-100:catchrelease_fisherBack:""Another time.""",
+100:catchrelease_fisherBack:Another time.",
 catchrelease_introHarpoonAsk,DialogOptionSelected,$option == catchrelease_introHarpoonAsk,,"""LYNE service frame. Docking gear, transponder, half the things people kick when the drone won't answer.""
 
 He looks past the camera.
@@ -1943,18 +1943,18 @@ $global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
-""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
-10:catchrelease_introCurious:""I want to know what you're doing out here.""
-20:catchrelease_introRodQuestion:""The rating said something about a ROD.""
-100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction after meeting the bar rating.
+""You want to fish.""","0:catchrelease_introWantWork:I'm looking for work.
+10:catchrelease_introCurious:I want to know what you're doing out here.
+20:catchrelease_introRodQuestion:The rating said something about a ROD.
+100:catchrelease_fisherBack:Not today.",Technical routing twin for the recovered-property introduction after meeting the bar rating.
 catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
 !$global.catchrelease_metRating",,"""So.""
 
 The Fisherman glances over a manifest.
 
-""You want to fish.""","0:catchrelease_introWantWork:""I'm looking for work.""
-10:catchrelease_introCurious:""I want to know what you're doing out here.""
-100:catchrelease_fisherBack:""Not today.""",Technical routing twin for the recovered-property introduction without the bar rating.
+""You want to fish.""","0:catchrelease_introWantWork:I'm looking for work.
+10:catchrelease_introCurious:I want to know what you're doing out here.
+100:catchrelease_fisherBack:Not today.",Technical routing twin for the recovered-property introduction without the bar rating.
 catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""Good.""
 
 The answer comes with no salesmanship attached.
@@ -1980,8 +1980,8 @@ Your science officer quietly points out that the D already stands for Device.
 
 The Fisherman hears this.
 
-""Yes.""","0:catchrelease_introRodMeaning:""What do the other letters stand for?""
-10:catchrelease_intro_rod:""Show me the equipment.""",
+""Yes.""","0:catchrelease_introRodMeaning:What do the other letters stand for?
+10:catchrelease_intro_rod:Show me the equipment.",
 catchrelease_introRodMeaning,DialogOptionSelected,$option == catchrelease_introRodMeaning,,"""Depends which manual you found.""
 
 He reaches for a control slate.
@@ -2000,9 +2000,9 @@ Nothing involved could reasonably be carried by a person.
 
 He sends your helm a local nav mark.
 
-""Open rupture nearby. Take one fish. Bring it back.""","0:catchrelease_introRodOperate:""Anything I should know before I use it?""
-10:catchrelease_introRodTrust:""You give this equipment to every stranger who asks?""
-100:catchrelease_introRodGo:""I'll bring you a fish.""",
+""Open rupture nearby. Take one fish. Bring it back.""","0:catchrelease_introRodOperate:Anything I should know before I use it?
+10:catchrelease_introRodTrust:You give this equipment to every stranger who asks?
+100:catchrelease_introRodGo:I'll bring you a fish.",
 catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,,"""Point the fleet at the rupture. Start the rig. Let the drones do their work.""
 
 He taps the side of his mug against the console.
@@ -2089,9 +2089,9 @@ He closes both.
 
 ""You're ready for the outfitter.""
 
-A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:""What can I do with the outfitter?""
+A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:What can I do with the outfitter?
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",Supplied wording retained verbatim; the live technical twin corrects the distinct-target comparison requested after playtesting.
+100:catchrelease_introShopLater:I'll look later.",Supplied wording retained verbatim; the live technical twin corrects the distinct-target comparison requested after playtesting.
 catchrelease_introTurnIn3Distinct,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -2111,10 +2111,10 @@ He closes both.
 
 He points at the comm menu.
 
-""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:""What can I do with the outfitter?""
-5:catchrelease_introConservatory:""What's a breach conservatory?""
+""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:What can I do with the outfitter?
+5:catchrelease_introConservatory:What's a breach conservatory?
 10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
+100:catchrelease_introShopLater:I'll look later.","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -2136,17 +2136,17 @@ Then the launcher.
 
 He looks directly at you.
 
-""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
-10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
+""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
+10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?
+20:catchrelease_introWeaponQuestion:This is a weapon.",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
 catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Keep the drones flying. Keep the return clean. Fit tackle for the work you're actually doing.""
 
 He gestures at your manifest.
 
 ""If the hardware isn't on your ship, it has no business on the invoice.""
 
-""Some lines stay off it until a job turns up the schematic. A schematic opens the purchase. It isn't the hardware.""","0:catchrelease_introAskTackle:""What is tackle?""
-10:catchrelease_introAskUpgrade:""What is an upgrade?""
+""Some lines stay off it until a job turns up the schematic. A schematic opens the purchase. It isn't the hardware.""","0:catchrelease_introAskTackle:What is tackle?
+10:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
 
@@ -2154,7 +2154,7 @@ He taps the manifest.
 
 ""Jobs turn up the schematics. Bring one back, and that tackle goes on the invoice.""
 
-""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:""What is an upgrade?""
+""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
 
@@ -2162,20 +2162,20 @@ He points at the entry.
 
 ""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
 
-""Improves the function listed on it.""","0:catchrelease_introAskTackle:""What is tackle?""
+""Improves the function listed on it.""","0:catchrelease_introAskTackle:What is tackle?
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introShopLater,,"""Probably wise.""
 
 He signals someone off-screen.
 
 ""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
-catchrelease_introConservatory,DialogOptionSelected,$option == catchrelease_introConservatory,,"""Public tanks. Local outfitter. Trade counter.""","0:catchrelease_introConservatoryGet:""How do I get one?""
-10:catchrelease_introShopLook:""What can I do with the outfitter?""
+catchrelease_introConservatory,DialogOptionSelected,$option == catchrelease_introConservatory,,"""Public tanks. Local outfitter. Trade counter.""","0:catchrelease_introConservatoryGet:How do I get one?
+10:catchrelease_introShopLook:What can I do with the outfitter?
 20:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",
-catchrelease_introConservatoryGet,DialogOptionSelected,$option == catchrelease_introConservatoryGet,,"""Crablobab has the plans. Build it on a colony you own.""","10:catchrelease_introShopLook:""What can I do with the outfitter?""
+100:catchrelease_introShopLater:I'll look later.",
+catchrelease_introConservatoryGet,DialogOptionSelected,$option == catchrelease_introConservatoryGet,,"""Crablobab has the plans. Build it on a colony you own.""","10:catchrelease_introShopLook:What can I do with the outfitter?
 20:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:""I'll look later.""",
+100:catchrelease_introShopLater:I'll look later.",
 catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"A second transfer begins.
 
 The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.
@@ -2194,9 +2194,9 @@ Then the launcher.
 
 He looks directly at you.
 
-""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:""The lights make a rupture?""
-10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""
-20:catchrelease_introWeaponQuestion:""This is a weapon.""",The assignment option is added only after the three safety questions have been answered.
+""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
+10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?
+20:catchrelease_introWeaponQuestion:This is a weapon.",The assignment option is added only after the three safety questions have been answered.
 catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,"$catchreleaseIntroLightAsked = true 0
 FireAll CatchReleaseIntroDeepQuestions","""Near enough for deck work.""
 
@@ -2219,12 +2219,12 @@ He considers the launcher.
 A beat.
 
 ""Don't shoot either one at people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
-catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,"0:catchrelease_introLightQuestion:""""The lights make a rupture?""""",
-catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,"10:catchrelease_introHarpoonQuestion:""""And the line behind the harpoon?""""",
-catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,"20:catchrelease_introWeaponQuestion:""""This is a weapon.""""",
+catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,0:catchrelease_introLightQuestion:The lights make a rupture?,
+catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?,
+catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,20:catchrelease_introWeaponQuestion:This is a weapon.,
 catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleaseIntroLightAsked
 $catchreleaseIntroHarpoonAsked
-$catchreleaseIntroWeaponAsked",,,"100:catchrelease_introDeepDone:""""What do you want caught?""""",The assignment continuation appears after all three equipment and safety questions have been covered.
+$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:What do you want caught?,The assignment continuation appears after all three equipment and safety questions have been covered.
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
@@ -2247,15 +2247,15 @@ He sends two range records to your fleet map.
 
 Your map resolves each record into range information and candidate systems.
 
-""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:""Where does the range data come from?""
-10:catchrelease_introPlannerAsk:""You want both of these?""","The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
+""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:Where does the range data come from?
+10:catchrelease_introPlannerAsk:You want both of these?","The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
 catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,SetOptionColor catchrelease_introPlannerAsk highlight,"""Surveys.""
 
 The Fisherman gives you a look over the rim of his mug.
 
 When you wait for the rest, he puts the mug down.
 
-""That's enough answer for a chart.""","10:catchrelease_introPlannerAsk:""""You want both of these?""""",The optional survey-source answer returns to the required planner question rather than skipping it.
+""That's enough answer for a chart.""",10:catchrelease_introPlannerAsk:You want both of these?,The optional survey-source answer returns to the required planner question rather than skipping it.
 catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,,"""One of each.""
 
 He brings up your sector map and marks the fishing-planner control.
@@ -2379,13 +2379,13 @@ catchrelease_intro_fourJumps,DialogOptionSelected,$option == catchrelease_intro_
 
 The Fisherman folds the rag once.
 
-""This one's here.""","0:catchrelease_introPressLocation:""That does not answer the question.""
+""This one's here.""","0:catchrelease_introPressLocation:That does not answer the question.
 100:catchrelease_fisherBack:Let it go",
 catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,$global.catchrelease_fisherAsked_sameHull = true 0,"""If the registry asks.""
 
 He looks back toward the plot.
 
-""Your fish is still here.""","0:catchrelease_introPressLocation:""How?""
+""Your fish is still here.""","0:catchrelease_introPressLocation:How?
 100:catchrelease_fisherBack:Let it go",
 catchrelease_introPressLocation,DialogOptionSelected,$option == catchrelease_introPressLocation,,"The Fisherman looks at you for a moment.
 
@@ -2823,7 +2823,7 @@ The fisher turns the slate around.
 A fleet identifier follows.
 
 ""Move them on and we can get the boats back out.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:""Find another rupture.""",
+catchrelease_jobDecline:Find another rupture.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Company hired security around our patch.""
 
@@ -2834,7 +2834,7 @@ The fisher shows you the contract boundary.
 A fleet code appears.
 
 ""Get them to move.""","catchrelease_jobAccept:Agree to move them off.
-catchrelease_jobDecline:""Somebody is paying them. Somebody will pay the next lot too.""",
+catchrelease_jobDecline:Somebody is paying them. Somebody will pay the next lot too.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the boats.""
 
@@ -2845,7 +2845,7 @@ The fisher does not sound frightened so much as irritated.
 A transponder record appears.
 
 ""We need the work stopped.""","catchrelease_jobAccept:Agree to go and see them.
-catchrelease_jobDecline:""Not against the Path.""",
+catchrelease_jobDecline:Not against the Path.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Good.""
 
 The camp coordinates and pirate transponder codes are transferred.",,
