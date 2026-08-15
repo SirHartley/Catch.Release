@@ -305,6 +305,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
         if ("turnIn".equals(action)) {
+            showAutoHandOver(dialog, memoryMap);
+
+            return true;
+        }
+
+        if ("turnInPick".equals(action)) {
             showHandOverPicker(dialog, memoryMap);
 
             return true;
@@ -336,6 +342,83 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     /** Opens the exact-specimen handoff and resumes the sheet only after a valid selection. */
+    /**
+     * The hands-off hand-in: the minimum set that covers the asks, chosen worst-first from the
+     * whole hold - crates and the pile included - shown for a yes or no before anything moves.
+     * A hold that cannot cover the order falls back to the picker, whose readout explains.
+     */
+    protected void showAutoHandOver(final InteractionDialogAPI dialog,
+                                    final Map<String, MemoryAPI> memoryMap) {
+
+        final FishHandoffPicker.Selection auto = FishHandoffPicker.autoSelect(asks, null);
+
+        if (auto == null || dialog == null) {
+            showHandOverPicker(dialog, memoryMap);
+            return;
+        }
+
+        //per-species counts, the same shape the sale confirmations speak in
+        final Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+        final Map<String, FishCatch> samples = new java.util.LinkedHashMap<>();
+        for (FishCatch fish : auto.getContents()) {
+            counts.merge(fish.speciesId, 1, Integer::sum);
+            samples.putIfAbsent(fish.speciesId, fish);
+        }
+
+        float height = 46f + counts.size() * 22f;
+
+        dialog.showCustomDialog(360f, height,
+                new com.fs.starfarer.api.campaign.BaseCustomDialogDelegate() {
+                    @Override
+                    public void createCustomDialog(com.fs.starfarer.api.ui.CustomPanelAPI panel,
+                                                   CustomDialogCallback callback) {
+
+                        TooltipMakerAPI text = panel.createUIElement(360f, height, false);
+
+                        text.setParaInsigniaLarge();
+                        text.addPara("Hand in:", 0f);
+                        text.setParaFontDefault();
+
+                        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+                            FishCatch sample = samples.get(entry.getKey());
+                            text.addPara(entry.getValue() + " x %s", 6f, Misc.getTextColor(),
+                                    sample.getSpec().rarity.color, sample.getDisplayName());
+                        }
+
+                        panel.addUIElement(text).inTL(0f, 0f);
+                    }
+
+                    @Override
+                    public boolean hasCancelButton() {
+                        return true;
+                    }
+
+                    @Override
+                    public String getConfirmText() {
+                        return "Hand it in";
+                    }
+
+                    @Override
+                    public String getCancelText() {
+                        return "Never mind";
+                    }
+
+                    @Override
+                    public void customDialogConfirm() {
+                        if (handOver(auto, dialog, memoryMap)) {
+                            afterPickerPaid(dialog, memoryMap);
+                        } else {
+                            afterPickerCancelled(dialog, memoryMap);
+                        }
+                    }
+
+                    @Override
+                    public void customDialogCancel() {
+                        afterPickerCancelled(dialog, memoryMap);
+                    }
+                });
+    }
+
     protected void showHandOverPicker(final InteractionDialogAPI dialog,
                                       final Map<String, MemoryAPI> memoryMap) {
 

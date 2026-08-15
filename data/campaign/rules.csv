@@ -424,11 +424,14 @@ catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish",SetOptionColor catchrelease_jobTurnIn highlight,,catchrelease_jobTurnIn:Hand over the catch.,updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
+$catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
+SetOptionColor catchrelease_jobTurnInPick highlight",,"catchrelease_jobTurnIn:Hand in your catch.
+catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
 catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,"The job opens the specimen picker; its callback spends the chosen fish, pays, and fires the rows below."
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,"The hands-off hand-in: the job auto-picks the minimum that covers the order and confirms it before anything moves."
+catchrelease_jobTurnInPickSel,DialogOptionSelected,$option == catchrelease_jobTurnInPick,Call $catchrelease_jobRef turnInPick,,,"The by-hand route: the specimen picker, with the order's asks ticked off live beside it."
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
@@ -875,10 +878,14 @@ FireAll CatchReleaseFleetQuestTurnIn","The fleet is still where you left it.
 They still need $entity.catchrelease_fleetQuestAsk.",,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
-$catchreleaseHasFish",SetOptionColor catchrelease_fqTurnIn highlight,,0:catchrelease_fqTurnIn:Hand over the catch,The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
+$catchreleaseHasFish","SetOptionColor catchrelease_fqTurnIn highlight
+SetOptionColor catchrelease_fqTurnInPick highlight",,"0:catchrelease_fqTurnIn:Hand in your catch
+5:catchrelease_fqTurnInPick:Pick what to hand in",The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
+catchrelease_fqTurnInPickSel,DialogOptionSelected,"$option == catchrelease_fqTurnInPick
+!$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnInPick,,,
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 $catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,"The cargo goes across.
 
