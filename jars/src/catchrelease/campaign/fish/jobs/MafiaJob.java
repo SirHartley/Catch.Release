@@ -273,7 +273,8 @@ public class MafiaJob extends FishJob {
     }
 
     protected static String percent(float odds) {
-        return Math.round(odds * 100f) + "%";
+        int tenths = Math.round(odds * 1000f);
+        return (tenths / 10) + "." + Math.abs(tenths % 10) + "%";
     }
 
     @Override

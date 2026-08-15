@@ -709,7 +709,7 @@ FireAll PopulateOptions","The loud child pushes the bracket toward you.
 
 The quiet child pulls it back far enough to point at two empty spaces.
 
-""And a neutral allocator.""
+""And somebody else has to decide who gets which one.""
 
 ""Same job,"" says the loud one.",,
 catchrelease_duel_offerRulesOption,PopulateOptions,"$menuState == catchreleaseDuelOffer
@@ -784,7 +784,7 @@ catchrelease_duelPickSel,DialogOptionSelected,$option == catchrelease_duelPick,C
 catchrelease_duelAllocationReady,CatchReleaseDuelAllocationReady,"$missionId == catchrelease_duel
 $catchreleaseDuelSelectionReady",,"The quiet child copies both container tags onto the bracket.
 
-BETTER / LARGER — $catchreleaseDuelBetterFish
+BETTER — $catchreleaseDuelBetterFish
 OTHER — $catchreleaseDuelOtherFish
 
 The loud child puts both hands flat on the table.
@@ -820,7 +820,7 @@ $catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseRewa
 
 The quiet child checks the grade tag on $catchreleaseDuelBetterFish, then taps the boxed rule marked FINE / EXCEPTIONAL — EXTRA PRIZE.
 
-""Premium.""
+""Extra prize.""
 
 The loud child retrieves the extra prize from beneath the bucket.
 
@@ -856,7 +856,7 @@ FireAll PopulateOptions","Vasque turns his line slate toward you.
 
 ""Take the contract fee and you're done. Or leave it on one side.""
 
-""I assign the pair when you deliver. Each line moves with that entrant's size against the other. Equal entrants open at thirty-eight percent either side. The rest stays with the house.""
+""I assign the pair when you deliver. Each line moves with where that entrant falls in its recorded size range, against the other. Equal entrants open at thirty-eight percent either side. The rest stays with the house.""
 
 Ferro adds, ""Win gets a new reward pool worth twice the contract. Lose gets nothing.""",,
 catchrelease_ring_terms,DialogOptionSelected,$option == catchrelease_ring_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
