@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemRenderer;
+import catchrelease.helper.loading.SilhouetteBaker;
 import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.ui.ShopUi;
@@ -78,28 +79,41 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishCodexEntryState.resolve(speciesId);
     }
 
-    /** The species shape is visible with range data; colour remains locked until it is caught. */
+    /**
+     * The species shape is visible with range data; colour remains locked until it is caught.
+     * <p>
+     * The list row is drawn by vanilla from a path plus one tint - no hook for the FishIcons
+     * compositing - so a range-data entry hands over a pre-baked silhouette texture that
+     * already wears the rim, and the tint stays white. If the bake failed, the raw art under
+     * an opaque black tint is the fallback: the same silhouette body, just rimless.
+     */
     @Override
     public String getIcon() {
         FishCodexEntryState state = getState();
         FishSpec spec = state.spec;
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
+        if (!state.isKnown()) return FishConstants.CODEX_CATEGORY_ICON;
 
-        return state.isKnown() ? FishCodex.getIcon(spec) : FishConstants.CODEX_CATEGORY_ICON;
+        if (state.isRangeDataOnly()) {
+            String silhouette = SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id);
+            if (silhouette != null) return silhouette;
+        }
+
+        return FishCodex.getIcon(spec);
     }
 
-    /**
-     * Vanilla creates a private sprite for a Codex row, so this tint cannot leak to other UI.
-     * <p>
-     * The list icon is the one place the {@code FishIcons} rimmed silhouette cannot draw: the
-     * codex renders an entry's icon as a single multiply-tinted sprite with no compositing hook
-     * (only hardcoded param types - hulls, planets, weapons - get richer renderers). Pure black
-     * vanished into the row, so range data wears the dark player colour instead: the shape as a
-     * monochrome shadow, readable, with the art's colours still withheld until it is caught.
-     */
+    /** White over a baked silhouette - the rim is in the pixels; black only as the rimless
+     *  fallback when the bake failed. Vanilla tints its own private sprite, so nothing leaks. */
     @Override
     public Color getIconColor() {
-        return getState().isRangeDataOnly() ? Misc.getDarkPlayerColor() : Color.WHITE;
+        FishCodexEntryState state = getState();
+        if (!state.isRangeDataOnly()) return Color.WHITE;
+
+        FishSpec spec = state.spec;
+        boolean haveBaked = spec != null
+                && SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id) != null;
+
+        return haveBaked ? Color.WHITE : Color.BLACK;
     }
 
     @Override

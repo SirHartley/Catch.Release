@@ -7,7 +7,9 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The three item ids the catch uses, and the shared work between them.
@@ -127,6 +129,43 @@ public class FishItems {
         }
 
         return opened;
+    }
+
+    /**
+     * Replaces every loose specimen with one crate per species, including singletons.
+     * <p>
+     * Used by transaction screens that need a compact species-level view. Existing containers are
+     * left alone; callers that want one canonical pass should {@link #unbox(CargoAPI)} first.
+     */
+    public static int packIntoCrates(CargoAPI cargo) {
+        if (cargo == null) return 0;
+
+        Map<String, List<FishCatch>> bySpecies = new LinkedHashMap<>();
+        List<CargoStackAPI> loose = new ArrayList<>();
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null || !FISH.equals(data.getId())) continue;
+
+            FishCatch fish = FishCatch.decode(data.getData());
+            if (fish == null || fish.speciesId == null) continue;
+
+            loose.add(stack);
+            List<FishCatch> species = bySpecies.computeIfAbsent(fish.speciesId,
+                    ignored -> new ArrayList<>());
+            for (int i = 0; i < (int) stack.getSize(); i++) species.add(fish);
+        }
+
+        if (loose.isEmpty()) return 0;
+
+        for (CargoStackAPI stack : loose) {
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL,
+                    stack.getSpecialDataIfSpecial(), stack.getSize());
+        }
+        for (List<FishCatch> species : bySpecies.values()) cargo.addSpecial(toBundle(species), 1);
+        cargo.sort();
+
+        return bySpecies.size();
     }
 
     /** What a stack of fish is worth at base value, crates included. */

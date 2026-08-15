@@ -160,16 +160,32 @@ public class ShopUi {
     /** Draws an upgrade pip row, lit pips up to {@code level}. */
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha) {
+        drawPips(x, y, size, gap, level, max, lit, alpha, null);
+    }
+
+    /**
+     * As above, with the ladder's gates drawn in: a bought rung is always the lit colour, an
+     * open rung the ordinary dark square, and a rung whose schematic is still missing goes grey.
+     *
+     * @param missingSchematic asked per 1-based rung; null means no rung is gated
+     */
+    public static void drawPips(float x, float y, float size, float gap,
+                                int level, int max, Color lit, float alpha,
+                                java.util.function.IntPredicate missingSchematic) {
 
         for (int i = 0; i < max; i++) {
             float px = x + i * (size + gap);
 
             if (i < level) {
                 drawQuad(px, y, size, size, lit, alpha);
-            } else {
-                drawQuad(px, y, size, size, Misc.getDarkPlayerColor(), 0.35f * alpha);
-                RoundedBorder.draw(px, y, size, size, 1f, Misc.getDarkPlayerColor(), 0.8f * alpha, 1f);
+                continue;
             }
+
+            Color box = missingSchematic != null && missingSchematic.test(i + 1)
+                    ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
+
+            drawQuad(px, y, size, size, box, 0.35f * alpha);
+            RoundedBorder.draw(px, y, size, size, 1f, box, 0.8f * alpha, 1f);
         }
     }
 

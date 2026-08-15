@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate.CustomDialogCallback;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
@@ -188,6 +189,8 @@ public class FishBuyer {
             offer.addSpecial(held.data, FishItems.isContainer(held.data) ? 1 : held.count);
         }
 
+        final PickerPackingSession packing = new PickerPackingSession(offer);
+
         dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
                 false, 330f, offer, new CargoPickerListener() {
 
@@ -217,10 +220,71 @@ public class FishBuyer {
 
                         panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
                                 Misc.getDGSCredits(valueOf(combined)));
+
+                        packing.addButton(panel, cargo);
                     }
                 });
 
         return true;
+    }
+
+    /** The left-column control and its one-way compacting transaction. */
+    protected static final class PickerPackingSession {
+        protected static final float BUTTON_WIDTH = 250f;
+        protected static final float BUTTON_HEIGHT = 24f;
+
+        protected final CargoAPI offer;
+        protected boolean packed;
+
+        PickerPackingSession(CargoAPI offer) {
+            this.offer = offer;
+        }
+
+        void addButton(TooltipMakerAPI panel, CargoAPI selected) {
+            if (packed || panel == null) return;
+
+            PackButton plugin = new PackButton(this, selected);
+            CustomPanelAPI custom = Global.getSettings().createCustom(
+                    BUTTON_WIDTH, BUTTON_HEIGHT + 10f, plugin);
+            TooltipMakerAPI element = custom.createUIElement(
+                    BUTTON_WIDTH, BUTTON_HEIGHT + 10f, false);
+            element.addButton("Pack into crates", plugin.buttonId,
+                    BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
+            custom.addUIElement(element).inTL(0f, 0f);
+            panel.addCustom(custom, 0f);
+        }
+
+        void pack(CargoAPI selected) {
+            if (packed) return;
+            packed = true;
+
+            //Selection lives in a second cargo object. Put it back before rebuilding the source so
+            //nothing remains stranded under the old loose-item identity.
+            if (selected != null && !selected.isEmpty()) {
+                offer.addAll(selected);
+                selected.clear();
+            }
+
+            FishItems.packIntoCrates(offer);
+            FishItems.packIntoCrates(Global.getSector().getPlayerFleet().getCargo());
+            offer.sort();
+        }
+    }
+
+    protected static final class PackButton extends BaseCustomUIPanelPlugin {
+        protected final Object buttonId = new Object();
+        protected final PickerPackingSession session;
+        protected final CargoAPI selected;
+
+        PackButton(PickerPackingSession session, CargoAPI selected) {
+            this.session = session;
+            this.selected = selected;
+        }
+
+        @Override
+        public void buttonPressed(Object buttonId) {
+            if (buttonId == this.buttonId) session.pack(selected);
+        }
     }
 
     protected static void sellPicked(InteractionDialogAPI dialog, CargoAPI picked) {
@@ -284,10 +348,15 @@ public class FishBuyer {
      * A specimen that is no longer aboard was sold, and simply stays out of the rebuilt box.
      */
     protected static void restoreContainers(List<ContainerSnapshot> boxed) {
-        if (boxed == null || boxed.isEmpty()) return;
         if (Global.getSector().getPlayerFleet() == null) return;
 
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+        //The buyer's Pack button is transactional too. Open its temporary species crates before
+        //putting the pre-picker boxes back; if there were none originally, this still restores the
+        //loose hold the player opened the buyer with.
+        FishItems.unbox(cargo);
+        if (boxed == null || boxed.isEmpty()) return;
 
         //what is loose right now, as a countable pool keyed by encoded specimen
         Map<String, Integer> loose = new HashMap<>();

@@ -100,6 +100,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     /** The chart requests, which are the ordinary work and nothing to do with the ladder. */
     public static final String WORK = "$catchreleaseWork";
+    public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
     public static final String WORK_MET = "$catchreleaseWorkMet";
     public static final String WORK_FISH = "$catchreleaseWorkFish";
     public static final String WORK_WHERE = "$catchreleaseWorkWhere";
@@ -506,7 +507,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         String optionId = params.get(1).getString(memoryMap);
         String label = params.get(2).getString(memoryMap);
-        boolean asked = Boolean.parseBoolean(params.get(3).getString(memoryMap));
+        boolean asked = params.get(3).getBoolean(memoryMap);
         if (optionId == null || label == null) return false;
 
         int index = local.getInt(FISHER_ASK_COUNT);
@@ -514,8 +515,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         int first = page * FISHER_ASK_PAGE_SIZE;
 
         if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
-            dialog.getOptionPanel().addOption(label, optionId);
-            if (asked) dialog.setOptionColor(optionId, FishRarity.COMMON.color);
+            if (asked) {
+                //Colour is part of option creation. A follow-up mutation could lose to the
+                //surrounding FireAll option batch on some dialog rebuilds.
+                dialog.getOptionPanel().addOption(label, optionId, FishRarity.COMMON.color, null);
+            } else {
+                dialog.getOptionPanel().addOption(label, optionId);
+            }
         }
 
         local.set(FISHER_ASK_COUNT, index + 1, 0);
@@ -573,6 +579,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
                                         List<Token> params, Map<String, MemoryAPI> memoryMap) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
+        //The offer has been rolled but is deliberately not active until the player accepts it.
+        //Using only getActive() made the pitch's fish and rewards stay plain even though reminders
+        //after acceptance used the same verb correctly.
+        if (work == null) work = pending;
         if (work == null || work.speciesId == null) return false;
 
         FishRequirement ask = new FishRequirement();
@@ -853,6 +863,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         FishermanQuest.Saved work = FishermanQuest.getActive();
 
         local.set(WORK, work != null, 0);
+        local.set(WORK_AVAILABLE, work == null && FishermanQuest.isAvailable(), 0);
         local.set(WORK_MET, work != null && FishermanQuest.isSatisfied(), 0);
 
         if (work != null) {

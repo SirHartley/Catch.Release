@@ -28,6 +28,8 @@
     },
   },
 
+  # the one rule command package the mod ships - see catchrelease.dialogue.rules.CatchReleaseCMD.
+  # settings arrays merge across mods, so listing only our own package adds to vanilla's five.
   "ruleCommandPackages":[
     "catchrelease.dialogue.rules",
   ],

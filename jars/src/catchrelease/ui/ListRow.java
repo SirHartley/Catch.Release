@@ -50,11 +50,6 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
         return 0.4f;
     }
 
-    /** The field's colour - the dark player colour, unless a row has a reason to go grey. */
-    protected Color getFieldColor() {
-        return Misc.getDarkPlayerColor();
-    }
-
     /** Runs even for a row scrolled out of view, before the cull - for hover bookkeeping
      *  that has to clear when the row leaves the window with the cursor still parked. */
     protected void beforeCull(float x, float y, float width, float height) {
@@ -88,7 +83,7 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
         boolean hovered = !selected && isMouseOver();
 
         float field = selected ? getSelectedFieldAlpha() : hovered ? 0.3f : 0.12f;
-        ShopUi.drawQuad(x, y, width, height, getFieldColor(), field * alphaMult);
+        ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), field * alphaMult);
 
         //every row wears its accent, graded by state
         ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, getAccentColor(),
