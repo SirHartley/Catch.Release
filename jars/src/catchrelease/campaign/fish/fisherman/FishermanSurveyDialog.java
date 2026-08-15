@@ -448,6 +448,13 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             FishermanShelf.putBack(dialog.getInteractionTarget(), lastPurchase.specId,
                     lastPurchase.stockIndex);
 
+            String name = catchrelease.helper.loading.FishSpecLoader
+                    .getFishSpec(lastPurchase.specId) == null ? "the last chart"
+                    : catchrelease.helper.loading.FishSpecLoader
+                            .getFishSpec(lastPurchase.specId).getDisplayName() + " range data";
+            Global.getSector().getCampaignUI().getMessageDisplay()
+                    .addMessage("Refunded " + name);
+
             lastPurchase = null;
             Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
         }
