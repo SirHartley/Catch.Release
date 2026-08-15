@@ -511,6 +511,16 @@ public class FishermanQuest {
                 ? null : mote.getContainingLocation().getId();
     }
 
+    /**
+     * Updates the note at the moment the requested specimen enters the hold. The keeper still
+     * polls so selling or otherwise removing it can reopen the request, but landing one no longer
+     * waits for that interval before the intel and rupture marker change.
+     */
+    public static void onCatchStored(FishCatch fish) {
+        Saved quest = getActive();
+        if (quest != null && isEligible(quest, fish)) setLanded(quest, true);
+    }
+
     protected static boolean isEligible(Saved quest, FishCatch fish) {
         if (quest == null || fish == null) return false;
         ensureIdentity(quest);

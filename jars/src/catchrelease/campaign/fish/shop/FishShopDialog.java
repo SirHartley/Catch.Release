@@ -137,6 +137,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         closed = true;
 
+        //the New! tags are first-visit news, and this visit has now seen them
+        ShopSchematics.clearAllFresh();
+
         if (onClose == null) {
             dialog.dismiss();
             return;
@@ -681,10 +684,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (!(free ? entry.devBuy() : entry.buy())) return;
 
-            if (receipt != null) {
-                purchases.add(receipt);
-                ShopMarks.unmark(receipt.markKey);
-            }
+            //the mark itself is cleared inside grant(), where every purchase route passes
+            if (receipt != null) purchases.add(receipt);
 
             Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
 
@@ -773,6 +774,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             refreshWallet();
             rebuild(true);
 
+            Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+                    "Refunded " + (entry != null ? entry.getName() : "the last purchase"));
             Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
         }
 

@@ -8,6 +8,8 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
@@ -103,6 +105,11 @@ public class FishRewardRoller {
             if (targetLevel < 0 || ShopSchematics.has(stat, targetLevel)) continue;
             if (reserved.contains(ShopSchematics.getKey(stat.id, targetLevel))) continue;
 
+            //a plan for a rig the player does not hold is a reward for somebody else's boat;
+            //the ungrouped catch stats answer null and stay open, being the minigame's own
+            String ability = StatIds.getAbilityId(stat.id);
+            if (ability != null && !FishingIntro.hasGear(ability)) continue;
+
             open.add(stat);
         }
 
@@ -120,7 +127,8 @@ public class FishRewardRoller {
         for (Tackle tackle : Tackle.values()) {
             if (tackle != Tackle.NONE && tackle.stocked && TackleManager.isUnlocked(tackle)
                     && !ShopSchematics.has(tackle)
-                    && !reserved.contains(ShopSchematics.getKey(tackle))) {
+                    && !reserved.contains(ShopSchematics.getKey(tackle))
+                    && ownsRigFor(tackle)) {
                 options.add(tackle);
             }
         }
@@ -161,6 +169,21 @@ public class FishRewardRoller {
     }
 
     /** Location data for a species not yet caught or already unlocked - a reward that already applied does nothing. */
+    /** Whether the player holds the rig this module bolts to - a plan for a slot they do not
+     *  have is a reward for somebody else's boat. BOTH fits either the drones or the line. */
+    protected static boolean ownsRigFor(Tackle tackle) {
+        if (tackle == null || tackle.fit == null) return false;
+
+        switch (tackle.fit) {
+            case DRONE: return FishingIntro.hasGear(StatIds.ROD_ABILITY);
+            case HARPOON: return FishingIntro.hasGear(StatIds.HARPOON_ABILITY);
+            case SEARCHLIGHT: return FishingIntro.hasGear(StatIds.LAMPS_ABILITY);
+            case BOTH: return FishingIntro.hasGear(StatIds.ROD_ABILITY)
+                    || FishingIntro.hasGear(StatIds.HARPOON_ABILITY);
+            default: return false;
+        }
+    }
+
     protected static FishReward rollLocationData(Random random, int fallbackCredits) {
         List<FishSpec> unknown = new ArrayList<>();
 

@@ -157,7 +157,9 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
     public void createMapTooltip(TooltipMakerAPI tooltip, boolean expanded) {
         if (fleet == null) return;
 
-        tooltip.addTitle(fleet.getNameWithFaction());
+        //getNameWithFaction() deliberately lower-cases ordinary fleet names; this is a named
+        //contact, so keep the fleet's authored casing and apply vanilla's title-style ucFirst.
+        tooltip.addTitle(Misc.ucFirst(fleet.getName()));
         int band = FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(fleet));
         tooltip.addPara(FishermanIdentity.corrupt(SERVICE_LINE, band), Misc.getGrayColor(), 10f);
     }

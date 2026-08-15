@@ -696,7 +696,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(hooked, spec, FishLogEntry.Method.HARPOON, new FishingMinigameDialogPlugin.Callback() {
+        boolean opened = FishingMinigameDialogPlugin.open(hooked, hooked, spec,
+                FishLogEntry.Method.HARPOON, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
                 //the state is the outcome: only a reeling line has anything on it
