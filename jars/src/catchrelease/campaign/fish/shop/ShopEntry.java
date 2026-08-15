@@ -208,10 +208,19 @@ public class ShopEntry {
         }
 
         grant();
-        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-                "Unlocked " + getName());
+        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(getBoughtMessage());
 
         return true;
+    }
+
+    /** What actually happened, in the top-left message line: a rung unlocks, a module is
+     *  fitted, a curio's switch is thrown. Read after {@link #grant()}, so the curio reports
+     *  the state it just switched to. */
+    protected String getBoughtMessage() {
+        if (isCurio()) return (ware.isOn() ? "Switched on " : "Switched off ") + getName();
+        if (isUpgrade()) return "Unlocked " + getName();
+
+        return "Fitted " + getName();
     }
 
     /**
@@ -234,6 +243,12 @@ public class ShopEntry {
      * anything granting a module or a rung from outside the shop still has to come through it.
      */
     public void grant() {
+        //the shopping-list mark and the New! tag belong to this exact purchase, and every route
+        //to it - paid, dev grant, a quest handing gear over - comes through here. Cleared before
+        //the level moves, while getMarkKey still names the rung being bought
+        ShopMarks.unmark(ShopMarks.getMarkKey(this));
+        ShopSchematics.clearFresh(this);
+
         //a curio is not handed over, it is flipped - it was already bought before the shop saw it
         if (isCurio()) {
             ware.setOn(!ware.isOn());
