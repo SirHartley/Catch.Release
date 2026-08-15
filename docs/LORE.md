@@ -1567,6 +1567,23 @@ At this point the player understands enough to explore the system independently.
 
 This boundary matters enormously.
 
+## Children and tournament jobs
+
+Children treat fishing as an ordinary part of Sector life. Their games may accumulate elaborate
+rules, brackets, titles and disputes without anyone needing to explain where fish come from.
+
+Write them as children taking invented procedure completely seriously, not as miniature procurement
+officers and not as indiscriminate comic noise. Their rules may be arbitrary but must remain
+internally consistent: who chooses first, whether swaps are allowed, what counts as final and who
+is permitted to settle a dispute.
+
+The two tournament children have complementary roles. The louder child negotiates and argues the
+case. The quieter child keeps the bracket and remembers the wording. When they appoint an outside
+captain to allocate two selected fish, that decision becomes binding playground diplomacy.
+
+They know ordinary visible qualities such as size and grade. They do not know fabric theory,
+pattern ontology or anything the Fisherman alone should understand.
+
 ## Ordinary buyers
 
 May know:
