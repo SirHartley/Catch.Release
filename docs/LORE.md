@@ -1584,6 +1584,24 @@ captain to allocate two selected fish, that decision becomes binding playground 
 They know ordinary visible qualities such as size and grade. They do not know fabric theory,
 pattern ontology or anything the Fisherman alone should understand.
 
+## Betting-ring brokers
+
+Ferro and Vasque broker private fish bouts. Ferro handles entrants, supplier terms and settlement.
+Vasque assigns the delivered pair, maintains the line and handles the numbered tank ampoules.
+
+Keep them quiet and procedural. They are not broad mobsters, theatrical gangsters or sinister
+exposition devices. Their status appears through what is already arranged: an expensive transport
+tank in an ordinary bar, locked treatment stock, contracts without surnames and a house line stated
+without apology.
+
+The player may take a guaranteed supplier consideration or replace it with a wager. Vasque prices
+each assigned specimen against the other using visible size. Equal entrants still favour the house;
+he regards that as the ordinary cost of making a market.
+
+They accept fish fighting as an ordinary commercial event. They may discuss grade, species, length,
+handling and observed results. They do not know why patterns hold or fail to hold shape and do not
+possess fabric theory.
+
 ## Ordinary buyers
 
 May know:

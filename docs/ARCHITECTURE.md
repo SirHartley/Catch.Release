@@ -221,7 +221,7 @@ choice in vanilla's unquoted option-panel style, including the introduction, job
 follow-up questions.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current sheet is 542 logical rules. Its supplied dialogue is kept verbatim except where a
+The current sheet is 558 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 
@@ -431,7 +431,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `CultJob.java` | One specific named species for a non-credit reward. Its rules-authored three-person offer states species, consideration, quantity and fifty-five-day deadline before a small hub; asking purpose makes all three repeat the exact species, then returns with accept and decline still available |
 | `CuratorJob.java` | One to three Uncommon-or-higher specimens, each accepted if Fine grade or low coherence. Its rules-authored public curator separates DISPLAY from RECORD accession value, states the seventy-day window and checks provenance before payment |
 | `KidsJob.java` | Two unrestricted fish for a children's tournament, with a thirty-day item-reward contract and a Fine-or-better premium. A conversation-local rules/allocator/terms hub gates acceptance behind the complete terms. At hand-in it holds an exact picker selection without spending it, names both contenders by grade, species and length, then spends only after the player assigns the better/larger specimen to one child; reselect and not-yet routes remain non-consuming, and the paid row records the chosen allocation |
-| `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
+| `MafiaJob.java` | Two generated-requirement fish for a private betting ring, due in thirty-five days. A conversation-local tank/wager/terms hub gates acceptance behind the full contract. At delivery an exact non-consuming picker pair is randomly assigned to Ferro and Vasque, named by grade, species and length, and given separately displayed odds from both specimens' relative size. The player then takes the guaranteed pool or backs either side at that exact line; reselect and not-yet consume nothing. Equal fighters sit at 38% each, preserving the house edge. A successful wager replaces the guaranteed pool with a new twice-value roll; a loss pays nothing, while a failed cargo spend restores the originally quoted pool |
 | `StartupJob.java` | Three rounds of growing quantity, no time limit. Its rules-authored pitch is a compact demand/operations/terms submenu: optional due-diligence questions return to the remaining topics, terms unlock acceptance, and decline is always available. A read-only round token lets the hand-in dialogue distinguish pilot, scale-up and production while preserving the existing three-delivery mechanic |
 | `TuberJob.java` | Two rounds: a Fine Uncommon/Rare specimen for the polished first post, then a low-coherence specimen when clean footage loses retention. The insufferable short-form creator voice is authored in `rules.csv` and bounded by `LORE.md`. |
 

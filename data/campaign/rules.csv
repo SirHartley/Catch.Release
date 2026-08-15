@@ -825,68 +825,140 @@ The quiet child checks the grade tag on $catchreleaseDuelBetterFish, then taps t
 The loud child retrieves the extra prize from beneath the bucket.
 
 Received: $catchreleaseReward.",,
-catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men sit on either side of a transport tank far too expensive for the bar around it. A locked ampoule case rests between the drinks.,,
+catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men sit on either side of a transport tank whose seals and circulation unit are better than anything else in the bar. A locked ampoule case rests beside one drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the tank.,
-catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""You bring stock,"" says $catchreleaseLeft.
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"$menuState = catchreleaseRingOffer 0
+FireAll PopulateOptions","""Ferro,"" says the man with the contract.
 
-""We arrange the event.""
+""Vasque,"" says the one beside the ampoules.
 
-$catchreleaseRight taps the ampoule case.
+No surnames follow.
 
-""$catchreleaseAskCap. Two.""
+""You supply entrants,"" Ferro says. ""We arrange the card.""",,
+catchrelease_ring_offerTankOption,PopulateOptions,"$menuState == catchreleaseRingOffer
+!$catchreleaseRingAskedTank",,,10:catchrelease_ring_tank:What happens in the tank?,
+catchrelease_ring_offerWagerOption,PopulateOptions,"$menuState == catchreleaseRingOffer
+!$catchreleaseRingAskedWager",,,20:catchrelease_ring_wager:How does the wager work?,
+catchrelease_ring_offerTermsOption,PopulateOptions,$menuState == catchreleaseRingOffer,,,30:catchrelease_ring_terms:Show me the terms.,
+catchrelease_ring_offerDeclineOption,PopulateOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_ring_tank,DialogOptionSelected,$option == catchrelease_ring_tank,"$catchreleaseRingAskedTank = true 0
+$menuState = catchreleaseRingOffer 0
+FireAll PopulateOptions","Ferro rests two fingers on the tank lid.
 
-The first man gives you the terms.
+""Two entrants. One bout. We call it when there's a result.""
 
-""Take $catchreleaseReward flat. Or put the fee on one of ours and take double if your side is still holding shape at the end.""","catchrelease_jobAccept:Supply the ring.
-catchrelease_jobDecline:Leave the arrangement alone.",
-catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,Neither man writes your name down.,,
-catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,The tank remains between them. Their attention moves elsewhere.,,
-catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Still two.""",,
-catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The containers change hands.
+Vasque unlocks the ampoule case, checks a numbered vial and locks it again.
 
-$catchreleaseRewardCap is counted out on the tank lid.",,
-catchrelease_ring_paidWon,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid
-$catchreleaseHasWager score:100
-$catchreleaseWon",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The tank is sealed. An unmarked ampoule empties into the water.
+""Tank treatment. Keeps the card on schedule.""",,
+catchrelease_ring_wager,DialogOptionSelected,$option == catchrelease_ring_wager,"$catchreleaseRingAskedWager = true 0
+$menuState = catchreleaseRingOffer 0
+FireAll PopulateOptions","Vasque turns his line slate toward you.
 
-The room closes around it.
+""Take the contract fee and you're done. Or leave it on one side.""
 
-When it is over, $catchreleaseWager's side is still holding together.
+""I assign the pair when you deliver. Each line moves with that entrant's size against the other. Equal entrants open at thirty-eight percent either side. The rest stays with the house.""
 
-You are paid $catchreleaseReward.",,
-catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid
-$catchreleaseHasWager score:100
-!$catchreleaseWon",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The ampoule goes in.
+Ferro adds, ""Win gets a new reward pool worth twice the contract. Lose gets nothing.""",,
+catchrelease_ring_terms,DialogOptionSelected,$option == catchrelease_ring_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+$menuState = catchreleaseRingTerms 0
+FireAll PopulateOptions","Ferro opens a short contract.
 
-The result is quick.
+""$catchreleaseAskCap. Two entrants. Thirty-five days.""
 
-Your side comes apart first.
+""Guaranteed consideration is $catchreleaseRewardCap.""
 
-$catchreleaseFoe shrugs.
+Vasque taps the blank line beside WAGER.
 
-""You picked.""
+""Or replace it with the line. We assign the two when you deliver. Back either side. Win pays a newly rolled pool worth twice the contract value. Lose, nothing.""",,
+catchrelease_ring_termsAcceptOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,30:catchrelease_jobAccept:Supply the ring.,
+catchrelease_ring_termsDeclineOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_ring_termsBackOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,50:catchrelease_ring_termsBack:Ask something else.,
+catchrelease_ring_termsBack,DialogOptionSelected,$option == catchrelease_ring_termsBack,"$menuState = catchreleaseRingOffer 0
+FireAll PopulateOptions",,,
+catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,"Ferro sends the contract. The supplier-name field is blank.
 
-No payment follows.",,
+""Thirty-five days.""",,
+catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"""Understood.""
+
+Ferro closes the contract. Vasque deletes an empty line from his slate.",,
+catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Still $catchreleaseAskCap,"" Ferro says.
+
+He checks the contract date.
+
+""The thirty-five-day window stands.""",,
 catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
-$catchreleaseHasFish","SetOptionColor catchrelease_ringFlat highlight
-SetOptionColor catchrelease_ringLeft highlight
-SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Hand them over and take the fee.
-catchrelease_ringLeft:Put the fee on $catchreleaseLeft's fish.
-catchrelease_ringRight:Put the fee on $catchreleaseRight's fish.","The one wager in the mod. Backing a side pays double or nothing, and the odds are read off the specimen handed over rather than off a coin."
+$catchreleaseHasFish
+!$catchreleaseRingSelectionReady",,,"catchrelease_ringPick:Choose two fighters.
+catchrelease_ringWait:Not yet.",Picker-first hand-in. No specimen is consumed here.
 catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
-!$catchreleaseHasFish",,,catchrelease_ringWait:Ask about the arrangement.,
+!$catchreleaseHasFish",,,catchrelease_ringWait:Not yet.,
+catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,Call $catchrelease_jobRef chooseFighters,,,
+catchrelease_ringAssignmentReady,CatchReleaseRingWagerReady,"$missionId == catchrelease_ring
+$catchreleaseRingSelectionReady",,"Vasque takes the two container tags, mixes them face-down once, and places one beside each man.
+
+FERRO — $catchreleaseLeftFish
+VASQUE — $catchreleaseRightFish
+
+He enters the measurements on his slate.
+
+""Ferro: $catchreleaseLeftOdds. Vasque: $catchreleaseRightOdds.""
+
+Ferro leaves the original contract open beside it.",,
+catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
+$catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
+SetOptionColor catchrelease_ringLeft highlight
+SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Take the guaranteed fee.
+catchrelease_ringLeft:Back $catchreleaseLeft ($catchreleaseLeftOdds).
+catchrelease_ringRight:Back $catchreleaseRight ($catchreleaseRightOdds).
+catchrelease_ringReselect:Choose different fighters.
+catchrelease_ringAssignmentWait:Not yet.","No selected fish is consumed until flat, left, or right is confirmed."
 catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,Call $catchrelease_jobRef turnInFlat,,,
 catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,Call $catchrelease_jobRef turnInLeft,,,
 catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,Call $catchrelease_jobRef turnInRight,,,
+catchrelease_ringReselectSel,DialogOptionSelected,$option == catchrelease_ringReselect,Call $catchrelease_jobRef chooseFighters,,,
+catchrelease_ringAssignmentWaitSel,DialogOptionSelected,$option == catchrelease_ringAssignmentWait,"Call $catchrelease_jobRef cancelFighters
+Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobRemind
+FireAll PopulateOptions",,,
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
+catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid
+!$catchreleaseHasWager score:100",SetTextHighlights $catchreleaseReward,"Ferro takes $catchreleaseLeftFish. Vasque takes $catchreleaseRightFish.
+
+Vasque deletes the line without entering a wager.
+
+""Flat,"" Ferro says.
+
+Received: $catchreleaseReward.",,
+catchrelease_ring_paidWon,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid
+$catchreleaseHasWager
+$catchreleaseWon score:110",SetTextHighlights $catchreleaseReward,"You backed $catchreleaseWager: $catchreleaseWagerFish, against $catchreleaseFoe: $catchreleaseFoeFish.
+
+Vasque empties a numbered ampoule into the tank and locks the case again.
+
+When he calls the result, $catchreleaseWager's specimen is still holding shape.
+
+Ferro replaces the guaranteed consideration with the winning pool.
+
+Received: $catchreleaseReward.",,
+catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
+$catchreleasePaid
+$catchreleaseHasWager
+!$catchreleaseWon score:110",,"You backed $catchreleaseWager: $catchreleaseWagerFish, against $catchreleaseFoe: $catchreleaseFoeFish.
+
+The ampoule goes in. Vasque watches the tank and closes the line when the result is clear.
+
+""$catchreleaseFoe,"" he says.
+
+Ferro closes the contract.
+
+No payment.",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A woman in a conservative suit has a private purchase contract open beside a nearly finished drink. The buyer field is masked; the specification is not.,,
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract.,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
