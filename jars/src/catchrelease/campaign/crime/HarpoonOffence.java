@@ -156,6 +156,15 @@ public class HarpoonOffence {
 
         applyRepLoss(faction.getId());
 
+        //The reputation hit can be the thing that crosses the faction into hostility. Civilian
+        //route AI will notice the relationship but will not necessarily leave its route to act on
+        //it, so give that newly-hostile fleet the same explicit fight-or-flight response as a
+        //charge in the hull.
+        if (!isCombatCrew(victim)
+                && faction.isHostileTo(Global.getSector().getPlayerFaction())) {
+            turnHostile(victim);
+        }
+
         return true;
     }
 
@@ -170,7 +179,8 @@ public class HarpoonOffence {
         if (isCombatCrew(victim)) return;
 
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
-        if (mem.getBoolean(DEMAND_FLAG) || mem.getBoolean(FLEEING_FLAG)) return;
+        if (mem.getBoolean(DEMAND_FLAG) || mem.getBoolean(FLEEING_FLAG)
+                || mem.getBoolean(HOSTILE_FLAG)) return;
 
         HarpoonWitness.begin(victim, factionId, isPlayerIdentified(), explosive);
     }
@@ -243,6 +253,20 @@ public class HarpoonOffence {
         if (player == null || victim == null) return false;
 
         return player.getEffectiveStrength() > victim.getEffectiveStrength() * OUTMATCHED_MULT;
+    }
+
+    /**
+     * Whether this fleet is strong enough to choose an engagement against the player.
+     * <p>
+     * This is the other side of vanilla's 1.25x decision: once a civilian fleet is hostile there
+     * cannot be a passive middle outcome, so only a fleet that clears the engage threshold chases
+     * and everything else runs.
+     */
+    public static boolean canEngagePlayer(CampaignFleetAPI victim) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || victim == null) return false;
+
+        return victim.getEffectiveStrength() > player.getEffectiveStrength() * OUTMATCHED_MULT;
     }
 
     /**
@@ -328,14 +352,21 @@ public class HarpoonOffence {
     protected static void flee(CampaignFleetAPI victim) {
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
 
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, false, 0f);
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, false, 0f);
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
                 REASON, false, 0f);
 
         mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
+        mem.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
         mem.unset(DEMAND_FLAG);
         mem.unset(DAMAGES_KEY);
         mem.unset(DAMAGES_TEXT_KEY);
+
+        //A repair demand installs this assignment explicitly. If the same crew later decides to
+        //run, leaving that order at the head of the queue makes the flight flags fight a literal
+        //instruction to close with the player.
+        victim.removeFirstAssignmentIfItIs(FleetAssignment.INTERCEPT);
 
         //vanilla's own half-hearted avoidance rather than a scripted run - a freighter keeps flying
         //its route, it just stops letting you get near it
@@ -451,10 +482,15 @@ public class HarpoonOffence {
     }
 
     /**
-     * Sets both hostile and aggressive (the pair vanilla's encounter check reads as "engage
-     * regardless") plus pursue-player. Deliberately not low-rep-impact: that flag downgrades the
-     * fight to transponder-off reputation actions, which skip the {@code ensureAtBest} floor at
-     * hostile and falsely promise no hostilities in the encounter tooltip.
+     * Makes the fleet hostile, then gives a civilian fleet an explicit strength-based response.
+     * A civilian route does not stop being a route merely because its relationship changed: a
+     * fleet strong enough for vanilla's engage threshold therefore gets an intercept order, while
+     * every other civilian clears conflicting pursuit state and runs. Combat crews retain their
+     * normal AI and only need the hostility/aggression flags.
+     * <p>
+     * Deliberately not low-rep-impact: that flag downgrades the fight to transponder-off reputation
+     * actions, which skip the {@code ensureAtBest} floor at hostile and falsely promise no
+     * hostilities in the encounter tooltip.
      * <p>
      * Public because one caller skips the count entirely: an explosive head is not a rope in the
      * side, and there's no version of that where the crew wants to talk first.
@@ -462,16 +498,50 @@ public class HarpoonOffence {
     public static void turnHostile(CampaignFleetAPI victim) {
         //the one exemption, and it covers the explosive head too: a hostile boat is a boat that
         //runs, and a boat that runs takes the shop and the charts with it
-        if (FishermanSpawner.isFisherman(victim)) return;
+        if (victim == null || FishermanSpawner.isFisherman(victim)) return;
 
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
 
         Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_HOSTILE, REASON, true, HOSTILE_DAYS);
-        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, true, HOSTILE_DAYS);
-        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, HOSTILE_DAYS);
-
         //ties HOSTILE_FLAG's ttl to the hostility flags' own clock
         mem.set(HOSTILE_FLAG, true, HOSTILE_DAYS);
+
+        if (!isCombatCrew(victim)) {
+            if (canEngagePlayer(victim)) {
+                engagePlayer(victim);
+            } else if (!mem.getBoolean(FLEEING_FLAG)) {
+                flee(victim);
+            }
+            return;
+        }
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, true, HOSTILE_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, HOSTILE_DAYS);
+    }
+
+    /** Breaks a hostile civilian fleet off its route and makes the strength decision visible. */
+    protected static void engagePlayer(CampaignFleetAPI victim) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        mem.unset(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY);
+        mem.unset(FLEEING_FLAG);
+        mem.unset(DEMAND_FLAG);
+        mem.unset(DAMAGES_KEY);
+        mem.unset(DAMAGES_TEXT_KEY);
+
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, REASON, true, HOSTILE_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, HOSTILE_DAYS);
+        Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_STICK_WITH_PLAYER_IF_ALREADY_TARGET,
+                REASON, true, HOSTILE_DAYS);
+        mem.set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, HOSTILE_DAYS);
+        mem.set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, HOSTILE_DAYS);
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return;
+
+        victim.clearAssignments();
+        victim.addAssignment(FleetAssignment.INTERCEPT, player, HOSTILE_DAYS);
+        burn(victim);
     }
 
     public static boolean hasTurnedHostile(CampaignFleetAPI fleet) {

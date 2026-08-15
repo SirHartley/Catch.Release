@@ -136,9 +136,11 @@ public class HarpoonWitness implements EveryFrameScript {
             return;
         }
 
-        //hit again on the way, and the crew has stopped being a messenger - they are either coming
-        //for the bill or running. Their new orders stand; this one lets go without touching them
-        if (HarpoonOffence.isDemanding(victim) || HarpoonOffence.isFleeing(victim)) {
+        //Hit again on the way, or crossed into hostility with the reputation loss, and the crew has
+        //stopped being a messenger. Their new repair, fight, or flight orders stand; this one lets
+        //go without touching them.
+        if (HarpoonOffence.isDemanding(victim) || HarpoonOffence.isFleeing(victim)
+                || HarpoonOffence.hasTurnedHostile(victim)) {
             abandon();
             return;
         }
