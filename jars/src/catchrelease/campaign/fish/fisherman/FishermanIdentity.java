@@ -67,7 +67,11 @@ public class FishermanIdentity {
     /** The one person, made on first ask and never again. Ungendered - see the class note. */
     public static PersonAPI get() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
-        if (stored instanceof PersonAPI) return (PersonAPI) stored;
+        if (stored instanceof PersonAPI) {
+            PersonAPI person = (PersonAPI) stored;
+            clearTitles(person);
+            return person;
+        }
 
         PersonAPI person = Global.getFactory().createPerson();
 
@@ -75,12 +79,17 @@ public class FishermanIdentity {
         person.setGender(FullName.Gender.ANY);
         person.setName(new FullName(FIRST_NAME, LAST_NAME, FullName.Gender.ANY));
         person.setPortraitSprite(getPortrait(0f));
-        person.setRankId(null);
-        person.setPostId(null);
+        clearTitles(person);
 
         Global.getSector().getMemoryWithoutUpdate().set(PERSON_KEY, person);
 
         return person;
+    }
+
+    /** The person card is a name, not a naval billet; also repairs titles persisted by old saves. */
+    private static void clearTitles(PersonAPI person) {
+        person.setRankId(null);
+        person.setPostId(null);
     }
 
     /** Puts them at the wheel of a boat, which is how the encounter screen finds them. */
