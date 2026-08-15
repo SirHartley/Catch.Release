@@ -43,7 +43,9 @@ public abstract class CampedSpotJob extends FishJob {
 
     /** Intermediate transitions that need their own intel update copy without adding mission stages. */
     protected enum Update {
-        CAMP_CLEARED
+        CAMP_CLEARED,
+        RECEIPT_CAUGHT,
+        RECEIPT_LOST
     }
 
     /** One at a time across the whole family - three of these running at once is three fleets parked in space. */
@@ -68,6 +70,9 @@ public abstract class CampedSpotJob extends FishJob {
 
     /** Set once the water is free again, whatever freed it. */
     protected boolean cleared = false;
+
+    /** Mirrors whether a qualifying receipt is currently in cargo; drives the marker and intel. */
+    protected boolean receiptAboard = false;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -196,6 +201,10 @@ public abstract class CampedSpotJob extends FishJob {
         setReceiptAsk();
         super.advanceImpl(amount);
 
+        if (isEnding() || isEnded()) return;
+
+        setReceiptAboard(super.isSatisfied());
+
         if (cleared) return;
 
         if (!CampedSpot.isGone(camper)) {
@@ -220,6 +229,24 @@ public abstract class CampedSpotJob extends FishJob {
         sendUpdateIfPlayerHasIntel(Update.CAMP_CLEARED, false);
     }
 
+    /**
+     * Moves the second objective with the actual specimen rather than merely remembering that one
+     * existed once. Selling or losing it before hand-in therefore puts the marked water back.
+     */
+    protected void setReceiptAboard(boolean aboard) {
+        if (receiptAboard == aboard) return;
+
+        receiptAboard = aboard;
+        if (aboard) {
+            QuestPond.release(pond, REF_KEY);
+        } else {
+            QuestPond.claim(pond, REF_KEY);
+        }
+
+        updateInteractionDataImpl();
+        sendUpdateIfPlayerHasIntel(aboard ? Update.RECEIPT_CAUGHT : Update.RECEIPT_LOST, false);
+    }
+
     @Override
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
@@ -229,6 +256,7 @@ public abstract class CampedSpotJob extends FishJob {
         token(mem, "$catchreleaseCampManyCap", size == null ? "" : Misc.ucFirst(size.describe));
         token(mem, "$catchreleaseCampWhere", systemName == null ? "" : systemName);
         token(mem, "$catchreleaseCampCleared", cleared);
+        token(mem, "$catchreleaseCampReceiptAboard", receiptAboard);
     }
 
     /**
@@ -264,12 +292,46 @@ public abstract class CampedSpotJob extends FishJob {
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
         if (getListInfoParam() == Update.CAMP_CLEARED) {
-            info.addPara("The camp has left. Catch any fish from the marked rupture.",
+            info.addPara(receiptAboard
+                            ? "The camp has left. Return to the fisher for payment."
+                            : "The camp has left. Catch any fish from the marked rupture.",
+                    getBulletColorForMode(mode), 0f);
+            return;
+        }
+        if (getListInfoParam() == Update.RECEIPT_CAUGHT) {
+            info.addPara(cleared
+                            ? "Proof secured. Return to the fisher for payment."
+                            : "Proof secured. The camp still needs to be cleared.",
+                    getBulletColorForMode(mode), 0f);
+            return;
+        }
+        if (getListInfoParam() == Update.RECEIPT_LOST) {
+            info.addPara("The proof is no longer aboard. Catch another fish from the marked rupture.",
                     getBulletColorForMode(mode), 0f);
             return;
         }
 
         super.addBulletPoints(info, mode);
+    }
+
+    /** Compact objective text follows the two independent conditions in either order. */
+    @Override
+    public String getNextStepText() {
+        if (isEnding()) return null;
+
+        if (!cleared) {
+            return receiptAboard
+                    ? "Clear the camp at the marked rupture; the proof is already aboard."
+                    : "Clear the camp at the marked rupture, then catch any fish there as proof.";
+        }
+
+        if (!receiptAboard) return "Catch any fish from the marked rupture as proof.";
+
+        MarketAPI market = getGiverMarket();
+        if (getPerson() == null || market == null) return "Return to the fisher for payment.";
+
+        return "Return to " + getPerson().getNameString() + " on " + market.getName()
+                + " for payment.";
     }
 
     @Override
@@ -285,8 +347,15 @@ public abstract class CampedSpotJob extends FishJob {
             info.addPara("Kill them, pay them off, or talk them out of it - nobody has asked for it"
                     + " to be done a particular way.", pad);
 
-            info.addPara("After the camp is gone, catch any fish from this exact rupture and bring"
-                    + " it back as proof that the spot can be worked again.", pad);
+            if (receiptAboard) {
+                info.addPara("The proof is already aboard. What remains is clearing the camp.", pad);
+            } else {
+                info.addPara("After the camp is gone, catch any fish from this exact rupture and"
+                        + " bring it back as proof that the spot can be worked again.", pad);
+            }
+        } else if (receiptAboard) {
+            info.addPara("The rupture in %s is clear and the proof is aboard. Return to the fisher"
+                            + " for payment.", pad, Misc.getHighlightColor(), systemName);
         } else {
             info.addPara("The rupture in %s is clear. Catch any fish from this exact rupture and"
                             + " bring it back as proof.", pad,

@@ -246,6 +246,11 @@ When the fleet leaves, the intel update says so and immediately names the remain
 any fish from the marked rupture. It must not leave the player inferring that the old fleet marker
 or the original clearing instruction is still current.
 
+Once a qualifying fish reaches the hold, the rupture marker clears and the intel says the proof is
+aboard. If the fleet is already gone, it directs the player back to the fisher; if not, it keeps the
+camp as the remaining objective. Losing the specimen before hand-in puts the rupture marker and
+the catch instruction back.
+
 They sincerely believe they are members of a larger profession.
 
 They are not pretending.
