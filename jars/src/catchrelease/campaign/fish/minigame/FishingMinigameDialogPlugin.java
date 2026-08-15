@@ -162,6 +162,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
         this.specimen.sourceId = getSourceId(anchor);
+        //All landed cargo needs a catch time, not only the Fisherman's planted specimen: jobs can
+        //ask whether this exact water was worked after their agreement was made.
+        this.specimen.caughtAt = Global.getSector().getClock().getTimestamp();
         catchrelease.campaign.fish.fisherman.FishermanQuest.markCatch(
                 this.specimen, catchTarget);
 

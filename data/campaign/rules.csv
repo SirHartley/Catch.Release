@@ -2833,7 +2833,9 @@ The fisher turns the slate around.
 
 A fleet identifier follows.
 
-""Move them on and we can get the boats back out.""","catchrelease_jobAccept:Agree to clear the spot.
+""Move them on and we can get the boats back out.""
+
+""Once they're gone, take any fish from that same rupture. Bring it back so I know the spot works.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Find another rupture.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Company hired security around our patch.""
@@ -2844,7 +2846,7 @@ The fisher shows you the contract boundary.
 
 A fleet code appears.
 
-""Get them to move.""","catchrelease_jobAccept:Agree to move them off.
+""Get them to move. Then fish it. Anything from that same rupture will do. Bring one back as proof.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Somebody is paying them. Somebody will pay the next lot too.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the boats.""
@@ -2855,7 +2857,7 @@ The fisher does not sound frightened so much as irritated.
 
 A transponder record appears.
 
-""We need them stopped.""","catchrelease_jobAccept:Agree to go and see them.
+""We need them stopped. When they're gone, pull anything from that same rupture and bring it back. I need to know I can work it.""","catchrelease_jobAccept:Agree to go and see them.
 catchrelease_jobDecline:Not against the Path.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"""Good.""
 
@@ -2870,7 +2872,7 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The camp answers almos
 
 ""Saw them leave.""
 
-Payment follows.",,
+Received: $catchreleaseReward.",,
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try talking first.""
 
 A beat.
@@ -2884,7 +2886,9 @@ $catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""G
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The exclusion zone disappears from the local plot.
 
-""That'll do.""",,
+""That'll do.""
+
+Received: $catchreleaseReward.",,
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Fine by me how.""",,
 catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"She nods, as though you have confirmed something. ""No. Nobody is.""",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
@@ -2894,7 +2898,9 @@ $catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""O
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"The boats return to the rupture.
 
-Someone has already started repairing the damaged rack.",,
+Someone has already started repairing the damaged rack.
+
+Received: $catchreleaseReward.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
 HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."
