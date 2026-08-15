@@ -3142,8 +3142,8 @@ CatchReleaseCMD leaveEncounter","You cut the link. The lamps keep burning.
 Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask about the account.,
-catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has a claim form open between him and a clerk. The clerk has pushed it back across the counter.,,
-catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask what the clerk is not writing down.,
+catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
+catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask about the claim.,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with her back to the wall and the door in view. Her drink has gone warm untouched.,,
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A fisher with a licence pinned to his jacket sits facing the door. Each time it opens, his hand stops halfway to his drink.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A man with a fisher's squint is drinking steadily and telling nobody in particular that he is not going back out there.,,
@@ -3162,15 +3162,17 @@ The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 ""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Company hired security around our patch.""
+Call $catchrelease_jobRef showRewardDetails","""A company survey moved the boundary. My claim did not.""
 
-The fisher shows you the contract boundary.
+The fisher overlays the two charts.
 
-""Security says the rupture is inside it. Our charts say it isn't. Nobody involved is paid enough to discover which map is right.""
+""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
 
-A fleet code appears.
+The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMany holding position.
 
-""Get them to move. Then fish it. Anything from that same rupture will do. Bring one back as proof.""","catchrelease_jobAccept:Agree to move them off.
+""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after the agreement; old cargo proves nothing about whether I can work the claim now.""
+
+""Seventy days. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Pathers have been visiting the boats.""
@@ -3205,26 +3207,28 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the retrieva
 ""Good. Boats go back out next shift.""
 
 Received: $catchreleaseReward.",,
-catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try talking first.""
+catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try the contract line first. They're professionals.""
 
-A beat.
+She sends the fleet code and both boundary charts.
 
-""Or don't. I don't own your ship.""",,
-catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,The fisher nods and goes back to the form.,,
+""If their employer stops paying them to stand there, I'd prefer everyone keep their hulls.""",,
+catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,She returns to the claim form and attaches the second survey chart again.,,
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-!$catchreleaseCampCleared",,"""They're still there.""
+!$catchreleaseCampCleared",,"""Still holding position.""
 
-She taps the fleet code on the form.",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+She checks the fleet code against the claim file.
+
+""My appeal has acquired another case number.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Gone.""
+$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""They're gone.""
 
 She closes the exclusion notice.
 
-""Then bring me $catchreleaseAsk out of it. I need to know the rupture can be worked.""",,
+""Now bring me $catchreleaseAsk from that rupture. I need a post-clearance catch for the claim file.""",,
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The exclusion zone disappears from the local plot.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"She attaches the retrieval record to the claim. The disputed boundary disappears from her working chart.
 
-""That'll do.""
+""That's evidence I can use.""
 
 Received: $catchreleaseReward.",,
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"""Fine by me how.""",,

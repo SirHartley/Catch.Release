@@ -246,6 +246,10 @@ Pirate pressure is commercial extortion. Write the fisher as a working operator 
 protection payments, idle boats, repair costs and narrowing margins, not as someone generically
 afraid of pirates. The occupation matters because every paid week makes the next one more expensive.
 
+Mercenary pressure is a boundary dispute made physical. The fisher thinks in filed charts, claim
+numbers, exclusion notices and contract language. They prefer a negotiated departure because hired
+professionals can leave when the contract changes, but they are not helpless if negotiation fails.
+
 When the fleet leaves, the intel update says so and immediately names the remaining work: catch
 any fish from the marked rupture. It must not leave the player inferring that the old fleet marker
 or the original clearing instruction is still current.
