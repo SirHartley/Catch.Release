@@ -221,7 +221,7 @@ choice in vanilla's unquoted option-panel style, including the introduction, job
 follow-up questions.
 
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
-The current sheet is 502 logical rules. Its supplied dialogue is kept verbatim except where a
+The current sheet is 510 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
 rows are routing twins and interrupted-conversation resumes needed to make that dialogue executable.
 
@@ -425,7 +425,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
-| `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |
+| `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor. Its rules-authored offer uses a conversation-local who/purpose/terms submenu: optional answers return to the remaining questions, decline is always available, and acceptance appears only after the generated specification and reward have been stated. The giver serves the household's own butler; controlled distance, restricted household access and delegated handling carry his contempt without an insult |
 | `ChefJob.java` | Three *different* types for a dish; sometimes FINE grade |
 | `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
 | `CultJob.java` | One specific named species, no credits. Its deliberately repeated species token sits in the last offer paragraph so the shared rarity highlighter can colour the actual target instead of searching for the longer generated ask |

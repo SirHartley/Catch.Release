@@ -1568,6 +1568,31 @@ May know:
 
 Do not make them ontologists.
 
+## The household under-butler
+
+The buyer in the Butler job is not the household's butler. He keeps that butler's rooms and
+schedule. The household is wealthy enough for its head servant to have personal service of his own,
+and a minor display purchase has travelled down to that service.
+
+He is professionally civil, precise and completely competent. He also considers an outside
+supplier beneath the threshold of household company. He never insults the player, calls them
+vermin, sneers, threatens or explains this judgement.
+
+Put the contempt in conduct:
+
+- controlled physical distance;
+- household material kept on his side of the table;
+- delivery kept outside household receiving;
+- porters handling the player's container;
+- the player filed as one name on an outside supplier list.
+
+Use one such detail per beat. He does not boast about the household's wealth or explain the staff
+tree as a joke. Titles, delegated work, private rooms and routing codes carry the hierarchy. Avoid
+an aristocratic accent, a Jeeves parody or theatrical haughtiness.
+
+He is still an ordinary buyer in what he knows: specification, mass, handling, purpose and price.
+Do not give him insight into patterns, the fabric or the trade's missing logistics.
+
 ## The TriTuber
 
 The TriTuber is the setting's equivalent of an insufferable short-form video producer. His working attention span is six seconds long. He speaks in hooks, reveals, retention cliffs, thumbnails, sponsor pools, comments, replays and follows. Even a private exchange becomes a performance for the feed; the person in front of him is a guest, prop and reaction shot before they are a person.

@@ -566,32 +566,75 @@ $catchreleasePaid
 Then, more quietly:
 
 ""Good.""",,
-catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink. He checks the room occasionally and never the time.,,
+catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
-catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I purchase for a private household.""
+catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
+FireAll PopulateOptions","The man stands before you reach the table and indicates the chair opposite.
 
-He does not volunteer the name.
+""Captain. I purchase occasional items for a private household. I understand you can obtain live catch.""
 
-""The request is $catchreleaseAsk.""
+He waits until you have taken the indicated seat. He does not sit again.
 
-He checks the wording once.
+""There is a small requirement outstanding.""",,
+catchrelease_butler_offerWhoOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerAskedWho",,,10:catchrelease_butler_who:Who are you buying for?,
+catchrelease_butler_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerAskedPurpose",,,20:catchrelease_butler_purpose:What is it for?,
+catchrelease_butler_offerTermsOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+!$catchreleaseButlerTerms",,,30:catchrelease_butler_terms:State the terms.,
+catchrelease_butler_offerAcceptOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+$catchreleaseButlerTerms",,,30:catchrelease_jobAccept:Accept the commission.,
+catchrelease_butler_offerDeclineOption,PopulateOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_butler_who,DialogOptionSelected,$option == catchrelease_butler_who,"$catchreleaseButlerAskedWho = true 0
+$menuState = catchreleaseButlerOffer 0
+FireAll PopulateOptions","""The household's butler.""
 
-""It is for display, not the kitchen. Condition matters less than meeting the specification.""
+A message marked HOUSEHOLD BUTLER — PRIVATE SERVICE opens on his slate. He clears it without reading.
 
-""$catchreleaseRewardCap on presentation.""","catchrelease_jobAccept:Accept the commission.
-catchrelease_jobDecline:Decline.",
+""I keep his rooms and schedule. This purchase was passed to me.""",,
+catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
+$menuState = catchreleaseButlerOffer 0
+FireAll PopulateOptions","""Display.""
+
+He turns a slate toward you but leaves it on his side of the table. It shows a tank fitted into an office.
+
+""For the household butler's receiving room. The space has been measured. The specimen will not enter the kitchens. Species and condition are not material to the purchase.""",,
+catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_terms,"$catchreleaseButlerTerms = true 0
+CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+$menuState = catchreleaseButlerOffer 0
+FireAll PopulateOptions","""One specimen. The requirement is $catchreleaseAsk.""
+
+He checks the figure on his slate.
+
+""Anything meeting that weight floor will do. Species and condition are immaterial. It is for display, not food.""
+
+""The consideration is $catchreleaseReward, payable on presentation.""",,
 catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good.""
 
-No contact details are exchanged. Your mission log nevertheless updates.",,
-catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Understood.""",,
-catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""The requirement remains $catchreleaseAskCap.""",,
+He makes a brief entry on his slate.
+
+""Bring it back to this port when you have it. Household receiving will not be necessary.""
+
+Your mission log updates.",,
+catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""Understood.""
+
+He removes the entry from his slate.
+
+""I'll return it to the outside supplier list.""",,
+catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""One specimen. $catchreleaseAskCap.""
+
+He checks the original entry.
+
+""Return it here when you have it.""",,
 catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He checks the container seal, then the scale.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"A dock porter places the container on the scale. The man checks the seal and mass from his slate.
 
-""That will do.""
+""Yes. That meets the requirement.""
 
-$catchreleaseRewardCap changes hands.",,
+$catchreleaseRewardCap changes hands.
+
+The porter receives a routing code: HOUSEHOLD BUTLER — PRIVATE ROOMS. The man has already turned to his next entry.",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A woman with an academic lanyard and salt-damaged hands is annotating photographs of public aquaria.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
