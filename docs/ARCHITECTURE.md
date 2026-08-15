@@ -209,6 +209,12 @@ the traps this repo has hit - is in [`RULES.md`](RULES.md), with
 [`rules/command_table.md`](rules/command_table.md) behind it. What follows is only what this
 mod does on top of it.
 
+**Option labels are UI actions, not quoted speech.** The `options` column never wraps a displayed
+label in quotation marks; quotes there are reserved for CSV structure, while quotes in a command's
+script arguments remain tokenizer syntax and are not rendered. This keeps every rules-authored
+choice in vanilla's unquoted option-panel style, including the introduction, job declines and
+follow-up questions.
+
 **Every word anybody speaks is in the sheet — jobs, the Fisherman, the introduction, the props.**
 The current overhaul is 470 logical rules. Its supplied dialogue is kept verbatim except where a
 later requested rewrite explicitly supersedes it; the additional
