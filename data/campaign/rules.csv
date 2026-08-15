@@ -35,9 +35,11 @@ FireAll CatchReleaseHitmanBribeOptions","The officer glances at the contract.
 catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,Vanilla's affordability check leaves the price visible but greys it out and explains a shortfall.
 catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitmanBribePay,"AddCredits -$entity.catchrelease_harpoonHitmanBribe
 CatchReleaseCMD bribeHitman
-CatchReleaseCMD leaveEncounter","The transfer clears. The officer closes your file.
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears. The officer closes your file.
 
 ""Contract cancelled.""",,
+catchrelease_fleetResolutionOpt,CatchReleaseFleetResolutionOptions,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",,100:catchrelease_fleetResolutionLeave:Leave,Shared terminal option for a resolved fleet conversation. The outcome remains on-screen until the player leaves; hostile outcomes and options that explicitly cut the comm link do not use this trigger.
+catchrelease_fleetResolutionLeaveSel,DialogOptionSelected,$option == catchrelease_fleetResolutionLeave,CatchReleaseCMD leaveEncounter,,,The actual exit still goes through vanilla fleet-encounter cleanup rather than merely dismissing the window.
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
@@ -386,7 +388,7 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 MakeOtherFleetPreventDisengage catchreleasePatrol false
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""Filed.""
+FireAll CatchReleaseFleetResolutionOptions","""Filed.""
 
 The transfer clears.
 
@@ -397,7 +399,7 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 MakeOtherFleetPreventDisengage catchreleasePatrol false
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","You spend several minutes establishing that the harpoon is recovery equipment, that the discharge was accidental, and that nobody has written a useful regulation for a ROD-equipped fishing launcher.
+FireAll CatchReleaseFleetResolutionOptions","You spend several minutes establishing that the harpoon is recovery equipment, that the discharge was accidental, and that nobody has written a useful regulation for a ROD-equipped fishing launcher.
 
 Eventually $PersonRank $personName changes the category.
 
@@ -855,14 +857,14 @@ Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $
 5:catchrelease_fqAcceptNoPromise:No promises.
 10:catchrelease_fqDecline:Decline",Two acceptance phrasings intentionally converge
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter","They transmit their logs and the local range references.
+FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
 
 No formal contract follows.",,
 catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_fqAcceptNoPromise,"$entity.catchrelease_fleetQuestTaken = true
-CatchReleaseCMD leaveEncounter","They transmit their logs and the local range references.
+FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
 
 No formal contract follows.",,Technical routing twin for the supplied second acceptance phrasing.
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,CatchReleaseCMD leaveEncounter,"""Fair enough.""
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,FireAll CatchReleaseFleetResolutionOptions,"""Fair enough.""
 
 The channel closes.",,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
@@ -878,7 +880,7 @@ catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:
 catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
-$catchreleaseFleetHandoffPaid",CatchReleaseCMD leaveEncounter,"The cargo goes across.
+$catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,"The cargo goes across.
 
 Someone on the receiving ship checks the containers and calls something away from the microphone.
 
@@ -912,7 +914,7 @@ $entity.catchrelease_harpoonDemandDone = true 30
 $global.catchrelease_damagesAnswered = true 1
 unset $entity.catchrelease_damagesConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""Received.""
+FireAll CatchReleaseFleetResolutionOptions","""Received.""
 
 The other vessel returns to its previous heading.",,
 catchrelease_damagesTalkSel,DialogOptionSelected,$option == catchrelease_talkDamages,"$entity.catchrelease_harpoonDamagesPaid = true 1
@@ -920,7 +922,7 @@ $entity.catchrelease_harpoonDemandDone = true 30
 $global.catchrelease_damagesAnswered = true 1
 unset $entity.catchrelease_damagesConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","You spend some time on the distinction between an intentional shot and a recovery-system discharge.
+FireAll CatchReleaseFleetResolutionOptions","You spend some time on the distinction between an intentional shot and a recovery-system discharge.
 
 The distinction improves under sustained discussion.
 
@@ -2750,7 +2752,7 @@ catchrelease_lampsOutSel,DialogOptionSelected,$option == catchrelease_lampsOut,"
 MakeOtherFleetPreventDisengage catchreleaseLamps false
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The lamps go dark.
+FireAll CatchReleaseFleetResolutionOptions","The lamps go dark.
 
 ""Logged.""
 
@@ -2760,7 +2762,7 @@ CatchReleaseCMD lampsOff
 MakeOtherFleetPreventDisengage catchreleaseLamps false
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The transfer clears and the lamps go dark.
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears and the lamps go dark.
 
 ""Filed.""",,
 catchrelease_lampTalkSel,DialogOptionSelected,$option == catchrelease_lampTalk,"CatchReleaseCMD lampsOff
@@ -2768,7 +2770,7 @@ CatchReleaseCMD lampForgive
 MakeOtherFleetPreventDisengage catchreleaseLamps false
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","You power the rig down while the conversation is still underway.
+FireAll CatchReleaseFleetResolutionOptions","You power the rig down while the conversation is still underway.
 
 The rest is spent on operating categories, survey work, and a license number nobody checks closely enough.
 
@@ -2785,7 +2787,7 @@ A shuttle crosses. For the better part of an hour there are strangers in the hol
 catchrelease_lampSeizedSel,DialogOptionSelected,$option == catchrelease_lampSeized,"CatchReleaseCMD seizeFish
 FireBest CatchReleaseLampSeized",,,"No text of its own: the command prints the losses, and the fired rows say what was said over them."
 catchrelease_lampSeizedFull,CatchReleaseLampSeized,$entity.catchrelease_lampHaul score:10,"ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The patrol inventory team removes the relevant catch.
+FireAll CatchReleaseFleetResolutionOptions","The patrol inventory team removes the relevant catch.
 
 Nobody spends time examining it in the passageway.
 
@@ -2793,7 +2795,7 @@ When the transfer manifest clears, $PersonRank $personName signs it.
 
 ""That will be all.""",,
 catchrelease_lampSeizedEmpty,CatchReleaseLampSeized,!$entity.catchrelease_lampHaul,"ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The inspection finds handling racks, tanks, and fishing equipment, but no relevant catch.
+FireAll CatchReleaseFleetResolutionOptions","The inspection finds handling racks, tanks, and fishing equipment, but no relevant catch.
 
 ""Nothing to seize.""
 
@@ -2968,7 +2970,7 @@ catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"Ad
 $entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The transfer clears.
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears.
 
 ""Pleasure.""
 
@@ -2976,7 +2978,7 @@ The formation begins to come about.",,
 catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","You do not argue ownership.
+FireAll CatchReleaseFleetResolutionOptions","You do not argue ownership.
 
 Instead you run through the ordinary hazards of holding station over an unstable rupture: drone losses, sensor failures, poor recovery rates, and the expense of getting a damaged fleet back to a real yard.
 
