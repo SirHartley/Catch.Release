@@ -433,7 +433,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
 | `StartupJob.java` | Three rounds of growing quantity, no time limit |
-| `TuberJob.java` | Two rounds: a fine rare first, then a low-coherence one "for content" |
+| `TuberJob.java` | Two rounds: a Fine Uncommon/Rare specimen for the polished first post, then a low-coherence specimen when clean footage loses retention. The insufferable short-form creator voice is authored in `rules.csv` and bounded by `LORE.md`. |
 
 ### `campaign/fish/jobs/camp`
 A fisher whose one good rupture has somebody parked on it. Three bar events, three ways through.

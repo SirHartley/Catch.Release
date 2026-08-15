@@ -799,53 +799,105 @@ One result makes her repeat the calibration.
 ""Good.""
 
 $catchreleaseRewardCap is transferred.",,
-catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A man has converted one end of the bar into a small recording set: two lamps, a good lens, and a chair placed precisely where everyone needs to walk.",,
-catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask about the recording.,
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A man has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. He is recording the same six-second introduction for the fourth time.",,
+catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what he is filming.,
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I run a fishing feed.""
+Call $catchrelease_jobRef showRewardDetails","He taps the lens awake before answering.
+
+""Feed, do not go anywhere. This is huge.""
+
+He turns one lamp toward you.
+
+""You. Captain. Look here. Perfect. Everyone, I have an actual fishing captain standing in front of me right now, and we may have the specimen.""
 
 He points to the chair.
 
-""I need $catchreleaseAsk. You bring it in, I hold it up, people argue in the comments about whether it is real.""
+""I need $catchreleaseAsk. You bring it in, I open on the reveal, cut to you, then ask the question everybody is already typing: is this thing real?""
 
-""$catchreleaseReward. Entire production budget.""","catchrelease_jobAccept:Agree to supply the recording.
-catchrelease_jobDecline:Stay out of it.",
-catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Good. Try to arrive before I publish the teaser.""",,
-catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Fair.""
+He leans toward the lens.
 
-The camera remains pointed at you for several seconds before he notices.",,
-catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Whenever you've got it.""
+""You are not ready for this one.""
 
-He checks his posting schedule.
+Then, to you:
 
-""Soon is better.""",,
+""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""","catchrelease_jobAccept:Agree to supply the specimen.
+catchrelease_jobDecline:Decline.",
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Feed, we have a captain.""
+
+He starts recording before you can move.
+
+""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
+
+He stops the clip.
+
+""That is the teaser. Bring it back before everyone starts accusing me of faking the whole thing.""",,
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow.""
+
+He turns to the lens without moving it off you.
+
+""Feed, you just watched a captain walk away from easy sponsor money.""
+
+A beat.
+
+""Would you have taken it? Tell me I'm wrong.""
+
+He finally lowers the camera.",,
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Still waiting.""
+
+He raises the camera as soon as he sees you.
+
+""Feed, update. The captain is back. Do we have it? We do not have it.""
+
+He lowers the camera again.
+
+""Soon, please. Every time you walk in here empty-handed, the comments decide something happened.""",,
 catchrelease_tuber_paid,catchreleaseJobPaid,"$missionId == catchrelease_tuber
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The specimen is recorded from four angles.
+$catchreleasePaid",SetTextHighlights $catchreleaseReward,"The specimen spends less than a minute under the lamps before he has four angles and a close shot of your hand beside it.
+
+""Do not move. Feed, look at this. Look at this.""
+
+He shifts the specimen half a handspan.
+
+""That is the opening frame. That is the whole clip.""
 
 You are paid $catchreleaseReward from a box of small sponsor transfers.",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
 $catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","He watches the numbers update.
+Call $catchrelease_jobRef showRewardDetails","He watches the numbers climb, flatten, then stop.
 
-""Fine.""
+""No. No, no. Feed liked it. Feed did not need it.""
 
-He refreshes the display.
+He scrubs backward through the clip.
 
-""Nobody sends a clip of a perfectly healthy fish to their friends.""
+""Look. Perfect specimen, perfect shot, everybody understands it immediately. That is death. They see the fish, they leave.""
 
-He looks toward your hold.
+He turns the display toward you as though the graph has personally insulted him.
 
-""Can you bring me one with a really bad coherence reading? $catchreleaseAskCap. Something the camera can't quite decide on.""
+""Bad coherence. Visible. $catchreleaseAskCap. I want one where the first frame says one thing and the next frame makes everyone check the first frame again.""
 
-""$catchreleaseRewardCap.""",,
+He points toward your hold.
+
+""Nobody explain it. Nobody correct anybody. I want three thousand comments from people absolutely certain they saw different things.""
+
+He is already changing the thumbnail.
+
+""$catchreleaseRewardCap. Bigger sponsor pool. This one could be enormous.""",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
 !$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He watches the playback.
 
-""That's the thumbnail.""
+""Oh, feed is going to hate this.""
 
-The payment follows.",,
+He crops in until the specimen fills the display.
+
+""Look at that. Do not look away. You think you've got it, then you look again.""
+
+He points at the frozen image.
+
+""That is the thumbnail. No cleanup. No explanation. Let everyone fight.""
+
+He authorizes the payment without looking up.",,
 catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,Three people in matching plain coats share a table. One drink has been ordered for all of them and remains untouched.,,
 catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask what they are waiting for.,
 catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies
