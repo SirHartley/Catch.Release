@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.items;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
@@ -238,6 +239,7 @@ public class FishItems {
         if (catchData == null || Global.getSector().getPlayerFleet() == null) return;
 
         stow(Global.getSector().getPlayerFleet().getCargo(), catchData);
+        FishermanQuest.onCatchStored(catchData);
     }
 
     /**

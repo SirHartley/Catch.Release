@@ -363,7 +363,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(getCatchAnchor(mote), fish, FishLogEntry.Method.DRONE, new FishingMinigameDialogPlugin.Callback() {
+        boolean opened = FishingMinigameDialogPlugin.open(getCatchAnchor(mote), mote, fish,
+                FishLogEntry.Method.DRONE, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
                 if (landed != null) FishItems.addToPlayerCargo(landed);

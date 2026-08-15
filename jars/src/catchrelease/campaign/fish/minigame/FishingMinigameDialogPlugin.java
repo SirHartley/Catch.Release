@@ -53,6 +53,13 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     /** Where this catch was taken; source of aberration, and read by the log on a win. */
     protected SectorEntityToken anchor;
 
+    /**
+     * The actual fish-shaped entity being landed. Usually the anchor too, but a drone working a
+     * rupture uses the rupture as its visual/source anchor while the quest identity lives on the
+     * mote inside it.
+     */
+    protected SectorEntityToken catchTarget;
+
     /** How it's being taken; recorded in the log, since the three methods aren't interchangeable. */
     protected FishLogEntry.Method method = FishLogEntry.Method.UNKNOWN;
 
@@ -79,17 +86,35 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
      */
     public static boolean open(SectorEntityToken anchor, FishSpec fish, FishLogEntry.Method method,
                                Callback callback) {
+        return open(anchor, anchor, fish, method, callback);
+    }
+
+    /**
+     * Opens against {@code anchor} while preserving the actual caught entity separately.
+     *
+     * @param catchTarget mote whose quest provenance follows the specimen into cargo
+     */
+    public static boolean open(SectorEntityToken anchor, SectorEntityToken catchTarget,
+                               FishSpec fish, FishLogEntry.Method method, Callback callback) {
         if (fish == null) return false;
 
-        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(fish, anchor, method, callback);
+        FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(
+                fish, anchor, catchTarget, method, callback);
 
         return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
     }
 
     public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
                                        FishLogEntry.Method method, Callback callback) {
+        this(fish, anchor, anchor, method, callback);
+    }
+
+    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
+                                       SectorEntityToken catchTarget,
+                                       FishLogEntry.Method method, Callback callback) {
         this.fish = fish;
         this.anchor = anchor;
+        this.catchTarget = catchTarget;
         this.method = method == null ? FishLogEntry.Method.UNKNOWN : method;
         this.callback = callback;
     }
@@ -126,7 +151,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         //a chart request is a question about the water rather than about the animal, so what the
         //trade planted always comes up barely holding whatever the local reading would have said -
         //and whatever was on the rig, which is why this is last
-        if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(anchor)) {
+        if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(catchTarget)) {
             aberration = 1f;
         }
 
@@ -137,7 +162,8 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
         this.specimen.sourceId = getSourceId(anchor);
-        catchrelease.campaign.fish.fisherman.FishermanQuest.markCatch(this.specimen, anchor);
+        catchrelease.campaign.fish.fisherman.FishermanQuest.markCatch(
+                this.specimen, catchTarget);
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();
@@ -178,6 +204,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (dialog != null) dialog.dismiss();
 
         SectorEntityToken anchor = this.anchor;
+        SectorEntityToken catchTarget = this.catchTarget;
         FishLogEntry.Method method = this.method;
         Callback callback = this.callback;
 
@@ -200,7 +227,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                 if (done) return;
 
                 patience -= amount;
-                done = open(anchor, pick, method, callback) || patience <= 0f;
+                done = open(anchor, catchTarget, pick, method, callback) || patience <= 0f;
             }
         });
     }
