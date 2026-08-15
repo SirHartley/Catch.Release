@@ -425,7 +425,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
 | `StandingOrderJob.java` | The plain one: quantity, rarity, grade, no extra mechanic. The baseline |
 | `AcademyJob.java` | Wants a low-coherence specimen; Galatia or large independent markets |
-| `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor. Its rules-authored offer is a reusable employer/purpose/terms submenu: the giver is butler to the household's First Butler, and the specimen is incidental furnishing for a secondary breakfast pavilion whose aquarium has its own service infrastructure. Each optional answer returns to the remaining questions and terms; acceptance appears once the specification has been stated |
+| `ButlerJob.java` | One fish above a rolled weight floor, paid by that floor |
 | `ChefJob.java` | Three *different* types for a dish; sometimes FINE grade |
 | `CompanionJob.java` | Hegemony only; one fish over a floor, bonus for exceeding it |
 | `CultJob.java` | One specific named species, no credits. Its deliberately repeated species token sits in the last offer paragraph so the shared rarity highlighter can colour the actual target instead of searching for the longer generated ask |
