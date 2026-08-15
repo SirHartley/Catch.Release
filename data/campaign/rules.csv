@@ -1787,7 +1787,7 @@ He looks at you.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_fishBack,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 5
 !$global.catchrelease_fisherAsked_fishBack","CatchReleaseCMD addFisherQuestion catchrelease_ask_fishBack ""Does anything out there fish back?"" false",,,
-catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,$global.catchrelease_fisherAsked_fishBack = true 0,"""Not with any tackle I'd sell you.""
+catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,$global.catchrelease_fisherAsked_fishBack = true 0,"""Not with any rig module I'd sell you.""
 
 Behind him, a crewman reaches through a closed locker door and removes a wrench.
 
@@ -1801,22 +1801,22 @@ catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_larges
 catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_tackle,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 3
-!$global.catchrelease_fisherAsked_tackle","CatchReleaseCMD addFisherQuestion catchrelease_ask_tackle ""What is tackle?"" false",,,
-catchrelease_ask_tackle,DialogOptionSelected,$option == catchrelease_ask_tackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
+!$global.catchrelease_fisherAsked_tackle","CatchReleaseCMD addFisherQuestion catchrelease_ask_tackle ""What are rig modules?"" false",,,
+catchrelease_ask_tackle,DialogOptionSelected,$option == catchrelease_ask_tackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One slot per rig.""
 
 He taps the manifest.
 
-""Jobs turn up the schematics. Bring one back, and that tackle goes on the invoice.""
+""Jobs turn up the schematics. Bring one back, and that module goes on the invoice.""
 
 ""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_upgrade,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 3
 !$global.catchrelease_fisherAsked_upgrade","CatchReleaseCMD addFisherQuestion catchrelease_ask_upgrade ""What is an upgrade?"" false",,,
-catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent tier.""
 
 He points at the entry.
 
-""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
+""Buy the early tiers. The final two need a schematic each; jobs turn those up.""
 
 ""Improves the function listed on it.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
@@ -1843,7 +1843,7 @@ $global.catchrelease_fisherAsked_fishBack","CatchReleaseCMD addFisherQuestion ca
 catchrelease_fisherAsked_largest,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 6
 $global.catchrelease_fisherAsked_largest","CatchReleaseCMD addFisherQuestion catchrelease_ask_largest ""What is the largest thing you have landed?"" true",,,
 catchrelease_fisherAsked_tackle,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 3
-$global.catchrelease_fisherAsked_tackle","CatchReleaseCMD addFisherQuestion catchrelease_ask_tackle ""What is tackle?"" true",,,
+$global.catchrelease_fisherAsked_tackle","CatchReleaseCMD addFisherQuestion catchrelease_ask_tackle ""What are rig modules?"" true",,,
 catchrelease_fisherAsked_upgrade,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 3
 $global.catchrelease_fisherAsked_upgrade","CatchReleaseCMD addFisherQuestion catchrelease_ask_upgrade ""What is an upgrade?"" true",,,
 catchrelease_fisherAsked_outfitterPayment,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 3
@@ -2150,30 +2150,30 @@ He looks directly at you.
 ""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
 10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?
 20:catchrelease_introWeaponQuestion:This is a weapon.",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
-catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Keep the drones flying. Keep the return clean. Fit tackle for the work you're actually doing.""
+catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Keep the drones flying. Keep the return clean. Fit the right module for the work you're actually doing.""
 
 He gestures at your manifest.
 
 ""If the hardware isn't on your ship, it has no business on the invoice.""
 
-""Some lines stay off it until a job turns up the schematic. A schematic opens the purchase. It isn't the hardware.""","0:catchrelease_introAskTackle:What is tackle?
+""Some lines stay off it until a job turns up the schematic. A schematic opens the purchase. It isn't the hardware.""","0:catchrelease_introAskTackle:What are rig modules?
 10:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
-catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One rig slot.""
+catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""Bought once. One slot per rig.""
 
 He taps the manifest.
 
-""Jobs turn up the schematics. Bring one back, and that tackle goes on the invoice.""
+""Jobs turn up the schematics. Bring one back, and that module goes on the invoice.""
 
 ""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
-catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent tier.""
 
 He points at the entry.
 
-""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
+""Buy the early tiers. The final two need a schematic each; jobs turn those up.""
 
-""Improves the function listed on it.""","0:catchrelease_introAskTackle:What is tackle?
+""Improves the function listed on it.""","0:catchrelease_introAskTackle:What are rig modules?
 100:catchrelease_introDeepGear:Continue",
 catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introShopLater,,"""Probably wise.""
 
@@ -2250,7 +2250,7 @@ SetOptionColor catchrelease_introPlannerAsk highlight","The Fisherman checks the
 
 He makes two small entries in the service ledger.
 
-""Harpoon and light tackle are open to you now.""
+""Harpoon tips and lens arrays are open to you now.""
 
 He sends two range records to your fleet map.
 

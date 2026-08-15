@@ -301,7 +301,7 @@ public class ShopMarks {
 
                 ShopPricing.Price price = ShopPricing.getPrice(mark.stat);
                 if (price != null && price.fish != null) {
-                    out.add(new Ask(ShopEntry.of(mark.stat).getName() + " level "
+                    out.add(new Ask(ShopEntry.of(mark.stat).getName() + " tier "
                             + mark.targetLevel, price.fish));
                 }
             } else if (key.startsWith("tackle:")) {

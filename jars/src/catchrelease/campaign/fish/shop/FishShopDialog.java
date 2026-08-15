@@ -514,12 +514,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                           Object tooltipParam) {
                     tooltip.addPara("Schematic required", Misc.getHighlightColor(), 0f);
-                    tooltip.addPara("Level %s is one of this ladder's final two rungs."
+                    tooltip.addPara("Upgrade tier %s is one of this upgrade's final two tiers."
                                     + " Fishing jobs can offer its schematic.", 6f,
                             Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
-                    tooltip.addPara("Each schematic unlocks one rung for purchase; it does not"
+                    tooltip.addPara("Each schematic unlocks one upgrade tier for purchase; it does not"
                             + " grant the upgrade.", Misc.getGrayColor(), 6f);
-                    tooltip.addPara("Marking this rung dots its schematic on job offers until"
+                    tooltip.addPara("Marking this tier dots its schematic on job offers until"
                             + " the plan is learned.", Misc.getGrayColor(), 6f);
                 }
             };
@@ -569,7 +569,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             info.addPara(entry.getDescription(), 12f);
 
             if (entry.isUpgrade() && !entry.isMaxed()) {
-                info.addPara("Now %s - next level %s", 12f, Misc.getHighlightColor(),
+                info.addPara("Now %s - next tier %s", 12f, Misc.getHighlightColor(),
                         entry.getValueAt(entry.getLevel()), entry.getValueAt(entry.getLevel() + 1));
             }
 
@@ -621,7 +621,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (entry.isLocked()) {
                 info.addPara("Schematic required.", Misc.getNegativeHighlightColor(), 16f);
-                info.addPara("Fishing jobs can offer the schematic for this rung.",
+                info.addPara("Fishing jobs can offer the schematic for this upgrade tier.",
                         Misc.getGrayColor(), 4f);
                 return;
             }
