@@ -2,7 +2,6 @@ package catchrelease.campaign.ponds.terrain;
 
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
-import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
@@ -230,7 +229,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     @Override
     public String getIconSpriteName() {
-        return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder");
+        return Global.getSettings().getSpriteName("catchrelease", "unstable_fabric_map_icon");
     }
 
     @Override

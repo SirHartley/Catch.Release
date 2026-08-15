@@ -127,7 +127,9 @@ hidden example. The old outfitter migration stub is gone — development assumes
 vanilla's five packages rather than replacing them.
 The `graphics.characters` additions also register all five Fisherman coherence portraits with the
 settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
-an unloaded raw path. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
+an unloaded raw path. The `graphics.catchrelease` additions likewise preload the dedicated
+`fisherman_map_icon` and `unstable_fabric_map_icon` glyphs used by the boat marker and live pond
+terrain. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
 world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
 the renderer.
 
@@ -150,8 +152,9 @@ their class name:**
 
 **`data/campaign/terrain.json`** — `catchrelease_StaticPond` → `MaskedFishingPondTerrainPlugin`,
 `catchrelease_coherence_field` → `CoherenceTerrain`. Carries the plugin class only; name, radius,
-layers and tags all come from the plugin — including the terrain id as a tag, which `BaseTerrain`
-does **not** add for you and which anything looking a terrain up by tag depends on.
+layers, tags and the live pond's unstable-fabric map icon all come from the plugin — including the
+terrain id as a tag, which `BaseTerrain` does **not** add for you and which anything looking a
+terrain up by tag depends on.
 
 **`data/campaign/special_items.csv`** — `catchrelease_fish` → `FishItemPlugin`,
 `catchrelease_fish_bundle` → `FishBundleItemPlugin`, `catchrelease_fish_pile` → `FishPileItemPlugin`.
@@ -166,8 +169,8 @@ day it is built. `crabStock` gates **his rotation only** — a row he may not ca
 hands out, and the reward roller leans on exactly those, so every row has a source. The art is cropped to cover a `388 x 170` pane with the glass line over its edge —
 `386 x 168` visible, near enough `2.3:1` — so about `772 x 336` at 2x.
 
-**`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' map mark
-(`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's one live prop
+**`data/config/custom_entities.json`** — the motes, harpoon, drone, the fishing boats' dedicated
+fisher-hook map mark (`catchrelease_FisherMapIcon` → `FishermanMapIcon`) and the introduction's one live prop
 (`catchrelease_TutorialWreck` → `TutorialWreck`). `catchrelease_Castaway` remains registered only
 so legacy saves can deserialize and retire its old beacon during migration. The pond is **not** here
 any more.
@@ -446,7 +449,7 @@ follows the local five-rung coherence reading, and none of them explains how.
 | `FishermanShelf.java` | What range data is on sale and on which boat — two slots to start, the pool that stops duplicates, and the restock dated off each sale |
 | `FishermanQuest.java` | Chart requests: one named specimen from one named place, kept in the water until it is landed. Acceptance mints a unique target ID and timestamp; the planted mote carries that ID into the landed `FishCatch`, alongside its catch timestamp and system, so neither an older specimen nor a same-species catch from elsewhere can satisfy the request. Hand-over filters the shared picker by that provenance and every picker or direct turn-in path revalidates the same exact specimen before spending, then reports both credits and the permanent additional range-data slot in vanilla's small green reward face before removing every matching intel note from a snapshot because Starsector exposes the manager's live repository list. Completion starts a 90-day (three campaign month) timestamp gate before another offer may roll. Its `QuestIntel` is a `FishAsker`, shows the shared rarity-backlit fish portrait (a silhouette until its target has been landed), colours the named quarry by rarity, carries the bullets vanilla's mission notes carry, explicitly appears under vanilla's Accepted intel tag, and can open the map on the target species' known range |
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language. It clears the host interaction's options immediately before opening its custom visual, and hands the Fisherman's sheet back exactly once on every close route |
-| `FishermanMapIcon.java` | The boat's mark on the system map — one per boat while the player shares its location, with old-save duplicates and marks in departed locations reconciled away |
+| `FishermanMapIcon.java` | The boat's dedicated fisher-hook mark on the system map — one per boat while the player shares its location, with old-save duplicates and marks in departed locations reconciled away |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin. The five portraits follow `FishItemPlugin`'s canonical coherence bands; `preparePortrait` mutates the shared person only for the boat being hailed, immediately before vanilla draws the comm portrait, so off-screen boats cannot overwrite it |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose, counts down against the rumor's own timestamp, and opens the fishing map either on the stranger's known range or as an all-category overview centered on the reported system. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
@@ -643,7 +646,7 @@ The pond, as terrain.
 
 | File | What it does |
 |---|---|
-| `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds |
+| `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds; discoverable ponds return the registered unstable-fabric map glyph while look-only ponds remain iconless |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
 | `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. Each external-control acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
