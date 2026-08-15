@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
@@ -60,6 +61,12 @@ public class StartupJob extends FishJob {
         setAsk((int) (asks.get(0).count * GROWTH) + genRandom.nextInt(3));
 
         return true;
+    }
+
+    /** Lets the sheet distinguish the pilot, scale-up, and production receipts. */
+    @Override
+    protected void setJobTokens(MemoryAPI mem) {
+        token(mem, "$catchreleaseRound", getRound());
     }
 
     @Override
