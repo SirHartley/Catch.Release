@@ -246,6 +246,8 @@ public enum CrabWares {
         }
 
         grant();
+        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+                "Traded crabs for " + name());
 
         return true;
     }

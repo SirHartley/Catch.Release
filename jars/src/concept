@@ -28,8 +28,7 @@ Shop
 - Any rungs that are locked because they require a schematic should be grey. I'm talking about the small, square icons. This means that the icon, while you do not have a schematic, should be grey, and when you have one, should be like normal atm, and when unlocked, light blue like atm.
 
 Crabolabob
-- Why the crabs? Should only be available once?
-- Change bass to crab. He should sell you 1 common or uncommon crab for 1 crab and 10k
+- Should use portrait in portraits folder, load via settings eg fisherman portrait
 
 Fleet interaction
 - Paying the fine immediately closes the dialogue. There should be a "leave" button there.

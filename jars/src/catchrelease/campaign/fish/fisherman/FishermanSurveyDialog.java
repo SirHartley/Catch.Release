@@ -310,15 +310,10 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     tooltip.addPara("Charts for charts", Misc.getBasePlayerColor(), 0f);
 
-                    tooltip.addPara("Range data marks a species' range on your map - the shape"
-                            + " of the thing is on the chart, the look of it still has to be"
-                            + " caught.", 8f);
+                    tooltip.addPara("Range data unlocks the habitat of the pattern on your map, allowing you to see its range and plot a course to catch it. " +
+                            "It also unlocks the preliminary codex data, some behavioural information, and the presence indicator on the system map.", 8f);
 
-                    tooltip.addPara("What is on the shelf is on it until the boat leaves; sold"
-                            + " data does not restock until the next one.", 8f);
-
-                    tooltip.addPara("Prices are paid in specimens. Escape closes.",
-                            Misc.getGrayColor(), 8f);
+                    tooltip.addPara("Restocks after a while. Encounters outside the core carry a unique inventory.", 8f);
                 }
             };
         }
@@ -404,6 +399,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
             lastPurchase = receipt;
             Global.getSoundPlayer().playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
+            Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+                    "Puchased range data for " + offer.spec.getDisplayName());
 
             rebuildGrid();
         }

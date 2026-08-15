@@ -208,6 +208,8 @@ public class ShopEntry {
         }
 
         grant();
+        Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
+                "Unlocked " + getName());
 
         return true;
     }
