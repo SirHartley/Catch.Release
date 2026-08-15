@@ -2944,7 +2944,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","$PersonRank $personName does not open with anything.
+EndConversation","$PersonRank $personName does not open with anything.
 
 ""Again. This month.""
 
@@ -2956,7 +2956,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""Fourth instance. Same month.""
+EndConversation","""Fourth instance. Same month.""
 
 $PersonRank $personName closes the incident record.
 
@@ -2972,7 +2972,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""There will be no further correspondence on this.""
+EndConversation","""There will be no further correspondence on this.""
 
 $PersonRank $personName closes the file.
 
@@ -2986,7 +2986,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","$PersonRank $personName is not alone at the screen this time, and nobody behind $himOrHer is speaking.
+EndConversation","$PersonRank $personName is not alone at the screen this time, and nobody behind $himOrHer is speaking.
 
 ""We asked. We fined. We took what you had taken. And here it is again, burning over people.""
 
@@ -3000,7 +3000,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The channel opens to shouting.
+EndConversation","The channel opens to shouting.
 
 ""There! There it is again! Moloch's lantern!""
 
@@ -3020,7 +3020,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","Somebody off-screen is still shouting when $PersonRank $personName opens the channel.
+EndConversation","Somebody off-screen is still shouting when $PersonRank $personName opens the channel.
 
 ""Four. In a month. You've made this my problem, and I don't solve problems the way the Navy does.""
 
@@ -3032,7 +3032,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""Fourth contravention against a direct order of the Sindrian Diktat.""
+EndConversation","""Fourth contravention against a direct order of the Sindrian Diktat.""
 
 $PersonRank $personName signs the finding on-screen.
 
@@ -3046,7 +3046,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","$PersonRank $personName has the convention open on a screen and closes it.
+EndConversation","$PersonRank $personName has the convention open on a screen and closes it.
 
 ""There is no fourth provision. The drafters assumed three opportunities would be sufficient.""
 
@@ -3062,7 +3062,7 @@ MakeOtherFleetAggressive catchreleaseLamps true 5
 MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The incident count is open beside $PersonRank $personName.
+EndConversation","The incident count is open beside $PersonRank $personName.
 
 ""Four times. In a month. Over people.""
 
