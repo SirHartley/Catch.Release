@@ -1067,6 +1067,24 @@ He was a mercenary captain and a technical collaborator before he became this.
 
 The education and competence should remain visible beneath the fisher's habits.
 
+### Warmth and cold purpose
+
+The Fisherman's warmth is real. He should read as the capable old captain who remembers to ask
+whether the deck crew have eaten, explains dangerous work without humiliating the learner and gives
+the player room to make the next mistake themselves. The useful shorthand is a kind grandfather who
+once did very questionable things in a war and has no intention of telling those stories.
+
+That warmth does not make his judgement soft. Beneath it, he evaluates people, places and patterns
+in terms of what will hold, what can be moved and what must not be pulled into definition. He guides
+the player toward bringing more patterns onto the stable side while knowing that the larger practice
+also increases instability. The immediate help may be sincere even when the full strategic calculus
+is not shared. Do not turn this into a villain's smirk, a confession or an exposed secret agenda;
+let it live in what he prioritises, what he omits and how smoothly he redirects the work.
+
+His speech therefore needs enough room to feel human. Do not mistake restraint for clipped delivery.
+He may pause, observe, teach, joke dryly and finish a practical thought. When he stops short, the
+reader should feel that a competent man chose the boundary, not that the prose ran out.
+
 ### Useful Fisherman cadence
 
 He often:
@@ -1273,6 +1291,16 @@ He is funny.
 He likes commerce.
 
 He is also about as thoroughly anomalous as a person can become and still operate a stall.
+
+Low coherence has made him more of a character, not less of a person: a cheerful merchant-clown
+whose caricature is becoming physically true. He treats local reality like shop clay. Space, stock,
+hands, pockets and continuity take the shape a transaction needs, and he neither worries about the
+change nor needs a theory for it.
+
+This gives him a deliberately different cadence from the Fisherman. Crablobab is expansive,
+colourful, delighted and physically comic. He makes light of reality breaking because business is
+going well. The performance is foreboding fun: funny in the moment, alarming only after the scene is
+reconstructed. Never flatten him into the Fisherman's measured pauses or clipped understatement.
 
 ## Do not make him sinister
 
@@ -1962,6 +1990,10 @@ The best Catch.Release horror often occurs several seconds after the player has 
 
 Faction dialogue should be recognizable through priorities and institutional habits, not caricatured accents.
 
+Recognizable does not mean flat. Patrol dialogue should retain colour, irritation, humour, menace
+and the sense that a particular officer is speaking. Institutional vocabulary is a foundation for
+voice, not a substitute for it.
+
 ## Hegemony
 
 Think:
@@ -2009,6 +2041,10 @@ Do not write every Church character as a fanatic.
 
 Faith can be completely sincere and completely ordinary.
 
+When reckless technology threatens inhabited space, that sincerity may become vivid moral force:
+creation, stewardship, trespass, mercy and the danger imposed on ordinary souls are natural Church
+language. They still do not know the fabric's technical mechanics.
+
 ## Luddic Path
 
 Think:
@@ -2021,6 +2057,12 @@ Think:
 Do not make every Pather rant.
 
 A calm Pather can be more convincing.
+
+The breach-lamp and hostile fishing-camp encounters are the deliberate exception. Here the player
+is repeatedly using a machine beside a wound in creation for appetite and profit. Pathers should be
+furious, unreasonable and ready to scream about Moloch's tools, defilement and violence against
+God's work. They may be emotionally close to the truth without possessing Fisherman-level physics;
+their response is accusation and holy violence, not calm administration.
 
 ## Persean League
 
