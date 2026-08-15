@@ -776,8 +776,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
 
-        //the toggle is sticky across map opens; a fresh overlay is told what was chosen
-        overlay.setCoherenceShown(FishMapPane.isCoherenceShown());
+        //the heat map belongs to the filter, not the bare map - activate() applies the sticky
+        //choice when the pane comes up, and a map without the filter shows no heat
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
@@ -822,6 +822,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 overlayPanel.getPosition().setSize(narrowWidth, paneHeight);
             }
 
+            //the sticky choice comes back with the filter it belongs to
+            if (overlay != null) overlay.setCoherenceShown(FishMapPane.isCoherenceShown());
+
             rebuildBlobs();
             applied = true;
         } catch (Throwable t) {
@@ -829,8 +832,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The filter goes off: the pane and the waters leave; the overlay stays for the route and
-     *  the system view, with its blob list emptied. */
+    /** The filter goes off: the pane, the waters and the heat map leave; the overlay stays for
+     *  the route and the system view, with its blob list emptied. */
     protected void deactivate() {
         try {
             //a planner holding the pane's slot goes down with it, without handing the slot back
@@ -856,6 +859,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             }
 
             if (overlay != null) overlay.setBlobs(null);
+
+            //the heat map is the filter's reading of the water, not the map's - it goes down
+            //with the pane; the sticky choice itself stays for the next activation
+            if (overlay != null) overlay.setCoherenceShown(false);
 
             if (overlayPanel != null) {
                 overlayPanel.getPosition().setSize(originalScrollerWidth, scrollerPos.getHeight());
