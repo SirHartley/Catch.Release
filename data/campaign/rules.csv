@@ -1812,11 +1812,11 @@ He taps the manifest.
 100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherOptAsk_upgrade,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 3
 !$global.catchrelease_fisherAsked_upgrade","CatchReleaseCMD addFisherQuestion catchrelease_ask_upgrade ""What is an upgrade?"" false",,,
-catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent tier.""
 
 He points at the entry.
 
-""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
+""Buy the early tiers. The final two need a schematic each; jobs turn those up.""
 
 ""Improves the function listed on it.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
@@ -2167,11 +2167,11 @@ He taps the manifest.
 
 ""Refit it when the work changes. Don't pay for it twice.""","0:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
-catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent rung.""
+catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Permanent tier.""
 
 He points at the entry.
 
-""Buy the early rungs. The last two need a schematic each; jobs turn those up.""
+""Buy the early tiers. The final two need a schematic each; jobs turn those up.""
 
 ""Improves the function listed on it.""","0:catchrelease_introAskTackle:What is tackle?
 100:catchrelease_introDeepGear:Continue",

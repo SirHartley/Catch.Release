@@ -130,8 +130,8 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
 
-        String text = entry.isMaxed() ? "LEVEL " + level + " / " + max + "  -  MAXED"
-                : "LEVEL " + level + " / " + max;
+        String text = entry.isMaxed() ? "TIER " + level + " / " + max + "  -  MAXED"
+                : "TIER " + level + " / " + max;
 
         if (sub == null) {
             sub = ShopUi.createText(font, text);

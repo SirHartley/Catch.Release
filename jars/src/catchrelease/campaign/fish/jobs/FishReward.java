@@ -217,7 +217,7 @@ public abstract class FishReward {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
             String name = stat == null ? statId : ShopEntry.of(stat).getName();
 
-            return "a schematic for " + name + " level " + targetLevel;
+            return "a schematic for " + name + " tier " + targetLevel;
         }
 
         @Override
@@ -233,13 +233,13 @@ public abstract class FishReward {
             ShopEntry entry = ShopEntry.of(stat);
             TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
             item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
-            item.addPara("%s — level %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
+            item.addPara("%s — Tier %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
                     entry.getName(), String.valueOf(targetLevel));
             item.addPara(stat.description, 6f);
-            item.addPara("This rung: %s → %s", 3f, Misc.getGrayColor(),
+            item.addPara("This tier: %s → %s", 3f, Misc.getGrayColor(),
                     Misc.getPositiveHighlightColor(), entry.getValueAt(targetLevel - 1),
                     entry.getValueAt(targetLevel));
-            addSchematicPurchase(item, ShopPricing.getPrice(stat, targetLevel), "upgrade rung");
+            addSchematicPurchase(item, ShopPricing.getPrice(stat, targetLevel), "upgrade tier");
             UIPanelAPI card = tooltip.addImageWithText(pad);
             CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f,
                     new SchematicMarkOverlay(statId, targetLevel));
