@@ -517,55 +517,104 @@ The cook smells the first, prods the second, and stares at the third for several
 ""Yes.""
 
 $catchreleaseReward is transferred.",,
-catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket is giving a presentation to a slate propped against an empty chair.,,
+catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on his slate. A half-finished drink sits at one corner of the table.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch.,
-catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""You fish. Good.""
+catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
+FireAll PopulateOptions","""You fish. Good.""
 
-He moves a sales projection aside.
+He closes three projections and opens a fourth.
 
-""I have buyers for fresh catch. What I don't have is a supplier willing to put their name on a repeat delivery schedule.""
+""Fresh catch has demand. Demand is not the problem. The problem is demonstrated inbound.""
 
-He shows you the first order.
+He turns the slate enough for you to see a diagram headed SUPPLY.",,
+catchrelease_startup_offerDemandOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+!$catchreleaseStartupAskedDemand",,,10:catchrelease_startup_demand:Who is buying?,
+catchrelease_startup_offerOperationsOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+!$catchreleaseStartupAskedOperations",,,20:catchrelease_startup_operations:How are you handling fulfillment?,
+catchrelease_startup_offerTermsOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+!$catchreleaseStartupTerms",,,30:catchrelease_startup_terms:Show me the terms.,
+catchrelease_startup_offerAcceptOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+$catchreleaseStartupTerms",,,30:catchrelease_jobAccept:Agree to the trial shipment.,
+catchrelease_startup_offerDeclineOption,PopulateOptions,$menuState == catchreleaseStartupOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_startup_demand,DialogOptionSelected,$option == catchrelease_startup_demand,"$catchreleaseStartupAskedDemand = true 0
+$menuState = catchreleaseStartupOffer 0
+FireAll PopulateOptions","""Restaurants. Clubs. Conservatories. That's the initial demand pool.""
 
-""$catchreleaseAskCap. One demonstration shipment.""
+He opens a page of projections broken down by population, income and prevailing catch prices.
 
-""$catchreleaseRewardCap. If it arrives when you say it will, I can sell the second run before the first is unpacked.""","catchrelease_jobAccept:Agree to the trial shipment.
-catchrelease_jobDecline:Find another boat.",
+""I've modeled purchasing volume across the addressable markets. Buyers are easy once you can show reliable inbound.""",,
+catchrelease_startup_operations,DialogOptionSelected,$option == catchrelease_startup_operations,"$catchreleaseStartupAskedOperations = true 0
+$menuState = catchreleaseStartupOffer 0
+FireAll PopulateOptions","He enlarges the supply diagram. Between SUPPLIER and CUSTOMER are boxes marked CONSOLIDATE, GRADE and DISPATCH. None has a name beside it.
+
+""You deliver here. From there it's consolidation, grading and dispatch. Standard functions.""
+
+He moves back to the supplier box.
+
+""First I need inbound.""",,
+catchrelease_startup_terms,DialogOptionSelected,$option == catchrelease_startup_terms,"$catchreleaseStartupTerms = true 0
+CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+$menuState = catchreleaseStartupOffer 0
+FireAll PopulateOptions","""Pilot run. $catchreleaseAskCap.""
+
+He brings up the payment line.
+
+""$catchreleaseRewardCap on delivery. No deadline. I need the completed shipment and the receipt.""
+
+He closes the terms sheet.
+
+""If the pilot works, we increase volume.""",,
 catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent.""
 
-He sends an invoice template.
+A supplier brief arrives in your inbox. The first page contains the quantity you just agreed to. The remaining pages are projections.
 
-""Fill in whatever parts fishermen fill in.""",,
-catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""Fine. Entirely fine.""
+""I'll mark inbound as active.""",,
+catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""Understood. I have other supplier conversations.""
 
-He turns back to the empty chair.
+He opens his contact list and starts again from the top.",,
+catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Current run is $catchreleaseAskCap.""
 
-""Where were we?""",,
-catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Still need the demonstration shipment. $catchreleaseAskCap.""",,
+He checks the quantity against his model.
+
+""Bring me that and we keep moving.""",,
 catchrelease_startup_paid,catchreleaseJobPaid,"$missionId == catchrelease_startup
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"He photographs the containers, the handling seals, and you standing beside both.
+$catchreleasePaid",,"He checks the delivery receipt against the current order.
 
-$catchreleaseReward is transferred immediately.",,
+""Good.""
+
+The agreed transfer clears.",,
 catchrelease_startup_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
-$catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","The first shipment has apparently become a presentation.
+$catchreleaseMore
+$catchreleaseRound == 1 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. The signed receipt goes straight into the presentation. The page title changes from PILOT to DEMONSTRATED INBOUND.
 
-""I need the next run.""
+""There. Now we scale.""
 
-He sends the new quantity.
+He sends the next order.
 
-""$catchreleaseAskCap. Same buyer, more tables.""",,
+""$catchreleaseAskCap. $catchreleaseRewardCap on delivery.""",,
+catchrelease_startup_paidScale,catchreleaseJobPaid,"$missionId == catchrelease_startup
+$catchreleasePaid
+$catchreleaseMore
+$catchreleaseRound == 2 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. He checks the second receipt, then duplicates the first two entries into a table headed REPEATABLE SUPPLY.
+
+""Good. Volume held.""
+
+Another order appears.
+
+""$catchreleaseAskCap. $catchreleaseRewardCap. This is the production run.""",,
 catchrelease_startup_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
-!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He stares at the signed delivery receipt.
+!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"$catchreleaseRewardCap is transferred. He reads the final delivery receipt twice.
 
-""Repeat customer.""
+Then he adds three rows to the business case: PILOT, SCALE, PRODUCTION.
 
-Then, more quietly:
+""That's the supply chain proven.""
 
-""Good.""",,
+He is already opening the demand projections.",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0

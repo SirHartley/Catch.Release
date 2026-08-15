@@ -432,7 +432,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 | `CuratorJob.java` | Several fish, accepting either fine-grade or low-coherence uncommon+ |
 | `KidsJob.java` | Two fish for two children; player picks who gets the better one |
 | `MafiaJob.java` | Two fish for a betting ring; flat fee, or wager with odds off specimen quality |
-| `StartupJob.java` | Three rounds of growing quantity, no time limit |
+| `StartupJob.java` | Three rounds of growing quantity, no time limit. Its rules-authored pitch is a compact demand/operations/terms submenu: optional due-diligence questions return to the remaining topics, terms unlock acceptance, and decline is always available. A read-only round token lets the hand-in dialogue distinguish pilot, scale-up and production while preserving the existing three-delivery mechanic |
 | `TuberJob.java` | Two rounds: a Fine Uncommon/Rare specimen for the polished first post, then a low-coherence specimen when clean footage loses retention. The insufferable short-form creator voice is authored in `rules.csv` and bounded by `LORE.md`. |
 
 ### `campaign/fish/jobs/camp`
