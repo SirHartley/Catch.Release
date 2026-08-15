@@ -235,6 +235,11 @@ scene, but breach-lamp escalation and the hostile fishing camp are intentionally
 Moloch, defilement, base appetite and violence against creation, screamed without accurate fabric
 physics. Institutional vocabulary must not flatten any of these into placeholder procedure.
 
+Dialogue drafting and corrective voice audits use the Codex app's Starsector Editor with the full
+current `LORE.md` attached. A regression repair also supplies the prior and current sheet excerpts,
+and keeps faction, Fisherman and Crablobab passes separate before a final whole-sheet voice check;
+this prevents generic tightening from erasing the distinctions the lore requires.
+
 The Fisherman and Crablobab never share a cadence. The former is a warm, patient old captain in
 presentation with a colder strategic calculus underneath; he teaches in full human beats, then
 chooses where an explanation must stop. The latter is low coherence becoming exuberant merchant

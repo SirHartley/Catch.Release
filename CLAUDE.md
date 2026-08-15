@@ -22,6 +22,12 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   whimsy on the surface, nothing good underneath, and never say so. Dialogue, species descriptions,
   tackle blurbs and intel notes all answer to it. It also lists what the mod does that the fiction
   has not explained yet; do not invent an answer in a row, settle it there first.
+- **Draft and audit dialogue with the Starsector Editor in the Codex app.** Give the editor the
+  complete current `docs/LORE.md`, not a summary, before asking it to revise a line. For corrective
+  passes, also supply both the pre-regression and current dialogue so stronger characterization is
+  restored rather than flattened by generic tightening. Use focused faction, Fisherman and
+  Crablobab passes, then give the editor the final sheet for voice QA. Its prose still has to pass
+  the rules safety checks below; the editor does not get to alter routes, tokens or mechanics.
 - **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
   verified against decompiled engine source - triggers, memory scopes, the operator table, the
   truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
