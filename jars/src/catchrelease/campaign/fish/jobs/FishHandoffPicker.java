@@ -179,11 +179,27 @@ public final class FishHandoffPicker {
                     public void pickedCargo(CargoAPI picked) {
                         Selection selection = match(picked, asks);
 
-                        if (selection == null) {
-                            listener.cancelled();
-                        } else {
+                        if (selection != null) {
                             listener.picked(selection);
+                            return;
                         }
+
+                        //the engine re-enables its confirm every frame whenever anything at all
+                        //is picked, so a wrong selection cannot be stopped at the button - it is
+                        //refused here instead, and the picker comes back with the reason said
+                        if (picked == null || picked.getStacksCopy().isEmpty()) {
+                            listener.cancelled();
+                            return;
+                        }
+
+                        if (dialog.getTextPanel() != null) {
+                            dialog.getTextPanel().addPara(
+                                    "That selection does not cover the order - nothing was"
+                                            + " handed over.",
+                                    Misc.getNegativeHighlightColor());
+                        }
+
+                        show(dialog, title, asks, eligibility, listener);
                     }
 
                     @Override
@@ -200,15 +216,34 @@ public final class FishHandoffPicker {
                         int selected = countLoose(combined);
                         boolean ready = match(combined, asks) != null;
 
-                        String request = describe(asks);
-                        LabelAPI requiredLine = panel.addPara("Required: %s", 0f,
-                                Misc.getHighlightColor(), request);
-                        FishRequirement.highlight(requiredLine, asks, request);
+                        //one line per ask, ticking off as the selection covers it - refreshed
+                        //every frame by the picker itself
+                        panel.addPara("The order:", 0f);
+
+                        List<Candidate> picked = readLoose(combined);
+                        boolean[] consumed = new boolean[picked.size()];
+
+                        for (FishRequirement ask : asks) {
+                            int need = Math.max(0, ask.count);
+                            int have = Math.min(need, attribute(ask, picked, consumed));
+                            boolean met = have >= need;
+
+                            String request = ask.describe();
+                            LabelAPI line = panel.addPara((met ? "[OK] " : "[  ] ")
+                                            + have + " / " + need + " - %s", 3f,
+                                    met ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
+                                    Misc.getHighlightColor(), request);
+                            FishRequirement.highlight(line, asks, request);
+                        }
+
                         panel.addPara("Selected: %s of %s specimens.", 10f,
                                 ready ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
                                 String.valueOf(selected), String.valueOf(required));
 
-                        if (!ready) {
+                        if (selected > required) {
+                            panel.addPara("Only what the order asks will be taken - a larger"
+                                    + " selection is refused.", Misc.getNegativeHighlightColor(), 5f);
+                        } else if (!ready) {
                             panel.addPara("The selection does not yet cover the full request.",
                                     Misc.getGrayColor(), 5f);
                         }
@@ -365,6 +400,50 @@ public final class FishHandoffPicker {
         }
 
         return false;
+    }
+
+    /**
+     * How many of an ask this selection covers, greedily, consuming what it attributes so a
+     * specimen never counts for two asks. A one-species ask with no species named takes its
+     * best single species. Display arithmetic - the authoritative yes/no stays {@code match}.
+     */
+    protected static int attribute(FishRequirement ask, List<Candidate> picked,
+                                   boolean[] consumed) {
+
+        int need = Math.max(0, ask.count);
+        if (need <= 0) return 0;
+
+        if (ask.sameSpecies && ask.speciesId == null) {
+            Map<String, List<Integer>> bySpecies = new LinkedHashMap<>();
+            for (int i = 0; i < picked.size(); i++) {
+                if (consumed[i] || !ask.matches(picked.get(i).fish)) continue;
+                bySpecies.computeIfAbsent(picked.get(i).fish.speciesId,
+                        k -> new ArrayList<>()).add(i);
+            }
+
+            List<Integer> best = null;
+            for (List<Integer> group : bySpecies.values()) {
+                if (best == null || group.size() > best.size()) best = group;
+            }
+            if (best == null) return 0;
+
+            int took = 0;
+            for (int i : best) {
+                if (took >= need) break;
+                consumed[i] = true;
+                took++;
+            }
+            return took;
+        }
+
+        int took = 0;
+        for (int i = 0; i < picked.size(); i++) {
+            if (took >= need) break;
+            if (consumed[i] || !ask.matches(picked.get(i).fish)) continue;
+            consumed[i] = true;
+            took++;
+        }
+        return took;
     }
 
     protected static List<Candidate> readLoose(CargoAPI cargo) {
