@@ -41,6 +41,11 @@ import java.util.Map;
  */
 public abstract class CampedSpotJob extends FishJob {
 
+    /** Intermediate transitions that need their own intel update copy without adding mission stages. */
+    protected enum Update {
+        CAMP_CLEARED
+    }
+
     /** One at a time across the whole family - three of these running at once is three fleets parked in space. */
     public static final String REF_KEY = "$catchrelease_campRef";
     public static final String IN_PROGRESS_KEY = "$catchrelease_campInProgress";
@@ -203,9 +208,16 @@ public abstract class CampedSpotJob extends FishJob {
 
         CampedSpot.setPondBlocked(pond, false);
         cleared = true;
+
+        //The fleet is no longer the objective even when it is still alive and flying away.
+        //BaseHubMission's stage-bound marker otherwise follows it until the whole job ends.
+        if (camper != null) {
+            Misc.makeUnimportant(camper.getMemoryWithoutUpdate(), getReason());
+        }
         camper = null;
 
         updateInteractionDataImpl();
+        sendUpdateIfPlayerHasIntel(Update.CAMP_CLEARED, false);
     }
 
     @Override
@@ -246,6 +258,18 @@ public abstract class CampedSpotJob extends FishJob {
         if (pond != null && !pond.isExpired()) return pond;
 
         return super.getMapLocation(map);
+    }
+
+    /** Transition messages say what changed and what remains instead of repeating "1 fish". */
+    @Override
+    protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+        if (getListInfoParam() == Update.CAMP_CLEARED) {
+            info.addPara("The camp has left. Catch any fish from the marked rupture.",
+                    getBulletColorForMode(mode), 0f);
+            return;
+        }
+
+        super.addBulletPoints(info, mode);
     }
 
     @Override
