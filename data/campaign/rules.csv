@@ -1890,6 +1890,75 @@ Once fitted, the whispering is gone.
 Nothing else changes.
 
 ""Outfitter toggles it! On, off, on again. You know the drill.""",0:catchrelease_crabStall:Continue,
+catchrelease_crabWareChicken_profile,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:10
+CatchReleaseCMD tokens
+$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
+
+Crablobab produces a little display tile. A chicken walks across it, reaches the edge, and continues across the back.
+
+""Fishing profile! Unknown catch becomes chicken. Very clear. Very upright.""
+
+He turns the tile sideways. The chicken keeps walking.
+
+""Only $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Permanent. Fish Outfitter, Extras. On when you like, off when you don't.""
+
+He taps the tile.
+
+""Sonar Head still shows the actual fish. Naturally. Sonar has standards.""","0:catchrelease_crabBuyChicken_profile:Pay him
+10:catchrelease_crabStall:Another time.",
+catchrelease_crabWareChicken_profileShort,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:5
+CatchReleaseCMD tokens
+!$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
+
+Crablobab produces a little display tile. A chicken walks across it, reaches the edge, and continues across the back.
+
+""Fishing profile! Unknown catch becomes chicken. Very clear. Very upright.""
+
+He turns the tile sideways. The chicken keeps walking.
+
+""Only $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Permanent. Fish Outfitter, Extras. On when you like, off when you don't.""
+
+He taps the tile.
+
+""Sonar Head still shows the actual fish. Naturally. Sonar has standards.""
+
+Crablobab checks your credits, then your crabs.
+
+""Ah. Short.""
+
+He returns the tile to his coat. The chicken continues across it.",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyChicken_profile,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
+!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the tile against your settings slate.
+
+MINIGAME MARKER — CHICKEN
+
+The new entry is dated tomorrow.
+
+""Done!""
+
+He points at it.
+
+""Fish Outfitter, Extras. Sonar Head still wins when fitted.""
+
+He considers the tile.
+
+""Chicken has other strengths.""",0:catchrelease_crabBaha:Baha?,
+catchrelease_crabBuyChicken_profileKnown,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
+$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the tile against your settings slate.
+
+MINIGAME MARKER — CHICKEN
+
+The new entry is dated tomorrow.
+
+""Done!""
+
+He points at it.
+
+""Fish Outfitter, Extras. Sonar Head still wins when fitted.""
+
+He considers the tile.
+
+""Chicken has other strengths.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,$global.catchrelease_crabAskedBaha = true 0,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
@@ -1989,6 +2058,7 @@ One of them is far enough away to require a light.
 ""Shop!""",,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareCelebration ""Celebration Charges"" CELEBRATION",,,
 catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabEarmuffsOwned,CatchReleaseCMD addCrabOption catchrelease_crabWareEarmuffs Earmuffs EARMUFFS,,,
+catchrelease_crabOptionChickenProfile,CatchReleaseCrabStallOptions,!$catchreleaseCrabChicken_profileOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareChicken_profile ""Chicken Profile"" CHICKEN_PROFILE",,,
 catchrelease_crabOptionExplosive,CatchReleaseCrabStallOptions,!$catchreleaseCrabExplosive_headOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareExplosive_head ""Explosive Head"" EXPLOSIVE_HEAD",,,
 catchrelease_crabOptionConservatory,CatchReleaseCrabStallOptions,!$catchreleaseCrabConservatoryOwned,"CatchReleaseCMD addCrabOption catchrelease_crabWareConservatory ""Breach Conservatory Plans"" CONSERVATORY",,,
 catchrelease_crabOptionBackdrop,CatchReleaseCrabStallOptions,$catchreleaseCrabBackdrop,"CatchReleaseCMD addCrabOption catchrelease_crabWareBackdrop ""Ask about the roll under his arm"" BACKDROP",,,

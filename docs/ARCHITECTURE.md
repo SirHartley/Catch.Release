@@ -192,9 +192,12 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 14 ids at the top level, merged into vanilla's ~600: eleven of our
-own (the searchlight UI set, six cargo handling sounds, the coherence whispers), the skillshot
-framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
+**`data/config/sounds.json`** — 18 ids at the top level, merged into vanilla's ~600: fifteen of
+our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, and the
+minigame's coin-filled chest opening, bar click and two outcome hooks), the skillshot framework's
+denied blip, and two vanilla character-screen ids re-declared at reduced volume. The minigame
+success and failure ids currently point at vanilla's reputation-raise and reputation-drop files,
+respectively, so replacing those placeholders later needs no Java change.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
@@ -531,12 +534,12 @@ The catch itself. Rules are separated from rendering on purpose.
 | File | What it does |
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. No GL, no input |
-| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, enlarged over a white fringe and core and drawn after treasure so the required target keeps visual priority; the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration, plus the live-catch click-to-lift hook, treasure-cover enter edges, and once-per-pickup treasure-got hook |
+| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus the live-catch click-to-lift hook with restrained per-press pitch variation, treasure-cover enter edges, and once-per-pickup treasure-got hook |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture and campaign timestamp on landed specimens from either drones or harpoons. It keeps that visual/source anchor separate from the caught mote, so a rupture-based drone catch and a direct harpoon catch both carry the planted chart-request identity into cargo |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
-| `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; its side-panel exhibit uses the closed treasure chest while the delayed tally waits, then switches to the open chest in the same update that reveals the first recovered-item row (including an immediate skipped reveal). Item names wrap inside its default width and rows grow vertically instead of stretching the screen for long blueprint names. Its success hook fires once when the delayed tally begins, after the fish readout finishes |
-| `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
+| `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; its side-panel exhibit uses the closed treasure chest while the delayed tally waits, then switches to the open chest and plays its coin-filled opening sound in the same update that reveals the first recovered-item row (including an immediate skipped reveal). Item names wrap inside its default width and rows grow vertically instead of stretching the screen for long blueprint names |
+| `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. Also owns the minigame's UI-sound hook, including a pitch-selecting overload for repeated effects. The confetti is bought — see `campaign/fish/crab` |
 
 ### `campaign/fish/treasure`
 Optional loot found mid-catch.
@@ -600,9 +603,12 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell, including a vanilla-blueprint-style four-corner icon pass for box labels |
 
 ### `campaign/fish/crab`
-Crablobab's per-port bar roll, four regular wares, rotating backdrop, and empty-shelf bass. The stall dialogue, labels and ordered option stream live in `rules.csv`;
+Crablobab's per-port bar roll, five regular wares, rotating backdrop, and empty-shelf bass. The stall dialogue, labels and ordered option stream live in `rules.csv`;
 `CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
-and highlighted credits-and-crabs tooltip. The same bridge mounts the campaign-persistent
+and highlighted credits-and-crabs tooltip. Chicken Profile follows the same affordable/shortfall
+pair and purchase routing as the other switchable curios: every refusal returns to the stall, and
+successful purchases either pass through the first `Baha?` explanation or return directly. The
+same bridge mounts the campaign-persistent
 `CrablobabIdentity` person card on every entry path; its portrait is resolved from the
 `graphics.characters` registration in `settings.json`, never from a hard-coded asset path. The ware
 state and prices are Java. The first
@@ -632,7 +638,7 @@ inflated credits-and-crabs price. Its hover card states both the Terrible qualit
 |---|---|
 | `CrablobabBarPresence.java` | The rules row's availability predicate. Dev mode returns true in every bar; ordinary play rolls independently in each eligible market using vanilla's bar seed and `barEventProbOneMore`, caches the result until that market's normal bar re-roll, and caps it at 60 days. Market-local state allows the same merchant to be present in several ports at once |
 | `CrablobabIdentity.java` | The campaign-persistent `Crab Merchant` shown by all three bar-entry greetings. It resolves `crabolabob.png` through the registered `graphics.characters` sprite id, refreshes the data-registered custom rank for old saves, and mounts the minimal vanilla person card without adding him to a market's permanent people or comm directory |
-| `CrabWares.java` | The four regular wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. It also constructs and sells the empty-shelf fallback as the Green Bass row's exact minimum-size Terrible specimen for 10,000 credits and one crab. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop; each actual blast also replaces the saved latest-target name and marks it for one acknowledgement at the next stall meeting. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
+| `CrabWares.java` | The five regular wares, what each costs in credits and crabs, where each one's ownership lives, and which of them has a switch. Chicken Profile is a one-time, switchable cosmetic purchase whose live state replaces only the minigame's unidentified mote; Sonar keeps its exact-species reveal. It also constructs and sells the empty-shelf fallback as the Green Bass row's exact minimum-size Terrible specimen for 10,000 credits and one crab. The explosive head is offered whenever none is currently owned, so detonating its single charge reopens the same Crablobab purchase loop; each actual blast also replaces the saved latest-target name and marks it for one acknowledgement at the next stall meeting. The conservatory is a vanilla `industry_bp` chip with the industry id in its data — the game's own plugin names it and teaches the faction, so nothing here knows what a blueprint screen looks like |
 | `CrabBackdrops.java` | The rolled scene under his arm: one at a time, a rotation down `backdrops.csv` rather than a roll, and the port remembers what he had there — so the same rock offers the same thing until it sells and the next rock offers the next thing. A completed sale leaves that port's backdrop slot empty for 60 days before the next scene is assigned. Priced off rarity; anything already owned drops out of the rotation |
 
 ### `campaign/fish/tackle`
