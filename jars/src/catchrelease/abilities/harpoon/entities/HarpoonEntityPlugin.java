@@ -208,6 +208,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         SectorEntityToken hit = findMote();
 
         if (hit != null) {
+            //Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
+            if (entity.isInCurrentLocation()) {
+                Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
+            }
+
             //an explosive head never gets as far as the push: there is nothing to shove, nothing to
             //play, and nothing to bring home. isExplosive reads the player's tackle, so an owned
             //line never asks - what is screwed onto the player's line is not on anyone else's

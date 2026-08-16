@@ -76,6 +76,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         harpoon.addTag(HarpoonConstants.TAG);
         harpoon.setLocation(from.x, from.y);
         harpoon.setFacing(angleFromFleet);
+
+        Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_FIRE, 1f, 1f);
     }
 
     /**
