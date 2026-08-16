@@ -89,6 +89,29 @@ public enum CrabWares {
     },
 
     /**
+     * A cosmetic catch-marker profile. It replaces only the unidentified mote: a Sonar Head still
+     * earns and displays the species on the line. Switchable so the joke is not a permanent UI tax.
+     */
+    CHICKEN_PROFILE("Chicken Profile", 12000, 3,
+            "Replaces the unidentified catch marker in the fishing minigame with a chicken. A"
+                    + " Sonar Head still shows the hooked species instead.") {
+        @Override
+        public boolean isOwned() {
+            return isBought(name());
+        }
+
+        @Override
+        public void grant() {
+            markBought(name());
+        }
+
+        @Override
+        public boolean isSwitchable() {
+            return true;
+        }
+    },
+
+    /**
      * The charge behind the barb. Granted through {@link ShopEntry}, which is the one place that
      * knows a running rig has to be stopped so it comes back up reading the module it now has.
      */

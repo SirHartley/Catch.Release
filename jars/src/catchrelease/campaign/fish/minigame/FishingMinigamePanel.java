@@ -408,9 +408,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerX = layout.getTrackCenterX() + getJitter(0f);
         float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
 
-        //Sonar still earns the exact species reveal; without it, the campaign mote is the catch.
+        //Sonar still earns the exact species reveal. The bought profile replaces only the
+        //unidentified mote, never the information a fitted head is meant to provide.
         if (!minigame.getTackle().sonar) {
-            renderCatchMote(centerX, centerY, alphaMult);
+            if (CrabWares.CHICKEN_PROFILE.isOn()) {
+                renderChicken(centerX, centerY, size, alphaMult);
+            } else {
+                renderCatchMote(centerX, centerY, alphaMult);
+            }
             return;
         }
 
@@ -421,6 +426,23 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
 
         sprite.setSize(size, size);
+        sprite.setColor(Color.WHITE);
+        sprite.setNormalBlend();
+        sprite.setAlphaMult(alphaMult);
+        sprite.renderAtCenter(centerX, centerY);
+    }
+
+    /** Draws the cosmetic profile at the mote's position, preserving the source art's aspect. */
+    protected void renderChicken(float centerX, float centerY, float size, float alphaMult) {
+        SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.MINIGAME_CHICKEN_ICON);
+        if (sprite == null) {
+            renderCatchMote(centerX, centerY, alphaMult);
+            return;
+        }
+
+        float scale = Math.min(size / sprite.getWidth(), size / sprite.getHeight());
+
+        sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
         sprite.setColor(Color.WHITE);
         sprite.setNormalBlend();
         sprite.setAlphaMult(alphaMult);
