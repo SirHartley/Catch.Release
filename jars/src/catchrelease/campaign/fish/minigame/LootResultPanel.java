@@ -453,7 +453,9 @@ public class LootResultPanel {
     }
 
     protected SpriteAPI getBoxSprite() {
-        return SpriteLoader.loadSprite(FishConstants.TREASURE_RESULT_CLOSED_ICON);
+        String icon = shown > 0 ? FishConstants.TREASURE_RESULT_OPEN_ICON
+                : FishConstants.TREASURE_RESULT_CLOSED_ICON;
+        return SpriteLoader.loadSprite(icon);
     }
 
     /** Loaded once and kept. A missing font costs the text and nothing else. */
