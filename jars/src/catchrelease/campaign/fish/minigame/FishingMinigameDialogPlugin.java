@@ -43,6 +43,8 @@ import java.util.Map;
  */
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
+    protected static final String CAMPAIGN_MUSIC_VOLUME_KEY = "campaignMusicVolumeMult";
+
     public interface Callback {
         /** @param landed specimen taken, or null if it got away - same object the readout showed */
         void onCatchResolved(FishCatch landed);
@@ -77,6 +79,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     /** Set while the panel is already on its way out, so closing it again is not attempted. */
     transient protected boolean dismissed = false;
+
+    /** Exact vanilla/modded value replaced for this dialog, so every exit restores it. */
+    transient protected float previousCampaignMusicVolume;
+    transient protected boolean campaignMusicVolumeScoped = false;
 
     /**
      * Opens the catch on a fish, if the UI will have it.
@@ -215,6 +221,29 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         dialog.showCustomVisualDialog(FishConstants.MINIGAME_PANEL_WIDTH, FishConstants.MINIGAME_PANEL_HEIGHT,
                 delegate);
+        beginCampaignMusicVolumeScope();
+    }
+
+    /**
+     * Vanilla's public suppressor applies this value after the player's music setting and current track
+     * level, making it a relative multiplier. Replace it only while requesting full suppression each frame.
+     */
+    protected void beginCampaignMusicVolumeScope() {
+        if (campaignMusicVolumeScoped) return;
+
+        previousCampaignMusicVolume = Global.getSettings().getFloat(CAMPAIGN_MUSIC_VOLUME_KEY);
+        float requested = Math.max(0f, Math.min(1f,
+                FishConstants.MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT));
+        Global.getSettings().setFloat(CAMPAIGN_MUSIC_VOLUME_KEY, requested);
+        campaignMusicVolumeScoped = true;
+    }
+
+    /** Restores the exact runtime setting that was present before this catch opened. */
+    protected void restoreCampaignMusicVolume() {
+        if (!campaignMusicVolumeScoped) return;
+
+        campaignMusicVolumeScoped = false;
+        Global.getSettings().setFloat(CAMPAIGN_MUSIC_VOLUME_KEY, previousCampaignMusicVolume);
     }
 
     /** Resolves both drone catches (anchor is the pond) and harpoon catches (anchor is the mote). */
@@ -239,6 +268,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     protected void reopenWith(FishSpec pick) {
         if (pick == null || resolved) return;
         resolved = true;
+        restoreCampaignMusicVolume();
 
         if (delegate != null) delegate.dismissPanel();
         if (dialog != null) dialog.dismiss();
@@ -276,6 +306,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     protected void resolve(boolean caught) {
         if (resolved) return;
         resolved = true;
+        restoreCampaignMusicVolume();
 
         // panel closes before the dialog, unless panel-close is what triggered this
         if (!dismissed && delegate != null) delegate.dismissPanel();
@@ -453,6 +484,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     @Override
     public void advance(float amount) {
+        if (!resolved && campaignMusicVolumeScoped) {
+            Global.getSector().getCampaignUI().suppressMusic(1f);
+        } else {
+            restoreCampaignMusicVolume();
+        }
     }
 
     @Override
