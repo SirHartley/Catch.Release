@@ -330,8 +330,8 @@ public class FishConstants {
     /** Played when a live-catch click starts lifting the indicator. */
     public static final String SOUND_INDICATOR_MOVE = "";
 
-    /** Played once when the treasure card begins its end-of-catch tally. */
-    public static final String SOUND_TREASURE_SUCCESS = "";
+    /** Played exactly when the loot-card chest changes from closed to open. */
+    public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
 
     /** Played on each edge where the catch bar begins covering an active treasure. */
     public static final String SOUND_TREASURE_HOVER = "";
