@@ -321,11 +321,11 @@ public class FishConstants {
     public static final float CELEBRATION_POP_TIME = 0.18f;
     public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
 
-    /** Blank = no sound wired up yet, not a placeholder id waiting to be found. */
-    public static final String SOUND_CAUGHT = "";
+    /** Played once when the fish is landed; its registered file is a temporary vanilla stand-in. */
+    public static final String SOUND_CAUGHT = "catchrelease_minigame_success";
 
-    /** Played once when the fish escapes or the player abandons the catch. */
-    public static final String SOUND_FAILED = "";
+    /** Played once when the fish escapes or the player abandons; temporarily a vanilla stand-in. */
+    public static final String SOUND_FAILED = "catchrelease_minigame_failure";
 
     /** Played when a live-catch click starts lifting the indicator, varied only enough not to repeat. */
     public static final String SOUND_INDICATOR_MOVE = "catchrelease_minigame_bar_click";
