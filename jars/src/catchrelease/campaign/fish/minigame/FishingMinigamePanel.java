@@ -60,6 +60,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Previous rules-state for the mote crossing either edge of the catch indicator. */
     protected boolean fishCoveredLastFrame;
 
+    /** Optional sound-set ids read once for this catch; empty means that input state is silent. */
+    protected final String lineHeldLoopId;
+    protected final String lineReleasedLoopId;
+
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
@@ -98,6 +102,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.method = method;
         this.listener = listener;
         this.fishCoveredLastFrame = minigame.isFishInBar();
+        this.lineHeldLoopId = readSoundSetting(FishConstants.SETTING_LINE_HELD_LOOP);
+        this.lineReleasedLoopId = readSoundSetting(FishConstants.SETTING_LINE_RELEASED_LOOP);
     }
 
     @Override
@@ -115,6 +121,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             minigame.advance(amount, reeling);
             advanceIndicatorSoundHook();
             advanceTreasureSoundHooks();
+
+            if (minigame.isRunning()) advanceLineSoundLoop();
             return;
         }
 
@@ -136,6 +144,20 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (endLingerLeft > 0f) return;
 
         end(false);
+    }
+
+    /** Calls vanilla's UI-loop path every running frame for exactly the current input state. */
+    protected void advanceLineSoundLoop() {
+        String soundId = reeling ? lineHeldLoopId : lineReleasedLoopId;
+        if (soundId.isEmpty()) return;
+
+        Global.getSoundPlayer().playUILoop(soundId, 1f, 1f);
+    }
+
+    /** Missing audio remains an intentionally silent slot, never an invalid sound lookup. */
+    protected static String readSoundSetting(String key) {
+        String soundId = Global.getSettings().getString(key);
+        return soundId == null ? "" : soundId.trim();
     }
 
     /** Sounds both entry and exit: either means the mote crossed one of the green window's lips. */

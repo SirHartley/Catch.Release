@@ -334,6 +334,10 @@ public class FishConstants {
     public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
     public static final float SOUND_INDICATOR_PITCH_MAX = 1.03f;
 
+    /** Optional UI-loop sound-set ids. Empty settings keep either state silent. */
+    public static final String SETTING_LINE_HELD_LOOP = "catchreleaseMinigameLineHeldLoop";
+    public static final String SETTING_LINE_RELEASED_LOOP = "catchreleaseMinigameLineReleasedLoop";
+
     /** Played exactly when the loot-card chest changes from closed to open. */
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
 
