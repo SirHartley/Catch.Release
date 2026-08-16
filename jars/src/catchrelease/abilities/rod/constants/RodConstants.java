@@ -10,6 +10,9 @@ public class RodConstants {
     /** Stereo launch report, played once for each drone entity successfully put into the world. */
     public static final String SOUND_DRONE_LAUNCH = "catchrelease_drone_launch";
 
+    /** Stereo opening report, replacing the searchlight-toggle placeholder at the center impact. */
+    public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
+
     //drones
     /** Radius of the ring drones fly once arrived; the reticule matches. */
     public static final float DRONE_ORBIT_RADIUS = 60f;
