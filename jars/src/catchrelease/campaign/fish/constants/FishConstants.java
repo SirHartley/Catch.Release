@@ -104,6 +104,8 @@ public class FishConstants {
     /** Seconds the result stays up before the dialog closes itself. */
     public static final float MINIGAME_END_LINGER = 0.9f;
     public static final float MINIGAME_FISH_ICON_SIZE = 38f;
+    public static final String MINIGAME_CHICKEN_ICON =
+            "graphics/catchrelease/icon/chicken.png";
 
     /**
      * The live catch uses the same glow texture and nested falloff as a campaign mote. The broad
