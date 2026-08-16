@@ -334,7 +334,8 @@ public class FishConstants {
     public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
     public static final float SOUND_INDICATOR_PITCH_MAX = 1.03f;
 
-    /** Optional UI-loop sound-set ids. Empty settings keep either state silent. */
+    /** Optional input sound-set ids. Empty settings keep their hooks silent. */
+    public static final String SETTING_LINE_CLICK_SOUND = "catchreleaseMinigameLineClickSound";
     public static final String SETTING_LINE_HELD_LOOP = "catchreleaseMinigameLineHeldLoop";
     public static final String SETTING_LINE_RELEASED_LOOP = "catchreleaseMinigameLineReleasedLoop";
 
