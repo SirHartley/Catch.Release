@@ -192,10 +192,10 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 15 ids at the top level, merged into vanilla's ~600: twelve of our
-own (the searchlight UI set, six cargo handling sounds, the coherence whispers, and the minigame's
-coin-filled chest opening), the skillshot framework's denied blip, and two vanilla character-screen
-ids re-declared at reduced volume.
+**`data/config/sounds.json`** — 16 ids at the top level, merged into vanilla's ~600: thirteen of
+our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, and the
+minigame's coin-filled chest opening and bar click), the skillshot framework's denied blip, and two
+vanilla character-screen ids re-declared at reduced volume.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
@@ -532,12 +532,12 @@ The catch itself. Rules are separated from rendering on purpose.
 | File | What it does |
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. No GL, no input |
-| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, enlarged over a white fringe and core and drawn after treasure so the required target keeps visual priority; the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration, plus the live-catch click-to-lift hook, treasure-cover enter edges, and once-per-pickup treasure-got hook |
+| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, enlarged over a white fringe and core and drawn after treasure so the required target keeps visual priority; the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration, plus the live-catch click-to-lift hook with restrained per-press pitch variation, treasure-cover enter edges, and once-per-pickup treasure-got hook |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture and campaign timestamp on landed specimens from either drones or harpoons. It keeps that visual/source anchor separate from the caught mote, so a rupture-based drone catch and a direct harpoon catch both carry the planted chart-request identity into cargo |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
 | `LootResultPanel.java` | The mirror card listing treasure recovered alongside the fish; its side-panel exhibit uses the closed treasure chest while the delayed tally waits, then switches to the open chest and plays its coin-filled opening sound in the same update that reveals the first recovered-item row (including an immediate skipped reveal). Item names wrap inside its default width and rows grow vertically instead of stretching the screen for long blueprint names |
-| `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. The confetti is bought — see `campaign/fish/crab` |
+| `CatchCelebration.java` | Flash, backlight and flourish on a landed fish. Also owns the minigame's UI-sound hook, including a pitch-selecting overload for repeated effects. The confetti is bought — see `campaign/fish/crab` |
 
 ### `campaign/fish/treasure`
 Optional loot found mid-catch.

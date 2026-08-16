@@ -21,6 +21,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -217,7 +218,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
             if (event.isLMBDownEvent()) {
                 if (minigame.isRunning()) {
-                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE);
+                    float pitch = MathUtils.getRandomNumberInRange(
+                            FishConstants.SOUND_INDICATOR_PITCH_MIN,
+                            FishConstants.SOUND_INDICATOR_PITCH_MAX);
+                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE, pitch);
                 }
                 reeling = true;
                 event.consume();

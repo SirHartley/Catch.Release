@@ -327,8 +327,10 @@ public class FishConstants {
     /** Played once when the fish escapes or the player abandons the catch. */
     public static final String SOUND_FAILED = "";
 
-    /** Played when a live-catch click starts lifting the indicator. */
-    public static final String SOUND_INDICATOR_MOVE = "";
+    /** Played when a live-catch click starts lifting the indicator, varied only enough not to repeat. */
+    public static final String SOUND_INDICATOR_MOVE = "catchrelease_minigame_bar_click";
+    public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
+    public static final float SOUND_INDICATOR_PITCH_MAX = 1.03f;
 
     /** Played exactly when the loot-card chest changes from closed to open. */
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
