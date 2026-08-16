@@ -65,12 +65,8 @@
 
 	#minigame
 
-	"catchrelease_minigame_line_held_loop":[
-		{"file":"sounds/catchrelease/minigame/unheld_loop.ogg","pitch":1,"volume":0.4},
-	],
-
-	"catchrelease_minigame_line_released_loop":[
-		{"file":"sounds/catchrelease/minigame/unheld_loop.ogg","pitch":1,"volume":0.1},
+	"catchrelease_minigame_loop":[
+		{"file":"sounds/catchrelease/minigame/unheld_loop.ogg","pitch":1,"volume":1},
 	],
 
 	"catchrelease_minigame_line_click":[
