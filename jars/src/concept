@@ -20,38 +20,10 @@ General
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
 Shop
-- Buying the last upgrade rung before a locked rung does not clear the marked state
-- "Unlocked X" top message does not correctly reflect the action (fit, unlock, switch on/Off)
-- There should be a similar message for refund (applies to shop & range data seller
-- The first time after the player unlocked a schematic for a rung or upgrade, there should be a small, gold label saying "New!" to the right of the upgrade indicators. If the shop is closed or the rung bought or marked, the label vanishes.
+- "new" label should be to the left of the upgrade tier indicators
 
 Quests
-- Quests must not offer schematic rewards for equipment you do not have yet.
-- Quest hand-in should always offer two options: "Hand in your catch" (with confirmation prompt showing what the picker will hand in for you - picker will always pick whatever meets the minimum condition of the quest to avoid over-fulfilling) & "Pick what to hand in" with cargo picker.
-- Change quest hand in cargo picker to show on the side if the prerequisites for each item required by the quest is met by what was handed in. Only unlock the confirm button once every condition is met.
-
-Pond Camper quest
-- Doesn't properly communicate that they need any fish from the pond as proof
-- making the fleet leave doesn't update the intel to say that it left and that you need to get a fish
-- getting a fish doesn't advance intel state and doesn't clear the pond quest mark
-- handing fish in doesn't respect the "must be from that specific pond after quest accepted timestamp" rule
-- Reward isn't communicated via text panel - should say smth along lines of "received: STUFF"
-
-Chart request
-- Intel doesn't seem to recognize catch when caught with harpoon? Might be a general problem.
-
-Fisherman
-- Map indictaor should vanish when you are close enough to see the fleet on the map so it doesn't overlap - reappear when you are no longer in range
-- map indicator should use UcFirst styling "The Fisherman" instead of all lowercase
-- Should have no "rank"
-
-Crabolabob
-- Should have custom rank "Crab Merchant"
-- Should only spawn in every single bar in devmode - otherwise, roll for it like bar encounter, but once rolled, keep present until re-roll or 2 months
-- Can be present in multiple bars at once
-
-Map
-- Coherence overlay should vanish when fish filter is disabled
+- "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
 
 Sound
 - Minigame lacks soundstrack
