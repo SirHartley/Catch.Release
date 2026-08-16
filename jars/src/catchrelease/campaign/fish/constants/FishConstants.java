@@ -339,9 +339,9 @@ public class FishConstants {
     public static final boolean PLAY_LINE_CLICK_ON_RELEASE = false;
     public static final String SOUND_LINE_LOOP = "catchrelease_minigame_loop";
     public static final float LINE_LOOP_BASE_VOLUME = 0.1f;
-    public static final float LINE_LOOP_HELD_VOLUME = 0.4f;
-    public static final float LINE_LOOP_HELD_FADE_IN = 0.05f;
-    public static final float LINE_LOOP_HELD_FADE_OUT = 0.15f;
+    public static final float LINE_LOOP_HELD_VOLUME = 0.3f;
+    public static final float LINE_LOOP_HELD_FADE_IN = 0.1f;
+    public static final float LINE_LOOP_HELD_FADE_OUT = 0.2f;
 
     /** Multiplies the player's current campaign-music volume while catching; clamped to [0, 1]. */
     public static final float MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT = 0.3f;
