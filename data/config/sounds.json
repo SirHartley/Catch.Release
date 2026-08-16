@@ -63,6 +63,21 @@
 	{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":1,"volume":1},
 	],
 
+	#minigame
+
+	"catchrelease_minigame_chest_open":[
+		{"file":"sounds/catchrelease/minigame/chest_with_coins.ogg","pitch":1,"volume":1},
+	],
+	"catchrelease_minigame_bar_click":[
+		{"file":"sounds/catchrelease/minigame/click.ogg","pitch":1,"volume":1},
+	],
+	"catchrelease_minigame_success":[
+		{"file":"sounds/sfx_interface/ui_reputation_raise.ogg","pitch":1,"volume":0.5},
+	],
+	"catchrelease_minigame_failure":[
+		{"file":"sounds/sfx_interface/ui_reputation_drop.ogg","pitch":1,"volume":0.5},
+	],
+
 	#UI
 	"skillshot_denied": [
 		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 0.3},

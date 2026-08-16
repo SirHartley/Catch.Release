@@ -250,9 +250,14 @@ public class CatchCelebration {
 
     /** Sound hook; a no-op until sound ids are filled in {@link FishConstants}. */
     public static void playHook(String soundId) {
+        playHook(soundId, 1f);
+    }
+
+    /** Same hook with a caller-selected pitch, used for deliberately subtle repeated variation. */
+    public static void playHook(String soundId, float pitch) {
         if (soundId == null || soundId.isEmpty()) return;
 
-        Global.getSoundPlayer().playUISound(soundId, 1f, 1f);
+        Global.getSoundPlayer().playUISound(soundId, pitch, 1f);
     }
 
     /** Ease-out curve. */

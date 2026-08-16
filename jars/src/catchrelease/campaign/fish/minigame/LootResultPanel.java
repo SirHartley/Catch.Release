@@ -61,7 +61,7 @@ public class LootResultPanel {
 
     protected int shown = 0;
     protected boolean skipped = false;
-    protected boolean successSoundPlayed = false;
+    protected boolean chestSoundPlayed = false;
 
     /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
     protected static class Coin {
@@ -107,25 +107,30 @@ public class LootResultPanel {
     }
 
     public void advance(float amount) {
-        if (!successSoundPlayed) {
-            successSoundPlayed = true;
-            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SUCCESS);
-        }
-
         elapsed += amount;
 
         while (shown < rows.size()
                 && elapsed >= (shown + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY) {
 
             shown++;
+            if (shown == 1) playChestOpenSound();
             CatchCelebration.playHook(FishConstants.SOUND_RESULT_LINE);
         }
     }
 
     /** Everything at once, for a player who would rather not be read to. */
     public void revealAll() {
+        if (shown == 0 && !rows.isEmpty()) playChestOpenSound();
         shown = rows.size();
         skipped = true;
+    }
+
+    /** The sound belongs to the same first-visible-row edge that swaps the box sprite. */
+    protected void playChestOpenSound() {
+        if (chestSoundPlayed) return;
+
+        chestSoundPlayed = true;
+        CatchCelebration.playHook(FishConstants.SOUND_TREASURE_OPEN);
     }
 
     /** True once there is nothing left to arrive. */
