@@ -86,6 +86,9 @@
 	"catchrelease_harpoon_fire":[
 		{"file":"sounds/catchrelease/skillshot/harpoon_fire.ogg","pitch":1,"volume":1},
 	],
+	"catchrelease_harpoon_hit":[
+		{"file":"sounds/catchrelease/skillshot/harpoon_hit.ogg","pitch":1,"volume":1},
+	],
 
 	#UI
 	"skillshot_denied": [
