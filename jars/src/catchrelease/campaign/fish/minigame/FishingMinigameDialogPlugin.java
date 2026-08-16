@@ -21,6 +21,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
+import com.fs.starfarer.api.impl.MusicPlayerPluginImpl;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
@@ -101,7 +102,43 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(
                 fish, anchor, catchTarget, method, callback);
 
-        return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
+        return showWithoutReplacingLocationMusic(plugin, anchor);
+    }
+
+    /**
+     * The campaign interaction host normally replaces location music with market or faction
+     * encounter music as it opens. Its public keep-location-music flag is checked synchronously
+     * inside {@code showInteractionDialog}, so scope that flag to this call and restore the
+     * anchor's exact prior value and expiry immediately afterward.
+     */
+    protected static boolean showWithoutReplacingLocationMusic(
+            FishingMinigameDialogPlugin plugin, SectorEntityToken anchor) {
+        if (anchor == null) {
+            return Global.getSector().getCampaignUI().showInteractionDialog(plugin, null);
+        }
+
+        MemoryAPI memory = anchor.getMemoryWithoutUpdate();
+        if (memory == null) {
+            return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
+        }
+
+        String key = MusicPlayerPluginImpl.KEEP_PLAYING_LOCATION_MUSIC_DURING_ENCOUNTER_MEM_KEY;
+        boolean hadValue = memory.contains(key);
+        Object previousValue = hadValue ? memory.get(key) : null;
+        float previousExpiry = hadValue ? memory.getExpire(key) : -1f;
+
+        memory.set(key, true);
+        try {
+            return Global.getSector().getCampaignUI().showInteractionDialog(plugin, anchor);
+        } finally {
+            if (!hadValue) {
+                memory.unset(key);
+            } else if (previousExpiry >= 0f) {
+                memory.set(key, previousValue, previousExpiry);
+            } else {
+                memory.set(key, previousValue);
+            }
+        }
     }
 
     public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
