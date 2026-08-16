@@ -136,7 +136,10 @@ an unloaded raw path. The `graphics.catchrelease` additions likewise preload the
 `fisherman_map_icon` and `unstable_fabric_map_icon` glyphs used by the boat marker and live pond
 terrain. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
 world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
-the renderer.
+the renderer. `catchreleaseMinigameLineClickSound` is the optional one-shot sound-set id for a
+live-catch LMB-down edge; `catchreleaseMinigameLineHeldLoop` and
+`catchreleaseMinigameLineReleasedLoop` are optional sound-set ids for the two fishing-input states.
+Empty values are deliberately silent.
 
 **`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
@@ -192,12 +195,13 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 18 ids at the top level, merged into vanilla's ~600: fifteen of
-our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, and the
-minigame's coin-filled chest opening, bar click and two outcome hooks), the skillshot framework's
-denied blip, and two vanilla character-screen ids re-declared at reduced volume. The minigame
-success and failure ids currently point at vanilla's reputation-raise and reputation-drop files,
-respectively, so replacing those placeholders later needs no Java change.
+**`data/config/sounds.json`** — 24 ids at the top level, merged into vanilla's ~600: twenty-one of
+our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the LYNE drone
+launch, harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
+opening, treasure spawn/pickup cues, the catch-indicator exit cue and two outcome hooks), the
+skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
+The minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
+files, respectively, so replacing those placeholders later needs no Java change.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
@@ -534,7 +538,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | File | What it does |
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. No GL, no input |
-| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus the live-catch click-to-lift hook with restrained per-press pitch variation, treasure-cover enter edges, and once-per-pickup treasure-got hook |
+| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus a lightly pitch-varied cue only when the mote leaves the green catch indicator and one-shot cues for each treasure spawn and successful pickup. It also reads the optional LMB-down one-shot and held/released line-loop ids once per catch, plays the click hook once on each live-catch press, and renews exactly the selected UI loop on every running frame |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture and campaign timestamp on landed specimens from either drones or harpoons. It keeps that visual/source anchor separate from the caught mote, so a rupture-based drone catch and a direct harpoon catch both carry the planted chart-request identity into cargo |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
@@ -737,16 +741,16 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `FishingRigs.java` | One answer to "is any rig running" - lamps lit, swarm out, or a line in the water |
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
 | `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond, a fitted Breach Coupler plus lit breach lamps sends a roaming one instead. Lit lamps disable the stock ROD rather than granting that mode for free. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall. An in-flight opener disables another shot until its rupture activates. The button stays active but disabled once only catch carriers are returning, since no drone remains to command |
-| `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it. The live mote is also the authoritative in-flight opening state, queried by target rupture so the ability cooldown cannot create a duplicate opener |
+| `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it. Its one center-arrival flash starts the opening cue and replaces the old searchlight placeholder with the dedicated boom. The live mote is also the authoritative in-flight opening state, queried by target rupture so the ability cooldown cannot create a duplicate opener |
 | `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet. A catch carried home is marked held for the whole return and fade, so the harpoon's shared takeability gate and every other rig reject it |
-| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
+| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones with one launch report per entity, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
 | `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: with a Breach Coupler fitted, a screen flying with the fleet goes after buried motes the breach lamps have **lit outright** and unearths them on contact. A dent is not a hole — taking one is the harpoon's Fathom Head and nothing else. Losing either the lamp opening or the coupler recalls the screen |
 | `rod/rendering/FishingRingRenderer.java` | The dashed ring showing the fishing radius |
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |
-| `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
-| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
-| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. Fleet collision eligibility excludes only the Fisherman, so normal and explosive shots pass through his boat and can hit something beyond it. An explosive impact records the mote's species name or struck fleet name before consuming the head. An NPC-owned line skips the minigame and always lands |
+| `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look, and ROD sound ids |
+| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line and reports only a successfully created shot; aim assist; press again to cut while hauling |
+| `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state; the confirmed mote strike reports once before the ordinary/explosive split. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. Fleet collision eligibility excludes only the Fisherman, so normal and explosive shots pass through his boat and can hit something beyond it. An explosive impact records the mote's species name or struck fleet name before consuming the head. An NPC-owned line skips the minigame and always lands |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, plus the explosive head's red halo/core palette and pulse tuning |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
@@ -910,7 +914,9 @@ strict JSON, which also tolerates trailing commas. Strip `#`-to-end-of-line befo
 **Sound files have a shape that depends on how they are played.** `SoundPlayerAPI` is explicit:
 `playUISound` wants **stereo**, `playSound` (positional) **must be mono**, `playLoop` should be
 mono. Our `spotlight_toggle.ogg` is mono because it goes through `playSound`; `skillshot_denied.ogg`
-is stereo because it goes through `playUISound`. Getting a new one backwards is not a compile error.
+is stereo because it goes through `playUISound`. The minigame's state loops follow vanilla's own
+`DuelPanel` and call `playUILoop` every frame while active. Getting a new one backwards is not a
+compile error.
 
 **`BaseHubMission` assumes there is a person, in about a dozen places that do not check.** The
 intel's icon and faction colour, the reputation lines, the reward text and the distance readouts all

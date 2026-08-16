@@ -329,19 +329,24 @@ public class FishConstants {
     /** Played once when the fish escapes or the player abandons; temporarily a vanilla stand-in. */
     public static final String SOUND_FAILED = "catchrelease_minigame_failure";
 
-    /** Played when a live-catch click starts lifting the indicator, varied only enough not to repeat. */
-    public static final String SOUND_INDICATOR_MOVE = "catchrelease_minigame_bar_click";
+    /** Played when the mote leaves the catch indicator, lightly pitch-varied. */
+    public static final String SOUND_INDICATOR_CROSS = "catchrelease_minigame_bar_click";
     public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
     public static final float SOUND_INDICATOR_PITCH_MAX = 1.03f;
+
+    /** Optional input sound-set ids. Empty settings keep their hooks silent. */
+    public static final String SETTING_LINE_CLICK_SOUND = "catchreleaseMinigameLineClickSound";
+    public static final String SETTING_LINE_HELD_LOOP = "catchreleaseMinigameLineHeldLoop";
+    public static final String SETTING_LINE_RELEASED_LOOP = "catchreleaseMinigameLineReleasedLoop";
 
     /** Played exactly when the loot-card chest changes from closed to open. */
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
 
-    /** Played on each edge where the catch bar begins covering an active treasure. */
-    public static final String SOUND_TREASURE_HOVER = "";
+    /** Played once whenever a new treasure appears on the live track. */
+    public static final String SOUND_TREASURE_SPAWN = "catchrelease_minigame_treasure_spawn";
 
     /** Played once when the currently tracked treasure is fully taken. */
-    public static final String SOUND_TREASURE_GOT = "";
+    public static final String SOUND_TREASURE_GOT = "catchrelease_minigame_treasure_get";
 
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";

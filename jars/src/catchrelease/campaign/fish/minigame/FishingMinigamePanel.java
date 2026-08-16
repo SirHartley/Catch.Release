@@ -57,6 +57,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected boolean reported = false;
     protected boolean failedSoundPlayed = false;
 
+    /** Previous rules-state for the mote crossing either edge of the catch indicator. */
+    protected boolean fishCoveredLastFrame;
+
+    /** Optional sound-set ids read once for this catch; empty means that input hook is silent. */
+    protected final String lineClickSoundId;
+    protected final String lineHeldLoopId;
+    protected final String lineReleasedLoopId;
+
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
@@ -69,9 +77,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
     protected boolean treasureResolved = false;
 
-    /** Per-pickup edge state for the live treasure sound hooks. */
+    /** Per-object edge state for the live treasure spawn and pickup hooks. */
     protected MinigameTreasure soundTreasure;
-    protected boolean treasureCoveredLastFrame = false;
     protected boolean treasureGotSoundPlayed = false;
 
     /** Held after a fish is lost so the result stays readable before the dialog closes itself. */
@@ -95,6 +102,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.where = where;
         this.method = method;
         this.listener = listener;
+        this.fishCoveredLastFrame = minigame.isFishInBar();
+        this.lineClickSoundId = readSoundSetting(FishConstants.SETTING_LINE_CLICK_SOUND);
+        this.lineHeldLoopId = readSoundSetting(FishConstants.SETTING_LINE_HELD_LOOP);
+        this.lineReleasedLoopId = readSoundSetting(FishConstants.SETTING_LINE_RELEASED_LOOP);
     }
 
     @Override
@@ -110,7 +121,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
+            advanceIndicatorSoundHook();
             advanceTreasureSoundHooks();
+
+            if (minigame.isRunning()) advanceLineSoundLoop();
             return;
         }
 
@@ -134,29 +148,53 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         end(false);
     }
 
-    /** Sounds bar entry repeatedly after leaving, but the take itself only once for each pickup. */
+    /** Calls vanilla's UI-loop path every running frame for exactly the current input state. */
+    protected void advanceLineSoundLoop() {
+        String soundId = reeling ? lineHeldLoopId : lineReleasedLoopId;
+        if (soundId.isEmpty()) return;
+
+        Global.getSoundPlayer().playUILoop(soundId, 1f, 1f);
+    }
+
+    /** Missing audio remains an intentionally silent slot, never an invalid sound lookup. */
+    protected static String readSoundSetting(String key) {
+        String soundId = Global.getSettings().getString(key);
+        return soundId == null ? "" : soundId.trim();
+    }
+
+    /** Sounds only the covered-to-uncovered edge, when the mote leaves the green window. */
+    protected void advanceIndicatorSoundHook() {
+        boolean covered = minigame.isFishInBar();
+
+        if (fishCoveredLastFrame && !covered) {
+            float pitch = MathUtils.getRandomNumberInRange(
+                    FishConstants.SOUND_INDICATOR_PITCH_MIN,
+                    FishConstants.SOUND_INDICATOR_PITCH_MAX);
+            CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_CROSS, pitch);
+        }
+
+        fishCoveredLastFrame = covered;
+    }
+
+    /** Sounds each new piece once when it appears, and once more only after a successful pickup. */
     protected void advanceTreasureSoundHooks() {
         MinigameTreasure treasure = minigame.getTreasure();
 
         if (treasure != soundTreasure) {
             soundTreasure = treasure;
-            treasureCoveredLastFrame = false;
             treasureGotSoundPlayed = false;
+
+            if (treasure != null && treasure.isActive()) {
+                CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SPAWN);
+            }
         }
 
         if (treasure == null) return;
-
-        boolean covered = treasure.isActive() && minigame.covers(treasure.position);
-        if (covered && !treasureCoveredLastFrame) {
-            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_HOVER);
-        }
 
         if (treasure.isTaken() && !treasureGotSoundPlayed) {
             treasureGotSoundPlayed = true;
             CatchCelebration.playHook(FishConstants.SOUND_TREASURE_GOT);
         }
-
-        treasureCoveredLastFrame = covered;
     }
 
     /** Puts up the readout and waits; does not close the dialog, the player does that. */
@@ -217,12 +255,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
-                if (minigame.isRunning()) {
-                    float pitch = MathUtils.getRandomNumberInRange(
-                            FishConstants.SOUND_INDICATOR_PITCH_MIN,
-                            FishConstants.SOUND_INDICATOR_PITCH_MAX);
-                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE, pitch);
-                }
+                if (minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {
