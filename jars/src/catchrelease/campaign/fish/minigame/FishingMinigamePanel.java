@@ -57,6 +57,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected boolean reported = false;
     protected boolean failedSoundPlayed = false;
 
+    /** Zero at the released baseline, one at the held volume; the sound id itself never changes. */
+    protected float lineLoopHeldLevel = 0f;
+
     /** Previous rules-state for the mote crossing either edge of the catch indicator. */
     protected boolean fishCoveredLastFrame;
 
@@ -116,7 +119,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             advanceIndicatorSoundHook();
             advanceTreasureSoundHooks();
 
-            if (minigame.isRunning()) advanceLineSoundLoop();
+            if (minigame.isRunning()) advanceLineSoundLoop(amount);
             return;
         }
 
@@ -140,14 +143,24 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         end(false);
     }
 
-    /** Calls vanilla's UI-loop path every running frame for exactly the current input state. */
-    protected void advanceLineSoundLoop() {
-        String soundId = reeling
-                ? FishConstants.SOUND_LINE_HELD_LOOP
-                : FishConstants.SOUND_LINE_RELEASED_LOOP;
-        if (soundId.isEmpty()) return;
+    /** Keeps one loop phase alive and swells only its volume around the held input state. */
+    protected void advanceLineSoundLoop(float amount) {
+        float fadeTime = reeling
+                ? FishConstants.LINE_LOOP_HELD_FADE_IN
+                : FishConstants.LINE_LOOP_HELD_FADE_OUT;
+        float step = fadeTime <= 0f ? 1f : amount / fadeTime;
 
-        Global.getSoundPlayer().playUILoop(soundId, 1f, 1f);
+        if (reeling) {
+            lineLoopHeldLevel = Math.min(1f, lineLoopHeldLevel + step);
+        } else {
+            lineLoopHeldLevel = Math.max(0f, lineLoopHeldLevel - step);
+        }
+
+        float volumeRange = FishConstants.LINE_LOOP_HELD_VOLUME - FishConstants.LINE_LOOP_BASE_VOLUME;
+        float volume = FishConstants.LINE_LOOP_BASE_VOLUME + volumeRange * lineLoopHeldLevel;
+        if (FishConstants.SOUND_LINE_LOOP.isEmpty() || volume <= 0f) return;
+
+        Global.getSoundPlayer().playUILoop(FishConstants.SOUND_LINE_LOOP, 1f, volume);
     }
 
     /** Sounds only the covered-to-uncovered edge, when the mote leaves the green window. */
