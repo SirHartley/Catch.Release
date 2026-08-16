@@ -415,7 +415,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.renderAtCenter(centerX, centerY);
     }
 
-    /** The treasure, if any: a stand-in icon with its time-left bar underneath. */
+    /** The treasure, if any: its resolution-specific closed-chest icon and time-left bar. */
     protected void renderTreasure(FishingMinigameLayout layout, float alphaMult) {
         MinigameTreasure treasure = minigame.getTreasure();
         if (treasure == null || !treasure.isActive()) return;
@@ -427,7 +427,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         Disc.draw(centerX, centerY, FishConstants.TREASURE_ICON_SIZE * 0.9f, treasure.rarity.color,
                 0.5f * alphaMult, 0f, true);
 
-        SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.TREASURE_ICON);
+        SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.TREASURE_MINIGAME_ICON);
         if (sprite != null) {
             sprite.setSize(FishConstants.TREASURE_ICON_SIZE, FishConstants.TREASURE_ICON_SIZE);
             sprite.setNormalBlend();

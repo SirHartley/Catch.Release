@@ -134,8 +134,13 @@ public class FishConstants {
      *  not touching (touching fights the icon's outline; a visible gap reads as unfinished). */
     public static final float TREASURE_RING_END = 1.15f;
 
-    /** Stand-in art, and the sizes it and its clock are drawn at. */
-    public static final String TREASURE_ICON = "graphics/catchrelease/icon/small_icon_catchrelease2.png";
+    /** Treasure result-card art; the live marker and its sizes follow. */
+    public static final String TREASURE_RESULT_CLOSED_ICON =
+            "graphics/catchrelease/icon/treasure_chest_closed.png";
+    public static final String TREASURE_RESULT_OPEN_ICON =
+            "graphics/catchrelease/icon/treasure_chest_open.png";
+    public static final String TREASURE_MINIGAME_ICON =
+            "graphics/catchrelease/icon/treasure_chest_closed_minigame.png";
     public static final float TREASURE_ICON_SIZE = 26f;
     public static final float TREASURE_BAR_WIDTH = 30f;
     public static final float TREASURE_BAR_HEIGHT = 3f;
