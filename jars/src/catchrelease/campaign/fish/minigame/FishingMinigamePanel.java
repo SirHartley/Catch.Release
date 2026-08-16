@@ -160,11 +160,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return soundId == null ? "" : soundId.trim();
     }
 
-    /** Sounds both entry and exit: either means the mote crossed one of the green window's lips. */
+    /** Sounds only the covered-to-uncovered edge, when the mote leaves the green window. */
     protected void advanceIndicatorSoundHook() {
         boolean covered = minigame.isFishInBar();
 
-        if (covered != fishCoveredLastFrame) {
+        if (fishCoveredLastFrame && !covered) {
             float pitch = MathUtils.getRandomNumberInRange(
                     FishConstants.SOUND_INDICATOR_PITCH_MIN,
                     FishConstants.SOUND_INDICATOR_PITCH_MAX);

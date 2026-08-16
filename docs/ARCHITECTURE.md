@@ -196,10 +196,11 @@ There is no plugin behind it — see the gotcha below.
 **`data/config/sounds.json`** — 24 ids at the top level, merged into vanilla's ~600: twenty-one of
 our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the LYNE drone
 launch, harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
-opening, treasure spawn/pickup cues, the bar-boundary cue and two outcome hooks), the skillshot
-framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume. The
-minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
-files, respectively, so replacing those placeholders later needs no Java change.Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
+opening, treasure spawn/pickup cues, the catch-indicator exit cue and two outcome hooks), the
+skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
+The minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
+files, respectively, so replacing those placeholders later needs no Java change.
+Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
 `catchrelease.commands.AllFish` — compiled into the jar since the commands moved out of the loose
@@ -535,7 +536,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | File | What it does |
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. No GL, no input |
-| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus a lightly pitch-varied cue whenever the mote crosses either lip of the green catch indicator and one-shot cues for each treasure spawn and successful pickup. It also reads the optional held/released line-loop ids once per catch and renews exactly the selected UI loop on every running frame |
+| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus a lightly pitch-varied cue only when the mote leaves the green catch indicator and one-shot cues for each treasure spawn and successful pickup. It also reads the optional held/released line-loop ids once per catch and renews exactly the selected UI loop on every running frame |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture and campaign timestamp on landed specimens from either drones or harpoons. It keeps that visual/source anchor separate from the caught mote, so a rupture-based drone catch and a direct harpoon catch both carry the planted chart-request identity into cargo |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
