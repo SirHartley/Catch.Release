@@ -336,6 +336,7 @@ public class FishConstants {
 
     /** Optional input sound-set ids. Empty settings keep their hooks silent. */
     public static final String SETTING_LINE_CLICK_SOUND = "catchreleaseMinigameLineClickSound";
+    public static final String SETTING_LINE_CLICK_ON_RELEASE = "catchreleaseMinigameLineClickOnRelease";
     public static final String SETTING_LINE_HELD_LOOP = "catchreleaseMinigameLineHeldLoop";
     public static final String SETTING_LINE_RELEASED_LOOP = "catchreleaseMinigameLineReleasedLoop";
 

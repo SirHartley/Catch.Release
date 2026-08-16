@@ -62,6 +62,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     /** Optional sound-set ids read once for this catch; empty means that input hook is silent. */
     protected final String lineClickSoundId;
+    protected final boolean lineClickOnRelease;
     protected final String lineHeldLoopId;
     protected final String lineReleasedLoopId;
 
@@ -104,6 +105,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.listener = listener;
         this.fishCoveredLastFrame = minigame.isFishInBar();
         this.lineClickSoundId = readSoundSetting(FishConstants.SETTING_LINE_CLICK_SOUND);
+        this.lineClickOnRelease = Global.getSettings().getBoolean(FishConstants.SETTING_LINE_CLICK_ON_RELEASE);
         this.lineHeldLoopId = readSoundSetting(FishConstants.SETTING_LINE_HELD_LOOP);
         this.lineReleasedLoopId = readSoundSetting(FishConstants.SETTING_LINE_RELEASED_LOOP);
     }
@@ -255,10 +257,11 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
-                if (minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
+                if (!lineClickOnRelease && minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {
+                if (lineClickOnRelease && minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
                 reeling = false;
                 event.consume();
             } else if (event.getEventValue() == Keyboard.KEY_ESCAPE){
