@@ -84,6 +84,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     transient protected SpriteAPI backgroundSprite;
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
+    /** Vanilla's soft lamp glow, shared visually with the campaign fish motes. */
+    transient protected SpriteAPI moteSprite;
 
     public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
                                FishLogEntry.Method method, Listener listener) {
@@ -271,8 +273,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderFrame(layout, alphaMult);
         renderTrack(layout, alphaMult);
         renderBar(layout, alphaMult);
-        renderFish(layout, alphaMult);
         renderTreasure(layout, alphaMult);
+        //The catch is the thing the player must never lose: it wins every overlap on the track.
+        renderFish(layout, alphaMult);
         renderMeter(layout, alphaMult);
 
         //result rendered first so its geometry is settled before the celebration centres on it
@@ -401,17 +404,63 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerX = layout.getTrackCenterX() + getJitter(0f);
         float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
 
-        SpriteAPI sprite = getTrackSprite();
+        //Sonar still earns the exact species reveal; without it, the campaign mote is the catch.
+        if (!minigame.getTackle().sonar) {
+            renderCatchMote(centerX, centerY, alphaMult);
+            return;
+        }
 
+        SpriteAPI sprite = getFishSprite();
         if (sprite == null) {
-            //fallback marker; not the rarity colour, which would give away what's on the line
-            drawQuad(centerX - size * 0.25f, centerY - size * 0.25f, size * 0.5f, size * 0.5f,
-                    Misc.getBrightPlayerColor(), alphaMult);
+            renderCatchMote(centerX, centerY, alphaMult);
             return;
         }
 
         sprite.setSize(size, size);
+        sprite.setColor(Color.WHITE);
+        sprite.setNormalBlend();
         sprite.setAlphaMult(alphaMult);
+        sprite.renderAtCenter(centerX, centerY);
+    }
+
+    /**
+     * The same layered additive glow as a mote in the campaign, enlarged for the narrow, busy
+     * track. A low white fringe is drawn first and a hard white point last: colour remains the
+     * identity, but neither the green catch bar nor an overlapping treasure can swallow it.
+     */
+    protected void renderCatchMote(float centerX, float centerY, float alphaMult) {
+        SpriteAPI sprite = getMoteSprite();
+        Color color = minigame.getFish().rarity.color;
+
+        if (sprite == null) {
+            Disc.draw(centerX, centerY, FishConstants.MINIGAME_MOTE_GLOW_SIZE * 0.5f,
+                    color, alphaMult, 0f, true);
+            Disc.draw(centerX, centerY, FishConstants.MINIGAME_MOTE_CORE_SIZE * 0.5f,
+                    Color.WHITE, alphaMult, alphaMult, false);
+            return;
+        }
+
+        sprite.setAdditiveBlend();
+        sprite.setColor(Color.WHITE);
+        sprite.setSize(FishConstants.MINIGAME_MOTE_HALO_SIZE,
+                FishConstants.MINIGAME_MOTE_HALO_SIZE);
+        sprite.setAlphaMult(FishConstants.MINIGAME_MOTE_HALO_ALPHA * alphaMult);
+        sprite.renderAtCenter(centerX, centerY);
+
+        sprite.setColor(color);
+        float glowSize = FishConstants.MINIGAME_MOTE_GLOW_SIZE;
+
+        for (int i = 0; i < FishConstants.MINIGAME_MOTE_GLOW_PASSES; i++) {
+            sprite.setSize(glowSize, glowSize);
+            sprite.setAlphaMult(alphaMult * (i == 0 ? 1f : FishConstants.MINIGAME_MOTE_INNER_ALPHA));
+            sprite.renderAtCenter(centerX, centerY);
+            glowSize *= FishConstants.MINIGAME_MOTE_GLOW_STEP;
+        }
+
+        sprite.setColor(Color.WHITE);
+        sprite.setSize(FishConstants.MINIGAME_MOTE_CORE_SIZE,
+                FishConstants.MINIGAME_MOTE_CORE_SIZE);
+        sprite.setAlphaMult(FishConstants.MINIGAME_MOTE_CORE_ALPHA * alphaMult);
         sprite.renderAtCenter(centerX, centerY);
     }
 
@@ -494,11 +543,13 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
     }
 
-    /** Generic stand-in icon; the real species is withheld until the readout unless sonar is active. */
-    protected SpriteAPI getTrackSprite() {
-        if (minigame.getTackle().sonar) return getFishSprite();
+    /** Vanilla's registered glow is always present; the null check keeps a broken install playable. */
+    protected SpriteAPI getMoteSprite() {
+        if (moteSprite == null) {
+            moteSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+        }
 
-        return SpriteLoader.loadSprite(FishConstants.MINIGAME_TRACK_ICON);
+        return moteSprite;
     }
 
     /**

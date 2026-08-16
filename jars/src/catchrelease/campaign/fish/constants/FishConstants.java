@@ -105,9 +105,19 @@ public class FishConstants {
     public static final float MINIGAME_END_LINGER = 0.9f;
     public static final float MINIGAME_FISH_ICON_SIZE = 38f;
 
-    /** Icon shown on the track while the catch runs - not the species art, which appears only
-     *  once landed (sonar, if it exists, would restore it here). */
-    public static final String MINIGAME_TRACK_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+    /**
+     * The live catch uses the same glow texture and nested falloff as a campaign mote. The broad
+     * white pass separates it from the bar and treasure, while the tiny white core survives even
+     * where a rarity colour is close to something underneath it.
+     */
+    public static final float MINIGAME_MOTE_HALO_SIZE = 44f;
+    public static final float MINIGAME_MOTE_HALO_ALPHA = 0.24f;
+    public static final float MINIGAME_MOTE_GLOW_SIZE = 34f;
+    public static final int MINIGAME_MOTE_GLOW_PASSES = 6;
+    public static final float MINIGAME_MOTE_GLOW_STEP = 0.3f;
+    public static final float MINIGAME_MOTE_INNER_ALPHA = 0.67f;
+    public static final float MINIGAME_MOTE_CORE_SIZE = 4f;
+    public static final float MINIGAME_MOTE_CORE_ALPHA = 0.95f;
 
     /**
      * Treasure spawned in the track: doesn't move, doesn't last, isn't the fish. CHANCE is the
