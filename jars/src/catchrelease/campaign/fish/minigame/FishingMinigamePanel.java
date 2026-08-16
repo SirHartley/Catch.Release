@@ -69,9 +69,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
     protected boolean treasureResolved = false;
 
-    /** Per-pickup edge state for the live treasure sound hooks. */
+    /** Per-object edge state for the live treasure spawn and pickup hooks. */
     protected MinigameTreasure soundTreasure;
-    protected boolean treasureCoveredLastFrame = false;
     protected boolean treasureGotSoundPlayed = false;
 
     /** Held after a fish is lost so the result stays readable before the dialog closes itself. */
@@ -134,29 +133,25 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         end(false);
     }
 
-    /** Sounds bar entry repeatedly after leaving, but the take itself only once for each pickup. */
+    /** Sounds each new piece once when it appears, and once more only after a successful pickup. */
     protected void advanceTreasureSoundHooks() {
         MinigameTreasure treasure = minigame.getTreasure();
 
         if (treasure != soundTreasure) {
             soundTreasure = treasure;
-            treasureCoveredLastFrame = false;
             treasureGotSoundPlayed = false;
+
+            if (treasure != null && treasure.isActive()) {
+                CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SPAWN);
+            }
         }
 
         if (treasure == null) return;
-
-        boolean covered = treasure.isActive() && minigame.covers(treasure.position);
-        if (covered && !treasureCoveredLastFrame) {
-            CatchCelebration.playHook(FishConstants.SOUND_TREASURE_HOVER);
-        }
 
         if (treasure.isTaken() && !treasureGotSoundPlayed) {
             treasureGotSoundPlayed = true;
             CatchCelebration.playHook(FishConstants.SOUND_TREASURE_GOT);
         }
-
-        treasureCoveredLastFrame = covered;
     }
 
     /** Puts up the readout and waits; does not close the dialog, the player does that. */

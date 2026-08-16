@@ -337,11 +337,11 @@ public class FishConstants {
     /** Played exactly when the loot-card chest changes from closed to open. */
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
 
-    /** Played on each edge where the catch bar begins covering an active treasure. */
-    public static final String SOUND_TREASURE_HOVER = "";
+    /** Played once whenever a new treasure appears on the live track. */
+    public static final String SOUND_TREASURE_SPAWN = "catchrelease_minigame_treasure_spawn";
 
     /** Played once when the currently tracked treasure is fully taken. */
-    public static final String SOUND_TREASURE_GOT = "";
+    public static final String SOUND_TREASURE_GOT = "catchrelease_minigame_treasure_get";
 
     /** One per line of the readout as it lands. Vanilla's supplies-into-the-hold sound. */
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
