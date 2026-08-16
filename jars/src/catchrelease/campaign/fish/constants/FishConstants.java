@@ -338,8 +338,8 @@ public class FishConstants {
     public static final String SOUND_LINE_CLICK = "catchrelease_minigame_line_click";
     public static final boolean PLAY_LINE_CLICK_ON_RELEASE = false;
     public static final String SOUND_LINE_LOOP = "catchrelease_minigame_loop";
-    public static final float LINE_LOOP_BASE_VOLUME = 0.55f;
-    public static final float LINE_LOOP_HELD_VOLUME = 1f;
+    public static final float LINE_LOOP_BASE_VOLUME = 0.1f;
+    public static final float LINE_LOOP_HELD_VOLUME = 0.4f;
     public static final float LINE_LOOP_HELD_FADE_IN = 0.05f;
     public static final float LINE_LOOP_HELD_FADE_OUT = 0.15f;
 
