@@ -192,12 +192,12 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 19 ids at the top level, merged into vanilla's ~600: sixteen of
+**`data/config/sounds.json`** — 20 ids at the top level, merged into vanilla's ~600: seventeen of
 our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the LYNE drone
-launch, and the minigame's coin-filled chest opening, bar click and two outcome hooks), the skillshot
-framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume. The
-minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
-files, respectively, so replacing those placeholders later needs no Java change.
+launch, harpoon fire, and the minigame's coin-filled chest opening, bar click and two outcome hooks),
+the skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced
+volume. The minigame success and failure ids currently point at vanilla's reputation-raise and
+reputation-drop files, respectively, so replacing those placeholders later needs no Java change.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
@@ -745,7 +745,7 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look |
-| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line; aim assist; press again to cut while hauling |
+| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line and reports only a successfully created shot; aim assist; press again to cut while hauling |
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. Fleet collision eligibility excludes only the Fisherman, so normal and explosive shots pass through his boat and can hit something beyond it. An explosive impact records the mote's species name or struck fleet name before consuming the head. An NPC-owned line skips the minigame and always lands |
 | `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, plus the explosive head's red halo/core palette and pulse tuning |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |

@@ -83,6 +83,9 @@
 	"catchrelease_drone_launch":[
 		{"file":"sounds/catchrelease/skillshot/drone_launch.ogg","pitch":1,"volume":1},
 	],
+	"catchrelease_harpoon_fire":[
+		{"file":"sounds/catchrelease/skillshot/harpoon_fire.ogg","pitch":1,"volume":1},
+	],
 
 	#UI
 	"skillshot_denied": [
