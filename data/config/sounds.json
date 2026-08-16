@@ -68,6 +68,12 @@
 	"catchrelease_minigame_chest_open":[
 		{"file":"sounds/catchrelease/minigame/chest_with_coins.ogg","pitch":1,"volume":1},
 	],
+	"catchrelease_minigame_treasure_spawn":[
+		{"file":"sounds/catchrelease/minigame/treasure_on_screen2.ogg","pitch":1,"volume":1},
+	],
+	"catchrelease_minigame_treasure_get":[
+		{"file":"sounds/catchrelease/minigame/treasure_get2.ogg","pitch":1,"volume":1},
+	],
 	"catchrelease_minigame_bar_click":[
 		{"file":"sounds/catchrelease/minigame/click.ogg","pitch":1,"volume":1},
 	],
