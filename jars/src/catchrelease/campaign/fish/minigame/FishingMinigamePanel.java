@@ -57,6 +57,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected boolean reported = false;
     protected boolean failedSoundPlayed = false;
 
+    /** Previous rules-state for the mote crossing either edge of the catch indicator. */
+    protected boolean fishCoveredLastFrame;
+
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
@@ -94,6 +97,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.where = where;
         this.method = method;
         this.listener = listener;
+        this.fishCoveredLastFrame = minigame.isFishInBar();
     }
 
     @Override
@@ -109,6 +113,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         if (minigame.isRunning()) {
             minigame.advance(amount, reeling);
+            advanceIndicatorSoundHook();
             advanceTreasureSoundHooks();
             return;
         }
@@ -131,6 +136,20 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (endLingerLeft > 0f) return;
 
         end(false);
+    }
+
+    /** Sounds both entry and exit: either means the mote crossed one of the green window's lips. */
+    protected void advanceIndicatorSoundHook() {
+        boolean covered = minigame.isFishInBar();
+
+        if (covered != fishCoveredLastFrame) {
+            float pitch = MathUtils.getRandomNumberInRange(
+                    FishConstants.SOUND_INDICATOR_PITCH_MIN,
+                    FishConstants.SOUND_INDICATOR_PITCH_MAX);
+            CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_CROSS, pitch);
+        }
+
+        fishCoveredLastFrame = covered;
     }
 
     /** Sounds each new piece once when it appears, and once more only after a successful pickup. */
@@ -212,12 +231,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
-                if (minigame.isRunning()) {
-                    float pitch = MathUtils.getRandomNumberInRange(
-                            FishConstants.SOUND_INDICATOR_PITCH_MIN,
-                            FishConstants.SOUND_INDICATOR_PITCH_MAX);
-                    CatchCelebration.playHook(FishConstants.SOUND_INDICATOR_MOVE, pitch);
-                }
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {

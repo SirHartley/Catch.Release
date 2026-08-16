@@ -329,8 +329,8 @@ public class FishConstants {
     /** Played once when the fish escapes or the player abandons; temporarily a vanilla stand-in. */
     public static final String SOUND_FAILED = "catchrelease_minigame_failure";
 
-    /** Played when a live-catch click starts lifting the indicator, varied only enough not to repeat. */
-    public static final String SOUND_INDICATOR_MOVE = "catchrelease_minigame_bar_click";
+    /** Played when the mote crosses either edge of the catch indicator, lightly pitch-varied. */
+    public static final String SOUND_INDICATOR_CROSS = "catchrelease_minigame_bar_click";
     public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
     public static final float SOUND_INDICATOR_PITCH_MAX = 1.03f;
 
