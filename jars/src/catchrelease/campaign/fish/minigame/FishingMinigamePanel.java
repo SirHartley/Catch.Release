@@ -60,12 +60,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     /** Previous rules-state for the mote crossing either edge of the catch indicator. */
     protected boolean fishCoveredLastFrame;
 
-    /** Optional sound-set ids read once for this catch; empty means that input hook is silent. */
-    protected final String lineClickSoundId;
-    protected final boolean lineClickOnRelease;
-    protected final String lineHeldLoopId;
-    protected final String lineReleasedLoopId;
-
     /** Runs once the fish is landed; holds the dialog open while it does. */
     transient protected CatchCelebration celebration;
 
@@ -104,10 +98,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.method = method;
         this.listener = listener;
         this.fishCoveredLastFrame = minigame.isFishInBar();
-        this.lineClickSoundId = readSoundSetting(FishConstants.SETTING_LINE_CLICK_SOUND);
-        this.lineClickOnRelease = Global.getSettings().getBoolean(FishConstants.SETTING_LINE_CLICK_ON_RELEASE);
-        this.lineHeldLoopId = readSoundSetting(FishConstants.SETTING_LINE_HELD_LOOP);
-        this.lineReleasedLoopId = readSoundSetting(FishConstants.SETTING_LINE_RELEASED_LOOP);
     }
 
     @Override
@@ -152,16 +142,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     /** Calls vanilla's UI-loop path every running frame for exactly the current input state. */
     protected void advanceLineSoundLoop() {
-        String soundId = reeling ? lineHeldLoopId : lineReleasedLoopId;
+        String soundId = reeling
+                ? FishConstants.SOUND_LINE_HELD_LOOP
+                : FishConstants.SOUND_LINE_RELEASED_LOOP;
         if (soundId.isEmpty()) return;
 
         Global.getSoundPlayer().playUILoop(soundId, 1f, 1f);
-    }
-
-    /** Missing audio remains an intentionally silent slot, never an invalid sound lookup. */
-    protected static String readSoundSetting(String key) {
-        String soundId = Global.getSettings().getString(key);
-        return soundId == null ? "" : soundId.trim();
     }
 
     /** Sounds only the covered-to-uncovered edge, when the mote leaves the green window. */
@@ -257,11 +243,13 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (event.isLMBDownEvent()) {
-                if (!lineClickOnRelease && minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
+                if (!FishConstants.PLAY_LINE_CLICK_ON_RELEASE && minigame.isRunning())
+                    CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
                 reeling = true;
                 event.consume();
             } else if (event.isLMBUpEvent()) {
-                if (lineClickOnRelease && minigame.isRunning()) CatchCelebration.playHook(lineClickSoundId);
+                if (FishConstants.PLAY_LINE_CLICK_ON_RELEASE && minigame.isRunning())
+                    CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
                 reeling = false;
                 event.consume();
             } else if (event.getEventValue() == Keyboard.KEY_ESCAPE){
