@@ -211,9 +211,11 @@ public class FishingMinigame {
 
         fishPosition += fishVelocity * amount;
 
-        //margin = half icon size (in track fractions) so the centred icon never hangs off the track
-        //edge; narrowest bar is still deeper than the margin, so the fish stays catchable there
-        float margin = FishConstants.MINIGAME_FISH_ICON_SIZE * 0.5f / FishConstants.MINIGAME_TRACK_HEIGHT;
+        //Margin follows the larger of the sonar icon and the mote's white halo, so neither hangs
+        //off the track edge; the narrowest bar remains deeper than it, keeping the catch reachable.
+        float markerSize = Math.max(FishConstants.MINIGAME_FISH_ICON_SIZE,
+                FishConstants.MINIGAME_MOTE_HALO_SIZE);
+        float margin = markerSize * 0.5f / FishConstants.MINIGAME_TRACK_HEIGHT;
 
         if (fishPosition < margin || fishPosition > 1f - margin) fishVelocity = 0f;
         fishPosition = MathUtils.clamp(fishPosition, margin, 1f - margin);
