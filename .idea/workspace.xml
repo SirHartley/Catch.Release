@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="treasure chest icons">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="sfx">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/chicken.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/icon/chicken.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +95,8 @@
     <MESSAGE value="Adjustments &amp; tooltip clarifications" />
     <MESSAGE value="rules adjustments - one drone to start, fisherman voice" />
     <MESSAGE value="treasure chest icons" />
-    <option name="LAST_COMMIT_MESSAGE" value="treasure chest icons" />
+    <MESSAGE value="sfx" />
+    <option name="LAST_COMMIT_MESSAGE" value="sfx" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
