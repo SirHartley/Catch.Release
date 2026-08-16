@@ -7,6 +7,9 @@ public class RodConstants {
     /** Drone hull and trail colour. */
     public static final Color DRONE_COLOR = Color.ORANGE;
 
+    /** Stereo launch report, played once for each drone entity successfully put into the world. */
+    public static final String SOUND_DRONE_LAUNCH = "catchrelease_drone_launch";
+
     //drones
     /** Radius of the ring drones fly once arrived; the reticule matches. */
     public static final float DRONE_ORBIT_RADIUS = 60f;

@@ -78,6 +78,12 @@
 		{"file":"sounds/sfx_interface/ui_reputation_drop.ogg","pitch":1,"volume":0.5},
 	],
 
+	#rigs
+
+	"catchrelease_drone_launch":[
+		{"file":"sounds/catchrelease/skillshot/drone_launch.ogg","pitch":1,"volume":1},
+	],
+
 	#UI
 	"skillshot_denied": [
 		{"file": "sounds/catchrelease/skillshot/skillshot_denied.ogg", "pitch": 1, "volume": 0.3},
