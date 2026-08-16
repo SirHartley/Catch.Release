@@ -1,6 +1,7 @@
 package catchrelease.abilities.rod.entities;
 
 import catchrelease.abilities.rod.animation.Flash;
+import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.campaign.ponds.renderer.RippleData;
 import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
@@ -117,7 +118,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
     public Flash flash;
     public SimpleRippleDataRunner ripples;
 
-    private void triggerFlash(Vector2f loc) {
+    private void triggerFlash() {
         flash = new Flash(color, entity.getLocation(), Flash.DEFAULT_EXPLOSION_SIZE);
         LunaCampaignRenderer.addRenderer(flash);
 
@@ -134,16 +135,10 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
             }
         });
 
-        float volumeDistance = 1000f;
-        float distance = Misc.getDistance(Global.getSector().getPlayerFleet().getLocation(), loc);
-        float fract = 1f - MathUtils.clamp(distance / volumeDistance, 0f, 1f);
-
-        Global.getSoundPlayer().playSound(
-                "catchrelease_ui_searchlight_toggle",
-                0.75f + 0.75f * MathUtils.clamp(color.getBlue() / 255f, 0f, 1f),
-                fract * 0.9f,
-                loc,
-                new Vector2f(0f, 0f));
+        //The supplied opening report is stereo, so RC8 requires the non-positional UI path.
+        if (entity.isInCurrentLocation()) {
+            Global.getSoundPlayer().playUISound(RodConstants.SOUND_POND_OPEN, 1f, 1f);
+        }
 
         flashed = true;
 
@@ -155,7 +150,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         if (dist > distToTarget) {
             dist = distToTarget;
-            triggerFlash(target.getLocation());
+            triggerFlash();
             Misc.fadeAndExpire(entity);
         }
 

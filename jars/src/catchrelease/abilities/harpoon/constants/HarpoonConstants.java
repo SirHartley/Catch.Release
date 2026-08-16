@@ -6,6 +6,12 @@ public class HarpoonConstants {
 
     public static final String ENTITY_ID = "catchrelease_Harpoon";
 
+    /** Stereo report played only after a charged shot has successfully created its head. */
+    public static final String SOUND_FIRE = "catchrelease_harpoon_fire";
+
+    /** Stereo mote-impact report; fleet collisions deliberately use no part of this hook. */
+    public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";
+
     /** Tag on every in-flight harpoon, so active ones can be found without walking the location. */
     public static final String TAG = "catchrelease_harpoon_line";
 
