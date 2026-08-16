@@ -65,6 +65,13 @@
 
 	#minigame
 
+	"catchrelease_minigame_line_held_loop":[
+		{"file":"sounds/catchrelease/minigame/held_loop.ogg","pitch":1,"volume":1},
+	],
+	"catchrelease_minigame_line_released_loop":[
+		{"file":"sounds/catchrelease/minigame/unheld_loop.ogg","pitch":1,"volume":1},
+	],
+
 	"catchrelease_minigame_chest_open":[
 		{"file":"sounds/catchrelease/minigame/chest_with_coins.ogg","pitch":1,"volume":1},
 	],

@@ -137,9 +137,9 @@ an unloaded raw path. The `graphics.catchrelease` additions likewise preload the
 terrain. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
 world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
 the renderer. `catchreleaseMinigameLineClickSound` is the optional one-shot sound-set id for a
-live-catch LMB-down edge; `catchreleaseMinigameLineHeldLoop` and
-`catchreleaseMinigameLineReleasedLoop` are optional sound-set ids for the two fishing-input states.
-Empty values are deliberately silent.
+live-catch LMB-down edge and remains empty by default. `catchreleaseMinigameLineHeldLoop` and
+`catchreleaseMinigameLineReleasedLoop` default to the registered held and released stereo UI-loop
+sets, backed by `held_loop.ogg` and `unheld_loop.ogg` respectively.
 
 **`data/campaign/bar_events.csv`** — 14 jobs, all `FishJob`s: 11 in `campaign/fish/jobs`, plus the
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
@@ -195,10 +195,10 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 24 ids at the top level, merged into vanilla's ~600: twenty-one of
+**`data/config/sounds.json`** — 26 ids at the top level, merged into vanilla's ~600: twenty-three of
 our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the LYNE drone
 launch, harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
-opening, treasure spawn/pickup cues, the catch-indicator exit cue and two outcome hooks), the
+opening, treasure spawn/pickup cues, two live line-state loops, the indicator-exit cue and two outcome hooks), the
 skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
 The minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
 files, respectively, so replacing those placeholders later needs no Java change.
