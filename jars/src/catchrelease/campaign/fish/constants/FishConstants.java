@@ -139,7 +139,8 @@ public class FishConstants {
             "graphics/catchrelease/icon/treasure_chest_closed.png";
     public static final String TREASURE_RESULT_OPEN_ICON =
             "graphics/catchrelease/icon/treasure_chest_open.png";
-    public static final String TREASURE_ICON = "graphics/catchrelease/icon/small_icon_catchrelease2.png";
+    public static final String TREASURE_MINIGAME_ICON =
+            "graphics/catchrelease/icon/treasure_chest_closed_minigame.png";
     public static final float TREASURE_ICON_SIZE = 26f;
     public static final float TREASURE_BAR_WIDTH = 30f;
     public static final float TREASURE_BAR_HEIGHT = 3f;
