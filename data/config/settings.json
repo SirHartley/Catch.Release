@@ -1,7 +1,7 @@
 {
   "catchreleaseBlackHoleSpiralWarpRange": 6000,
-  "catchreleaseMinigameLineHeldLoop": "",
-  "catchreleaseMinigameLineReleasedLoop": "",
+  "catchreleaseMinigameLineHeldLoop": "catchrelease_minigame_line_held_loop",
+  "catchreleaseMinigameLineReleasedLoop": "catchrelease_minigame_line_released_loop",
   "catchreleaseMinigameLineClickSound": "",
 
   "graphics": {
