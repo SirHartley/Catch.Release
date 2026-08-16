@@ -600,9 +600,12 @@ Fish in cargo.
 | `FishItemRenderer.java` | Icon plus rarity and grade pips over the cargo cell, including a vanilla-blueprint-style four-corner icon pass for box labels |
 
 ### `campaign/fish/crab`
-Crablobab's per-port bar roll, four regular wares, rotating backdrop, and empty-shelf bass. The stall dialogue, labels and ordered option stream live in `rules.csv`;
+Crablobab's per-port bar roll, five regular wares, rotating backdrop, and empty-shelf bass. The stall dialogue, labels and ordered option stream live in `rules.csv`;
 `CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
-and highlighted credits-and-crabs tooltip. The same bridge mounts the campaign-persistent
+and highlighted credits-and-crabs tooltip. Chicken Profile follows the same affordable/shortfall
+pair and purchase routing as the other switchable curios: every refusal returns to the stall, and
+successful purchases either pass through the first `Baha?` explanation or return directly. The
+same bridge mounts the campaign-persistent
 `CrablobabIdentity` person card on every entry path; its portrait is resolved from the
 `graphics.characters` registration in `settings.json`, never from a hard-coded asset path. The ware
 state and prices are Java. The first
