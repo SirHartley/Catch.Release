@@ -192,9 +192,10 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 26 ids at the top level, merged into vanilla's ~600: twenty-three of
-our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the LYNE drone
-launch, harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
+**`data/config/sounds.json`** — 28 ids at the top level, merged into vanilla's ~600: twenty-five of
+our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the
+ROD's mono directional LYNE drone launch, orbit-to-chase lock, and mote catch;
+harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
 opening, treasure spawn/pickup cues, one continuously renewed line loop backed by `unheld_loop.ogg`,
 the input click, the indicator-exit cue and two outcome hooks), the
 skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
@@ -740,8 +741,8 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge-pool rearm for the charged abilities; bans them all from hyperspace |
 | `rod/ability/PondInteractionAbilityPlugin.java` | Unlocks the nearest pond, then casts and recalls the swarm; away from any pond, a fitted Breach Coupler plus lit breach lamps sends a roaming one instead. Lit lamps disable the stock ROD rather than granting that mode for free. An occupied camp-job rupture locks new ROD deployments while always preserving an existing swarm's recall. An in-flight opener disables another shot until its rupture activates. The button stays active but disabled once only catch carriers are returning, since no drone remains to command |
 | `rod/entities/RodMoteEntityPlugin.java` | The mote flown at a pond to open it. Its one center-arrival flash starts the opening cue and replaces the old searchlight placeholder with the dedicated boom. The live mote is also the authoritative in-flight opening state, queried by target rupture so the ability cooldown cannot create a duplicate opener |
-| `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet. A catch carried home is marked held for the whole return and fade, so the harpoon's shared takeability gate and every other rig reject it |
-| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones with one launch report per entity, assigns chasers, handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
+| `rod/entities/FishingDroneEntityPlugin.java` | One drone: launch, orbit, chase, return — steering, not pathing. Only an orbiting-to-chasing transition emits the directional target-lock report; launch/rejoin flight stays silent. Its circle's centre is asked for per frame, so a roaming drone flies the same circle around the fleet. A catch carried home is marked held for the whole return and fade, so the harpoon's shared takeability gate and every other rig reject it |
+| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast: spawns drones with one world-positioned launch report per entity, assigns chasers, reports confirmed mote contact only after the catch path accepts it, and handles recall. Four hooks — search centre, search area, what counts as fish, when it is over — are what the roaming variant replaces. Reachability is asked for the whole of a chase, so a drone breaks off whatever goes dark or dives under it |
 | `rod/scripts/RoamingDroneSwarmScript.java` | The pondless swarm: with a Breach Coupler fitted, a screen flying with the fleet goes after buried motes the breach lamps have **lit outright** and unearths them on contact. A dent is not a hole — taking one is the harpoon's Fathom Head and nothing else. Losing either the lamp opening or the coupler recalls the screen |
 | `rod/rendering/FishingRingRenderer.java` | The dashed ring showing the fishing radius |
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |

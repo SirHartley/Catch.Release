@@ -130,7 +130,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
             drone.setLocation(fleet.getLocation().x, fleet.getLocation().y);
             drones.add(drone);
-            Global.getSoundPlayer().playUISound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f);
+            Global.getSoundPlayer().playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
+                    drone.getLocation(), drone.getVelocity());
         }
     }
 
@@ -359,6 +360,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         //nothing to play against - an unidentified mote is simply taken
         if (fish == null) {
+            playMoteHit(mote);
             handled.add(mote.getId());
             getPlugin(drone).recall(mote);
             return;
@@ -377,7 +379,14 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         //the UI was busy - the drone stays on the mote and it comes round again next tick
         if (!opened) return;
 
+        playMoteHit(mote);
         handled.add(mote.getId());
+    }
+
+    /** One confirmed contact report; callers invoke this only after the catch path accepts the mote. */
+    protected void playMoteHit(SectorEntityToken mote) {
+        Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_HIT, 1f, 1f,
+                mote.getLocation(), mote.getVelocity());
     }
 
     /** Drives the minigame's aberration/region colouring - the pond for a cast, the mote itself
