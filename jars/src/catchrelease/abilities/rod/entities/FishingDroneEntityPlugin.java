@@ -398,8 +398,15 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Send this one after a mote. */
     public void chase(SectorEntityToken mote) {
+        boolean acquiredFromOrbit = mode == Mode.ORBITING;
+
         this.chaseTarget = mote;
         this.mode = Mode.CHASING;
+
+        if (acquiredFromOrbit) {
+            Global.getSoundPlayer().playSound(RodConstants.SOUND_TARGET_LOCK, 1f, 1f,
+                    entity.getLocation(), velocity);
+        }
     }
 
     /** Back to the circle - flown into, not snapped to, since it may be a long way off it by now. */
