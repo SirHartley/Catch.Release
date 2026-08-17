@@ -44,6 +44,11 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected Vector2f target;
 
     protected List<SectorEntityToken> drones = new ArrayList<>();
+
+    /** Launch plan is fixed at dispatch, so an upgrade change cannot reshape a sequence in flight. */
+    protected int plannedDroneCount = 0;
+    protected int nextDroneIndex = 0;
+    protected float nextDroneLaunchIn = 0f;
     protected IntervalUtil searchInterval = new IntervalUtil(RodConstants.DRONE_SEARCH_INTERVAL, RodConstants.DRONE_SEARCH_INTERVAL);
 
     /** Motes already dealt with, so a drone does not intercept the same one over and over. */
@@ -67,13 +72,14 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     /**
-     * Puts a swarm out: recalls anything already out, spawns it, registers it, and hangs its
-     * renderers on it. The recall lives here rather than in each caller so a subclass cannot forget it.
+     * Puts a swarm out: recalls anything already out, begins its timed launch sequence,
+     * registers it, and hangs its renderers on it. The recall lives here rather than in each
+     * caller so a subclass cannot forget it.
      */
     protected static <T extends FishingDroneSwarmScript> T launch(T script) {
         recallExisting();
 
-        script.spawnDrones();
+        script.beginDroneLaunches();
 
         Global.getSector().addScript(script);
 
@@ -114,25 +120,60 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         this.target = target;
     }
 
-    protected void spawnDrones() {
+    /** Launches the first drone now and leaves the upgraded remainder on the timed queue. */
+    protected void beginDroneLaunches() {
+        plannedDroneCount = getDroneCount();
+        nextDroneIndex = 0;
+        nextDroneLaunchIn = 0f;
+
+        launchNextDrone();
+        nextDroneLaunchIn = Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
+    }
+
+    /** Creates exactly one queued drone at its stable slot around the eventual orbit. */
+    protected boolean launchNextDrone() {
+        if (!hasPendingDrones()) return false;
+
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
-        if (fleet == null) return;
-
-        int count = getDroneCount();
-
-        for (int i = 0; i < count; i++) {
-            //spread the slots evenly so the drones do not stack up on the same arc
-            float slotAngle = 360f / count * i;
-
-            SectorEntityToken drone = fleet.getContainingLocation().addCustomEntity(
-                    Misc.genUID(), null, FishingDroneEntityPlugin.ENTITY_ID, null,
-                    createDroneParams(slotAngle));
-
-            drone.setLocation(fleet.getLocation().x, fleet.getLocation().y);
-            drones.add(drone);
-            Global.getSoundPlayer().playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
-                    drone.getLocation(), drone.getVelocity());
+        if (fleet == null || fleet.getContainingLocation() == null) {
+            plannedDroneCount = nextDroneIndex;
+            return false;
         }
+
+        //spread the fixed plan evenly so sequential launches still fill distinct slots
+        float slotAngle = 360f / plannedDroneCount * nextDroneIndex;
+
+        SectorEntityToken drone = fleet.getContainingLocation().addCustomEntity(
+                Misc.genUID(), null, FishingDroneEntityPlugin.ENTITY_ID, null,
+                createDroneParams(slotAngle));
+
+        drone.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        drones.add(drone);
+        nextDroneIndex++;
+
+        Global.getSoundPlayer().playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
+                drone.getLocation(), drone.getVelocity());
+
+        return true;
+    }
+
+    /**
+     * Releases at most one drone per campaign frame. Under time acceleration a late sequence
+     * catches up over successive frames instead of collapsing several launches back together.
+     */
+    protected void advanceDroneLaunches(float amount) {
+        if (!hasPendingDrones()) return;
+
+        nextDroneLaunchIn -= amount;
+        if (nextDroneLaunchIn > 0f) return;
+
+        if (launchNextDrone()) {
+            nextDroneLaunchIn += Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
+        }
+    }
+
+    protected boolean hasPendingDrones() {
+        return nextDroneIndex < plannedDroneCount;
     }
 
     protected FishingDroneEntityPlugin.Params createDroneParams(float slotAngle) {
@@ -172,17 +213,23 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         dropExpiredDrones();
 
-        if (drones.isEmpty()) {
-            done = true;
-            return;
-        }
-
         if (!recalling && shouldRecall()) {
             recall();
             return;
         }
 
-        if (recalling) return;
+        if (recalling) {
+            if (drones.isEmpty()) done = true;
+            return;
+        }
+
+        advanceDroneLaunches(amount);
+
+        //an empty live list is not the end while upgraded drones are still queued
+        if (drones.isEmpty() && !hasPendingDrones()) {
+            done = true;
+            return;
+        }
 
         //checked every frame so a caught-up mote is not left waiting a tick
         checkChasers();
@@ -428,12 +475,15 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return closest;
     }
 
-    /** Sends every drone home. They despawn as they arrive, and the script ends with the last one. */
+    /** Cancels the unlaunched remainder and sends every live drone home. */
     public void recall() {
         //a second call would restart the count and make the trip home look longer than it is
         if (recalling) return;
 
         recalling = true;
+
+        //nothing new may leave after a recall, whether it was manual or automatic
+        plannedDroneCount = nextDroneIndex;
         recallCount = drones.size();
 
         for (SectorEntityToken drone : drones) {
@@ -469,10 +519,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return recalling;
     }
 
-    /** Whether a button press can still tell any drone to come home. A catch carrier already on
-     * its return leg has no command left to receive; once it is the last drone out, the ROD stays
+    /** Whether a press can cancel queued launches or tell a live drone to come home. A catch
+     * carrier already on its return leg has no command left to receive; once it is the last drone
+     * out, the ROD stays
      * active but disabled until that delivery reaches the fleet. */
     public boolean hasRecallableDrones() {
+        if (hasPendingDrones()) return true;
+
         for (SectorEntityToken drone : drones) {
             FishingDroneEntityPlugin plugin = getPlugin(drone);
             if (plugin != null && !plugin.isReturning()) return true;
