@@ -95,6 +95,14 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     /** The mote being run down, if any. */
     protected SectorEntityToken chaseTarget;
 
+    /**
+     * True while {@link Mode#LAUNCHING} means rejoining the passive orbit after a broken chase,
+     * rather than the initial flight out from the fleet. A mote can become reachable again before
+     * the drone physically reaches the ring; that is still a new acquisition and must report its
+     * target lock.
+     */
+    protected boolean returningToPassiveOrbit = false;
+
     /** The mote being carried home, if this drone caught something. */
     protected SectorEntityToken carried;
 
@@ -224,6 +232,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         currentRadius = Misc.getDistance(center, entity.getLocation());
         facingOffset = getAngleDifference(getHeading(), currentAngle + 90f);
 
+        returningToPassiveOrbit = false;
         mode = Mode.ORBITING;
     }
 
@@ -398,12 +407,15 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Send this one after a mote. */
     public void chase(SectorEntityToken mote) {
-        boolean acquiredFromOrbit = mode == Mode.ORBITING;
+        boolean isNewTarget = mote != null && mote != chaseTarget;
+        boolean shouldReportLock = isNewTarget
+                && (mode == Mode.ORBITING || returningToPassiveOrbit);
 
         this.chaseTarget = mote;
+        this.returningToPassiveOrbit = false;
         this.mode = Mode.CHASING;
 
-        if (acquiredFromOrbit) {
+        if (shouldReportLock) {
             Global.getSoundPlayer().playSound(RodConstants.SOUND_TARGET_LOCK, 1f, 1f,
                     entity.getLocation(), velocity);
         }
@@ -412,6 +424,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     /** Back to the circle - flown into, not snapped to, since it may be a long way off it by now. */
     public void returnToOrbit() {
         this.chaseTarget = null;
+        this.returningToPassiveOrbit = true;
         this.mode = Mode.LAUNCHING;
     }
 
@@ -424,6 +437,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.carried = carried;
         setCarriedHeld(true);
         this.chaseTarget = null;
+        this.returningToPassiveOrbit = false;
         this.mode = Mode.RETURNING;
     }
 
