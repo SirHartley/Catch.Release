@@ -79,16 +79,16 @@
 		{"file":"sounds/catchrelease/minigame/treasure_on_screen2.ogg","pitch":1,"volume":0.8},
 	],
 	"catchrelease_minigame_treasure_get":[
-		{"file":"sounds/catchrelease/minigame/treasure_get2.ogg","pitch":0.8,"volume":0.6},
+		{"file":"sounds/catchrelease/minigame/treasure_get3.ogg","pitch":0.8,"volume":1},
 	],
 	"catchrelease_minigame_bar_click":[
 		{"file":"sounds/catchrelease/minigame/click.ogg","pitch":1,"volume":1},
 	],
 	"catchrelease_minigame_success":[
-		{"file":"sounds/sfx_interface/ui_reputation_raise.ogg","pitch":1,"volume":0.5},
+		{"file":"sounds/catchrelease/minigame/sucess3.ogg","pitch":1,"volume":1},
 	],
 	"catchrelease_minigame_failure":[
-		{"file":"sounds/sfx_interface/ui_reputation_drop.ogg","pitch":1,"volume":0.5},
+		{"file":"sounds/catchrelease/minigame/fail.ogg","pitch":1,"volume":1},
 	],
 
 	#rigs

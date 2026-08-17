@@ -4,6 +4,7 @@
     <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="sfx">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/icon/treasure_chest_closed.png-autosave.kra" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/constants/FishConstants.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

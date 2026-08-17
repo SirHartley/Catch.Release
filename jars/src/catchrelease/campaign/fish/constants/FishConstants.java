@@ -344,7 +344,7 @@ public class FishConstants {
     public static final float LINE_LOOP_HELD_FADE_OUT = 0.2f;
 
     /** Multiplies the player's current campaign-music volume while catching; clamped to [0, 1]. */
-    public static final float MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT = 0.3f;
+    public static final float MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT = 0.5f;
 
     /** Played exactly when the loot-card chest changes from closed to open. */
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
