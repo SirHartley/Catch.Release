@@ -5,16 +5,22 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 
+import java.awt.Color;
+
 /**
  * A skillshot that fires out of a charge pool rather than a rearm timer. The pool alone gates
- * firing - no vanilla flat rearm on top. {@link #getCooldownFraction()} shows whichever wait is
- * actually in front of the player: the short inter-shot blink with charges in hand, or the pool's
- * own refill progress when empty.
+ * firing - no vanilla flat rearm on top. {@link #getCooldownFraction()} shows the pool's progress
+ * toward its next charge whenever the pool is not full, including while another charge remains
+ * ready to fire. The short inter-shot blink is only visible when the pool refills completely before
+ * that rearm ends.
  */
 public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
 
     /** The blink between two shots out of the same pool. */
     public static final float REARM_SECONDS = 0.2f;
+
+    /** Vanilla's cooldown shade is alpha 171; partial pools stay legible under this lighter veil. */
+    public static final int AVAILABLE_REGEN_COOLDOWN_ALPHA = 90;
 
     /** Counts in campaign seconds, like the pool it sits next to. */
     protected float rearmLeft = 0f;
@@ -78,18 +84,38 @@ public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
         if (rearmLeft < 0f) rearmLeft = 0f;
     }
 
-    /** Progress toward next charge when the pool is empty; otherwise the inter-shot rearm blink. */
+    /** Progress toward the next missing charge; at a full pool, only the inter-shot rearm remains. */
     @Override
     public float getCooldownFraction() {
         ChargeManager.Refill refill = defineRefill();
 
-        if (!ChargeManager.hasCharge(getChargeId(), refill.maxStat, refill.maxFallback)) {
+        int charges = ChargeManager.getCharges(getChargeId(), refill.maxStat, refill.maxFallback);
+        if (charges < getMaxCharges()) {
             return ChargeManager.getProgressToNext(getChargeId(), refill.maxStat, refill.maxFallback);
         }
 
         if (rearmLeft <= 0f) return 1f;
 
         return 1f - rearmLeft / REARM_SECONDS;
+    }
+
+    /**
+     * Refill progress and ability lockout are deliberately separate: a partial pool paints the
+     * cooldown indicator but does not disable a charge that is already ready. Vanilla's ability
+     * base asks this virtual method from {@code isUsable()}, while its button renderer asks
+     * {@link #getCooldownFraction()} independently.
+     */
+    @Override
+    public boolean isOnCooldown() {
+        return rearmLeft > 0f || !hasCharge();
+    }
+
+    /** Empty uses vanilla's strong disabled shade; a usable, refilling pool gets a lighter veil. */
+    @Override
+    public Color getCooldownColor() {
+        if (!hasCharge()) return super.getCooldownColor();
+
+        return new Color(0, 0, 0, AVAILABLE_REGEN_COOLDOWN_ALPHA);
     }
 
     @Override
