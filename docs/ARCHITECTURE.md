@@ -616,6 +616,8 @@ Crablobab's per-port bar roll, five regular wares, rotating backdrop, and empty-
 and highlighted credits-and-crabs tooltip. Chicken Profile follows the same affordable/shortfall
 pair and purchase routing as the other switchable curios: every refusal returns to the stall, and
 successful purchases either pass through the first `Baha?` explanation or return directly.
+Its full sales pitch keeps Crablobab expansive and physically comic while stating the marker,
+Sonar override, permanent switch, and complete cost on both affordability branches.
 The same bridge mounts the campaign-persistent
 `CrablobabIdentity` person card on every entry path, then saves that person visual as the stall
 return target so opening merchandise and returning from backdrop previews cannot fall back to the

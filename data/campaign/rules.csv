@@ -1897,71 +1897,87 @@ catchrelease_crabWareChicken_profile,DialogOptionSelected,"$option == catchrelea
 CatchReleaseCMD tokens
 $catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
 
-Crablobab produces a little display tile. A chicken walks across it, reaches the edge, and continues across the back.
+Crablobab produces a little display tile and plants it upright on the counter. A chicken crosses the screen at a determined walk. It reaches the edge, continues around the back of the tile, and comes into view again from the other side.
 
-""Fishing profile! Unknown catch becomes chicken. Very clear. Very upright.""
+""There we are! Fishing profile. Very important distinction: not a fish. Much easier to recognize.""
 
-He turns the tile sideways. The chicken keeps walking.
+He turns the tile toward you and traces a finger after the chicken.
 
-""Only $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Permanent. Fish Outfitter, Extras. On when you like, off when you don't.""
+""When you've got something on the line and the display hasn't identified it yet, that little rarity-coloured light becomes this fellow instead. He keeps the post until a fitted Sonar Head has an actual fish to show you. Very dependable chicken.""
 
-He taps the tile.
+The chicken completes another circuit.
 
-""Sonar Head still shows the actual fish. Naturally. Sonar has standards.""","0:catchrelease_crabBuyChicken_profile:Pay him
+""Permanent purchase, naturally. $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Then Fish Outfitter, Extras — switch it on, switch it off, switch it back on when you remember why you bought it.""
+
+Crablobab lifts the tile higher.
+
+""And if you've fitted a Sonar Head, sonar wins. Proper fish picture, proper identification, no chicken. Quite right too. Chicken is excellent signage, terrible sonar.""","0:catchrelease_crabBuyChicken_profile:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareChicken_profileShort,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
 
-Crablobab produces a little display tile. A chicken walks across it, reaches the edge, and continues across the back.
+Crablobab produces a little display tile and plants it upright on the counter. A chicken crosses the screen at a determined walk. It reaches the edge, continues around the back of the tile, and comes into view again from the other side.
 
-""Fishing profile! Unknown catch becomes chicken. Very clear. Very upright.""
+""There we are! Fishing profile. Very important distinction: not a fish. Much easier to recognize.""
 
-He turns the tile sideways. The chicken keeps walking.
+He turns the tile toward you and traces a finger after the chicken.
 
-""Only $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Permanent. Fish Outfitter, Extras. On when you like, off when you don't.""
+""When you've got something on the line and the display hasn't identified it yet, that little rarity-coloured light becomes this fellow instead. He keeps the post until a fitted Sonar Head has an actual fish to show you. Very dependable chicken.""
 
-He taps the tile.
+The chicken completes another circuit.
 
-""Sonar Head still shows the actual fish. Naturally. Sonar has standards.""
+""Permanent purchase, naturally. $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Then Fish Outfitter, Extras — switch it on, switch it off, switch it back on when you remember why you bought it.""
 
-Crablobab checks your credits, then your crabs.
+Crablobab lifts the tile higher.
 
-""Ah. Short.""
+""And if you've fitted a Sonar Head, sonar wins. Proper fish picture, proper identification, no chicken. Quite right too. Chicken is excellent signage, terrible sonar.""
 
-He returns the tile to his coat. The chicken continues across it.",10:catchrelease_crabStall:Another time.,
+Crablobab checks your credits. Then your crabs. Then he checks the crabs again by lifting one slightly and putting it back.
+
+""Ah! We have encountered a procurement issue.""
+
+He counts on his fingers, reaches six, and starts again.
+
+""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. At present you are short of at least one of those categories.""
+
+The display tile disappears back into his coat. The chicken keeps walking across it until the last corner vanishes.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyChicken_profile,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the tile against your settings slate.
+!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your settings slate.
+
+A new line appears:
 
 MINIGAME MARKER — CHICKEN
 
-The new entry is dated tomorrow.
+The entry is dated tomorrow.
 
-""Done!""
+""There! Installed, registered, acknowledged by whatever part of the outfitter insists on acknowledging things.""
 
-He points at it.
+He points at the setting with the tile.
 
-""Fish Outfitter, Extras. Sonar Head still wins when fitted.""
+""Fish Outfitter, Extras. Chicken on, chicken off. Sonar Head still gets first say when fitted, because sonar has actually met the fish.""
 
-He considers the tile.
+He gives the tile an approving little nod.
 
-""Chicken has other strengths.""",0:catchrelease_crabBaha:Baha?,
+""Good profile. Strong silhouette. Doesn't overpromise.""",0:catchrelease_crabBaha:Baha?,
 catchrelease_crabBuyChicken_profileKnown,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the tile against your settings slate.
+$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your settings slate.
+
+A new line appears:
 
 MINIGAME MARKER — CHICKEN
 
-The new entry is dated tomorrow.
+The entry is dated tomorrow.
 
-""Done!""
+""There! Installed, registered, acknowledged by whatever part of the outfitter insists on acknowledging things.""
 
-He points at it.
+He points at the setting with the tile.
 
-""Fish Outfitter, Extras. Sonar Head still wins when fitted.""
+""Fish Outfitter, Extras. Chicken on, chicken off. Sonar Head still gets first say when fitted, because sonar has actually met the fish.""
 
-He considers the tile.
+He gives the tile an approving little nod.
 
-""Chicken has other strengths.""",0:catchrelease_crabStall:Continue,
+""Good profile. Strong silhouette. Doesn't overpromise.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,$global.catchrelease_crabAskedBaha = true 0,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
