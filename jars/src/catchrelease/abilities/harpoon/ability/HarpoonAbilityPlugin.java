@@ -3,11 +3,13 @@ package catchrelease.abilities.harpoon.ability;
 import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
+import lunalib.lunaSettings.LunaSettings;
 import org.lazywizard.lazylib.MathUtils;
 import catchrelease.skillshot.GuideLineStyle;
 import catchrelease.skillshot.render.DirectionReticuleRenderer;
@@ -41,9 +43,39 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     @Override
     public ChargeManager.Refill getRefill() {
-        return new ChargeManager.Refill(
-                StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
-                StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK);
+        return new HarpoonRefill();
+    }
+
+    /** Static so the sector-level charge manager never retains an ability-plugin instance. */
+    protected static class HarpoonRefill extends ChargeManager.Refill {
+        protected HarpoonRefill() {
+            super(StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
+                    StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK);
+        }
+
+        @Override
+        public void onChargeGained() {
+            if (shouldPlayChargeReload()) {
+                Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_CHARGE_RELOAD, 1f, 1f);
+            }
+        }
+    }
+
+    /**
+     * The default relevance gate follows the two places a harpoon is used: lit breach lamps,
+     * or the interaction reach of an open pond. Invalid or missing settings fail to that safe
+     * default rather than unexpectedly making the cue global.
+     */
+    protected static boolean shouldPlayChargeReload() {
+        String mode = LunaSettings.getString("catchrelease", HarpoonConstants.RELOAD_SOUND_SETTING);
+        if (HarpoonConstants.RELOAD_SOUND_NEVER.equals(mode)) return false;
+        if (HarpoonConstants.RELOAD_SOUND_ALWAYS.equals(mode)) return true;
+
+        CampaignFleetAPI fleet = Global.getSector() == null
+                ? null : Global.getSector().getPlayerFleet();
+
+        return SearchlightAbilityPlugin.isBreaching()
+                || SearchlightAbilityPlugin.isNearActivePond(fleet);
     }
 
     @Override
