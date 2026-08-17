@@ -3,7 +3,31 @@
   <component name="ChangeListManager">
     <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="sfx">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/abilities.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/abilities.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/config/sounds.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/sounds.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/ability/HarpoonAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/ability/HarpoonAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/ability/PondInteractionAbilityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/constants/RodConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/constants/RodConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/scripts/FishingDroneSwarmScript.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/rod/scripts/FishingDroneSwarmScript.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/held_loop.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/sucess.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/sucess3.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/treasure_get.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/treasure_get2.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/treasure_get3.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/minigame/treasure_on_screen.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/charge_reload.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/skillshot/charge_reload.ogg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/drone_launch.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/harpoon_hit.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/pond_open_boom_at_0_390.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/rod_hit.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/rod_target_lock.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/rod_target_lock2.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/rod_target_lock3.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/skillshot/rod_target_lock3.ogg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/short_boom.ogg" beforeDir="false" afterPath="$PROJECT_DIR$/sounds/catchrelease/skillshot/short_boom.ogg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/skillshot/short_loud_boom.ogg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_loop.ogg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

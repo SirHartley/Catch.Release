@@ -11,6 +11,7 @@
           "drone":"graphics/ships/munitions_drone.png",
           "fisherman_map_icon":"graphics/catchrelease/ui/fisherman.png",
           "unstable_fabric_map_icon":"graphics/catchrelease/ui/unstable_fabric.png",
+          "lyne":"graphics/catchrelease/ability/lyne.png",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
     },

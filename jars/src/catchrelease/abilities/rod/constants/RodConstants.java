@@ -13,9 +13,6 @@ public class RodConstants {
     /** Directional acquisition report when a passive or passive-bound drone commits to a new target. */
     public static final String SOUND_TARGET_LOCK = "catchrelease_rod_target_lock";
 
-    /** Mono directional report at confirmed drone/mote contact. */
-    public static final String SOUND_MOTE_HIT = "catchrelease_rod_hit";
-
     /** Second mono directional layer when the drone has the mote. */
     public static final String SOUND_MOTE_CAUGHT = "catchrelease_rod_catch";
 

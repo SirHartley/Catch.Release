@@ -432,8 +432,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     /** One confirmed contact report; callers invoke this only after the catch path accepts the mote. */
     protected void playMoteHit(SectorEntityToken mote) {
-        Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_HIT, 1f, 1f,
-                mote.getLocation(), mote.getVelocity());
         Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
                 mote.getLocation(), mote.getVelocity());
     }

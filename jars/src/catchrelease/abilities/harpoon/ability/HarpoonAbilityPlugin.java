@@ -69,6 +69,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     protected static boolean shouldPlayChargeReload() {
         String mode = LunaSettings.getString("catchrelease", HarpoonConstants.RELOAD_SOUND_SETTING);
         if (HarpoonConstants.RELOAD_SOUND_NEVER.equals(mode)) return false;
+
+        if (Global.getSector().getCampaignUI().isShowingDialog()) return false;
+
         if (HarpoonConstants.RELOAD_SOUND_ALWAYS.equals(mode)) return true;
 
         CampaignFleetAPI fleet = Global.getSector() == null

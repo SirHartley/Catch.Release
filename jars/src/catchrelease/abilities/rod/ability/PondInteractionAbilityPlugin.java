@@ -248,7 +248,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     @Override
     public String getSpriteName() {
         if (closestPondActive() || isRoamingAvailable()) {
-            return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder2");
+            return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "lyne");
         }
 
         return super.getSpriteName();

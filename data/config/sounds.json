@@ -84,20 +84,21 @@
 	"catchrelease_minigame_line_click":[
 		{"file":"sounds/catchrelease/minigame/click_trigger.ogg","pitch":1,"volume":0},
 	],
+
 	"catchrelease_minigame_chest_open":[
 		{"file":"sounds/catchrelease/minigame/chest_with_coins.ogg","pitch":1,"volume":0.4},
 	],
 	"catchrelease_minigame_treasure_spawn":[
-		{"file":"sounds/catchrelease/minigame/treasure_on_screen2.ogg","pitch":1,"volume":0.8},
+		{"file":"sounds/catchrelease/minigame/treasure_on_screen2.ogg","pitch":1,"volume":0.7},
 	],
 	"catchrelease_minigame_treasure_get":[
-		{"file":"sounds/catchrelease/minigame/treasure_get3.ogg","pitch":0.8,"volume":1},
+		{"file":"sounds/catchrelease/minigame/treasure_get4.ogg","pitch":1,"volume":0.9},
 	],
 	"catchrelease_minigame_bar_click":[
 		{"file":"sounds/catchrelease/minigame/click.ogg","pitch":1,"volume":1},
 	],
 	"catchrelease_minigame_success":[
-		{"file":"sounds/catchrelease/minigame/sucess3.ogg","pitch":1,"volume":1},
+		{"file":"sounds/catchrelease/minigame/sucess2.ogg","pitch":1,"volume":0.8},
 	],
 	"catchrelease_minigame_failure":[
 		{"file":"sounds/catchrelease/minigame/fail.ogg","pitch":1,"volume":1},
@@ -106,16 +107,13 @@
 	#rigs
 
 	"catchrelease_drone_launch":[
-		{"file":"sounds/catchrelease/skillshot/drone_launch_mono.ogg","pitch":1,"volume":0.7},
+		{"file":"sounds/catchrelease/skillshot/drone_launch_mono.ogg","pitch":1,"volume":1.1},
 	],
 	"catchrelease_rod_target_lock":[
-		{"file":"sounds/catchrelease/skillshot/rod_target_lock3.ogg","pitch":1,"volume":1},
-	],
-	"catchrelease_rod_hit":[
-		{"file":"sounds/catchrelease/skillshot/rod_hit.ogg","pitch":1,"volume":1},
+		{"file":"sounds/catchrelease/skillshot/rod_target_lock3.ogg","pitch":1,"volume":1.1},
 	],
 	"catchrelease_rod_catch":[
-		{"file":"sounds/catchrelease/skillshot/rod_hit2_mono.ogg","pitch":1,"volume":1},
+		{"file":"sounds/catchrelease/skillshot/rod_hit2_mono.ogg","pitch":1,"volume":0.8},
 	],
 	"catchrelease_harpoon_charge_reload":[
 		{"file":"sounds/catchrelease/skillshot/charge_reload.ogg","pitch":1,"volume":1},
@@ -124,7 +122,7 @@
 		{"file":"sounds/catchrelease/skillshot/harpoon_fire.ogg","pitch":1,"volume":1},
 	],
 	"catchrelease_harpoon_hit":[
-		{"file":"sounds/catchrelease/skillshot/harpoon_hit.ogg","pitch":0.9,"volume":0.5},
+		{"file":"sounds/catchrelease/skillshot/harpoon_hit2.ogg","pitch":0.9,"volume":0.5},
 	],
 	"catchrelease_pond_open_boom":[
 		{"file":"sounds/catchrelease/skillshot/pond_open_boom.ogg","pitch":1,"volume":1},
