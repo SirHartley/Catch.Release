@@ -387,6 +387,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected void playMoteHit(SectorEntityToken mote) {
         Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_HIT, 1f, 1f,
                 mote.getLocation(), mote.getVelocity());
+        Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
+                mote.getLocation(), mote.getVelocity());
     }
 
     /** Drives the minigame's aberration/region colouring - the pond for a cast, the mote itself

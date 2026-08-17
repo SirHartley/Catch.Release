@@ -16,6 +16,9 @@ public class RodConstants {
     /** Mono directional report at confirmed drone/mote contact. */
     public static final String SOUND_MOTE_HIT = "catchrelease_rod_hit";
 
+    /** Second mono directional layer when the drone has the mote. */
+    public static final String SOUND_MOTE_CAUGHT = "catchrelease_rod_catch";
+
     /** Stereo opening report, replacing the searchlight-toggle placeholder at the center impact. */
     public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
 
