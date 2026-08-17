@@ -1,9 +1,5 @@
 {
 
-	"catchrelease_ui_searchlight_loop":[
-		{"file":"sounds/catchrelease/spotlight/spotlight_loop.ogg","pitch":1.0,"volume":0.8},
-	],
-
 	"catchrelease_ui_searchlight_on":{
 		"sounds":[
 			{"file":"sounds/catchrelease/spotlight/spotlight_ability_on.ogg","pitch":0.9,"volume":0.6},
@@ -101,7 +97,7 @@
 		{"file":"sounds/catchrelease/minigame/sucess2.ogg","pitch":1,"volume":0.8},
 	],
 	"catchrelease_minigame_failure":[
-		{"file":"sounds/catchrelease/minigame/fail.ogg","pitch":1,"volume":1},
+		{"file":"sounds/catchrelease/minigame/fail.ogg","pitch":0.8,"volume":0.8},
 	],
 
 	#rigs
