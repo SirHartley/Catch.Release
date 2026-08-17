@@ -117,6 +117,9 @@
 	"catchrelease_rod_catch":[
 		{"file":"sounds/catchrelease/skillshot/rod_hit2_mono.ogg","pitch":1,"volume":1},
 	],
+	"catchrelease_harpoon_charge_reload":[
+		{"file":"sounds/catchrelease/skillshot/charge_reload.ogg","pitch":1,"volume":1},
+	],
 	"catchrelease_harpoon_fire":[
 		{"file":"sounds/catchrelease/skillshot/harpoon_fire.ogg","pitch":1,"volume":1},
 	],

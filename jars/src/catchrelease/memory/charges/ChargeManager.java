@@ -109,6 +109,10 @@ public class ChargeManager implements EveryFrameScript {
             this.rateStat = rateStat;
             this.rateFallback = rateFallback;
         }
+
+        /** Called once when a refill step crosses one or more whole-charge boundaries. */
+        public void onChargeGained() {
+        }
     }
 
     /** Tells the manager how a pool refills. Safe to call repeatedly; the last call wins. */
@@ -151,7 +155,12 @@ public class ChargeManager implements EveryFrameScript {
 
             float seconds = Math.max(0.1f, UpgradeManager.getValue(refill.rateStat, refill.rateFallback));
 
-            pools.put(entry.getKey(), Math.min(max, pool + amount / seconds));
+            float next = Math.min(max, pool + amount / seconds);
+            pools.put(entry.getKey(), next);
+
+            if ((int) Math.floor(next) > (int) Math.floor(pool)) {
+                refill.onChargeGained();
+            }
         }
     }
 }

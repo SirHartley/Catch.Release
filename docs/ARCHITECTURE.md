@@ -192,16 +192,21 @@ on `BeginFleetEncounter`, does `unset $ignorePlayerCommRequests` then `OpenComms
 reason walking up to a fishing boat opens the conversation instead of the engage/disengage screen.
 There is no plugin behind it — see the gotcha below.
 
-**`data/config/sounds.json`** — 29 ids at the top level, merged into vanilla's ~600: twenty-six of
+**`data/config/sounds.json`** — 32 ids at the top level, merged into vanilla's ~600: twenty-nine of
 our own (the searchlight UI set, six cargo handling sounds, the coherence whispers, the
 ROD's mono directional LYNE drone launch, orbit-to-chase lock, mote impact, and catch layer;
-harpoon fire and mote impact, the ROD pond-opening boom, and the minigame's coin-filled chest
+harpoon fire, mote impact and charge-ready UI report, the ROD pond-opening boom, and the
+minigame's coin-filled chest
 opening, treasure spawn/pickup cues, one continuously renewed line loop backed by `unheld_loop.ogg`,
 the input click, the indicator-exit cue and two outcome hooks), the
 skillshot framework's denied blip, and two vanilla character-screen ids re-declared at reduced volume.
 The minigame success and failure ids currently point at vanilla's reputation-raise and reputation-drop
 files, respectively, so replacing those placeholders later needs no Java change.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
+
+**data/config/LunaSettings.csv** — one Audio radio setting for the harpoon charge-ready
+report: never, only while the breach lamps are lit or an open pond is in interaction range
+(the default), or always.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
 `catchrelease.commands.AllFish` — compiled into the jar since the commands moved out of the loose
@@ -748,9 +753,9 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `rod/rendering/FishingDroneDebugRenderer.java` | Dev only: ring and per-drone spokes |
 | `rod/animation/Flash.java` | Short additive glow burst |
 | `rod/constants/RodConstants.java` | Drone speed, steering, orbit, return acceleration, ring look, and ROD sound ids |
-| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line and reports only a successfully created shot; aim assist; press again to cut while hauling |
+| `harpoon/ability/HarpoonAbilityPlugin.java` | Fires the line and reports only a successfully created shot; aim assist; press again to cut while hauling. Its static refill definition plays the charge-ready UI cue according to the LunaLib radio setting, defaulting to lit breach lamps or an open pond in interaction range |
 | `harpoon/entities/HarpoonEntityPlugin.java` | The whole cast: flight, strike, hauling, catch, return, rope rendering. Pond and breach-lamp targets share one acquisition path that normalizes both to an ordinary fish mote before the common hold/shove state; the confirmed mote strike reports once before the ordinary/explosive split. A player's fitted explosive head gets a layered, irregular red warning pulse; its glow is a private filename-loaded sprite whose mutable render state is reset after every draw, never the shared campaign-entity sprite. Fleet collision eligibility excludes only the Fisherman, so normal and explosive shots pass through his boat and can hit something beyond it. An explosive impact records the mote's species name or struck fleet name before consuming the head. An NPC-owned line skips the minigame and always lands |
-| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, plus the explosive head's red halo/core palette and pulse tuning |
+| `harpoon/constants/HarpoonConstants.java` | Flight, catch radius, haul physics, rope spring and wave params, sound/setting ids, plus the explosive head's red halo/core palette and pulse tuning |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | The breach lamps: spools them up, beam slow, detectability penalty, yields to open ponds. Three questions about a buried mote, and they are **not** interchangeable — `isLit` (a beam is on it, so it can be taken), `isDetected` (it is showing as a dent at all, including the passive reach, so it can be seen), `isBreaching` (the lamps are lit at all) |
 | `searchlight/scripts/Searchlight.java` | One beam: sweep, lock-on, picks its face, drives distortion and ripples |
 | `searchlight/rendering/SearchlightGlowRenderer.java` | The circular beam, purple over its window |
@@ -827,7 +832,7 @@ Shader and GL machinery.
 | `memory/upgrades/UpgradeManager.java` | Save-persisted levels. `getValue` is the single read entry point; `updateBaseValues` re-walks the sheet each load, seeding stats the save predates and refreshing every sheet-owned field, so the save owns the levels and the sheet owns everything else |
 | `memory/upgrades/StatIds.java` | The ids joining code to `UpgradeData.csv` |
 | `memory/upgrades/UpgradeStat.java` | One row: base, FLAT/MULT per level, category, current value |
-| `memory/charges/ChargeManager.java` | Float charge pools that regenerate continuously |
+| `memory/charges/ChargeManager.java` | Float charge pools that regenerate continuously; refill definitions receive one callback when a step crosses a whole-charge boundary, without treating initial full-pool creation as a gain |
 | `memory/TransientMemory.java` | Session-only cache. Keys must start with `$`, never persisted |
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
@@ -952,7 +957,8 @@ exist, so the Extras tab appears the moment the first curio is bought and not be
 and `CrabWares.CELEBRATION` answers three separate questions — bought (his business, never undone),
 owned (where it is kept), and switched on (the player's, through the shop). `FishingMinigamePanel`
 asks `isOn()` and simply does not build a `CatchCelebration`; nothing inside that class asks again.
-The mod ships no `LunaSettings.csv` any more, so it has no page in LunaLib's menu.
+The celebration remains absent from LunaLib. The mod's LunaSettings page exists only for the
+harpoon charge-ready sound policy; it does not make the celebration configurable again.
 
 **Stocking a module and owning one are a third question.** `Tackle.stocked` says whether the
 outfitter carries it, and `TackleManager.getOptions()` lists what it stocks *plus anything already

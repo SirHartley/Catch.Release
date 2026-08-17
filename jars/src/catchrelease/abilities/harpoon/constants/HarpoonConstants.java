@@ -12,6 +12,14 @@ public class HarpoonConstants {
     /** Stereo mote-impact report; fleet collisions deliberately use no part of this hook. */
     public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";
 
+    /** UI report when the pool restores a whole harpoon charge. */
+    public static final String SOUND_CHARGE_RELOAD = "catchrelease_harpoon_charge_reload";
+
+    public static final String RELOAD_SOUND_SETTING = "catchrelease_harpoonChargeReloadSound";
+    public static final String RELOAD_SOUND_NEVER = "Never play";
+    public static final String RELOAD_SOUND_RELEVANT = "Play when relevant";
+    public static final String RELOAD_SOUND_ALWAYS = "Always play";
+
     /** Tag on every in-flight harpoon, so active ones can be found without walking the location. */
     public static final String TAG = "catchrelease_harpoon_line";
 

@@ -1,0 +1,2 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+catchrelease_harpoonChargeReloadSound,Harpoon reload sound,Radio,Play when relevant,"Never play, Play when relevant, Always play","Plays when the harpoon restores a charge. Relevant means while the breach lamps are lit or the fleet is close to an open pond.",,,Audio
