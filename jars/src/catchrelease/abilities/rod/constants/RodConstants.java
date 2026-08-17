@@ -23,6 +23,9 @@ public class RodConstants {
     public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
 
     //drones
+    /** Seconds between drones in one launch sequence; the first leaves immediately. */
+    public static float DRONE_LAUNCH_OFFSET = 0.5f;
+
     /** Radius of the ring drones fly once arrived; the reticule matches. */
     public static final float DRONE_ORBIT_RADIUS = 60f;
 
