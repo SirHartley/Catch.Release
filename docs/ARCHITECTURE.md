@@ -615,10 +615,12 @@ Crablobab's per-port bar roll, five regular wares, rotating backdrop, and empty-
 `CatchReleaseCMD` mounts those options immediately so each ware can carry its structured description
 and highlighted credits-and-crabs tooltip. Chicken Profile follows the same affordable/shortfall
 pair and purchase routing as the other switchable curios: every refusal returns to the stall, and
-successful purchases either pass through the first `Baha?` explanation or return directly. The
-same bridge mounts the campaign-persistent
-`CrablobabIdentity` person card on every entry path; its portrait is resolved from the
-`graphics.characters` registration in `settings.json`, never from a hard-coded asset path. The ware
+successful purchases either pass through the first `Baha?` explanation or return directly.
+The same bridge mounts the campaign-persistent
+`CrablobabIdentity` person card on every entry path, then saves that person visual as the stall
+return target so opening merchandise and returning from backdrop previews cannot fall back to the
+bar scene. Its portrait is resolved from the `graphics.characters` registration in `settings.json`,
+never from a hard-coded asset path. The ware
 state and prices are Java. The first
 switchable-curio purchase routes through the shared `Baha?` correction; after that campaign-long
 answer, later switchable purchases give the short outfitter reminder directly. The switch itself

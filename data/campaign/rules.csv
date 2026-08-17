@@ -1706,6 +1706,7 @@ catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBa
 catchrelease_crabBarAdd,AddBarEvents,CatchReleaseCMD crabBarAvailable,"AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
 catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
 !$global.catchrelease_metCrablobab","CatchReleaseCMD showCrabPortrait
+SaveCurrentVisual
 $global.catchrelease_metCrablobab = true 0","""Terrible!""
 
 He says it with obvious satisfaction.
@@ -1725,6 +1726,7 @@ catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crab
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
 CatchReleaseCMD crabExplosivePending","CatchReleaseCMD showCrabPortrait
+SaveCurrentVisual
 CatchReleaseCMD crabAcknowledgeExplosive
 SetTextHighlights $catchreleaseCrabExplosiveTarget","""Back!""
 
@@ -1743,7 +1745,8 @@ He looks expectantly at your empty hands.
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-CatchReleaseCMD crabExplosiveSettled",CatchReleaseCMD showCrabPortrait,"""Back!""
+CatchReleaseCMD crabExplosiveSettled","CatchReleaseCMD showCrabPortrait
+SaveCurrentVisual","""Back!""
 
 Crablobab says it with obvious satisfaction.
 
