@@ -27,6 +27,9 @@ import java.awt.*;
 
 public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
+    protected static final String SOUND_POND_OPEN_UI = "catchrelease_ui_rod_pond_open_sfx";
+    protected static final String SOUND_DRONE_DISPATCH_UI = "catchrelease_ui_rod_drone_dispatch";
+
     //Press once to unlock nearby pond
     //once unlocked, this ability changes to a targetted skillshot instead for the angler behaviour
     //away from any pond, with the breach lamps lit and their coupler fitted, the press sends a
@@ -94,6 +97,19 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     @Override
     public boolean showReticuleOnActivation() {
         return closestPondActive();
+    }
+
+    @Override
+    public String getOnSoundUI() {
+        // Keep recalls in drone mode even if the pond or breach-lamp state has changed
+        // since the swarm was dispatched.
+        if (FishingDroneSwarmScript.getExisting() != null
+                || closestPondActive()
+                || isRoamingAvailable()) {
+            return SOUND_DRONE_DISPATCH_UI;
+        }
+
+        return SOUND_POND_OPEN_UI;
     }
 
     @Override
