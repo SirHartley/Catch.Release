@@ -7,7 +7,7 @@ public class RodConstants {
     /** Drone hull and trail colour. */
     public static final Color DRONE_COLOR = Color.ORANGE;
 
-    /** Stereo launch report, played once for each drone entity successfully put into the world. */
+    /** Mono directional launch report, played once for each drone successfully put into the world. */
     public static final String SOUND_DRONE_LAUNCH = "catchrelease_drone_launch";
 
     /** Stereo opening report, replacing the searchlight-toggle placeholder at the center impact. */

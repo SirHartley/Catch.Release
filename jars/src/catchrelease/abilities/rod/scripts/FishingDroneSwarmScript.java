@@ -130,7 +130,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
             drone.setLocation(fleet.getLocation().x, fleet.getLocation().y);
             drones.add(drone);
-            Global.getSoundPlayer().playUISound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f);
+            Global.getSoundPlayer().playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
+                    drone.getLocation(), drone.getVelocity());
         }
     }
 
