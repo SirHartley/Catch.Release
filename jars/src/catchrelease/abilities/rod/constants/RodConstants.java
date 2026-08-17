@@ -10,6 +10,9 @@ public class RodConstants {
     /** Mono directional launch report, played once for each drone successfully put into the world. */
     public static final String SOUND_DRONE_LAUNCH = "catchrelease_drone_launch";
 
+    /** Directional acquisition report, only when an orbiting drone commits to a target. */
+    public static final String SOUND_TARGET_LOCK = "catchrelease_rod_target_lock";
+
     /** Stereo opening report, replacing the searchlight-toggle placeholder at the center impact. */
     public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
 
