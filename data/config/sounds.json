@@ -23,13 +23,13 @@
 
 	"catchrelease_ui_rod_pond_open_sfx":{
 		"sounds":[
-			{"file":"sounds/catchrelease/spotlight/spotlight_toggle.ogg","pitch":1,"volume":1},
+			{"file":"sounds/catchrelease/skillshot/dramatic_boom.ogg","pitch":1,"volume":1},
 		],
 	},
 
 	"catchrelease_ui_rod_drone_dispatch":{
 		"sounds":[
-			{"file":"sounds/catchrelease/spotlight/spotlight_toggle.ogg","pitch":1,"volume":1},
+			{"file":"sounds/catchrelease/skillshot/short_boom.ogg","pitch":1,"volume":1},
 		],
 	},
 
