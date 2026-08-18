@@ -290,8 +290,35 @@ public class FishermanSpawner implements EveryFrameScript {
     }
 
 
+    /**
+     * Console/testing entry point: guarantees the ordinary visiting Fisherman in this system
+     * without spending the location's natural roll or leaving a second sector-wide visitor.
+     * A live local boat is already the requested result; an off-system visitor retires through
+     * the same duplicate path used by save reconciliation before the replacement is created.
+     */
+    public static CampaignFleetAPI spawnNow(StarSystemAPI system, Vector2f near) {
+        if (system == null || near == null || Global.getSector() == null) return null;
+
+        reconcileSystem(system);
+        CampaignFleetAPI local = CoreFisherSpawner.getAnyBoat(system);
+        if (local != null) return local;
+
+        FishermanSpawner spawner = new FishermanSpawner();
+        CampaignFleetAPI visitor = spawner.getLiveFleet();
+        if (visitor != null && visitor.getContainingLocation() != system) {
+            //The duplicate retirement is immediate off-screen, so release everything owned by
+            //that visitor before despawning it; its fleet script will no longer receive a frame.
+            FishermanShelf.releaseFor(visitor);
+            FishermanMapIcon.removeFor(visitor);
+            retireDuplicate(visitor);
+        }
+
+        FishermanMapIcon.removeOutside(system);
+        return spawner.spawn(system, near);
+    }
+
     /** The boat itself: one cruiser, a few logistics hulls, lamps and manners fitted by script. */
-    protected void spawn(StarSystemAPI system, Vector2f near) {
+    protected CampaignFleetAPI spawn(StarSystemAPI system, Vector2f near) {
         CampaignFleetAPI fleet = Global.getFactory().createEmptyFleet(
                 FishermanConstants.FACTION, FishermanConstants.FLEET_NAME, true);
 
@@ -335,6 +362,8 @@ public class FishermanSpawner implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, fleet);
 
         stamp();
+
+        return fleet;
     }
 
     /** Whether a fleet is one of the trade's boats at all, for anything that routes on it. */
