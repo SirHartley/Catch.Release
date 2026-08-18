@@ -124,6 +124,8 @@ public final class PaneWidgets {
                 ShopUi.drawQuad(x, y, w, 2f, color, 0.35f * alphaMult);
             }
 
+            Color color = on ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
             SpriteAPI face = getIcon();
             if (face != null) {
                 float scale = Math.min(ICON_SIZE / face.getWidth(), ICON_SIZE / face.getHeight());
@@ -131,6 +133,7 @@ public final class PaneWidgets {
                 face.setSize(face.getWidth() * scale, face.getHeight() * scale);
                 face.setNormalBlend();
                 face.setAlphaMult((on ? 1f : 0.55f) * alphaMult);
+                face.setColor(color);
                 face.renderAtCenter(Math.round(x + w * 0.5f),
                         Math.round(y + h - 3f - ICON_SIZE * 0.5f));
             }
@@ -144,7 +147,6 @@ public final class PaneWidgets {
                 text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
-            Color color = on ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
             text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
             //held two pixels off the underline, which the label used to stand right on

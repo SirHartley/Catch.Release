@@ -2,8 +2,6 @@
 
 todo
 
-    - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
-
 ---------------------
 
 scrapped
@@ -11,6 +9,7 @@ scrapped
     - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate //irrelevant because selling fish on open market and storing fish doesnt matter. Trading in fish also doesn't matter...
     - The Ribcage fishing hub
     - Main quest tie-in (fish the 4th drone for galatia)
+    - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
 qa_
@@ -19,19 +18,11 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Shop
-- "new" label should be to the left of the upgrade tier indicators
-
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
 
-Sound
-- Minigame lacks soundstrack
-- Celebration tush on catch & extra for treasure
-- "Got treasure" notif when successfully taking in treasure. Should be a fading label where the trasure was? Maybe add treasure icon below the minigame?
-- Harpoon needs activation, catch and retract sounds
-
 ---------------------
+
 Impactful Upgrades
 
 The Radial Rig
@@ -47,79 +38,6 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
-
-Fleet interaction
-- Paying the fine immediately closes the dialogue. There should be a "leave" button there.
-- Actually, most fleet dialogues have this issue.
-- Hitting a civ fleet with a harpoon makes it hostile but doesn't cause it to engage you. It should engage you or run depending on if it's bigger than you.
-
-Shop
-- Get rid of the gray backing for "locked" entries.
-- The unlocked rungs should always be blue, not gray, even if the other rungs on the entry are locked.
-- Any rungs that are locked because they require a schematic should be grey. I'm talking about the small, square icons. This means that the icon, while you do not have a schematic, should be grey, and when you have one, should be like normal atm, and when unlocked, light blue like atm.
-
-Fisherman
-- At stability "barely holding", add one-time option "are you okay" to the main menu. Answer: Never better, thank you for asking. -> R1: Okay then... R2: Are you sure? Got a mirror? -> Fabric's playing tricks, don't mind it. -> R1: If you say so. R2: This is another one of these knots, isn't it? -> A terribly frayed one, especially here.
-- Ask about work - Should send the player after a _specific_ fish. You can't just hand in any random fish you got in cargo, it has to be target fish id caught after quest received timestamp in the target system
-- Ask about work - Quest dialogue does not highlight fish in rarity colour or rewards as important
-- Ask about work - Hand in dialogue should show "The Fisherman now stocks an additional range data entry." in green - quest reward. Small letters, as is vanilla standard.
-- Ask about work - Should only be available every 3 months after completion
-- Range Data seller - Should roll chances for rarity of sold range data (check if this isn't already the case...)
-- Sell fish - add "pack into crates" button to the left side of the cargo picker. Pressing it reloads panel with all fish packed into crates for easier selling.
-- "Ask about something else" - entries you have clicked once should be coloured grey in addition to being moved to the back
-
-Lamp Interaction
-- Patrols with other assignments like standing down ect should immediately stop doing what they were doing and move to confront about lights. Check how it's handled for vanilla transponder interactions.
-- Turning off the lights while tracked by patrol should still make that patrol engage you and warn you about consequences next time. If you're on your second+ time, it's consequence time.
-
-Cargo
-- Right-clicking any fish or crate for packing resets cargo grid, which is terrible for UX - should be static
-- Cargo tooltip not telling me why fish is marked
-
-Codex
-- Small icons in side list don't use silhouette renderer when range data available - they are just black. Should be silhouette while in range data mode
-
-Crabolabob
-- Once he sold a backdrop, he does not sell one in that location again for 2 months.
-- Needs dialogue if he got nothing to sell. Will sell you an overpriced, crappy quality bass if he got nothing. Tooltip should say so.
-- previous Explosive Head target dialogue not firing
-
-Aquarium
-- Common background text entries should be white in list
-
-Minigame
-- God rays look terrible, look at aquarium and do similar to that
-- Treasure card: very long names like blueprints should wrap around lines instead of making the screen extremely wide
-
-Cohesion
-- Cohesion should be increased by colonies. If there's a colony, cohesion must be Stable. Colonies should stabilize their surroundings within 5LY with a falloff - similar to a source of instability, these are a source of stability. Make sure the map accounts for this.
-
-Shop
-- Unlocked rungs should be light blue player colour, not yellow
-- Remove Lamp Identify upgrade, redundant with latest changes
-- Un-purchaseable upgrades lines should have grey line background
-- Un-purchaseable upgrade rung square icons should be coloured grey instead of default blue
-- double-check if marking a schematic rung will show the mark on the quest reward tooltip in the bar quest
-- Add to mark tooltip what happens when you mark a schematic rung
-- Move & unify the "mark" tooltip to the vanilla framework - it's currently manual render. Shorten it substantially.
-- Fitted items should show green instead of grey
-
-Range Data seller
-- cost label runs into newline, should use tooltip for "have" portion
-- Cost label should use correct colour for common/uncommen ect
-- Needs a leave label just like shop
-
-Sell Fish
-- Missing options to sell up to rare and up to epic
-- After engaging in sell fish option all fish in cargo are unpacked from their last state. and in inventory as single items.
-- If all fish are in the big pile the sell all up to x options don't work because it thinks everythign is important.
-- Return buttons says continue - should be return
-
-Map
-- Fishing planner important mark shouldn't have text beside it in the list
-- f2 to open codex while hovering a range data entry no longer works anywhere
-- route planner: Fish icons on the map should be stacked into a circle as best they can. for instance: 3 should be a triangle, 4 should be in a square (2 rows, 2 per img) ect so they can be normal-size while keeping whitespace in bubble low.
-
 
 ---------------------
 
