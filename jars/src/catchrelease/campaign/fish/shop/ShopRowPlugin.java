@@ -130,40 +130,28 @@ public class ShopRowPlugin extends ListRow {
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
 
-    /** The right-hand end of the row: pips for a ladder, a mark or a price tag for a module -
-     *  and the gold New! tag at the far edge while a freshly learned schematic waits unseen. */
+    /** The right-hand end of the row: pips for a ladder, a mark or a price tag for a module.
+     *  A fresh upgrade's gold New! tag sits immediately left of its tier indicators. */
     protected void renderState(float x, float y, float width, float height, float alphaMult) {
         float right = x + width - PAD_SIDE;
 
-        if (ShopSchematics.isFresh(entry)) {
-            LazyFont small = ShopUi.getSmallFont();
-
-            if (small != null) {
-                if (fresh == null) {
-                    fresh = ShopUi.createText(small, "New!");
-                    fresh.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
-                }
-
-                fresh.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
-                fresh.draw(Math.round(right), Math.round(y + height * 0.5f + fresh.getHeight() * 0.5f));
-
-                //the indicators step left so the tag sits to their right, as promised
-                right -= fresh.getWidth() + 6f;
-            }
-        }
-
         if (entry.isUpgrade() && !entry.isMaxed()) {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
+            float pipsLeft = right - pipsWidth;
 
             //bought rungs always in the player's own colour; an unbought rung is grey only
             //while its schematic is missing, and an ordinary dark square once it can be bought
-            ShopUi.drawPips(Math.round(right - pipsWidth), Math.round(y + (height - PIP_SIZE) * 0.5f),
+            ShopUi.drawPips(Math.round(pipsLeft), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
                     Misc.getBasePlayerColor(), alphaMult,
                     rung -> ShopSchematics.requires(entry.stat, rung)
                             && !ShopSchematics.has(entry.stat, rung));
+
+            drawFresh(pipsLeft - 6f, y, height, alphaMult);
             return;
         }
+
+        right = drawFresh(right, y, height, alphaMult);
 
         //a switch says which way it is thrown, both ways - OFF has to be as readable as ON, since
         //an unmarked row would look like the shelf had simply not loaded
@@ -196,6 +184,25 @@ public class ShopRowPlugin extends ListRow {
 
         ShopUi.drawQuad(right - PIP_SIZE, y + (height - PIP_SIZE) * 0.5f, PIP_SIZE, PIP_SIZE,
                 rarity.color, (entry.canAfford() ? 0.9f : 0.35f) * alphaMult);
+    }
+
+    /** Draws the fresh-schematic tag with its right edge at {@code right}, then returns the next
+     *  indicator's right edge with the standard gap already removed. */
+    protected float drawFresh(float right, float y, float height, float alphaMult) {
+        if (!ShopSchematics.isFresh(entry)) return right;
+
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return right;
+
+        if (fresh == null) {
+            fresh = ShopUi.createText(small, "New!");
+            fresh.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+        }
+
+        fresh.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+        fresh.draw(Math.round(right), Math.round(y + height * 0.5f + fresh.getHeight() * 0.5f));
+
+        return right - fresh.getWidth() - 6f;
     }
 
     protected void drawMark(String text, Color color, float right, float y, float height,
