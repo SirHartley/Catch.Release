@@ -548,7 +548,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     }
 
     /** Opens the requested map exactly once, after CodexDialog's dismissal delegate clears the
-     *  campaign state's codex flag. This runs while paused, as codex transitions do. */
+     *  campaign state's codex flag. If the codex was opened from the map, that map is already the
+     *  current core tab; asking vanilla to select MAP again toggles the map closed. This runs while
+     *  paused, as codex transitions do. */
     protected void openPendingMapWhenCodexCloses() {
         if (!pendingMapOpen) return;
 
@@ -566,7 +568,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         if (Boolean.TRUE.equals(showing)) return;
 
         pendingMapOpen = false;
-        ui.showCoreUITab(CoreUITabId.MAP);
+
+        //Vanilla's MAP tab action is a toggle: selecting it while its panel is current calls
+        //dismiss(0). A codex opened by F2 over one of our map rows leaves that map underneath the
+        //codex overlay, so simply let the existing screen receive the parked focus request.
+        if (ui.getCurrentCoreTab() != CoreUITabId.MAP) {
+            ui.showCoreUITab(CoreUITabId.MAP);
+        }
     }
 
     protected static boolean hasPendingFocus() {
