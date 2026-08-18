@@ -1,6 +1,6 @@
 package catchrelease.ui;
 
-import catchrelease.ModPlugin;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  */
 public final class PaneWidgets {
 
-    /** The chips' own face: category art does not exist yet, and a stand-in says so honestly. */
+    /** The small label hand under each chip's category art. */
     public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
 
     public static final String CLICK_SOUND = "ui_button_pressed";
@@ -67,8 +67,8 @@ public final class PaneWidgets {
         return text == null || ghost.equals(text) ? "" : text;
     }
 
-    /** One filter category as a chip: a placeholder mark (category art doesn't exist yet)
-     *  over the name, lit in its own colour while on. Reads state, never writes it - the
+    /** One filter category as a chip: its own mark over the name, lit in its own colour
+     *  while on. Reads state, never writes it - the
      *  toggle is the owner's to make, which is also what keeps this class ignorant of what
      *  it is filtering. */
     public static class Chip extends BaseCustomUIPanelPlugin {
@@ -77,6 +77,7 @@ public final class PaneWidgets {
 
         protected final String label;
         protected final Color color;
+        protected final String iconId;
         protected final Supplier<Boolean> on;
         protected final Runnable onToggle;
 
@@ -86,9 +87,11 @@ public final class PaneWidgets {
         protected transient SpriteAPI icon;
         protected transient boolean iconChecked;
 
-        public Chip(String label, Color color, Supplier<Boolean> on, Runnable onToggle) {
+        public Chip(String label, Color color, String iconId,
+                    Supplier<Boolean> on, Runnable onToggle) {
             this.label = label;
             this.color = color;
+            this.iconId = iconId;
             this.on = on;
             this.onToggle = onToggle;
         }
@@ -153,8 +156,10 @@ public final class PaneWidgets {
             if (iconChecked) return icon;
             iconChecked = true;
 
+            if (iconId == null || iconId.isEmpty()) return null;
+
             try {
-                icon = Global.getSettings().getSprite(ModPlugin.MOD_ID, "placeholder");
+                icon = SpriteLoader.getSprite(iconId);
             } catch (Exception e) {
                 icon = null;
             }
