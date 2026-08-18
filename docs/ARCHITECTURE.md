@@ -134,7 +134,9 @@ The `graphics.characters` additions also register all five Fisherman coherence p
 settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
 an unloaded raw path. The `graphics.catchrelease` additions likewise preload the dedicated
 `fisherman_map_icon` and `unstable_fabric_map_icon` glyphs used by the boat marker and live pond
-terrain, plus the four pane category marks consumed through `FishType`.
+terrain, plus the four pane category marks consumed through `FishType`. Seven dedicated outfitter
+marks feed the main kinds and rig shelves through `ShopEntry.Kind` and `ShopGroup`; Catch and
+Extras deliberately reuse the pane fish and miscellaneous marks.
 `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
 world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
 the renderer. Minigame sound ids and the click press/release toggle are Java constants, not settings.
@@ -584,8 +586,8 @@ Arrays**. `Tackle` remains the serialized/internal type only and must never appe
 | File | What it does |
 |---|---|
 | `FishShopDialog.java` | The dialog: tabs, list, detail pane and buy. Its lower-left undo takes paid purchases back newest-first for this visit, restoring the exact fish cargo, credits, prior upgrade/module state and any exact-tier mark cleared by that purchase; closing drops the session receipts and makes what remains final. A successful paid purchase clears that purchase's shopping mark. Modules remain absent until their schematics are known; only a gated upgrade tier appears as a locked row, whose hover explains the purchase-only distinction and final-two-tier rule. Selecting that row replaces the ordinary price with a red schematic requirement and a muted pointer to fishing jobs. It clears the host interaction's options immediately before opening its custom visual, and delivers the close callback once whether it was reached by LEAVE, Escape, or the visual's own dismissal |
-| `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy. Its purchase guard covers both schematic types, while its visible locked state is upgrade-only because unknown tackle never enters the outfitter list |
-| `ShopGroup.java` | The shelves, which stat ids and rigs belong to which, and the centralized player-facing module noun for each rig (`harpoon tip`, `drone core`, `lens array`; generic `rig module` for shared fits) |
+| `ShopEntry.java` | Wraps one shelf item — upgrade, tackle or curio — behind uniform price/state/buy. Its `Kind` owns each main tab's registered art. Its purchase guard covers both schematic types, while its visible locked state is upgrade-only because unknown tackle never enters the outfitter list. Its detail portrait prefers the optional item texture path and otherwise uses the shelf's registered category mark |
+| `ShopGroup.java` | The shelves, which stat ids and rigs belong to which, their shared tab/fallback-entry icon (with separate upgrade/modifier art for Lamps and Drones), and the centralized player-facing module noun for each rig (`harpoon tip`, `drone core`, `lens array`; generic `rig module` for shared fits) |
 | `ShopPricing.java` | Per-campaign seeded prices in credits and fish. The capability-changing Breach Coupler occupies the unique top tackle tier: 20,000 credits plus a tier-five named catch ask. Exact-rung lookup lets a promised schematic preview the same later price even if the player's current rung changes |
 | `ShopMarks.java` | The shopping list: upgrade marks identify one exact target rung (`stat:id:level`), including a currently locked rung, while tackle marks identify the module and rig. Legacy whole-ladder keys migrate to the next rung. A learned rung's mark feeds the route planner and hangs the quest-yellow dot on every fish that would pay for it; before it is learned, the same identity dots a matching schematic job reward instead. `mark`, `unmark` and `toggle` keep that persisted set and its wanted-fish cache in step; purchase clears a mark while session undo restores it. `isMarked` is the marks alone, which only the outfitter asks; `isWanted` counts every `FishAsker` in the log too, which is what the dot means on every other screen. The cache retains named asks rather than bare requirements, so cargo's dot and its tooltip reason are always derived from the same snapshot |
 | `FishAsker.java` | The interface anything waiting on a fish implements — `FishJob`, `FishingIntro.IntroIntel`, `FishermanQuest.QuestIntel`. What `ShopMarks` walks the intel log for, so a species an errand wants wears the mark whether or not the errand is a bar job |
@@ -596,7 +598,7 @@ Arrays**. `Tackle` remains the serialized/internal type only and must never appe
 | `ShopRowPlugin.java` | One shelf row on the shared `ui/ListRow` skeleton, plus the shopping-list ring: the ring's slot splits the click. The ring's explanation is a stock tooltip the pane hangs off a transparent hotspot over the slot - see the gotcha on hand-drawn controls |
 | `ShopTabPlugin.java` | One tab button |
 | `ShopHeaderPlugin.java` | Title, credits and the per-rarity fish purse |
-| `ShopDetailHeaderPlugin.java` | The detail pane's portrait, name and ladder readout |
+| `ShopDetailHeaderPlugin.java` | The detail pane's item-or-category portrait, name and ladder readout |
 
 The drawing helpers these plugins share (`ShopUi`) live in the top-level `ui` package.
 
@@ -659,7 +661,7 @@ Modules bolted to a rig.
 
 | File | What it does |
 |---|---|
-| `Tackle.java` | The modules, which rig each fits, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play. `BREACH_COUPLER` is the drone rig's permission to use lamp-cut openings in open space |
+| `Tackle.java` | The modules, which rig each fits, the optional outfitter icon path for an individual module, and the multipliers each applies. `coherenceBonus` is the odd one out: it is taken off the water's aberration at the catch site rather than read during play. `BREACH_COUPLER` is the drone rig's permission to use lamp-cut openings in open space |
 | `TackleManager.java` | Two facts: which modules are **owned**, and which is in each rig's slot. `get()` always returns non-null, possibly `NONE`; `consume()` removes a consumable from both facts at once. Gear-dependent modules stay off the shelf and out of rewards until their prerequisite is owned, while an already-owned permanent module remains refittable for save compatibility |
 
 ### `campaign/fish/map`
@@ -836,12 +838,12 @@ Shader and GL machinery.
 |---|---|
 | `memory/upgrades/UpgradeManager.java` | Save-persisted levels. `getValue` is the single read entry point; `updateBaseValues` re-walks the sheet each load, seeding stats the save predates and refreshing every sheet-owned field, so the save owns the levels and the sheet owns everything else |
 | `memory/upgrades/StatIds.java` | The ids joining code to `UpgradeData.csv` |
-| `memory/upgrades/UpgradeStat.java` | One row: base, FLAT/MULT per level, category, current value |
+| `memory/upgrades/UpgradeStat.java` | One row: base, FLAT/MULT per level, category, optional outfitter icon path, current value |
 | `memory/charges/ChargeManager.java` | Float charge pools that regenerate continuously; refill definitions receive one callback when a step crosses a whole-charge boundary, without treating initial full-pool creation as a gain |
 | `memory/TransientMemory.java` | Session-only cache. Keys must start with `$`, never persisted |
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
-| `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, cached |
+| `helper/loading/UpgradeStatLoader.java` | `UpgradeData.csv` → `UpgradeStat`, including its optional outfitter icon path, cached |
 | `helper/loading/BackdropLoader.java` | `backdrops.csv` → `Backdrop`, cached |
 | `helper/loading/SilhouetteBaker.java` | Pre-baked silhouette PNGs for vanilla surfaces that take an icon path and draw it themselves - the codex list row. Composes exactly what FishIcons draws live (the art faint at four offsets under an opaque black lid) into `graphics/catchrelease/generated/`, rebaking when the source art is newer, and hands back a path `loadTexture` has already accepted |
 | `helper/loading/SpriteLoader.java` | Sprites by id or path, a fresh instance per ask - the engine mints a new `SpriteAPI` around the shared GL texture on every `getSprite`, so instance state is always the caller's own. Only the loaded-or-missing fact per path is cached, so a texture uploads once and a missing file logs once. The old shared-instance-plus-reset model is gone; it was the root of every cross-screen sprite leak |
@@ -1333,7 +1335,8 @@ names `java.lang.reflect.Field` or `Method` directly.
 
 **Upgrade sheet column names are forgiving on purpose.** `UpgradeStatLoader` accepts both
 `type`/`baseType` and `increaseType`/`upgradeType` — a mismatch once made every MULT upgrade silently
-do nothing.
+do nothing. Its `icon` column is an optional texture path; a blank cell deliberately falls back to the
+entry's `ShopGroup` mark.
 
 ---
 

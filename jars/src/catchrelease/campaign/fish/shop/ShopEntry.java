@@ -4,11 +4,13 @@ import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.characters.AbilityPlugin;
+import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 
 /**
@@ -22,15 +24,19 @@ import com.fs.starfarer.api.util.Misc;
 public class ShopEntry {
 
     public enum Kind {
-        UPGRADE("Upgrades"),
-        TACKLE("Modifiers"),
-        CURIO("Extras");
+        UPGRADE("Upgrades", "shop_upgrade"),
+        TACKLE("Modifiers", "shop_modifiers"),
+        CURIO("Extras", "pane_misc");
 
         /** What the main tab row calls this. Held here so a fourth kind is one line, not two. */
         public final String tabTitle;
 
-        Kind(String tabTitle) {
+        /** Settings-registered art for the main tab. */
+        public final String iconId;
+
+        Kind(String tabTitle, String iconId) {
             this.tabTitle = tabTitle;
+            this.iconId = iconId;
         }
     }
 
@@ -98,6 +104,23 @@ public class ShopEntry {
             case TACKLE: return tackle.description;
             default: return stat.description;
         }
+    }
+
+    /**
+     * A fresh portrait sprite for the outfitter. Item-authored art is a texture path, matching the
+     * rest of the mod's data tables; when none is authored the shelf's registered category mark
+     * gives both the list tab and its detail pane the same visual identity.
+     */
+    public SpriteAPI getIcon() {
+        String path = null;
+
+        if (kind == Kind.UPGRADE) path = stat.icon;
+        else if (kind == Kind.TACKLE) path = tackle.icon;
+
+        if (path != null && !path.isBlank()) return SpriteLoader.loadSprite(path);
+        if (group == null || group.iconId == null || group.iconId.isEmpty()) return null;
+
+        return SpriteLoader.getSprite(group.iconId);
     }
 
     public boolean isCurio() {

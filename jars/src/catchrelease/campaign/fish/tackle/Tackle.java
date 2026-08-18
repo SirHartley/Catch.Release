@@ -159,6 +159,8 @@ public enum Tackle {
     public final String name;
     public final Fit fit;
     public final String description;
+    /** Optional texture path for the outfitter; the rig shelf icon is used when this is blank. */
+    public final String icon;
 
     //everything below is neutral unless a tackle says otherwise
     public float barSizeMult = 1f;
@@ -214,9 +216,14 @@ public enum Tackle {
     public boolean fanBeam = false;
 
     Tackle(String name, Fit fit, String description) {
+        this(name, fit, description, null);
+    }
+
+    Tackle(String name, Fit fit, String description, String icon) {
         this.name = name;
         this.fit = fit;
         this.description = description;
+        this.icon = icon;
     }
 
     /**

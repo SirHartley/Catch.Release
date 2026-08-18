@@ -418,8 +418,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             for (int i = 0; i < kinds.size(); i++) {
                 ShopEntry.Kind kind = kinds.get(i);
 
-                addTab(kind, kind.tabTitle,
-                        kind == ShopEntry.Kind.UPGRADE ? "placeholder" : "placeholder2",
+                addTab(kind, kind.tabTitle, kind.iconId,
                         false, PAD + i * (mainWidth + TAB_GAP), top, mainWidth, MAIN_TAB_HEIGHT);
             }
 
@@ -431,7 +430,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             float categoryWidth = (LIST_WIDTH - (groups.length - 1) * TAB_GAP) / groups.length;
 
             for (int i = 0; i < groups.length; i++) {
-                addTab(groups[i], groups[i].tabTitle, "placeholder",
+                addTab(groups[i], groups[i].tabTitle, groups[i].iconId,
                         true, PAD + i * (categoryWidth + TAB_GAP), categoryTop,
                         categoryWidth, CATEGORY_TAB_HEIGHT);
             }
