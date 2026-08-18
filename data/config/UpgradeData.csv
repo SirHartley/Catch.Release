@@ -1,4 +1,4 @@
-id,baseValue,type,increasePerLevel,increaseType,maxLevel,category,description
+id,baseValue,type,increasePerLevel,increaseType,maxLevel,category,description,icon
 Example,0.5,DOUBLE,1,FLAT,5,CAMPAIGN,
 searchlight_area,240,INT,100,FLAT,3,CAMPAIGN,The radius covered by each lamp.
 searchlight_speed,30,INT,0.2,MULT,3,CAMPAIGN,The speed each lamp sweeps at.

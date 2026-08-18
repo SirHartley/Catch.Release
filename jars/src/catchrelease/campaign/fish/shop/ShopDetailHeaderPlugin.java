@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.data.FishRarity;
-import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -15,7 +14,7 @@ import java.awt.Color;
 /**
  * Detail pane header: portrait in a cargo-square, name beside it, ladder or slot info underneath.
  * Square backlight colour is the next purchase's price tier, or the done-colour once finished.
- * Portrait art is a placeholder pending real assets.
+ * Item-specific art falls back to the category mark shared with its shelf tab.
  */
 public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
 
@@ -76,7 +75,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         Disc.draw(x + BOX_SIZE * 0.5f, y + BOX_SIZE * 0.5f, BOX_SIZE * 0.5f, getAccent(),
                 0.3f * alphaMult, 0f, true);
 
-        SpriteAPI art = SpriteLoader.getSprite(entry.isUpgrade() ? "placeholder" : "placeholder2");
+        SpriteAPI art = entry.getIcon();
         if (art != null) {
             float scale = Math.min(ART_SIZE / art.getWidth(), ART_SIZE / art.getHeight());
 

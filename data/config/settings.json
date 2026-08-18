@@ -15,6 +15,13 @@
           "pane_crab":"graphics/catchrelease/ui/crab.png",
           "pane_mollusc":"graphics/catchrelease/ui/mollusc.png",
           "pane_misc":"graphics/catchrelease/ui/misc.png",
+          "shop_upgrade":"graphics/catchrelease/ui/upgrade.png",
+          "shop_modifiers":"graphics/catchrelease/ui/modifiers.png",
+          "shop_lights":"graphics/catchrelease/ui/lights.png",
+          "shop_lights_modifiers":"graphics/catchrelease/ui/lights2.png",
+          "shop_rod":"graphics/catchrelease/ui/rod.png",
+          "shop_rod_modifiers":"graphics/catchrelease/ui/rod2.png",
+          "shop_harpoon":"graphics/catchrelease/ui/harpoon.png",
           "lyne":"graphics/catchrelease/ability/lyne.png",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"

@@ -12,18 +12,21 @@ import com.fs.starfarer.api.Global;
  */
 public enum ShopGroup {
 
-    SEARCHLIGHTS("Breach lamps", "Lamps", "catchrelease_searchlights"),
-    DRONES("Drones", "Drones", "catchrelease_rod"),
-    HARPOON("Harpoon", "Harpoon", "catchrelease_harpoon"),
-    THE_CATCH("The catch", "Catch"),
-    DRONE_TACKLE("Drone cores", "Drone cores", "catchrelease_rod"),
-    HARPOON_TIPS("Harpoon tips", "Harpoon tips", "catchrelease_harpoon"),
-    SEARCHLIGHT_RIG("Lens arrays", "Lens arrays", "catchrelease_searchlights");
+    SEARCHLIGHTS("Breach lamps", "Lamps", "shop_lights", "catchrelease_searchlights"),
+    DRONES("Drones", "Drones", "shop_rod", "catchrelease_rod"),
+    HARPOON("Harpoon", "Harpoon", "shop_harpoon", "catchrelease_harpoon"),
+    THE_CATCH("The catch", "Catch", "pane_fish"),
+    DRONE_TACKLE("Drone cores", "Drone cores", "shop_rod_modifiers", "catchrelease_rod"),
+    HARPOON_TIPS("Harpoon tips", "Harpoon tips", "shop_harpoon", "catchrelease_harpoon"),
+    SEARCHLIGHT_RIG("Lens arrays", "Lens arrays", "shop_lights_modifiers", "catchrelease_searchlights");
 
     public final String title;
 
     /** What fits on a tab, where the full title would not. */
     public final String tabTitle;
+
+    /** Settings-registered art shared by this shelf's tab and entries without their own art. */
+    public final String iconId;
 
     /**
      * The ability this shelf is about, or null for shelves that are about the catch itself.
@@ -34,13 +37,14 @@ public enum ShopGroup {
      */
     public final String needsAbility;
 
-    ShopGroup(String title, String tabTitle) {
-        this(title, tabTitle, null);
+    ShopGroup(String title, String tabTitle, String iconId) {
+        this(title, tabTitle, iconId, null);
     }
 
-    ShopGroup(String title, String tabTitle, String needsAbility) {
+    ShopGroup(String title, String tabTitle, String iconId, String needsAbility) {
         this.title = title;
         this.tabTitle = tabTitle;
+        this.iconId = iconId;
         this.needsAbility = needsAbility;
     }
 

@@ -24,6 +24,8 @@ public class UpgradeStat {
     public UpgradeType upgradeType;
     public int maxLevel;
     public String description;
+    /** Optional texture path for the outfitter; its shelf icon is used when this is blank. */
+    public String icon;
     public Category category = Category.CAMPAIGN;
 
 
