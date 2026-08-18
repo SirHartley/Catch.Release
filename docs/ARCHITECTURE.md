@@ -219,8 +219,11 @@ that many real specimens of every species, and adds one species crate per row to
 `AddFish` accepts a positive amount after a fish id or multi-word display name, resolves exact and
 unique partial matches before using Console Commands' typo-correction matcher, and reports
 ambiguous partials instead of silently choosing. Its native autocomplete exposes both ids and
-display names, with word-by-word continuation for manually typed names. Console Commands remains
-runtime-optional: its own loader is the only code that ever loads these classes, so the mod runs
+display names, with word-by-word continuation for manually typed names. `SpawnFisherman` has no
+arguments and places the ordinary visiting Fisherman in the player's current star system; it reuses
+an existing local boat and retires an off-system visitor before making the standard full fleet.
+Console Commands remains runtime-optional: its own loader is the only code that ever loads these
+classes, so the mod runs
 without the console installed, and it is deliberately not a `mod_info.json` dependency.
 
 ---
@@ -497,7 +500,7 @@ follows the local five-rung coherence reading, and none of them explains how.
 
 | File | What it does |
 |---|---|
-| `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system - a small base leaned on by a full hold and a long absence - after which the system is locked for a month so re-entry is not a re-roll. Its sector sweep recovers a visiting boat whose old-save pointer was lost, keeps one visitor sector-wide and one Fisherman per system, and marks on-screen legacy extras for off-screen retirement rather than making them vanish |
+| `FishermanSpawner.java` | The visiting boat: one roll per arrival in an uninhabited system - a small base leaned on by a full hold and a long absence - after which the system is locked for a month so re-entry is not a re-roll. Its sector sweep recovers a visiting boat whose old-save pointer was lost, keeps one visitor sector-wide and one Fisherman per system, and marks on-screen legacy extras for off-screen retirement rather than making them vanish. Its explicit console/testing entry point bypasses only the natural roll, reuses a local boat, and retires an off-system visitor before creating the standard visiting fleet |
 | `CoreFisherSpawner.java` | One boat to every inhabited system, re-posted if it is lost - weekly, and again the moment the player arrives, so a destroyed boat is back by the time anybody looks. `ensureBoat` takes the canonical live Fisherman of either schedule before posting, so a directed tutorial errand cannot place a standing boat beside a visitor |
 | `CoreFisherBehavior.java` | The standing boat: the same rig and the same man, no visit clock, and the outer-reaches route |
 | `OuterReaches.java` | Where a boat is willing to be, and which legs clear the inhabited worlds. `place()` is the one gate every boat placement goes through: clamped into the band in an inhabited system, unconstrained where there is nobody |
