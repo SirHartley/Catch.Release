@@ -1405,7 +1405,7 @@ The Fisherman shifts a service slate out of his working space.
 
 ""I've got range data if you're after something particular. Work if you're not.""
 
-A crewman crosses behind him carrying a sealed crate. Halfway across the compartment there is no longer a crate in his hands.",,
+A crewman crosses behind him carrying a sealed crate. Halfway across the compartment, his hands are empty.",,
 catchrelease_fisherComms2,OpenCommLink,"$entity.catchrelease_fisherman score:1020
 CatchReleaseCMD tokens
 $catchreleaseDrift == 2","$menuState = catchreleaseFisher 0
@@ -1447,7 +1447,7 @@ $catchreleaseStage == 0","CatchReleaseCMD point
 $menuState = catchreleaseFisher 0
 FireAll PopulateOptions","The hail is accepted promptly.
 
-An older man in patched working clothes studies your transponder return. Grey stubble, old scar tissue, the posture of someone who spent enough years on command decks to stop sitting properly in chairs.
+An older man in patched working clothes studies your transponder return. Grey beard, old scar tissue, the posture of someone who spent enough years on command decks to stop sitting properly in chairs.
 
 ""Haven't got you in the ledger.""
 
@@ -1521,7 +1521,7 @@ $catchreleaseStage == 3
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
 !$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:I just left you in another system.,
-catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
+#catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
@@ -2336,7 +2336,7 @@ $catchreleaseStage < 6
 !$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
-$catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","Get me ""$catchreleaseTarget from a rupture in $catchreleaseTargetWhere.""
 
 He sends the mark again.
 
@@ -2349,21 +2349,21 @@ $catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTa
 
 He forwards the system data.
 
-""Fabric runs thinner there. Still near the Core. Same drones, same ROD.""
+""Fabric runs thinner there. Still near the Core. Same drone, same ROD.""
 
 ""Take the catch and come back. Don't make a long watch of it.""",100:catchrelease_fisherBack:Continue,Technical fallback for a stage-three target placed in open space; it reuses the supplied stage-three briefing verbatim and never names gear the player receives later.
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:8
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring $catchreleaseTarget, found in open space in $catchreleaseTargetWhere.""
 
 He brings up the retrieval sequence.
 
-""Lights until the return settles. Then the harpoon. Once you've got it, lamps off.""",100:catchrelease_fisherBack:Continue,
+""Lights until the return settles. Then harpoon it. Once you've got it, lamps off.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetCharted,DialogOptionSelected,"$option == catchrelease_askTarget score:6
 CatchReleaseCMD tokens
-!$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""$catchreleaseTarget.""
+!$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Bring me $catchreleaseTarget.""
 
 He taps the range entry.
 
@@ -2484,14 +2484,12 @@ Nothing involved could reasonably be carried by a person.
 
 He sends your helm a local nav mark.
 
-""Open rupture nearby. Take one fish. Nothing ambitious. Bring it back and we'll go over the return.""","0:catchrelease_introRodOperate:Anything I should know before I use it?
+""Use it to break through the rupture nearby. Take one fish. Nothing ambitious. Bring it back and we'll go over the return.""","0:catchrelease_introRodOperate:Anything I should know before I use it?
 10:catchrelease_introRodTrust:You give this equipment to every stranger who asks?
 100:catchrelease_introRodGo:I'll bring you a fish.",
-catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,,"""Point the fleet at the rupture. Start the rig and let the drone work.""
+catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,,"""Point the fleet at some unstable fabric. Start the ROD to break it open, then let the drone work.""
 
-He brings up the return trace.
-
-""Watch this more than the picture. If it starts getting ugly, stop and bring the drone home.""
+""Watch the return trace. If it starts getting ugly, stop and bring the drone home.""
 
 He closes the display.
 
@@ -2504,7 +2502,7 @@ He gives your fleet readout another look.
 
 A small nod.
 
-""Try not to make a liar of me.""",catchrelease_introRodGo:Continue,
+""Try not to make a liar of me.""",catchrelease_introRodOperate:Continue,
 catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,FireBest CatchReleaseIntroBrief,,,
 catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
 CatchReleaseCMD tokens
@@ -2534,7 +2532,7 @@ He turns the specimen container slightly.
 ""Fish is fine if you're buying supper. Pattern's the careful word.""",catchrelease_introFirstContinue:And the careful answer?,
 catchrelease_introFirstContinue,DialogOptionSelected,$option == catchrelease_introFirstContinue,,"The Fisherman brings up the deployment record.
 
-""LYNE drones carry the ROD through the rupture. That's the part you're calling the line. Drone goes through, gets a return, brings the pattern back across.""
+""LYNE drones carry the ROD through the rupture. Drone goes through, gets a return, brings the pattern back across.""
 
 He zooms the display until the ROD trace fills it.
 
@@ -2549,7 +2547,7 @@ catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_gho
 
 The Fisherman considers the specimen rather than the question.
 
-""We tried asking it every way that seemed useful. None of the answers improved the rig.""
+""We tried asking it every way that seemed useful. None of the answers helped.""
 
 He closes the container record.
 
@@ -2567,27 +2565,6 @@ FireBest CatchReleaseIntroBrief",,,
 catchrelease_introFirstDoneAlready,DialogOptionSelected,"$option == catchrelease_introFirstDone
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated Continue may replay the current brief but cannot call sendOut again and replace the assigned target.
-catchrelease_introTurnIn3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:63
-CatchReleaseCMD tokens
-$catchreleaseStage == 3
-$catchreleaseTargetMet
-$catchreleaseStage < 0","CatchReleaseCMD takeTarget
-CatchReleaseCMD giveOutfitter
-CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
-
-""Same sort of pattern. Different fabric.""
-
-A finger traces one coherence plot, then the other.
-
-""That's enough to teach the instruments what you're looking at.""
-
-He closes both.
-
-""You're ready for the outfitter.""
-
-A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:What can I do with the outfitter?
-10:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:I'll look later.",Supplied wording retained verbatim; the live technical twin corrects the distinct-target comparison requested after playtesting.
 catchrelease_introTurnIn3Distinct,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -2595,7 +2572,7 @@ $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD giveOutfitter
 CatchReleaseCMD tokens","The Fisherman puts the two retrieval logs side by side.
 
-""There we are. Different pattern. Different fabric.""
+""There we are. Different pattern. Different kind of fabric.""
 
 A finger traces one coherence plot, then the other.
 
@@ -2605,11 +2582,8 @@ He closes both.
 
 ""You're ready for the outfitter.""
 
-He points at the comm menu.
-
-""Mine while you're alongside. A breach conservatory keeps one planetside.""","0:catchrelease_introShopLook:What can I do with the outfitter?
-5:catchrelease_introConservatory:What's a breach conservatory?
-10:catchrelease_introDeepGear:Continue
+A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:What's an outfitter?
+10:catchrelease_introShopLater2:Got it.
 100:catchrelease_introShopLater:I'll look later.","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
@@ -2624,58 +2598,50 @@ The Fisherman watches your crew guide the first frame into place.
 
 He points at the projector rig.
 
-""Name's poor. They don't light much. They work the fabric until the ROD can get through where there wasn't a rupture before.""
+""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
+catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""Outfitter's simple enough. Keep the drones flying, keep the return clean, fit the right core for the work. Mostly, it's a place to get better gear.""
 
-Then the launcher.
+He holds a beat-up dataslate into the feed.
 
-""Harpoon's the quick way. Lights find you a pattern in open space. Harpoon puts a ROD head on it before it slips away.""
+""Some modules need a schematic before I can build them. Those turn up where the trade does. Bars, working fleets, places like that.""
 
-He looks directly at you.
-
-""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
-10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?
-20:catchrelease_introWeaponQuestion:This is a weapon.",Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
-catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,,"""Outfitter's simple enough. Keep the drones flying, keep the return clean, fit the right module for the work.""
-
-He opens your manifest.
-
-""If the hardware isn't aboard, it has no business on the invoice.""
-
-""Some modules stay off it until a job turns up the schematic. The schematic opens the purchase. It isn't the hardware itself.""","0:catchrelease_introAskTackle:What are rig modules?
+""Bring me the schematic and the materials. I'll build it for you.""","0:catchrelease_introAskTackle:What are modifiers?
 10:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
-catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,$global.catchrelease_fisherAsked_tackle = true 0,"""A rig module is something you buy once. One slot per rig.""
+catchrelease_introAskTackleOption,ShopIntroQuestions,!$global.catchrelease_fisherAsked_tackle,,,0:catchrelease_introAskTackle:What are modifiers?,
+catchrelease_introAskUpgradeOption,ShopIntroQuestions,!$global.catchrelease_fisherAsked_upgrade,,,0:catchrelease_introAskUpgrade:What is an upgrade?,
+catchrelease_introAskWhereOption,ShopIntroQuestions,!$global.catchrelease_fisherAsked_where,,,0:catchrelease_introAskWhere:Where can I find schematics?,
+catchrelease_introAskShopContinue,ShopIntroQuestions,,,,100:catchrelease_introDeepGear:Continue,
+catchrelease_introAskTackle,DialogOptionSelected,$option == catchrelease_introAskTackle,"$global.catchrelease_fisherAsked_tackle = true 0
+FireAll ShopIntroQuestions","""Rig modules change how the gear works. Some more than others. All of them need a schematic.""
 
 He taps the manifest.
 
-""Jobs turn up the schematics. Bring one back and that module goes on the invoice.""
+""Bring me the schematic and the materials. I'll build it and add it to the outfitter.""
 
-""Refit when the work changes. No sense paying twice for the same hardware.""","0:catchrelease_introAskUpgrade:What is an upgrade?
-100:catchrelease_introDeepGear:Continue",
-catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,$global.catchrelease_fisherAsked_upgrade = true 0,"""Upgrade's permanent.""
+""After that, swap it in when the work calls for it. No need to build the same module twice.""",,
+catchrelease_introAskUpgrade,DialogOptionSelected,$option == catchrelease_introAskUpgrade,"$global.catchrelease_fisherAsked_upgrade = true 0
+FireAll ShopIntroQuestions","""Upgrade's a permanent improvement to the rig attributes.""
 
 He points out the tier listing.
 
-""Buy the early tiers normally. The final two need a schematic each; jobs turn those up.""
+""Buy the early tiers normally. The final two need a schematic each; jobs turn those up.""",,
+catchrelease_introAskWhere,DialogOptionSelected,$option == catchrelease_introAskWhere,"$global.catchrelease_fisherAsked_where = true 0
+FireAll ShopIntroQuestions","He holds the beaten slate up.
 
-""Once it's fitted, the listed function improves and stays improved.""","0:catchrelease_introAskTackle:What are rig modules?
-100:catchrelease_introDeepGear:Continue",
+""Most people in the trade keep their own modifications on these. Do them a favor, they might part with a copy.""
+
+He taps the schematic.
+
+""Bars are a good place to ask around. Working fleets, too.""",,
 catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introShopLater,,"""Probably wise.""
 
 He signals someone off-screen.
 
 ""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
-catchrelease_introConservatory,DialogOptionSelected,$option == catchrelease_introConservatory,,"""Public tanks, local outfitter, trade counter.""
+catchrelease_introShopLater2,DialogOptionSelected,$option == catchrelease_introShopLater2,,"He signals someone off-screen.
 
-He counts them off without looking at a slate.
-
-""Half civic attraction, half working shop. Useful thing to have on a colony.""","0:catchrelease_introConservatoryGet:How do I get one?
-10:catchrelease_introShopLook:What can I do with the outfitter?
-20:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:I'll look later.",
-catchrelease_introConservatoryGet,DialogOptionSelected,$option == catchrelease_introConservatoryGet,,"""Crablobab has the plans. Build it on a colony you own.""","10:catchrelease_introShopLook:What can I do with the outfitter?
-20:catchrelease_introDeepGear:Continue
-100:catchrelease_introShopLater:I'll look later.",
+""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
 catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"A second transfer begins.
 
 The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.
@@ -2686,19 +2652,19 @@ The Fisherman watches your crew guide the first frame into place.
 
 He points at the projector rig.
 
-""Name's poor. They don't light much. They work the fabric until the ROD can get through where there wasn't a rupture before.""
+""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,The assignment option is added only after the three safety questions have been answered.
+catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,,"He points at the second rig.
 
-Then the launcher.
+""That's a harpoon. Name's apt, this time.""
 
-""Harpoon's the quick way. Lights find you a pattern in open space. Harpoon puts a ROD head on it before it slips away.""
+""Quick and hard way to get a pattern. Lights thin the fabric enough to bring one within reach. Harpoon puts a ROD head on it before it slips away.""
 
 He looks directly at you.
 
-""Heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
+""It's a heavy projectile. Treat it accordingly.""","0:catchrelease_introLightQuestion:The lights make a rupture?
 10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?
-20:catchrelease_introWeaponQuestion:This is a weapon.",The assignment option is added only after the three safety questions have been answered.
-catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,"$catchreleaseIntroLightAsked = true 0
-FireAll CatchReleaseIntroDeepQuestions","""Near enough for deck work.""
+20:catchrelease_introWeaponQuestion:This is a weapon.",
+catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,$catchreleaseIntroLightAsked = true 0,"""Near enough for deck work.""
 
 The Fisherman brings up the local plot.
 
@@ -2706,7 +2672,8 @@ The Fisherman brings up the local plot.
 
 He closes it again.
 
-""Run them away from people. That's the part that matters.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+""Run them away from people.""",0:catchrelease_introLightQuestion_continue:Why?,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+catchrelease_introLightQuestion_continue,DialogOptionSelected,$option == catchrelease_introLightQuestion_continue,FireAll CatchReleaseIntroDeepQuestions,"""Yes. The lights put out readings patrols don't care for. Use them well clear of planets and inhabited traffic.""",,
 catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,"$catchreleaseIntroHarpoonAsked = true 0
 FireAll CatchReleaseIntroDeepQuestions","""Return trace.""
 
@@ -2734,25 +2701,24 @@ FireBest CatchReleaseIntroBrief",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
-$catchreleaseTargetMet","CatchReleaseCMD takeTarget
-CatchReleaseCMD giveCharts
-CatchReleaseCMD tokens
-SetOptionColor catchrelease_introPlannerAsk highlight","The Fisherman checks the harpoon telemetry while the specimen is transferred.
+$catchreleaseTargetMet",,"The Fisherman checks the harpoon telemetry while the specimen is transferred.
 
 ""Good shot.""
 
 He makes two small entries in the service ledger.
 
-""Harpoon tips and lens arrays are open to you now.""
+""Harpoon and lens upgrades are open to you now.""",0:catchrelease_introTurnIn4_continue:Continue,"The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
+catchrelease_introTurnIn4_continue,DialogOptionSelected,$option == catchrelease_introTurnIn4_continue,"CatchReleaseCMD takeTarget
+CatchReleaseCMD giveCharts
+CatchReleaseCMD tokens
+SetOptionColor catchrelease_introPlannerAsk highlight","He sends two range records to your fleet map.
 
-He sends two range records to your fleet map.
+""Range data. Two common patterns.""
 
-""Range data. Common patterns, both of them.""
+Your map resolves each record into a range and a list of candidate systems.
 
-Your map resolves each record into range information and candidate systems.
-
-""Chart tells you where a pattern turns up. Doesn't promise it'll be waiting at the first stop.""","0:catchrelease_introSurveyAsk:Where does the range data come from?
-10:catchrelease_introPlannerAsk:You want both of these?","The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
+""Shows you where they turn up. Doesn't mean the first system you visit will have one.""","0:catchrelease_introSurveyAsk:Where does the range data come from?
+10:catchrelease_introPlannerAsk:You want both of these?",
 catchrelease_introSurveyAsk,DialogOptionSelected,$option == catchrelease_introSurveyAsk,SetOptionColor catchrelease_introPlannerAsk highlight,"""Surveys.""
 
 The Fisherman considers the question for a moment.
@@ -2830,7 +2796,7 @@ He sends the range mark.
 ""That one I want clean.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefThree,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
-$catchreleaseStage == 5","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Two this time. One of each.""
+$catchreleaseStage == 5","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""","""Two this time. Bring one of each.""
 
 The Fisherman sends the records again.
 
@@ -2838,11 +2804,11 @@ The Fisherman sends the records again.
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
-!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. $catchreleaseTargetWhere.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Get $catchreleaseTarget in $catchreleaseTargetWhere.""
 
 He checks your manifest.
 
-""You've still got both drones, so I've heard worse excuses.""",catchrelease_fisherBack:Continue,
+""You've still got the drone. No excuses.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting3,DialogOptionSelected,"$option == catchrelease_fisherIntro score:58
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
