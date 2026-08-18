@@ -134,7 +134,8 @@ The `graphics.characters` additions also register all five Fisherman coherence p
 settings texture loader; `FishermanIdentity` resolves those ids rather than handing the portrait UI
 an unloaded raw path. The `graphics.catchrelease` additions likewise preload the dedicated
 `fisherman_map_icon` and `unstable_fabric_map_icon` glyphs used by the boat marker and live pond
-terrain. `catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
+terrain, plus the four pane category marks consumed through `FishType`.
+`catchreleaseBlackHoleSpiralWarpRange` is the portable black-hole pass's
 world-space radius and defaults to `6000`; setting it to zero disables the draw without removing
 the renderer. Minigame sound ids and the click press/release toggle are Java constants, not settings.
 
@@ -680,7 +681,7 @@ The sector-map fish filter.
 | `FishRoutePopup.java` | The planner in the sidebar's slot, built from the sidebar's own parts: search, chips, pick up to five, plot |
 | `FishTooltips.java` | The one species tooltip every fish icon answers a hover with |
 | `FishIntelPlanetPanel.java` | The intel Planets view's fish panel, beside the planet card |
-| `FishType.java` | Filter categories with colour and icon |
+| `FishType.java` | Filter categories with colour and their registered pane-widget sprite id |
 | `CoreUiCrawler.java` | Reflection into the obfuscated core UI to find the filter row |
 
 ### `campaign/fish/codex`
@@ -803,7 +804,7 @@ exception: it is its own encapsulated universe and keeps its own dress.
 | File | What it does |
 |---|---|
 | `ShopUi.java` | Shared drawing helpers: fonts, quads, vertical gradients (constant colour with graded alpha, or both ends their own), clipping, pips, card placement, and `drawPanel` - the transparent-black, half-strength-border face every pane wears |
-| `PaneWidgets.java` | The shared widgets: type chip, text button, title row, list header with its help mark, the standalone help mark, the centred empty-space note, and the hand-worked ghost text a bare `TextFieldAPI` does not provide |
+| `PaneWidgets.java` | The shared widgets: category-art type chip, text button, title row, list header with its help mark, the standalone help mark, the centred empty-space note, and the hand-worked ghost text a bare `TextFieldAPI` does not provide. Each chip owns a fresh sprite instance for its supplied registered id, so render-state mutation stays local to that chip |
 | `ListRow.java` | The scrolling-list row skeleton every list row extends: cull against the list window, clip to it, the graded dark field, the accent strip, clicks that only land in view. `campaign/fish/map/FishListRow` and `campaign/fish/shop/ShopRowPlugin` build on it |
 | `FishIcons.java` | A species' face by Codex knowledge: the art once landed, its rimmed black silhouette while only surveyed. `drawBacklit` is the complete named-species portrait shared by the chart shop, Codex detail and Intel note, including the same rarity-coloured light. The rim **is** the artwork (a multiply cannot lighten), so it is withheld until the black copy covering it is nearly opaque — see `RIM_COVER_FLOOR`. Draws on its own fresh sprite instance per call - the engine mints one per `getSprite`, so nothing here can blacken cargo or result screens |
 

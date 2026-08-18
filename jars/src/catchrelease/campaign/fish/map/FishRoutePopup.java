@@ -185,7 +185,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         for (int i = 0; i < types.length; i++) {
             FishType type = types[i];
             CustomPanelAPI chip = panel.createCustomPanel(chipWidth, CHIP_HEIGHT,
-                    new PaneWidgets.Chip(type.label, type.color,
+                    new PaneWidgets.Chip(type.label, type.color, type.iconId,
                             () -> filter.types.contains(type), () -> onChipToggled(type)));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
