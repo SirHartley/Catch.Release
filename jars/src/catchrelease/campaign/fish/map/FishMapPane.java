@@ -342,7 +342,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addCustom(chipRow, 8f);
 
         CustomPanelAPI deselect = panel.createCustomPanel(innerWidth, DESELECT_HEIGHT,
-                new PaneWidgets.TextButton(() -> "DESELECT ALL", () -> !selectedIds.isEmpty(),
+                new PaneWidgets.TextButton(() -> "DESELECT ALL",
+                        () -> !selectedIds.isEmpty() || filter.speciesRestricted,
                         this::onDeselectAll));
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
@@ -437,6 +438,15 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected void onDeselectAll() {
+        //An intel request owns more state than the visible selections: broad asks may have no
+        //individual picks at all, and exact asks also leave an allowed-species constraint behind.
+        //Deselecting that request means leaving its scope entirely, not showing its category union.
+        if (filter.speciesRestricted) {
+            showOverview();
+            host.onPresenceChanged();
+            return;
+        }
+
         if (selectedIds.isEmpty()) return;
 
         selectedIds.clear();
