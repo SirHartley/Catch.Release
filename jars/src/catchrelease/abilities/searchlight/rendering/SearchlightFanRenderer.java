@@ -85,6 +85,11 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     public void fadeAndExpire(float fadeSeconds) {
         if (expired) return;
 
+        if (fadeSeconds <= 0f) {
+            expired = true;
+            return;
+        }
+
         fading = true;
         fadeDuration = fadeSeconds;
         fadeElapsed = 0f;
