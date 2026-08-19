@@ -75,6 +75,12 @@ public class FishermanSpawner implements EveryFrameScript {
         if (!(where instanceof StarSystemAPI)) return;
         StarSystemAPI system = (StarSystemAPI) where;
 
+        //Lesson two may have posted a temporary standing boat in otherwise uninhabited water.
+        //That boat is already the system's Fisherman even though it is not the sector's visitor,
+        //so the ordinary arrival roll must yield to it just as it yields to a core posting.
+        reconcileSystem(system);
+        if (CoreFisherSpawner.getAnyBoat(system) != null) return;
+
         //asked before the lock is spent: one boat at a time is a sector-wide rule, and a system
         //passed over because he is already out somewhere else has not had its question answered
         if (getLiveFleet() != null) return;
@@ -319,6 +325,13 @@ public class FishermanSpawner implements EveryFrameScript {
 
     /** The boat itself: one cruiser, a few logistics hulls, lamps and manners fitted by script. */
     protected CampaignFleetAPI spawn(StarSystemAPI system, Vector2f near) {
+        //Keep the invariant at the mutation boundary too. The arrival watcher is not the only
+        //caller (the console command deliberately comes through here), and future callers should
+        //not need to know that a tutorial posting uses the standing schedule in empty water.
+        reconcileSystem(system);
+        CampaignFleetAPI local = CoreFisherSpawner.getAnyBoat(system);
+        if (local != null) return local;
+
         CampaignFleetAPI fleet = Global.getFactory().createEmptyFleet(
                 FishermanConstants.FACTION, FishermanConstants.FLEET_NAME, true);
 
