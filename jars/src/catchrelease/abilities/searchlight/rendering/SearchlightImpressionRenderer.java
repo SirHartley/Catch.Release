@@ -43,6 +43,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
     /** Ability's own list, held live rather than copied - lights keep arriving after this
      *  exists, staggered on the activation pause. */
     private final List<Searchlight> lights;
+    private final SearchlightAbilityPlugin owner;
+    private final LocationAPI home;
 
     /** Each touched mote's mark strength, full while under a beam. Pruned as it decays or its
      *  mote dies/leaves - the keys would otherwise keep every swept mote's entity alive. */
@@ -76,17 +78,28 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
     //flicker
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
-    public SearchlightImpressionRenderer(List<Searchlight> lights) {
+    public SearchlightImpressionRenderer(List<Searchlight> lights,
+                                         SearchlightAbilityPlugin owner, LocationAPI home) {
         this.lights = lights;
+        this.owner = owner;
+        this.home = home;
     }
 
     @Override
     public boolean isExpired() {
-        return expired;
+        return expired || owner == null || home == null
+                || (!fading && !owner.isRuntimeCurrent())
+                || (Global.getSector() != null
+                && Global.getSector().getCurrentLocation() != home);
     }
 
     public void fadeAndExpire(float fadeSeconds) {
         if (expired) return;
+
+        if (fadeSeconds <= 0f) {
+            expired = true;
+            return;
+        }
 
         fading = true;
         fadeDuration = fadeSeconds;
@@ -95,7 +108,10 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     @Override
     public void advance(float amount) {
-        if (expired) return;
+        if (isExpired()) {
+            expired = true;
+            return;
+        }
 
         timePassed += amount;
         flicker.advance(amount);
@@ -185,7 +201,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         //not gated on marks - the passive shadow dent exists near any live beam, marked or not
-        if (expired) return;
+        if (isExpired()) return;
         loadSpritesIfNeeded();
 
         //the beams' own resting alpha, so a dent removes about as much light as a beam puts in

@@ -15,6 +15,7 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.abilities.BaseToggleAbility;
@@ -46,7 +47,30 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private List<Searchlight> activeSearchlights = new ArrayList<>();
     private List<CircularArc> searchlightArcs = new ArrayList<>();
 
-    private SearchlightImpressionRenderer impressionRenderer;
+    /** Runtime-only: LunaLib drops transient registrations on load, so retaining the object would
+     * leave a non-null renderer that is no longer registered anywhere. */
+    private transient SearchlightImpressionRenderer impressionRenderer;
+
+    /** The location this activation belongs to. Runtime-only and rebound on the first post-load
+     * frame; changing location after that ends the activation instead of carrying global Luna
+     * renderers into another system at the same raw coordinates. */
+    private transient LocationAPI activationLocation;
+
+    @Override
+    protected Object readResolve() {
+        super.readResolve();
+        ensureCollections();
+
+        impressionRenderer = null;
+        activationLocation = null;
+
+        return this;
+    }
+
+    protected void ensureCollections() {
+        if (activeSearchlights == null) activeSearchlights = new ArrayList<>();
+        if (searchlightArcs == null) searchlightArcs = new ArrayList<>();
+    }
 
     /**
      * Whether the player's lights currently mark this mote as found. State lives in the impression
@@ -82,17 +106,19 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     protected void activateImpl() {
+        //Activation is also the recovery path for any old-save or interrupted runtime state. Never
+        //discard the only handles to a fleet script and its global renderers before expiring them.
+        teardownRuntime(false);
+
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null || fleet.getContainingLocation() == null) return;
+
+        activationLocation = fleet.getContainingLocation();
         timePassed = 0f;
         lightsToActivate = getSearchlightNum();
         spoolDone = false;
-        activeSearchlights.clear();
-        searchlightArcs.clear();
 
-        //one shared renderer for all dents, avoiding double-depth dents where beams cross; a renderer
-        //still fading from a previous toggle is force-expired first
-        if (impressionRenderer != null) impressionRenderer.fadeAndExpire(0f);
-        impressionRenderer = new SearchlightImpressionRenderer(activeSearchlights);
-        LunaCampaignRenderer.addTransientRenderer(impressionRenderer);
+        ensureImpressionRenderer();
 
         float size = Searchlight.getArea();
         float radius = size * 2f;
@@ -103,7 +129,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         for (int i = 0; i < lightsToActivate; i++) {
             float minAngle = areaPerLight * i;
 
-            searchlightArcs.add(new CircularArc(getFleet().getLocation(), radius,
+            searchlightArcs.add(new CircularArc(fleet.getLocation(), radius,
                     minAngle, minAngle + areaPerLight));
         }
     }
@@ -111,9 +137,25 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     @Override
     protected void applyEffect(float amount, float level) {
         CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return;
+        if (fleet == null) {
+            if (level <= 0f) teardownRuntime(false);
+            return;
+        }
 
-        if (level > 0 && !canRunHere(fleet)) {
+        ensureCollections();
+
+        if (level <= 0f || !isActive()) {
+            unapplyFleetEffect(fleet);
+            return;
+        }
+
+        //Old saves have no runtime location/owner bindings. Rebuild them once, then hold the
+        //activation to that exact location so LunaLib's global coordinate space cannot leak it.
+        if (activationLocation == null) activationLocation = fleet.getContainingLocation();
+        bindActiveLights(fleet);
+        ensureImpressionRenderer();
+
+        if (!isRuntimeCurrent() || !canRunHere(fleet)) {
             deactivate();
             return;
         }
@@ -130,9 +172,14 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             spoolDone = true;
         }
 
-        if (spoolDone & lightsToActivate > 0 && timePassed > SEARCHLIGHT_ACTIVATION_PAUSE){
-            addSearchlight();
-            lightsToActivate--;
+        if (spoolDone && lightsToActivate > 0 && timePassed > SEARCHLIGHT_ACTIVATION_PAUSE){
+            if (addSearchlight()) {
+                lightsToActivate--;
+            } else {
+                //A partial/old save can disagree about pending count and arcs. Stop cleanly rather
+                //than throwing every frame while already-created renderers remain alive.
+                lightsToActivate = 0;
+            }
             timePassed = 0f;
         }
 
@@ -140,8 +187,25 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Breach lamps");
 
-        if (level <= 0) {
-            cleanupImpl();
+    }
+
+    protected void ensureImpressionRenderer() {
+        if (activationLocation == null) return;
+
+        if (impressionRenderer == null || impressionRenderer.isExpired()) {
+            impressionRenderer = new SearchlightImpressionRenderer(activeSearchlights,
+                    this, activationLocation);
+        }
+
+        if (!LunaCampaignRenderer.hasRenderer(impressionRenderer)) {
+            LunaCampaignRenderer.addTransientRenderer(impressionRenderer);
+        }
+    }
+
+    protected void bindActiveLights(CampaignFleetAPI fleet) {
+        activeSearchlights.removeIf(light -> light == null || light.isDone());
+        for (Searchlight light : activeSearchlights) {
+            light.bindOwner(this, fleet, activationLocation);
         }
     }
 
@@ -177,16 +241,21 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
     }
 
-    private void addSearchlight(){
+    private boolean addSearchlight(){
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null || activationLocation == null || searchlightArcs.isEmpty()) return false;
+
         Searchlight searchlight = new Searchlight();
+        CircularArc arc = searchlightArcs.remove(0);
 
-        //arcs hold a direct reference to the fleet's location vector, so lights track the fleet
-        //automatically; taken front-first for a consistent activation order
-        searchlight.init(searchlightArcs.get(0));
-        searchlightArcs.remove(0);
-
-        getFleet().addScript(searchlight);
+        //Membership is established before init so its first face can prove ownership immediately.
+        //The light then rebinds the center to the fleet's live position every frame instead of
+        //trusting this initial Vector2f alias forever.
         activeSearchlights.add(searchlight);
+        searchlight.init(arc, this, fleet, activationLocation);
+        fleet.addScript(searchlight);
+
+        return true;
     }
 
     /**
@@ -194,7 +263,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
      * and not beside an open pond rupture (that's the R.O.D.'s water).
      */
     public static boolean canRunHere(CampaignFleetAPI fleet) {
-        if (fleet == null || fleet.getContainingLocation() == null) return true;
+        if (fleet == null || fleet.getContainingLocation() == null) return false;
         if (fleet.getContainingLocation().isHyperspace()) return false;
 
         return !isNearActivePond(fleet);
@@ -234,7 +303,34 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     private void expireLights(boolean withFade){
-        for (Searchlight searchlight : activeSearchlights) searchlight.expire(withFade);
+        for (Searchlight searchlight : activeSearchlights) {
+            if (searchlight != null) searchlight.expire(withFade);
+        }
+    }
+
+    /** A light calls this every frame. Membership closes the last orphan path: a script from an
+     * older activation cannot revive merely because the same ability instance is on again. */
+    public boolean owns(Searchlight light) {
+        return light != null && activeSearchlights != null && activeSearchlights.contains(light);
+    }
+
+    /** Lets a serialized light restore runtime-only ownership even if its fleet script advances
+     * before the ability on the first post-load frame. Only the ability's own saved list can call
+     * this successfully; orphan scripts fail the membership check before reaching it. */
+    public void recoverRuntimeLocation(LocationAPI location) {
+        if (activationLocation == null) activationLocation = location;
+    }
+
+    /** Whether this exact ability activation still owns campaign rendering in the current place. */
+    public boolean isRuntimeCurrent() {
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null || activationLocation == null || Global.getSector() == null) return false;
+
+        return isActive()
+                && fleet.getAbility(ABILITY_ID) == this
+                && fleet.getContainingLocation() == activationLocation
+                && Global.getSector().getCurrentLocation() == activationLocation
+                && canRunHere(fleet);
     }
 
     /**
@@ -247,31 +343,44 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     protected void deactivateImpl() {
-        timePassed = 0f;
-        lightsToActivate = 0;
-        spoolDone = false;
-
-        //fade skipped only in hyperspace, where nothing should linger drawing; deactivating near a
-        //pond still gets the normal spool-down
+        //Fade only if the activation is still in the place that owns its coordinates. A location
+        //handoff must retire the global renderers immediately.
         CampaignFleetAPI fleet = getFleet();
-        boolean withFade = fleet != null && fleet.getContainingLocation() != null
+        boolean withFade = fleet != null && activationLocation != null
+                && fleet.getContainingLocation() == activationLocation
                 && !fleet.getContainingLocation().isHyperspace();
 
-        expireLights(withFade);
-        activeSearchlights.clear();
-
-        //dents fade on the same terms as the lights - instantly in hyperspace
-        if (impressionRenderer != null) {
-            impressionRenderer.fadeAndExpire(withFade ? 1f : 0f);
-            impressionRenderer = null;
-        }
-
-        cleanupImpl();
+        teardownRuntime(withFade);
+        unapplyFleetEffect(fleet);
     }
 
     @Override
     protected void cleanupImpl() {
         CampaignFleetAPI fleet = getFleet();
+        teardownRuntime(false);
+        unapplyFleetEffect(fleet);
+    }
+
+    protected void teardownRuntime(boolean withFade) {
+        ensureCollections();
+
+        timePassed = 0f;
+        lightsToActivate = 0;
+        spoolDone = false;
+
+        expireLights(withFade);
+        activeSearchlights.clear();
+        searchlightArcs.clear();
+
+        if (impressionRenderer != null) {
+            impressionRenderer.fadeAndExpire(withFade ? 1f : 0f);
+            impressionRenderer = null;
+        }
+
+        activationLocation = null;
+    }
+
+    protected void unapplyFleetEffect(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
         fleet.getStats().getDetectedRangeMod().unmodify(getModId());
