@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.dialogue.rules.QuestDialogMap;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -367,6 +368,18 @@ public abstract class FishJob extends HubMissionWithBarEvent
             showRewardDetails(dialog);
 
             return true;
+        }
+
+        if ("showRemoteMap".equals(action)) {
+            SectorEntityToken location = getMapLocation(null);
+            String systemId = location == null || location.getStarSystem() == null
+                    ? null : location.getStarSystem().getId();
+            String title = params.size() > 1
+                    ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
+                    : "Target";
+
+            return QuestDialogMap.showRemote(dialog, systemId, location, title,
+                    getFactionForUIColors(), getIcon(), getIntelTags(null));
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
