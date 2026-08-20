@@ -587,7 +587,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         //The offer has been rolled but is deliberately not active until the player accepts it.
         //Using only getActive() made the pitch's fish and rewards stay plain even though reminders
         //after acceptance used the same verb correctly.
-        if (work == null) work = pending;
+        if (work == null) work = FishermanQuest.getOffer();
         if (work == null || work.speciesId == null) return false;
 
         FishRequirement ask = new FishRequirement();
@@ -948,11 +948,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /**
      * Takes vanilla's "Cut the comm link" back off the list.
      * <p>
-     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter
-     * - {@code catchrelease_fisherEncounter} sends it straight to comms - and it carries its own
-     * Leave on ESCAPE. Vanilla's cut-link option sits beside it offering the same thing by a
-     * different name, and worse, lands the player back on the engage/disengage screen of a boat
-     * nobody is fighting.
+     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter,
+     * while a bar mission temporarily gives the market an active person. Both make vanilla append a
+     * comm-link exit to menus that already own their exits. On the boat it also lands the player back
+     * on the engage/disengage screen of a fleet nobody is fighting.
      * <p>
      * Removed rather than suppressed: the option is added by whatever fired before this, and the
      * option panel is the one place both can be seen. {@code OptionId} is public on vanilla's
@@ -964,8 +963,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         dialog.getOptionPanel().removeOption(
                 com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.OptionId.CUT_COMM);
 
-        //the string form, for the sheet's own rows - vanilla answers to both
-        dialog.getOptionPanel().removeOption("cutCommLink");
+        String[] ruleOptions = {
+                "cutCommLink", "cutCommLink2", "cutCommLinkPolite",
+                "cutCommLinkNoText", "cutCommLinkNoText2"
+        };
+        for (String option : ruleOptions) dialog.getOptionPanel().removeOption(option);
 
         return true;
     }
@@ -1025,38 +1027,29 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     //---------------------------------------------------------------- chart requests
 
-    /**
-     * Held between the pitch and the answer; a declined job is not kept anywhere.
-     * <p>
-     * Static, because the pitch and the acceptance are two different rows and the engine owes no
-     * promise that both run on the same command instance - an instance field here is state
-     * balanced on an implementation detail.
-     */
-    protected static FishermanQuest.Saved pending;
-
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
         if (local != null) local.set(WORK_ROLLED, false, 0);
 
-        pending = FishermanQuest.roll();
-        if (pending == null) return false;
+        FishermanQuest.Saved offer = FishermanQuest.getOrRollOffer();
+        if (offer == null) return false;
 
         if (local == null) return true;
 
-        local.set(WORK_FISH, FishermanQuest.describe(pending), 0);
-        local.set(WORK_WHERE, pending.systemName, 0);
-        local.set(WORK_PAY, Misc.getDGSCredits(pending.credits), 0);
-        local.set(WORK_POND, pending.atPond, 0);
+        local.set(WORK_FISH, FishermanQuest.describe(offer), 0);
+        local.set(WORK_WHERE, offer.systemName, 0);
+        local.set(WORK_PAY, Misc.getDGSCredits(offer.credits), 0);
+        local.set(WORK_POND, offer.atPond, 0);
         local.set(WORK_ROLLED, true, 0);
 
         return true;
     }
 
     protected boolean takeWork() {
-        if (pending == null) return false;
+        FishermanQuest.Saved offer = FishermanQuest.getOffer();
+        if (offer == null) return false;
 
-        FishermanQuest.accept(pending);
-        pending = null;
+        FishermanQuest.accept(offer);
 
         return true;
     }

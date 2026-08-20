@@ -72,10 +72,29 @@ public class FishRewardRoller {
             }
         }
 
+        coalesceCredits(rewards);
+
         // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
         if (rewards.isEmpty()) rewards.add(FishReward.credits(creditPayout(value)));
 
         return rewards;
+    }
+
+    /** One payment should name cash once, even when both independently rolled slots land on it. */
+    protected static void coalesceCredits(List<FishReward> rewards) {
+        int first = -1;
+        int total = 0;
+
+        for (int i = rewards.size() - 1; i >= 0; i--) {
+            FishReward reward = rewards.get(i);
+            if (!(reward instanceof FishReward.Credits)) continue;
+
+            first = i;
+            total += ((FishReward.Credits) reward).amount;
+            rewards.remove(i);
+        }
+
+        if (first >= 0) rewards.add(first, FishReward.credits(roundCreditReward(total)));
     }
 
     protected static FishReward rollOne(Random random, int value, boolean allowCredits,
@@ -266,7 +285,16 @@ public class FishRewardRoller {
 
     /** Turns the roller's internal barter value into a cash payout without inflating item rewards. */
     public static int creditPayout(int value) {
-        return Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
+        int payout = Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
+
+        return roundCreditReward(payout);
+    }
+
+    /** Cash offers use readable sector-scale figures instead of displaying roller noise. */
+    public static int roundCreditReward(int amount) {
+        int step = amount > 100_000 ? 10_000 : 1_000;
+
+        return Math.round(amount / (float) step) * step;
     }
 
     /** Same job, different day. */

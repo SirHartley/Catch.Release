@@ -456,6 +456,8 @@ BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
 catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"FireBest catchreleaseJobDeclined
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+catchrelease_jobDropCutComm,PopulateOptions,"$BarCMD
+$catchrelease_jobRef",CatchReleaseCMD dropCutComm,,,A selected bar mission sets both references. This row runs after vanilla's person-conversation option and removes it from every job menu without touching fleet-given quests.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
@@ -769,9 +771,6 @@ The quiet child points at the two empty spaces.
 ""When you come back, you pick which two we're using. Then you pick who gets the better one.""",,
 catchrelease_duel_termsAcceptOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
 catchrelease_duel_termsDeclineOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
-catchrelease_duel_termsBackOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,50:catchrelease_duel_termsBack:Ask something else.,
-catchrelease_duel_termsBack,DialogOptionSelected,$option == catchrelease_duel_termsBack,"$menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions",,,
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name at the top of the bracket.
 The loud child leans over to inspect it.
 
@@ -826,7 +825,8 @@ catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_duel_paid,catchreleaseJobPaid,"$missionId == catchrelease_duel
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
+$catchreleasePaid","SetTextHighlights $catchreleaseReward
+SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
 The quiet child writes both names into the bracket.
 The loud child studies his fish, then looks across the table at the other one.
@@ -834,10 +834,11 @@ The loud child studies his fish, then looks across the table at the other one.
 ""Okay.""
 
 The quiet child pushes the prize toward you.
-Received: $catchreleaseReward.",,
+Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
-$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
+$catchreleaseBonus score:100","CatchReleaseCMD highlightJobText $catchreleaseReward
+SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
 The quiet child checks the grade tag on $catchreleaseDuelBetterFish.
 ""That one's Fine.""
@@ -848,7 +849,10 @@ The loud child immediately reaches under the bucket.
 ""I was getting it.""
 ""Too slow.""
 
-Received: $catchreleaseReward.",,
+Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
+catchrelease_duelPaidCleanup,PopulateOptions,"$missionId == catchrelease_duel
+$catchreleasePaid",CatchReleaseCMD dropCutComm,,,The terminal tournament row owns its only exit; this removes vanilla's person-conversation exit when the automatic PopulateOptions pass follows allocation.
+catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask whether the tank is taking bets.,
 catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"$menuState = catchreleaseRingOffer 0
