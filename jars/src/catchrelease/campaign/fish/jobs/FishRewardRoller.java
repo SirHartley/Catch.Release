@@ -72,10 +72,29 @@ public class FishRewardRoller {
             }
         }
 
+        coalesceCredits(rewards);
+
         // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
         if (rewards.isEmpty()) rewards.add(FishReward.credits(creditPayout(value)));
 
         return rewards;
+    }
+
+    /** One payment should name cash once, even when both independently rolled slots land on it. */
+    protected static void coalesceCredits(List<FishReward> rewards) {
+        int first = -1;
+        int total = 0;
+
+        for (int i = rewards.size() - 1; i >= 0; i--) {
+            FishReward reward = rewards.get(i);
+            if (!(reward instanceof FishReward.Credits)) continue;
+
+            first = i;
+            total += ((FishReward.Credits) reward).amount;
+            rewards.remove(i);
+        }
+
+        if (first >= 0) rewards.add(first, FishReward.credits(total));
     }
 
     protected static FishReward rollOne(Random random, int value, boolean allowCredits,
