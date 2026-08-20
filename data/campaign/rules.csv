@@ -456,23 +456,137 @@ BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
 catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"FireBest catchreleaseJobDeclined
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
-catchrelease_jobDropCutComm,PopulateOptions,"$BarCMD
-$catchrelease_jobRef",CatchReleaseCMD dropCutComm,,,A selected bar mission sets both references. This row runs after vanilla's person-conversation option and removes it from every job menu without touching fleet-given quests.
-catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
+catchrelease_jobDeliverReady,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
 SetOptionColor catchrelease_jobTurnInPick highlight",,"catchrelease_jobTurnIn:Hand in your catch.
 catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
-catchrelease_jobDeliverShort,PopulateOptions,"$catchrelease_jobDeliver
+catchrelease_jobDeliverShort,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
+catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobDeliver,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
+catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
+!$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
+catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,EndConversation NO_CONTINUE,,,Person and market conversations can close directly; no fleet encounter cleanup is involved.
 catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,The hands-off hand-in: the job auto-picks the minimum that covers the order and confirms it before anything moves.
 catchrelease_jobTurnInPickSel,DialogOptionSelected,$option == catchrelease_jobTurnInPick,Call $catchrelease_jobRef turnInPick,,,"The by-hand route: the specimen picker, with the order's asks ticked off live beside it."
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
+catchrelease_jobContactGreeting,PickGreeting,$catchrelease_jobDeliver score:1000,"ShowPersonVisual
+Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobGreeting
+FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, then build only the job-owned option batch."
+catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
+
+""Captain. Good timing.""
+
+A supplier line is pulled to the front of the slate, your comm ID already attached to it.
+
+""Let's see where the order stands.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The cook answers from somewhere just off the kitchen floor, wipes one hand on an apron and props a slate against a stack of ingredient cards.
+
+""Captain. You're back.""
+
+Three separate lines sit under the name of the dish.
+
+""All right. Let's see what we're working with.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with his supply diagram already open.
+
+""Captain. Excellent. I was just updating the inbound model.""
+
+He moves your supplier box to the center of the display. CONSOLIDATE, GRADE and DISPATCH are still waiting downstream.
+
+""Where are we?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The man answers promptly. A household schedule remains open on his slate, though your supplier entry has already been brought to the front.
+
+""Captain. Good day.""
+
+He sets the slate down on his side of the desk.
+
+""You wished to discuss the commission.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
+
+""Captain. Good to hear from you.""
+
+She marks her place in the current record and brings your commission onto the main display.
+
+""Let's have a look at where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_duel_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_duel score:100,,"The loud child appears first, leaning so close to the pickup that only half a face fits in frame.
+
+""Captain!""
+
+The quiet child pulls the comm unit back and puts the tournament bracket in front of it instead.
+
+""We kept your spot.""
+
+""I said we would.""
+
+""You also tried to write somebody else in it.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"Salvatore takes the call from the same table. Enzo has the book open beside the tank and does not stop writing.
+
+""Captain,"" Salvatore says. ""You're still on the card.""
+
+Enzo turns one page, finds your line and rests a finger beside it.
+
+""Go ahead.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
+
+""Captain.""
+
+The buyer field remains masked. She scrolls directly to your specification and the delivery line beneath it.
+
+""What do you need from me?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens.
+
+""Captain. Good.""
+
+She saves one comparison, then brings your retrieval commission onto the screen beside an empty record slot.
+
+""Tell me where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
+
+""Wait. Captain's on comms.""
+
+The lens swings toward the display before the sentence is finished.
+
+""Feed, update just came through. This is either excellent timing or excellent retention.""
+
+He checks the recording indicator.
+
+""All right. Talk to me.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"All three plain-coated buyers are present when the connection opens.
+
+The first looks at you.
+
+The second brings up the purchase entry.
+
+The third says, ""Captain.""
+
+They wait.",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
+
+""Captain.""
+
+He pushes the figures aside and brings up the job marker.
+
+""Tell me you've got something worth changing next month's numbers for.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
+
+""Captain.""
+
+She closes a fresh message from the claims office without reading it twice.
+
+""Any movement on your end?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
+
+""Captain.""
+
+The fisher checks the doorway once, then brings up the camp marker.
+
+""What have you got?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -516,32 +630,32 @@ $catchreleaseRewardCap is transferred.",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on his slate. A half-finished drink sits at one corner of the table.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch.,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
-FireAll PopulateOptions","""You fish. Good.""
+FireAll JobSpecificOptions","""You fish. Good.""
 
 He closes three projections and opens a fourth.
 
 ""Fresh catch has demand. Demand is not the problem. The problem is demonstrated inbound.""
 
 He turns the slate enough for you to see a diagram headed SUPPLY.",,
-catchrelease_startup_offerDemandOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+catchrelease_startup_offerDemandOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupAskedDemand",,,10:catchrelease_startup_demand:Who is buying?,
-catchrelease_startup_offerOperationsOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+catchrelease_startup_offerOperationsOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupAskedOperations",,,20:catchrelease_startup_operations:How are you handling fulfillment?,
-catchrelease_startup_offerTermsOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+catchrelease_startup_offerTermsOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupTerms",,,30:catchrelease_startup_terms:Show me the terms.,
-catchrelease_startup_offerAcceptOption,PopulateOptions,"$menuState == catchreleaseStartupOffer
+catchrelease_startup_offerAcceptOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 $catchreleaseStartupTerms",,,30:catchrelease_jobAccept:Agree to the trial shipment.,
-catchrelease_startup_offerDeclineOption,PopulateOptions,$menuState == catchreleaseStartupOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_startup_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseStartupOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_startup_demand,DialogOptionSelected,$option == catchrelease_startup_demand,"$catchreleaseStartupAskedDemand = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll PopulateOptions","""Restaurants. Clubs. Conservatories. That's the initial demand pool.""
+FireAll JobSpecificOptions","""Restaurants. Clubs. Conservatories. That's the initial demand pool.""
 
 He opens a page of projections broken down by population, income and prevailing catch prices.
 
 ""I've modeled purchasing volume across the addressable markets. Buyers are easy once you can show reliable inbound.""",,
 catchrelease_startup_operations,DialogOptionSelected,$option == catchrelease_startup_operations,"$catchreleaseStartupAskedOperations = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll PopulateOptions","He enlarges the supply diagram. Between SUPPLIER and CUSTOMER are boxes marked CONSOLIDATE, GRADE and DISPATCH. None has a name beside it.
+FireAll JobSpecificOptions","He enlarges the supply diagram. Between SUPPLIER and CUSTOMER are boxes marked CONSOLIDATE, GRADE and DISPATCH. None has a name beside it.
 
 ""You deliver here. From there it's consolidation, grading and dispatch. Standard functions.""
 
@@ -552,7 +666,7 @@ catchrelease_startup_terms,DialogOptionSelected,$option == catchrelease_startup_
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseStartupOffer 0
-FireAll PopulateOptions","""Pilot run. $catchreleaseAskCap.""
+FireAll JobSpecificOptions","""Pilot run. $catchreleaseAskCap.""
 
 He brings up the payment line.
 
@@ -614,32 +728,32 @@ He is already opening the demand projections.",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A man in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
-FireAll PopulateOptions","The man stands before you reach the table and indicates the chair opposite.
+FireAll JobSpecificOptions","The man stands before you reach the table and indicates the chair opposite.
 
 ""Captain. I purchase occasional items for a private household. I understand you can obtain live catch.""
 
 He waits until you have taken the indicated seat. He does not sit again.
 
 ""There is a small requirement outstanding.""",,
-catchrelease_butler_offerWhoOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+catchrelease_butler_offerWhoOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 !$catchreleaseButlerAskedWho",,,10:catchrelease_butler_who:Who are you buying for?,
-catchrelease_butler_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+catchrelease_butler_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 !$catchreleaseButlerAskedPurpose",,,20:catchrelease_butler_purpose:What is it for?,
-catchrelease_butler_offerTermsOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+catchrelease_butler_offerTermsOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 !$catchreleaseButlerTerms",,,30:catchrelease_butler_terms:State the terms.,
-catchrelease_butler_offerAcceptOption,PopulateOptions,"$menuState == catchreleaseButlerOffer
+catchrelease_butler_offerAcceptOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 $catchreleaseButlerTerms",,,30:catchrelease_jobAccept:Accept the commission.,
-catchrelease_butler_offerDeclineOption,PopulateOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_butler_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_butler_who,DialogOptionSelected,$option == catchrelease_butler_who,"$catchreleaseButlerAskedWho = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll PopulateOptions","""The household's butler.""
+FireAll JobSpecificOptions","""The household's butler.""
 
 A message marked HOUSEHOLD BUTLER — PRIVATE SERVICE opens on his slate. He clears it without reading.
 
 ""I keep his rooms and schedule. This purchase was passed to me.""",,
 catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll PopulateOptions","""Display.""
+FireAll JobSpecificOptions","""Display.""
 
 He turns a slate toward you but leaves it on his side of the table. It shows a tank fitted into an office.
 
@@ -648,7 +762,7 @@ catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_te
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseButlerOffer 0
-FireAll PopulateOptions","""One specimen. The requirement is $catchreleaseAsk.""
+FireAll JobSpecificOptions","""One specimen. The requirement is $catchreleaseAsk.""
 
 He checks the figure on his slate.
 
@@ -706,7 +820,7 @@ catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have taken 
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask what they're doing.,
 catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"Call $catchrelease_jobRef showBarBackdrop
 $menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","The loud child turns the bracket around so you can see it.
+FireAll JobSpecificOptions","The loud child turns the bracket around so you can see it.
 
 ""We're having a tournament.""
 
@@ -719,15 +833,15 @@ The quiet child points to two empty spaces near the bottom.
 The loud child looks at you.
 
 ""So you can do it.""",,
-catchrelease_duel_offerRulesOption,PopulateOptions,"$menuState == catchreleaseDuelOffer
+catchrelease_duel_offerRulesOption,JobSpecificOptions,"$menuState == catchreleaseDuelOffer
 !$catchreleaseDuelAskedRules",,,10:catchrelease_duel_rules:How does the tournament work?,
-catchrelease_duel_offerNeutralOption,PopulateOptions,"$menuState == catchreleaseDuelOffer
+catchrelease_duel_offerNeutralOption,JobSpecificOptions,"$menuState == catchreleaseDuelOffer
 !$catchreleaseDuelAskedNeutral",,,20:catchrelease_duel_neutral:Why do you need me?,
-catchrelease_duel_offerTermsOption,PopulateOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:What do you need me to bring?,
-catchrelease_duel_offerDeclineOption,PopulateOptions,$menuState == catchreleaseDuelOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_duel_offerTermsOption,JobSpecificOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:What do you need me to bring?,
+catchrelease_duel_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseDuelOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_rules,DialogOptionSelected,$option == catchrelease_duel_rules,"$catchreleaseDuelAskedRules = true 0
 $menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","The quiet child turns the bracket over. The back is covered in rules in two different colours.
+FireAll JobSpecificOptions","The quiet child turns the bracket over. The back is covered in rules in two different colours.
 
 ""One fish each. No swapping. Don't mess with the other person's fish.""
 
@@ -738,7 +852,7 @@ FireAll PopulateOptions","The quiet child turns the bracket over. The back is co
 The quiet child adds something to the list.",,
 catchrelease_duel_neutral,DialogOptionSelected,$option == catchrelease_duel_neutral,"$catchreleaseDuelAskedNeutral = true 0
 $menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","""Because he says I always take the better one,"" says the loud child.
+FireAll JobSpecificOptions","""Because he says I always take the better one,"" says the loud child.
 
 ""You do.""
 
@@ -756,7 +870,7 @@ The quiet child considers this, then nods.
 catchrelease_duel_terms,DialogOptionSelected,$option == catchrelease_duel_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseDuelTerms 0
-FireAll PopulateOptions","The quiet child checks the bracket.
+FireAll JobSpecificOptions","The quiet child checks the bracket.
 
 ""$catchreleaseAskCap. Any two fish.""
 ""Good ones,"" says the loud child.
@@ -773,8 +887,8 @@ They show you the prize: $catchreleaseRewardCap.
 The quiet child points at the two empty spaces.
 
 ""When you come back, you pick which two we're using. Then you pick who gets the better one.""",,
-catchrelease_duel_termsAcceptOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
-catchrelease_duel_termsDeclineOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_duel_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
+catchrelease_duel_termsDeclineOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name at the top of the bracket.
 The loud child leans over to inspect it.
 
@@ -793,12 +907,12 @@ The quiet child points to the empty spaces.
 ""And we need them before thirty days are up.""
 ""I remember,"" says the loud child.
 ""I'm telling the captain.""",,
-catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
+catchrelease_duelHandOver,JobSpecificOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
 !$catchreleaseDuelSelectionReady",,,"catchrelease_duelPick:Pick two fish for the tournament.
 catchrelease_duelWait:Not yet.",The specimen picker selects exactly two qualifying fish without removing either from cargo.
-catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
+catchrelease_duelShortOpt,JobSpecificOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Not yet.,
 catchrelease_duelPickSel,DialogOptionSelected,$option == catchrelease_duelPick,Call $catchrelease_jobRef chooseContenders,,,
@@ -824,10 +938,10 @@ catchrelease_duelReselectSel,DialogOptionSelected,$option == catchrelease_duelRe
 catchrelease_duelAllocationWaitSel,DialogOptionSelected,$option == catchrelease_duelAllocationWait,"Call $catchrelease_jobRef cancelContenders
 Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_duel_paid,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid","SetTextHighlights $catchreleaseReward
 SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
@@ -854,37 +968,35 @@ The loud child immediately reaches under the bucket.
 ""Too slow.""
 
 Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
-catchrelease_duelPaidCleanup,PopulateOptions,"$missionId == catchrelease_duel
-$catchreleasePaid",CatchReleaseCMD dropCutComm,,,The terminal tournament row owns its only exit; this removes vanilla's person-conversation exit when the automatic PopulateOptions pass follows allocation.
 catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask whether the tank is taking bets.,
 catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"$menuState = catchreleaseRingOffer 0
-FireAll PopulateOptions","The older man looks you over. The younger keeps writing on a slate.
+FireAll JobSpecificOptions","The older man looks you over. The younger keeps writing on a slate.
 
 ""You here to put money down,"" the older man asks, ""or bring us something worth putting money on?""
 
 ""Salvatore."" He does not offer a hand. He nods across the tank. ""Enzo.""
 
 Enzo looks up. ""If it's neither, the bar has other tables.""",,
-catchrelease_ring_offerPeopleOption,PopulateOptions,"$menuState == catchreleaseRingOffer
+catchrelease_ring_offerPeopleOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
 !$catchreleaseRingAskedPeople",,,10:catchrelease_ring_people:Who runs the bouts?,
-catchrelease_ring_offerTankOption,PopulateOptions,"$menuState == catchreleaseRingOffer
+catchrelease_ring_offerTankOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
 !$catchreleaseRingAskedTank",,,20:catchrelease_ring_tank:What happens in the tank?,
-catchrelease_ring_offerWagerOption,PopulateOptions,"$menuState == catchreleaseRingOffer
+catchrelease_ring_offerWagerOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
 !$catchreleaseRingAskedWager",,,30:catchrelease_ring_wager:How does the book work?,
-catchrelease_ring_offerTermsOption,PopulateOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_ring_terms:Hear the offer.,
-catchrelease_ring_offerDeclineOption,PopulateOptions,$menuState == catchreleaseRingOffer,,,50:catchrelease_jobDecline:Leave them to it.,
+catchrelease_ring_offerTermsOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_ring_terms:Hear the offer.,
+catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,50:catchrelease_jobDecline:Leave them to it.,
 catchrelease_ring_people,DialogOptionSelected,$option == catchrelease_ring_people,"$catchreleaseRingAskedPeople = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll PopulateOptions","""Nobody runs them,"" Salvatore says. ""We know the man who owns the room. Enzo keeps the book. I settle up when it's over.""
+FireAll JobSpecificOptions","""Nobody runs them,"" Salvatore says. ""We know the man who owns the room. Enzo keeps the book. I settle up when it's over.""
 
 The bartender replaces Salvatore's drink without being called over.
 
 Enzo taps the tank. ""The fish handle the fighting.""",,
 catchrelease_ring_tank,DialogOptionSelected,$option == catchrelease_ring_tank,"$catchreleaseRingAskedTank = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll PopulateOptions","Enzo taps the glass with the back of one fingernail.
+FireAll JobSpecificOptions","Enzo taps the glass with the back of one fingernail.
 
 ""Two fish. One round. I call it when one stops answering the other.""
 
@@ -895,7 +1007,7 @@ He unlocks the case, holds a numbered ampoule to the light and puts it back.
 Salvatore glances at the tank. ""And keeps the evening moving.""",,
 catchrelease_ring_wager,DialogOptionSelected,$option == catchrelease_ring_wager,"$catchreleaseRingAskedWager = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll PopulateOptions","Enzo turns his slate around.
+FireAll JobSpecificOptions","Enzo turns his slate around.
 
 ""We buy the pair. That's the sure thing. Or I leave what we owe you in the book and put it behind one of them.""
 
@@ -907,7 +1019,7 @@ Salvatore says, ""Your fish wins, you get a fresh purse worth twice the job. It 
 catchrelease_ring_terms,DialogOptionSelected,$option == catchrelease_ring_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingTerms 0
-FireAll PopulateOptions","Salvatore turns over a drink coaster. The job is already written on the back.
+FireAll JobSpecificOptions","Salvatore turns over a drink coaster. The job is already written on the back.
 
 ""$catchreleaseAskCap. Thirty-five days.""
 
@@ -918,11 +1030,11 @@ He taps the last line.
 Enzo draws a bracket beneath it.
 
 ""Take the sure payment and go home, or leave it in my book behind one of the pair. Winner gets a fresh purse worth twice the job. Loser gets nothing.""",,
-catchrelease_ring_termsAcceptOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,30:catchrelease_jobAccept:Take the job.,
-catchrelease_ring_termsDeclineOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,40:catchrelease_jobDecline:Walk away.,
-catchrelease_ring_termsBackOption,PopulateOptions,$menuState == catchreleaseRingTerms,,,50:catchrelease_ring_termsBack:Ask something else.,
+catchrelease_ring_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,30:catchrelease_jobAccept:Take the job.,
+catchrelease_ring_termsDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,40:catchrelease_jobDecline:Walk away.,
+catchrelease_ring_termsBackOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,50:catchrelease_ring_termsBack:Ask something else.,
 catchrelease_ring_termsBack,DialogOptionSelected,$option == catchrelease_ring_termsBack,"$menuState = catchreleaseRingOffer 0
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,"Salvatore folds the coaster once and slides it across.
 
 ""Good. We hold a place on the card for thirty-five days.""
@@ -940,12 +1052,12 @@ catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring s
 Enzo raps one knuckle against the empty side of the tank.
 
 ""The room is waiting.""",,
-catchrelease_ringHandOver,PopulateOptions,"$catchrelease_ringBet
+catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
 !$catchreleaseRingSelectionReady",,,"catchrelease_ringPick:Bring out two fighters.
 catchrelease_ringWait:Not yet.",Picker-first hand-in. No specimen is consumed here.
-catchrelease_ringShortOpt,PopulateOptions,"$catchrelease_ringBet
+catchrelease_ringShortOpt,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Not yet.,
 catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,Call $catchrelease_jobRef chooseFighters,,,
@@ -977,10 +1089,10 @@ catchrelease_ringReselectSel,DialogOptionSelected,$option == catchrelease_ringRe
 catchrelease_ringAssignmentWaitSel,DialogOptionSelected,$option == catchrelease_ringAssignmentWait,"Call $catchrelease_jobRef cancelFighters
 Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
-FireAll PopulateOptions",,,
+FireAll JobSpecificOptions",,,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid
 !$catchreleaseHasWager score:100",SetTextHighlights $catchreleaseReward,"Salvatore takes $catchreleaseLeftFish. Enzo takes $catchreleaseRightFish.
@@ -1019,20 +1131,20 @@ catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_clie
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
-FireAll PopulateOptions","""I represent a private buyer. One specimen.""
+FireAll JobSpecificOptions","""I represent a private buyer. One specimen.""
 
 She turns the specification toward you.
 
 ""$catchreleaseAskCap. The stated figure is the minimum.""
 
 ""Forty days. $catchreleaseRewardCap on delivery. A separate premium applies if it falls in the upper two-fifths of its recorded size range.""",,
-catchrelease_client_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseClientOffer
+catchrelease_client_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseClientOffer
 !$catchreleaseClientAskedPurpose",,,10:catchrelease_client_purpose:What does the buyer want it for?,
-catchrelease_client_offerAcceptOption,PopulateOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
-catchrelease_client_offerDeclineOption,PopulateOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_client_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
+catchrelease_client_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_client_purpose,DialogOptionSelected,$option == catchrelease_client_purpose,"$catchreleaseClientAskedPurpose = true 0
 $menuState = catchreleaseClientOffer 0
-FireAll PopulateOptions","""He intends to buy it.""
+FireAll JobSpecificOptions","""He intends to buy it.""
 
 She scrolls past the masked buyer field to the handling section.
 
@@ -1181,7 +1293,7 @@ catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask
 catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseCultOffer 0
-FireAll PopulateOptions","The first gives you a fish name.
+FireAll JobSpecificOptions","The first gives you a fish name.
 
 ""$catchreleaseSpecies.""
 
@@ -1190,13 +1302,13 @@ The second names what they are offering in return.
 ""$catchreleaseRewardCap.""
 
 The third says, ""One specimen. Fifty-five days.""",,
-catchrelease_cult_offerPurposeOption,PopulateOptions,"$menuState == catchreleaseCultOffer
+catchrelease_cult_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseCultOffer
 !$catchreleaseCultAskedPurpose",,,10:catchrelease_cult_purpose:What is it for?,
-catchrelease_cult_offerAcceptOption,PopulateOptions,$menuState == catchreleaseCultOffer,,,30:catchrelease_jobAccept:Agree to bring it.,
-catchrelease_cult_offerDeclineOption,PopulateOptions,$menuState == catchreleaseCultOffer,,,40:catchrelease_jobDecline:Decline.,
+catchrelease_cult_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseCultOffer,,,30:catchrelease_jobAccept:Agree to bring it.,
+catchrelease_cult_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseCultOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_cult_purpose,DialogOptionSelected,$option == catchrelease_cult_purpose,"$catchreleaseCultAskedPurpose = true 0
 $menuState = catchreleaseCultOffer 0
-FireAll PopulateOptions","""$catchreleaseSpecies,"" says the first.
+FireAll JobSpecificOptions","""$catchreleaseSpecies,"" says the first.
 
 ""$catchreleaseSpecies,"" says the second.
 
