@@ -8,7 +8,6 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemRenderer;
-import catchrelease.helper.loading.SilhouetteBaker;
 import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.ui.ShopUi;
@@ -83,9 +82,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
      * The species shape is visible with range data; colour remains locked until it is caught.
      * <p>
      * The list row is drawn by vanilla from a path plus one tint - no hook for the FishIcons
-     * compositing - so a range-data entry hands over a pre-baked silhouette texture that
-     * already wears the rim, and the tint stays white. If the bake failed, the raw art under
-     * an opaque black tint is the fallback: the same silhouette body, just rimless.
+     * compositing, so the list uses vanilla's tint for the same alpha-shaped black body.
      */
     @Override
     public String getIcon() {
@@ -94,26 +91,16 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
         if (!state.isKnown()) return FishConstants.CODEX_CATEGORY_ICON;
 
-        if (state.isRangeDataOnly()) {
-            String silhouette = SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id);
-            if (silhouette != null) return silhouette;
-        }
-
         return FishCodex.getIcon(spec);
     }
 
-    /** White over a baked silhouette - the rim is in the pixels; black only as the rimless
-     *  fallback when the bake failed. Vanilla tints its own private sprite, so nothing leaks. */
+    /** Vanilla tints its own private list sprite, so the silhouette cannot leak into other UI. */
     @Override
     public Color getIconColor() {
         FishCodexEntryState state = getState();
         if (!state.isRangeDataOnly()) return Color.WHITE;
 
-        FishSpec spec = state.spec;
-        boolean haveBaked = spec != null
-                && SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id) != null;
-
-        return haveBaked ? Color.WHITE : Color.BLACK;
+        return Color.BLACK;
     }
 
     @Override
