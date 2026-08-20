@@ -242,6 +242,7 @@ public class ShopMarks {
                 for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
                         : Global.getSector().getIntelManager().getIntel()) {
 
+                    if (intel.isEnding() || intel.isEnded()) continue;
                     if (!(intel instanceof FishAsker asker)) continue;
                     String name = asker.getAskerName();
                     if (name == null || name.isEmpty()) continue;
