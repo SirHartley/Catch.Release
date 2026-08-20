@@ -758,9 +758,6 @@ The quiet child points to another boxed rule.
 ""When you come back, you choose the two contenders first,"" says the loud child. ""Then you decide who gets the better one.""",,
 catchrelease_duel_termsAcceptOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:Agree to find two.,
 catchrelease_duel_termsDeclineOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
-catchrelease_duel_termsBackOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,50:catchrelease_duel_termsBack:Ask something else.,
-catchrelease_duel_termsBack,DialogOptionSelected,$option == catchrelease_duel_termsBack,"$menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions",,,
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name beside OFFICIAL.
 
 The loud child draws a box around it.
