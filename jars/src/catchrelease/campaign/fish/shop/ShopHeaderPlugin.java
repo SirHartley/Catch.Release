@@ -136,7 +136,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
                 0.18f * alphaMult);
         ShopUi.drawQuad(x, y, CHIP_WIDTH, 2f, rarity.color, 0.6f * presence * alphaMult);
 
-        SpriteAPI icon = SpriteLoader.getSprite("placeholder");
+        SpriteAPI icon = SpriteLoader.getSprite("pane_fish");
         if (icon != null) {
             icon.setSize(ICON_SIZE, ICON_SIZE);
             icon.setColor(rarity.color);
