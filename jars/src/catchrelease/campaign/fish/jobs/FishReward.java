@@ -2,7 +2,6 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
-import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.BackdropLoader;
@@ -15,9 +14,9 @@ import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
-import catchrelease.helper.loading.SilhouetteBaker;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
+import catchrelease.ui.FishIcons;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -393,15 +392,18 @@ public abstract class FishReward {
             FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
             if (tooltip == null || spec == null || isRedundant()) return false;
 
-            String silhouette = SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id);
-            if (silhouette == null) return false;
-
-            TooltipMakerAPI item = tooltip.beginImageWithText(silhouette, 48f);
+            TooltipMakerAPI item = tooltip.beginImageWithText(
+                    "graphics/catchrelease/icon/blank.png", 48f);
             item.addPara("Range data", Misc.getHighlightColor(), 0f);
             item.addPara(spec.getDisplayName(), spec.rarity.color, 3f);
             item.addPara("Range data unlocks the habitat of the pattern on your map, allowing you"
                     + " to see its range and plot a course to catch it.", 6f);
-            tooltip.addImageWithText(pad);
+            UIPanelAPI card = tooltip.addImageWithText(pad);
+
+            CustomPanelAPI silhouette = Global.getSettings().createCustom(48f, 48f,
+                    new RangeDataSilhouetteOverlay(spec));
+            card.addComponent(silhouette).inLMid(0f);
+            card.bringComponentToTop(silhouette);
 
             return true;
         }
@@ -430,6 +432,30 @@ public abstract class FishReward {
             int value = fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
 
             return FishRewardRoller.creditPayout(value);
+        }
+    }
+
+    /** Uses the mod's shared knowledge-aware fish portrait in a vanilla image-with-text slot. */
+    protected static class RangeDataSilhouetteOverlay extends BaseCustomUIPanelPlugin {
+        protected final FishSpec spec;
+        protected PositionAPI pos;
+
+        protected RangeDataSilhouetteOverlay(FishSpec spec) {
+            this.spec = spec;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            float size = Math.min(pos.getWidth(), pos.getHeight());
+            FishIcons.drawBacklit(spec, pos.getCenterX(), pos.getCenterY(),
+                    size * 0.5f, size * 0.7f, alphaMult);
         }
     }
 

@@ -1855,8 +1855,8 @@ The rating gives you the relevant nav reference.
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
 catchrelease_crabBarAdd,AddBarEvents,CatchReleaseCMD crabBarAvailable,"AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
 catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
-!$global.catchrelease_metCrablobab","CatchReleaseCMD showCrabPortrait
-SaveCurrentVisual
+!$global.catchrelease_metCrablobab","SaveCurrentVisual
+CatchReleaseCMD showCrabPortrait
 $global.catchrelease_metCrablobab = true 0","""Terrible!""
 
 He says it with obvious satisfaction.
@@ -1875,8 +1875,8 @@ This is not a question.
 catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-CatchReleaseCMD crabExplosivePending","CatchReleaseCMD showCrabPortrait
-SaveCurrentVisual
+CatchReleaseCMD crabExplosivePending","SaveCurrentVisual
+CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD crabAcknowledgeExplosive
 SetTextHighlights $catchreleaseCrabExplosiveTarget","""Back!""
 
@@ -1895,8 +1895,8 @@ He looks expectantly at your empty hands.
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
-CatchReleaseCMD crabExplosiveSettled","CatchReleaseCMD showCrabPortrait
-SaveCurrentVisual","""Back!""
+CatchReleaseCMD crabExplosiveSettled","SaveCurrentVisual
+CatchReleaseCMD showCrabPortrait","""Back!""
 
 Crablobab says it with obvious satisfaction.
 
@@ -1920,7 +1920,7 @@ Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the 
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStallEmpty,DialogOptionSelected,"$option == catchrelease_crabStall score:20
 CatchReleaseCMD tokens
-!$catchreleaseCrabAny","RestoreSavedVisual
+!$catchreleaseCrabAny","CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD beginCrabOptions
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
 
@@ -1936,7 +1936,7 @@ He considers this.
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabAny
-$catchreleaseCrabBackdrop","RestoreSavedVisual
+$catchreleaseCrabBackdrop","CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD beginCrabOptions
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
 
@@ -2201,7 +2201,7 @@ The category was already present.",0:catchrelease_crabStall:Continue,
 catchrelease_crabStallBare,DialogOptionSelected,"$option == catchrelease_crabStall score:5
 CatchReleaseCMD tokens
 $catchreleaseCrabAny
-!$catchreleaseCrabBackdrop","RestoreSavedVisual
+!$catchreleaseCrabBackdrop","CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD beginCrabOptions
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
 
@@ -2220,8 +2220,7 @@ catchrelease_crabOptionBass,CatchReleaseCrabStallOptions,!$catchreleaseCrabAny,"
 catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,CatchReleaseCMD addCrabOption catchrelease_crabLeave Leave,,,
 catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabBackdropAfford","SaveCurrentVisual
-CatchReleaseCMD crabShowBackdrop
+$catchreleaseCrabBackdropAfford","CatchReleaseCMD crabShowBackdrop
 SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab produces the rolled backdrop from behind his knee.
 
 He unrolls it against the wall.
@@ -2236,8 +2235,7 @@ He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCra
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareBackdropShort,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabBackdropAfford","SaveCurrentVisual
-CatchReleaseCMD crabShowBackdrop
+!$catchreleaseCrabBackdropAfford","CatchReleaseCMD crabShowBackdrop
 SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab snaps the backdrop open against the wall in one practiced movement.
 
 ""$catchreleaseCrabBackdropName! Makes your aquarium look like an actual place. Nobody stands at a tank to look at water.""
