@@ -233,6 +233,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return highlightWorkText(ruleId, dialog, params, memoryMap);
             case "highlightIntroText":
                 return highlightIntroText(ruleId, dialog, params, memoryMap);
+            case "showIntroMap":
+                return showIntroMap(dialog, params.size() > 1
+                        ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
+                        : null);
+            case "showWorkMap":
+                return showWorkMap(dialog, params.size() > 1
+                        ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
+                        : null);
 
             //---- the ladder
             case "point":
@@ -345,6 +353,30 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             default:
                 return false;
         }
+    }
+
+    /** Shows the current tutorial destination only while it is in another star system. */
+    protected boolean showIntroMap(InteractionDialogAPI dialog, String title) {
+        FishingIntro.Target target = FishingIntro.getTarget();
+        FishingIntro.IntroIntel intel = new FishingIntro.IntroIntel();
+
+        return QuestDialogMap.showRemote(dialog,
+                target == null ? null : target.systemId,
+                intel.getMapLocation(null),
+                title == null ? "Target" : title,
+                intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
+    }
+
+    /** Shows the persisted chart-request offer or accepted destination, never a freshly rerolled one. */
+    protected boolean showWorkMap(InteractionDialogAPI dialog, String title) {
+        FishermanQuest.Saved work = FishermanQuest.getActive();
+        if (work == null) work = FishermanQuest.getOffer();
+        if (work == null) return QuestDialogMap.hide(dialog);
+
+        FishermanQuest.QuestIntel intel = new FishermanQuest.QuestIntel(work);
+        return QuestDialogMap.showRemote(dialog, work.systemId, intel.getMapLocation(null),
+                title == null ? "Target" : title,
+                intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
 
     /**

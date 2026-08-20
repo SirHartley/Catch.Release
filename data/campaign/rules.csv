@@ -451,10 +451,12 @@ ShowDefaultVisual
 CatchReleaseCMD leaveEncounter","""So was I, once."" The link closes.
 
 Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
-catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"FireBest catchreleaseJobAccepted
+catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"HideMapMarker
+FireBest catchreleaseJobAccepted
 BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
-catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"FireBest catchreleaseJobDeclined
+catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"HideMapMarker
+FireBest catchreleaseJobDeclined
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
@@ -467,9 +469,12 @@ Call $catchrelease_jobRef updateData
 catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobDeliver,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
 catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
 !$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
-catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,EndConversation NO_CONTINUE,,,Person and market conversations can close directly; no fleet encounter cleanup is involved.
-catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,Call $catchrelease_jobRef turnIn,,,The hands-off hand-in: the job auto-picks the minimum that covers the order and confirms it before anything moves.
-catchrelease_jobTurnInPickSel,DialogOptionSelected,$option == catchrelease_jobTurnInPick,Call $catchrelease_jobRef turnInPick,,,"The by-hand route: the specimen picker, with the order's asks ticked off live beside it."
+catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,"HideMapMarker
+EndConversation NO_CONTINUE",,,Person and market conversations can close directly; no fleet encounter cleanup is involved.
+catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"HideMapMarker
+Call $catchrelease_jobRef turnIn",,,The hands-off hand-in: the job auto-picks the minimum that covers the order and confirms it before anything moves.
+catchrelease_jobTurnInPickSel,DialogOptionSelected,$option == catchrelease_jobTurnInPick,"HideMapMarker
+Call $catchrelease_jobRef turnInPick",,,"The by-hand route: the specimen picker, with the order's asks ticked off live beside it."
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
@@ -1674,7 +1679,8 @@ $catchreleaseTargetHere
 !$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:Is this the same ship?,
 catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
-catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,CatchReleaseCMD leaveEncounter,,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
+catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,"HideMapMarker
+CatchReleaseCMD leaveEncounter",,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
@@ -1698,7 +1704,8 @@ catchrelease_fisherSellCommon,DialogOptionSelected,$option == catchrelease_fishe
 catchrelease_fisherSellUncommon,DialogOptionSelected,$option == catchrelease_fisherSellUncommon,CatchReleaseCMD sellUpTo UNCOMMON,,,
 catchrelease_fisherSellRare,DialogOptionSelected,$option == catchrelease_fisherSellRare,CatchReleaseCMD sellUpTo RARE,,,
 catchrelease_fisherSellEpic,DialogOptionSelected,$option == catchrelease_fisherSellEpic,CatchReleaseCMD sellUpTo EPIC,,,
-catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"$menuState = catchreleaseFisher 0
+catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"HideMapMarker
+$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
 catchrelease_fisherOkay,DialogOptionSelected,$option == catchrelease_fisherOkay,$global.catchrelease_fisherAsked_okay = true,"""Never better, thank you for asking.""
 
@@ -1755,7 +1762,8 @@ catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork 
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay """"another chart on the shelf""""","""I've got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay """"another chart on the shelf""""
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""I've got one.""
 
 He sends over a range entry.
 
@@ -1769,10 +1777,11 @@ He names the payment: $catchreleaseWorkPay.
 
 ""And I'll carry another chart on the shelf for you when you're done.""","0:catchrelease_workTake:Take the work
 100:catchrelease_fisherBack:Not now",
-catchrelease_workOfferNone,CatchReleaseWorkOffer,!$catchreleaseWorkRolled,,"The Fisherman works through the available range entries, then closes the list.
+catchrelease_workOfferNone,CatchReleaseWorkOffer,!$catchreleaseWorkRolled,HideMapMarker,"The Fisherman works through the available range entries, then closes the list.
 
 ""Nothing I can put a mark on right now.""",100:catchrelease_fisherBack:Continue,
-catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,CatchReleaseCMD takeWork,The system is added to your intel log.,100:catchrelease_fisherBack:Continue,
+catchrelease_workTake,DialogOptionSelected,$option == catchrelease_workTake,"HideMapMarker
+CatchReleaseCMD takeWork",The system is added to your intel log.,100:catchrelease_fisherBack:Continue,
 catchrelease_workDone,DialogOptionSelected,"$option == catchrelease_fisherWork score:30
 CatchReleaseCMD tokens
 $catchreleaseWork
@@ -1793,7 +1802,8 @@ $catchreleaseWorkHandoffPaid",,"The container is taken aft while the Fisherman s
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet",CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere,"""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet","CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
 
 He checks the old mark.
 
@@ -2459,7 +2469,8 @@ $catchreleaseStage < 6
 !$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
-$catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","Get me ""$catchreleaseTarget from a rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","Get me ""$catchreleaseTarget from a rupture in $catchreleaseTargetWhere.""
 
 He sends the mark again.
 
@@ -2468,7 +2479,8 @@ catchrelease_askTargetOpenRod,DialogOptionSelected,"$option == catchrelease_askT
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Next one's $catchreleaseTarget. $catchreleaseTargetWhere.""
 
 He forwards the system data.
 
@@ -2479,7 +2491,8 @@ catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarg
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4
 !$catchreleaseTargetPond
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring $catchreleaseTarget, found in open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Bring $catchreleaseTarget, found in open space in $catchreleaseTargetWhere.""
 
 He brings up the retrieval sequence.
 
@@ -2888,7 +2901,8 @@ catchrelease_introGetFreeRumor,DialogOptionSelected,$option == catchrelease_intr
 catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 2
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Bring me $catchreleaseTarget from a local rupture in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Bring me $catchreleaseTarget from a local rupture in $catchreleaseTargetWhere.""
 
 The Fisherman sends the mark.
 
@@ -2896,7 +2910,8 @@ The Fisherman sends the mark.
 catchrelease_briefOne,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 3
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Next one's a $catchreleaseTarget from $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Next one's a $catchreleaseTarget from $catchreleaseTargetWhere.""
 
 He forwards the system data.
 
@@ -2908,7 +2923,8 @@ A pause.
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
-$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Get me $catchreleaseTarget. It roams the open space in $catchreleaseTargetWhere.""
+$catchreleaseTargetPlaced","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Get me $catchreleaseTarget. It roams the open space in $catchreleaseTargetWhere.""
 
 ""Use the breach lights until you have the return. Harpoon it. Bring it here.""
 
@@ -2925,7 +2941,8 @@ The Fisherman sends the records again.
 catchrelease_introWaiting2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:57
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
-!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""Get $catchreleaseTarget in $catchreleaseTargetWhere.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""Get $catchreleaseTarget in $catchreleaseTargetWhere.""
 
 He checks your manifest.
 
@@ -2935,7 +2952,8 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 !$catchreleaseTargetHere
-!$catchreleaseDeepHandoff","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget's still in $catchreleaseTargetWhere.""
+!$catchreleaseDeepHandoff","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""$catchreleaseTarget's still in $catchreleaseTargetWhere.""
 
 A pause.
 
@@ -2943,7 +2961,8 @@ A pause.
 catchrelease_introWaiting4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:59
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
-!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""","""$catchreleaseTarget. Open space, $catchreleaseTargetWhere.""
+!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
+CatchReleaseCMD showIntroMap ""Target: $catchreleaseTargetWhere""","""$catchreleaseTarget. Open space, $catchreleaseTargetWhere.""
 
 ""Lights first. Harpoon second. Try not to reverse those out of enthusiasm.""",catchrelease_fisherBack:Continue,
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
@@ -3485,7 +3504,8 @@ catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.i
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask what happened to the equipment.,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Pirates found our rupture. Now they collect protection on it.""
+Call $catchrelease_jobRef showRewardDetails
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pirates found our rupture. Now they collect protection on it.""
 
 The fisher turns the account sheet around.
 
@@ -3498,7 +3518,8 @@ The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 ""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""A company survey moved the boundary.
+Call $catchrelease_jobRef showRewardDetails
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.
 
 The fisher overlays the charts.
 
@@ -3511,7 +3532,8 @@ The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMa
 ""Seventy days. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Pathers. First they came to preach. Then they cut power to the drone rack.""
+Call $catchrelease_jobRef showRewardDetails
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack.""
 
 The fisher puts the damaged component down.
 
@@ -3528,13 +3550,14 @@ catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrele
 ""Whatever gets them off it. Just don't leave me owing them afterward.""",,
 catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,The fisher closes the job entry and moves another maintenance payment into next month.,,
 catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-!$catchreleaseCampCleared",,"""Still there.""
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there.""
 
 The fisher checks the camp marker.
 
 ""Raised the weekly number again, too.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Camp's gone. Good.""
+$catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Camp's gone. Good.""
 
 He taps the rupture marker.
 
@@ -3552,13 +3575,14 @@ She sends the fleet code and both boundary charts.
 ""If their employer stops paying them to stand there, I'd prefer everyone keep their hulls.""",,
 catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,She returns to the claim form and attaches the second survey chart again.,,
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-!$catchreleaseCampCleared",,"""Still holding position.""
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still holding position.""
 
 She checks the fleet code against the claim file.
 
 ""My appeal has acquired another case number.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""They're gone.""
+$catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
 
 She closes the exclusion notice.
 
@@ -3576,13 +3600,14 @@ catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchreleas
 
 The damaged component goes back into a tool bag.",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-!$catchreleaseCampCleared",,"""Still there.""
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there.""
 
 The fisher checks a message from the yard crew.
 
 ""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-$catchreleaseCampCleared",CatchReleaseCMD highlightJobText $catchreleaseAsk,"""They're gone.""
+$catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
 
 The fisher checks the cleared marker once more.
 
