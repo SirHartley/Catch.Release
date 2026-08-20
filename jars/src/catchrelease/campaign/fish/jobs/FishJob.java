@@ -706,6 +706,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public void addDescriptionForCurrentStage(TooltipMakerAPI info, float width, float height) {
         super.addDescriptionForCurrentStage(info, width, height);
 
+        if (isEnding() || isEnded()) return;
+
         SectorEntityToken route = getFishRequestRouteTarget();
         if (route == null) {
             FishIntelMapButton.add(info, width, asks);
