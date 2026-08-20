@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="tutorial rules overhaul &amp; some minor fixes">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="dialogue">
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishermanInterception.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishermanInterception.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/TutorialConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/TutorialConstants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -112,7 +109,8 @@
     <MESSAGE value="icons, rules work" />
     <MESSAGE value="fixed icon colouring in sidepanel" />
     <MESSAGE value="tutorial rules overhaul &amp; some minor fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="tutorial rules overhaul &amp; some minor fixes" />
+    <MESSAGE value="dialogue" />
+    <option name="LAST_COMMIT_MESSAGE" value="dialogue" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -19,19 +19,10 @@ General
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
 Bar quests
-- Rewards: can roll credits twice. If it does, it should unify into one number.
-- Credit rewards should be rounded by 1000 (8430 -> 8000). If > 100.000, round 10.000s (108.110 -> 110.000)
-- Range data reward preview must be similar format to upgrade/module & include silhouette icon.
-- "Cut the comm link" shows up in bar quest dialogue - should never happen
-- Child Tournament: Should show no person image, just portrait_generic.png
-- Child tournament "Ask something else" is redundant
-- Child tournament: Quest completion doesn't resolve correctly and shows default quest accept dialogue instead of outro & close
+-
 
 Fisherman
 - Add question "why can't I use the drones on the searchlights" - A: drones can't return because lights not a full breach, would get stuck in hyperspace. That's why the harpoon has a line. Q: okay / any way to change that: A: Yes, rare schematic. (heard rumor there's a...)
-
-Chart Request
-- Denying the request and then accepting it on second turn causes it to re-roll the quest target. It should stay static once rolled.
 
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
@@ -39,6 +30,18 @@ Quests
 ---------------------
 
 Impactful Upgrades
+
+Chart Request
+- Denying the request and then accepting it on second turn causes it to re-roll the quest target. It should stay static once rolled.
+
+Bar quests
+- Rewards: can roll credits twice. If it does, it should unify into one number.
+- Credit rewards should be rounded by 1000 (8430 -> 8000). If > 100.000, round 10.000s (108.110 -> 110.000)
+- Range data reward preview must be similar format to upgrade/module & include silhouette icon.
+- "Cut the comm link" shows up in bar quest dialogue - should never happen
+- Child Tournament: Should show no person image, just portrait_generic.png
+- Child tournament "Ask something else" is redundant
+- Child tournament: Quest completion doesn't resolve correctly and shows default quest accept dialogue instead of outro & close
 
 The Radial Rig
 - Should probably feature a questline to get - scientist?

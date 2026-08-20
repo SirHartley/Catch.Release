@@ -700,101 +700,120 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She matches each seal 
 ""Good. That's enough for the record.""
 
 $catchreleaseRewardCap is transferred.",,
-catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have occupied a corner table with an empty bucket and a handwritten tournament bracket. Several rules have been added in a different colour.,,
-catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask about the tournament.,
+catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have taken over a corner table with an empty bucket and a hand-drawn tournament bracket. Several names have been crossed out and written back in.,,
+catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask what they're doing.,
 catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"$menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","The loud child pushes the bracket toward you.
+FireAll PopulateOptions","The loud child turns the bracket around so you can see it.
 
-""We're missing two entrants.""
+""We're having a tournament.""
 
-The quiet child pulls it back far enough to point at two empty spaces.
+The quiet child points to two empty spaces near the bottom.
 
-""And somebody else has to decide who gets which one.""
+""But we need two more fish.""
+""And he won't let me pick.""
+""Because you always pick yours first.""
 
-""Same job,"" says the loud one.",,
+The loud child looks at you.
+
+""So you can do it.""",,
 catchrelease_duel_offerRulesOption,PopulateOptions,"$menuState == catchreleaseDuelOffer
-!$catchreleaseDuelAskedRules",,,10:catchrelease_duel_rules:What are the tournament rules?,
+!$catchreleaseDuelAskedRules",,,10:catchrelease_duel_rules:How does the tournament work?,
 catchrelease_duel_offerNeutralOption,PopulateOptions,"$menuState == catchreleaseDuelOffer
-!$catchreleaseDuelAskedNeutral",,,20:catchrelease_duel_neutral:Why do I decide the allocation?,
-catchrelease_duel_offerTermsOption,PopulateOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:Show me the terms.,
+!$catchreleaseDuelAskedNeutral",,,20:catchrelease_duel_neutral:Why do you need me?,
+catchrelease_duel_offerTermsOption,PopulateOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:Wwhat do you need me to bring?,
 catchrelease_duel_offerDeclineOption,PopulateOptions,$menuState == catchreleaseDuelOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_rules,DialogOptionSelected,$option == catchrelease_duel_rules,"$catchreleaseDuelAskedRules = true 0
 $menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","The quiet child turns the bracket over. The reverse is filled with numbered rules in two different hands.
+FireAll PopulateOptions","The quiet child turns the bracket over. The back is covered in rules in two different colours.
 
-""One fish each. No swaps after allocation. Nobody touches the other entrant. Captain's decision is final.""
+""One fish each. No swapping. Don't mess with the other person's fish.""
+""That means no poking it either,"" says the loud child.
 
-The loud child points to the last line.
+""That is messing with it.""
+""It didn't say that before.""
 
-""That one's new.""",,
+The quiet child adds something to the list.",,
 catchrelease_duel_neutral,DialogOptionSelected,$option == catchrelease_duel_neutral,"$catchreleaseDuelAskedNeutral = true 0
 $menuState = catchreleaseDuelOffer 0
-FireAll PopulateOptions","""Because if I choose, he says I took the good one,"" says the loud child.
+FireAll PopulateOptions","""Because he says I always take the better one,"" says the loud child.
+""You do.""
+""Not always.""
+""Almost always.""
 
-""You did,"" says the quiet one.
+The loud child points at you.
 
-The loud child ignores this.
+""You don't care which one I get.""
 
-""So now a captain chooses.""
+The quiet child considers this, then nods.
 
-The quiet child taps a boxed line on the bracket: ALLOCATION FINAL.",,
+""Yeah.""",,
 catchrelease_duel_terms,DialogOptionSelected,$option == catchrelease_duel_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseDuelTerms 0
-FireAll PopulateOptions","The quiet child reads from the bracket.
+FireAll PopulateOptions","The quiet child checks the bracket.
 
-""$catchreleaseAskCap. Any two fish. One each.""
+""$catchreleaseAskCap. Any two fish.""
+""Good ones,"" says the loud child.
+""They don't have to be good.""
+""They should be.""
 
-""Thirty days,"" the loud child adds.
+The quiet child ignores him.
+""Bring them back in thirty days.""
 
-They show you what they are offering: $catchreleaseRewardCap.
+They show you the prize: $catchreleaseRewardCap.
 
-The quiet child points to another boxed rule.
+""If one of them is Fine or Exceptional, there's another prize too,"" says the loud child.
 
-""If the better one is Fine or Exceptional, there's an extra prize.""
+The quiet child points at the two empty spaces.
 
-""When you come back, you choose the two contenders first,"" says the loud child. ""Then you decide who gets the better one.""",,
-catchrelease_duel_termsAcceptOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:Agree to find two.,
+""When you come back, you pick which two we're using. Then you pick who gets the better one.""",,
+catchrelease_duel_termsAcceptOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
 catchrelease_duel_termsDeclineOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_termsBackOption,PopulateOptions,$menuState == catchreleaseDuelTerms,,,50:catchrelease_duel_termsBack:Ask something else.,
 catchrelease_duel_termsBack,DialogOptionSelected,$option == catchrelease_duel_termsBack,"$menuState = catchreleaseDuelOffer 0
 FireAll PopulateOptions",,,
-catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name beside OFFICIAL.
+catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name at the top of the bracket.
+The loud child leans over to inspect it.
 
-The loud child draws a box around it.
+""You spelled it right.""
+""I know.""",,
+catchrelease_duel_declined,catchreleaseJobDeclined,$missionId == catchrelease_duel,,"""Okay.""
 
-""Captain's decision is final.""",,
-catchrelease_duel_declined,catchreleaseJobDeclined,$missionId == catchrelease_duel,,"""All right.""
+The quiet child goes back to the bracket.
+The loud child turns in his seat and starts looking around the bar.
 
-The quiet child erases the empty OFFICIAL line. The loud child is already looking around the bar for another adult.",,
-catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Two fish, one each.""
+""Hey. Are you a captain?""",,
+catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Two fish.""
 
-The quiet child points to the two empty spaces on the bracket.
+The quiet child points to the empty spaces.
 
-""Thirty days was the rule.""",,
+""And we need them before thirty days are up.""
+""I remember,"" says the loud child.
+""I'm telling the captain.""",,
 catchrelease_duelHandOver,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
-!$catchreleaseDuelSelectionReady",,,"catchrelease_duelPick:Choose two contenders.
+!$catchreleaseDuelSelectionReady",,,"catchrelease_duelPick:Pick two fish for the tournament.
 catchrelease_duelWait:Not yet.",The specimen picker selects exactly two qualifying fish without removing either from cargo.
 catchrelease_duelShortOpt,PopulateOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Not yet.,
 catchrelease_duelPickSel,DialogOptionSelected,$option == catchrelease_duelPick,Call $catchrelease_jobRef chooseContenders,,,
 catchrelease_duelAllocationReady,CatchReleaseDuelAllocationReady,"$missionId == catchrelease_duel
-$catchreleaseDuelSelectionReady",,"The quiet child copies both container tags onto the bracket.
+$catchreleaseDuelSelectionReady",,"The quiet child copies both container tags into the two empty spaces.
 
-BETTER — $catchreleaseDuelBetterFish
-OTHER — $catchreleaseDuelOtherFish
+$catchreleaseDuelBetterFish
+$catchreleaseDuelOtherFish
 
-The loud child puts both hands flat on the table.
-
-""Captain decides.""",,
+The loud child looks from one to the other.
+""I know which one I'd pick.""
+""You're not picking.""
+""I know.""",,
 catchrelease_duelAllocationOptions,CatchReleaseDuelAllocationOptions,"$missionId == catchrelease_duel
 $catchreleaseDuelSelectionReady","SetOptionColor catchrelease_duelLoud highlight
-SetOptionColor catchrelease_duelQuiet highlight",,"catchrelease_duelLoud:Give the better specimen to the loud child.
-catchrelease_duelQuiet:Give the better specimen to the quiet child.
-catchrelease_duelReselect:Choose different specimens.
+SetOptionColor catchrelease_duelQuiet highlight",,"catchrelease_duelLoud:Give the better fish to the loud child.
+catchrelease_duelQuiet:Give the better fish to the quiet child.
+catchrelease_duelReselect:Choose different fish.
 catchrelease_duelAllocationWait:Not yet.",No fish is removed until an allocation option is confirmed.
 catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,Call $catchrelease_jobRef turnInLoud,,,
 catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,Call $catchrelease_jobRef turnInQuiet,,,
@@ -809,20 +828,25 @@ FireAll PopulateOptions",,,
 catchrelease_duel_paid,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid",SetTextHighlights $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
-The quiet child records both assignments on the bracket. The loud child checks the line marked CAPTAIN'S DECISION FINAL.
+The quiet child writes both names into the bracket.
+The loud child studies his fish, then looks across the table at the other one.
 
-They hand over the agreed prize.
+""Okay.""
 
+The quiet child pushes the prize toward you.
 Received: $catchreleaseReward.",,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
 $catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
-The quiet child checks the grade tag on $catchreleaseDuelBetterFish, then taps the boxed rule marked FINE / EXCEPTIONAL — EXTRA PRIZE.
+The quiet child checks the grade tag on $catchreleaseDuelBetterFish.
+""That one's Fine.""
+
+The loud child immediately reaches under the bucket.
 
 ""Extra prize.""
-
-The loud child retrieves the extra prize from beneath the bucket.
+""I was getting it.""
+""Too slow.""
 
 Received: $catchreleaseReward.",,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
