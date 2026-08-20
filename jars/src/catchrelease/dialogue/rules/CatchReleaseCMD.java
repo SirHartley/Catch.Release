@@ -948,11 +948,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     /**
      * Takes vanilla's "Cut the comm link" back off the list.
      * <p>
-     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter
-     * - {@code catchrelease_fisherEncounter} sends it straight to comms - and it carries its own
-     * Leave on ESCAPE. Vanilla's cut-link option sits beside it offering the same thing by a
-     * different name, and worse, lands the player back on the engage/disengage screen of a boat
-     * nobody is fighting.
+     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter,
+     * while a bar mission temporarily gives the market an active person. Both make vanilla append a
+     * comm-link exit to menus that already own their exits. On the boat it also lands the player back
+     * on the engage/disengage screen of a fleet nobody is fighting.
      * <p>
      * Removed rather than suppressed: the option is added by whatever fired before this, and the
      * option panel is the one place both can be seen. {@code OptionId} is public on vanilla's
@@ -964,8 +963,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         dialog.getOptionPanel().removeOption(
                 com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.OptionId.CUT_COMM);
 
-        //the string form, for the sheet's own rows - vanilla answers to both
-        dialog.getOptionPanel().removeOption("cutCommLink");
+        String[] ruleOptions = {
+                "cutCommLink", "cutCommLink2", "cutCommLinkPolite",
+                "cutCommLinkNoText", "cutCommLinkNoText2"
+        };
+        for (String option : ruleOptions) dialog.getOptionPanel().removeOption(option);
 
         return true;
     }

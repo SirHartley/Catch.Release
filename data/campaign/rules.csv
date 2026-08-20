@@ -456,6 +456,8 @@ BarCMD accept $missionId
 BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
 catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"FireBest catchreleaseJobDeclined
 BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+catchrelease_jobDropCutComm,PopulateOptions,"$BarCMD
+$catchrelease_jobRef",CatchReleaseCMD dropCutComm,,,A selected bar mission sets both references. This row runs after vanilla's person-conversation option and removes it from every job menu without touching fleet-given quests.
 catchrelease_jobDeliverReady,PopulateOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
