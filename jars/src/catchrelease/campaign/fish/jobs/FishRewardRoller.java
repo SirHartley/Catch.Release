@@ -94,7 +94,7 @@ public class FishRewardRoller {
             rewards.remove(i);
         }
 
-        if (first >= 0) rewards.add(first, FishReward.credits(total));
+        if (first >= 0) rewards.add(first, FishReward.credits(roundCreditReward(total)));
     }
 
     protected static FishReward rollOne(Random random, int value, boolean allowCredits,
@@ -285,7 +285,16 @@ public class FishRewardRoller {
 
     /** Turns the roller's internal barter value into a cash payout without inflating item rewards. */
     public static int creditPayout(int value) {
-        return Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
+        int payout = Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
+
+        return roundCreditReward(payout);
+    }
+
+    /** Cash offers use readable sector-scale figures instead of displaying roller noise. */
+    public static int roundCreditReward(int amount) {
+        int step = amount > 100_000 ? 10_000 : 1_000;
+
+        return Math.round(amount / (float) step) * step;
     }
 
     /** Same job, different day. */
