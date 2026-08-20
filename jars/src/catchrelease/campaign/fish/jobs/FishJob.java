@@ -49,12 +49,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
     /** Set on the giver while the ordinary hand-over options should be shown. */
     public static final String DELIVER_FLAG = "$catchrelease_jobDeliver";
 
-    /**
-     * Set on every accepted job giver, including jobs with specialized hand-over flags. Dialogue
-     * routing must not depend on which kind of delivery menu a subclass happens to use.
-     */
-    public static final String CONTACT_FLAG = "$catchrelease_jobContact";
-
     /** Whether the hold covers the whole ask, refreshed every time the dialogue asks. */
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
 
@@ -203,7 +197,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         PersonAPI person = getPerson();
         if (person == null) return;
 
-        makeImportant(person, CONTACT_FLAG, Stage.WANTED);
         makeImportant(person, getDeliverFlag(), Stage.WANTED);
     }
 
@@ -359,6 +352,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
 
+        if ("isContactActive".equals(action)) {
+            return isContactActive();
+        }
+
         if ("showContactVisual".equals(action)) {
             showContactVisual(dialog);
 
@@ -396,6 +393,14 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    /**
+     * Live contact gate used by rules instead of a newly serialized stage flag. This makes the
+     * route work for accepted jobs from older saves and excludes entity-given fleet quests.
+     */
+    protected boolean isContactActive() {
+        return isAccepted() && Stage.WANTED.equals(currentStage) && getPerson() != null;
     }
 
     /**

@@ -466,7 +466,7 @@ catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditi
 catchrelease_jobDeliverShort,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobContact,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
+catchrelease_jobLeaveOption,JobSpecificOptions,Call $catchrelease_jobRef isContactActive,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
 catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
 !$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
 catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,"HideMapMarker
@@ -480,7 +480,7 @@ FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
-catchrelease_jobContactGreeting,PickGreeting,$catchrelease_jobContact score:1000,"Call $catchrelease_jobRef updateData
+catchrelease_jobContactGreeting,PickGreeting,Call $catchrelease_jobRef isContactActive score:1000,"Call $catchrelease_jobRef updateData
 Call $catchrelease_jobRef showContactVisual
 FireBest catchreleaseJobGreeting
 FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, then build only the job-owned option batch."
