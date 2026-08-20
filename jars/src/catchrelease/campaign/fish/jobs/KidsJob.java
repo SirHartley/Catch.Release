@@ -23,6 +23,8 @@ import java.util.Map;
  */
 public class KidsJob extends FishJob {
 
+    public static final String GROUP_PORTRAIT = "graphics/portraits/portrait_generic.png";
+
     /** The flag that puts this job's own pair of options up instead of the shared hand-over. */
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
 
@@ -49,6 +51,9 @@ public class KidsJob extends FishJob {
         setGiverVoice(Voices.SPACER);
 
         if (!setUpGiver(createdAt)) return false;
+        //The giver is a mission anchor, not one of the two children: the scene gets no lone face.
+        getPerson().setPortraitSprite(GROUP_PORTRAIT);
+
 
         days = DAYS;
 
