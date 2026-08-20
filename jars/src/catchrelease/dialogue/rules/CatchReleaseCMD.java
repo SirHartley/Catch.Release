@@ -587,7 +587,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         //The offer has been rolled but is deliberately not active until the player accepts it.
         //Using only getActive() made the pitch's fish and rewards stay plain even though reminders
         //after acceptance used the same verb correctly.
-        if (work == null) work = pending;
+        if (work == null) work = FishermanQuest.getOffer();
         if (work == null || work.speciesId == null) return false;
 
         FishRequirement ask = new FishRequirement();
@@ -1027,38 +1027,29 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     //---------------------------------------------------------------- chart requests
 
-    /**
-     * Held between the pitch and the answer; a declined job is not kept anywhere.
-     * <p>
-     * Static, because the pitch and the acceptance are two different rows and the engine owes no
-     * promise that both run on the same command instance - an instance field here is state
-     * balanced on an implementation detail.
-     */
-    protected static FishermanQuest.Saved pending;
-
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
         if (local != null) local.set(WORK_ROLLED, false, 0);
 
-        pending = FishermanQuest.roll();
-        if (pending == null) return false;
+        FishermanQuest.Saved offer = FishermanQuest.getOrRollOffer();
+        if (offer == null) return false;
 
         if (local == null) return true;
 
-        local.set(WORK_FISH, FishermanQuest.describe(pending), 0);
-        local.set(WORK_WHERE, pending.systemName, 0);
-        local.set(WORK_PAY, Misc.getDGSCredits(pending.credits), 0);
-        local.set(WORK_POND, pending.atPond, 0);
+        local.set(WORK_FISH, FishermanQuest.describe(offer), 0);
+        local.set(WORK_WHERE, offer.systemName, 0);
+        local.set(WORK_PAY, Misc.getDGSCredits(offer.credits), 0);
+        local.set(WORK_POND, offer.atPond, 0);
         local.set(WORK_ROLLED, true, 0);
 
         return true;
     }
 
     protected boolean takeWork() {
-        if (pending == null) return false;
+        FishermanQuest.Saved offer = FishermanQuest.getOffer();
+        if (offer == null) return false;
 
-        FishermanQuest.accept(pending);
-        pending = null;
+        FishermanQuest.accept(offer);
 
         return true;
     }
