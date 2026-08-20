@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.ShopMarks;
+import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -16,6 +17,7 @@ import com.fs.starfarer.api.campaign.CustomDialogDelegate.CustomDialogCallback;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -246,16 +248,17 @@ public class FishBuyer {
             PackButton plugin = new PackButton(this, selected);
             CustomPanelAPI custom = Global.getSettings().createCustom(
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, plugin);
+            plugin.panel = custom;
             TooltipMakerAPI element = custom.createUIElement(
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, false);
-            element.addButton("Pack into crates", plugin.buttonId,
+            plugin.button = element.addButton("Pack into crates", plugin.buttonId,
                     BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
             custom.addUIElement(element).inTL(0f, 0f);
             panel.addCustom(custom, 0f);
         }
 
-        void pack(CargoAPI selected) {
-            if (packed) return;
+        boolean pack(CargoAPI selected) {
+            if (packed) return false;
             packed = true;
 
             //Selection lives in a second cargo object. Put it back before rebuilding the source so
@@ -268,6 +271,7 @@ public class FishBuyer {
             FishItems.packIntoCrates(offer);
             FishItems.packIntoCrates(Global.getSector().getPlayerFleet().getCargo());
             offer.sort();
+            return true;
         }
     }
 
@@ -275,6 +279,8 @@ public class FishBuyer {
         protected final Object buttonId = new Object();
         protected final PickerPackingSession session;
         protected final CargoAPI selected;
+        protected CustomPanelAPI panel;
+        protected ButtonAPI button;
 
         PackButton(PickerPackingSession session, CargoAPI selected) {
             this.session = session;
@@ -283,7 +289,61 @@ public class FishBuyer {
 
         @Override
         public void buttonPressed(Object buttonId) {
-            if (buttonId == this.buttonId) session.pack(selected);
+            if (buttonId != this.buttonId || !session.pack(selected)) return;
+
+            if (button != null) button.setEnabled(false);
+            PickerCargoRefresh.refreshFrom(panel);
+        }
+    }
+
+    /**
+     * Vanilla's cargo picker does not watch its backing cargo for structural changes. Its two
+     * grids are rebuilt by an internal cargo panel's stable {@code updateCargoViews()} method,
+     * but neither that panel nor the refresh is exposed through the public picker API.
+     * <p>
+     * Start at our custom button panel, walk stable {@code getParent()} links to the picker, and
+     * inspect each ancestor's direct fields by capability. The field and concrete class names are
+     * deliberately never used: both are obfuscated. Failure is soft; the transaction remains
+     * correct even if a later game version moves the refresh owner.
+     */
+    protected static final class PickerCargoRefresh {
+        protected static final int MAX_PARENT_DEPTH = 16;
+
+        static void refreshFrom(CustomPanelAPI panel) {
+            Object current = panel;
+
+            for (int depth = 0; current != null && depth < MAX_PARENT_DEPTH; depth++) {
+                if (invokeRefresh(current)) return;
+
+                for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
+                        current, null, null, null, null, false)) {
+                    try {
+                        Object value = field.get(current);
+                        if (value != null && invokeRefresh(value)) return;
+                    } catch (Throwable ignored) {
+                        //One inaccessible or invalid field does not invalidate the capability crawl.
+                    }
+                }
+
+                try {
+                    current = ReflectionUtils.invokeIfExists(current, "getParent");
+                } catch (Throwable ignored) {
+                    return;
+                }
+            }
+        }
+
+        protected static boolean invokeRefresh(Object candidate) {
+            try {
+                List<ReflectionUtils.ReflectedMethod> methods = ReflectionUtils.getMethodsMatching(
+                        candidate, "updateCargoViews", null, 0, null);
+                if (methods.size() != 1) return false;
+
+                methods.get(0).invoke(candidate);
+                return true;
+            } catch (Throwable ignored) {
+                return false;
+            }
         }
     }
 
