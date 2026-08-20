@@ -733,6 +733,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
     /** The compact form, for the list down the side of the intel screen. */
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+        if (isEnding() || isEnded()) return;
+
         Color text = getBulletColorForMode(mode);
 
         float pad = mode == ListInfoMode.IN_DESC ? 10f : 0f;
