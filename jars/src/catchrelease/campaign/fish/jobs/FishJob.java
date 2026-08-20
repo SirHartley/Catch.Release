@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
@@ -72,6 +73,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         ABANDONED
     }
+
+    /** Campaign-message discriminator for a newly advanced partial order. */
+    public static final String CATCH_PROGRESS_UPDATE = "catchrelease_fish_job_progress";
 
     /** What's being asked for, in order; some jobs ask for more than one requirement at once. */
     protected List<FishRequirement> asks = new ArrayList<>();
@@ -226,6 +230,44 @@ public abstract class FishJob extends HubMissionWithBarEvent
         String required = getRequiredFactionId();
 
         return required == null || required.equals(market.getFactionId());
+    }
+
+    /**
+     * Called after a landed catch has entered cargo. Only an active order with more than one
+     * specimen outstanding sends progress; pre-existing and surplus cargo do not create noise.
+     */
+    public static void onCatchStored(FishCatch caught) {
+        if (caught == null || Global.getSector() == null) return;
+
+        for (IntelInfoPlugin intel : new ArrayList<>(
+                Global.getSector().getIntelManager().getIntel())) {
+            if (!(intel instanceof FishJob)) continue;
+
+            FishJob job = (FishJob) intel;
+            if (!Stage.WANTED.equals(job.currentStage) || job.getRequestedCount() <= 1) continue;
+
+            boolean advanced = false;
+            for (FishRequirement ask : job.asks) {
+                if (ask == null || !ask.matches(caught)) continue;
+
+                int aboard = FishCurrency.count(ask);
+                if (aboard > 0 && aboard <= ask.count) advanced = true;
+            }
+
+            if (advanced) job.sendUpdateIfPlayerHasIntel(CATCH_PROGRESS_UPDATE, false);
+        }
+    }
+
+    protected int getRequestedCount() {
+        int total = 0;
+        for (FishRequirement ask : asks) {
+            if (ask != null) total += Math.max(0, ask.count);
+        }
+        return total;
+    }
+
+    protected int getProgress(FishRequirement ask) {
+        return ask == null ? 0 : Math.min(ask.count, FishCurrency.count(ask));
     }
 
     /** Whether the player is carrying everything this job asked for, right now. */
@@ -641,10 +683,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         bullet(info);
         for (FishRequirement ask : asks) {
-            String description = Misc.ucFirst(ask.describe());
-            LabelAPI line = info.addPara(description, text, 0f);
-            FishRequirement.highlight(line, Collections.singletonList(ask), description,
-                    String.valueOf(ask.count));
+            String progress = ask.describeProgress(getProgress(ask));
+            LabelAPI line = info.addPara(progress, text, 0f);
+            FishRequirement.highlight(line, Collections.singletonList(ask), progress,
+                    getProgress(ask) + "/" + ask.count);
         }
 
         if (days > 0f) addDays(info, "remaining", getDaysLeft(), text);
@@ -692,9 +734,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         float pad = mode == ListInfoMode.IN_DESC ? 10f : 0f;
 
-        LabelAPI line = info.addPara(Misc.ucFirst(describeAsks()), text, pad);
-        FishRequirement.highlight(line, asks, Misc.ucFirst(describeAsks()),
-                asks.isEmpty() ? null : String.valueOf(asks.get(0).count));
+        for (FishRequirement ask : asks) {
+            String progress = ask.describeProgress(getProgress(ask));
+            LabelAPI line = info.addPara(progress, text, pad);
+            FishRequirement.highlight(line, Collections.singletonList(ask), progress,
+                    getProgress(ask) + "/" + ask.count);
+            pad = 0f;
+        }
 
         if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
     }

@@ -261,6 +261,17 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
+    /** A compact live-progress line which retains every qualifier from {@link #describe()}. */
+    public String describeProgress(int aboard) {
+        int shown = Math.max(0, Math.min(count, aboard));
+        String description = describe();
+        String countPrefix = count + " ";
+        String subject = description.startsWith(countPrefix)
+                ? description.substring(countPrefix.length()) : description;
+
+        return shown + "/" + count + " aboard - " + Misc.ucFirst(subject);
+    }
+
     /** The whole ask as one sentence fragment: "3 crabs, Rare or better, graded Fine or better". */
     public String describe() {
         StringBuilder text = new StringBuilder();

@@ -500,6 +500,22 @@ public class FishingIntro {
         updateIntel();
     }
 
+    /** Updates multi-chart intel as each requested species reaches the hold. */
+    public static void onCatchStored(FishCatch caught) {
+        Target target = getTarget();
+        if (target == null || caught == null || target.anySpecies) return;
+        if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
+        if (target.needsDeepGear
+                && (caught.method != FishLogEntry.Method.HARPOON
+                || caught.implement != CatchImplement.BREACH_LAMP)) return;
+
+        if (isTargetMet()) {
+            setLanded(target, true);
+        } else if (target.speciesIds.size() > 1) {
+            updateIntel();
+        }
+    }
+
     /** Whether the current errand has been answered by something in the hold. */
     public static boolean isLanded() {
         Target target = getTarget();
@@ -1231,9 +1247,23 @@ public class FishingIntro {
                             at.getContainingLocation().getName());
                 }
             } else {
-                String wanted = describeTarget();
-                LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
-                FishRequirement.highlight(wantedLine, getAsks(), wanted);
+                List<catchrelease.campaign.fish.shop.FishRequirement> asks = getAsks();
+                if (asks.size() > 1) {
+                    for (catchrelease.campaign.fish.shop.FishRequirement ask : asks) {
+                        int aboard = find(ask.speciesId, target.needsDeepGear) == null ? 0 : 1;
+                        String progress = ask.describeProgress(aboard);
+                        LabelAPI wantedLine = info.addPara(progress, initPad, tc, h,
+                                aboard + "/" + ask.count);
+                        FishRequirement.highlight(wantedLine,
+                                java.util.Collections.singletonList(ask), progress,
+                                aboard + "/" + ask.count);
+                        initPad = 0f;
+                    }
+                } else {
+                    String wanted = describeTarget();
+                    LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
+                    FishRequirement.highlight(wantedLine, asks, wanted);
+                }
                 if (target.systemName != null) {
                     info.addPara("In %s", 0f, tc, h, target.systemName);
                 }
