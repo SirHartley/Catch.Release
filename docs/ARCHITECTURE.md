@@ -145,8 +145,10 @@ the renderer. Minigame sound ids and the click press/release toggle are Java con
 three camp events in `campaign/fish/jobs/camp`, whose shared base `CampedSpotJob` extends `FishJob`
 like the rest. The two bar encounters that are *not* jobs — Crablobab and the rating — are
 `AddBarEvents` rows in `rules.csv` instead. Crablobab's availability row calls the shared command
-bridge for its per-market roll, while his entry rows use it to mount the settings-registered
-portrait. **Three of the job ids do not match
+bridge for its per-market roll. His entry rows preserve the bar visual before mounting the
+settings-registered portrait; stall returns remount that portrait directly, backdrop previews do
+not overwrite the saved slot, and the authored exit restores the bar visual before returning to
+the bar menu. **Three of the job ids do not match
 their class name:**
 Bar-job offer and active-contact menus fire the private `JobSpecificOptions` trigger. This keeps
 vanilla person options, especially `cutCommLink`, out of job dialogue by construction. Picker
