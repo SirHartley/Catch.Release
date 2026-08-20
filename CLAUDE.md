@@ -28,6 +28,9 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   restored rather than flattened by generic tightening. Use focused faction, Fisherman and
   Crablobab passes, then give the editor the final sheet for voice QA. Its prose still has to pass
   the rules safety checks below; the editor does not get to alter routes, tokens or mechanics.
+  **Never treat the Editor's draft or QA as the lore check:** independently compare every returned
+  line against the complete current `docs/LORE.md` before integration, and send any terminology or
+  mechanics conflict back to the Editor for correction.
 - **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
   verified against decompiled engine source - triggers, memory scopes, the operator table, the
   truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
