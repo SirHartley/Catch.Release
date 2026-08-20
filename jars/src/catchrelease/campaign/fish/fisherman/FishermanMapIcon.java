@@ -31,6 +31,9 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
 
+    /** The map only needs to hand a selected mark to the real moving fleet promptly, not per frame. */
+    protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
+
     private static final String SERVICE_LINE =
             "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
 
@@ -106,6 +109,9 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     protected CampaignFleetAPI fleet;
 
+    /** Real-time campaign seconds since the last course-target check; zero is safe for old saves. */
+    protected float autopilotCheckElapsed = 0f;
+
     /** Object identity is the fleet identity here: plugin parameters serialize that exact hull. */
     protected boolean isFor(CampaignFleetAPI other) {
         return fleet == other;
@@ -134,6 +140,31 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         }
 
         entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        redirectAutopilot(amount);
+    }
+
+    /**
+     * Makes the map mark a way to select the boat, rather than a stationary destination painted
+     * over it. The map's ordinary click handling first lays in a course to this custom entity. On
+     * the next check, replace that ultimate endpoint through the public campaign UI API; vanilla
+     * then owns the course to the moving fleet and keeps updating it after the mark disappears at
+     * sensor range.
+     */
+    protected void redirectAutopilot(float amount) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || player.getContainingLocation() != entity.getContainingLocation()) {
+            autopilotCheckElapsed = 0f;
+            return;
+        }
+
+        autopilotCheckElapsed += amount;
+        if (autopilotCheckElapsed < AUTOPILOT_CHECK_SECONDS) return;
+
+        autopilotCheckElapsed %= AUTOPILOT_CHECK_SECONDS;
+
+        if (Global.getSector().getCampaignUI().getUltimateCourseTarget() == entity) {
+            Global.getSector().getCampaignUI().layInCourseForNextStep(fleet);
+        }
     }
 
     public void remove() {

@@ -14,8 +14,8 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.util.Misc.FleetFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,12 +30,13 @@ import java.util.List;
  * seen it, however, the stop is committed. Putting the lamps out ends that burn, not the patrol's
  * approach; the warning or consequence still has to be delivered.
  * <p>
- * One at a time, like the harpoon patrol, so a busy system does not produce a queue of crews all
- * wanting the same conversation. What they actually say, and what the ladder costs, is
+ * Every patrol with eyes on a near-world offence comes at once. The first one to make contact owns
+ * the conversation; its stopped flag settles that burn and sends every other responder back to the
+ * assignment which the intercept interrupted. What the winner says, and what the ladder costs, is
  * {@link LampOffence} and {@code rules.csv}.
  * <p>
- * Transient: rebuilt on every load, all state in game memory, the stopped patrol re-found by its
- * flag.
+ * Transient: rebuilt on every load, all state in game memory, the responding patrols re-found by
+ * their flags.
  */
 public class LampPatrolResponse implements EveryFrameScript {
 
@@ -47,9 +48,6 @@ public class LampPatrolResponse implements EveryFrameScript {
 
     /** The system whose law produced this stop, retained if the fleet or player leaves it. */
     public static final String SYSTEM_KEY = "$catchrelease_lampPatrolSystem";
-
-    /** How far from the player a patrol can be and still notice. */
-    public static final float SEARCH_RANGE = 2500f;
 
     /** Days one crew will keep after the player about it before giving up. */
     public static final float CHASE_DAYS = 8f;
@@ -63,7 +61,8 @@ public class LampPatrolResponse implements EveryFrameScript {
     /** Matches vanilla's own fleet-search cadence. */
     protected final IntervalUtil interval = new IntervalUtil(0.1f, 0.3f);
 
-    protected CampaignFleetAPI stopping = null;
+    /** Every patrol currently committed to this burn; rebuilt from their flags on load. */
+    protected final List<CampaignFleetAPI> stopping = new ArrayList<>();
 
     /** Whether the lamps were burning last time this looked, so the moment they light is catchable. */
     protected transient boolean lit = false;
@@ -76,28 +75,30 @@ public class LampPatrolResponse implements EveryFrameScript {
     public void advance(float amount) {
         interval.advance(Global.getSector().getClock().convertToDays(amount));
 
-        if (stopping != null) {
-            maintain();
-            return;
-        }
+        if (!stopping.isEmpty()) maintain();
 
         if (!interval.intervalElapsed()) return;
 
-        stopping = reacquire();
-        if (stopping != null) return;
+        //Flag reacquisition covers save/load and stays on the search interval; an idle script
+        //should not walk every fleet once per frame.
+        if (stopping.isEmpty()) {
+            reacquire();
+            if (!stopping.isEmpty()) maintain();
+        }
 
         look();
     }
 
-    /** Re-finds an in-progress stop by its flag, since the stop lives in memory rather than here. */
-    protected CampaignFleetAPI reacquire() {
+    /** Re-finds every in-progress stop by its flag, since the stop lives in memory rather than here. */
+    protected void reacquire() {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CampaignFleetAPI fleet : location.getFleets()) {
-                if (fleet.getMemoryWithoutUpdate().getBoolean(LampOffence.SAW_KEY)) return fleet;
+                if (fleet.getMemoryWithoutUpdate().getBoolean(LampOffence.SAW_KEY)
+                        && !stopping.contains(fleet)) {
+                    stopping.add(fleet);
+                }
             }
         }
-
-        return null;
     }
 
     /** The whole of the trigger: lamps lit, somebody's space, somebody watching. */
@@ -111,6 +112,10 @@ public class LampPatrolResponse implements EveryFrameScript {
             return;
         }
 
+        //Lights-out starts a new burn, but not in the middle of the committed stop about the old
+        //one. This also keeps a load during an approach from incrementing the persisted run.
+        if (!lit && !stopping.isEmpty()) return;
+
         //the lamps coming on is what starts an offence, so the transition is what is watched rather
         //than the state - staying lit for a week is one burn, not a week of them
         if (!lit) {
@@ -118,27 +123,16 @@ public class LampPatrolResponse implements EveryFrameScript {
             LampOffence.beginRun();
         }
 
-        CampaignFleetAPI closest = null;
-        float best = Float.MAX_VALUE;
+        //The first responder already delivered this burn's stop. Fresh patrols can see the lamps,
+        //but do not form a second queue behind a conversation which has already happened.
+        if (LampOffence.isRunResolved()) return;
 
-        List<CampaignFleetAPI> nearby = Misc.findNearbyFleets(player, SEARCH_RANGE, new FleetFilter() {
-            @Override
-            public boolean accept(CampaignFleetAPI curr) {
-                return canObject(curr, player);
-            }
-        });
-
-        for (CampaignFleetAPI curr : nearby) {
-            float distance = Misc.getDistance(player.getLocation(), curr.getLocation());
-            if (distance >= best) continue;
-
-            best = distance;
-            closest = curr;
+        //Visibility is the range limit. A fixed-radius prefilter could exclude a patrol whose
+        //sensor strength genuinely lets it see the player's very detectable lit fleet.
+        for (CampaignFleetAPI curr
+                : new ArrayList<>(player.getContainingLocation().getFleets())) {
+            if (canObject(curr, player)) send(curr);
         }
-
-        if (closest == null) return;
-
-        send(closest);
     }
 
     /**
@@ -205,13 +199,12 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         //Vanilla's pursuit flags tell the tactical AI that it may pick the player, but an active
         //assignment such as STANDING_DOWN can still keep the assignment module in charge of the
-        //course. This stop is already committed, so replace the patrol's work with the intercept;
-        //its route AI will supply ordinary patrol work again after the stop is cleaned up.
+        //course. Put the intercept first so it takes control now without destroying the work which
+        //must resume if another responder reaches the player first.
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        patrol.clearAssignments();
-        patrol.addAssignment(FleetAssignment.INTERCEPT, player, CHASE_DAYS);
+        patrol.addAssignmentAtStart(FleetAssignment.INTERCEPT, player, CHASE_DAYS, null);
 
-        stopping = patrol;
+        if (!stopping.contains(patrol)) stopping.add(patrol);
     }
 
     /**
@@ -221,51 +214,40 @@ public class LampPatrolResponse implements EveryFrameScript {
      */
     protected void maintain() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        MemoryAPI mem = stopping.getMemoryWithoutUpdate();
 
         //Lights-out is still the boundary between burns, even though it no longer calls off a stop
         //which has already been committed. If they are relit before this crew arrives, leave this
         //false; look() will start the new run after the current encounter is settled.
         if (!SearchlightAbilityPlugin.isBreaching()) lit = false;
 
-        //first, before isAlive(): refusing turns them hostile and the fight happens inside the same
-        //paused dialog, so by the time the script looks again the crew may already be dead
-        if (mem.getBoolean(LampOffence.STOPPED_KEY)) {
-            //the sheet says the conversation happened; which burn it was about is this side's to
-            //record, since the sheet has no idea one is being counted
-            LampOffence.markTold(mem);
+        //First, before liveness or hostility: refusing can turn the winner hostile and resolve the
+        //fight inside the paused dialog. Its stopped flag still claims the encounter for the group.
+        for (CampaignFleetAPI patrol : new ArrayList<>(stopping)) {
+            if (!patrol.getMemoryWithoutUpdate().getBoolean(LampOffence.STOPPED_KEY)) continue;
 
-            end();
+            LampOffence.markRunResolved();
+            for (CampaignFleetAPI responder : new ArrayList<>(stopping)) {
+                LampOffence.markTold(responder.getMemoryWithoutUpdate());
+                end(responder);
+            }
             return;
         }
 
-        if (!stopping.isAlive() || player == null) {
-            end();
-            return;
-        }
+        for (CampaignFleetAPI patrol : new ArrayList<>(stopping)) {
+            MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
-        if (!mem.getBoolean(LampOffence.SAW_KEY)) {
-            end();
-            return;
-        }
+            if (!patrol.isAlive() || player == null
+                    || !mem.getBoolean(LampOffence.SAW_KEY)
+                    || player.isInHyperspace() || player.isInHyperspaceTransition()
+                    || patrol.getContainingLocation() != player.getContainingLocation()
+                    || patrol.isHostileTo(player)) {
+                end(patrol);
+                continue;
+            }
 
-        if (player.isInHyperspace() || player.isInHyperspaceTransition()) {
-            end();
-            return;
-        }
-
-        if (stopping.getContainingLocation() != player.getContainingLocation()) {
-            end();
-            return;
-        }
-
-        if (stopping.isHostileTo(player)) {
-            end();
-            return;
-        }
-
-        if (player.getVisibilityLevelTo(stopping) != VisibilityLevel.NONE) {
-            Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
+            if (player.getVisibilityLevelTo(patrol) != VisibilityLevel.NONE) {
+                Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
+            }
         }
     }
 
@@ -276,27 +258,27 @@ public class LampPatrolResponse implements EveryFrameScript {
      * Putting the lamps out closes the current burn immediately without closing the committed stop.
      * A later relight is therefore a fresh run after this encounter has been settled.
      */
-    protected void end() {
-        if (stopping == null) return;
+    protected void end(CampaignFleetAPI patrol) {
+        if (patrol == null) return;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        MemoryAPI mem = stopping.getMemoryWithoutUpdate();
+        MemoryAPI mem = patrol.getMemoryWithoutUpdate();
         boolean lampsStillBurning = SearchlightAbilityPlugin.isBreaching();
 
         //Do not wait for the next interval sweep to notice the off transition. The player can put
         //them out during the paused conversation and relight before look() gets an off frame.
         if (!lampsStillBurning) lit = false;
 
-        FleetAssignmentDataAPI assignment = stopping.getCurrentAssignment();
+        FleetAssignmentDataAPI assignment = patrol.getCurrentAssignment();
         if (assignment != null && assignment.getAssignment() == FleetAssignment.INTERCEPT
                 && assignment.getTarget() == player) {
-            stopping.removeFirstAssignmentIfItIs(assignment.getAssignment());
+            patrol.removeFirstAssignmentIfItIs(assignment.getAssignment());
         }
 
-        stopping.setInteractionTarget(null);
+        patrol.setInteractionTarget(null);
 
-        if (stopping.getAI() instanceof ModularFleetAIAPI) {
-            ModularFleetAIAPI ai = (ModularFleetAIAPI) stopping.getAI();
+        if (patrol.getAI() instanceof ModularFleetAIAPI) {
+            ModularFleetAIAPI ai = (ModularFleetAIAPI) patrol.getAI();
             if (ai.getTacticalModule().getTarget() == player) ai.getTacticalModule().setTarget(null);
         }
 
@@ -310,8 +292,11 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (retryKey != null) {
             MemoryAPI sector = Global.getSector().getMemoryWithoutUpdate();
 
-            if (lampsStillBurning) sector.set(retryKey, true, RETRY_DAYS);
-            else sector.unset(retryKey);
+            if (lampsStillBurning && !LampOffence.isRunResolved()) {
+                sector.set(retryKey, true, RETRY_DAYS);
+            } else {
+                sector.unset(retryKey);
+            }
         }
 
         mem.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
@@ -321,7 +306,7 @@ public class LampPatrolResponse implements EveryFrameScript {
         mem.unset(FACTION_KEY);
         mem.unset(SYSTEM_KEY);
 
-        stopping = null;
+        stopping.remove(patrol);
     }
 
     /** One retry slot per enforcing faction per system; neither dimension may leak into another. */
