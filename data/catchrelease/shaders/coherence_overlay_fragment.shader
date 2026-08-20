@@ -16,15 +16,18 @@ void main() {
     vec2 uv = gl_TexCoord[0].xy;
     vec2 p = uv / visibleUV; // 0-1 across the visible screen
 
-    // centre distance, deliberately not aspect-corrected: equal-d in p space is an oval on a
-    // widescreen, so the clear centre keeps the screen's own shape. 0 centre, 1 mid-edge
-    vec2 c = (p - 0.5) * 2.0;
-    float d = length(c);
+    // Distance through the screen rectangle: 0 at centre and 1 at every point on its edge.
+    // Euclidean distance makes the corners 1.414 while the mid-edges are 1, so the corners stay
+    // broadly saturated even when the inner boundary is almost at the edge. max() gives the
+    // intended uniform inset and makes the visible reach agree on all four sides.
+    vec2 c = abs((p - 0.5) * 2.0);
+    float d = max(c.x, c.y);
 
-    // edge-pinned at level 0, in to innerClear at level 1 and no further. Held off 1.0: the
-    // distance falloffs feeding level can hand over a millionth, and smoothstep with two equal
-    // edges divides by zero - one NaN here is the whole screen, since this pass replaces it
-    float inner = min(mix(1.0, innerClear, level), 0.999);
+    // Edge-pinned at level 0, linearly in to innerClear at level 1 and no further. Held off 1.0:
+    // the distance falloffs feeding level can hand over a millionth, and smoothstep with two
+    // equal edges divides by zero - one NaN here is the whole screen, since this pass replaces it.
+    float reach = (1.0 - innerClear) * level;
+    float inner = min(1.0 - reach, 0.999);
     float mask = smoothstep(inner, 1.0, d);
 
     // two sine octaves per axis, each driven by the other axis's coordinate so no band ever

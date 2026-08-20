@@ -820,7 +820,7 @@ Shader and GL machinery.
 |---|---|
 | `distortion/CampaignDistortionRenderer.java` | GraphicsLib's distortion pass, rebuilt to run on the campaign map |
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
-| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside. Both warp and tint sit under a radial mask that leaves the middle of the screen clear |
+| `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside. Both warp and tint sit under a screen-edge mask whose uniform rectangular inset advances linearly as coherence fails; high-coherence states remain shallow at the corners instead of inheriting a circle's permanently saturated wedges |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
