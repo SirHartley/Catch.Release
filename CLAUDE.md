@@ -4,6 +4,8 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 
 ## Workflow
 
+- **Read this file in full before every Catch.Release task.** Refresh the current remote
+  `CLAUDE.md` at the start of each task; a read from an earlier task does not carry over.
 - **Ask the `starsector-knowledge` skill first, and for anything vanilla ask it only.** It is
   the full API, the decompiled internals and the whole stock `data/` folder for one exact game
   build, indexed - and it covers the obfuscated code and the csv formats, which nothing else
@@ -22,15 +24,6 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   whimsy on the surface, nothing good underneath, and never say so. Dialogue, species descriptions,
   tackle blurbs and intel notes all answer to it. It also lists what the mod does that the fiction
   has not explained yet; do not invent an answer in a row, settle it there first.
-- **Draft and audit dialogue with the Starsector Editor in the Codex app.** Give the editor the
-  complete current `docs/LORE.md`, not a summary, before asking it to revise a line. For corrective
-  passes, also supply both the pre-regression and current dialogue so stronger characterization is
-  restored rather than flattened by generic tightening. Use focused faction, Fisherman and
-  Crablobab passes, then give the editor the final sheet for voice QA. Its prose still has to pass
-  the rules safety checks below; the editor does not get to alter routes, tokens or mechanics.
-  **Never treat the Editor's draft or QA as the lore check:** independently compare every returned
-  line against the complete current `docs/LORE.md` before integration, and send any terminology or
-  mechanics conflict back to the Editor for correction.
 - **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
   verified against decompiled engine source - triggers, memory scopes, the operator table, the
   truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
@@ -56,6 +49,41 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 - **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
   a missing or invalid CLI login must never block PR creation, inspection, or merging when the app
   is connected.
+
+## ChatGPT app workflow (ChatGPT only)
+
+This section applies only when ChatGPT is working on Catch.Release in the ChatGPT app. It is
+**not an instruction for Claude**.
+
+- **Use local and pinned GPTs directly through the ChatGPT app.** ChatGPT can switch to GPTs
+  such as the Starsector Editor inside the app. Do not open `chatgpt.com` or use the browser
+  to reach them.
+- **Treat the PC filesystem as unavailable for writes until the filesystem incident is
+  explicitly cleared.** Do not try to edit, patch, create, delete, move, or format local files.
+  Do not perform local Git operations either: no local branch, checkout, staging, commit, pull,
+  push, merge, or post-merge sync. Local reads may be attempted when useful, but expect them to
+  fail and do not make the workflow depend on them.
+- **Use the connected GitHub app for the entire repository workflow.** Read the current remote
+  files and refs there, create the task branch there, make each file update there, inspect the
+  remote diff there, and open and merge the pull request there. While the incident remains
+  unresolved, do not fall back to PowerShell, a local checkout, the `gh` CLI, the browser, or
+  another local write path.
+- **Preserve the repository's task/commit discipline through the GitHub app.** One task is one
+  commit. If a message contains several tasks, commit them separately on the same task branch in
+  the requested order, and open and merge the pull request only after the whole message is done.
+- **Work from, and finish against, remote state.** Refresh remote `master` before branching and
+  check it again before merging, account for intervening remote changes, verify the merged remote
+  commit, and leave every local checkout and live mod install untouched.
+- **Draft and audit dialogue with the Starsector Editor GPT in the ChatGPT app.** Give the editor
+  the complete current remote `docs/LORE.md`, not a summary, before asking it to revise a line.
+  For corrective passes, also supply both the pre-regression and current dialogue so stronger
+  characterization is restored rather than flattened by generic tightening. Use focused faction,
+  Fisherman and Crablobab passes, then give the editor the final sheet for voice QA. Its prose
+  still has to pass the rules safety checks below; the editor does not get to alter routes, tokens
+  or mechanics. **Never treat the Editor's draft or QA as the lore check:** independently compare
+  every returned line against the complete current remote `docs/LORE.md` before integration, and
+  send any terminology or mechanics conflict back to the Editor for correction. Apply the
+  approved result through the GitHub app only.
 
 ## Model assignments
 
