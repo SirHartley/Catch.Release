@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class KidsJob extends FishJob {
 
-    public static final String GROUP_PORTRAIT = "graphics/portraits/portrait_generic.png";
+    public static final String GROUP_PORTRAIT_ID = "catchrelease_duel_group";
 
     /** The flag that puts this job's own pair of options up instead of the shared hand-over. */
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
@@ -51,8 +52,9 @@ public class KidsJob extends FishJob {
         setGiverVoice(Voices.SPACER);
 
         if (!setUpGiver(createdAt)) return false;
-        //The giver is a mission anchor, not one of the two children: the scene gets no lone face.
-        getPerson().setPortraitSprite(GROUP_PORTRAIT);
+        // The giver only anchors the comm-directory entry; it is not one of the two children.
+        getPerson().setPortraitSprite(Global.getSettings()
+                .getSpriteName("characters", GROUP_PORTRAIT_ID));
 
 
         days = DAYS;
@@ -78,6 +80,14 @@ public class KidsJob extends FishJob {
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
+
+        if ("showBarBackdrop".equals(action)) {
+            if (dialog != null && dialog.getVisualPanel() != null) {
+                dialog.getVisualPanel().restoreSavedVisual();
+            }
+
+            return true;
+        }
 
         if ("chooseContenders".equals(action)) {
             showContenderPicker(dialog, memoryMap);

@@ -34,6 +34,7 @@
       "catchrelease_fisherman_unstable": "graphics/catchrelease/portraits/fisherman_4_unstable.png",
       "catchrelease_fisherman_barely_holding": "graphics/catchrelease/portraits/fisherman_5_barelyholding.png",
       "catchrelease_crabolabob": "graphics/catchrelease/portraits/crabolabob.png",
+      "catchrelease_duel_group": "graphics/portraits/portrait_generic.png",
     },
 
     "fx": {
