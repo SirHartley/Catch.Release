@@ -2,7 +2,9 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
+import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -13,6 +15,7 @@ import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.helper.loading.SilhouetteBaker;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
@@ -385,6 +388,29 @@ public abstract class FishReward {
                     ? speciesId : FishSpecLoader.getFishSpec(speciesId).getDisplayName();
 
             return "range data on the " + name;
+        }
+
+        @Override
+        public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
+            FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
+            if (tooltip == null || spec == null || isRedundant()) return false;
+
+            String silhouette = SilhouetteBaker.getSilhouette(FishCodex.getIcon(spec), spec.id);
+            if (silhouette == null) return false;
+
+            TooltipMakerAPI item = tooltip.beginImageWithText(silhouette, 48f);
+            item.addPara("Range data", Misc.getHighlightColor(), 0f);
+            item.addPara(spec.getDisplayName(), spec.rarity.color, 3f);
+            item.addPara("Range data unlocks the habitat of the pattern on your map, allowing you"
+                    + " to see its range and plot a course to catch it.", 6f);
+            tooltip.addImageWithText(pad);
+
+            return true;
+        }
+
+        @Override
+        public boolean hasOfferDetails() {
+            return !isRedundant();
         }
 
         @Override
