@@ -152,6 +152,11 @@ Bar-job offer and active-contact menus fire the private `JobSpecificOptions` tri
 vanilla person options, especially `cutCommLink`, out of job dialogue by construction. Picker
 cancel and payout callbacks resume through that same trigger; authored job exits close directly.
 
+Accepted contacts also own a scored `PickGreeting` wrapper. It shows the contact visual, refreshes
+the job's live tokens, fires the one `$missionId`-specific `catchreleaseJobGreeting`, and then builds
+the private option batch. All 14 jobs therefore open from intel with their own rules-authored scene
+instead of a generic vanilla voice greeting.
+
 
 | Id | Class | | Id | Class |
 |---|---|---|---|---|

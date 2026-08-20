@@ -464,8 +464,7 @@ catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditi
 catchrelease_jobDeliverShort,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobLeaveOption,JobSpecificOptions,"$catchrelease_jobDeliver
-!$BarCMD","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
+catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobDeliver,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
 catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
 !$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
 catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,EndConversation NO_CONTINUE,,,Person and market conversations can close directly; no fleet encounter cleanup is involved.
@@ -476,6 +475,118 @@ FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
+catchrelease_jobContactGreeting,PickGreeting,$catchrelease_jobDeliver score:1000,"ShowPersonVisual
+Call $catchrelease_jobRef updateData
+FireBest catchreleaseJobGreeting
+FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, then build only the job-owned option batch."
+catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
+
+""Captain. Good timing.""
+
+A supplier line is pulled to the front of the slate, your comm ID already attached to it.
+
+""Let's see where the order stands.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The cook answers from somewhere just off the kitchen floor, wipes one hand on an apron and props a slate against a stack of ingredient cards.
+
+""Captain. You're back.""
+
+Three separate lines sit under the name of the dish.
+
+""All right. Let's see what we're working with.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with his supply diagram already open.
+
+""Captain. Excellent. I was just updating the inbound model.""
+
+He moves your supplier box to the center of the display. CONSOLIDATE, GRADE and DISPATCH are still waiting downstream.
+
+""Where are we?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The man answers promptly. A household schedule remains open on his slate, though your supplier entry has already been brought to the front.
+
+""Captain. Good day.""
+
+He sets the slate down on his side of the desk.
+
+""You wished to discuss the commission.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
+
+""Captain. Good to hear from you.""
+
+She marks her place in the current record and brings your commission onto the main display.
+
+""Let's have a look at where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_duel_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_duel score:100,,"The loud child appears first, leaning so close to the pickup that only half a face fits in frame.
+
+""Captain!""
+
+The quiet child pulls the comm unit back and puts the tournament bracket in front of it instead.
+
+""We kept your spot.""
+
+""I said we would.""
+
+""You also tried to write somebody else in it.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"Salvatore takes the call from the same table. Enzo has the book open beside the tank and does not stop writing.
+
+""Captain,"" Salvatore says. ""You're still on the card.""
+
+Enzo turns one page, finds your line and rests a finger beside it.
+
+""Go ahead.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
+
+""Captain.""
+
+The buyer field remains masked. She scrolls directly to your specification and the delivery line beneath it.
+
+""What do you need from me?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens.
+
+""Captain. Good.""
+
+She saves one comparison, then brings your retrieval commission onto the screen beside an empty record slot.
+
+""Tell me where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
+
+""Wait. Captain's on comms.""
+
+The lens swings toward the display before the sentence is finished.
+
+""Feed, update just came through. This is either excellent timing or excellent retention.""
+
+He checks the recording indicator.
+
+""All right. Talk to me.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"All three plain-coated buyers are present when the connection opens.
+
+The first looks at you.
+
+The second brings up the purchase entry.
+
+The third says, ""Captain.""
+
+They wait.",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
+
+""Captain.""
+
+He pushes the figures aside and brings up the job marker.
+
+""Tell me you've got something worth changing next month's numbers for.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
+
+""Captain.""
+
+She closes a fresh message from the claims office without reading it twice.
+
+""Any movement on your end?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
+
+""Captain.""
+
+The fisher checks the doorway once, then brings up the camp marker.
+
+""What have you got?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
