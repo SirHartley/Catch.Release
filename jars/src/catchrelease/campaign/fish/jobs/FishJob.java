@@ -61,6 +61,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String PAID_KEY = "$catchreleasePaid";
     public static final String BONUS_KEY = "$catchreleaseBonus";
     public static final String MORE_KEY = "$catchreleaseMore";
+    /** Option trigger reserved for bar-job conversations, isolated from vanilla person options. */
+    public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
+
 
     public enum Stage {
         /** Accepted, fish not yet caught. */
@@ -491,14 +494,14 @@ public abstract class FishJob extends HubMissionWithBarEvent
                                    Map<String, MemoryAPI> memoryMap) {
 
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
-        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+        FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
 
     /** Returns to the options that opened the picker without spending or advancing the job. */
     protected void afterPickerCancelled(InteractionDialogAPI dialog,
                                         Map<String, MemoryAPI> memoryMap) {
 
-        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+        FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
 
     /**
