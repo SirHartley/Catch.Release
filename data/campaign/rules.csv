@@ -3559,7 +3559,7 @@ The payment figure appears.
 ""$entity.catchrelease_campBribeDGS credits buys our absence. It does not make you clean.""",,
 catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),"Greyed out with a reason rather than hidden, the way vanilla handles a bribe the player cannot cover."
 catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them to move on,"The third way through, for a fleet that can neither win the fight nor cover the bribe. Same bonus XP key the enforcement stops use - it is the same kind of thing being talked out of."
-catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLink:Cut the comm link,"Vanilla's own option and vanilla's own handler. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
+catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLinkNoText:Cut the comm link,"Vanilla's no-continue comm exit returns directly to the fleet menu. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
 catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
 $entity.catchrelease_campCleared = true
 ShowDefaultVisual","The transfer clears.
