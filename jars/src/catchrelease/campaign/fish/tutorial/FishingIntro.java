@@ -1300,14 +1300,19 @@ public class FishingIntro {
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (target != null && target.systemId != null && !target.landed) {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            } else if (target == null || target.landed) {
+                FishIntelMapButton.addSetAutopilot(info, width, getMapLocation(null));
             } else {
-                FishIntelMapButton.add(info, width, target == null ? null : getAsks());
+                FishIntelMapButton.add(info, width, getAsks());
             }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             Target target = getTarget();
+            if ((target == null || target.landed)
+                    && FishIntelMapButton.handleSetAutopilot(buttonId, getMapLocation(null))) return;
+
             if (target != null && target.systemId != null
                     && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
 

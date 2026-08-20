@@ -288,7 +288,7 @@ public class FishRumors {
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (getMapAsks() == null) {
-                FishIntelMapButton.add(info, width, null);
+                FishIntelMapButton.addSetAutopilot(info, width, getMapLocation(null));
             } else {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             }
@@ -302,6 +302,9 @@ public class FishRumors {
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = getMapAsks();
+            if (mapAsks == null
+                    && FishIntelMapButton.handleSetAutopilot(buttonId, getMapLocation(null))) return;
+
             if (mapAsks != null
                     && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
 

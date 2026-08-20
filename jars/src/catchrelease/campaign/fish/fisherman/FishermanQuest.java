@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -793,14 +794,20 @@ public class FishermanQuest {
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            if (!quest.landed) {
+            if (quest.landed) {
+                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+            } else {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-            if (FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+            if (quest.landed
+                    && FishIntelMapButton.handleSetAutopilot(buttonId,
+                    FishingIntro.getNearestBoat())) return;
+            if (!quest.landed
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
             super.buttonPressConfirmed(buttonId, ui);
         }
 
