@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs.camp;
 
 import catchrelease.campaign.fish.jobs.FishJob;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -239,7 +240,7 @@ public abstract class CampedSpotJob extends FishJob {
         camper = null;
 
         updateInteractionDataImpl();
-        sendUpdateIfPlayerHasIntel(Update.CAMP_CLEARED, false);
+        FishIntelNotifications.update(this, Update.CAMP_CLEARED);
     }
 
     /**
@@ -257,7 +258,8 @@ public abstract class CampedSpotJob extends FishJob {
         }
 
         updateInteractionDataImpl();
-        sendUpdateIfPlayerHasIntel(aboard ? Update.RECEIPT_CAUGHT : Update.RECEIPT_LOST, false);
+        FishIntelNotifications.update(this,
+                aboard ? Update.RECEIPT_CAUGHT : Update.RECEIPT_LOST);
     }
 
     @Override
@@ -299,6 +301,12 @@ public abstract class CampedSpotJob extends FishJob {
         if (pond != null && !pond.isExpired()) return pond;
 
         return super.getMapLocation(map);
+    }
+
+    /** This receipt belongs to one named rupture; habitat search would point elsewhere. */
+    @Override
+    protected SectorEntityToken getFishRequestRouteTarget() {
+        return getMapLocation(null);
     }
 
     /** Transition messages say what changed and what remains instead of repeating "1 fish". */

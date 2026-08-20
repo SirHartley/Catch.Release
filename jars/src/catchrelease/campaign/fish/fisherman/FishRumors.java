@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -138,7 +139,7 @@ public class FishRumors {
         Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
 
         RumorIntel intel = new RumorIntel(rumor);
-        Global.getSector().getIntelManager().addIntel(intel);
+        FishIntelNotifications.queue(intel);
         intel.endAfterDelay(FishermanConstants.RUMOR_DURATION_DAYS);
 
         return rumor;
@@ -286,7 +287,11 @@ public class FishRumors {
             info.addPara(describe(rumor), 10f);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, getMapAsks());
+            if (getMapAsks() == null) {
+                FishIntelMapButton.addSetAutopilot(info, width, getMapLocation(null));
+            } else {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            }
         }
 
         protected List<catchrelease.campaign.fish.shop.FishRequirement> getMapAsks() {
@@ -297,6 +302,12 @@ public class FishRumors {
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = getMapAsks();
+            if (mapAsks == null
+                    && FishIntelMapButton.handleSetAutopilot(buttonId, getMapLocation(null))) return;
+
+            if (mapAsks != null
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
             com.fs.starfarer.api.campaign.SectorEntityToken center = mapAsks == null
                     ? getMapLocation(null) : null;
 

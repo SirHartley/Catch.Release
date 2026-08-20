@@ -6,9 +6,11 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -276,7 +278,7 @@ public class FishermanQuest {
         ensureIdentity(quest);
 
         Global.getSector().getPersistentData().put(STATE_KEY, quest);
-        Global.getSector().getIntelManager().addIntel(new QuestIntel(quest));
+        FishIntelNotifications.queue(new QuestIntel(quest));
     }
 
     //---------------------------------------------------------------- the hand-in
@@ -483,7 +485,7 @@ public class FishermanQuest {
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
                 .getIntel(QuestIntel.class)) {
 
-            ((QuestIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+            FishIntelNotifications.update((QuestIntel) intel, null);
         }
     }
 
@@ -792,12 +794,20 @@ public class FishermanQuest {
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, getAsks());
+            if (quest.landed) {
+                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+            } else {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-            if (FishIntelMapButton.handle(buttonId, ui, getAsks(), null, null)) return;
+            if (quest.landed
+                    && FishIntelMapButton.handleSetAutopilot(buttonId,
+                    FishingIntro.getNearestBoat())) return;
+            if (!quest.landed
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
             super.buttonPressConfirmed(buttonId, ui);
         }
 

@@ -15,6 +15,7 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -38,7 +39,6 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.util.DelayedActionScript;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lwjgl.util.vector.Vector2f;
@@ -195,8 +195,7 @@ public class FishingIntro {
         setStage(POINTED);
 
         IntroIntel intel = new IntroIntel();
-        intel.setForceAddNextFrame(true);
-        Global.getSector().getIntelManager().queueIntel(intel);
+        FishIntelNotifications.queue(intel);
     }
 
     /** Lesson one: the rod, and one fish out of the nearest rupture. */
@@ -420,9 +419,7 @@ public class FishingIntro {
         Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
     }
 
-    /** Invalidates the persistent intel entry whenever its live destination is replaced. A dialog
-     *  keeps the campaign paused, so the stock zero-day script sends the visible update on the
-     *  first unpaused frame after it closes instead of laying a campaign message over the scene. */
+    /** Invalidates the persistent intel entry whenever its live destination is replaced. */
     protected static void updateIntel() {
         IntelManagerAPI manager = Global.getSector().getIntelManager();
 
@@ -431,13 +428,6 @@ public class FishingIntro {
         if (!manager.getCommQueue(IntroIntel.class).isEmpty()
                 || manager.getIntel(IntroIntel.class).isEmpty()) return;
 
-        if (Global.getSector().getCampaignUI().isShowingDialog()) {
-            if (!Global.getSector().hasScript(DelayedIntroIntelUpdate.class)) {
-                Global.getSector().addScript(new DelayedIntroIntelUpdate());
-            }
-            return;
-        }
-
         sendIntelUpdate();
     }
 
@@ -445,22 +435,10 @@ public class FishingIntro {
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
                 .getIntel(IntroIntel.class)) {
 
-            ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+            FishIntelNotifications.update((IntroIntel) intel, null);
         }
     }
 
-    /** Zero vanilla days: not a timer, just the first frame the campaign is unpaused again. */
-    protected static class DelayedIntroIntelUpdate extends DelayedActionScript {
-
-        protected DelayedIntroIntelUpdate() {
-            super(0f);
-        }
-
-        @Override
-        public void doAction() {
-            sendIntelUpdate();
-        }
-    }
 
     /**
      * Takes this errand's claim off whatever rupture it was using.
@@ -498,6 +476,22 @@ public class FishingIntro {
         if (landed) letGo(target);
 
         updateIntel();
+    }
+
+    /** Updates multi-chart intel as each requested species reaches the hold. */
+    public static void onCatchStored(FishCatch caught) {
+        Target target = getTarget();
+        if (target == null || caught == null || target.anySpecies) return;
+        if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
+        if (target.needsDeepGear
+                && (caught.method != FishLogEntry.Method.HARPOON
+                || caught.implement != CatchImplement.BREACH_LAMP)) return;
+
+        if (isTargetMet()) {
+            setLanded(target, true);
+        } else if (target.speciesIds.size() > 1) {
+            updateIntel();
+        }
     }
 
     /** Whether the current errand has been answered by something in the hold. */
@@ -1231,9 +1225,23 @@ public class FishingIntro {
                             at.getContainingLocation().getName());
                 }
             } else {
-                String wanted = describeTarget();
-                LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
-                FishRequirement.highlight(wantedLine, getAsks(), wanted);
+                List<catchrelease.campaign.fish.shop.FishRequirement> asks = getAsks();
+                if (asks.size() > 1) {
+                    for (catchrelease.campaign.fish.shop.FishRequirement ask : asks) {
+                        int aboard = find(ask.speciesId, target.needsDeepGear) == null ? 0 : 1;
+                        String progress = ask.describeProgress(aboard);
+                        LabelAPI wantedLine = info.addPara(progress, initPad, tc, h,
+                                aboard + "/" + ask.count);
+                        FishRequirement.highlight(wantedLine,
+                                java.util.Collections.singletonList(ask), progress,
+                                aboard + "/" + ask.count);
+                        initPad = 0f;
+                    }
+                } else {
+                    String wanted = describeTarget();
+                    LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
+                    FishRequirement.highlight(wantedLine, asks, wanted);
+                }
                 if (target.systemName != null) {
                     info.addPara("In %s", 0f, tc, h, target.systemName);
                 }
@@ -1290,12 +1298,24 @@ public class FishingIntro {
             }
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, target == null ? null : getAsks());
+            if (target != null && target.systemId != null && !target.landed) {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            } else if (target == null || target.landed) {
+                FishIntelMapButton.addSetAutopilot(info, width, getMapLocation(null));
+            } else {
+                FishIntelMapButton.add(info, width, getAsks());
+            }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             Target target = getTarget();
+            if ((target == null || target.landed)
+                    && FishIntelMapButton.handleSetAutopilot(buttonId, getMapLocation(null))) return;
+
+            if (target != null && target.systemId != null
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = target == null
                     ? null : getAsks();
             SectorEntityToken center = target == null ? getMapLocation(null) : null;
