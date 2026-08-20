@@ -708,7 +708,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        boolean opened = FishingMinigameDialogPlugin.open(hooked, hooked, spec,
+        SectorEntityToken catchAnchor = hooked;
+        if (hooked.getCustomPlugin() instanceof FishEntityPlugin fish && fish.getPond() != null) {
+            catchAnchor = fish.getPond();
+        }
+
+        boolean opened = FishingMinigameDialogPlugin.open(catchAnchor, hooked, spec,
                 FishLogEntry.Method.HARPOON, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
