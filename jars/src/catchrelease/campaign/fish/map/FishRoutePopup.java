@@ -259,7 +259,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         for (Map.Entry<String, String> ask : reasons.entrySet()) {
             FishSpec spec = FishPresence.getSpec(ask.getKey());
-            if (spec == null || !FishPresence.isKnown(spec)) continue;
+            if (spec == null || !FishPresence.hasRangeData(spec)) continue;
             if (!filter.accepts(spec)) continue;
             if (!pinned.add(spec.id)) continue;
 
@@ -270,6 +270,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
 
         for (FishSpec spec : FishPresence.getShown(filter)) {
+            if (!FishPresence.hasRangeData(spec)) continue;
             if (pinned.contains(spec.id)) continue;
 
             Row row = new Row();

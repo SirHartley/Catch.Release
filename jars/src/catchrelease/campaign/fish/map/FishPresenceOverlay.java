@@ -73,7 +73,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float ROUTE_ICON_GAP = 2f;
     public static final float ROUTE_BADGE_PAD = 5f;
 
+    public static final String NO_DATA_TEXT = "NO DATA";
+    public static final float NO_DATA_WIDTH = 180f;
+    public static final float NO_DATA_HEIGHT = 54f;
+    public static final float NO_DATA_BORDER = 2f;
+
     protected List<Blob> blobs = new ArrayList<>();
+    protected boolean noDataShown;
 
     /** The map's inner render widget - the thing that knows the camera. */
     protected Object mapWidget;
@@ -93,6 +99,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     public void setBlobs(List<Blob> blobs) {
         this.blobs = blobs == null ? new ArrayList<>() : blobs;
+    }
+
+    public void setNoDataShown(boolean shown) {
+        noDataShown = shown;
     }
 
     @Override
@@ -206,6 +216,33 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
 
         renderRoute(factor, centerX, centerY, alphaMult);
+        renderNoData(alphaMult);
+    }
+
+    /** A deliberately blunt chart-state notice, centred over the visible map and drawn last. */
+    protected void renderNoData(float alphaMult) {
+        if (!noDataShown || panelPos == null) return;
+
+        LazyFont bold = ShopUi.getTitleFont();
+        if (bold == null) return;
+
+        float x = panelPos.getX() + (panelPos.getWidth() - NO_DATA_WIDTH) * 0.5f;
+        float y = panelPos.getY() + (panelPos.getHeight() - NO_DATA_HEIGHT) * 0.5f;
+        Color red = Misc.getNegativeHighlightColor();
+
+        ShopUi.drawQuad(x, y, NO_DATA_WIDTH, NO_DATA_HEIGHT, Color.BLACK,
+                0.88f * alphaMult);
+        ShopUi.drawQuad(x, y, NO_DATA_WIDTH, NO_DATA_BORDER, red, alphaMult);
+        ShopUi.drawQuad(x, y + NO_DATA_HEIGHT - NO_DATA_BORDER,
+                NO_DATA_WIDTH, NO_DATA_BORDER, red, alphaMult);
+        ShopUi.drawQuad(x, y, NO_DATA_BORDER, NO_DATA_HEIGHT, red, alphaMult);
+        ShopUi.drawQuad(x + NO_DATA_WIDTH - NO_DATA_BORDER, y,
+                NO_DATA_BORDER, NO_DATA_HEIGHT, red, alphaMult);
+
+        LazyFont.DrawableString text = bold.createText(NO_DATA_TEXT,
+                ShopUi.withAlpha(red, alphaMult), bold.getBaseHeight());
+        text.draw(Math.round(x + (NO_DATA_WIDTH - text.getWidth()) * 0.5f),
+                Math.round(y + (NO_DATA_HEIGHT + text.getHeight()) * 0.5f));
     }
 
 

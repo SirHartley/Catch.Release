@@ -66,11 +66,17 @@ public class FishPresence {
         return shown;
     }
 
-    /** Dev mode knows everything. Otherwise it has to have been caught or paid for. */
+    /** Whether the player has actually learned this species' range. Dev mode does not forge it. */
+    public static boolean hasRangeData(FishSpec spec) {
+        return spec != null && spec.id != null
+                && (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id));
+    }
+
+    /** Dev mode exposes every species row. Otherwise it has to have been caught or paid for. */
     public static boolean isKnown(FishSpec spec) {
         if (Global.getSettings().isDevMode()) return true;
 
-        return FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id);
+        return hasRangeData(spec);
     }
 
     /**
@@ -87,11 +93,10 @@ public class FishPresence {
     /** Whether this species' waters get drawn at all. */
     public static boolean showsRegions(FishSpec spec) {
         if (spec == null || !spec.hasHabitat()) return false;
-        if (Global.getSettings().isDevMode()) return true;
 
-        //shading tracks isKnown() - catching a species also teaches its location, so there's no
-        //separate cutoff once landed
-        return isKnown(spec);
+        //Catching a species also teaches its location. Dev mode may expose the row for testing,
+        //but it must not disclose the habitat before either half of that progression happened.
+        return hasRangeData(spec);
     }
 
     /**
@@ -204,6 +209,8 @@ public class FishPresence {
 
     /** Where pointing the map at this species should land: the record catch, else its first water. */
     public static Vector2f getFocusPoint(FishSpec spec) {
+        if (!hasRangeData(spec)) return null;
+
         FishLogEntry logged = FishLog.get(spec.id);
         if (logged != null && logged.recordLocationInHyper != null) return logged.recordLocationInHyper;
 
@@ -215,8 +222,7 @@ public class FishPresence {
     public static String getStatus(FishSpec spec) {
         if (FishLog.isCaught(spec.id)) return "landed";
 
-        //missing region data is flagged only in dev mode
-        if (Global.getSettings().isDevMode() && !spec.hasHabitat()) return "no data";
+        if (!hasRangeData(spec) || !spec.hasHabitat()) return "no data";
 
         return "region data";
     }

@@ -119,6 +119,16 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return selectedIds;
     }
 
+    /** Whether an outside handoff selected anything whose range the player has not learned. */
+    public boolean hasSelectionWithoutRangeData() {
+        for (String id : selectedIds) {
+            FishSpec spec = FishPresence.getSpec(id);
+            if (spec != null && !FishPresence.hasRangeData(spec)) return true;
+        }
+
+        return false;
+    }
+
     /** No selection means the range view: the selection itself is the mode switch. */
     public boolean isCategoryView() {
         return selectedIds.isEmpty();
@@ -179,7 +189,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !FishPresence.isKnown(spec)) continue;
+            if (spec == null || spec.id == null || !FishPresence.hasRangeData(spec)) continue;
             if (!couldSupplyAny(asks, spec)) continue;
 
             filter.allowedSpeciesIds.add(spec.id);
