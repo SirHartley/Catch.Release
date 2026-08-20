@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
@@ -254,7 +255,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
                 if (aboard > 0 && aboard <= ask.count) advanced = true;
             }
 
-            if (advanced) job.sendUpdateIfPlayerHasIntel(CATCH_PROGRESS_UPDATE, false);
+            if (advanced) FishIntelNotifications.update(job, CATCH_PROGRESS_UPDATE);
         }
     }
 

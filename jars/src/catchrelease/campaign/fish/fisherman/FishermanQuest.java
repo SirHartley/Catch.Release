@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
@@ -276,7 +277,7 @@ public class FishermanQuest {
         ensureIdentity(quest);
 
         Global.getSector().getPersistentData().put(STATE_KEY, quest);
-        Global.getSector().getIntelManager().addIntel(new QuestIntel(quest));
+        FishIntelNotifications.queue(new QuestIntel(quest));
     }
 
     //---------------------------------------------------------------- the hand-in
@@ -483,7 +484,7 @@ public class FishermanQuest {
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
                 .getIntel(QuestIntel.class)) {
 
-            ((QuestIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+            FishIntelNotifications.update((QuestIntel) intel, null);
         }
     }
 

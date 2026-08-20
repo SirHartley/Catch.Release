@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -138,7 +139,7 @@ public class FishRumors {
         Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
 
         RumorIntel intel = new RumorIntel(rumor);
-        Global.getSector().getIntelManager().addIntel(intel);
+        FishIntelNotifications.queue(intel);
         intel.endAfterDelay(FishermanConstants.RUMOR_DURATION_DAYS);
 
         return rumor;
