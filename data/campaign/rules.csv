@@ -466,7 +466,7 @@ catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditi
 catchrelease_jobDeliverShort,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobDeliver,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
+catchrelease_jobLeaveOption,JobSpecificOptions,$catchrelease_jobContact,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
 catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
 !$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
 catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,"HideMapMarker
@@ -480,8 +480,8 @@ FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
-catchrelease_jobContactGreeting,PickGreeting,$catchrelease_jobDeliver score:1000,"ShowPersonVisual
-Call $catchrelease_jobRef updateData
+catchrelease_jobContactGreeting,PickGreeting,$catchrelease_jobContact score:1000,"Call $catchrelease_jobRef updateData
+Call $catchrelease_jobRef showContactVisual
 FireBest catchreleaseJobGreeting
 FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, then build only the job-owned option batch."
 catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
@@ -530,11 +530,11 @@ The quiet child pulls the comm unit back and puts the tournament bracket in fron
 ""I said we would.""
 
 ""You also tried to write somebody else in it.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
-catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"Salvatore takes the call from the same table. Enzo has the book open beside the tank and does not stop writing.
+catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"$personFirstName takes the call from the same table. $catchreleaseRight has the book open beside the tank and does not stop writing.
 
-""Captain,"" Salvatore says. ""You're still on the card.""
+""Captain,"" $personFirstName says. ""You're still on the card.""
 
-Enzo turns one page, finds your line and rests a finger beside it.
+$catchreleaseRight turns one page, finds your line and rests a finger beside it.
 
 ""Go ahead.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
 catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
@@ -976,14 +976,15 @@ Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
 catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask whether the tank is taking bets.,
-catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"$menuState = catchreleaseRingOffer 0
+catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"Call $catchrelease_jobRef showContactVisual
+$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The older man looks you over. The younger keeps writing on a slate.
 
 ""You here to put money down,"" the older man asks, ""or bring us something worth putting money on?""
 
-""Salvatore."" He does not offer a hand. He nods across the tank. ""Enzo.""
+""$personFirstName."" He does not offer a hand. He nods across the tank. ""$catchreleaseRight.""
 
-Enzo looks up. ""If it's neither, the bar has other tables.""",,
+$catchreleaseRight looks up. ""If it's neither, the bar has other tables.""",,
 catchrelease_ring_offerPeopleOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
 !$catchreleaseRingAskedPeople",,,10:catchrelease_ring_people:Who runs the bouts?,
 catchrelease_ring_offerTankOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
@@ -994,14 +995,14 @@ catchrelease_ring_offerTermsOption,JobSpecificOptions,$menuState == catchrelease
 catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,50:catchrelease_jobDecline:Leave them to it.,
 catchrelease_ring_people,DialogOptionSelected,$option == catchrelease_ring_people,"$catchreleaseRingAskedPeople = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","""Nobody runs them,"" Salvatore says. ""We know the man who owns the room. Enzo keeps the book. I settle up when it's over.""
+FireAll JobSpecificOptions","""Nobody runs them,"" $personFirstName says. ""We know the man who owns the room. $catchreleaseRight keeps the book. I settle up when it's over.""
 
-The bartender replaces Salvatore's drink without being called over.
+The bartender replaces $personFirstName's drink without being called over.
 
-Enzo taps the tank. ""The fish handle the fighting.""",,
+$catchreleaseRight taps the tank. ""The fish handle the fighting.""",,
 catchrelease_ring_tank,DialogOptionSelected,$option == catchrelease_ring_tank,"$catchreleaseRingAskedTank = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","Enzo taps the glass with the back of one fingernail.
+FireAll JobSpecificOptions","$catchreleaseRight taps the glass with the back of one fingernail.
 
 ""Two fish. One round. I call it when one stops answering the other.""
 
@@ -1009,10 +1010,10 @@ He unlocks the case, holds a numbered ampoule to the light and puts it back.
 
 ""That keeps them interested.""
 
-Salvatore glances at the tank. ""And keeps the evening moving.""",,
+$personFirstName glances at the tank. ""And keeps the evening moving.""",,
 catchrelease_ring_wager,DialogOptionSelected,$option == catchrelease_ring_wager,"$catchreleaseRingAskedWager = true 0
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","Enzo turns his slate around.
+FireAll JobSpecificOptions","$catchreleaseRight turns his slate around.
 
 ""We buy the pair. That's the sure thing. Or I leave what we owe you in the book and put it behind one of them.""
 
@@ -1020,19 +1021,19 @@ He draws two short lines with a gap between them.
 
 ""Bigger for its kind gets the better number. Same standing opens at thirty-eight each. The space in the middle is ours.""
 
-Salvatore says, ""Your fish wins, you get a fresh purse worth twice the job. It loses, we're square.""",,
+$personFirstName says, ""Your fish wins, you get a fresh purse worth twice the job. It loses, we're square.""",,
 catchrelease_ring_terms,DialogOptionSelected,$option == catchrelease_ring_terms,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingTerms 0
-FireAll JobSpecificOptions","Salvatore turns over a drink coaster. The job is already written on the back.
+FireAll JobSpecificOptions","$personFirstName turns over a drink coaster. The job is already written on the back.
 
 ""$catchreleaseAskCap. Thirty-five days.""
 
 He taps the last line.
 
-""$catchreleaseRewardCap. Bring Enzo two that meet the ask and that's yours.""
+""$catchreleaseRewardCap. Bring $catchreleaseRight two that meet the ask and that's yours.""
 
-Enzo draws a bracket beneath it.
+$catchreleaseRight draws a bracket beneath it.
 
 ""Take the sure payment and go home, or leave it in my book behind one of the pair. Winner gets a fresh purse worth twice the job. Loser gets nothing.""",,
 catchrelease_ring_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,30:catchrelease_jobAccept:Take the job.,
@@ -1040,21 +1041,21 @@ catchrelease_ring_termsDeclineOption,JobSpecificOptions,$menuState == catchrelea
 catchrelease_ring_termsBackOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,50:catchrelease_ring_termsBack:Ask something else.,
 catchrelease_ring_termsBack,DialogOptionSelected,$option == catchrelease_ring_termsBack,"$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions",,,
-catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,"Salvatore folds the coaster once and slides it across.
+catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,"$personFirstName folds the coaster once and slides it across.
 
 ""Good. We hold a place on the card for thirty-five days.""
 
-Enzo does not look up from his slate. ""After that, I fill it.""",,
-catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"Salvatore nods once.
+$catchreleaseRight does not look up from his slate. ""After that, I fill it.""",,
+catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"$personFirstName nods once.
 
 ""Then you were only asking after the tank.""
 
-Enzo turns his slate away. The bartender collects the empty glass between you and them.",,
-catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"Salvatore does not look at a calendar.
+$catchreleaseRight turns his slate away. The bartender collects the empty glass between you and them.",,
+catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"$personFirstName does not look at a calendar.
 
 ""$catchreleaseAskCap. Thirty-five days from when you said yes.""
 
-Enzo raps one knuckle against the empty side of the tank.
+$catchreleaseRight raps one knuckle against the empty side of the tank.
 
 ""The room is waiting.""",,
 catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
@@ -1067,18 +1068,18 @@ Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Not yet.,
 catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,Call $catchrelease_jobRef chooseFighters,,,
 catchrelease_ringAssignmentReady,CatchReleaseRingWagerReady,"$missionId == catchrelease_ring
-$catchreleaseRingSelectionReady",,"Enzo takes the two container tags, turns them face-down and deals one to either side of the tank.
+$catchreleaseRingSelectionReady",,"$catchreleaseRight takes the two container tags, turns them face-down and deals one to either side of the tank.
 
-SALVATORE — $catchreleaseLeftFish
-ENZO — $catchreleaseRightFish
+$catchreleaseLeft — $catchreleaseLeftFish
+$catchreleaseRight — $catchreleaseRightFish
 
 He writes the line beneath them.
 
-""Salvatore at $catchreleaseLeftOdds. Me at $catchreleaseRightOdds.""
+""$personFirstName at $catchreleaseLeftOdds. Me at $catchreleaseRightOdds.""
 
-Salvatore sets the agreed payment between you.
+$personFirstName sets the agreed payment between you.
 
-""Take what we owe you, or tell Enzo where to leave it.""",,
+""Take what we owe you, or tell $catchreleaseRight where to leave it.""",,
 catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
@@ -1100,9 +1101,9 @@ FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
 $catchreleasePaid
-!$catchreleaseHasWager score:100",SetTextHighlights $catchreleaseReward,"Salvatore takes $catchreleaseLeftFish. Enzo takes $catchreleaseRightFish.
+!$catchreleaseHasWager score:100",SetTextHighlights $catchreleaseReward,"$personFirstName takes $catchreleaseLeftFish. $catchreleaseRight takes $catchreleaseRightFish.
 
-Enzo strikes both names from the wager column. Salvatore passes you the agreed payment.
+$catchreleaseRight strikes both names from the wager column. $personFirstName passes you the agreed payment.
 
 ""Clean,"" he says.
 
@@ -1112,11 +1113,11 @@ $catchreleasePaid
 $catchreleaseHasWager
 $catchreleaseWon score:110",SetTextHighlights $catchreleaseReward,"You leave the payment on $catchreleaseWager's side, behind $catchreleaseWagerFish. Across the tank, $catchreleaseFoe has $catchreleaseFoeFish.
 
-Enzo breaks the seal on a numbered ampoule and empties it into the tank. The tank rocks once against its restraints. He watches until it settles.
+$catchreleaseRight breaks the seal on a numbered ampoule and empties it into the tank. The tank rocks once against its restraints. He watches until it settles.
 
-""$catchreleaseWager,"" Enzo says.
+""$catchreleaseWager,"" $catchreleaseRight says.
 
-Salvatore takes back the sure payment and settles the winning purse.
+$personFirstName takes back the sure payment and settles the winning purse.
 
 Received: $catchreleaseReward.",,
 catchrelease_ring_paidLost,catchreleaseJobPaid,"$missionId == catchrelease_ring
@@ -1124,11 +1125,11 @@ $catchreleasePaid
 $catchreleaseHasWager
 !$catchreleaseWon score:110",,"You leave the payment on $catchreleaseWager's side, behind $catchreleaseWagerFish. Across the tank, $catchreleaseFoe has $catchreleaseFoeFish.
 
-Enzo breaks the seal on a numbered ampoule and empties it into the tank. He watches until there is no argument left to make.
+$catchreleaseRight breaks the seal on a numbered ampoule and empties it into the tank. He watches until there is no argument left to make.
 
 ""$catchreleaseFoe,"" he says.
 
-Salvatore draws one line through the amount beside your name.
+$personFirstName draws one line through the amount beside your name.
 
 No payment.",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A woman in a conservative suit has a private purchase contract open beside a nearly finished drink. The buyer field is masked; the specification is not.,,

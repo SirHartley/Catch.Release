@@ -46,8 +46,14 @@ public abstract class FishJob extends HubMissionWithBarEvent
      */
     public static final String REF_KEY = "$catchrelease_jobRef";
 
-    /** Set on the giver while the fish are owed, which is what puts the hand-over option up. */
+    /** Set on the giver while the ordinary hand-over options should be shown. */
     public static final String DELIVER_FLAG = "$catchrelease_jobDeliver";
+
+    /**
+     * Set on every accepted job giver, including jobs with specialized hand-over flags. Dialogue
+     * routing must not depend on which kind of delivery menu a subclass happens to use.
+     */
+    public static final String CONTACT_FLAG = "$catchrelease_jobContact";
 
     /** Whether the hold covers the whole ask, refreshed every time the dialogue asks. */
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
@@ -197,6 +203,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         PersonAPI person = getPerson();
         if (person == null) return;
 
+        makeImportant(person, CONTACT_FLAG, Stage.WANTED);
         makeImportant(person, getDeliverFlag(), Stage.WANTED);
     }
 
@@ -344,13 +351,19 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     /**
-     * Handles the {@code turnIn} action called from rules.csv. Every handled verb must return true -
+     * Handles rules.csv actions shared by every fish job. Every handled verb must return true -
      * vanilla throws on an unhandled action rather than treating it as failed - so results are
      * reported through memory flags instead.
      */
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
+
+        if ("showContactVisual".equals(action)) {
+            showContactVisual(dialog);
+
+            return true;
+        }
 
         if ("turnIn".equals(action)) {
             showAutoHandOver(dialog, memoryMap);
@@ -383,6 +396,16 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    /**
+     * Standard accepted-job portrait. Multi-person jobs extend this hook with vanilla's secondary
+     * portrait slot without changing the active person that supplies the rules memory tokens.
+     */
+    protected void showContactVisual(InteractionDialogAPI dialog) {
+        if (dialog == null || getPerson() == null) return;
+
+        dialog.getVisualPanel().showPersonInfo(getPerson(), false);
     }
 
     /** Item-style cards under an offer, only for rewards whose short name cannot explain them. */
