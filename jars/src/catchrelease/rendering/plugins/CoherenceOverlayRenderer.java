@@ -25,6 +25,8 @@ import java.util.EnumSet;
  * Runs on ABOVE so everything in the world is already drawn before it is bent. The screen is
  * copied by hand first ({@link ShaderLib#copyScreen}) - in combat GraphicsLib's own pipeline has
  * done that before a shader like this runs, but nothing does out here.
+ * Its mask advances inward from the rectangular screen edge, not from a centre-distance circle:
+ * every edge and corner therefore follows the same linear coherence-to-inset progression.
  */
 public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
