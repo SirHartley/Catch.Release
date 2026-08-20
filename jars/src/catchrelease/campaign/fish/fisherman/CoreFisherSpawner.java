@@ -155,6 +155,13 @@ public class CoreFisherSpawner implements EveryFrameScript {
      * flying in from the rim on the first day of the campaign says the opposite.
      */
     protected static CampaignFleetAPI post(StarSystemAPI system) {
+        //Every creation path owns the location-level invariant at its mutation boundary. This is
+        //normally reached after a sweep/ensure check, but keeping the guard here prevents a new
+        //caller from placing a standing boat beside a visitor or directed tutorial posting.
+        FishermanSpawner.reconcileSystem(system);
+        CampaignFleetAPI existing = getAnyBoat(system);
+        if (existing != null) return existing;
+
         CampaignFleetAPI fleet = Global.getFactory().createEmptyFleet(
                 FishermanConstants.FACTION, FishermanConstants.FLEET_NAME, true);
 

@@ -67,6 +67,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float CONTROLS_HEIGHT = 154f;
     public static final float ROW_HEIGHT = 24f;
 
+    public static final String NO_DATA_TEXT = "No data for entry";
+    public static final float NO_DATA_NOTE_HEIGHT = 20f;
+    public static final float NO_DATA_RESET_WIDTH = 110f;
+    public static final float NO_DATA_RESET_HEIGHT = 22f;
+    public static final float NO_DATA_GAP = 8f;
+
     /** The coherence toggle's strip along the pane's floor. */
     public static final float COHERENCE_HEIGHT = 22f;
     public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
@@ -98,6 +104,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     protected final Set<String> selectedIds = new LinkedHashSet<>();
     protected int shownCount = 0;
+    protected boolean resetRequested = false;
 
     public FishMapPane(Host host) {
         this.host = host;
@@ -124,6 +131,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public void showSpecies(String speciesId) {
         if (speciesId == null) return;
 
+        resetRequested = false;
+
         //A later Codex jump is an ordinary species selection, not a continuation of an intel
         //request's category constraint. The same pane can survive beneath the Codex overlay.
         boolean wasRestricted = filter.speciesRestricted;
@@ -149,6 +158,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
      * species which could supply the order is represented, not merely the first three.
      */
     public void showRequirements(List<FishRequirement> asks) {
+        resetRequested = false;
         selectedIds.clear();
         filter.search = "";
         filter.types.clear();
@@ -188,6 +198,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
     /** Fresh un-narrowed survey view, used by intel that points at a place rather than a quarry. */
     public void showOverview() {
+        resetRequested = false;
         selectedIds.clear();
         filter.search = "";
         filter.types.clear();
@@ -267,6 +278,14 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public void advance(float amount) {
         if (searchField == null) return;
 
+        //The reset button lives inside the list that resetting replaces. Defer the rebuild until
+        //advance rather than removing that component while Starsector is walking its input tree.
+        if (resetRequested) {
+            resetRequested = false;
+            showOverview();
+            host.onPresenceChanged();
+        }
+
         String effective = PaneWidgets.tendGhost(searchField, SEARCH_GHOST);
         String current = filter.search == null ? "" : filter.search;
 
@@ -323,7 +342,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addCustom(chipRow, 8f);
 
         CustomPanelAPI deselect = panel.createCustomPanel(innerWidth, DESELECT_HEIGHT,
-                new PaneWidgets.TextButton(() -> "DESELECT ALL", () -> !selectedIds.isEmpty(),
+                new PaneWidgets.TextButton(() -> "DESELECT ALL",
+                        () -> !selectedIds.isEmpty() || filter.speciesRestricted,
                         this::onDeselectAll));
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
@@ -347,11 +367,38 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         shownCount = shown.size();
 
         float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f;
+        float listWidth = width - PAD * 2f;
+        boolean noDataForEntry = filter.speciesRestricted
+                && filter.allowedSpeciesIds.isEmpty();
+
         //same air on both sides - the list's slot is inset PAD left and right alike
-        listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
+        listElement = panel.createUIElement(listWidth, listHeight, !noDataForEntry);
+
+        if (noDataForEntry) {
+            CustomPanelAPI emptyState = panel.createCustomPanel(listWidth, listHeight,
+                    new BaseCustomUIPanelPlugin() {
+                    });
+
+            float blockHeight = NO_DATA_NOTE_HEIGHT + NO_DATA_GAP + NO_DATA_RESET_HEIGHT;
+            float blockTop = Math.max(0f, (listHeight - blockHeight) * 0.5f);
+
+            CustomPanelAPI note = panel.createCustomPanel(listWidth, NO_DATA_NOTE_HEIGHT,
+                    new PaneWidgets.Note(NO_DATA_TEXT));
+            emptyState.addComponent(note).inTL(0f, blockTop);
+
+            CustomPanelAPI reset = panel.createCustomPanel(
+                    NO_DATA_RESET_WIDTH, NO_DATA_RESET_HEIGHT,
+                    new PaneWidgets.TextButton(() -> "RESET", () -> true,
+                            () -> resetRequested = true));
+            emptyState.addComponent(reset).inTL(
+                    (listWidth - NO_DATA_RESET_WIDTH) * 0.5f,
+                    blockTop + NO_DATA_NOTE_HEIGHT + NO_DATA_GAP);
+
+            listElement.addCustom(emptyState, 0f);
+        }
 
         for (FishSpec spec : shown) {
-            CustomPanelAPI row = panel.createCustomPanel(width - PAD * 2f - 6f, ROW_HEIGHT,
+            CustomPanelAPI row = panel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
                     new RowPlugin(spec));
 
             listElement.addCustom(row, 3f);
@@ -391,6 +438,15 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected void onDeselectAll() {
+        //An intel request owns more state than the visible selections: broad asks may have no
+        //individual picks at all, and exact asks also leave an allowed-species constraint behind.
+        //Deselecting that request means leaving its scope entirely, not showing its category union.
+        if (filter.speciesRestricted) {
+            showOverview();
+            host.onPresenceChanged();
+            return;
+        }
+
         if (selectedIds.isEmpty()) return;
 
         selectedIds.clear();

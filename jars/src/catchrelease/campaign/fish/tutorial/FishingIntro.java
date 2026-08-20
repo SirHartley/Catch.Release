@@ -30,6 +30,7 @@ import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
@@ -37,6 +38,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.DelayedActionScript;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lwjgl.util.vector.Vector2f;
@@ -192,7 +194,9 @@ public class FishingIntro {
 
         setStage(POINTED);
 
-        Global.getSector().getIntelManager().addIntel(new IntroIntel());
+        IntroIntel intel = new IntroIntel();
+        intel.setForceAddNextFrame(true);
+        Global.getSector().getIntelManager().queueIntel(intel);
     }
 
     /** Lesson one: the rod, and one fish out of the nearest rupture. */
@@ -416,12 +420,45 @@ public class FishingIntro {
         Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
     }
 
-    /** Invalidates the persistent intel entry whenever its live destination is replaced. */
+    /** Invalidates the persistent intel entry whenever its live destination is replaced. A dialog
+     *  keeps the campaign paused, so the stock zero-day script sends the visible update on the
+     *  first unpaused frame after it closes instead of laying a campaign message over the scene. */
     protected static void updateIntel() {
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+
+        //The first note is still dynamic while queued; its eventual first message already reads
+        //the newest target. Sending an update too would produce two messages on the same frame.
+        if (!manager.getCommQueue(IntroIntel.class).isEmpty()
+                || manager.getIntel(IntroIntel.class).isEmpty()) return;
+
+        if (Global.getSector().getCampaignUI().isShowingDialog()) {
+            if (!Global.getSector().hasScript(DelayedIntroIntelUpdate.class)) {
+                Global.getSector().addScript(new DelayedIntroIntelUpdate());
+            }
+            return;
+        }
+
+        sendIntelUpdate();
+    }
+
+    protected static void sendIntelUpdate() {
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
                 .getIntel(IntroIntel.class)) {
 
             ((IntroIntel) intel).sendUpdateIfPlayerHasIntel(null, false);
+        }
+    }
+
+    /** Zero vanilla days: not a timer, just the first frame the campaign is unpaused again. */
+    protected static class DelayedIntroIntelUpdate extends DelayedActionScript {
+
+        protected DelayedIntroIntelUpdate() {
+            super(0f);
+        }
+
+        @Override
+        public void doAction() {
+            sendIntelUpdate();
         }
     }
 
@@ -929,10 +966,13 @@ public class FishingIntro {
     }
 
     protected static void dropNote() {
-        for (IntelInfoPlugin intel : new ArrayList<>(Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class))) {
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        List<IntelInfoPlugin> notes = new ArrayList<>(manager.getIntel(IntroIntel.class));
+        notes.addAll(manager.getCommQueue(IntroIntel.class));
 
-            Global.getSector().getIntelManager().removeIntel(intel);
+        for (IntelInfoPlugin intel : notes) {
+
+            manager.removeIntel(intel);
         }
     }
 

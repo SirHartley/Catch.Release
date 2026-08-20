@@ -3,6 +3,8 @@ package catchrelease.abilities.searchlight.scripts;
 import catchrelease.helper.math.CircularArc;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import catchrelease.helper.math.TrigHelper;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -75,7 +77,9 @@ public class Searchlight implements EveryFrameScript {
     /** Seconds one face takes to hand over to the other when the fleet crosses. */
     public static final float LOOK_SWAP_FADE = 1f;
 
-    private final List<RippleRingRenderer> rings = new ArrayList<>();
+    /** Luna registrations are transient, so retaining their objects through a save only creates
+     * unreachable, never-advancing baggage. */
+    private transient List<RippleRingRenderer> rings = new ArrayList<>();
     private final Vector2f currentRenderLoc = new Vector2f();
 
     private CircularArc arc;
@@ -121,6 +125,11 @@ public class Searchlight implements EveryFrameScript {
 
     private transient List<WaveDistortion> fanLenses;
 
+    /** Runtime ownership. Rebound by the ability after load before this script may draw again. */
+    private transient SearchlightAbilityPlugin owner;
+    private transient CampaignFleetAPI ownerFleet;
+    private transient LocationAPI home;
+
     @Override
     public boolean isDone() {
         return expired;
@@ -135,8 +144,10 @@ public class Searchlight implements EveryFrameScript {
      * The arc sweeps in world-fixed degrees, not hull heading - tying it to a manually-piloted
      * fleet's constantly-correcting facing never lets the sweep settle.
      */
-    public void init(CircularArc circularArc) {
+    public void init(CircularArc circularArc, SearchlightAbilityPlugin owner,
+                     CampaignFleetAPI ownerFleet, LocationAPI home) {
         this.arc = circularArc;
+        bindOwner(owner, ownerFleet, home);
         baseArcAngle = arc.startAngle;
 
         //set before the faces are built, or they'd read the vector's (0,0) default for one frame
@@ -151,6 +162,15 @@ public class Searchlight implements EveryFrameScript {
     public void advance(float amt) {
         if (expired || arc == null) return;
 
+        if (!isRuntimeCurrent()) {
+            expire(false);
+            return;
+        }
+
+        //Do not trust a saved/reference alias to remain the fleet's live Vector2f forever.
+        arc.center = ownerFleet.getLocation();
+
+        ensureRings();
         advanceMovement(amt);
         advanceLook();
         advanceLens();
@@ -160,11 +180,60 @@ public class Searchlight implements EveryFrameScript {
         if (ringInterval.intervalElapsed() && fan == null) {
             float size = getArea();
             RippleRingRenderer ring = new RippleRingRenderer(currentRenderLoc, size, RING_COLOR);
+            ring.home = home;
             rings.add(ring);
             LunaCampaignRenderer.addTransientRenderer(ring);
         }
 
         rings.removeIf(RippleRingRenderer::isExpired);
+    }
+
+    public void bindOwner(SearchlightAbilityPlugin owner, CampaignFleetAPI ownerFleet,
+                          LocationAPI home) {
+        this.owner = owner;
+        this.ownerFleet = ownerFleet;
+        this.home = home;
+        if (arc != null && ownerFleet != null) arc.center = ownerFleet.getLocation();
+    }
+
+    /** A fleet script is save-persistent while every face it registers is not. Refuse to rebuild
+     * those faces unless this exact live activation still owns the script in the same location. */
+    public boolean isRuntimeCurrent() {
+        if (expired) return false;
+        if ((owner == null || ownerFleet == null || home == null) && !recoverOwnerAfterLoad()) {
+            return false;
+        }
+
+        AbilityPlugin installed = ownerFleet.getAbility(SearchlightAbilityPlugin.ABILITY_ID);
+
+        return installed == owner
+                && owner.owns(this)
+                && owner.isRuntimeCurrent()
+                && ownerFleet.getContainingLocation() == home;
+    }
+
+    /** Runtime fields are transient. Recover only through list membership on the installed, active
+     * player ability; a genuinely orphaned old script is therefore rejected rather than revived. */
+    protected boolean recoverOwnerAfterLoad() {
+        if (Global.getSector() == null) return false;
+
+        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        if (fleet == null || fleet.getContainingLocation() == null) return false;
+
+        AbilityPlugin installed = fleet.getAbility(SearchlightAbilityPlugin.ABILITY_ID);
+        if (!(installed instanceof SearchlightAbilityPlugin candidate)
+                || !candidate.isActive() || !candidate.owns(this)) {
+            return false;
+        }
+
+        candidate.recoverRuntimeLocation(fleet.getContainingLocation());
+        bindOwner(candidate, fleet, fleet.getContainingLocation());
+
+        return true;
+    }
+
+    protected void ensureRings() {
+        if (rings == null) rings = new ArrayList<>();
     }
 
     public void advanceMovement(float amt) {
@@ -211,6 +280,8 @@ public class Searchlight implements EveryFrameScript {
      * before light. Also heals load: transient faces come back null and get rebuilt here.
      */
     protected void advanceLook() {
+        if (!isRuntimeCurrent()) return;
+
         boolean fanned = isFanned();
 
         if (fanned) {
@@ -467,9 +538,15 @@ public class Searchlight implements EveryFrameScript {
     }
 
     public void expire(boolean withFade) {
+        if (expired) return;
+
+        ensureRings();
         float fadeSeconds = withFade ? 1f : 0f;
         for (RippleRingRenderer ring : rings) ring.fadeAndExpire(fadeSeconds);
-        if (glow != null) glow.fadeAndExpire(fadeSeconds);
+        if (glow != null) {
+            glow.fadeAndExpire(fadeSeconds);
+            glow = null;
+        }
 
         if (breach != null) {
             breach.fadeAndExpire(fadeSeconds);
