@@ -119,6 +119,16 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return selectedIds;
     }
 
+    /** Whether an outside handoff selected anything whose range the player has not learned. */
+    public boolean hasSelectionWithoutRangeData() {
+        for (String id : selectedIds) {
+            FishSpec spec = FishPresence.getSpec(id);
+            if (spec != null && !FishPresence.hasRangeData(spec)) return true;
+        }
+
+        return false;
+    }
+
     /** No selection means the range view: the selection itself is the mode switch. */
     public boolean isCategoryView() {
         return selectedIds.isEmpty();
@@ -179,7 +189,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !FishPresence.isKnown(spec)) continue;
+            if (spec == null || spec.id == null || !FishPresence.hasRangeData(spec)) continue;
             if (!couldSupplyAny(asks, spec)) continue;
 
             filter.allowedSpeciesIds.add(spec.id);
@@ -343,11 +353,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         CustomPanelAPI deselect = panel.createCustomPanel(innerWidth, DESELECT_HEIGHT,
                 new PaneWidgets.TextButton(() -> "DESELECT ALL",
-                        () -> !selectedIds.isEmpty() || filter.speciesRestricted,
+                        () -> !selectedIds.isEmpty() || !filter.types.isEmpty()
+                                || filter.speciesRestricted,
                         this::onDeselectAll));
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
-                "Clear the picked species and return to shading whole categories."),
+                "Clear the picked species and switch off every category filter."),
                 deselect, TooltipMakerAPI.TooltipLocation.BELOW);
 
         CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT,
@@ -438,18 +449,22 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected void onDeselectAll() {
-        //An intel request owns more state than the visible selections: broad asks may have no
-        //individual picks at all, and exact asks also leave an allowed-species constraint behind.
-        //Deselecting that request means leaving its scope entirely, not showing its category union.
-        if (filter.speciesRestricted) {
-            showOverview();
-            host.onPresenceChanged();
-            return;
-        }
-
-        if (selectedIds.isEmpty()) return;
+        boolean wasRestricted = filter.speciesRestricted;
+        if (selectedIds.isEmpty() && filter.types.isEmpty() && !wasRestricted) return;
 
         selectedIds.clear();
+        filter.types.clear();
+
+        //An intel request owns more state than the visible selections. Leaving its scope clears
+        //the hidden allowlist too, while the empty type set deliberately leaves every chip off.
+        if (wasRestricted) {
+            filter.search = "";
+            filter.allowedSpeciesIds.clear();
+            filter.speciesRestricted = false;
+            if (searchField != null) searchField.setText(SEARCH_GHOST);
+        }
+
+        rebuildList();
         host.onPresenceChanged();
     }
 

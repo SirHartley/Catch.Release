@@ -866,7 +866,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 ReflectionUtils.invoke(mapScreen, "centerOn", keep);
             }
 
-            if (overlay != null) overlay.setBlobs(null);
+            if (overlay != null) {
+                overlay.setBlobs(null);
+                overlay.setNoDataShown(false);
+            }
 
             //the heat map is the filter's reading of the water, not the map's - it goes down
             //with the pane; the sticky choice itself stays for the next activation
@@ -961,6 +964,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
 
         overlay.setBlobs(blobs);
+        overlay.setNoDataShown(pane.hasSelectionWithoutRangeData());
     }
 
     /** The three weaves, dealt in pick order; a fourth of anything starts the deal over. */
