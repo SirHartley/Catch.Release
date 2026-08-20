@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.entities;
 
+import catchrelease.abilities.harpoon.ability.HarpoonAbilityPlugin;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonOffence;
@@ -211,6 +212,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             //Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
             if (entity.isInCurrentLocation()) {
                 Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
+            }
+
+            //The player's fitted retrieval head refunds the confirmed shot. NPC-owned lines do
+            //not borrow the player's tackle, and fleet hits and misses never pass through here.
+            if (owner == null && TackleManager.get(Tackle.Fit.HARPOON).retrievesCharge) {
+                HarpoonAbilityPlugin.retrieveCharge();
             }
 
             //an explosive head never gets as far as the push: there is nothing to shove, nothing to

@@ -61,6 +61,11 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         }
     }
 
+    /** Returns a recovered head to the same capped pool used by firing and timed regeneration. */
+    public static boolean retrieveCharge() {
+        return ChargeManager.gain(CHARGE_ID, new HarpoonRefill());
+    }
+
     /**
      * The default relevance gate follows the two places a harpoon is used: lit breach lamps,
      * or the interaction reach of an open pond. Invalid or missing settings fail to that safe
