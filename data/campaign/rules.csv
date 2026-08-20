@@ -2393,6 +2393,25 @@ He looks at you.
 
 ""Same rule applies to the crew. Keep the trip short. Don't turn it into research.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherOptAsk_searchlightDrones,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
+!$global.catchrelease_fisherAsked_searchlightDrones","CatchReleaseCMD addFisherQuestion catchrelease_ask_searchlightDrones ""Why can't I use the drones with the searchlights?"" false",,,
+catchrelease_ask_searchlightDrones,DialogOptionSelected,$option == catchrelease_ask_searchlightDrones,$global.catchrelease_fisherAsked_searchlightDrones = true,"""The lights don't open a full breach. They wear the fabric thin enough for the ROD to reach through, but not enough for a drone to make the trip both ways.""
+
+He taps the harpoon schematic.
+
+""Send a drone through one of those and it'll be stuck beyond the fabric. That's why the harpoon keeps the line back to the ship. The rig doesn't have to make the return crossing on its own.""","0:catchrelease_ask_searchlightDronesGotIt:Got it.
+10:catchrelease_ask_searchlightDronesChange:Can that be changed?",
+catchrelease_ask_searchlightDronesGotIt,DialogOptionSelected,$option == catchrelease_ask_searchlightDronesGotIt,"$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions","""Good.""",,
+catchrelease_ask_searchlightDronesChange,DialogOptionSelected,$option == catchrelease_ask_searchlightDronesChange,,"""Yes.""
+
+He considers that for a moment.
+
+""There's a schematic for it. Rare one. Changes how the drone-side equipment handles a light-made breach.""
+
+""I've heard a rumor somebody has a copy.""",0:catchrelease_ask_searchlightDronesKeepEye:I'll keep an eye out.,
+catchrelease_ask_searchlightDronesKeepEye,DialogOptionSelected,$option == catchrelease_ask_searchlightDronesKeepEye,"$menuState = catchreleaseFisherAsk 0
+FireAll PopulateOptions","""Do that.""",,
 catchrelease_fisherOptAsk_fishBack,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 5
 !$global.catchrelease_fisherAsked_fishBack","CatchReleaseCMD addFisherQuestion catchrelease_ask_fishBack ""Does anything out there fish back?"" false",,,
 catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishBack,$global.catchrelease_fisherAsked_fishBack = true,"""Not with any rig module I'd sell you.""
@@ -2448,6 +2467,8 @@ catchrelease_fisherAsked_patterns,CatchReleaseFisherQuestionsAsked,"$catchreleas
 $global.catchrelease_fisherAsked_patterns","CatchReleaseCMD addFisherQuestion catchrelease_ask_patterns ""The patterns. What are they, actually?"" true",,,
 catchrelease_fisherAsked_deepWater,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 4
 $global.catchrelease_fisherAsked_deepWater","CatchReleaseCMD addFisherQuestion catchrelease_ask_deepWater ""Why is the deep water worse?"" true",,,
+catchrelease_fisherAsked_searchlightDrones,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_searchlightDrones","CatchReleaseCMD addFisherQuestion catchrelease_ask_searchlightDrones ""Why can't I use the drones with the searchlights?"" true",,,
 catchrelease_fisherAsked_fishBack,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 5
 $global.catchrelease_fisherAsked_fishBack","CatchReleaseCMD addFisherQuestion catchrelease_ask_fishBack ""Does anything out there fish back?"" true",,,
 catchrelease_fisherAsked_largest,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 6

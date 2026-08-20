@@ -1258,6 +1258,16 @@ branch on and always returns true, and in a row's *script* a verb does the thing
 it worked. The panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is
 machinery and there is nothing for a sheet to say about it.
 
+The Starsector Editor is a draft source, not the lore authority: every returned line is independently
+compared with `docs/LORE.md` before sheet insertion, and an Editor QA result does not replace that
+check. The Fisherman's question menu then keeps the same division: sheet rows add unasked topics
+first and asked topics second, and `addFisherQuestion` gives the latter the common-grey colour. The
+searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
+`$global.catchrelease_fisherAsked_searchlightDrones`, and returns both its acknowledgement and its
+schematic follow-up to the same menu. It explains the `BREACH_COUPLER` gate without granting it: a
+lamp-made opening is not a full breach, an uncoupled drone would be stuck beyond the fabric, and
+the harpoon's LINE keeps the retrieval system connected without being a physical cable.
+
 **A work offer rolls once before it speaks.** `catchrelease_workOffer` gets or creates a pending chart
 request in sector persistent data and fires `CatchReleaseWorkOffer`; declining, leaving, saving, or
 returning to the offer reuses that exact fish-and-system pair until acceptance consumes it.
