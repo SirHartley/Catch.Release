@@ -43,9 +43,6 @@ import java.util.Collections;
  */
 public abstract class FishReward {
 
-    public static final String SCHEMATIC_ICON =
-            "graphics/catchrelease/icon/small_icon_catchrelease2.png";
-
     /** What the offer says out loud, as a noun phrase: "2,000 credits", "a Barbed Head". */
     public abstract String describe();
 
@@ -235,7 +232,7 @@ public abstract class FishReward {
             if (tooltip == null || stat == null) return false;
 
             ShopEntry entry = ShopEntry.of(stat);
-            TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
+            TooltipMakerAPI item = tooltip.beginImageWithText(entry.getIconName(), 48f);
             item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
             item.addPara("%s — Tier %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
                     entry.getName(), String.valueOf(targetLevel));
@@ -312,7 +309,8 @@ public abstract class FishReward {
         public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
             if (tooltip == null) return false;
 
-            TooltipMakerAPI item = tooltip.beginImageWithText(SCHEMATIC_ICON, 48f);
+            ShopEntry entry = ShopEntry.of(tackle);
+            TooltipMakerAPI item = tooltip.beginImageWithText(entry.getIconName(), 48f);
             item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
             item.addPara(tackle.name, Misc.getTextColor(), 3f);
             item.addPara("Fits: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),

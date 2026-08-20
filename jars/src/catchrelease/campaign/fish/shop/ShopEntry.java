@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -54,6 +55,26 @@ public class ShopEntry {
 
     public static ShopEntry of(Tackle tackle, Tackle.Fit rig) {
         return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig, null);
+    }
+
+    /**
+     * A module entry for displays that are not tied to one particular slot. Dual-fit modules use
+     * the first rig the player actually owns, matching the first shop row they can see.
+     */
+    public static ShopEntry of(Tackle tackle) {
+        Tackle.Fit rig = tackle == null ? null : tackle.fit;
+
+        if (rig == Tackle.Fit.BOTH) {
+            rig = Tackle.Fit.DRONE;
+
+            if (Global.getSector() != null && Global.getSector().getPlayerFleet() != null
+                    && !Global.getSector().getPlayerFleet().hasAbility(StatIds.ROD_ABILITY)
+                    && Global.getSector().getPlayerFleet().hasAbility(StatIds.HARPOON_ABILITY)) {
+                rig = Tackle.Fit.HARPOON;
+            }
+        }
+
+        return of(tackle, rig);
     }
 
     public static ShopEntry of(CrabWares ware) {
@@ -121,6 +142,22 @@ public class ShopEntry {
         if (group == null || group.iconId == null || group.iconId.isEmpty()) return null;
 
         return SpriteLoader.getSprite(group.iconId);
+    }
+
+    /**
+     * Texture name for stock tooltip image APIs, resolved by the same authored-art then shelf-art
+     * rule as {@link #getIcon()}.
+     */
+    public String getIconName() {
+        String path = null;
+
+        if (kind == Kind.UPGRADE) path = stat.icon;
+        else if (kind == Kind.TACKLE) path = tackle.icon;
+
+        if (path != null && !path.isBlank()) return path;
+        if (group == null || group.iconId == null || group.iconId.isEmpty()) return null;
+
+        return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, group.iconId);
     }
 
     public boolean isCurio() {
