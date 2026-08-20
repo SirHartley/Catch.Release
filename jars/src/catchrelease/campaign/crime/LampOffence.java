@@ -62,6 +62,9 @@ public class LampOffence {
     public static final String RUN_KEY = "$catchrelease_lampRun";
     public static final String STOPPED_RUN_KEY = "$catchrelease_lampStoppedRun";
 
+    /** The burn already claimed by whichever pursuing patrol reached the player first. */
+    public static final String RESOLVED_RUN_KEY = "$catchrelease_lampResolvedRun";
+
     /** How close to somewhere inhabited counts as over it. */
     public static final float PLANET_RANGE = 3000f;
 
@@ -98,14 +101,11 @@ public class LampOffence {
     /**
      * Whether running lamps here is an offence against this faction at all.
      * <p>
-     * System-bound first, the way the transponder law is: a flag polices the systems it holds
-     * something in and nowhere else, so a Hegemony picket three jumps from anything Hegemony has
-     * nothing to say about what the player is doing with the fabric out there.
-     * <p>
-     * Inside their own space there are two ways to be in trouble. Everybody objects to a window
-     * opened over people, which means close enough to somewhere inhabited to be over it. The ones
-     * who object on principle - see {@link #hatesLampsAnywhere} - object anywhere in the system,
-     * planet or no planet, which is the difference between a regulation and a doctrine.
+     * A window opened over people is an immediate hazard rather than a jurisdiction question: any
+     * patrol that sees it comes over, regardless of whose flag is on the nearby world. Away from an
+     * inhabited world, the transponder-law shape still applies. A flag polices only systems where it
+     * holds something, and only the factions that object on principle - see
+     * {@link #hatesLampsAnywhere} - object throughout those systems.
      */
     public static boolean isIllegalHere(CampaignFleetAPI player, String factionId) {
         if (player == null) return false;
@@ -113,11 +113,9 @@ public class LampOffence {
         LocationAPI where = player.getContainingLocation();
         if (!(where instanceof StarSystemAPI)) return false;
 
-        if (!ownsSystem((StarSystemAPI) where, factionId)) return false;
+        if (getNearbyInhabited(player) != null) return true;
 
-        if (hatesLampsAnywhere(factionId)) return true;
-
-        return getNearbyInhabited(player) != null;
+        return ownsSystem((StarSystemAPI) where, factionId) && hatesLampsAnywhere(factionId);
     }
 
     /** The inhabited world the player is currently hanging over, if any. */
@@ -277,6 +275,16 @@ public class LampOffence {
     /** Called when the lamps come on somewhere they should not be, which starts a fresh offence. */
     public static void beginRun() {
         Global.getSector().getMemoryWithoutUpdate().set(RUN_KEY, getRun() + 1);
+    }
+
+    /** Whether one of the patrols pursuing this burn has already opened the stop. */
+    public static boolean isRunResolved() {
+        return Global.getSector().getMemoryWithoutUpdate().getInt(RESOLVED_RUN_KEY) == getRun();
+    }
+
+    /** Lets the first patrol to reach the player release every other responder to its old work. */
+    public static void markRunResolved() {
+        Global.getSector().getMemoryWithoutUpdate().set(RESOLVED_RUN_KEY, getRun());
     }
 
     /** Whether this crew has already had the conversation about the burn currently in progress. */
