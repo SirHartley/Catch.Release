@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -662,12 +663,24 @@ public abstract class FishJob extends HubMissionWithBarEvent
     @Override
     public void addDescriptionForCurrentStage(TooltipMakerAPI info, float width, float height) {
         super.addDescriptionForCurrentStage(info, width, height);
-        FishIntelMapButton.add(info, width, asks);
+
+        SectorEntityToken route = getFishRequestRouteTarget();
+        if (route == null) {
+            FishIntelMapButton.add(info, width, asks);
+        } else {
+            FishIntelMapButton.addPlotRoute(info, width, route);
+        }
     }
 
-    /** Every accepted fish request can open the map already narrowed to compatible species. */
+    /** Exact-place requests override this; ordinary jobs remain habitat searches. */
+    protected SectorEntityToken getFishRequestRouteTarget() {
+        return null;
+    }
+
+    /** Every accepted request either narrows habitats or routes to its named place. */
     @Override
     public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+        if (FishIntelMapButton.handlePlotRoute(buttonId, getFishRequestRouteTarget())) return;
         if (FishIntelMapButton.handle(buttonId, ui, asks, null, null)) return;
         super.buttonPressConfirmed(buttonId, ui);
     }

@@ -716,7 +716,7 @@ distance for the last two.
 | File | What it does |
 |---|---|
 | `FishConstants.java` | Every magic number for minigame, result cards, celebration, treasure and codex, including the IDE-editable input sound ids, click-edge toggle and campaign-music volume multiplier |
-| `FishIntelMapButton.java` | The shared **Open fishing map** intel button, its precise hover contract, and the public map-tab/show-on-map handoff used by jobs, tutorial/chart quests and rumors |
+| `FishIntelMapButton.java` | Shared intel navigation: **Open fishing map** narrows habitat data for requests without a known destination, while **Plot route** uses vanilla's public course planner for system-bound fish requests. Jobs, tutorial/chart quests and rumors all hand off through it |
 | `FishMapIntel.java` | **Dead.** A husk kept so old saves load and delete it themselves |
 
 ### `campaign/ponds`

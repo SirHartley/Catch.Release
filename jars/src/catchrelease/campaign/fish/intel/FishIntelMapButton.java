@@ -18,6 +18,7 @@ import java.util.List;
 public final class FishIntelMapButton {
 
     public static final String BUTTON_ID = "catchrelease_open_fishing_map";
+    public static final String PLOT_ROUTE_BUTTON_ID = "catchrelease_plot_fish_route";
     public static final float HEIGHT = 22f;
 
     private FishIntelMapButton() {
@@ -52,6 +53,30 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
+    /** A known destination supersedes habitat search: send the campaign autopilot there. */
+    public static void addPlotRoute(TooltipMakerAPI info, float width,
+                                    SectorEntityToken destination) {
+        if (info == null || destination == null
+                || Global.getCurrentState() != GameState.CAMPAIGN) return;
+
+        float buttonWidth = Math.min(width, 260f);
+        info.addButton("Plot route", PLOT_ROUTE_BUTTON_ID, Misc.getBasePlayerColor(),
+                Misc.getDarkPlayerColor(), (int) buttonWidth, HEIGHT, 18f);
+
+        info.addTooltipToPrevious(new BaseTooltipCreator() {
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                return 360f;
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                      Object tooltipParam) {
+                tooltip.addPara("Lays in a course to the system named by this request.", 0f);
+            }
+        }, TooltipMakerAPI.TooltipLocation.BELOW);
+    }
+
     /** Convenience for one named target without exposing mutable singleton lists. */
     public static List<FishRequirement> forSpecies(String speciesId) {
         if (speciesId == null) return null;
@@ -81,6 +106,17 @@ public final class FishIntelMapButton {
             ui.showOnMap(center);
         } else if (Global.getSector() != null && Global.getSector().getCampaignUI() != null) {
             Global.getSector().getCampaignUI().showCoreUITab(CoreUITabId.MAP);
+        }
+
+        return true;
+    }
+
+    /** Uses vanilla's public route planner; the destination may be a system anchor or entity. */
+    public static boolean handlePlotRoute(Object buttonId, SectorEntityToken destination) {
+        if (!PLOT_ROUTE_BUTTON_ID.equals(buttonId)) return false;
+
+        if (destination != null && Global.getSector() != null) {
+            Global.getSector().layInCourseFor(destination);
         }
 
         return true;

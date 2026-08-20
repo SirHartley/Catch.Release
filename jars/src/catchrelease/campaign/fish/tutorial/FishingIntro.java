@@ -1290,12 +1290,19 @@ public class FishingIntro {
             }
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, target == null ? null : getAsks());
+            if (target != null && target.systemId != null && !target.landed) {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            } else {
+                FishIntelMapButton.add(info, width, target == null ? null : getAsks());
+            }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             Target target = getTarget();
+            if (target != null && target.systemId != null
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = target == null
                     ? null : getAsks();
             SectorEntityToken center = target == null ? getMapLocation(null) : null;

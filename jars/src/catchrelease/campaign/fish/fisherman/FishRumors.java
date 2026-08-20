@@ -286,7 +286,11 @@ public class FishRumors {
             info.addPara(describe(rumor), 10f);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, getMapAsks());
+            if (getMapAsks() == null) {
+                FishIntelMapButton.add(info, width, null);
+            } else {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            }
         }
 
         protected List<catchrelease.campaign.fish.shop.FishRequirement> getMapAsks() {
@@ -297,6 +301,9 @@ public class FishRumors {
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = getMapAsks();
+            if (mapAsks != null
+                    && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
             com.fs.starfarer.api.campaign.SectorEntityToken center = mapAsks == null
                     ? getMapLocation(null) : null;
 

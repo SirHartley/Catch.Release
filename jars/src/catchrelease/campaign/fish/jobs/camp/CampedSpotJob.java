@@ -301,6 +301,12 @@ public abstract class CampedSpotJob extends FishJob {
         return super.getMapLocation(map);
     }
 
+    /** This receipt belongs to one named rupture; habitat search would point elsewhere. */
+    @Override
+    protected SectorEntityToken getFishRequestRouteTarget() {
+        return getMapLocation(null);
+    }
+
     /** Transition messages say what changed and what remains instead of repeating "1 fish". */
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {

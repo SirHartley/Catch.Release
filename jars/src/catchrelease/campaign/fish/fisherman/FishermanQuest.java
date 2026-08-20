@@ -792,12 +792,14 @@ public class FishermanQuest {
                     Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
-            FishIntelMapButton.add(info, width, getAsks());
+            if (!quest.landed) {
+                FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+            }
         }
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-            if (FishIntelMapButton.handle(buttonId, ui, getAsks(), null, null)) return;
+            if (FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
             super.buttonPressConfirmed(buttonId, ui);
         }
 
