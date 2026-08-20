@@ -49,6 +49,31 @@ public class ChargeManager implements EveryFrameScript {
         return true;
     }
 
+    /**
+     * Adds one charge without exceeding the pool's live upgraded maximum. Fractional regeneration
+     * is preserved, so retrieving a shot at 0.4 leaves 1.4 rather than discarding progress.
+     *
+     * @return whether the pool changed; false when it was already full or the definition is invalid
+     */
+    public static boolean gain(String abilityId, Refill refill) {
+        if (abilityId == null || refill == null) return false;
+
+        define(abilityId, refill);
+
+        float max = getMax(refill.maxStat, refill.maxFallback);
+        float pool = getPool(abilityId, refill.maxStat, refill.maxFallback);
+        float next = Math.min(max, pool + 1f);
+        if (next <= pool) return false;
+
+        getPools().put(abilityId, next);
+
+        if ((int) Math.floor(next) > (int) Math.floor(pool)) {
+            refill.onChargeGained();
+        }
+
+        return true;
+    }
+
     /** 0 to 1 towards the next charge. */
     public static float getProgressToNext(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);

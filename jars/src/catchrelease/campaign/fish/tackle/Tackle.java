@@ -115,6 +115,14 @@ public enum Tackle {
         }
     },
 
+    RETRIEVAL_HEAD("Retrieval Head", Fit.HARPOON,
+            "Recovers a ready head when the barb finds a pattern. Hitting a fish restores one"
+                    + " harpoon charge, up to the rig's capacity. A miss still costs the shot.") {
+        {
+            retrievesCharge = true;
+        }
+    },
+
     EXPLOSIVE_HEAD("Explosive Head", Fit.HARPOON,
             "A shaped charge behind the barb. Whatever the head reaches goes up with it, and so does"
                     + " the head - nothing is landed on this, and nothing was ever going to be. Put"
@@ -194,6 +202,9 @@ public enum Tackle {
      * is never exposed by a beam.
      */
     public boolean deepStrike = false;
+
+    /** Whether a confirmed mote strike restores one charge to the harpoon's capped pool. */
+    public boolean retrievesCharge = false;
 
     /**
      * Whether the barb carries a charge that goes off on whatever the head reaches. The one module
