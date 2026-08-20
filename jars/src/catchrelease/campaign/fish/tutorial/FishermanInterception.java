@@ -9,6 +9,8 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.ai.FleetAIFlags;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -124,15 +126,22 @@ public class FishermanInterception implements EveryFrameScript {
         boat.setLocation(at.x, at.y);
 
         boat.clearAssignments();
-        boat.addAssignment(FleetAssignment.INTERCEPT, player, 3f, "closing on your fleet");
+
+        boat.getMemoryWithoutUpdate().set(FleetAIFlags.PLACE_TO_LOOK_FOR_TARGET, new Vector2f(player.getLocation()), 30f);
+        if (boat.getAI() instanceof ModularFleetAIAPI) {
+            ((ModularFleetAIAPI)boat.getAI()).getTacticalModule().setTarget(player);
+        }
+
+        boat.addAssignment(FleetAssignment.INTERCEPT, player, 10f, "closing on your fleet");
 
         //the one thing that lets it off the trawler's pace, and it expires with the assignment
         boat.getMemoryWithoutUpdate().set(CHASING_KEY, true, CHASE_DAYS);
 
         //it wants to be talked to, and it does not lose interest halfway there
-        boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PURSUE_PLAYER, true, 3f);
-        boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true, 3f);
-        boat.getMemoryWithoutUpdate().set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, 3f);
+        boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PURSUE_PLAYER, true, 10f);
+        boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true, 10f);
+        boat.getMemoryWithoutUpdate().set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, 10f);
+        boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_ALLOW_LONG_PURSUIT, true, 10f);
 
         Global.getSector().getCampaignUI().addMessage(boat.getName()
                 + " is closing on your position.", Misc.getHighlightColor());

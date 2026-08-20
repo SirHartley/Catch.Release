@@ -72,7 +72,7 @@ public class TutorialConstants {
     public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";
     //---------------------------------------------------------------- the interception
 
-    public static final float INTERCEPT_SPAWN_DISTANCE = 2600f;
+    public static final float INTERCEPT_SPAWN_DISTANCE = 800f;
     public static final float INTERCEPT_TRIGGER_RANGE = 1400f;
     public static final float INTERCEPT_CHECK_SECONDS = 0.5f;
 

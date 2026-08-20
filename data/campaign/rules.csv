@@ -1506,7 +1506,7 @@ $catchreleaseWorkAvailable",,,50:catchrelease_fisherWork:Ask about work,
 catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
-$catchreleaseWork",,,50:catchrelease_fisherWork:What did I need to fetch again?,
+$catchreleaseWork",,,50:catchrelease_fisherWork:What do I need to fetch again?,
 catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
@@ -1893,87 +1893,72 @@ catchrelease_crabWareChicken_profile,DialogOptionSelected,"$option == catchrelea
 CatchReleaseCMD tokens
 $catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
 
-Crablobab produces a little display tile and plants it upright on the counter. A chicken crosses the screen at a determined walk. It reaches the edge, continues around the back of the tile, and comes into view again from the other side.
+Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish.
+A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
 
-""There we are! Fishing profile. Very important distinction: not a fish. Much easier to recognize.""
+""Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up.""
 
-He turns the tile toward you and traces a finger after the chicken.
+Crablobab turns the tile toward you.
 
-""When you've got something on the line and the display hasn't identified it yet, that little rarity-coloured light becomes this fellow instead. He keeps the post until a fitted Sonar Head has an actual fish to show you. Very dependable chicken.""
+""Very important: not a fish. If he were a fish, I'd have to charge you for the fish.""
 
-The chicken completes another circuit.
+He considers this, then brightens.
 
-""Permanent purchase, naturally. $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Then Fish Outfitter, Extras — switch it on, switch it off, switch it back on when you remember why you bought it.""
+""$catchreleaseCrabChicken_profilePrice credits, $catchreleaseCrabChicken_profileCrabs crabs. Permanent! Buy him once, chicken forever.""
 
-Crablobab lifts the tile higher.
+The chicken completes another circuit. Crablobab gives it an approving nod.
 
-""And if you've fitted a Sonar Head, sonar wins. Proper fish picture, proper identification, no chicken. Quite right too. Chicken is excellent signage, terrible sonar.""","0:catchrelease_crabBuyChicken_profile:Pay him
+""Look at him go.""","0:catchrelease_crabBuyChicken_profile:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareChicken_profileShort,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
 
-Crablobab produces a little display tile and plants it upright on the counter. A chicken crosses the screen at a determined walk. It reaches the edge, continues around the back of the tile, and comes into view again from the other side.
+Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish.
 
-""There we are! Fishing profile. Very important distinction: not a fish. Much easier to recognize.""
+""There he is!""
 
-He turns the tile toward you and traces a finger after the chicken.
+A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
 
-""When you've got something on the line and the display hasn't identified it yet, that little rarity-coloured light becomes this fellow instead. He keeps the post until a fitted Sonar Head has an actual fish to show you. Very dependable chicken.""
+""Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up.""
 
-The chicken completes another circuit.
+He turns the tile toward you, then glances at your payment.
 
-""Permanent purchase, naturally. $catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Then Fish Outfitter, Extras — switch it on, switch it off, switch it back on when you remember why you bought it.""
+""Ah! Nearly a chicken.""
 
-Crablobab lifts the tile higher.
+Crablobab counts the credits, then the crabs, then counts both again in the opposite order.
 
-""And if you've fitted a Sonar Head, sonar wins. Proper fish picture, proper identification, no chicken. Quite right too. Chicken is excellent signage, terrible sonar.""
+""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. This is less than that.""
 
-Crablobab checks your credits. Then your crabs. Then he checks the crabs again by lifting one slightly and putting it back.
+He takes the tile back. The chicken continues marching.
 
-""Ah! We have encountered a procurement issue.""
-
-He counts on his fingers, reaches six, and starts again.
-
-""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. At present you are short of at least one of those categories.""
-
-The display tile disappears back into his coat. The chicken keeps walking across it until the last corner vanishes.",10:catchrelease_crabStall:Another time.,
+""Good news! He'll still be here when you're richer.""",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyChicken_profile,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your settings slate.
+!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
+The chicken walks right over.
 
-A new line appears:
+""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things.""
 
-MINIGAME MARKER — CHICKEN
+He gives the chicken an approving little nod.
 
-The entry is dated tomorrow.
+""If you get tired of him, put him away. He won't mind. Ask Baha.""
 
-""There! Installed, registered, acknowledged by whatever part of the outfitter insists on acknowledging things.""
+Crablobab watches the chicken peck an app icon.
 
-He points at the setting with the tile.
-
-""Fish Outfitter, Extras. Chicken on, chicken off. Sonar Head still gets first say when fitted, because sonar has actually met the fish.""
-
-He gives the tile an approving little nod.
-
-""Good profile. Strong silhouette. Doesn't overpromise.""",0:catchrelease_crabBaha:Baha?,
+""Professional.""",0:catchrelease_crabBaha:Baha?,
 catchrelease_crabBuyChicken_profileKnown,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your settings slate.
+$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
+The chicken walks right over.
 
-A new line appears:
+""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things.""
 
-MINIGAME MARKER — CHICKEN
+He gives the chicken an approving little nod.
 
-The entry is dated tomorrow.
+""If you get tired of him, put him away. He won't mind.""
 
-""There! Installed, registered, acknowledged by whatever part of the outfitter insists on acknowledging things.""
+Crablobab watches the chicken peck an app icon.
 
-He points at the setting with the tile.
-
-""Fish Outfitter, Extras. Chicken on, chicken off. Sonar Head still gets first say when fitted, because sonar has actually met the fish.""
-
-He gives the tile an approving little nod.
-
-""Good profile. Strong silhouette. Doesn't overpromise.""",0:catchrelease_crabStall:Continue,
+""Professional.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,$global.catchrelease_crabAskedBaha = true 0,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
@@ -2510,7 +2495,7 @@ The Fisherman checks the ROD telemetry first.
 Only then does he look at what you brought back.
 
 ""First trip's mostly about getting the rig home with you. You did.""","0:catchrelease_introFirstContinue:Continue
-10:catchrelease_introFirstProud:Not bad for a first catch, eh?
+10:catchrelease_introFirstProud:Not bad for a first catch, isn't it?
 20:catchrelease_introFirstQuestion:What did I actually catch?",
 catchrelease_introFirstProud,DialogOptionSelected,$option == catchrelease_introFirstProud,,"The corner of his mouth moves.
 
@@ -2736,6 +2721,7 @@ $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
+Highlight ""Four additional records transfer:""
 AddTextSmall ""Range data purchasing unlocked"" highlight","The two catches are checked against their range records.
 
 The Fisherman marks the first entry complete, then the second.
@@ -2821,8 +2807,7 @@ $catchreleaseStage == 4
 catchrelease_introWaiting5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:60
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
-!$catchreleaseTargetMet","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget""
-Highlight ""Use the route planner on the map""","""I gave you range surveys on two patterns. Bring both of them. One of each.""
+!$catchreleaseTargetMet","Highlight ""Use the route planner on the map""","""I gave you range surveys on two patterns. Bring both of them. One of each.""
 
 He brings up the entries.
 

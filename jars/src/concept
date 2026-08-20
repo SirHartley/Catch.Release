@@ -18,8 +18,20 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Intel
-- Fish requests from specific systems should not show the "show fish in planner" button, but instead a "plot route" button to set autopilot to the system
+Bar quests
+- Rewards: can roll credits twice. If it does, it should unify into one number.
+- Credit rewards should be rounded by 1000 (8430 -> 8000). If > 100.000, round 10.000s (108.110 -> 110.000)
+- Range data reward preview must be similar format to upgrade/module & include silhouette icon.
+- "Cut the comm link" shows up in bar quest dialogue - should never happen
+- Child Tournament: Should show no person image, just portrait_generic.png
+- Child tournament "Ask something else" is redundant
+- Child tournament: Quest completion doesn't resolve correctly and shows default quest accept dialogue instead of outro & close
+
+Fisherman
+- Add question "why can't I use the drones on the searchlights" - A: drones can't return because lights not a full breach, would get stuck in hyperspace. That's why the harpoon has a line. Q: okay / any way to change that: A: Yes, rare schematic. (heard rumor there's a...)
+
+Chart Request
+- Denying the request and then accepting it on second turn causes it to re-roll the quest target. It should stay static once rolled.
 
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
@@ -42,9 +54,37 @@ The LYNE drone Auto-Dispatcher
 
 handed off_
 
+Shop / cargo picker
+- Pack into crates button doesn't work - may need custom impl or reflection
+
+Fleet interaction
+- Lamps near planets: ANY patrol seeing you with lights on near a planet should immediately engage a chase (not only of the planet faction, and not only a single one). THe first that gets you gets the dialogue, all others return to their duties.
+
+Map
+- Fish that do not have a known range data entry should not show their range info even when somehow accessed in the planner - should instead display "NO DATA" in bold red letters on the star map. Square border.
+- Deselect all sidebar button should leave category filters toggled off
+
+Intel
+- Fish requests from specific systems should not show the "show fish in planner" button, but instead a "plot route" button to set autopilot to the system.
+- Intel entries for quests requiring multiple fish should show both in a list in the intel. The intel should update with notification if one fish of multiple is caught, and it should show partial progress (by fish) in the intel.
+- Remove the "show habitat / plot course" button on completed intel.
+- Delayed intel giving seems to have stopped giving notifications at all? Check if all intels, including rumor, quest and jobs ect, properly show a notif
+- Intel that does not target a fish shouldn't have an "open fishing map" button but a "set autopilot" button (rumors...)
+
+Overlay
+- The overlay should scale less distance into your screen at high coherence levels (linear progression). I'm not sure if it's currently bugged and always rendered at full size.
+
+Harpoon head
+- Add: Retrieval Head - gain a harpoon charge when you hit a mote with a harpoon (never exceed cap)
+
+Fisherman fleet indicator
+- Targetting the indicator for autopilot should instead target the fisherman fleet. Just check the autopilot target every now and then while player in system (every second is enough) and set it to fisherman fleet if target is fisherman indicator
+
 ---------------------
 
 self_
+- upgrades too cheap
+- rumor / intel icons
 - Industry icon
 - Fix fish crate display icon
 - fish heading all wrong
