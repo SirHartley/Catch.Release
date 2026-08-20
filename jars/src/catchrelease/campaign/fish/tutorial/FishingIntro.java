@@ -1209,95 +1209,156 @@ public class FishingIntro {
          */
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
-            Color h = Misc.getHighlightColor();
-            Color tc = getBulletColorForMode(mode);
-
-            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+            Color text = getBulletColorForMode(mode);
+            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
 
             bullet(info);
 
             Target target = getTarget();
-
             if (target == null) {
                 SectorEntityToken at = getMapLocation(null);
                 if (at != null && at.getContainingLocation() != null) {
-                    info.addPara("Nearest boat: %s", initPad, tc, h,
+                    info.addPara("Nearest boat: %s", pad, text, Misc.getHighlightColor(),
                             at.getContainingLocation().getName());
                 }
             } else {
-                List<catchrelease.campaign.fish.shop.FishRequirement> asks = getAsks();
-                if (asks.size() > 1) {
-                    for (catchrelease.campaign.fish.shop.FishRequirement ask : asks) {
-                        int aboard = find(ask.speciesId, target.needsDeepGear) == null ? 0 : 1;
-                        String progress = ask.describeProgress(aboard);
-                        LabelAPI wantedLine = info.addPara(progress, initPad, tc, h,
-                                aboard + "/" + ask.count);
-                        FishRequirement.highlight(wantedLine,
-                                java.util.Collections.singletonList(ask), progress,
-                                aboard + "/" + ask.count);
-                        initPad = 0f;
-                    }
-                } else {
-                    String wanted = describeTarget();
-                    LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
-                    FishRequirement.highlight(wantedLine, asks, wanted);
-                }
-                if (target.systemName != null) {
-                    info.addPara("In %s", 0f, tc, h, target.systemName);
-                }
+                pad = addProgressLines(info, target, text, pad);
 
-                if (target.needsDeepGear) {
-                    info.addPara("Breach lamp and harpoon line only", tc, 0f);
-                } else if (target.atPond) {
-                    info.addPara("The mark is a rupture", tc, 0f);
+                if (target.landed) {
+                    info.addPara("Return to the nearest fishing boat", text, pad);
+                } else {
+                    pad = addDestinationLine(info, target, text, pad);
+
+                    if (target.needsDeepGear) {
+                        info.addPara("Breach Lights and Harpoon only", text, pad);
+                    } else if (target.atPond) {
+                        info.addPara("ROD/LINE at the marked rupture", text, pad);
+                    }
                 }
             }
 
             unindent(info);
         }
 
+        /** Adds bar-job-style aboard/required progress and returns zero for following bullet rows. */
+        protected float addProgressLines(TooltipMakerAPI info, Target target, Color text,
+                                         float pad) {
+            if (target.anySpecies) {
+                int aboard = target.landed ? 1 : 0;
+                info.addPara("%s anything you can land", pad, text, Misc.getHighlightColor(),
+                        aboard + "/1");
+                return 0f;
+            }
+
+            for (catchrelease.campaign.fish.shop.FishRequirement ask : getAsks()) {
+                int aboard = find(ask.speciesId, target.needsDeepGear) == null ? 0 : 1;
+                String progress = ask.describeProgress(aboard);
+                LabelAPI line = info.addPara(progress, text, pad);
+                FishRequirement.highlight(line,
+                        java.util.Collections.singletonList(ask), progress,
+                        aboard + "/" + ask.count);
+                pad = 0f;
+            }
+
+            return pad;
+        }
+
+        /** Adds the live destination in the same compact form used by accepted bar jobs. */
+        protected float addDestinationLine(TooltipMakerAPI info, Target target, Color text,
+                                           float pad) {
+            if (target.systemName == null) {
+                info.addPara("Known ranges on the fishing map", text, pad);
+            } else if (target.atPond) {
+                info.addPara("Marked rupture in %s", pad, text, Misc.getHighlightColor(),
+                        target.systemName);
+            } else {
+                info.addPara("Open space in %s", pad, text, Misc.getHighlightColor(),
+                        target.systemName);
+            }
+
+            return 0f;
+        }
+
+        /** What completing the current rung unlocks, stated with the bar jobs' payment density. */
+        protected void addReturnBenefits(TooltipMakerAPI info, Target target, Color text) {
+            float pad = 0f;
+
+            switch (target.stage) {
+                case RODDED -> info.addPara("Further instruction and the next lesson", text, pad);
+                case FISH_ONE -> {
+                    info.addPara("Fishing Outfitter access", text, pad);
+                    info.addPara("Breach Lights and Harpoon rigs", text, 0f);
+                }
+                case FISH_TWO -> {
+                    info.addPara("Remaining Outfitter shelves for the Breach Lights and Harpoon",
+                            text, pad);
+                    info.addPara("2 common range data entries", text, 0f);
+                }
+                case FISH_THREE -> {
+                    info.addPara("Range data purchasing", text, pad);
+                    info.addPara("2 common, 1 uncommon, and 1 rare range data entries", text, 0f);
+                }
+                default -> info.addPara("Further fishing instruction", text, pad);
+            }
+        }
+
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             Target target = getTarget();
+            float opad = 10f;
+            Color highlight = Misc.getHighlightColor();
+            Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
             if (target == null) {
                 if (isCarryingFisherProperty()) {
                     info.addPara("The LYNE service assembly still carries its last accepted"
-                            + " handshake. Take it to a fishing boat.", 10f);
+                            + " handshake. Take it to a fishing boat.", opad);
                 } else {
                     info.addPara("There is a trade working the far edges of the inhabited systems."
-                            + " Find one of their boats and hail it.", 10f);
+                            + " Find one of their boats and hail it.", opad);
                 }
-            } else if (target.landed) {
-                String wanted = Misc.ucFirst(describeTarget());
-                LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
-                        Misc.getHighlightColor(), wanted);
-                FishRequirement.highlight(landed, getAsks(), wanted);
-            } else if (target.systemName == null) {
-                //the chart rung, which is the one errand with no place in it - the whole lesson is
-                //that the charts say where. A line naming a system it does not have would read
-                //"out of" and then nothing, which is what it did
-                String wanted = describeTarget();
-                LabelAPI charted = info.addPara("Bring back %s. The charts say where; the planner on the map will"
-                        + " plot it.", 10f, Misc.getHighlightColor(), wanted);
-                FishRequirement.highlight(charted, getAsks(), wanted);
-            } else {
-                String wanted = describeTarget();
-                LabelAPI placed = info.addPara("Bring back %s, out of %s.", 10f,
-                        Misc.getHighlightColor(), wanted, target.systemName);
-                FishRequirement.highlight(placed, getAsks(), wanted, target.systemName);
 
-                if (target.needsDeepGear) {
-                    info.addPara("It has to come up through a breach lamp, on a harpoon line."
-                            + " Nothing out of a pond will answer the question.",
-                            Misc.getGrayColor(), 10f);
-                } else if (target.atPond) {
-                    info.addPara("The mark is a rupture. Drop a rod down it.",
-                            Misc.getGrayColor(), 10f);
+                info.addPara("Next step:", opad);
+                bullet(info);
+                SectorEntityToken at = getMapLocation(null);
+                if (at != null && at.getContainingLocation() != null) {
+                    info.addPara("Find the nearest fishing boat in %s", 0f, text, highlight,
+                            at.getContainingLocation().getName());
+                } else {
+                    info.addPara("Find and hail a fishing boat", text, 0f);
                 }
+                unindent(info);
+            } else {
+                String catchWord = target.speciesIds.size() > 1 ? "catches" : "catch";
+                info.addPara("The Fisherman is waiting for the lesson's " + catchWord + ".", opad);
+
+                info.addPara("What is wanted:", opad);
+                bullet(info);
+                addProgressLines(info, target, text, 0f);
+                unindent(info);
+
+                info.addPara(target.landed ? "Return to:" : "Where and how:", opad);
+                bullet(info);
+                if (target.landed) {
+                    info.addPara("The nearest fishing boat", text, 0f);
+                } else {
+                    addDestinationLine(info, target, text, 0f);
+
+                    if (target.needsDeepGear) {
+                        info.addPara("Use the Breach Lights, then land it with the Harpoon",
+                                text, 0f);
+                    } else if (target.atPond) {
+                        info.addPara("Use the ROD/LINE at the marked rupture", text, 0f);
+                    }
+                }
+                unindent(info);
+
+                info.addPara("On return:", opad);
+                bullet(info);
+                addReturnBenefits(info, target, text);
+                unindent(info);
             }
 
-            addBulletPoints(info, ListInfoMode.IN_DESC);
             if (target != null && target.systemId != null && !target.landed) {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             } else if (target == null || target.landed) {
