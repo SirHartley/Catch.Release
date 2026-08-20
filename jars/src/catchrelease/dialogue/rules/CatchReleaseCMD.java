@@ -353,7 +353,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
      * and what you would be looking at are demonstrably the same thing.
      * <p>
      * No conservatory behind it: he sells scenes to people who have nowhere to hang them yet, and
-     * the pane copes. Put his portrait back with vanilla's own {@code RestoreSavedVisual}.
+     * the pane copes. The stall rules remount his portrait directly so the saved bar visual remains
+     * available for the encounter exit.
      */
     protected boolean showBackdrop(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
