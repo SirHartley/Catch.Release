@@ -837,15 +837,15 @@ catchrelease_duel_offerRulesOption,JobSpecificOptions,"$menuState == catchreleas
 !$catchreleaseDuelAskedRules",,,10:catchrelease_duel_rules:How does the tournament work?,
 catchrelease_duel_offerNeutralOption,JobSpecificOptions,"$menuState == catchreleaseDuelOffer
 !$catchreleaseDuelAskedNeutral",,,20:catchrelease_duel_neutral:Why do you need me?,
-catchrelease_duel_offerTermsOption,JobSpecificOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:Wwhat do you need me to bring?,
+catchrelease_duel_offerTermsOption,JobSpecificOptions,$menuState == catchreleaseDuelOffer,,,30:catchrelease_duel_terms:What do you need me to bring?,
 catchrelease_duel_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseDuelOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_rules,DialogOptionSelected,$option == catchrelease_duel_rules,"$catchreleaseDuelAskedRules = true 0
 $menuState = catchreleaseDuelOffer 0
 FireAll JobSpecificOptions","The quiet child turns the bracket over. The back is covered in rules in two different colours.
 
 ""One fish each. No swapping. Don't mess with the other person's fish.""
-""That means no poking it either,"" says the loud child.
 
+""That means no poking it either,"" says the loud child.
 ""That is messing with it.""
 ""It didn't say that before.""
 
@@ -853,8 +853,11 @@ The quiet child adds something to the list.",,
 catchrelease_duel_neutral,DialogOptionSelected,$option == catchrelease_duel_neutral,"$catchreleaseDuelAskedNeutral = true 0
 $menuState = catchreleaseDuelOffer 0
 FireAll JobSpecificOptions","""Because he says I always take the better one,"" says the loud child.
+
 ""You do.""
+
 ""Not always.""
+
 ""Almost always.""
 
 The loud child points at you.
@@ -3497,9 +3500,9 @@ The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 ""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""A company survey moved the boundary. My claim did not.""
+Call $catchrelease_jobRef showRewardDetails","""A company survey moved the boundary.
 
-The fisher overlays the two charts.
+The fisher overlays the charts.
 
 ""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
 
