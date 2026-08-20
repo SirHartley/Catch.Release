@@ -515,6 +515,9 @@ follows the local five-rung coherence reading, and none of them explains how.
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` gives the same lead in precise intel prose, counts down against the rumor's own timestamp, and opens the fishing map either on the stranger's known range or as an all-category overview centered on the reported system. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
+The Fisherman map mark is also an autopilot proxy. Once per second while the player is local,
+its plugin replaces a course to the mark with a course to its moving fleet.
+
 ### `dialogue/rules`
 The one rule command the mod ships, and the only place the sheet reaches into Java.
 
