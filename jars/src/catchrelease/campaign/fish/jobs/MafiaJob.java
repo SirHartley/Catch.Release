@@ -5,6 +5,9 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.characters.FullName;
+import com.fs.starfarer.api.characters.FullName.Gender;
+import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -41,8 +44,15 @@ public class MafiaJob extends FishJob {
     /** What a winning bet is worth against the flat fee. */
     public static final float WIN_MULT = 2f;
 
-    protected String left = "Salvatore";
-    protected String right = "Enzo";
+    protected static final String LEFT_FIRST_NAME = "Salvatore";
+    protected static final String RIGHT_FIRST_NAME = "Enzo";
+
+    /** Names retained as strings because wager settlement persists them independently of the UI. */
+    protected String left = LEFT_FIRST_NAME;
+    protected String right = RIGHT_FIRST_NAME;
+
+    /** The second on-screen person; not placed in the comm directory as a duplicate contact. */
+    protected PersonAPI partner;
 
     /** Dialog-only pair; nothing leaves cargo until the player confirms fee or wager. */
     protected transient FishHandoffPicker.Selection pendingSelection;
@@ -70,6 +80,7 @@ public class MafiaJob extends FishJob {
         setGiverVoice(Voices.VILLAIN);
 
         if (!setUpGiver(createdAt)) return false;
+        setUpPeople(createdAt);
 
         days = DAYS;
 
@@ -123,6 +134,45 @@ public class MafiaJob extends FishJob {
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    /**
+     * Gives both named men real PersonAPI records. The giver remains the only comm-directory
+     * contact; the partner lives with the mission and occupies vanilla's second portrait slot.
+     * The lazy path also repairs accepted jobs created by older saves.
+     */
+    protected void setUpPeople(MarketAPI market) {
+        PersonAPI giver = getPerson();
+        if (giver != null) {
+            giver.setName(new FullName(LEFT_FIRST_NAME, "", Gender.MALE));
+            left = giver.getName().getFirst();
+        }
+
+        if (partner == null && market != null && market.getFaction() != null) {
+            for (int i = 0; i < 8; i++) {
+                partner = market.getFaction().createRandomPerson(Gender.MALE, random());
+                if (giver == null || giver.getPortraitSprite() == null
+                        || !giver.getPortraitSprite().equals(partner.getPortraitSprite())) break;
+            }
+        }
+
+        if (partner != null) {
+            partner.setName(new FullName(RIGHT_FIRST_NAME, "", Gender.MALE));
+            partner.setRankId(Ranks.CITIZEN);
+            partner.setVoice(Voices.VILLAIN);
+            right = partner.getName().getFirst();
+        }
+    }
+
+    /** Uses the same secondary portrait slot as vanilla's Baird/Coureuse scene. */
+    @Override
+    protected void showContactVisual(InteractionDialogAPI dialog) {
+        setUpPeople(getGiverMarket());
+        super.showContactVisual(dialog);
+
+        if (dialog != null && partner != null) {
+            dialog.getVisualPanel().showSecondPerson(partner);
+        }
     }
 
     protected void showFighterPicker(final InteractionDialogAPI dialog,
@@ -232,6 +282,11 @@ public class MafiaJob extends FishJob {
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
 
+        setUpPeople(getGiverMarket());
+
+        // Refresh vanilla's active-person first-name token as well, which repairs old accepted
+        // jobs whose randomly generated giver was named before this pair became explicit people.
+        token(mem, "$personFirstName", left);
         token(mem, "$catchreleaseLeft", left);
         token(mem, "$catchreleaseRight", right);
         token(mem, "$catchreleaseRingSelectionReady",
