@@ -74,6 +74,7 @@ import java.util.Set;
 public class FishermanQuest {
 
     public static final String STATE_KEY = "$catchrelease_fisherQuest";
+    public static final String OFFER_KEY = "$catchrelease_fisherQuestOffer";
     public static final String ROUND_KEY = "$catchrelease_fisherQuestRound";
     public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
     public static final float COOLDOWN_DAYS = 90f;
@@ -128,6 +129,13 @@ public class FishermanQuest {
 
     public static Saved getActive() {
         Object stored = Global.getSector().getPersistentData().get(STATE_KEY);
+
+        return stored instanceof Saved ? (Saved) stored : null;
+    }
+
+    /** The request already shown to the player, held unchanged until it is accepted. */
+    public static Saved getOffer() {
+        Object stored = Global.getSector().getPersistentData().get(OFFER_KEY);
 
         return stored instanceof Saved ? (Saved) stored : null;
     }
@@ -204,6 +212,17 @@ public class FishermanQuest {
         return quest;
     }
 
+    /** Returns the existing offer, or rolls and persists the first one the player is shown. */
+    public static Saved getOrRollOffer() {
+        Saved offer = getOffer();
+        if (offer != null) return offer;
+
+        offer = roll();
+        if (offer != null) Global.getSector().getPersistentData().put(OFFER_KEY, offer);
+
+        return offer;
+    }
+
     /** A qualifying specimen and a system it naturally inhabits. */
     protected static class Target {
         public final FishSpec spec;
@@ -278,6 +297,7 @@ public class FishermanQuest {
         ensureIdentity(quest);
 
         Global.getSector().getPersistentData().put(STATE_KEY, quest);
+        Global.getSector().getPersistentData().remove(OFFER_KEY);
         FishIntelNotifications.queue(new QuestIntel(quest));
     }
 
