@@ -29,7 +29,7 @@ import java.util.Map;
  * <p>
  * The fisher at the bar is not a broker and is not offering work in the usual sense - they had one
  * rupture that reliably produced, somebody is sitting on it, and they cannot go back. What they want
- * is the spot, and the fish is only how they know you went. That is why the job has two conditions
+ * is the spot, and the catch is only how they know you went. That is why the job has two conditions
  * rather than one: clearing the camp is the job, and the specimen is the receipt.
  * <p>
  * Three variants, which are three bar events and three thin subclasses, because the difference is
@@ -162,8 +162,8 @@ public abstract class CampedSpotJob extends FishJob {
     }
 
     /**
-     * One fish of any species, but only if its catch record names this exact rupture. Also repairs
-     * pre-change saves whose active camp still asks for the old planted species.
+     * One landed specimen of any type, but only if its catch record names this exact rupture. Also
+     * repairs active saves whose receipt still carries the old fish-only or named-species filter.
      */
     protected void setReceiptAsk() {
         if (pond == null || pond.getId() == null) return;
@@ -176,7 +176,7 @@ public abstract class CampedSpotJob extends FishJob {
 
         if (asks.size() == 1) {
             FishRequirement current = asks.get(0);
-            if (current != null && current.speciesId == null && "fish".equals(current.tag)
+            if (current != null && current.speciesId == null && current.tag == null
                     && pond.getId().equals(current.sourceId)
                     && current.minCaughtAt == acceptedAt) {
                 return;
@@ -185,7 +185,6 @@ public abstract class CampedSpotJob extends FishJob {
 
         FishRequirement receipt = new FishRequirement();
         receipt.count = 1;
-        receipt.tag = "fish";
         receipt.sourceId = pond.getId();
         receipt.minCaughtAt = acceptedAt;
 
