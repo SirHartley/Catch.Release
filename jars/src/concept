@@ -18,9 +18,6 @@ General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 - Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Bar quests
--
-
 Fisherman
 - Add question "why can't I use the drones on the searchlights" - A: drones can't return because lights not a full breach, would get stuck in hyperspace. That's why the harpoon has a line. Q: okay / any way to change that: A: Yes, rare schematic. (heard rumor there's a...)
 
@@ -30,18 +27,6 @@ Quests
 ---------------------
 
 Impactful Upgrades
-
-Chart Request
-- Denying the request and then accepting it on second turn causes it to re-roll the quest target. It should stay static once rolled.
-
-Bar quests
-- Rewards: can roll credits twice. If it does, it should unify into one number.
-- Credit rewards should be rounded by 1000 (8430 -> 8000). If > 100.000, round 10.000s (108.110 -> 110.000)
-- Range data reward preview must be similar format to upgrade/module & include silhouette icon.
-- "Cut the comm link" shows up in bar quest dialogue - should never happen
-- Child Tournament: Should show no person image, just portrait_generic.png
-- Child tournament "Ask something else" is redundant
-- Child tournament: Quest completion doesn't resolve correctly and shows default quest accept dialogue instead of outro & close
 
 The Radial Rig
 - Should probably feature a questline to get - scientist?
@@ -56,6 +41,24 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
+
+Bar quests
+- "camped rupture" - harpooning a fish doesn't seem to count for fishing from the rupture - should count for quest completion
+- "intel name - completed" slug in dialogue should not show secondary "x/1 fish in cargo" line when presented in the inventory because that line isn't correct the moment it gets handed in
+- contacting the contacts through the intel screen uses the default greeting, which isn't good for most of these quests. Adjust the greeting. Let the starsector editor decide the entire content, give it the context of the quest to base off of. don't make it too flat, mechanical or boring.
+- "cut the comm link" still present in bar dialogue - you should probably remodel the dialogue to use FireAll JobSpecificOptions instead of using PopulateOptions
+
+Chart Request
+- Denying the request and then accepting it on second turn causes it to re-roll the quest target. It should stay static once rolled.
+
+Bar quests
+- Rewards: can roll credits twice. If it does, it should unify into one number.
+- Credit rewards should be rounded by 1000 (8430 -> 8000). If > 100.000, round 10.000s (108.110 -> 110.000)
+- Range data reward preview must be similar format to upgrade/module & include silhouette icon.
+- "Cut the comm link" shows up in bar quest dialogue - should never happen
+- Child Tournament: Should show no person image, just portrait_generic.png
+- Child tournament "Ask something else" is redundant
+- Child tournament: Quest completion doesn't resolve correctly and shows default quest accept dialogue instead of outro & close
 
 Shop / cargo picker
 - Pack into crates button doesn't work - may need custom impl or reflection
