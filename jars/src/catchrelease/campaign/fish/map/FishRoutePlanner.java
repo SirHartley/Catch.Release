@@ -94,7 +94,7 @@ public class FishRoutePlanner {
 
         for (Map.Entry<String, String> entry : byId.entrySet()) {
             FishSpec spec = FishPresence.getSpec(entry.getKey());
-            if (spec == null || !FishPresence.isKnown(spec)) continue;
+            if (spec == null || !FishPresence.hasRangeData(spec)) continue;
 
             out.add(new Suggestion(entry.getKey(), entry.getValue()));
         }
@@ -120,7 +120,7 @@ public class FishRoutePlanner {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
-            if (!FishPresence.isKnown(spec)) continue;
+            if (!FishPresence.hasRangeData(spec)) continue;
 
             known++;
             if (ask.couldBeSatisfiedBy(spec)) could.add(spec.id);
@@ -152,6 +152,7 @@ public class FishRoutePlanner {
 
             for (String id : speciesIds) {
                 FishSpec spec = FishPresence.getSpec(id);
+                if (!FishPresence.hasRangeData(spec)) continue;
                 if (!FishPresence.livesIn(spec, system)) continue;
 
                 if (hosted == null) hosted = new LinkedHashSet<>();
@@ -244,6 +245,11 @@ public class FishRoutePlanner {
 
         for (String id : speciesIds) {
             FishSpec spec = FishPresence.getSpec(id);
+
+            if (!FishPresence.hasRangeData(spec)) {
+                out.add(id);
+                continue;
+            }
 
             boolean placed = false;
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
