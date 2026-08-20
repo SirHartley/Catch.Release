@@ -704,7 +704,8 @@ $catchreleasePaid",SetTextHighlights $catchreleaseReward,"She matches each seal 
 $catchreleaseRewardCap is transferred.",,
 catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have taken over a corner table with an empty bucket and a hand-drawn tournament bracket. Several names have been crossed out and written back in.,,
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask what they're doing.,
-catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"$menuState = catchreleaseDuelOffer 0
+catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"Call $catchrelease_jobRef showBarBackdrop
+$menuState = catchreleaseDuelOffer 0
 FireAll PopulateOptions","The loud child turns the bracket around so you can see it.
 
 ""We're having a tournament.""
