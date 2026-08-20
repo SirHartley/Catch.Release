@@ -151,6 +151,21 @@ public class KidsJob extends FishJob {
         pendingSelection = null;
     }
 
+    /** The tournament has an authored terminal exchange; generic person options must not replace it. */
+    @Override
+    protected void afterPickerPaid(InteractionDialogAPI dialog,
+                                   Map<String, MemoryAPI> memoryMap) {
+
+        MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+        if (mem != null) mem.unset("$menuState");
+
+        if (dialog != null && dialog.getOptionPanel() != null) {
+            dialog.getOptionPanel().clearOptions();
+        }
+
+        FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+    }
+
     /** Bonus for specimen grade, not for the (consequence-free) loud/quiet choice. */
     @Override
     protected boolean payBonus(FishCatch offered) {

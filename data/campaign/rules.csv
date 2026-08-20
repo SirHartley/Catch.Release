@@ -806,16 +806,18 @@ catchrelease_duelWaitSel,DialogOptionSelected,$option == catchrelease_duelWait,"
 FireBest catchreleaseJobRemind
 FireAll PopulateOptions",,,
 catchrelease_duel_paid,catchreleaseJobPaid,"$missionId == catchrelease_duel
-$catchreleasePaid",SetTextHighlights $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
+$catchreleasePaid","SetTextHighlights $catchreleaseReward
+SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
 The quiet child records both assignments on the bracket. The loud child checks the line marked CAPTAIN'S DECISION FINAL.
 
 They hand over the agreed prize.
 
-Received: $catchreleaseReward.",,
+Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
-$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseReward,"You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
+$catchreleaseBonus score:100","CatchReleaseCMD highlightJobText $catchreleaseReward
+SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
 The quiet child checks the grade tag on $catchreleaseDuelBetterFish, then taps the boxed rule marked FINE / EXCEPTIONAL — EXTRA PRIZE.
 
@@ -823,7 +825,10 @@ The quiet child checks the grade tag on $catchreleaseDuelBetterFish, then taps t
 
 The loud child retrieves the extra prize from beneath the bucket.
 
-Received: $catchreleaseReward.",,
+Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
+catchrelease_duelPaidCleanup,PopulateOptions,"$missionId == catchrelease_duel
+$catchreleasePaid",CatchReleaseCMD dropCutComm,,,The terminal tournament row owns its only exit; this removes vanilla's person-conversation exit when the automatic PopulateOptions pass follows allocation.
+catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask whether the tank is taking bets.,
 catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"$menuState = catchreleaseRingOffer 0
