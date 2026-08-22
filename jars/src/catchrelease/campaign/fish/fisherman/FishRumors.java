@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.fisherman;
 
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -16,6 +17,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
+import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import org.lazywizard.lazylib.MathUtils;
 
@@ -284,7 +286,9 @@ public class FishRumors {
 
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
-            info.addPara(describe(rumor), 10f);
+            String description = describe(rumor);
+            LabelAPI paragraph = info.addPara(description, 10f);
+            FishRequirement.highlightFishNames(paragraph, description);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (getMapAsks() == null) {

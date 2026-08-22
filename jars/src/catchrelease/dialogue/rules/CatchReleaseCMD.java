@@ -44,6 +44,7 @@ import com.fs.starfarer.api.util.Misc.Token;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,6 +230,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return highlightWorkText(ruleId, dialog, params, memoryMap);
             case "highlightIntroText":
                 return highlightIntroText(ruleId, dialog, params, memoryMap);
+            case "highlightFishText":
+                return highlightQuestText(ruleId, dialog, params, memoryMap,
+                        Collections.emptyList(), null);
             case "showIntroMap":
                 return showIntroMap(dialog, params.size() > 1
                         ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
@@ -658,18 +662,37 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         com.fs.starfarer.api.campaign.TextPanelAPI panel = text(dialog);
         if (panel == null) return false;
 
-        List<FishRequirement.RarityHighlight> rarity = FishRequirement.getRarityHighlights(asks);
-        boolean hasRarity = !rarity.isEmpty();
-        Map<String, Color> highlights = new LinkedHashMap<>();
-
+        List<String> values = new ArrayList<>();
         for (int i = 1; i < params.size(); i++) {
             String value = params.get(i).getStringWithTokenReplacement(ruleId, dialog, memoryMap);
-            if (value == null || value.isEmpty()) continue;
-            if (hasRarity && (value.equals(fullAsk) || value.equals(Misc.ucFirst(fullAsk)))) continue;
-            highlights.putIfAbsent(value, Misc.getHighlightColor());
+            if (value != null && !value.isEmpty()) values.add(value);
         }
 
-        for (FishRequirement.RarityHighlight entry : rarity) {
+        List<FishRequirement.RarityHighlight> askRarity =
+                FishRequirement.getRarityHighlights(asks);
+        List<FishRequirement.RarityHighlight> fishNames =
+                FishRequirement.getFishNameHighlights(values.toArray(new String[0]));
+
+        Map<String, Color> highlights = new LinkedHashMap<>();
+        for (String value : values) {
+            boolean containsRarity = false;
+            for (FishRequirement.RarityHighlight entry : fishNames) {
+                if (value.contains(entry.text)) {
+                    containsRarity = true;
+                    break;
+                }
+            }
+            if (!containsRarity && !askRarity.isEmpty() && fullAsk != null
+                    && (value.equals(fullAsk) || value.equals(Misc.ucFirst(fullAsk)))) {
+                containsRarity = true;
+            }
+            if (!containsRarity) highlights.putIfAbsent(value, Misc.getHighlightColor());
+        }
+
+        for (FishRequirement.RarityHighlight entry : askRarity) {
+            highlights.put(entry.text, entry.rarity.color);
+        }
+        for (FishRequirement.RarityHighlight entry : fishNames) {
             highlights.put(entry.text, entry.rarity.color);
         }
         if (highlights.isEmpty()) return true;

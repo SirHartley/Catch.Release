@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -181,6 +182,82 @@ public class FishRequirement {
         }
     }
 
+    /**
+     * Finds every species name embedded in arbitrary player-facing text and pairs it with the
+     * canonical rarity colour. Longer names claim their span first, so a mod-added species such as
+     * "Deepwater Pufferfish" cannot also be mistaken for "Pufferfish".
+     */
+    public static List<RarityHighlight> getFishNameHighlights(String... texts) {
+        if (texts == null || texts.length == 0) return Collections.emptyList();
+
+        List<FishSpec> specs = FishSpecLoader.getAllFishSpecs();
+        specs.sort((a, b) -> Integer.compare(displayNameLength(b), displayNameLength(a)));
+
+        Map<String, FishRarity> found = new LinkedHashMap<>();
+
+        for (String text : texts) {
+            if (text == null || text.isEmpty()) continue;
+
+            String lower = text.toLowerCase(Locale.ROOT);
+            List<int[]> claimed = new ArrayList<>();
+
+            for (FishSpec spec : specs) {
+                if (spec == null) continue;
+
+                String name = spec.getDisplayName();
+                if (name == null || name.isEmpty()) continue;
+
+                String needle = name.toLowerCase(Locale.ROOT);
+                int from = 0;
+
+                while (from < lower.length()) {
+                    int start = lower.indexOf(needle, from);
+                    if (start < 0) break;
+
+                    int end = start + needle.length();
+                    boolean overlaps = false;
+                    for (int[] span : claimed) {
+                        if (start < span[1] && end > span[0]) {
+                            overlaps = true;
+                            break;
+                        }
+                    }
+
+                    boolean startsOnBoundary = start == 0
+                            || !Character.isLetterOrDigit(text.charAt(start - 1));
+                    boolean endsOnBoundary = end == text.length()
+                            || !Character.isLetterOrDigit(text.charAt(end));
+
+                    if (!overlaps && startsOnBoundary && endsOnBoundary) {
+                        found.putIfAbsent(text.substring(start, end), spec.rarity);
+                        claimed.add(new int[] {start, end});
+                    }
+
+                    from = end;
+                }
+            }
+        }
+
+        List<RarityHighlight> out = new ArrayList<>();
+        for (Map.Entry<String, FishRarity> entry : found.entrySet()) {
+            out.add(new RarityHighlight(entry.getKey(), entry.getValue()));
+        }
+        return out;
+    }
+
+    protected static int displayNameLength(FishSpec spec) {
+        if (spec == null || spec.getDisplayName() == null) return 0;
+        return spec.getDisplayName().length();
+    }
+
+    protected static boolean containsHighlight(String text, List<RarityHighlight> highlights) {
+        if (text == null || highlights == null) return false;
+        for (RarityHighlight entry : highlights) {
+            if (entry != null && entry.text != null && text.contains(entry.text)) return true;
+        }
+        return false;
+    }
+
     /** Returns every exact rarity-bearing substring in this requirement. */
     public List<RarityHighlight> getRarityHighlights() {
         Map<String, FishRarity> found = new LinkedHashMap<>();
@@ -228,35 +305,70 @@ public class FishRequirement {
         return out;
     }
 
-    /** Applies rarity colours to an intel/UI label while ordinary highlights stay yellow. */
+    /**
+     * Applies rarity colours to every species name and explicit rarity floor in an intel/UI label,
+     * while ordinary highlights stay yellow. Arbitrary highlighted values such as a rolled reward
+     * are inspected too, so a range-data reward cannot flatten its species name back to yellow.
+     */
     public static void highlight(LabelAPI label, List<FishRequirement> asks, String fallbackAsk,
                                  String... normalHighlights) {
         if (label == null) return;
 
+        List<String> inspected = new ArrayList<>();
+        if (fallbackAsk != null) inspected.add(fallbackAsk);
+        if (normalHighlights != null) Collections.addAll(inspected, normalHighlights);
+
+        List<RarityHighlight> askRarity = getRarityHighlights(asks);
+        List<RarityHighlight> fishNames =
+                getFishNameHighlights(inspected.toArray(new String[0]));
+
         List<String> strings = new ArrayList<>();
         List<Color> colors = new ArrayList<>();
+
         if (normalHighlights != null) {
             for (String text : normalHighlights) {
-                if (text == null || text.isEmpty()) continue;
+                if (text == null || text.isEmpty() || containsHighlight(text, fishNames)) continue;
                 strings.add(text);
                 colors.add(Misc.getHighlightColor());
             }
         }
 
-        List<RarityHighlight> rarity = getRarityHighlights(asks);
-        if (rarity.isEmpty()) {
-            if (fallbackAsk != null && !fallbackAsk.isEmpty()) {
+        if (askRarity.isEmpty()) {
+            if (fallbackAsk != null && !fallbackAsk.isEmpty()
+                    && !containsHighlight(fallbackAsk, fishNames)) {
                 strings.add(fallbackAsk);
                 colors.add(Misc.getHighlightColor());
             }
-        } else {
-            for (RarityHighlight entry : rarity) {
-                strings.add(entry.text);
-                colors.add(entry.rarity.color);
-            }
+        }
+
+        Map<String, FishRarity> rarity = new LinkedHashMap<>();
+        for (RarityHighlight entry : askRarity) rarity.put(entry.text, entry.rarity);
+        for (RarityHighlight entry : fishNames) rarity.put(entry.text, entry.rarity);
+
+        for (Map.Entry<String, FishRarity> entry : rarity.entrySet()) {
+            strings.add(entry.getKey());
+            colors.add(entry.getValue().color);
         }
 
         if (strings.isEmpty()) return;
+        label.setHighlight(strings.toArray(new String[0]));
+        label.setHighlightColors(colors.toArray(new Color[0]));
+    }
+
+    /** Applies only embedded fish-name colours, leaving all surrounding prose untouched. */
+    public static void highlightFishNames(LabelAPI label, String... texts) {
+        if (label == null) return;
+
+        List<RarityHighlight> fishNames = getFishNameHighlights(texts);
+        if (fishNames.isEmpty()) return;
+
+        List<String> strings = new ArrayList<>();
+        List<Color> colors = new ArrayList<>();
+        for (RarityHighlight entry : fishNames) {
+            strings.add(entry.text);
+            colors.add(entry.rarity.color);
+        }
+
         label.setHighlight(strings.toArray(new String[0]));
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
