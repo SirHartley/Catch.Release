@@ -17,6 +17,8 @@ public class PondConstants {
     public static final float POND_INTERACT_RANGE_MULT = 1.5f;
     public static final float MOTE_SPAWN_INSET = 0.85f;
 
+    public static final String VIEWPORT_SNAP_SETTING = "catchrelease_pondViewportSnap";
+
     public static final float POND_FOCUS_TIME_CONSTANT = 1f;
     public static final float POND_FOCUS_RETURN_TIME_CONSTANT = 0.4f;
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
