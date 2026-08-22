@@ -1441,10 +1441,8 @@ $entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
 CatchReleaseCMD leaveEncounter",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
-catchrelease_wreckOpen,OpenInteractionDialog,"$entity.tag:catchrelease_tutorial_wreck score:1000
-CatchReleaseCMD tokens","ShowDefaultVisual
-SetShortcut catchrelease_wreckLeave ""ESCAPE""
-FireAll PopulateOptions","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
+catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
+SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
 
 One object remains attached to the dorsal handling deck.
 
@@ -1452,10 +1450,8 @@ At first it reads as part of the ship. Closer inspection resolves a reinforced s
 
 The frame is held to the wreck by three emergency clamps. None belong to the wreck.","catchrelease_wreckLook:Inspect the derelict
 catchrelease_wreckTake:Recover the service assembly
+catchrelease_wreckExplore:Explore the derelict
 catchrelease_wreckLeave:Leave the wreck alone",
-catchrelease_wreckHideTake,PopulateOptions,"$entity.tag:catchrelease_tutorial_wreck
-CatchReleaseCMD tokens
-$catchreleaseCarrying",RemoveOption catchrelease_wreckTake,,,
 catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The boarding party finds an ordinary dead ship.
 
 The reactor is cold. The lockers have been emptied. Someone took the expensive avionics and left the galley fittings. There are no bodies.
@@ -1467,8 +1463,7 @@ Your ops chief sends back imagery of the external frame.
 A closer image follows.
 
 Someone has scratched maintenance intervals into the casing by hand.",catchrelease_wreckLook2:Continue,
-catchrelease_wreckLook2,DialogOptionSelected,"$option == catchrelease_wreckLook2
-CatchReleaseCMD tokens",,"Your crew can recover the assembly intact. It will take a cargo crane and several hours of unproductive swearing.
+catchrelease_wreckLook2,DialogOptionSelected,$option == catchrelease_wreckLook2,,"Your crew can recover the assembly intact. It will take a cargo crane and several hours of unproductive swearing.
 
 The transponder package still contains the last service handshake it accepted.
 
@@ -1481,17 +1476,18 @@ It is larger aboard your ship than it looked outside: several tonnes of scarred 
 
 Your crew lash it down.
 
-The service handshake still points to the Fisherman.",catchrelease_wreckLeave:Leave,
+The service handshake still points to the Fisherman.","catchrelease_wreckExplore:Explore the derelict
+catchrelease_wreckLeave:Leave",
+catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExplore,"SalvageGenFromSeed
+FireBest ShowSalvageEntityDetails
+FireBest SalvageCheckHostile",,,Chains into vanilla's own salvage flow - the same three commands the stock sal_ rows run on any salvageable.
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,EndConversation,,,
-catchrelease_castawaySurvey,DialogOptionSelected,"$option == surveyPerform
-!$market.isSurveyed
-CatchReleaseCMD castawayEligible score:1100","CatchReleaseCMD startCastaway
+catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
+!$catchrelease_castawaySeen
+CatchReleaseCMD castawayEligible score:1000","CatchReleaseCMD startCastaway
+$catchrelease_castawaySeen = true 0
 $option = catchrelease_castawayPlanetOpen 0
-FireBest DialogOptionSelected",,,"Technical survey hook, shaped after gaIntro2surveyOpen: the planet remains the interaction target and the supplied scene opens before vanilla performs the survey."
-catchrelease_castawayReminder,PopulateOptions,"$market.catchrelease_castawayHost
-!$market.catchrelease_castawayRescued",,,catchrelease_castawayContact:Respond to the survivor's beacon,The survey found a surface cache; leaving its scene open does not make the host planet disappear.
-catchrelease_castawayContact,DialogOptionSelected,$option == catchrelease_castawayContact,"$option = catchrelease_castawayPlanetOpen 0
-FireBest DialogOptionSelected",,,
+FireBest DialogOptionSelected",,,"The rating's scene takes an eligible planet's own interaction over, vanilla's mission-target way (a score-boosted OpenInteractionDialog row, like aem_target); the seen flag expires with the pause, so the hold lasts one dialog and he hails again next visit until given a berth."
 catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
@@ -1499,15 +1495,8 @@ The source is a prefabricated cache dug into the surface. Most of it is storage,
 The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
 10:catchrelease_ratingWho:Ask who he worked for
 20:catchrelease_ratingRescue:Offer passage
-100:catchrelease_castawayLeave:Leave",Technical routing twin for the planet-hosted survey flow; supplied scene text and sequencing remain verbatim.
-catchrelease_castawayOpen,OpenInteractionDialog,$entity.tag:catchrelease_castaway score:1000,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
-
-The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
-
-The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
-10:catchrelease_ratingWho:Ask who he worked for
-20:catchrelease_ratingRescue:Offer passage
-100:catchrelease_castawayLeave:Leave",Adjust tag/IDs to existing castaway implementation if needed
+90:catchrelease_castawayToPlanet:See to the planet
+100:catchrelease_castawayLeave:Leave",The scene itself; entered only through the interaction hijack above.
 catchrelease_ratingAsk,DialogOptionSelected,$option == catchrelease_ratingAsk,,"""Missed the boat.""
 
 He sees your expression.
@@ -1530,10 +1519,13 @@ He gives your comms officer the old fleet handshake.
 catchrelease_castawayBack,DialogOptionSelected,$option == catchrelease_castawayBack,ShowDefaultVisual,,"0:catchrelease_ratingAsk:Ask how he got here
 10:catchrelease_ratingWho:Ask who he worked for
 20:catchrelease_ratingRescue:Offer passage
+90:catchrelease_castawayToPlanet:See to the planet
 100:catchrelease_castawayLeave:Leave",Technical menu return for the supplied castaway branches.
 catchrelease_ratingRescue,DialogOptionSelected,$option == catchrelease_ratingRescue,CatchReleaseCMD rescueCastaway,"He accepts before you finish the sentence.
 
-Your personnel officer finds a spare berth.",,
+Your personnel officer finds a spare berth.","0:catchrelease_castawayToPlanet:See to the planet
+100:catchrelease_castawayLeave:Leave",
+catchrelease_castawayToPlanet,DialogOptionSelected,$option == catchrelease_castawayToPlanet,FireBest OpenInteractionDialog,,,Hands the dialog back to the planet's ordinary interaction; the seen flag or the rescue keeps the scene from re-firing inside it.
 catchrelease_castawayLeave,DialogOptionSelected,$option == catchrelease_castawayLeave,DismissDialog,,,
 catchrelease_fisherEncounter,BeginFleetEncounter,"$catchrelease_fisherman score:1000
 !$isHostile","unset $ignorePlayerCommRequests

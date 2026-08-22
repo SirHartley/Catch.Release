@@ -120,9 +120,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SELL_RARE = "$catchreleaseSellRare";
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
-    /** The hulk's hull, for the row that describes it. */
-    public static final String WRECK_HULL = "$catchreleaseWreckHull";
-
     /** Whether a rumor is going spare. */
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
@@ -275,7 +272,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "castawayEligible":
                 return dialog != null && dialog.getInteractionTarget()
                         instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
-                        && Castaway.canStart(planet);
+                        && Castaway.isEligible(planet);
             case "startCastaway":
                 return dialog != null && dialog.getInteractionTarget()
                         instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
@@ -284,6 +281,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             //---- the hulk
             case "carryFisherProperty":
                 FishingIntro.takeFisherProperty();
+                //the scene's flag and marker come off with the assembly; ordinary salvage remains
+                if (dialog != null) TutorialWreck.retire(dialog.getInteractionTarget());
                 return true;
             case "dropFisherProperty":
                 FishingIntro.dropFisherProperty();
@@ -878,8 +877,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
-        if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
-
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 
         local.set(CRAB_ANY, CrabWares.isAnythingLeft() || scene != null, 0);
@@ -968,12 +965,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return HarpoonHitman.acceptBribe(fleet);
     }
 
-    /** Gives the stranded rating a berth and completes whichever safe host delivered the scene. */
+    /** Gives the stranded rating a berth and completes the host world's scene. The dialog stays
+     *  up - the row that called this shows the berth being found and offers the planet or the
+     *  door, the way vanilla's planet-bound errands hand the dialog back rather than slam it. */
     protected boolean rescueCastaway(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
         Castaway.rescue(dialog.getInteractionTarget());
-        dialog.dismiss();
 
         return true;
     }

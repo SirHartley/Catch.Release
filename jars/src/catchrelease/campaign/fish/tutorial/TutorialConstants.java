@@ -31,9 +31,15 @@ public class TutorialConstants {
 
     //---------------------------------------------------------------- the wreck
 
-    public static final String WRECK_ENTITY_ID = "catchrelease_TutorialWreck";
     public static final String WRECK_PLACED_KEY = "$catchrelease_wreckPlaced";
-    public static final String WRECK_NAME = "Derelict Cruiser";
+
+    /** On the hulk's own memory while it still carries the assembly - what the sheet's scene
+     *  keys on, and what {@code TutorialWreck.retire} takes off again. */
+    public static final String WRECK_FLAG = "$catchrelease_tutorialWreck";
+
+    /** The mission-marker reason, set at placement and cleared with the flag. */
+    public static final String WRECK_IMPORTANT = "catchrelease_tutorial";
+
     /** Whether the player recovered the Fisherman's LYNE service assembly from the wreck. */
     public static final String FISHER_PROPERTY_KEY = "$catchrelease_fisherProperty";
 
@@ -58,13 +64,10 @@ public class TutorialConstants {
 
     //---------------------------------------------------------------- the rating
 
-    /** The same person, found two ways: on a surveyed world's surface, or nursing a drink in a bar. */
-    public static final String CASTAWAY_ENTITY_ID = "catchrelease_Castaway";
+    /** The same person, found two ways: on an unsurveyed world's surface, or in a bar. */
     public static final String CASTAWAY_PLACED_KEY = "$catchrelease_castawayPlaced";
-    public static final String CASTAWAY_NAME = "Distress Beacon";
-    public static final String CASTAWAY_TAG = "catchrelease_castaway";
 
-    /** Planet-market flags for the survey-hosted scene and its one-way completion. */
+    /** Planet-market flags for the planet-hosted scene and its one-way completion. */
     public static final String CASTAWAY_HOST_KEY = "$catchrelease_castawayHost";
     public static final String CASTAWAY_RESCUED_KEY = "$catchrelease_castawayRescued";
 
