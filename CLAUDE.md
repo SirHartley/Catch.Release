@@ -76,16 +76,15 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
 - **Use local and pinned GPTs directly through the ChatGPT app.** ChatGPT can switch to GPTs
   such as the Starsector Editor inside the app. Do not open `chatgpt.com` or use the browser
   to reach them.
-- **Treat the PC filesystem as unavailable for writes until the filesystem incident is
-  explicitly cleared.** Do not try to edit, patch, create, delete, move, or format local files.
-  Do not perform local Git operations either: no local branch, checkout, staging, commit, pull,
-  push, merge, or post-merge sync. Local reads may be attempted when useful, but expect them to
-  fail and do not make the workflow depend on them.
+- **Keep every PC checkout read-only when ChatGPT is in the app.** Local files may be inspected,
+  but never edit, patch, create, delete, move, or format repository files there. Do not perform
+  local Git operations either: no local branch, checkout, staging, commit, pull, push, merge, or
+  post-merge sync. A working filesystem sandbox does not change this boundary: earlier local
+  writes corrupted files, so the connected GitHub app is the only repository write path.
 - **Use the connected GitHub app for the entire repository workflow.** Read the current remote
   files and refs there, create the task branch there, make each file update there, inspect the
-  remote diff there, and open and merge the pull request there. While the incident remains
-  unresolved, do not fall back to PowerShell, a local checkout, the `gh` CLI, the browser, or
-  another local write path.
+  remote diff there, and open and merge the pull request there. Do not fall back to PowerShell,
+  a local checkout, the `gh` CLI, the browser, or another local write path.
 - **Preserve the repository's task/commit discipline through the GitHub app.** One task is one
   commit. If a message contains several tasks, commit them separately on the same task branch in
   the requested order, and open and merge the pull request only after the whole message is done.

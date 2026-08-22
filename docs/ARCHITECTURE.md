@@ -10,10 +10,12 @@ the same commit as the change. A map that is wrong is worse than no map, because
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.
 
-**Repository boundary:** implementation writes happen only in the current task repository. Live
-mod installs and other checkouts are read-only audit sources unless the user explicitly asks for a
-write or synchronization; merging a PR never authorizes a post-merge sync. This boundary is defined
-in `CLAUDE.md` and applies to every path outside the task checkout.
+**Repository boundary:** implementation writes happen only in the current task repository. For
+ChatGPT in the ChatGPT app, that repository is operated remotely through the connected GitHub app;
+every PC checkout remains read-only even when its filesystem sandbox works. Live mod installs and
+other checkouts are read-only audit sources unless the user explicitly asks for a write or
+synchronization; merging a PR never authorizes a post-merge sync. This boundary is defined in
+`CLAUDE.md`.
 
 **[`LORE.md`](LORE.md) is the setting and writing authority** — what a breach, a pattern, the ROD,
 the Fisherman and Crablobab actually are; who notices contradictions; who is allowed to know what;
