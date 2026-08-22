@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.colony;
 
-import catchrelease.campaign.fish.data.FishRarity;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -111,11 +110,9 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
             String label = backdrop.getDisplayName();
             if (hanging != null && backdrop.id.equals(hanging.id)) label += " - up now";
 
-            if (backdrop.rarity == FishRarity.COMMON) {
-                dialog.getOptionPanel().addOption(label, backdrop, "The backdrop can be changed at any time. More can be found through quests or purchased from a certain crab merchant.");
-            } else {
-                dialog.getOptionPanel().addOption(label, backdrop, backdrop.rarity.color, "The backdrop can be changed at any time. More can be found through quests or purchased from a certain crab merchant.");
-            }
+            dialog.getOptionPanel().addOption(label, backdrop, backdrop.rarity.color,
+                    "The backdrop can be changed at any time. More can be found through quests"
+                            + " or purchased from a certain crab merchant.");
         }
 
         if (backdropPage > 0) {

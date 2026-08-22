@@ -104,7 +104,7 @@ public class FishItemRenderer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         if (rarity != null) {
-            //backing needed or the common grey blends into the art instead of reading as a mark
+            //backing needed or the pale Common accent blends into the art instead of reading as a mark
             backing(barX, rowY, barWidth, size, alphaMult);
 
             quad(barX, rowY, barWidth, size, rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
