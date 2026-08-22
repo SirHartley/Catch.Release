@@ -120,9 +120,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SELL_RARE = "$catchreleaseSellRare";
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
-    /** The hulk's hull, for the row that describes it. */
-    public static final String WRECK_HULL = "$catchreleaseWreckHull";
-
     /** Whether a rumor is going spare. */
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
@@ -284,6 +281,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             //---- the hulk
             case "carryFisherProperty":
                 FishingIntro.takeFisherProperty();
+                //the scene's flag and marker come off with the assembly; ordinary salvage remains
+                if (dialog != null) TutorialWreck.retire(dialog.getInteractionTarget());
                 return true;
             case "dropFisherProperty":
                 FishingIntro.dropFisherProperty();
@@ -877,8 +876,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR_LOOT, rumor != null && rumor.type == FishRumors.TYPE_LOOT, 0);
         local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
-
-        if (target != null) local.set(WRECK_HULL, TutorialWreck.describeHull(target), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 

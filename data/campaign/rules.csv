@@ -1441,10 +1441,8 @@ $entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
 CatchReleaseCMD leaveEncounter",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
-catchrelease_wreckOpen,OpenInteractionDialog,"$entity.tag:catchrelease_tutorial_wreck score:1000
-CatchReleaseCMD tokens","ShowDefaultVisual
-SetShortcut catchrelease_wreckLeave ""ESCAPE""
-FireAll PopulateOptions","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
+catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
+SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
 
 One object remains attached to the dorsal handling deck.
 
@@ -1452,10 +1450,8 @@ At first it reads as part of the ship. Closer inspection resolves a reinforced s
 
 The frame is held to the wreck by three emergency clamps. None belong to the wreck.","catchrelease_wreckLook:Inspect the derelict
 catchrelease_wreckTake:Recover the service assembly
+catchrelease_wreckExplore:Explore the derelict
 catchrelease_wreckLeave:Leave the wreck alone",
-catchrelease_wreckHideTake,PopulateOptions,"$entity.tag:catchrelease_tutorial_wreck
-CatchReleaseCMD tokens
-$catchreleaseCarrying",RemoveOption catchrelease_wreckTake,,,
 catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The boarding party finds an ordinary dead ship.
 
 The reactor is cold. The lockers have been emptied. Someone took the expensive avionics and left the galley fittings. There are no bodies.
@@ -1467,8 +1463,7 @@ Your ops chief sends back imagery of the external frame.
 A closer image follows.
 
 Someone has scratched maintenance intervals into the casing by hand.",catchrelease_wreckLook2:Continue,
-catchrelease_wreckLook2,DialogOptionSelected,"$option == catchrelease_wreckLook2
-CatchReleaseCMD tokens",,"Your crew can recover the assembly intact. It will take a cargo crane and several hours of unproductive swearing.
+catchrelease_wreckLook2,DialogOptionSelected,$option == catchrelease_wreckLook2,,"Your crew can recover the assembly intact. It will take a cargo crane and several hours of unproductive swearing.
 
 The transponder package still contains the last service handshake it accepted.
 
@@ -1481,7 +1476,11 @@ It is larger aboard your ship than it looked outside: several tonnes of scarred 
 
 Your crew lash it down.
 
-The service handshake still points to the Fisherman.",catchrelease_wreckLeave:Leave,
+The service handshake still points to the Fisherman.","catchrelease_wreckExplore:Explore the derelict
+catchrelease_wreckLeave:Leave",
+catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExplore,"SalvageGenFromSeed
+FireBest ShowSalvageEntityDetails
+FireBest SalvageCheckHostile",,,Chains into vanilla's own salvage flow - the same three commands the stock sal_ rows run on any salvageable.
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,EndConversation,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
 !$catchrelease_castawaySeen

@@ -49,36 +49,6 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
-	# somebody who did this before you, beside the rupture that killed them. Domain-era hulk art
-	# stands in until there is a holed-cruiser sprite
-	"catchrelease_TutorialWreck":{
-		"defaultName":"Derelict Cruiser",
-		"nameInText":"derelict cruiser",
-		"shortName":"wreck",
-		"aOrAn":"a",
-		"isOrAre":"is",
-		"defaultRadius":60,
-		"interactionImage":"graphics/illustrations/space_wreckage.jpg",
-		"icon":"graphics/icons/derelict.png",
-		"iconWidth":27,
-		"iconHeight":27,
-		"sprite":"graphics/stations/survey_ship.png",
-		"spriteWidth":60,
-		"spriteHeight":60,
-		"renderShadow":true,
-		"useLightColor":true,
-		"showInCampaign":true,
-		"showIconOnMap":true,
-		"showNameOnMap":false,
-		"scaleNameWithZoom":false,
-		"scaleIconWithZoom":true,
-		"renderCircleIndicator":true,
-		"renderCircleIndicatorSelectionFlash":true,
-		"layers":[STATIONS],
-		"tags":["has_interaction_dialog", "catchrelease_tutorial_wreck"],
-		"pluginClass":"catchrelease.campaign.fish.tutorial.TutorialWreck"
-	},
-
 	# the fishing boats' mark on the system map - drawn there and nowhere else, so the boat can be
 	# found among the blips without anything being painted over its hull out in space
 	"catchrelease_FisherMapIcon":{
