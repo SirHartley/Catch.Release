@@ -49,6 +49,18 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 - **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
   a missing or invalid CLI login must never block PR creation, inspection, or merging when the app
   is connected.
+- **Whoever merges a pull request deletes its branch.** Immediately after the merge, in the same
+  session, through the same GitHub app. A merged branch is finished work, and one left standing is
+  indistinguishable at a glance from work still in flight - which is how the repository reached a
+  hundred and fifty of them, none of which anybody could tell apart from the outside without
+  auditing each one. Tidying up after somebody else is nobody's job in particular, so it has to be
+  the job of the agent that merged. The session's own assigned task branch is the single exception:
+  it is reset onto the new master and reused under the same name rather than deleted.
+  If the deletion is refused, say so in the reply and name the branch. Some sessions hold
+  credentials that can create and update refs but not delete them; the refusal is an HTTP 403 on
+  the delete push while an ordinary push still succeeds. That is a permission boundary, not
+  something to route around - report it and leave the branch, so it is a known leftover rather than
+  a silent one.
 
 ## ChatGPT app workflow (ChatGPT only)
 
