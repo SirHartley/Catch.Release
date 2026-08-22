@@ -129,36 +129,41 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
 - **Use local and pinned GPTs directly through the ChatGPT app.** ChatGPT can switch to GPTs
   such as the Starsector Editor inside the app. Do not open `chatgpt.com` or use the browser
   to reach them.
-- **Keep every PC checkout read-only when ChatGPT is in the app.** Local files may be inspected,
-  but never edit, patch, create, delete, move, or format repository files there. Do not perform
-  local Git operations either: no local branch, checkout, staging, commit, pull, push, merge, or
-  post-merge sync. A working filesystem sandbox does not change this boundary: earlier local
-  writes corrupted files, so the connected GitHub app is the only repository write path.
-- **Use the connected GitHub app for the entire repository workflow.** Read the current remote
-  files and refs there, create the task branch there, make each file update there, inspect the
-  remote diff there, and open and merge the pull request there. Do not fall back to PowerShell,
-  a local checkout, the `gh` CLI, the browser, or another local write path.
-- **Preserve the repository's task/commit discipline through the GitHub app.** One task is one
+- **Use one dedicated task checkout for local repository work.** Normal `git clone`, fetch,
+  branch, checkout, edit, build, commit, integration and push operations are permitted inside
+  that checkout. A task checkout is not a live mod installation or another standing checkout;
+  the generic no-sync rule above still protects both.
+- **Validate a new or suspect filesystem before trusting it.** Clone current remote `master`
+  into a disposable directory, confirm HEAD matches the remote commit, require a clean
+  `git status` and `git fsck --full`, verify a repository file against its remote blob, and
+  exercise a write/read/delete round trip plus local branch creation and switching. Remove the
+  disposable clone after checking its resolved path. If any check fails, keep PC checkouts
+  read-only and return to the GitHub-app-only workflow until the cause is resolved.
+- **Split the repository workflow between local Git and the connected GitHub app.** Use the
+  task checkout for source work and Git history. Use the GitHub app to create, inspect and merge
+  pull requests, and as the remote-only fallback if local Git or the filesystem stops being
+  trustworthy. Do not use the browser for repository work; the `gh` CLI remains only the
+  fallback described by the generic workflow above.
+- **Preserve the repository's task/commit discipline in the task checkout.** One task is one
   commit. If a message contains several tasks, commit them separately on the same task branch in
   the requested order, and open and merge the pull request only after the whole message is done.
-- **Work from, and finish against, remote state.** Refresh remote `master` before branching and
-  check it again before merging, account for intervening remote changes, verify the merged remote
-  commit, and leave every local checkout and live mod install untouched.
-- **Compile from a disposable copy of the exact remote branch.** Temporary compiler inputs and
-  output are allowed only in an isolated build directory; never compile from, write into, or sync
-  a PC checkout or live mod install. Remove the build directory afterward. This narrow build
-  scratch exception does not authorize any other local repository writes. If it cannot be used,
-  stop before merge.
+- **Work from, and finish against, remote state.** Fetch current remote `master` before
+  branching and again before merging, integrate intervening changes, push the exact final task
+  commit, verify the merged remote commit, and leave every live mod install and unrelated
+  checkout untouched.
+- **Compile the exact final task-branch checkout.** Use a clean, empty output directory and the
+  complete Java 17 dependency set under [Building](#building). Never compile from or write into a
+  live mod installation. If the full compile cannot run, stop before merge.
 - **Draft and audit dialogue with the Starsector Editor GPT in the ChatGPT app.** Give the editor
-  the complete current remote `docs/LORE.md`, not a summary, before asking it to revise a line.
-  For corrective passes, also supply both the pre-regression and current dialogue so stronger
+  the complete current `docs/LORE.md`, not a summary, before asking it to revise a line. For
+  corrective passes, also supply both the pre-regression and current dialogue so stronger
   characterization is restored rather than flattened by generic tightening. Use focused faction,
   Fisherman and Crablobab passes, then give the editor the final sheet for voice QA. Its prose
   still has to pass the rules safety checks below; the editor does not get to alter routes, tokens
   or mechanics. **Never treat the Editor's draft or QA as the lore check:** independently compare
-  every returned line against the complete current remote `docs/LORE.md` before integration, and
-  send any terminology or mechanics conflict back to the Editor for correction. Apply the
-  approved result through the GitHub app only.
+  every returned line against the complete current `docs/LORE.md` before integration, and send
+  any terminology or mechanics conflict back to the Editor for correction. Apply the approved
+  result in the task checkout and push it through the normal Git workflow.
 
 ## Model assignments
 
