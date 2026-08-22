@@ -742,7 +742,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         bullet(info);
         for (FishReward reward : rewards) {
-            info.addPara(Misc.ucFirst(reward.describe()), text, 0f);
+            String description = Misc.ucFirst(reward.describe());
+            LabelAPI line = info.addPara(description, text, 0f);
+            FishRequirement.highlightFishNames(line, description);
         }
         unindent(info);
     }

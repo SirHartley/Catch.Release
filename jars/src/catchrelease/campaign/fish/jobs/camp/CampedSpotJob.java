@@ -385,7 +385,7 @@ public abstract class CampedSpotJob extends FishJob {
         String reward = describeRewards();
         LabelAPI terms = info.addPara("The promised payment is %s.", pad,
                 Misc.getHighlightColor(), reward);
-        terms.setHighlight(reward);
+        FishRequirement.highlight(terms, getAsks(), null, reward);
 
         //the same helper as the list row's clock, so the two surfaces say it the same way
         if (days > 0f) {
