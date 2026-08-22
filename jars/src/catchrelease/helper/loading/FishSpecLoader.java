@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class FishSpecLoader {
-
     public static final String PATH = "data/campaign/fish.csv";
 
     public static Map<String, FishSpec> getFishSpecsFromMemory() {
@@ -106,7 +104,6 @@ public class FishSpecLoader {
         return s;
     }
 
-
     private static Set<String> parseList(String value) {
         Set<String> out = new LinkedHashSet<>();
         if (value == null) return out;
@@ -118,7 +115,6 @@ public class FishSpecLoader {
 
         return out;
     }
-
 
     private static Set<StarColour> parseStarColours(String value) {
         Set<StarColour> out = new LinkedHashSet<>();

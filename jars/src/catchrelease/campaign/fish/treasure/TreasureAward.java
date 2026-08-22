@@ -3,14 +3,12 @@ package catchrelease.campaign.fish.treasure;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class TreasureAward {
-
+    public final TreasureRarity rarity;
+    public final List<Item> items = new ArrayList<>();
 
     public static class Item {
         public final String name;
-
-
         public final String sprite;
         public final int count;
 
@@ -21,13 +19,9 @@ public class TreasureAward {
         }
     }
 
-    public final TreasureRarity rarity;
-    public final List<Item> items = new ArrayList<>();
-
     public TreasureAward(TreasureRarity rarity) {
         this.rarity = rarity;
     }
-
 
     public String describe() {
         StringBuilder out = new StringBuilder();

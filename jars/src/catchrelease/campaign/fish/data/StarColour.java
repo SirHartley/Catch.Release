@@ -1,8 +1,6 @@
 package catchrelease.campaign.fish.data;
 
-
 public enum StarColour {
-
     BLUE("a blue star"),
     WHITE("a white star"),
     YELLOW("a yellow star"),
@@ -11,17 +9,13 @@ public enum StarColour {
     BROWN("a brown dwarf"),
     NEUTRON("a neutron star"),
     BLACK_HOLE("a black hole"),
-
-
     NONE("no sun at all");
-
 
     public final String name;
 
     StarColour(String name) {
         this.name = name;
     }
-
 
     public static StarColour of(String starType) {
         if (starType == null) return NONE;
@@ -52,7 +46,6 @@ public enum StarColour {
                 return WHITE;
         }
     }
-
 
     public static StarColour parse(String name) {
         if (name == null) return null;

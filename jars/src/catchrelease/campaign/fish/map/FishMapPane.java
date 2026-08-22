@@ -27,26 +27,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class FishMapPane extends BaseCustomUIPanelPlugin {
-
-
-    public interface Host {
-
-        void onPresenceChanged();
-
-
-        void onSpeciesFocused(FishSpec spec);
-
-
-        void onPlannerRequested();
-
-
-        void onCoherenceToggled(boolean shown);
-    }
-
     public static final float WIDTH = 250f;
-
     public static final float PAD = 14f;
     public static final float PLANNER_HEIGHT = 22f;
     public static final float SEARCH_HEIGHT = 22f;
@@ -56,59 +38,76 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float HEADER_HEIGHT = 20f;
     public static final float CONTROLS_HEIGHT = 154f;
     public static final float ROW_HEIGHT = 24f;
-
     public static final String NO_DATA_TEXT = "No data for entry";
     public static final float NO_DATA_NOTE_HEIGHT = 20f;
     public static final float NO_DATA_RESET_WIDTH = 110f;
     public static final float NO_DATA_RESET_HEIGHT = 22f;
     public static final float NO_DATA_GAP = 8f;
-
-
     public static final float COHERENCE_HEIGHT = 22f;
     public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
-
     public static final String SEARCH_GHOST = "Search...";
-
-
     public static final int MAX_SELECTED = 3;
-
-
     protected static boolean coherenceShown = false;
-
-
-    public static boolean isCoherenceShown() {
-        return coherenceShown;
-    }
 
     protected final Host host;
     protected final FishPresence.Filter filter = new FishPresence.Filter();
-
     protected CustomPanelAPI panel;
     protected float width, height;
     protected PositionAPI pos;
-
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
-
     protected final Set<String> selectedIds = new LinkedHashSet<>();
     protected int shownCount = 0;
     protected boolean resetRequested = false;
 
+    public interface Host {
+        void onPresenceChanged();
+
+        void onSpeciesFocused(FishSpec spec);
+
+        void onPlannerRequested();
+
+        void onCoherenceToggled(boolean shown);
+    }
+
+    protected class RowPlugin extends FishListRow {
+        public RowPlugin(FishSpec spec) {
+            super(spec);
+        }
+
+        @Override
+        protected PositionAPI getViewport() {
+            return listViewport;
+        }
+
+        @Override
+        protected boolean isSelected() {
+            return selectedIds.contains(spec.id);
+        }
+
+        @Override
+        protected void onRowClick(float pointX, float pointY) {
+            onRowClicked(spec);
+        }
+    }
+
     public FishMapPane(Host host) {
         this.host = host;
+    }
+
+    public static boolean isCoherenceShown() {
+        return coherenceShown;
     }
 
     public FishPresence.Filter getFilter() {
         return filter;
     }
 
-
     public Set<String> getSelectedIds() {
         return selectedIds;
     }
-
 
     public boolean hasSelectionWithoutRangeData() {
         for (String id : selectedIds) {
@@ -119,11 +118,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return false;
     }
 
-
     public boolean isCategoryView() {
         return selectedIds.isEmpty();
     }
-
 
     public void showSpecies(String speciesId) {
         if (speciesId == null) return;
@@ -146,7 +143,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         selectedIds.add(speciesId);
         if (wasRestricted && panel != null) rebuildList();
     }
-
 
     public void showRequirements(List<FishRequirement> asks) {
         resetRequested = false;
@@ -187,7 +183,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         rebuildList();
     }
 
-
     public void showOverview() {
         resetRequested = false;
         selectedIds.clear();
@@ -210,7 +205,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return false;
     }
 
-
     public void mount(CustomPanelAPI panel, float width, float height) {
         this.panel = panel;
         this.width = width;
@@ -220,7 +214,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         buildFooter();
         rebuildList();
     }
-
 
     protected void buildFooter() {
         float innerWidth = width - PAD * 2f - 6f;
@@ -249,7 +242,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -261,7 +253,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
-
 
     @Override
     public void advance(float amount) {
@@ -282,7 +273,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             host.onPresenceChanged();
         }
     }
-
 
     protected void buildControls() {
         // the same right edge as the list's rows below, which sit 6px in for their scroller
@@ -345,7 +335,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
 
-
     protected void rebuildList() {
         if (listRemovable != null) panel.removeComponent(listRemovable);
 
@@ -405,7 +394,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         host.onPresenceChanged();
     }
 
-
     protected void onRowClicked(FishSpec spec) {
         if (selectedIds.contains(spec.id)) {
             selectedIds.remove(spec.id);
@@ -438,7 +426,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         rebuildList();
         host.onPresenceChanged();
     }
-
 
     protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
         return new BaseTooltipCreator() {
@@ -506,28 +493,5 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 !selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED
                         ? "Three ranges are already up - deselect one first."
                         : "Click to toggle its range on the map. F2 opens the codex.");
-    }
-
-
-    protected class RowPlugin extends FishListRow {
-
-        public RowPlugin(FishSpec spec) {
-            super(spec);
-        }
-
-        @Override
-        protected PositionAPI getViewport() {
-            return listViewport;
-        }
-
-        @Override
-        protected boolean isSelected() {
-            return selectedIds.contains(spec.id);
-        }
-
-        @Override
-        protected void onRowClick(float pointX, float pointY) {
-            onRowClicked(spec);
-        }
     }
 }

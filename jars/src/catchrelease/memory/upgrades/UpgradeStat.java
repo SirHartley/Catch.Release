@@ -11,7 +11,6 @@ public class UpgradeStat {
         MULT
     }
 
-
     public enum Category {
         CAMPAIGN,
         MINIGAME
@@ -24,11 +23,8 @@ public class UpgradeStat {
     public UpgradeType upgradeType;
     public int maxLevel;
     public String description;
-
     public String icon;
     public Category category = Category.CAMPAIGN;
-
-
     public int level = 0;
 
     private int getClampedLevel() {

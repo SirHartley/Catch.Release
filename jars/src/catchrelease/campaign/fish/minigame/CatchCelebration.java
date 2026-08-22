@@ -15,25 +15,19 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CatchCelebration {
+    protected final FishSpec fish;
+    protected final List<Confetto> confetti = new ArrayList<>();
+    protected float elapsed = 0f;
+    transient protected LazyFont font;
+    transient protected LazyFont.DrawableString text;
+    transient protected boolean fontChecked = false;
+    protected boolean confettiSpawned = false;
 
     protected static class Confetto {
         float x, y, vx, vy, spin, angle, size;
         Color color;
     }
-
-    protected final FishSpec fish;
-    protected final List<Confetto> confetti = new ArrayList<>();
-
-    protected float elapsed = 0f;
-
-    transient protected LazyFont font;
-    transient protected LazyFont.DrawableString text;
-    transient protected boolean fontChecked = false;
-
-
-    protected boolean confettiSpawned = false;
 
     public CatchCelebration(FishSpec fish) {
         this.fish = fish;
@@ -62,7 +56,6 @@ public class CatchCelebration {
         return c;
     }
 
-
     protected Color pickColor(FishSpec fish) {
         if (fish != null
                 && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
@@ -88,7 +81,6 @@ public class CatchCelebration {
     public boolean isDone() {
         return elapsed >= FishConstants.CELEBRATION_TIME;
     }
-
 
     protected float getProgress() {
         return MathUtils.clamp(elapsed / Math.max(0.01f, FishConstants.CELEBRATION_TIME), 0f, 1f);
@@ -123,7 +115,6 @@ public class CatchCelebration {
         renderText(centerX, centerY, progress, alpha);
     }
 
-
     protected void renderFlash(float centerX, float centerY, float progress, float alpha) {
         float share = MathUtils.clamp(progress / FishConstants.CELEBRATION_FLASH_TIME, 0f, 1f);
         if (share >= 1f) return;
@@ -131,7 +122,6 @@ public class CatchCelebration {
         Disc.draw(centerX, centerY, FishConstants.CELEBRATION_FLASH_SIZE * (0.2f + share * 0.8f),
                 getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha, 0f, true);
     }
-
 
     protected void renderBacklight(float centerX, float centerY, float progress, float alpha) {
         float radius = getBacklightRadius(progress);
@@ -154,7 +144,6 @@ public class CatchCelebration {
 
         return FishConstants.CELEBRATION_BACKLIGHT_SIZE * (0.55f + 0.45f * ease(progress)) * pulse;
     }
-
 
     protected void renderFish(SpriteAPI sprite, float centerX, float centerY, float progress, float alpha) {
         if (sprite == null) return;
@@ -195,7 +184,6 @@ public class CatchCelebration {
         GL11.glPopAttrib();
     }
 
-
     protected void renderText(float centerX, float centerY, float progress, float alpha) {
         LazyFont.DrawableString drawable = getText();
         if (drawable == null) return;
@@ -214,7 +202,6 @@ public class CatchCelebration {
         drawable.drawAtAngle(centerX - drawable.getWidth() * 0.5f, y, FishConstants.CELEBRATION_TEXT_ANGLE);
     }
 
-
     protected Color getAccentColor() {
         return fish == null ? Color.WHITE : fish.rarity.color;
     }
@@ -223,7 +210,6 @@ public class CatchCelebration {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(),
                 (int) MathUtils.clamp(alpha * 255f, 0f, 255f));
     }
-
 
     protected LazyFont.DrawableString getText() {
         if (!fontChecked) {
@@ -240,18 +226,15 @@ public class CatchCelebration {
         return text;
     }
 
-
     public static void playHook(String soundId) {
         playHook(soundId, 1f);
     }
-
 
     public static void playHook(String soundId, float pitch) {
         if (soundId == null || soundId.isEmpty()) return;
 
         Global.getSoundPlayer().playUISound(soundId, pitch, 1f);
     }
-
 
     protected static float ease(float t) {
         return 1f - (1f - t) * (1f - t);

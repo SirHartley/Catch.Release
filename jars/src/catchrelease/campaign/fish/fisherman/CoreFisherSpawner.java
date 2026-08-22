@@ -9,13 +9,13 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class CoreFisherSpawner implements EveryFrameScript {
-
     protected final IntervalUtil interval =
             new IntervalUtil(FishermanConstants.CORE_CHECK_DAYS * 0.8f,
                     FishermanConstants.CORE_CHECK_DAYS * 1.2f);
-
+    protected transient boolean swept = false;
+    protected transient com.fs.starfarer.api.campaign.LocationAPI lastLocation;
+    protected transient boolean placed = false;
 
     public static void register() {
         Global.getSector().addTransientScript(new CoreFisherSpawner());
@@ -30,7 +30,6 @@ public class CoreFisherSpawner implements EveryFrameScript {
     public boolean runWhilePaused() {
         return false;
     }
-
 
     @Override
     public void advance(float amount) {
@@ -54,13 +53,6 @@ public class CoreFisherSpawner implements EveryFrameScript {
         }
     }
 
-    protected transient boolean swept = false;
-
-
-    protected transient com.fs.starfarer.api.campaign.LocationAPI lastLocation;
-    protected transient boolean placed = false;
-
-
     protected boolean hasJustArrived() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -80,7 +72,6 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return true;
     }
 
-
     public static CampaignFleetAPI getBoat(StarSystemAPI system) {
         if (system == null) return null;
 
@@ -92,7 +83,6 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return null;
     }
 
-
     public static CampaignFleetAPI ensureBoat(StarSystemAPI system) {
         FishermanSpawner.reconcileSystem(system);
         CampaignFleetAPI existing = getAnyBoat(system);
@@ -100,14 +90,12 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return existing != null ? existing : post(system);
     }
 
-
     public static CampaignFleetAPI getAnyBoat(StarSystemAPI system) {
         if (system == null) return null;
 
         return FishermanSpawner.chooseSystemBoat(system,
                 FishermanSpawner.getLiveFishermen(system));
     }
-
 
     protected static CampaignFleetAPI post(StarSystemAPI system) {
         FishermanSpawner.reconcileSystem(system);

@@ -15,53 +15,13 @@ import java.awt.Color;
 import java.util.List;
 import java.util.function.Supplier;
 
-
 public final class PaneWidgets {
-
-
     public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
-
     public static final String CLICK_SOUND = "ui_button_pressed";
-
     protected static transient LazyFont tinyFont;
     protected static transient boolean tinyChecked = false;
 
-    private PaneWidgets() {
-    }
-
-
-    public static LazyFont getTinyFont() {
-        if (tinyChecked) return tinyFont;
-        tinyChecked = true;
-
-        try {
-            tinyFont = LazyFont.loadFont(CHIP_ICON_FONT);
-        } catch (Exception e) {
-            tinyFont = null;
-        }
-
-        return tinyFont;
-    }
-
-
-    public static String tendGhost(TextFieldAPI field, String ghost) {
-        String text = field.getText();
-        boolean focused = field.hasFocus();
-
-        if (focused && ghost.equals(text)) {
-            field.deleteAll(false);
-            text = "";
-        } else if (!focused && (text == null || text.isEmpty())) {
-            field.setText(ghost);
-            text = ghost;
-        }
-
-        return text == null || ghost.equals(text) ? "" : text;
-    }
-
-
     public static class Chip extends BaseCustomUIPanelPlugin {
-
         public static final float ICON_SIZE = 16f;
 
         protected final String label;
@@ -69,9 +29,7 @@ public final class PaneWidgets {
         protected final String iconId;
         protected final Supplier<Boolean> on;
         protected final Runnable onToggle;
-
         protected PositionAPI chipPos;
-
         protected transient LazyFont.DrawableString text;
         protected transient SpriteAPI icon;
         protected transient boolean iconChecked;
@@ -177,23 +135,8 @@ public final class PaneWidgets {
         }
     }
 
-
-    public static void drawNote(String text, float x, float y, float width, float height,
-                                float alphaMult) {
-        LazyFont small = ShopUi.getSmallFont();
-        if (small == null) return;
-
-        LazyFont.DrawableString line = small.createText(text,
-                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), small.getBaseHeight());
-        line.draw(Math.round(x + (width - line.getWidth()) * 0.5f),
-                Math.round(y + (height + line.getHeight()) * 0.5f));
-    }
-
-
     public static class Note extends BaseCustomUIPanelPlugin {
-
         protected final String text;
-
         protected PositionAPI notePos;
 
         public Note(String text) {
@@ -214,13 +157,9 @@ public final class PaneWidgets {
         }
     }
 
-
     public static class TitleRow extends BaseCustomUIPanelPlugin {
-
         protected final String label;
-
         protected PositionAPI titlePos;
-
         protected transient LazyFont.DrawableString text;
 
         public TitleRow(String label) {
@@ -256,13 +195,9 @@ public final class PaneWidgets {
         }
     }
 
-
     public static class ListHeader extends BaseCustomUIPanelPlugin {
-
         protected final Supplier<String> label;
-
         protected PositionAPI headerPos;
-
         protected transient LazyFont.DrawableString text;
         protected transient String written;
         protected transient LazyFont.DrawableString help;
@@ -316,11 +251,8 @@ public final class PaneWidgets {
         }
     }
 
-
     public static class HelpMark extends BaseCustomUIPanelPlugin {
-
         protected PositionAPI markPos;
-
         protected transient LazyFont.DrawableString mark;
 
         @Override
@@ -352,15 +284,11 @@ public final class PaneWidgets {
         }
     }
 
-
     public static class TextButton extends BaseCustomUIPanelPlugin {
-
         protected final Supplier<String> label;
         protected final Supplier<Boolean> live;
         protected final Runnable onClick;
-
         protected PositionAPI buttonPos;
-
         protected transient LazyFont.DrawableString text;
         protected transient String written;
 
@@ -428,5 +356,47 @@ public final class PaneWidgets {
                 return;
             }
         }
+    }
+
+    private PaneWidgets() {
+    }
+
+    public static LazyFont getTinyFont() {
+        if (tinyChecked) return tinyFont;
+        tinyChecked = true;
+
+        try {
+            tinyFont = LazyFont.loadFont(CHIP_ICON_FONT);
+        } catch (Exception e) {
+            tinyFont = null;
+        }
+
+        return tinyFont;
+    }
+
+    public static String tendGhost(TextFieldAPI field, String ghost) {
+        String text = field.getText();
+        boolean focused = field.hasFocus();
+
+        if (focused && ghost.equals(text)) {
+            field.deleteAll(false);
+            text = "";
+        } else if (!focused && (text == null || text.isEmpty())) {
+            field.setText(ghost);
+            text = ghost;
+        }
+
+        return text == null || ghost.equals(text) ? "" : text;
+    }
+
+    public static void drawNote(String text, float x, float y, float width, float height,
+                                float alphaMult) {
+        LazyFont small = ShopUi.getSmallFont();
+        if (small == null) return;
+
+        LazyFont.DrawableString line = small.createText(text,
+                ShopUi.withAlpha(Misc.getGrayColor(), alphaMult), small.getBaseHeight());
+        line.draw(Math.round(x + (width - line.getWidth()) * 0.5f),
+                Math.round(y + (height + line.getHeight()) * 0.5f));
     }
 }

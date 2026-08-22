@@ -13,20 +13,14 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.List;
 
-
 public class FishSystemPane extends BaseCustomUIPanelPlugin {
-
     public static final float WIDTH = 76f;
-
     public static final float PAD = 8f;
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
-
-
     public static final float HEADING_HEIGHT = 22f;
 
     protected PositionAPI pos;
-
 
     public void mount(CustomPanelAPI panel, float width, float height, StarSystemAPI system) {
         List<FishSpec> known = FishPresence.getKnownFishIn(system);
@@ -62,7 +56,6 @@ public class FishSystemPane extends BaseCustomUIPanelPlugin {
     public void positionChanged(PositionAPI position) {
         pos = position;
     }
-
 
     @Override
     public void renderBelow(float alphaMult) {

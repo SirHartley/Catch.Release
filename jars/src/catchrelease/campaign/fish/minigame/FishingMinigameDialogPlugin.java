@@ -31,49 +31,179 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
-
     protected static final String CAMPAIGN_MUSIC_VOLUME_KEY = "campaignMusicVolumeMult";
-
-    public interface Callback {
-
-        void onCatchResolved(FishCatch landed);
-    }
 
     protected FishSpec fish;
     protected Callback callback;
-
-
     protected SectorEntityToken anchor;
-
-
     protected SectorEntityToken catchTarget;
-
-
     protected FishLogEntry.Method method = FishLogEntry.Method.UNKNOWN;
-
-
     protected FishCatch specimen;
-
     protected InteractionDialogAPI dialog;
     protected FishingMinigame minigame;
     protected Delegate delegate;
     protected boolean resolved = false;
-
-
     transient protected boolean dismissed = false;
-
-
     transient protected float previousCampaignMusicVolume;
     transient protected boolean campaignMusicVolumeScoped = false;
 
+    public interface Callback {
+        void onCatchResolved(FishCatch landed);
+    }
+
+    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
+            FishingMinigamePanel.Listener {
+        protected static final float DEV_BUTTON_WIDTH = 150f;
+        protected static final float DEV_BUTTON_HEIGHT = 24f;
+        protected static final float DEV_LIST_WIDTH = 220f;
+        protected static final float DEV_GAP = 30f;
+
+        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
+        protected DialogCallbacks callbacks;
+        protected CustomPanelAPI framePanel;
+        protected CustomPanelAPI fishList;
+        protected final Object devWinId = new Object();
+        protected final Object devWinTreasureId = new Object();
+        protected final Object devTreasureId = new Object();
+        protected final Object devFishId = new Object();
+
+        @Override
+        public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
+            this.callbacks = callbacks;
+            this.framePanel = panel;
+
+            addFramingElements(panel);
+        }
+
+        protected void addFramingElements(CustomPanelAPI panel) {
+            if (Global.getSettings().isDevMode()) addDevControls(panel);
+        }
+
+        protected void addDevControls(CustomPanelAPI panel) {
+            float height = (DEV_BUTTON_HEIGHT + 4f) * 4f + 4f;
+
+            CustomPanelAPI strip = panel.createCustomPanel(DEV_BUTTON_WIDTH, height, this);
+            TooltipMakerAPI element = strip.createUIElement(DEV_BUTTON_WIDTH, height, false);
+
+            element.addButton("Win", devWinId, DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Win with treasure", devWinTreasureId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Spawn treasure", devTreasureId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+            element.addButton("Spawn fish...", devFishId,
+                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
+
+            strip.addUIElement(element).inTL(0f, 0f);
+            panel.addComponent(strip).inTL(-DEV_BUTTON_WIDTH - DEV_GAP, 0f);
+        }
+
+        protected void toggleFishList() {
+            if (fishList != null) {
+                framePanel.removeComponent(fishList);
+                fishList = null;
+                return;
+            }
+
+            List<FishSpec> specs = FishSpecLoader.getAllFishSpecs();
+            if (specs.isEmpty() || framePanel == null) return;
+
+            float height = FishConstants.MINIGAME_PANEL_HEIGHT;
+
+            fishList = framePanel.createCustomPanel(DEV_LIST_WIDTH, height, this);
+            TooltipMakerAPI element = fishList.createUIElement(DEV_LIST_WIDTH, height, true);
+
+            for (FishSpec spec : specs) {
+                element.addButton(spec.name == null || spec.name.isEmpty() ? spec.id : spec.name,
+                        spec, DEV_LIST_WIDTH - 25f, 22f, 3f);
+            }
+
+            fishList.addUIElement(element).inTL(0f, 0f);
+            framePanel.addComponent(fishList)
+                    .inTL(-DEV_BUTTON_WIDTH - DEV_GAP - DEV_LIST_WIDTH - 10f, 0f);
+        }
+
+        @Override
+        public void buttonPressed(Object buttonId) {
+            if (buttonId == devWinId) {
+                minigame.setCaught();
+            } else if (buttonId == devWinTreasureId) {
+                minigame.devTakeTreasure();
+                minigame.setCaught();
+            } else if (buttonId == devTreasureId) {
+                minigame.devSpawnTreasure();
+            } else if (buttonId == devFishId) {
+                toggleFishList();
+            } else if (buttonId instanceof FishSpec) {
+                reopenWith((FishSpec) buttonId);
+            }
+        }
+
+        @Override
+        public CustomUIPanelPlugin getCustomPanelPlugin() {
+            return panel;
+        }
+
+        @Override
+        public float getNoiseAlpha() {
+            return 0f;
+        }
+
+        @Override
+        public void advance(float amount) {
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+        }
+
+        @Override
+        public void renderBelow(float alphaMult) {
+        }
+
+        @Override
+        public void render(float alphaMult) {
+        }
+
+        @Override
+        public void processInput(List<InputEventAPI> events) {
+        }
+
+        protected void dismissPanel() {
+            if (callbacks != null) callbacks.dismissDialog();
+        }
+
+        @Override
+        public void reportDismissed(int option) {
+            dismissed = true;
+            resolve(minigame != null && minigame.isCaught());
+        }
+
+        @Override
+        public void onMinigameEnded(boolean caught) {
+            resolve(caught);
+        }
+    }
+
+    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
+                                       FishLogEntry.Method method, Callback callback) {
+        this(fish, anchor, anchor, method, callback);
+    }
+
+    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
+                                       SectorEntityToken catchTarget,
+                                       FishLogEntry.Method method, Callback callback) {
+        this.fish = fish;
+        this.anchor = anchor;
+        this.catchTarget = catchTarget;
+        this.method = method == null ? FishLogEntry.Method.UNKNOWN : method;
+        this.callback = callback;
+    }
 
     public static boolean open(SectorEntityToken anchor, FishSpec fish, FishLogEntry.Method method,
                                Callback callback) {
         return open(anchor, anchor, fish, method, callback);
     }
-
 
     public static boolean open(SectorEntityToken anchor, SectorEntityToken catchTarget,
                                FishSpec fish, FishLogEntry.Method method, Callback callback) {
@@ -84,7 +214,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         return showWithoutReplacingLocationMusic(plugin, anchor);
     }
-
 
     protected static boolean showWithoutReplacingLocationMusic(
             FishingMinigameDialogPlugin plugin, SectorEntityToken anchor) {
@@ -114,21 +243,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                 memory.set(key, previousValue);
             }
         }
-    }
-
-    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
-                                       FishLogEntry.Method method, Callback callback) {
-        this(fish, anchor, anchor, method, callback);
-    }
-
-    public FishingMinigameDialogPlugin(FishSpec fish, SectorEntityToken anchor,
-                                       SectorEntityToken catchTarget,
-                                       FishLogEntry.Method method, Callback callback) {
-        this.fish = fish;
-        this.anchor = anchor;
-        this.catchTarget = catchTarget;
-        this.method = method == null ? FishLogEntry.Method.UNKNOWN : method;
-        this.callback = callback;
     }
 
     @Override
@@ -184,7 +298,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         beginCampaignMusicVolumeScope();
     }
 
-
     protected void beginCampaignMusicVolumeScope() {
         if (campaignMusicVolumeScoped) return;
 
@@ -195,14 +308,12 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         campaignMusicVolumeScoped = true;
     }
 
-
     protected void restoreCampaignMusicVolume() {
         if (!campaignMusicVolumeScoped) return;
 
         campaignMusicVolumeScoped = false;
         Global.getSettings().setFloat(CAMPAIGN_MUSIC_VOLUME_KEY, previousCampaignMusicVolume);
     }
-
 
     protected static String getSourceId(SectorEntityToken anchor) {
         if (anchor == null) return null;
@@ -215,7 +326,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         return MaskedFishingPondTerrainPlugin.getPondPlugin(anchor) == null
                 ? null : anchor.getId();
     }
-
 
     protected void reopenWith(FishSpec pick) {
         if (pick == null || resolved) return;
@@ -254,7 +364,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         });
     }
 
-
     protected void resolve(boolean caught) {
         if (resolved) return;
         resolved = true;
@@ -265,158 +374,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (dialog != null) dialog.dismiss();
         if (callback != null) callback.onCatchResolved(caught ? specimen : null);
     }
-
-
-    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
-            FishingMinigamePanel.Listener {
-
-
-        protected static final float DEV_BUTTON_WIDTH = 150f;
-        protected static final float DEV_BUTTON_HEIGHT = 24f;
-        protected static final float DEV_LIST_WIDTH = 220f;
-        protected static final float DEV_GAP = 30f;
-
-        protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
-
-
-        protected DialogCallbacks callbacks;
-
-
-        protected CustomPanelAPI framePanel;
-
-
-        protected CustomPanelAPI fishList;
-
-        protected final Object devWinId = new Object();
-        protected final Object devWinTreasureId = new Object();
-        protected final Object devTreasureId = new Object();
-        protected final Object devFishId = new Object();
-
-        @Override
-        public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
-            this.callbacks = callbacks;
-            this.framePanel = panel;
-
-            addFramingElements(panel);
-        }
-
-
-        protected void addFramingElements(CustomPanelAPI panel) {
-            if (Global.getSettings().isDevMode()) addDevControls(panel);
-        }
-
-
-        protected void addDevControls(CustomPanelAPI panel) {
-            float height = (DEV_BUTTON_HEIGHT + 4f) * 4f + 4f;
-
-            CustomPanelAPI strip = panel.createCustomPanel(DEV_BUTTON_WIDTH, height, this);
-            TooltipMakerAPI element = strip.createUIElement(DEV_BUTTON_WIDTH, height, false);
-
-            element.addButton("Win", devWinId, DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
-            element.addButton("Win with treasure", devWinTreasureId,
-                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
-            element.addButton("Spawn treasure", devTreasureId,
-                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
-            element.addButton("Spawn fish...", devFishId,
-                    DEV_BUTTON_WIDTH, DEV_BUTTON_HEIGHT, 4f);
-
-            strip.addUIElement(element).inTL(0f, 0f);
-            panel.addComponent(strip).inTL(-DEV_BUTTON_WIDTH - DEV_GAP, 0f);
-        }
-
-
-        protected void toggleFishList() {
-            if (fishList != null) {
-                framePanel.removeComponent(fishList);
-                fishList = null;
-                return;
-            }
-
-            List<FishSpec> specs = FishSpecLoader.getAllFishSpecs();
-            if (specs.isEmpty() || framePanel == null) return;
-
-            float height = FishConstants.MINIGAME_PANEL_HEIGHT;
-
-            fishList = framePanel.createCustomPanel(DEV_LIST_WIDTH, height, this);
-            TooltipMakerAPI element = fishList.createUIElement(DEV_LIST_WIDTH, height, true);
-
-            for (FishSpec spec : specs) {
-                element.addButton(spec.name == null || spec.name.isEmpty() ? spec.id : spec.name,
-                        spec, DEV_LIST_WIDTH - 25f, 22f, 3f);
-            }
-
-            fishList.addUIElement(element).inTL(0f, 0f);
-            framePanel.addComponent(fishList)
-                    .inTL(-DEV_BUTTON_WIDTH - DEV_GAP - DEV_LIST_WIDTH - 10f, 0f);
-        }
-
-
-        @Override
-        public void buttonPressed(Object buttonId) {
-            if (buttonId == devWinId) {
-                minigame.setCaught();
-            } else if (buttonId == devWinTreasureId) {
-                minigame.devTakeTreasure();
-                minigame.setCaught();
-            } else if (buttonId == devTreasureId) {
-                minigame.devSpawnTreasure();
-            } else if (buttonId == devFishId) {
-                toggleFishList();
-            } else if (buttonId instanceof FishSpec) {
-                reopenWith((FishSpec) buttonId);
-            }
-        }
-
-        @Override
-        public CustomUIPanelPlugin getCustomPanelPlugin() {
-            return panel;
-        }
-
-
-        @Override
-        public float getNoiseAlpha() {
-            return 0f;
-        }
-
-        @Override
-        public void advance(float amount) {
-        }
-
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-        }
-
-        @Override
-        public void renderBelow(float alphaMult) {
-        }
-
-        @Override
-        public void render(float alphaMult) {
-        }
-
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-        }
-
-
-        protected void dismissPanel() {
-            if (callbacks != null) callbacks.dismissDialog();
-        }
-
-
-        @Override
-        public void reportDismissed(int option) {
-            dismissed = true;
-            resolve(minigame != null && minigame.isCaught());
-        }
-
-        @Override
-        public void onMinigameEnded(boolean caught) {
-            resolve(caught);
-        }
-    }
-
 
     @Override
     public void advance(float amount) {

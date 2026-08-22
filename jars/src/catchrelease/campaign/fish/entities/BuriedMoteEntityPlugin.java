@@ -12,10 +12,14 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
-
     public static final String BURIED_TAG = "catchrelease_buried_mote";
+
+    protected String fishId;
+    protected float heading = 0f;
+    protected float headingLeft = 0f;
+    protected float time = 0f;
+    protected float sineVariance = 1f;
 
     public static class Params {
         public final String fishId;
@@ -24,15 +28,6 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
             this.fishId = fishId;
         }
     }
-
-    protected String fishId;
-
-    protected float heading = 0f;
-    protected float headingLeft = 0f;
-    protected float time = 0f;
-
-
-    protected float sineVariance = 1f;
 
     @Override
     public void init(SectorEntityToken entity, Object params) {
@@ -55,13 +50,11 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
     }
 
-
     public FishRarity getRarity() {
         FishSpec spec = getFishSpec();
 
         return spec == null ? FishRarity.COMMON : spec.rarity;
     }
-
 
     @Override
     public void advance(float amount) {
@@ -87,13 +80,11 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         entity.setLocation(next.x, next.y);
     }
 
-
     protected void pickHeadingTime() {
         headingLeft = MathUtils.getRandomNumberInRange(
                 FishConstants.BURIED_HEADING_TIME_MIN, FishConstants.BURIED_HEADING_TIME_MAX)
                 / Math.max(0.01f, getRarity().wanderMult);
     }
-
 
     public SectorEntityToken unearth() {
         if (entity == null || entity.isExpired()) return null;
@@ -111,7 +102,6 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         return mote;
     }
-
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {

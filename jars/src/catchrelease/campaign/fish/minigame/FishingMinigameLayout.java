@@ -3,39 +3,28 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.ui.PositionAPI;
 
-
 public class FishingMinigameLayout {
-
     public float trackX;
     public float trackY;
     public float trackWidth;
     public float trackHeight;
-
     public float meterX;
     public float meterY;
     public float meterWidth;
     public float meterHeight;
-
-
     public float frameX;
     public float frameY;
     public float frameWidth;
     public float frameHeight;
-
-
     public float panelX;
     public float panelY;
     public float panelWidth;
     public float panelHeight;
-
-
     public float resultX;
     public float resultWidth;
     public float boxX;
     public float boxY;
     public float boxSize;
-
-
     public float lootPanelX;
     public float lootPanelY;
     public float lootPanelWidth;
@@ -91,7 +80,6 @@ public class FishingMinigameLayout {
         frameHeight = trackHeight + FishConstants.MINIGAME_FRAME_PAD * 2f;
     }
 
-
     public void fitResultContent(float contentWidth) {
         float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
 
@@ -104,7 +92,6 @@ public class FishingMinigameLayout {
         boxX = resultX + (resultWidth - boxSize) * 0.5f;
     }
 
-
     public void centerResultContent(float contentHeight, float headroom) {
         float total = contentHeight + headroom;
         float centeredTop = panelY + (panelHeight + total) * 0.5f - headroom;
@@ -112,7 +99,6 @@ public class FishingMinigameLayout {
 
         boxY = Math.min(centeredTop, highestTop) - boxSize;
     }
-
 
     public float getTrackY(float fraction) {
         return trackY + fraction * trackHeight;
@@ -122,7 +108,6 @@ public class FishingMinigameLayout {
         return trackX + trackWidth * 0.5f;
     }
 
-
     public float getBoxCenterX() {
         return boxX + boxSize * 0.5f;
     }
@@ -130,7 +115,6 @@ public class FishingMinigameLayout {
     public float getBoxCenterY() {
         return boxY + boxSize * 0.5f;
     }
-
 
     public void fitLootContent(float contentWidth) {
         float wanted = contentWidth + FishConstants.MINIGAME_RESULT_PAD * 2f;
@@ -146,9 +130,7 @@ public class FishingMinigameLayout {
         lootBoxX = lootX + (lootWidth - boxSize) * 0.5f;
     }
 
-
     public void alignLootContent(float contentHeight) {
         lootBoxY = boxY;
     }
-
 }

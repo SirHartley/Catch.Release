@@ -16,10 +16,7 @@ import catchrelease.skillshot.render.SkillshotRenderer;
 
 import java.util.List;
 
-
 public class OnKeyPressSkillshotListener implements SkillshotInputListener, CampaignInputListener {
-
-
     public static final int FIRST_SLOT_KEY = Keyboard.KEY_1;
     public static final int LAST_SLOT_KEY = Keyboard.KEY_9;
 
@@ -119,7 +116,6 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
 
         input.consume();
     }
-
 
     protected SkillshotAbility getSlottedSkillshotAbility(int slotIndex) {
         List<PersistentUIDataAPI.AbilitySlotAPI> slots = Global.getSector().getUIData().getAbilitySlotsAPI().getCurrSlotsCopy();

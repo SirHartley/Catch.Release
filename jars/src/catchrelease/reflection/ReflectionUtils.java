@@ -12,29 +12,20 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-
 public final class ReflectionUtils {
-
-    private ReflectionUtils() {
-    }
-
-
     private static final MethodHandle GET_FIELD;
     private static final MethodHandle SET_FIELD;
     private static final MethodHandle GET_FIELD_TYPE;
     private static final MethodHandle GET_FIELD_NAME;
     private static final MethodHandle SET_FIELD_ACCESSIBLE;
-
     private static final MethodHandle INVOKE_METHOD;
     private static final MethodHandle GET_METHOD_NAME;
     private static final MethodHandle GET_METHOD_RETURN;
     private static final MethodHandle GET_METHOD_PARAMS;
     private static final MethodHandle SET_METHOD_ACCESSIBLE;
-
     private static final MethodHandle NEW_INSTANCE;
     private static final MethodHandle GET_CONSTRUCTOR_PARAMS;
     private static final MethodHandle SET_CONSTRUCTOR_ACCESSIBLE;
-
     static {
         try {
             ClassLoader bootstrap = Class.class.getClassLoader();
@@ -61,12 +52,114 @@ public final class ReflectionUtils {
             throw new RuntimeException("Could not bind method handles onto java.lang.reflect", t);
         }
     }
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
+    private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = new HashMap<>();
+    private static final Map<Class<?>, Set<Class<?>>> PRIMITIVE_WIDENS_FROM = new HashMap<>();
+    static {
+        PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
+        PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
+        PRIMITIVE_TO_WRAPPER.put(char.class, Character.class);
+        PRIMITIVE_TO_WRAPPER.put(short.class, Short.class);
+        PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);
+        PRIMITIVE_TO_WRAPPER.put(long.class, Long.class);
+        PRIMITIVE_TO_WRAPPER.put(float.class, Float.class);
+        PRIMITIVE_TO_WRAPPER.put(double.class, Double.class);
+        PRIMITIVE_TO_WRAPPER.put(void.class, Void.class);
+
+        for (Map.Entry<Class<?>, Class<?>> entry : PRIMITIVE_TO_WRAPPER.entrySet()) {
+            WRAPPER_TO_PRIMITIVE.put(entry.getValue(), entry.getKey());
+        }
+
+        PRIMITIVE_WIDENS_FROM.put(short.class, widensFrom(byte.class));
+        PRIMITIVE_WIDENS_FROM.put(int.class, widensFrom(byte.class, short.class, char.class));
+        PRIMITIVE_WIDENS_FROM.put(long.class, widensFrom(byte.class, short.class, char.class, int.class));
+        PRIMITIVE_WIDENS_FROM.put(float.class,
+                widensFrom(byte.class, short.class, char.class, int.class, long.class));
+        PRIMITIVE_WIDENS_FROM.put(double.class,
+                widensFrom(byte.class, short.class, char.class, int.class, long.class, float.class));
+    }
+
+    public static final class ReflectedField {
+        private final Object field;
+        public final Class<?> type;
+        public final String name;
+
+        private ReflectedField(Object field) {
+            this.field = field;
+            this.type = typeOf(field);
+            this.name = nameOf(field);
+        }
+
+        public Object get(Object instance) {
+            try {
+                SET_FIELD_ACCESSIBLE.invoke(field, true);
+                return GET_FIELD.invoke(field, instance);
+            } catch (Throwable t) {
+                throw new RuntimeException("Could not read field '" + name + "'", t);
+            }
+        }
+
+        public void set(Object instance, Object value) {
+            try {
+                SET_FIELD_ACCESSIBLE.invoke(field, true);
+                SET_FIELD.invoke(field, instance, value);
+            } catch (Throwable t) {
+                throw new RuntimeException("Could not write field '" + name + "'", t);
+            }
+        }
+    }
+
+    public static final class ReflectedMethod {
+        private final Object method;
+        public final Class<?>[] parameterTypes;
+        public final Class<?> returnType;
+        public final String name;
+
+        private ReflectedMethod(Object method) {
+            this.method = method;
+            this.parameterTypes = paramTypesOf(method);
+            this.returnType = returnTypeOf(method);
+            this.name = methodNameOf(method);
+        }
+
+        public Object invoke(Object instance, Object... arguments) {
+            Object[] args = arguments == null ? new Object[0] : arguments;
+            try {
+                SET_METHOD_ACCESSIBLE.invoke(method, true);
+                return INVOKE_METHOD.invoke(method, instance, args);
+            } catch (Throwable t) {
+                throw new RuntimeException("Could not invoke method '" + name + "'", t);
+            }
+        }
+    }
+
+    public static final class ReflectedConstructor {
+        private final Object constructor;
+        public final Class<?>[] parameterTypes;
+
+        private ReflectedConstructor(Object constructor) {
+            this.constructor = constructor;
+            this.parameterTypes = constructorParamTypesOf(constructor);
+        }
+
+        public Object newInstance(Object... arguments) {
+            Object[] args = arguments == null ? new Object[0] : arguments;
+            try {
+                SET_CONSTRUCTOR_ACCESSIBLE.invoke(constructor, true);
+                return NEW_INSTANCE.invoke(constructor, args);
+            } catch (Throwable t) {
+                throw new RuntimeException("Could not invoke constructor", t);
+            }
+        }
+    }
+
+    private ReflectionUtils() {
+    }
 
     private static MethodHandle handle(Class<?> owner, String name, Class<?> returnType, Class<?>... paramTypes)
             throws NoSuchMethodException, IllegalAccessException {
         return MethodHandles.lookup().findVirtual(owner, name, MethodType.methodType(returnType, paramTypes));
     }
-
 
     private static String nameOf(Object field) {
         try {
@@ -116,16 +209,13 @@ public final class ReflectionUtils {
         }
     }
 
-
     public static Object get(Object instance, String name) {
         return get(instance, name, null, false);
     }
 
-
     public static Object get(Object instance, String name, Class<?> assignableTo) {
         return get(instance, name, assignableTo, false);
     }
-
 
     public static Object get(Object instance, String name, Class<?> assignableTo, boolean searchSuperclass) {
         Class<?> clazz = instance.getClass();
@@ -141,11 +231,9 @@ public final class ReflectionUtils {
         return matches.get(0).get(instance);
     }
 
-
     public static void set(Object instance, String name, Object value) {
         set(instance, name, value, false);
     }
-
 
     public static void set(Object instance, String name, Object value, boolean searchSuperclass) {
         Class<?> clazz = instance.getClass();
@@ -161,7 +249,6 @@ public final class ReflectionUtils {
         }
         matches.get(0).set(instance, value);
     }
-
 
     public static Object invoke(Object instance, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
@@ -180,7 +267,6 @@ public final class ReflectionUtils {
         return matches.get(0).invoke(instance, arguments);
     }
 
-
     public static Object invokeStatic(Class<?> clazz, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
         Class<?>[] paramTypes = typesOf(arguments);
@@ -197,21 +283,17 @@ public final class ReflectionUtils {
         return matches.get(0).invoke(null, arguments);
     }
 
-
     public static boolean hasMethodOfName(Object instance, String name) {
         return !getMethodsMatching(instance.getClass(), name, null, null, null).isEmpty();
     }
-
 
     public static boolean hasFieldOfName(Object instance, String name) {
         return !getFieldsMatching(instance.getClass(), name, null, null, null, true).isEmpty();
     }
 
-
     public static boolean hasFieldOfType(Object instance, Class<?> type) {
         return !getFieldsMatching(instance.getClass(), null, null, type, null, true).isEmpty();
     }
-
 
     public static Object invokeIfExists(Object instance, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
@@ -219,7 +301,6 @@ public final class ReflectionUtils {
         if (matches.size() != 1) return null;
         return matches.get(0).invoke(instance, arguments);
     }
-
 
     public static List<ReflectedField> getFieldsMatching(Class<?> clazz, String name, Class<?> exactType,
                                                         Class<?> assignableTo, Class<?> accepts,
@@ -248,13 +329,11 @@ public final class ReflectionUtils {
         return matches;
     }
 
-
     public static List<ReflectedField> getFieldsMatching(Object instance, String name, Class<?> exactType,
                                                         Class<?> assignableTo, Class<?> accepts,
                                                         boolean searchSuperclass) {
         return getFieldsMatching(instance.getClass(), name, exactType, assignableTo, accepts, searchSuperclass);
     }
-
 
     public static List<ReflectedMethod> getMethodsMatching(Class<?> clazz, String name,
                                                           Class<?> returnTypeAssignableTo, Integer numOfParams,
@@ -278,13 +357,11 @@ public final class ReflectionUtils {
         return matches;
     }
 
-
     public static List<ReflectedMethod> getMethodsMatching(Object instance, String name,
                                                            Class<?> returnTypeAssignableTo, Integer numOfParams,
                                                            Class<?>[] parameterTypes) {
         return getMethodsMatching(instance.getClass(), name, returnTypeAssignableTo, numOfParams, parameterTypes);
     }
-
 
     public static List<ReflectedConstructor> getConstructorsMatching(Class<?> clazz, Integer numOfParams,
                                                                     Class<?>[] parameterTypes) {
@@ -334,45 +411,11 @@ public final class ReflectionUtils {
         return methods;
     }
 
-
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
-
-
-    private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = new HashMap<>();
-
-
-    private static final Map<Class<?>, Set<Class<?>>> PRIMITIVE_WIDENS_FROM = new HashMap<>();
-
-    static {
-        PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class);
-        PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class);
-        PRIMITIVE_TO_WRAPPER.put(char.class, Character.class);
-        PRIMITIVE_TO_WRAPPER.put(short.class, Short.class);
-        PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);
-        PRIMITIVE_TO_WRAPPER.put(long.class, Long.class);
-        PRIMITIVE_TO_WRAPPER.put(float.class, Float.class);
-        PRIMITIVE_TO_WRAPPER.put(double.class, Double.class);
-        PRIMITIVE_TO_WRAPPER.put(void.class, Void.class);
-
-        for (Map.Entry<Class<?>, Class<?>> entry : PRIMITIVE_TO_WRAPPER.entrySet()) {
-            WRAPPER_TO_PRIMITIVE.put(entry.getValue(), entry.getKey());
-        }
-
-        PRIMITIVE_WIDENS_FROM.put(short.class, widensFrom(byte.class));
-        PRIMITIVE_WIDENS_FROM.put(int.class, widensFrom(byte.class, short.class, char.class));
-        PRIMITIVE_WIDENS_FROM.put(long.class, widensFrom(byte.class, short.class, char.class, int.class));
-        PRIMITIVE_WIDENS_FROM.put(float.class,
-                widensFrom(byte.class, short.class, char.class, int.class, long.class));
-        PRIMITIVE_WIDENS_FROM.put(double.class,
-                widensFrom(byte.class, short.class, char.class, int.class, long.class, float.class));
-    }
-
     private static Set<Class<?>> widensFrom(Class<?>... types) {
         Set<Class<?>> set = new HashSet<>();
         Collections.addAll(set, types);
         return set;
     }
-
 
     private static boolean isParameterCompatible(Class<?> targetType, Class<?> callerArgType) {
         if (callerArgType == null) return !targetType.isPrimitive();
@@ -404,7 +447,6 @@ public final class ReflectionUtils {
         return widens != null && widens.contains(unboxed);
     }
 
-
     private static Class<?>[] typesOf(Object[] args) {
         Class<?>[] types = new Class<?>[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -432,98 +474,5 @@ public final class ReflectionUtils {
             out.append(types[i] == null ? "null" : types[i].getName());
         }
         return out.append(']').toString();
-    }
-
-
-    public static final class ReflectedField {
-        private final Object field;
-
-
-        public final Class<?> type;
-
-
-        public final String name;
-
-        private ReflectedField(Object field) {
-            this.field = field;
-            this.type = typeOf(field);
-            this.name = nameOf(field);
-        }
-
-
-        public Object get(Object instance) {
-            try {
-                SET_FIELD_ACCESSIBLE.invoke(field, true);
-                return GET_FIELD.invoke(field, instance);
-            } catch (Throwable t) {
-                throw new RuntimeException("Could not read field '" + name + "'", t);
-            }
-        }
-
-
-        public void set(Object instance, Object value) {
-            try {
-                SET_FIELD_ACCESSIBLE.invoke(field, true);
-                SET_FIELD.invoke(field, instance, value);
-            } catch (Throwable t) {
-                throw new RuntimeException("Could not write field '" + name + "'", t);
-            }
-        }
-    }
-
-
-    public static final class ReflectedMethod {
-        private final Object method;
-
-
-        public final Class<?>[] parameterTypes;
-
-
-        public final Class<?> returnType;
-
-
-        public final String name;
-
-        private ReflectedMethod(Object method) {
-            this.method = method;
-            this.parameterTypes = paramTypesOf(method);
-            this.returnType = returnTypeOf(method);
-            this.name = methodNameOf(method);
-        }
-
-
-        public Object invoke(Object instance, Object... arguments) {
-            Object[] args = arguments == null ? new Object[0] : arguments;
-            try {
-                SET_METHOD_ACCESSIBLE.invoke(method, true);
-                return INVOKE_METHOD.invoke(method, instance, args);
-            } catch (Throwable t) {
-                throw new RuntimeException("Could not invoke method '" + name + "'", t);
-            }
-        }
-    }
-
-
-    public static final class ReflectedConstructor {
-        private final Object constructor;
-
-
-        public final Class<?>[] parameterTypes;
-
-        private ReflectedConstructor(Object constructor) {
-            this.constructor = constructor;
-            this.parameterTypes = constructorParamTypesOf(constructor);
-        }
-
-
-        public Object newInstance(Object... arguments) {
-            Object[] args = arguments == null ? new Object[0] : arguments;
-            try {
-                SET_CONSTRUCTOR_ACCESSIBLE.invoke(constructor, true);
-                return NEW_INSTANCE.invoke(constructor, args);
-            } catch (Throwable t) {
-                throw new RuntimeException("Could not invoke constructor", t);
-            }
-        }
     }
 }

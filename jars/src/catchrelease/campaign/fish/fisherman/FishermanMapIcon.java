@@ -11,17 +11,14 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
 
-
 public class FishermanMapIcon extends BaseCustomEntityPlugin {
-
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
-
-
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
-
     private static final String SERVICE_LINE =
             "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
 
+    protected CampaignFleetAPI fleet;
+    protected float autopilotCheckElapsed = 0f;
 
     public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
         if (fleet == null) return null;
@@ -55,7 +52,6 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         return icon;
     }
 
-
     public static void removeFor(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
@@ -70,7 +66,6 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         }
     }
 
-
     public static void removeOutside(LocationAPI playerLocation) {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             if (location == playerLocation) continue;
@@ -78,18 +73,11 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
             for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
                 if (ENTITY_ID.equals(candidate.getCustomEntityType())
                         && candidate.getCustomPlugin() instanceof FishermanMapIcon) {
-
                     location.removeEntity(candidate);
                 }
             }
         }
     }
-
-    protected CampaignFleetAPI fleet;
-
-
-    protected float autopilotCheckElapsed = 0f;
-
 
     protected boolean isFor(CampaignFleetAPI other) {
         return fleet == other;
@@ -102,14 +90,12 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (pluginParams instanceof CampaignFleetAPI) fleet = (CampaignFleetAPI) pluginParams;
     }
 
-
     @Override
     public void advance(float amount) {
         if (entity == null) return;
 
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()
                 || fleet.getContainingLocation() != entity.getContainingLocation()) {
-
             remove();
             return;
         }
@@ -117,7 +103,6 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
         redirectAutopilot(amount);
     }
-
 
     protected void redirectAutopilot(float amount) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -151,7 +136,6 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
     public float getMapTooltipWidth() {
         return 280f;
     }
-
 
     @Override
     public void createMapTooltip(TooltipMakerAPI tooltip, boolean expanded) {

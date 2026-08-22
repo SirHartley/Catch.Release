@@ -24,44 +24,28 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
 import java.util.Map;
 
-
 public abstract class CampedSpotJob extends FishJob {
-
-
     protected enum Update {
         CAMP_CLEARED,
         RECEIPT_CAUGHT,
         RECEIPT_LOST
     }
 
-
     public static final String REF_KEY = "$catchrelease_campRef";
     public static final String IN_PROGRESS_KEY = "$catchrelease_campInProgress";
-
     public static final float DAYS = 70f;
-
-
     public static final float MAX_LY = 14f;
 
-
-    protected abstract CampType getType();
-
     protected CampSize size;
-
     protected String speciesId;
     protected String systemName;
-
     protected CampaignFleetAPI camper;
     protected SectorEntityToken pond;
-
-
     protected boolean cleared = false;
-
-
     protected boolean receiptAboard = false;
-
-
     protected long acceptedAt = 0L;
+
+    protected abstract CampType getType();
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -92,7 +76,6 @@ public abstract class CampedSpotJob extends FishJob {
         return true;
     }
 
-
     @Override
     public void acceptImpl(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         super.acceptImpl(dialog, memoryMap);
@@ -109,7 +92,6 @@ public abstract class CampedSpotJob extends FishJob {
         // the map points at whoever is sitting on the water, which is where the player has to go first regardless of how they intend to deal with it
         makeImportant(camper, null, Stage.WANTED);
     }
-
 
     protected StarSystemAPI pickSystem(MarketAPI from) {
         if (from == null || from.getPrimaryEntity() == null) return null;
@@ -130,7 +112,6 @@ public abstract class CampedSpotJob extends FishJob {
 
         return picker.pick();
     }
-
 
     protected void setReceiptAsk() {
         if (pond == null || pond.getId() == null) return;
@@ -158,12 +139,10 @@ public abstract class CampedSpotJob extends FishJob {
         speciesId = null;
     }
 
-
     @Override
     public boolean isSatisfied() {
         return cleared && super.isSatisfied();
     }
-
 
     @Override
     protected void advanceImpl(float amount) {
@@ -195,7 +174,6 @@ public abstract class CampedSpotJob extends FishJob {
         FishIntelNotifications.update(this, Update.CAMP_CLEARED);
     }
 
-
     protected void setReceiptAboard(boolean aboard) {
         if (receiptAboard == aboard) return;
 
@@ -223,7 +201,6 @@ public abstract class CampedSpotJob extends FishJob {
         token(mem, "$catchreleaseCampReceiptAboard", receiptAboard);
     }
 
-
     @Override
     protected void notifyEnded() {
         super.notifyEnded();
@@ -235,7 +212,6 @@ public abstract class CampedSpotJob extends FishJob {
         QuestPond.release(pond, REF_KEY);
     }
 
-
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
         if (camper != null && !camper.isExpired()) return camper;
@@ -244,12 +220,10 @@ public abstract class CampedSpotJob extends FishJob {
         return super.getMapLocation(map);
     }
 
-
     @Override
     protected SectorEntityToken getFishRequestRouteTarget() {
         return getMapLocation(null);
     }
-
 
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
@@ -275,7 +249,6 @@ public abstract class CampedSpotJob extends FishJob {
 
         super.addBulletPoints(info, mode);
     }
-
 
     @Override
     public String getNextStepText() {

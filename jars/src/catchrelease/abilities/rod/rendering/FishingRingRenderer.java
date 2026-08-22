@@ -13,12 +13,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-
 public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
-
     protected FishingDroneSwarmScript swarm;
-
-
     protected float fade = 0f;
     protected float pulseTime = 0f;
 
@@ -67,7 +63,6 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     protected float getCircumference() {
         return (float) (2f * Math.PI * swarm.getRingDrawRadius());
     }
-
 
     protected float getAlpha() {
         if (!swarm.isMoteInRing()) return RodConstants.RING_ALPHA_IDLE * fade;

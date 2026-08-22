@@ -28,16 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class FishRoutePopup extends BaseCustomUIPanelPlugin {
-
-
-    public interface Host {
-        void onRoutePlotted(FishRoute.Saved route);
-
-        void onPlannerClosed();
-    }
-
     public static final float PAD = 14f;
     public static final float TITLE_HEIGHT = 20f;
     public static final float CLOSE_WIDTH = 20f;
@@ -47,41 +38,81 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     public static final float HEADER_HEIGHT = 20f;
     public static final float CONTROLS_HEIGHT = 124f;
     public static final float ROW_HEIGHT = 24f;
-
-
     public static final float NOTICE_HEIGHT = 18f;
     public static final float BUTTON_HEIGHT = 26f;
     public static final float FOOTER_HEIGHT = NOTICE_HEIGHT + 4f + BUTTON_HEIGHT;
-
     public static final String SEARCH_GHOST = "Search...";
 
     protected final Host host;
-
-
     protected final Map<String, String> reasons = new LinkedHashMap<>();
-
-
     protected final List<Row> rows = new ArrayList<>();
     protected final Set<String> selected = new LinkedHashSet<>();
-
     protected final FishPresence.Filter filter = new FishPresence.Filter();
-
     protected CustomPanelAPI panel;
     protected float width, height;
     protected PositionAPI pos;
-
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
-
-
     protected String notice;
     protected Color noticeColor;
+
+    public interface Host {
+        void onRoutePlotted(FishRoute.Saved route);
+
+        void onPlannerClosed();
+    }
 
     protected static class Row {
         FishSpec spec;
         String reason;
+    }
+
+    protected class NoticePlugin extends BaseCustomUIPanelPlugin {
+        protected PositionAPI noticePos;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            noticePos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (noticePos == null || alphaMult <= 0f || notice == null) return;
+
+            LazyFont small = ShopUi.getSmallFont();
+            if (small == null) return;
+
+            // grows upward from its floor - a wrapped second line eats into the list rather than lying across the button it explains
+            LazyFont.DrawableString line = small.createText(notice,
+                    ShopUi.withAlpha(noticeColor == null ? Misc.getGrayColor() : noticeColor,
+                            alphaMult), small.getBaseHeight(), noticePos.getWidth());
+
+            line.draw(Math.round(noticePos.getX()),
+                    Math.round(noticePos.getY() + line.getHeight()));
+        }
+    }
+
+    protected class RowPlugin extends FishListRow {
+        public RowPlugin(Row row) {
+            super(row.spec);
+        }
+
+        @Override
+        protected PositionAPI getViewport() {
+            return listViewport;
+        }
+
+        @Override
+        protected boolean isSelected() {
+            return selected.contains(spec.id);
+        }
+
+        @Override
+        protected void onRowClick(float pointX, float pointY) {
+            onRowClicked(spec);
+        }
     }
 
     public FishRoutePopup(Host host) {
@@ -91,7 +122,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             reasons.putIfAbsent(suggestion.speciesId, suggestion.reason);
         }
     }
-
 
     public void mount(CustomPanelAPI panel, float width, float height) {
         this.panel = panel;
@@ -108,7 +138,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -120,7 +149,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
-
 
     @Override
     public void advance(float amount) {
@@ -134,7 +162,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             rebuildList();
         }
     }
-
 
     protected void buildControls() {
         // the same right edge as the list's rows below, which sit 6px in for their scroller
@@ -188,7 +215,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
 
-
     protected void buildFooter() {
         float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI footer = panel.createUIElement(innerWidth, FOOTER_HEIGHT, false);
@@ -208,7 +234,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - FOOTER_HEIGHT);
     }
-
 
     protected void rebuildList() {
         if (listRemovable != null) panel.removeComponent(listRemovable);
@@ -268,7 +293,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         rebuildList();
     }
 
-
     protected void onRowClicked(FishSpec spec) {
         if (selected.remove(spec.id)) {
             notice = null;
@@ -322,7 +346,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         FishRoute.set(route);
         host.onRoutePlotted(route);
     }
-
 
     protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
         return new BaseTooltipCreator() {
@@ -389,55 +412,5 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             }
             return "Click to pick it for the route. F2 opens the codex.";
         });
-    }
-
-
-    protected class NoticePlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI noticePos;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            noticePos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (noticePos == null || alphaMult <= 0f || notice == null) return;
-
-            LazyFont small = ShopUi.getSmallFont();
-            if (small == null) return;
-
-            // grows upward from its floor - a wrapped second line eats into the list rather than lying across the button it explains
-            LazyFont.DrawableString line = small.createText(notice,
-                    ShopUi.withAlpha(noticeColor == null ? Misc.getGrayColor() : noticeColor,
-                            alphaMult), small.getBaseHeight(), noticePos.getWidth());
-
-            line.draw(Math.round(noticePos.getX()),
-                    Math.round(noticePos.getY() + line.getHeight()));
-        }
-    }
-
-
-    protected class RowPlugin extends FishListRow {
-
-        public RowPlugin(Row row) {
-            super(row.spec);
-        }
-
-        @Override
-        protected PositionAPI getViewport() {
-            return listViewport;
-        }
-
-        @Override
-        protected boolean isSelected() {
-            return selected.contains(spec.id);
-        }
-
-        @Override
-        protected void onRowClick(float pointX, float pointY) {
-            onRowClicked(spec);
-        }
     }
 }

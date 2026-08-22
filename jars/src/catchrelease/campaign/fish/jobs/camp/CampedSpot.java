@@ -17,46 +17,22 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.Random;
 
-
 public class CampedSpot {
-
-
     public static final String CAMP_FLAG = "$catchrelease_campFleet";
-
-
     public static final String WHO_KEY = "$catchreleaseCampWho";
-
-
     public static final String BRIBE_KEY = "$catchrelease_campBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_campBribeDGS";
-
-
     public static final String CLEARED_FLAG = "$catchrelease_campCleared";
-
-
     public static final String WARNED_FLAG = "$catchrelease_campWarned";
-
-
     public static final String CLOSING_FLAG = "$catchrelease_campClosing";
-
     public static final float WARNING_CHASE_DAYS = 3f;
-
-
     public static final String POND_BLOCKED_FLAG = "$catchrelease_campedPond";
-
-
     public static final String CAMP_SPECIES_KEY = "$catchrelease_campedSpecies";
-
-
     public static final float OFFSET = 350f;
-
-
     public static final float HOLD_DAYS = 100000f;
-
 
     public static CampaignFleetAPI spawn(CampType type, CampSize size, SectorEntityToken pond,
                                          Random random) {
-
         if (type == null || size == null || pond == null) return null;
 
         LocationAPI where = pond.getContainingLocation();
@@ -107,7 +83,6 @@ public class CampedSpot {
         return fleet;
     }
 
-
     public static void allowPlayerToLeave(CampaignFleetAPI fleet, SectorEntityToken pond) {
         if (fleet == null) return;
 
@@ -121,7 +96,6 @@ public class CampedSpot {
         fleet.clearAssignments();
         fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, pond, HOLD_DAYS, "Sitting on the rupture");
     }
-
 
     public static void updateWarningPursuit(CampaignFleetAPI fleet, SectorEntityToken pond) {
         if (fleet == null || pond == null || fleet.getAI() == null) return;
@@ -160,7 +134,6 @@ public class CampedSpot {
         }
     }
 
-
     protected static void endWarningPursuit(CampaignFleetAPI fleet, SectorEntityToken pond,
                                             CampaignFleetAPI player) {
         if (fleet.getBattle() != null || fleet.getAI() == null) return;
@@ -196,7 +169,6 @@ public class CampedSpot {
         setPondBlocked(pond, blocked, null);
     }
 
-
     public static void setPondBlocked(SectorEntityToken pond, boolean blocked, String speciesId) {
         if (pond == null) return;
 
@@ -214,13 +186,11 @@ public class CampedSpot {
         return pond != null && pond.getMemoryWithoutUpdate().getBoolean(POND_BLOCKED_FLAG);
     }
 
-
     public static String getCampedSpecies(SectorEntityToken pond) {
         if (!isPondBlocked(pond)) return null;
 
         return pond.getMemoryWithoutUpdate().getString(CAMP_SPECIES_KEY);
     }
-
 
     public static boolean isGone(CampaignFleetAPI camper) {
         if (camper == null) return true;
@@ -230,14 +200,12 @@ public class CampedSpot {
         return camper.getMemoryWithoutUpdate().getBoolean(CLEARED_FLAG);
     }
 
-
     public static void despawn(CampaignFleetAPI camper) {
         if (camper == null || camper.isExpired()) return;
 
         camper.getMemoryWithoutUpdate().unset(CAMP_FLAG);
         camper.despawn();
     }
-
 
     public static boolean hasSector() {
         return Global.getSector() != null;

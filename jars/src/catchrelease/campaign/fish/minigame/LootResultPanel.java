@@ -16,16 +16,27 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class LootResultPanel {
+    protected static final int COIN_SEGMENTS = 16;
 
+    protected final List<TreasureAward> awards;
+    protected final List<Row> rows = new ArrayList<>();
+    protected float elapsed = 0f;
+    protected float backdrop = 0f;
+    protected int shown = 0;
+    protected boolean skipped = false;
+    protected boolean chestSoundPlayed = false;
+    protected final List<Coin> coins = new ArrayList<>();
+    transient protected LazyFont font;
+    transient protected LazyFont titleFont;
+    transient protected LazyFont.DrawableString title;
+    transient protected boolean fontsChecked = false;
 
     protected static class Row {
         final String name;
         final String spriteName;
         final int count;
         final Color color;
-
         transient LazyFont.DrawableString nameText;
         transient LazyFont.DrawableString countText;
 
@@ -36,20 +47,6 @@ public class LootResultPanel {
             this.color = color;
         }
     }
-
-    protected final List<TreasureAward> awards;
-    protected final List<Row> rows = new ArrayList<>();
-
-
-    protected float elapsed = 0f;
-
-
-    protected float backdrop = 0f;
-
-    protected int shown = 0;
-    protected boolean skipped = false;
-    protected boolean chestSoundPlayed = false;
-
 
     protected static class Coin {
         float fx;
@@ -63,16 +60,6 @@ public class LootResultPanel {
         float spinRate; // radians per second the whole ellipse turns in the plane, signed
         float spinPhase;
     }
-
-
-    protected static final int COIN_SEGMENTS = 16;
-
-    protected final List<Coin> coins = new ArrayList<>();
-
-    transient protected LazyFont font;
-    transient protected LazyFont titleFont;
-    transient protected LazyFont.DrawableString title;
-    transient protected boolean fontsChecked = false;
 
     public LootResultPanel(List<TreasureAward> awards) {
         this.awards = awards == null ? new ArrayList<>() : awards;
@@ -88,7 +75,6 @@ public class LootResultPanel {
         return rows.isEmpty();
     }
 
-
     public void advanceBackdrop(float amount) {
         backdrop += amount;
     }
@@ -98,13 +84,11 @@ public class LootResultPanel {
 
         while (shown < rows.size()
                 && elapsed >= (shown + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY) {
-
             shown++;
             if (shown == 1) playChestOpenSound();
             CatchCelebration.playHook(FishConstants.SOUND_RESULT_LINE);
         }
     }
-
 
     public void revealAll() {
         if (shown == 0 && !rows.isEmpty()) playChestOpenSound();
@@ -112,14 +96,12 @@ public class LootResultPanel {
         skipped = true;
     }
 
-
     protected void playChestOpenSound() {
         if (chestSoundPlayed) return;
 
         chestSoundPlayed = true;
         CatchCelebration.playHook(FishConstants.SOUND_TREASURE_OPEN);
     }
-
 
     public boolean isComplete() {
         return shown >= rows.size();
@@ -140,7 +122,6 @@ public class LootResultPanel {
         y = renderTitle(layout, y, alphaMult);
         renderRows(layout, y, alphaMult);
     }
-
 
     protected float getContentWidth() {
         float widest = 0f;
@@ -164,7 +145,6 @@ public class LootResultPanel {
         return widest;
     }
 
-
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -181,7 +161,6 @@ public class LootResultPanel {
         return height;
     }
 
-
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Color.BLACK, 0.85f * alphaMult);
@@ -194,7 +173,6 @@ public class LootResultPanel {
         CatchResultPanel.dress(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, alphaMult);
     }
-
 
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
@@ -278,7 +256,6 @@ public class LootResultPanel {
         }
     }
 
-
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
         Color accent = getBestRarity().color;
 
@@ -314,7 +291,6 @@ public class LootResultPanel {
         return best;
     }
 
-
     protected float renderTitle(FishingMinigameLayout layout, float y, float alphaMult) {
         if (title == null) return y;
 
@@ -323,7 +299,6 @@ public class LootResultPanel {
 
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
-
 
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
@@ -374,18 +349,15 @@ public class LootResultPanel {
         return y;
     }
 
-
     protected float getRowWidth(Row row) {
         return FishConstants.MINIGAME_LOOT_ICON + FishConstants.MINIGAME_LOOT_ICON_GAP
                 + row.nameText.getWidth();
     }
 
-
     protected float getRowHeight(Row row) {
         return Math.max(FishConstants.MINIGAME_LOOT_LINE_HEIGHT,
                 row.nameText.getHeight() + FishConstants.MINIGAME_LOOT_ROW_PAD);
     }
-
 
     protected float getNameMaxWidth(Row row) {
         float width = FishConstants.MINIGAME_RESULT_WIDTH
@@ -399,7 +371,6 @@ public class LootResultPanel {
 
         return width;
     }
-
 
     protected void build(Row row) {
         if (row.nameText != null) return;
@@ -415,7 +386,6 @@ public class LootResultPanel {
         row.nameText.setMaxWidth(getNameMaxWidth(row));
     }
 
-
     protected SpriteAPI getRowSprite(Row row) {
         SpriteAPI sprite = SpriteLoader.loadSprite(row.spriteName);
 
@@ -427,7 +397,6 @@ public class LootResultPanel {
                 : FishConstants.TREASURE_RESULT_CLOSED_ICON;
         return SpriteLoader.loadSprite(icon);
     }
-
 
     protected void loadFonts() {
         if (fontsChecked) return;

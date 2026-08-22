@@ -14,17 +14,13 @@ import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 
-
 public class ShopEntry {
-
     public enum Kind {
         UPGRADE("Upgrades", "shop_upgrade"),
         TACKLE("Modifiers", "shop_modifiers"),
         CURIO("Extras", "pane_misc");
 
-
         public final String tabTitle;
-
 
         public final String iconId;
 
@@ -36,11 +32,20 @@ public class ShopEntry {
 
     public final Kind kind;
     public final ShopGroup group;
-
     public final UpgradeStat stat;
     public final Tackle tackle;
     public final Tackle.Fit rig;
     public final CrabWares ware;
+
+    protected ShopEntry(Kind kind, ShopGroup group, UpgradeStat stat, Tackle tackle, Tackle.Fit rig,
+                        CrabWares ware) {
+        this.kind = kind;
+        this.group = group;
+        this.stat = stat;
+        this.tackle = tackle;
+        this.rig = rig;
+        this.ware = ware;
+    }
 
     public static ShopEntry of(UpgradeStat stat) {
         return new ShopEntry(Kind.UPGRADE, ShopGroup.forStat(stat), stat, null, null, null);
@@ -49,7 +54,6 @@ public class ShopEntry {
     public static ShopEntry of(Tackle tackle, Tackle.Fit rig) {
         return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig, null);
     }
-
 
     public static ShopEntry of(Tackle tackle) {
         Tackle.Fit rig = tackle == null ? null : tackle.fit;
@@ -71,16 +75,6 @@ public class ShopEntry {
         return new ShopEntry(Kind.CURIO, ShopGroup.forWare(ware), null, null, null, ware);
     }
 
-    protected ShopEntry(Kind kind, ShopGroup group, UpgradeStat stat, Tackle tackle, Tackle.Fit rig,
-                        CrabWares ware) {
-        this.kind = kind;
-        this.group = group;
-        this.stat = stat;
-        this.tackle = tackle;
-        this.rig = rig;
-        this.ware = ware;
-    }
-
     public String getName() {
         if (kind == Kind.CURIO) return ware.name;
         if (kind == Kind.TACKLE) return tackle.name;
@@ -91,7 +85,6 @@ public class ShopEntry {
 
         return Misc.ucFirst(id.replace('_', ' '));
     }
-
 
     public String getListName() {
         if (kind == Kind.CURIO) return ware.name;
@@ -117,7 +110,6 @@ public class ShopEntry {
         }
     }
 
-
     public SpriteAPI getIcon() {
         String path = null;
 
@@ -129,7 +121,6 @@ public class ShopEntry {
 
         return SpriteLoader.getSprite(group.iconId);
     }
-
 
     public String getIconName() {
         String path = null;
@@ -146,7 +137,6 @@ public class ShopEntry {
     public boolean isCurio() {
         return kind == Kind.CURIO;
     }
-
 
     public boolean isOn() {
         return isCurio() && ware.isOn();
@@ -172,11 +162,9 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.get(rig) == tackle;
     }
 
-
     public boolean isOwned() {
         return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
     }
-
 
     public boolean isLocked() {
         if (!isUpgrade()) return false;
@@ -187,11 +175,9 @@ public class ShopEntry {
                 && !ShopSchematics.has(stat, targetLevel);
     }
 
-
     public boolean isPurchaseLocked() {
         return kind == Kind.TACKLE ? !ShopSchematics.has(tackle) : isLocked();
     }
-
 
     public ShopPricing.Price getPrice() {
         if (isOwned()) return null;
@@ -201,7 +187,6 @@ public class ShopEntry {
 
         return isUpgrade() ? ShopPricing.getPrice(stat) : ShopPricing.getPrice(tackle);
     }
-
 
     public FishRarity getPriceRarity() {
         ShopPricing.Price price = getPrice();
@@ -226,11 +211,9 @@ public class ShopEntry {
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get();
     }
 
-
     public boolean isDone() {
         return isMaxed() || isFitted();
     }
-
 
     public boolean buy() {
         if (isDone() || isPurchaseLocked() || !canAfford()) return false;
@@ -249,14 +232,12 @@ public class ShopEntry {
         return true;
     }
 
-
     protected String getBoughtMessage() {
         if (isCurio()) return (ware.isOn() ? "Switched on " : "Switched off ") + getName();
         if (isUpgrade()) return "Unlocked " + getName();
 
         return "Fitted " + getName();
     }
-
 
     public boolean devBuy() {
         if (isDone()) return false;
@@ -265,7 +246,6 @@ public class ShopEntry {
 
         return true;
     }
-
 
     public void grant() {
         ShopMarks.unmark(ShopMarks.getMarkKey(this));
@@ -293,7 +273,6 @@ public class ShopEntry {
         stopAbility(getRigAbilityId());
     }
 
-
     protected String getRigAbilityId() {
         if (rig == null) return null;
 
@@ -305,7 +284,6 @@ public class ShopEntry {
         }
     }
 
-
     protected static void stopAbility(String abilityId) {
         if (abilityId == null) return;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return;
@@ -315,7 +293,6 @@ public class ShopEntry {
 
         ability.deactivate();
     }
-
 
     public String getValueAt(int level) {
         if (!isUpgrade()) return "";
@@ -335,7 +312,6 @@ public class ShopEntry {
 
         return text;
     }
-
 
     public String getKey() {
         switch (kind) {

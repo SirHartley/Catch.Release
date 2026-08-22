@@ -11,9 +11,7 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 
-
 public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
-
     public static final float BOX_SIZE = 72f;
     public static final float ART_SIZE = 52f;
     public static final float TEXT_GAP = 16f;
@@ -21,9 +19,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
     public static final float PIP_GAP = 4f;
 
     protected final ShopEntry entry;
-
     protected PositionAPI pos;
-
     protected transient LazyFont.DrawableString name;
     protected transient LazyFont.DrawableString sub;
 
@@ -49,7 +45,6 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         renderBox(x, boxY, alphaMult);
         renderText(x + BOX_SIZE + TEXT_GAP, y, height, alphaMult);
     }
-
 
     protected Color getAccent() {
         if (entry.isCurio()) {
@@ -111,7 +106,6 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         else renderSlot(x, top, alphaMult);
     }
 
-
     protected void renderLadder(float x, float top, float alphaMult) {
         int level = entry.getLevel();
         int max = entry.getMaxLevel();
@@ -138,7 +132,6 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         sub.draw(Math.round(x + ShopUi.getPipRowWidth(max, PIP_SIZE, PIP_GAP) + 10f), Math.round(top + 1f));
     }
 
-
     protected void renderSwitch(float x, float top, float alphaMult) {
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
@@ -155,7 +148,6 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         sub.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         sub.draw(Math.round(x), Math.round(top));
     }
-
 
     protected void renderSlot(float x, float top, float alphaMult) {
         LazyFont font = ShopUi.getSmallFont();

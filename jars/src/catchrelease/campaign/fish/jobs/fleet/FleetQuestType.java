@@ -10,9 +10,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.Random;
 
-
 public enum FleetQuestType {
-
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -20,7 +18,6 @@ public enum FleetQuestType {
                     + " will make it worth the detour.",
             "They need something living out of a nearby rupture before the printer will run again.",
             "Holding position"),
-
     SEEKER("Fleet on a Hunt",
             FleetTypes.SCAVENGER_SMALL,
             "We have been out here eleven weeks looking for one specific thing and we are not"
@@ -28,7 +25,6 @@ public enum FleetQuestType {
                     + " we came out with instead.",
             "They have been hunting one specimen for weeks with the wrong gear entirely.",
             "Searching"),
-
     QUOTA("Short of Quota",
             FleetTypes.TRADE_SMALL,
             "Our quota is due, our nets came up light, and the difference between filed and short"
@@ -36,14 +32,12 @@ public enum FleetQuestType {
                     + " pay out of the margin.",
             "Their filed quota is short and the deadline is not moving.",
             "Filling quota"),
-
     STARVING("Hungry Fleet",
             FleetTypes.TRADE_SMALL,
             "We have been on printed protein for nineteen days. Nobody is dying. Everybody is"
                     + " furious. Bring us something that was recently alive and name a price.",
             "Nineteen days of printed protein and a crew about to mutiny over it.",
             "Rationing"),
-
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
             "Coil's going and the gel that packs it is not something you can synthesise out here."
@@ -51,7 +45,6 @@ public enum FleetQuestType {
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
             "Holding position"),
-
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
             "I am not in distress and I would like that on the record. I am in want. There is a"
@@ -59,7 +52,6 @@ public enum FleetQuestType {
                     + " one. Catch it and the price stops being a problem.",
             "A private collector who has run out of people willing to sell to them.",
             "Waiting"),
-
     WAGER("Settling a Bet",
             FleetTypes.SCAVENGER_SMALL,
             "There is a disagreement aboard about what is actually down there and it has stopped"
@@ -70,15 +62,11 @@ public enum FleetQuestType {
 
     public final String title;
 
-
     public final String fleetType;
-
 
     public final String pitch;
 
-
     public final String note;
-
 
     public final String actionText;
 
@@ -89,7 +77,6 @@ public enum FleetQuestType {
         this.note = note;
         this.actionText = actionText;
     }
-
 
     protected static String pickSpecies(Random random) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
@@ -143,7 +130,6 @@ public enum FleetQuestType {
 
         return ask;
     }
-
 
     public int getBaseCredits() {
         switch (this) {

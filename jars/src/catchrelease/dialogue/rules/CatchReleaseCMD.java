@@ -49,13 +49,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class CatchReleaseCMD extends BaseCommandPlugin {
-
-
     public static final String DRIFT = "$catchreleaseDrift";
-
-
     public static final String STAGE = "$catchreleaseStage";
     public static final String TARGET = "$catchreleaseTarget";
     public static final String TARGET_WHERE = "$catchreleaseTargetWhere";
@@ -63,16 +58,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_POND = "$catchreleaseTargetPond";
     public static final String TARGET_DEEP = "$catchreleaseTargetDeep";
     public static final String TARGET_HERE = "$catchreleaseTargetHere";
-
-
     public static final String TARGET_SET = "$catchreleaseTargetSet";
     public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
-
-
     public static final String WORK = "$catchreleaseWork";
     public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
     public static final String WORK_MET = "$catchreleaseWorkMet";
@@ -81,52 +72,34 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_PAY = "$catchreleaseWorkPay";
     public static final String WORK_POND = "$catchreleaseWorkPond";
     public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
-
-
     public static final String SHELF = "$catchreleaseShelf";
     public static final String HAS_FISH = "$catchreleaseHoldHasFish";
-
-
     public static final String SELL_COMMON = "$catchreleaseSellCommon";
     public static final String SELL_UNCOMMON = "$catchreleaseSellUncommon";
     public static final String SELL_RARE = "$catchreleaseSellRare";
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
-
-
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
     public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
     public static final String RUMOR_LOOT = "$catchreleaseRumorLoot";
     public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
-
-
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
-
-
     protected static final String FISHER_ASK_PAGE = "$catchreleaseFisherAskPage";
     protected static final String FISHER_ASK_COUNT = "$catchreleaseFisherAskCount";
     protected static final int FISHER_ASK_PAGE_SIZE = 6;
-
-
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
     public static final String CRAB_CRAB_NAME = "$catchreleaseCrabBassName";
     public static final String CRAB_CRAB_PRICE = "$catchreleaseCrabBassPrice";
     public static final String CRAB_CRAB_CRAB_PRICE = "$catchreleaseCrabBassCrabPrice";
     public static final String CRAB_CRAB_AFFORD = "$catchreleaseCrabBassAfford";
-
-
     public static final String CRAB_BACKDROP = "$catchreleaseCrabBackdrop";
     public static final String CRAB_BACKDROP_NAME = "$catchreleaseCrabBackdropName";
     public static final String CRAB_BACKDROP_PRICE = "$catchreleaseCrabBackdropPrice";
     public static final String CRAB_BACKDROP_CRABS = "$catchreleaseCrabBackdropCrabs";
     public static final String CRAB_BACKDROP_AFFORD = "$catchreleaseCrabBackdropAfford";
-
-
     public static final String FISH_WELCOME = "$catchreleaseFishWelcome";
-
-
     public static final String LAMP_CONV = "$catchrelease_lampConv";
     public static final String LAMP_RUNG = "$catchrelease_lampRung";
     public static final String LAMP_FINE = "$catchrelease_lampFine";
@@ -134,10 +107,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String LAMP_WHERE = "$catchrelease_lampWhere";
     public static final String LAMP_HAUL = "$catchrelease_lampHaul";
 
+    protected transient InteractionDialogPlugin behind;
+    protected transient boolean panelOpen;
+
     @Override
     public boolean execute(String ruleId, InteractionDialogAPI dialog, List<Token> params,
                            Map<String, MemoryAPI> memoryMap) {
-
         if (params.isEmpty()) return false;
 
         String verb = params.get(0).getString(memoryMap);
@@ -302,7 +277,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-
     protected boolean showIntroMap(InteractionDialogAPI dialog, String title) {
         FishingIntro.Target target = FishingIntro.getTarget();
         FishingIntro.IntroIntel intel = new FishingIntro.IntroIntel();
@@ -314,7 +288,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
 
-
     protected boolean showWorkMap(InteractionDialogAPI dialog, String title) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
         if (work == null) work = FishermanQuest.getOffer();
@@ -325,7 +298,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 title == null ? "Target" : title,
                 intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
-
 
     protected boolean showBackdrop(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
@@ -342,7 +314,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean buyCrabWare(String wareName) {
         if (wareName == null) return false;
 
@@ -353,14 +324,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-
     protected boolean beginCrabOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
         dialog.getOptionPanel().clearOptions();
         return true;
     }
-
 
     protected boolean addCrabOption(InteractionDialogAPI dialog, List<Token> params,
                                     Map<String, MemoryAPI> memoryMap) {
@@ -401,7 +370,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-
     protected void addCrabCostTooltip(OptionPanelAPI panel, Object optionId, String description,
                                       int credits, int crabs) {
         final String creditText = Misc.getDGSCredits(credits);
@@ -416,7 +384,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             }
         });
     }
-
 
     protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
@@ -445,7 +412,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean beginFisherQuestions(InteractionDialogAPI dialog,
                                            Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -455,7 +421,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(FISHER_ASK_COUNT, 0, 0);
         return true;
     }
-
 
     protected boolean addFisherQuestion(InteractionDialogAPI dialog, List<Token> params,
                                         Map<String, MemoryAPI> memoryMap) {
@@ -486,7 +451,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean finishFisherQuestions(InteractionDialogAPI dialog, List<Token> params,
                                              Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -513,7 +477,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean highlightJobText(String ruleId, InteractionDialogAPI dialog,
                                        List<Token> params, Map<String, MemoryAPI> memoryMap) {
         if (memoryMap == null) return false;
@@ -533,7 +496,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 job.getAsks(), job.describeAsks());
     }
 
-
     protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
                                         List<Token> params, Map<String, MemoryAPI> memoryMap) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
@@ -548,7 +510,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
                 FishermanQuest.describe(work));
     }
-
 
     protected boolean highlightIntroText(String ruleId, InteractionDialogAPI dialog,
                                          List<Token> params, Map<String, MemoryAPI> memoryMap) {
@@ -567,7 +528,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
                 FishingIntro.describeTarget());
     }
-
 
     protected boolean highlightQuestText(String ruleId, InteractionDialogAPI dialog,
                                          List<Token> params, Map<String, MemoryAPI> memoryMap,
@@ -619,7 +579,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return dialog == null ? null : dialog.getTextPanel();
     }
 
-
     protected boolean openLampStop(InteractionDialogAPI dialog) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         if (patrol == null) return false;
@@ -653,7 +612,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean putLampsOut() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -666,7 +624,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean chargeLampStanding(InteractionDialogAPI dialog, boolean refused) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         if (patrol == null || patrol.getFaction() == null) return false;
@@ -677,7 +634,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected boolean forgiveLampStop(InteractionDialogAPI dialog) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -686,7 +642,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         LampOffence.forgive(player, patrol.getFaction().getId());
         return true;
     }
-
 
     protected boolean seizeFish(InteractionDialogAPI dialog) {
         int taken = FishCurrency.seizeAll();
@@ -704,20 +659,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-
     protected MarketAPI getMarket(InteractionDialogAPI dialog) {
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
         return target == null ? null : target.getMarket();
     }
 
-
     protected CampaignFleetAPI getOtherFleet(InteractionDialogAPI dialog) {
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
         return target instanceof CampaignFleetAPI ? (CampaignFleetAPI) target : null;
     }
-
 
     protected void writeTokens(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap.get("local");
@@ -809,19 +761,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-
-    protected transient InteractionDialogPlugin behind;
-
-
-    protected transient boolean panelOpen;
-
-
     protected boolean leaveEncounter(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
         if (dialog.getPlugin() instanceof
                 com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl fid) {
-
             fid.cleanUpBattle();
         }
 
@@ -829,7 +773,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         return true;
     }
-
 
     protected boolean bribeHitman(InteractionDialogAPI dialog) {
         if (dialog == null || !(dialog.getInteractionTarget() instanceof CampaignFleetAPI fleet)) {
@@ -839,7 +782,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return HarpoonHitman.acceptBribe(fleet);
     }
 
-
     protected boolean rescueCastaway(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -847,7 +789,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         return true;
     }
-
 
     protected boolean dropCutComm(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
@@ -888,7 +829,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return false;
     }
 
-
     protected void resume(InteractionDialogAPI dialog) {
         if (dialog == null || !panelOpen) return;
 
@@ -907,7 +847,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         com.fs.starfarer.api.impl.campaign.rulecmd.FireBest.fire(null, dialog,
                 behind == null ? null : behind.getMemoryMap(), "CatchReleaseFisherResume");
     }
-
 
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -935,7 +874,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         return true;
     }
-
 
     public static FishRarity parseRarity(String name) {
         if (name == null) return null;

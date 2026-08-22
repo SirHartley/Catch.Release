@@ -29,65 +29,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-
 public abstract class FishJob extends HubMissionWithBarEvent
         implements catchrelease.campaign.fish.shop.FishAsker {
-
+    public enum Stage {
+        WANTED,
+        DONE,
+        FAILED,
+        ABANDONED
+    }
 
     public static final String REF_KEY = "$catchrelease_jobRef";
-
-
     public static final String DELIVER_FLAG = "$catchrelease_jobDeliver";
-
-
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
-
-
     public static final String ASK_KEY = "$catchreleaseAsk";
     public static final String ASK_CAP_KEY = "$catchreleaseAskCap";
     public static final String REWARD_KEY = "$catchreleaseReward";
     public static final String REWARD_CAP_KEY = "$catchreleaseRewardCap";
-
-
     public static final String PAID_KEY = "$catchreleasePaid";
     public static final String BONUS_KEY = "$catchreleaseBonus";
     public static final String MORE_KEY = "$catchreleaseMore";
-
     public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
-
-
-    public enum Stage {
-
-        WANTED,
-
-
-        DONE,
-
-
-        FAILED,
-
-        ABANDONED
-    }
-
-
     public static final String CATCH_PROGRESS_UPDATE = "catchrelease_fish_job_progress";
 
-
     protected List<FishRequirement> asks = new ArrayList<>();
-
-
     protected List<FishReward> rewards = new ArrayList<>();
-
-
     protected String factionId = null;
-
-
     protected float days = 0f;
-
-
     protected float deadline = 0f;
-
-
     protected int round = 0;
 
     protected void addAsk(FishRequirement ask) {
@@ -107,7 +75,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return asks;
     }
 
-
     @Override
     public String getAskerName() {
         return getBaseName();
@@ -121,7 +88,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return round;
     }
 
-
     protected boolean setUpGiver(MarketAPI market) {
         if (market == null) return false;
 
@@ -132,7 +98,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         return setPersonMissionRef(person, REF_KEY);
     }
-
 
     protected void setUpSpine() {
         setStartingStage(Stage.WANTED);
@@ -146,7 +111,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         markDeliverable();
     }
 
-
     protected void setClock() {
         if (days <= 0f) return;
 
@@ -155,14 +119,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
         setTimeLimit(Stage.FAILED, deadline, null, Stage.DONE);
     }
 
-
     protected float getDaysLeft() {
         // deadline may be unset for a job accepted before it was recorded; fall back to the plain allowance
         float ends = deadline > 0f ? deadline : days;
 
         return Math.max(0f, ends - elapsed);
     }
-
 
     protected void markDeliverable() {
         PersonAPI person = getPerson();
@@ -171,16 +133,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
         makeImportant(person, getDeliverFlag(), Stage.WANTED);
     }
 
-
     protected String getDeliverFlag() {
         return DELIVER_FLAG;
     }
 
-
     protected String getRequiredFactionId() {
         return factionId;
     }
-
 
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
@@ -195,7 +154,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         return required == null || required.equals(market.getFactionId());
     }
-
 
     public static void onCatchStored(FishCatch caught) {
         if (caught == null || Global.getSector() == null) return;
@@ -231,7 +189,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return ask == null ? 0 : Math.min(ask.count, FishCurrency.count(ask));
     }
 
-
     public boolean isSatisfied() {
         for (FishRequirement ask : asks) {
             if (FishCurrency.count(ask) < ask.count) return false;
@@ -240,11 +197,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return true;
     }
 
-
     public FishCatch getBestOffered() {
         return asks.isEmpty() ? null : FishCurrency.findBest(asks.get(0));
     }
-
 
     public boolean turnIn() {
         if (!isSatisfied()) return false;
@@ -262,14 +217,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return true;
     }
 
-
     public String describeAsks() {
         List<String> parts = new ArrayList<>();
         for (FishRequirement ask : asks) parts.add(ask.describe());
 
         return join(parts);
     }
-
 
     public String describeRewards() {
         List<String> parts = new ArrayList<>();
@@ -291,11 +244,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return out.toString();
     }
 
-
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
-
         if ("isContactActive".equals(action)) {
             return isContactActive();
         }
@@ -339,18 +290,15 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
-
     protected boolean isContactActive() {
         return Stage.WANTED.equals(currentStage) && getPerson() != null;
     }
-
 
     protected void showContactVisual(InteractionDialogAPI dialog) {
         if (dialog == null || getPerson() == null) return;
 
         dialog.getVisualPanel().showPersonInfo(getPerson(), false);
     }
-
 
     protected void showRewardDetails(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getTextPanel() == null) return;
@@ -367,10 +315,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (tooltip != null) dialog.getTextPanel().addTooltip();
     }
 
-
     protected void showAutoHandOver(final InteractionDialogAPI dialog,
                                     final Map<String, MemoryAPI> memoryMap) {
-
         final FishHandoffPicker.Selection auto = FishHandoffPicker.autoSelect(asks, null);
 
         if (auto == null || dialog == null) {
@@ -393,7 +339,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
                     @Override
                     public void createCustomDialog(com.fs.starfarer.api.ui.CustomPanelAPI panel,
                                                    CustomDialogCallback callback) {
-
                         TooltipMakerAPI text = panel.createUIElement(360f, height, false);
 
                         text.setParaInsigniaLarge();
@@ -442,7 +387,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
     protected void showHandOverPicker(final InteractionDialogAPI dialog,
                                       final Map<String, MemoryAPI> memoryMap) {
-
         boolean opened = FishHandoffPicker.show(dialog, "Select specimens for the order", asks,
                 new FishHandoffPicker.Listener() {
                     @Override
@@ -463,21 +407,16 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (!opened) afterPickerCancelled(dialog, memoryMap);
     }
 
-
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
-
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
         FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
 
-
     protected void afterPickerCancelled(InteractionDialogAPI dialog,
                                         Map<String, MemoryAPI> memoryMap) {
-
         FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
-
 
     protected void handOver(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
@@ -512,10 +451,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
 
-
     protected boolean handOver(FishHandoffPicker.Selection selection, InteractionDialogAPI dialog,
                                Map<String, MemoryAPI> memoryMap) {
-
         MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
         if (selection == null) {
             token(mem, PAID_KEY, false);
@@ -548,20 +485,16 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return true;
     }
 
-
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
     }
-
 
     protected boolean payBonus(FishCatch offered) {
         return false;
     }
 
-
     protected boolean onDelivered() {
         return false;
     }
-
 
     protected void updateTokens(MemoryAPI mem) {
         if (mem == null) return;
@@ -580,10 +513,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
         setJobTokens(mem);
     }
 
-
     protected void setJobTokens(MemoryAPI mem) {
     }
-
 
     protected static void token(MemoryAPI mem, String key, Object value) {
         if (mem != null) mem.set(key, value, 0f);
@@ -594,11 +525,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         updateTokens(interactionMemory);
     }
 
-
     protected Random random() {
         return genRandom == null ? new Random() : genRandom;
     }
-
 
     protected MarketAPI getGiverMarket() {
         PersonAPI person = getPerson();
@@ -610,12 +539,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return Global.getSector() != null && Global.getSector().getPlayerFleet() != null;
     }
 
-
     @Override
     protected String getMissionTypeNoun() {
         return "job";
     }
-
 
     @Override
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
@@ -655,7 +582,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         unindent(info);
     }
 
-
     @Override
     public void addDescriptionForCurrentStage(TooltipMakerAPI info, float width, float height) {
         super.addDescriptionForCurrentStage(info, width, height);
@@ -670,11 +596,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
     }
 
-
     protected SectorEntityToken getFishRequestRouteTarget() {
         return null;
     }
-
 
     @Override
     public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
@@ -682,7 +606,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (FishIntelMapButton.handle(buttonId, ui, asks, null, null)) return;
         super.buttonPressConfirmed(buttonId, ui);
     }
-
 
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
@@ -703,7 +626,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
     }
 
-
     @Override
     public String getNextStepText() {
         if (isEnding()) return null;
@@ -716,7 +638,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return "Catch " + describeAsks() + ", then find " + person.getNameString()
                 + " on " + market.getName() + ".";
     }
-
 
     @Override
     public boolean addNextStepText(TooltipMakerAPI info, Color text, float pad) {

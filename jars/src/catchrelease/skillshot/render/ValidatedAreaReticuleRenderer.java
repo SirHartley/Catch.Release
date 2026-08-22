@@ -2,9 +2,7 @@ package catchrelease.skillshot.render;
 
 import catchrelease.skillshot.SkillshotSettings;
 
-
 public class ValidatedAreaReticuleRenderer extends AreaReticuleRenderer {
-
     protected PositionValidator validator;
 
     public ValidatedAreaReticuleRenderer(PositionValidator validator) {

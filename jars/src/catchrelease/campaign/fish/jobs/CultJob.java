@@ -9,11 +9,8 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-
 public class CultJob extends FishJob {
-
     public static final int VALUE = 2800;
-
     public static final float DAYS = 55f;
 
     protected String speciesId;

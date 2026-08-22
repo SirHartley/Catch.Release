@@ -16,10 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishCurrency {
-
-
     public static Map<FishRarity, Integer> count() {
         Map<FishRarity, Integer> counts = new EnumMap<>(FishRarity.class);
         for (FishRarity rarity : FishRarity.values()) counts.put(rarity, 0);
@@ -44,7 +41,6 @@ public class FishCurrency {
 
         return held == null ? 0 : held;
     }
-
 
     public static int count(FishRequirement req) {
         if (req == null) return Integer.MAX_VALUE;
@@ -72,7 +68,6 @@ public class FishCurrency {
         return best;
     }
 
-
     public static boolean spend(FishRequirement req) {
         if (req == null) return true;
         if (count(req) < req.count) return false;
@@ -91,7 +86,6 @@ public class FishCurrency {
 
         return left <= 0;
     }
-
 
     protected static String pickBestSpecies(FishRequirement req) {
         CargoAPI cargo = getCargo();
@@ -116,10 +110,8 @@ public class FishCurrency {
         return best;
     }
 
-
     public static int spendMatching(CargoAPI cargo, java.util.function.Predicate<FishCatch> matches,
                                     int amount, boolean bundles) {
-
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             if (amount <= 0) break;
 
@@ -159,7 +151,6 @@ public class FishCurrency {
         return amount;
     }
 
-
     public static boolean spend(FishRarity rarity, int amount) {
         if (rarity == null || amount <= 0) return true;
         if (count(rarity) < amount) return false;
@@ -175,7 +166,6 @@ public class FishCurrency {
 
         return left <= 0;
     }
-
 
     protected static int spendFromStacks(CargoAPI cargo, FishRarity rarity, int amount, boolean bundles) {
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
@@ -211,7 +201,6 @@ public class FishCurrency {
         return amount;
     }
 
-
     public static int seizeAll() {
         CargoAPI cargo = getCargo();
         if (cargo == null) return 0;
@@ -234,7 +223,6 @@ public class FishCurrency {
         return taken;
     }
 
-
     public static FishCatch findBest(FishRequirement req) {
         CargoAPI cargo = getCargo();
         if (req == null || cargo == null) return null;
@@ -251,7 +239,6 @@ public class FishCurrency {
 
         return best;
     }
-
 
     protected static List<FishCatch> read(CargoStackAPI stack) {
         List<FishCatch> out = new ArrayList<>();

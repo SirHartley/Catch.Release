@@ -26,16 +26,13 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 
 public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
-
     protected static final String SOUND_POND_OPEN_UI = "catchrelease_ui_rod_pond_open_sfx";
     protected static final String SOUND_DRONE_DISPATCH_UI = "catchrelease_ui_rod_drone_dispatch";
-
 
     @Override
     protected String getActivationText() {
         return isRoamingAvailable() ? "Dispatching drones" : "Forcing the rupture";
     }
-
 
     @Override
     protected void onActivatedWithoutReticule() {
@@ -48,7 +45,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
         unlockClosestPond();
     }
-
 
     public boolean isRoamingAvailable() {
         return SearchlightAbilityPlugin.isBreaching() && hasBreachCoupler();
@@ -111,7 +107,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         FishingDroneSwarmScript.dispatch(getPond(), worldTarget);
     }
 
-
     @Override
     public void pressButton() {
         if (entity != null && entity.isPlayerFleet()) {
@@ -151,7 +146,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         return super.isUsable();
     }
 
-
     @Override
     public boolean isActive() {
         return FishingDroneSwarmScript.getExisting() != null;
@@ -161,7 +155,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     public boolean showActiveIndicator() {
         return isActive();
     }
-
 
     @Override
     public float getCooldownFraction() {
@@ -220,7 +213,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
         addIncompatibleToTooltip(tooltip, false);
     }
-
 
     @Override
     public String getSpriteName() {

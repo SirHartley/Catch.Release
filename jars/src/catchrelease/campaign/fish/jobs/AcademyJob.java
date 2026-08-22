@@ -6,17 +6,10 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-
 public class AcademyJob extends FishJob {
-
-
     public static final String HOME = "galatia";
-
-
     public static final int MIN_SIZE = 5;
-
     public static final int VALUE_PER_FISH = 2400;
-
     public static final float DAYS = 60f;
 
     @Override

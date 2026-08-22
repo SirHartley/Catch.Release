@@ -9,22 +9,14 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 
 import java.awt.Color;
 
-
 public final class FishIcons {
-
-
     public static final float BACKLIGHT_ALPHA = 0.35f;
-
-
     public static final float RIM_ALPHA = 0.45f;
     public static final float RIM_OFFSET = 1f;
-
-
     public static final float RIM_COVER_FLOOR = 0.85f;
 
     private FishIcons() {
     }
-
 
     public static void drawBacklit(FishSpec spec, float centerX, float centerY,
                                    float backlightRadius, float artSize, float alphaMult) {
@@ -34,7 +26,6 @@ public final class FishIcons {
                 BACKLIGHT_ALPHA * alphaMult, 0f, true);
         draw(spec, centerX, centerY, artSize, alphaMult);
     }
-
 
     public static void draw(FishSpec spec, float centerX, float centerY, float size,
                             float alphaMult) {
@@ -73,7 +64,6 @@ public final class FishIcons {
         icon.setAlphaMult(alphaMult);
         icon.renderAtCenter(x, y);
     }
-
 
     protected static float coverShare(float alphaMult) {
         if (alphaMult >= 1f) return 1f;

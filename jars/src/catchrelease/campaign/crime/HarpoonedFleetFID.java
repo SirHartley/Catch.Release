@@ -7,15 +7,14 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.util.Misc;
 
-
 public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
-
+    public static final String HIGHLIGHT_COMMS = "$highlightComms";
+    public static final int LINES = 4;
+    public static final String LINE_KEY = "$catchreleaseHarpoonLine";
+    public static final String NAME_KEY = "$otherFleetFactionArticle";
+    public static final String NAME_CAP_KEY = "$otherFleetFactionArticleCap";
 
     protected boolean spoken = false;
-
-
-    public static final String HIGHLIGHT_COMMS = "$highlightComms";
-
 
     @Override
     public void init(InteractionDialogAPI dialog) {
@@ -26,7 +25,6 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
 
         speak();
     }
-
 
     protected void highlightComms(InteractionDialogAPI dialog) {
         if (dialog == null) return;
@@ -39,7 +37,6 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
 
         other.getMemoryWithoutUpdate().set(HIGHLIGHT_COMMS, true, 0f);
     }
-
 
     protected void speak() {
         if (spoken || dialog == null) return;
@@ -59,12 +56,6 @@ public class HarpoonedFleetFID extends FleetInteractionDialogPluginImpl {
 
         FireBest.fire(null, dialog, getMemoryMap(), "CatchReleaseHarpoonedGreeting");
     }
-
-
-    public static final int LINES = 4;
-    public static final String LINE_KEY = "$catchreleaseHarpoonLine";
-    public static final String NAME_KEY = "$otherFleetFactionArticle";
-    public static final String NAME_CAP_KEY = "$otherFleetFactionArticleCap";
 
     protected CampaignFleetAPI getOtherFleet() {
         if (dialog == null) return null;

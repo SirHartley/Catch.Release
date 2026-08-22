@@ -37,131 +37,76 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishShopDialog implements InteractionDialogPlugin {
-
     public static final float WIDTH = 920f;
     public static final float HEIGHT = 640f;
-
     public static final float PAD = 12f;
     public static final float HEADER_HEIGHT = 46f;
     public static final float LIST_WIDTH = 320f;
-
-
     public static final float ROW_WIDTH = LIST_WIDTH - 6f;
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
-
-
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
-
     public static final float TOOLTIP_WIDTH = 320f;
-
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
-
-
     public static final float LEAVE_WIDTH = 120f;
     public static final float LEAVE_HEIGHT = 26f;
-
-
     public static final float UNDO_WIDTH = 200f;
     public static final float UNDO_HEIGHT = 26f;
     public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
 
+    protected InteractionDialogAPI dialog;
+    protected Delegate delegate;
+    protected boolean closed;
+    protected final OnClose onClose;
 
     public interface OnClose {
         void onShopClosed(InteractionDialogAPI dialog);
     }
 
-
-    public static boolean open() {
-        return Global.getSector().getCampaignUI()
-                .showInteractionDialog(new FishShopDialog(), Global.getSector().getPlayerFleet());
-    }
-
-    protected InteractionDialogAPI dialog;
-    protected Delegate delegate;
-    protected boolean closed;
-
-
-    protected final OnClose onClose;
-
-    public FishShopDialog() {
-        this(null);
-    }
-
-    public FishShopDialog(OnClose onClose) {
-        this.onClose = onClose;
-    }
-
-    @Override
-    public void init(InteractionDialogAPI dialog) {
-        this.dialog = dialog;
-        closed = false;
-
-        // returns anything a save is still holding in shop storage - that button no longer exists
-        ShopStorage.reclaim();
-
-        dialog.setPromptText("");
-        dialog.hideVisualPanel();
-        dialog.hideTextPanel();
-        dialog.setBackgroundDimAmount(0.6f);
-
-        delegate = new Delegate();
-
-        dialog.getOptionPanel().clearOptions();
-        dialog.showCustomVisualDialog(WIDTH, HEIGHT, delegate);
-    }
-
-
-    protected void close() {
-        if (closed || dialog == null) return;
-
-        closed = true;
-
-        // the New! tags are first-visit news, and this visit has now seen them
-        ShopSchematics.clearAllFresh();
-
-        if (onClose == null) {
-            dialog.dismiss();
-            return;
-        }
-
-        onClose.onShopClosed(dialog);
-    }
-
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
             ShopRowPlugin.Host, ShopTabPlugin.Host, ShopHeaderPlugin.Purse {
-
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
-
         protected final List<ShopEntry> entries = new ArrayList<>();
         protected String selectedKey;
-
-
         protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
         protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
-
         protected TooltipMakerAPI list;
-
-
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
         protected int credits = 0;
-
-
         protected final List<UIComponentAPI> added = new ArrayList<>();
-
-
         protected final List<Receipt> purchases = new ArrayList<>();
-
-
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
         protected PositionAPI pos;
 
+        protected class Receipt {
+            final String entryKey;
+            final String markKey;
+            final List<Object[]> fishAboard;
+            final float creditsAboard;
+            final boolean marked;
+            final int statLevel;
+            final boolean tackleOwned;
+            final Tackle fitted;
+
+            Receipt(ShopEntry entry) {
+                entryKey = entry.getKey();
+                markKey = ShopMarks.getMarkKey(entry);
+                fishAboard = snapshotFish();
+                creditsAboard = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
+                marked = ShopMarks.isMarked(markKey);
+
+                statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
+                tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
+                        && TackleManager.isOwned(entry.tackle);
+                fitted = entry.kind == ShopEntry.Kind.TACKLE
+                        ? TackleManager.get(entry.rig) : null;
+            }
+        }
 
         @Override
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
@@ -174,7 +119,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             build();
         }
-
 
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
@@ -235,7 +179,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildLeave();
         }
 
-
         protected void buildLeave() {
             CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, LEAVE_HEIGHT,
                     new catchrelease.ui.PaneWidgets.TextButton(() -> "LEAVE",
@@ -246,7 +189,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - LEAVE_HEIGHT);
             added.add(leave);
         }
-
 
         protected void buildUndo() {
             TooltipMakerAPI footer = panel.createUIElement(UNDO_WIDTH, UNDO_HEIGHT, false);
@@ -273,7 +215,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             place(footer, PAD, HEIGHT - PAD - UNDO_HEIGHT);
         }
 
-
         protected void rebuild(boolean keepScroll) {
             if (panel == null) return;
 
@@ -289,7 +230,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 list.getExternalScroller().setYOffset(scroll);
             }
         }
-
 
         protected PositionAPI place(TooltipMakerAPI element, float x, float y) {
             PositionAPI pos = panel.addUIElement(element);
@@ -309,7 +249,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             added.add(header);
         }
 
-
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
             List<ShopGroup> out = new ArrayList<>();
 
@@ -324,7 +263,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             return out.toArray(new ShopGroup[0]);
         }
-
 
         protected List<ShopEntry.Kind> getStockedKinds() {
             List<ShopEntry.Kind> out = new ArrayList<>();
@@ -341,7 +279,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return out;
         }
 
-
         protected List<ShopEntry> getVisible() {
             List<ShopEntry> visible = new ArrayList<>();
 
@@ -357,7 +294,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
         }
-
 
         protected void buildTabs() {
             float top = PAD + HEADER_HEIGHT + 10f;
@@ -390,7 +326,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void addTab(Object data, String label, String iconId,
                               boolean vertical, float x, float y, float width, float height) {
-
             CustomPanelAPI tab = panel.createCustomPanel(width, height,
                     new ShopTabPlugin(data, label, iconId, vertical, this));
 
@@ -475,7 +410,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             };
         }
 
-
         protected TooltipMakerAPI.TooltipCreator createMarkTooltip(ShopEntry entry) {
             return new BaseTooltipCreator() {
                 @Override
@@ -536,7 +470,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             buildPrice(info, entry);
             buildBuyButton(info, entry);
         }
-
 
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isCurio()) {
@@ -600,7 +533,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
         }
 
-
         protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
             if (entry.isDone()) return;
 
@@ -641,34 +573,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             refreshWallet();
             rebuild(true);
         }
-
-
-        protected class Receipt {
-            final String entryKey;
-            final String markKey;
-            final List<Object[]> fishAboard;
-            final float creditsAboard;
-            final boolean marked;
-
-            final int statLevel;
-            final boolean tackleOwned;
-            final Tackle fitted;
-
-            Receipt(ShopEntry entry) {
-                entryKey = entry.getKey();
-                markKey = ShopMarks.getMarkKey(entry);
-                fishAboard = snapshotFish();
-                creditsAboard = Global.getSector().getPlayerFleet().getCargo().getCredits().get();
-                marked = ShopMarks.isMarked(markKey);
-
-                statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
-                tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
-                        && TackleManager.isOwned(entry.tackle);
-                fitted = entry.kind == ShopEntry.Kind.TACKLE
-                        ? TackleManager.get(entry.rig) : null;
-            }
-        }
-
 
         protected List<Object[]> snapshotFish() {
             List<Object[]> stacks = new ArrayList<>();
@@ -732,7 +636,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return null;
         }
 
-
         protected ShopEntry getSelected() {
             List<ShopEntry> visible = getVisible();
 
@@ -784,12 +687,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
         public void advance(float amount) {
         }
 
-
         @Override
         public void reportDismissed(int option) {
             FishShopDialog.this.close();
         }
-
 
         @Override
         public void processInput(List<InputEventAPI> events) {
@@ -808,7 +709,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
             pos = position;
         }
 
-
         @Override
         public void renderBelow(float alphaMult) {
             if (pos == null || alphaMult <= 0f) return;
@@ -820,7 +720,54 @@ public class FishShopDialog implements InteractionDialogPlugin {
         @Override
         public void render(float alphaMult) {
         }
+    }
 
+    public FishShopDialog() {
+        this(null);
+    }
+
+    public FishShopDialog(OnClose onClose) {
+        this.onClose = onClose;
+    }
+
+    public static boolean open() {
+        return Global.getSector().getCampaignUI()
+                .showInteractionDialog(new FishShopDialog(), Global.getSector().getPlayerFleet());
+    }
+
+    @Override
+    public void init(InteractionDialogAPI dialog) {
+        this.dialog = dialog;
+        closed = false;
+
+        // returns anything a save is still holding in shop storage - that button no longer exists
+        ShopStorage.reclaim();
+
+        dialog.setPromptText("");
+        dialog.hideVisualPanel();
+        dialog.hideTextPanel();
+        dialog.setBackgroundDimAmount(0.6f);
+
+        delegate = new Delegate();
+
+        dialog.getOptionPanel().clearOptions();
+        dialog.showCustomVisualDialog(WIDTH, HEIGHT, delegate);
+    }
+
+    protected void close() {
+        if (closed || dialog == null) return;
+
+        closed = true;
+
+        // the New! tags are first-visit news, and this visit has now seen them
+        ShopSchematics.clearAllFresh();
+
+        if (onClose == null) {
+            dialog.dismiss();
+            return;
+        }
+
+        onClose.onShopClosed(dialog);
     }
 
     @Override

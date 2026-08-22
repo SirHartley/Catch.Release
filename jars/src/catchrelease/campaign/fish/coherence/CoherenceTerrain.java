@@ -17,20 +17,18 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-
 public class CoherenceTerrain extends StarCoronaTerrainPlugin {
-
-
     public static final String TERRAIN_ID = "catchrelease_coherence_field";
-
-
     public static final float FIELD_RADIUS = 50000f;
-
-
     public static final float IDLE_EXPIRE = 5f;
+    public static final float READING_REFRESH = 1f;
 
     protected float idle = 0f;
+    protected transient float readingClock = 0f;
+    protected transient TimedValue<Reading> reading;
 
+    protected record Reading(float aberration, String source) {
+    }
 
     @Override
     public void init(String terrainId, SectorEntityToken entity, Object param) {
@@ -38,7 +36,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
 
         entity.addTag(TERRAIN_ID);
     }
-
 
     public static void ensureIn(LocationAPI location) {
         if (location == null) return;
@@ -53,7 +50,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         location.addTerrain(TERRAIN_ID, params);
     }
 
-
     @Override
     public boolean containsEntity(SectorEntityToken other) {
         return other != null && other == Global.getSector().getPlayerFleet() && getLevel() > 0f;
@@ -62,7 +58,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     protected float getLevel() {
         return CoherenceOverlayScript.getLevel();
     }
-
 
     @Override
     public void advance(float amount) {
@@ -84,7 +79,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     public String getNameForTooltip() {
         return "Thin Fabric";
     }
-
 
     @Override
     public String getTerrainName() {
@@ -113,17 +107,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         tooltip.addPara("Specimens taken here come up further from what they should be, which is"
                 + " worth more to some buyers and less to others.", pad);
     }
-
-
-    public static final float READING_REFRESH = 1f;
-
-
-    protected record Reading(float aberration, String source) {
-    }
-
-
-    protected transient float readingClock = 0f;
-    protected transient TimedValue<Reading> reading;
 
     protected Reading getReading() {
         // lazily built - the field is transient, so a loaded save starts without one
@@ -159,7 +142,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     public float getTooltipWidth() {
         return 350f;
     }
-
 
     @Override
     public void applyEffect(SectorEntityToken entity, float days) {
@@ -203,7 +185,6 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     public boolean hasAIFlag(Object flag) {
         return false;
     }
-
 
     @Override
     public float getMaxEffectRadius(Vector2f locFrom) {

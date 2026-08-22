@@ -12,10 +12,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.Random;
 
-
 public final class CrablobabBarPresence {
-
-
     public static final String VANILLA_ROLL_KEY = "$BarCMD_shownEvents";
     public static final String ROLL_KEY = "$catchrelease_crablobab_bar_roll";
     public static final float MAX_ROLL_DAYS = 60f;
@@ -23,7 +20,6 @@ public final class CrablobabBarPresence {
 
     private CrablobabBarPresence() {
     }
-
 
     public static boolean isAvailable(InteractionDialogAPI dialog) {
         if (Global.getSettings().isDevMode()) return true;
@@ -42,7 +38,6 @@ public final class CrablobabBarPresence {
         memory.set(ROLL_KEY, present, MAX_ROLL_DAYS);
         return present;
     }
-
 
     private static boolean roll(SectorEntityToken target, MarketAPI market) {
         BarEventManager manager = BarEventManager.getInstance();

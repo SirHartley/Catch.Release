@@ -10,12 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class Backdrops {
-
-
     public static final String OWNED_KEY = "$catchrelease_backdrops";
-
 
     public static Backdrop getDefault() {
         Backdrop bare = null;
@@ -31,7 +27,6 @@ public class Backdrops {
         return bare;
     }
 
-
     public static Backdrop getHanging(BreachConservatory conservatory) {
         if (conservatory == null) return getDefault();
 
@@ -39,7 +34,6 @@ public class Backdrops {
 
         return chosen != null && isOwned(chosen) ? chosen : getDefault();
     }
-
 
     public static boolean hang(BreachConservatory conservatory, Backdrop backdrop) {
         if (conservatory == null || backdrop == null || !isOwned(backdrop)) return false;
@@ -49,12 +43,10 @@ public class Backdrops {
         return true;
     }
 
-
     public static boolean hasArt(Backdrop backdrop) {
         return backdrop != null && backdrop.sprite != null && !backdrop.sprite.isEmpty()
                 && SpriteLoader.loadSprite(backdrop.sprite) != null;
     }
-
 
     public static boolean isBare(Backdrop backdrop) {
         return backdrop == null || backdrop.sprite == null || backdrop.sprite.isEmpty();
@@ -65,7 +57,6 @@ public class Backdrops {
 
         return backdrop.owned || getOwnedIds().contains(backdrop.id);
     }
-
 
     public static void own(String id) {
         if (id == null || BackdropLoader.get(id) == null) return;
@@ -82,7 +73,6 @@ public class Backdrops {
 
         return out;
     }
-
 
     public static List<Backdrop> getUnowned() {
         List<Backdrop> out = new ArrayList<>();

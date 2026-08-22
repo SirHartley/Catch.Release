@@ -10,35 +10,20 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class OuterReaches {
-
-
     public static final float AVOID_RADIUS = 2500f;
-
-
     public static final float INNER_PAD = 1500f;
     public static final float OUTER_PAD = 2500f;
-
-
     public static final float MIN_BAND = 3000f;
-
-
     public static final float DEFAULT_OUTER = 14000f;
-
-
     public static final int TRIES = 24;
-
-
     public static final float LEG_DAYS = 25f;
-
 
     public static Vector2f center(StarSystemAPI system) {
         if (system == null || system.getCenter() == null) return new Vector2f();
 
         return new Vector2f(system.getCenter().getLocation());
     }
-
 
     public static List<SectorEntityToken> getPopulated(StarSystemAPI system) {
         List<SectorEntityToken> out = new ArrayList<>();
@@ -54,11 +39,9 @@ public class OuterReaches {
         return out;
     }
 
-
     public static boolean isPopulated(StarSystemAPI system) {
         return !getPopulated(system).isEmpty();
     }
-
 
     public static float getInnerLimit(StarSystemAPI system) {
         float furthest = 0f;
@@ -70,7 +53,6 @@ public class OuterReaches {
 
         return furthest + AVOID_RADIUS + INNER_PAD;
     }
-
 
     public static float getOuterLimit(StarSystemAPI system) {
         float furthest = 0f;
@@ -88,7 +70,6 @@ public class OuterReaches {
 
         return Math.max(furthest + OUTER_PAD, getInnerLimit(system) + MIN_BAND);
     }
-
 
     public static Vector2f place(StarSystemAPI system, Vector2f preferred) {
         if (system == null || preferred == null) return preferred;
@@ -111,7 +92,6 @@ public class OuterReaches {
                 MathUtils.clamp(distance, inner, outer), bearing);
     }
 
-
     public static Vector2f pick(StarSystemAPI system, Vector2f from) {
         float inner = getInnerLimit(system);
         float outer = getOuterLimit(system);
@@ -130,7 +110,6 @@ public class OuterReaches {
                 MathUtils.getRandomNumberInRange(0f, 360f));
     }
 
-
     public static boolean isLegClear(StarSystemAPI system, Vector2f from, Vector2f to) {
         for (SectorEntityToken populated : getPopulated(system)) {
             if (distanceToSegment(populated.getLocation(), from, to) < AVOID_RADIUS) return false;
@@ -138,7 +117,6 @@ public class OuterReaches {
 
         return true;
     }
-
 
     public static float distanceToSegment(Vector2f point, Vector2f from, Vector2f to) {
         if (from == null) return Misc.getDistance(point, to);

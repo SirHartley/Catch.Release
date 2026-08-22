@@ -29,65 +29,36 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishingMinigamePanel implements CustomUIPanelPlugin {
-
-    public interface Listener {
-        void onMinigameEnded(boolean caught);
-    }
-
     protected FishingMinigame minigame;
     protected Listener listener;
-
-
     protected FishCatch specimen;
-
-
     protected SectorEntityToken where;
     protected FishLogEntry.Method method;
-
     protected PositionAPI position;
-
-
     protected FishingMinigameLayout layout;
     protected boolean reeling = false;
     protected boolean reported = false;
     protected boolean failedSoundPlayed = false;
-
-
     protected float lineLoopHeldLevel = 0f;
-
-
     protected boolean fishCoveredLastFrame;
-
-
     transient protected CatchCelebration celebration;
-
     transient protected CatchResultPanel result;
-
-
     transient protected LootResultPanel lootResult;
-
-
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
     protected boolean treasureResolved = false;
-
-
     protected MinigameTreasure soundTreasure;
     protected boolean treasureGotSoundPlayed = false;
-
-
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
-
-
     protected float jitterTime = 0f;
-
-
     transient protected SpriteAPI backgroundSprite;
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
-
     transient protected SpriteAPI moteSprite;
+
+    public interface Listener {
+        void onMinigameEnded(boolean caught);
+    }
 
     public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
                                FishLogEntry.Method method, Listener listener) {
@@ -138,7 +109,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         end(false);
     }
 
-
     protected void advanceLineSoundLoop(float amount) {
         float fadeTime = reeling
                 ? FishConstants.LINE_LOOP_HELD_FADE_IN
@@ -158,7 +128,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         Global.getSoundPlayer().playUILoop(FishConstants.SOUND_LINE_LOOP, 1f, volume);
     }
 
-
     protected void advanceIndicatorSoundHook() {
         boolean covered = minigame.isFishInBar();
 
@@ -171,7 +140,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         fishCoveredLastFrame = covered;
     }
-
 
     protected void advanceTreasureSoundHooks() {
         MinigameTreasure treasure = minigame.getTreasure();
@@ -192,7 +160,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             CatchCelebration.playHook(FishConstants.SOUND_TREASURE_GOT);
         }
     }
-
 
     protected void advanceCaught(float amount) {
         if (result == null) {
@@ -223,7 +190,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (celebration != null) celebration.advance(amount);
     }
 
-
     protected void resolveTreasure() {
         if (treasureResolved) return;
         treasureResolved = true;
@@ -234,7 +200,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             lootAwards.add(TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle));
         }
     }
-
 
     protected void end(boolean caught) {
         if (reported) return;
@@ -271,7 +236,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
     }
 
-
     protected void processResultInput(InputEventAPI event) {
         if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
             event.consume();
@@ -290,7 +254,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             if (lootResult != null) lootResult.revealAll();
         }
     }
-
 
     protected boolean isReadoutComplete() {
         return result.isComplete() && (lootResult == null || lootResult.isComplete());
@@ -320,12 +283,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
     }
 
-
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
         drawDressing(layout.trackX, layout.trackY, layout.trackWidth, layout.trackHeight, alphaMult);
         drawDressing(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight, alphaMult);
     }
-
 
     protected void drawDressing(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
@@ -339,7 +300,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 Misc.getBrightPlayerColor(), FishConstants.MINIGAME_BORDER_ALPHA * alphaMult);
     }
 
-
     protected void drawBorder(float x, float y, float width, float height, float offset,
                               Color color, float alpha) {
         RoundedBorder.draw(
@@ -352,7 +312,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 alpha,
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
-
 
     protected void renderTrack(FishingMinigameLayout layout, float alphaMult) {
         // solid black first so the backing reads against the dialog rather than through it
@@ -377,7 +336,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 Misc.getDarkPlayerColor(), 0.05f * alphaMult);
     }
 
-
     protected SpriteAPI getBackgroundSprite() {
         if (backgroundChecked) return backgroundSprite;
         backgroundChecked = true;
@@ -399,7 +357,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         return warp;
     }
-
 
     protected void renderBar(FishingMinigameLayout layout, float alphaMult) {
         float height = minigame.getBarHeightFraction() * layout.trackHeight;
@@ -456,7 +413,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.renderAtCenter(centerX, centerY);
     }
 
-
     protected void renderChicken(float centerX, float centerY, float size, float alphaMult) {
         SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.MINIGAME_CHICKEN_ICON);
         if (sprite == null) {
@@ -472,7 +428,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.setAlphaMult(alphaMult);
         sprite.renderAtCenter(centerX, centerY);
     }
-
 
     protected void renderCatchMote(float centerX, float centerY, float alphaMult) {
         SpriteAPI sprite = getMoteSprite();
@@ -510,7 +465,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.renderAtCenter(centerX, centerY);
     }
 
-
     protected void renderTreasure(FishingMinigameLayout layout, float alphaMult) {
         MinigameTreasure treasure = minigame.getTreasure();
         if (treasure == null || !treasure.isActive()) return;
@@ -542,10 +496,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         renderTreasureClock(treasure, centerX, centerY, alphaMult);
     }
 
-
     protected void renderTreasureClock(MinigameTreasure treasure, float centerX, float centerY,
                                        float alphaMult) {
-
         float width = FishConstants.TREASURE_BAR_WIDTH;
         float height = FishConstants.TREASURE_BAR_HEIGHT;
 
@@ -556,7 +508,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         drawQuad(x, y, width, height, Color.BLACK, 0.6f * alphaMult);
         drawQuad(x, y, width * treasure.getTimeLeft(), height, treasure.rarity.color, 0.9f * alphaMult);
     }
-
 
     protected void renderMeter(FishingMinigameLayout layout, float alphaMult) {
         drawQuad(layout.meterX, layout.meterY, layout.meterWidth, layout.meterHeight,
@@ -570,7 +521,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 color, 0.8f * alphaMult);
     }
 
-
     protected float getJitter(float offset) {
         float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
 
@@ -583,7 +533,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
     }
 
-
     protected SpriteAPI getMoteSprite() {
         if (moteSprite == null) {
             moteSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
@@ -592,14 +541,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         return moteSprite;
     }
 
-
     protected SpriteAPI getFishSprite() {
         FishSpec fish = minigame.getFish();
         if (fish.icon == null || fish.icon.isEmpty()) return null;
 
         return SpriteLoader.loadSprite(fish.icon);
     }
-
 
     protected static void drawVerticalGradient(float x, float y, float width, float height,
                                                Color color, float bottomAlpha, float topAlpha) {
@@ -646,7 +593,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
         GL11.glPopAttrib();
     }
-
 
     @Override
     public void buttonPressed(Object buttonId) {

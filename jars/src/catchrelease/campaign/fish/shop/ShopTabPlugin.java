@@ -13,16 +13,7 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.awt.Color;
 import java.util.List;
 
-
 public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
-
-
-    public interface Host {
-        boolean isActiveTab(Object id);
-
-        void onTabClicked(Object id);
-    }
-
     public static final float ACCENT_HEIGHT = 2f;
     public static final float ICON_SIZE = 18f;
     public static final float ICON_GAP = 6f;
@@ -32,10 +23,14 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
     protected final String iconId;
     protected final boolean vertical;
     protected final Host host;
-
     protected PositionAPI pos;
-
     protected transient LazyFont.DrawableString text;
+
+    public interface Host {
+        boolean isActiveTab(Object id);
+
+        void onTabClicked(Object id);
+    }
 
     public ShopTabPlugin(Object id, String label, String iconId, boolean vertical, Host host) {
         this.id = id;

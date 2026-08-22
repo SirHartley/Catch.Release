@@ -7,12 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class FishLocationSummary {
-
-
     protected static final String[] QUADRANTS = {"NE", "NW", "SE", "SW"};
-
 
     public static String describe(FishSpec spec) {
         if (spec == null) return "Nowhere anyone has written down.";
@@ -35,7 +31,6 @@ public class FishLocationSummary {
     protected static void addIfAny(List<String> clauses, String clause) {
         if (clause != null) clauses.add(clause);
     }
-
 
     protected static String describeRegions(Set<SectorRegion> regions) {
         if (regions == null || regions.isEmpty()) return "Anywhere in the sector";
@@ -71,7 +66,6 @@ public class FishLocationSummary {
         return Character.toUpperCase(joined.charAt(0)) + joined.substring(1);
     }
 
-
     protected static String describeBand(String band, Set<String> quadrants) {
         if (quadrants.size() == QUADRANTS.length) return "in " + band;
 
@@ -92,7 +86,6 @@ public class FishLocationSummary {
         }
     }
 
-
     protected static String describeStars(Set<StarColour> starColours) {
         if (starColours == null || starColours.isEmpty()) return null;
 
@@ -105,7 +98,6 @@ public class FishLocationSummary {
 
         return "under " + joinNatural(names, "or");
     }
-
 
     protected static String describeAges(Set<StarAge> ages) {
         if (ages == null || ages.isEmpty() || ages.size() >= 3) return null;
@@ -122,7 +114,6 @@ public class FishLocationSummary {
         return "in " + joinNatural(names, "or") + " constellations";
     }
 
-
     protected static String describeCoherence(float minAberration, float maxAberration) {
         boolean floor = minAberration > 0f;
         boolean ceiling = maxAberration < 1f;
@@ -135,7 +126,6 @@ public class FishLocationSummary {
         return "only where coherence holds";
     }
 
-
     protected static String describeReach(Set<CatchImplement> reachedBy) {
         if (reachedBy == null || reachedBy.isEmpty() || reachedBy.size() > 1) return null;
 
@@ -145,7 +135,6 @@ public class FishLocationSummary {
 
         return "and only ever loose in the dark, under a breach lamp";
     }
-
 
     protected static String describeTags(Set<String> systemTags) {
         if (systemTags == null || systemTags.isEmpty()) return null;
@@ -171,7 +160,6 @@ public class FishLocationSummary {
             default: return tag.trim().toLowerCase().replace("theme_", "").replace('_', ' ');
         }
     }
-
 
     protected static String joinNatural(List<String> parts, String word) {
         if (parts.isEmpty()) return "";

@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishermanSpawner implements EveryFrameScript {
-
+    protected transient LocationAPI lastLocation;
+    protected transient boolean placed = false;
 
     public static void register() {
         Global.getSector().addTransientScript(new FishermanSpawner());
@@ -74,21 +74,14 @@ public class FishermanSpawner implements EveryFrameScript {
         spawn(system, player.getLocation());
     }
 
-
-    protected transient LocationAPI lastLocation;
-    protected transient boolean placed = false;
-
-
     protected boolean isLocked(StarSystemAPI system) {
         return system.getMemoryWithoutUpdate().getBoolean(FishermanConstants.SPAWN_LOCK_KEY);
     }
-
 
     protected void lock(StarSystemAPI system) {
         system.getMemoryWithoutUpdate().set(FishermanConstants.SPAWN_LOCK_KEY, true,
                 FishermanConstants.SPAWN_LOCK_DAYS);
     }
-
 
     protected float getChance(StarSystemAPI system) {
         float chance = FishermanConstants.SPAWN_BASE_CHANCE;
@@ -115,12 +108,10 @@ public class FishermanSpawner implements EveryFrameScript {
         return Math.min(1f, chance);
     }
 
-
     protected void stamp() {
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.LAST_SEEN_KEY,
                 Global.getSector().getClock().getTimestamp());
     }
-
 
     protected CampaignFleetAPI getLiveFleet() {
         Object stored = Global.getSector().getMemoryWithoutUpdate()
@@ -145,7 +136,6 @@ public class FishermanSpawner implements EveryFrameScript {
         return null;
     }
 
-
     public static List<CampaignFleetAPI> getLiveFishermen(LocationAPI location) {
         List<CampaignFleetAPI> boats = new ArrayList<>();
         if (location == null) return boats;
@@ -157,13 +147,11 @@ public class FishermanSpawner implements EveryFrameScript {
         return boats;
     }
 
-
     public static boolean isLiveFisherman(CampaignFleetAPI fleet) {
         return isFisherman(fleet)
                 && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY)
                 && !fleet.isExpired() && fleet.isAlive();
     }
-
 
     public static void reconcileLegacyFleets() {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
@@ -193,7 +181,6 @@ public class FishermanSpawner implements EveryFrameScript {
         }
     }
 
-
     public static void reconcileSystem(StarSystemAPI system) {
         List<CampaignFleetAPI> boats = getLiveFishermen(system);
         if (boats.size() < 2) return;
@@ -203,7 +190,6 @@ public class FishermanSpawner implements EveryFrameScript {
             if (boat != canonical) retireDuplicate(boat);
         }
     }
-
 
     public static CampaignFleetAPI chooseSystemBoat(StarSystemAPI system,
                                                       List<CampaignFleetAPI> boats) {
@@ -222,7 +208,6 @@ public class FishermanSpawner implements EveryFrameScript {
         return boats.get(0);
     }
 
-
     public static void retireDuplicate(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY)) {
             return;
@@ -237,7 +222,6 @@ public class FishermanSpawner implements EveryFrameScript {
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.RETIRE_KEY, true);
     }
 
-
     protected boolean isEligible(StarSystemAPI system) {
         if (!system.isProcgen()) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
@@ -248,7 +232,6 @@ public class FishermanSpawner implements EveryFrameScript {
 
         return true;
     }
-
 
     public static CampaignFleetAPI spawnNow(StarSystemAPI system, Vector2f near) {
         if (system == null || near == null || Global.getSector() == null) return null;
@@ -268,7 +251,6 @@ public class FishermanSpawner implements EveryFrameScript {
         FishermanMapIcon.removeOutside(system);
         return spawner.spawn(system, near);
     }
-
 
     protected CampaignFleetAPI spawn(StarSystemAPI system, Vector2f near) {
         reconcileSystem(system);
@@ -318,12 +300,10 @@ public class FishermanSpawner implements EveryFrameScript {
         return fleet;
     }
 
-
     public static boolean isFisherman(CampaignFleetAPI fleet) {
         return fleet != null
                 && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.FLEET_FLAG);
     }
-
 
     public static boolean isVisiting(CampaignFleetAPI fleet) {
         return fleet != null

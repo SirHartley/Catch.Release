@@ -11,34 +11,27 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 
-
 public class ShopRowPlugin extends ListRow {
+    public static final float PIP_SIZE = 8f;
+    public static final float PIP_GAP = 3f;
+    public static final float PAD_SIDE = 10f;
+    public static final float MARK_SLOT = 18f;
+    public static final float MARK_RADIUS = 5f;
 
+    protected final ShopEntry entry;
+    protected final Host host;
+    protected transient LazyFont.DrawableString name;
+    protected transient LazyFont.DrawableString mark;
+    protected transient String markText;
+    protected transient LazyFont.DrawableString fresh;
 
     public interface Host {
         boolean isSelected(ShopEntry entry);
 
         void onRowClicked(ShopEntry entry);
 
-
         PositionAPI getListViewport();
     }
-
-    public static final float PIP_SIZE = 8f;
-    public static final float PIP_GAP = 3f;
-    public static final float PAD_SIDE = 10f;
-
-
-    public static final float MARK_SLOT = 18f;
-    public static final float MARK_RADIUS = 5f;
-
-    protected final ShopEntry entry;
-    protected final Host host;
-
-    protected transient LazyFont.DrawableString name;
-    protected transient LazyFont.DrawableString mark;
-    protected transient String markText;
-    protected transient LazyFont.DrawableString fresh;
 
     public ShopRowPlugin(ShopEntry entry, Host host) {
         this.entry = entry;
@@ -55,12 +48,10 @@ public class ShopRowPlugin extends ListRow {
         return host.isSelected(entry);
     }
 
-
     @Override
     protected float getSelectedFieldAlpha() {
         return 0.5f;
     }
-
 
     @Override
     protected Color getAccentColor() {
@@ -75,7 +66,6 @@ public class ShopRowPlugin extends ListRow {
         renderName(x, y, height, selected, alphaMult);
         renderState(x, y, width, height, alphaMult);
     }
-
 
     protected void renderMarkRing(float x, float y, float height, float alphaMult) {
         boolean marked = ShopMarks.isMarked(entry);
@@ -119,7 +109,6 @@ public class ShopRowPlugin extends ListRow {
         name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT + 4f),
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
-
 
     protected void renderState(float x, float y, float width, float height, float alphaMult) {
         float right = x + width - PAD_SIDE;
@@ -172,7 +161,6 @@ public class ShopRowPlugin extends ListRow {
                 rarity.color, (entry.canAfford() ? 0.9f : 0.35f) * alphaMult);
     }
 
-
     protected float drawFresh(float right, float y, float height, float alphaMult) {
         if (!ShopSchematics.isFresh(entry)) return right;
 
@@ -192,7 +180,6 @@ public class ShopRowPlugin extends ListRow {
 
     protected void drawMark(String text, Color color, float right, float y, float height,
                             float alphaMult) {
-
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
 
@@ -205,7 +192,6 @@ public class ShopRowPlugin extends ListRow {
         mark.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         mark.draw(Math.round(right), Math.round(y + height * 0.5f + mark.getHeight() * 0.5f));
     }
-
 
     @Override
     protected void onRowClick(float pointX, float pointY) {

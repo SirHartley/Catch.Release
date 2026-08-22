@@ -21,10 +21,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
-
-
     public static final float BOX_ICON_GRID = 80f;
     public static final float BOX_ICON_UL_X = 49f;
     public static final float BOX_ICON_UL_Y = 35f;
@@ -63,7 +60,6 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
@@ -89,17 +85,14 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-
     protected boolean isBulkDown() {
         return org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_LCONTROL)
                 || org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_RCONTROL);
     }
 
-
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
-
         super.render(x, y, w, h, alphaMult, glowMult, renderer);
 
         List<FishCatch> contents = getContents();
@@ -124,10 +117,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-
     protected void renderBoxIcon(float x, float y, float w, float h, float alphaMult,
                                  float glowMult, FishSpec spec) {
-
         String path = spec == null || spec.icon == null || spec.icon.isEmpty()
                 ? FishConstants.ITEM_ICON_FALLBACK : spec.icon;
 
@@ -143,11 +134,9 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         return x + w * imageX / BOX_ICON_GRID;
     }
 
-
     protected float gridY(float y, float h, float imageY) {
         return y + h * (BOX_ICON_GRID - imageY) / BOX_ICON_GRID;
     }
-
 
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,

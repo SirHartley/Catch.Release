@@ -6,19 +6,15 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class CoreFisherBehavior extends FishermanBehavior {
-
     public CoreFisherBehavior(CampaignFleetAPI fleet) {
         super(fleet);
     }
-
 
     @Override
     protected boolean isVisiting() {
         return false;
     }
-
 
     @Override
     protected void keepWorking() {

@@ -7,14 +7,9 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-
 public class CompanionJob extends FishJob {
-
     public static final int VALUE = 3400;
-
     public static final float DAYS = 40f;
-
-
     public static final float BONUS_FRACTION = 0.6f;
 
     @Override
@@ -47,7 +42,6 @@ public class CompanionJob extends FishJob {
 
         return true;
     }
-
 
     @Override
     protected boolean payBonus(FishCatch offered) {

@@ -19,27 +19,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public final class FishHandoffPicker {
-
     public interface Listener {
         void picked(Selection selection);
 
         void cancelled();
     }
 
-
     public interface Eligibility {
         boolean accepts(FishCatch fish);
     }
-
 
     public static final class Selection {
         protected final List<SpecialItemData> items;
         protected final List<FishCatch> contents;
         protected final FishCatch bestForFirstAsk;
-
-
         protected final boolean boxed;
 
         protected Selection(List<SpecialItemData> items, List<FishCatch> contents,
@@ -54,11 +48,9 @@ public final class FishHandoffPicker {
             return bestForFirstAsk;
         }
 
-
         public List<FishCatch> getContents() {
             return contents;
         }
-
 
         public boolean spend() {
             if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) {
@@ -86,7 +78,6 @@ public final class FishHandoffPicker {
 
             return true;
         }
-
 
         protected boolean spendBoxed(CargoAPI cargo) {
             Map<String, Integer> need = new LinkedHashMap<>();
@@ -143,28 +134,23 @@ public final class FishHandoffPicker {
 
     public static boolean show(InteractionDialogAPI dialog, String title,
                                final List<FishRequirement> asks, final Listener listener) {
-
         return show(dialog, title, asks, null, listener);
     }
 
-
     public static boolean show(InteractionDialogAPI dialog, String title, String confirmText,
                                final List<FishRequirement> asks, final Listener listener) {
-
         return show(dialog, title, confirmText, asks, null, listener);
     }
 
     public static boolean show(InteractionDialogAPI dialog, String title,
                                final List<FishRequirement> asks, final Eligibility eligibility,
                                final Listener listener) {
-
         return show(dialog, title, "Hand over", asks, eligibility, listener);
     }
 
     protected static boolean show(InteractionDialogAPI dialog, String title, String confirmText,
                                   final List<FishRequirement> asks,
                                   final Eligibility eligibility, final Listener listener) {
-
         if (dialog == null || listener == null || asks == null || asks.isEmpty()) return false;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return false;
 
@@ -225,7 +211,6 @@ public final class FishHandoffPicker {
                                                   CargoStackAPI pickedUp,
                                                   boolean pickedUpFromSource,
                                                   CargoAPI combined) {
-
                         int selected = countLoose(combined);
                         boolean ready = match(combined, asks) != null;
 
@@ -265,7 +250,6 @@ public final class FishHandoffPicker {
         return true;
     }
 
-
     public static Selection autoSelect(List<FishRequirement> asks, Eligibility eligibility) {
         if (asks == null || asks.isEmpty()) return null;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return null;
@@ -273,7 +257,6 @@ public final class FishHandoffPicker {
         List<Candidate> candidates = new ArrayList<>();
         for (CargoStackAPI stack
                 : Global.getSector().getPlayerFleet().getCargo().getStacksCopy()) {
-
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (data == null) continue;
 
@@ -373,7 +356,6 @@ public final class FishHandoffPicker {
     protected static boolean assign(int slot, int[] slots, int[] assignment, boolean[] used,
                                     int[] assignedPerAsk, String[] speciesPerAsk,
                                     List<Candidate> candidates, List<FishRequirement> asks) {
-
         if (slot >= slots.length) return true;
 
         int askIndex = slots[slot];
@@ -409,10 +391,8 @@ public final class FishHandoffPicker {
         return false;
     }
 
-
     protected static int attribute(FishRequirement ask, List<Candidate> picked,
                                    boolean[] consumed) {
-
         int need = Math.max(0, ask.count);
         if (need <= 0) return 0;
 

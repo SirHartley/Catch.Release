@@ -16,24 +16,36 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-
 public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
-
     public static final float DEFAULT_RANGE = 6000f;
     public static final float DEFAULT_TWIST = 2.4f;
     public static final float DEFAULT_MOTION = 0.3f;
     public static final float DEFAULT_SPEED = 0.55f;
-
     public static final String DEFAULT_VERTEX_SHADER =
             "data/catchrelease/shaders/circular_spiral_warp_vertex.shader";
     public static final String DEFAULT_FRAGMENT_SHADER =
             "data/catchrelease/shaders/circular_spiral_warp_fragment.shader";
 
+    protected final SourceProvider provider;
+    protected final Config config;
+    protected final List<Source> sources = new ArrayList<>();
+    protected float time = 0f;
+    protected boolean loaded = false;
+    protected boolean usable = false;
+    protected boolean validated = false;
+    protected int program = 0;
+    protected int uVisibleUV = -1;
+    protected int uCenterUV = -1;
+    protected int uRadiusUV = -1;
+    protected int uTime = -1;
+    protected int uStrength = -1;
+    protected int uTwist = -1;
+    protected int uMotion = -1;
+    protected int uSpeed = -1;
 
     public interface SourceProvider {
         void collect(List<Source> out);
     }
-
 
     public static final class Source {
         public final Vector2f location;
@@ -49,7 +61,6 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-
     public static class Config {
         public float range = DEFAULT_RANGE;
         public float twist = DEFAULT_TWIST;
@@ -58,24 +69,6 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         public String vertexShader = DEFAULT_VERTEX_SHADER;
         public String fragmentShader = DEFAULT_FRAGMENT_SHADER;
     }
-
-    protected final SourceProvider provider;
-    protected final Config config;
-    protected final List<Source> sources = new ArrayList<>();
-
-    protected float time = 0f;
-    protected boolean loaded = false;
-    protected boolean usable = false;
-    protected boolean validated = false;
-    protected int program = 0;
-    protected int uVisibleUV = -1;
-    protected int uCenterUV = -1;
-    protected int uRadiusUV = -1;
-    protected int uTime = -1;
-    protected int uStrength = -1;
-    protected int uTwist = -1;
-    protected int uMotion = -1;
-    protected int uSpeed = -1;
 
     public CircularSpiralWarpRenderer(SourceProvider provider) {
         this(provider, new Config());
@@ -101,12 +94,10 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         return false;
     }
 
-
     @Override
     public void advance(float amount) {
         time += amount;
     }
-
 
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
@@ -132,7 +123,6 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
             if (!usable) break;
         }
     }
-
 
     protected void draw(Source source, ViewportAPI viewport) {
         ShaderLib.copyScreen(ShaderLib.getScreenTexture(), GL13.GL_TEXTURE0);

@@ -29,37 +29,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class FishingDroneSwarmScript implements EveryFrameScript {
-
     protected SectorEntityToken pond;
     protected Vector2f target;
-
     protected List<SectorEntityToken> drones = new ArrayList<>();
-
-
     protected int plannedDroneCount = 0;
     protected int nextDroneIndex = 0;
     protected float nextDroneLaunchIn = 0f;
     protected IntervalUtil searchInterval = new IntervalUtil(RodConstants.DRONE_SEARCH_INTERVAL, RodConstants.DRONE_SEARCH_INTERVAL);
-
-
     protected Set<String> handled = new HashSet<>();
-
     protected boolean recalling = false;
     protected boolean done = false;
-
-
     protected int recallCount = 0;
-
-
     protected boolean moteInRing = false;
 
+    public FishingDroneSwarmScript(SectorEntityToken pond, Vector2f target) {
+        this.pond = pond;
+        this.target = target;
+    }
 
     public static FishingDroneSwarmScript dispatch(SectorEntityToken pond, Vector2f target) {
         return launch(new FishingDroneSwarmScript(pond, target));
     }
-
 
     protected static <T extends FishingDroneSwarmScript> T launch(T script) {
         recallExisting();
@@ -78,7 +69,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return script;
     }
 
-
     public static void recallExisting() {
         for (EveryFrameScript script : new ArrayList<>(Global.getSector().getScripts())) {
             if (script instanceof FishingDroneSwarmScript) {
@@ -86,7 +76,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             }
         }
     }
-
 
     public static FishingDroneSwarmScript getExisting() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
@@ -99,12 +88,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return null;
     }
 
-    public FishingDroneSwarmScript(SectorEntityToken pond, Vector2f target) {
-        this.pond = pond;
-        this.target = target;
-    }
-
-
     protected void beginDroneLaunches() {
         plannedDroneCount = getDroneCount();
         nextDroneIndex = 0;
@@ -113,7 +96,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         launchNextDrone();
         nextDroneLaunchIn = Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
     }
-
 
     protected boolean launchNextDrone() {
         if (!hasPendingDrones()) return false;
@@ -140,7 +122,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return true;
     }
 
-
     protected void advanceDroneLaunches(float amount) {
         if (!hasPendingDrones()) return;
 
@@ -165,11 +146,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 StatIds.FISHING_DRONE_COUNT, RodConstants.DRONE_COUNT_FALLBACK)));
     }
 
-
     public static float getRingRadius() {
         return UpgradeManager.getValue(StatIds.DRONE_CATCH_AREA, RodConstants.RING_RADIUS_FALLBACK);
     }
-
 
     public static float getChaseMargin() {
         return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN,
@@ -217,7 +196,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (searchInterval.intervalElapsed()) lookForCatch();
     }
 
-
     protected boolean shouldRecall() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null || pond == null) return true;
@@ -231,7 +209,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return Misc.getDistance(fleet.getLocation(), pond.getLocation())
                 > pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;
     }
-
 
     protected void lookForCatch() {
         if (getSearchCenter() == null) return;
@@ -259,7 +236,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
-
     protected void sortByPriority(List<SectorEntityToken> motes) {
         final float priority = UpgradeManager.getValue(StatIds.DRONE_RARE_PRIORITY, 0f);
         if (priority <= 0f || motes.size() < 2) return;
@@ -271,7 +247,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             }
         });
     }
-
 
     protected static int getRarityOrdinal(SectorEntityToken mote) {
         FishSpec spec = null;
@@ -285,21 +260,17 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return spec == null ? 0 : spec.rarity.rank;
     }
 
-
     public Vector2f getSearchCenter() {
         return pond == null ? null : target;
     }
-
 
     protected float getReach() {
         return getRingRadius() + getChaseMargin();
     }
 
-
     public float getRingDrawRadius() {
         return getRingRadius();
     }
-
 
     public float getPatrolRadius() {
         return RodConstants.DRONE_ORBIT_RADIUS;
@@ -311,11 +282,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG);
     }
 
-
     protected boolean isReachable(SectorEntityToken mote) {
         return FishEntityPlugin.isAvailable(mote);
     }
-
 
     protected boolean isCatchable(SectorEntityToken mote) {
         if (mote.isExpired() || !mote.isAlive()) return false;
@@ -365,7 +334,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
-
     protected void onMoteReached(final SectorEntityToken drone, final SectorEntityToken mote) {
         FishEntityPlugin plugin = mote.getCustomPlugin() instanceof FishEntityPlugin
                 ? (FishEntityPlugin) mote.getCustomPlugin()
@@ -397,17 +365,14 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         handled.add(mote.getId());
     }
 
-
     protected void playMoteHit(SectorEntityToken mote) {
         Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
                 mote.getLocation(), mote.getVelocity());
     }
 
-
     protected SectorEntityToken getCatchAnchor(SectorEntityToken mote) {
         return pond == null ? mote : pond;
     }
-
 
     protected void resolveCatch(SectorEntityToken drone, SectorEntityToken mote, boolean caught) {
         FishingDroneEntityPlugin plugin = getPlugin(drone);
@@ -438,7 +403,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return closest;
     }
 
-
     public void recall() {
         if (recalling) return;
 
@@ -453,7 +417,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             if (plugin != null && !plugin.isReturning()) plugin.recall(null);
         }
     }
-
 
     public float getRecallProgress() {
         if (!recalling || recallCount <= 0) return 1f;
@@ -480,7 +443,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     public boolean isRecalling() {
         return recalling;
     }
-
 
     public boolean hasRecallableDrones() {
         if (hasPendingDrones()) return true;

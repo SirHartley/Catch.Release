@@ -11,28 +11,22 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishermanShelf {
-
-
     public static class SurveyOffer {
         public FishSpec spec;
         public FishRarity costRarity;
         public int costCount;
     }
 
-
     public static boolean isShared(SectorEntityToken fleet) {
         return fleet != null
                 && fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.SHARED_SHELF_FLAG);
     }
 
-
     public static int getSlots() {
         return FishermanConstants.SURVEY_SLOTS_BASE + Global.getSector().getMemoryWithoutUpdate()
                 .getInt(FishermanConstants.SURVEY_SLOTS_KEY);
     }
-
 
     public static void widen(int by) {
         if (by <= 0) return;
@@ -41,7 +35,6 @@ public class FishermanShelf {
                 Global.getSector().getMemoryWithoutUpdate()
                         .getInt(FishermanConstants.SURVEY_SLOTS_KEY) + by);
     }
-
 
     public static List<String> getStock(SectorEntityToken fleet) {
         if (fleet == null) return new ArrayList<>();
@@ -61,7 +54,6 @@ public class FishermanShelf {
 
         return stock;
     }
-
 
     @SuppressWarnings("unchecked")
     public static List<String> getSharedStock() {
@@ -84,14 +76,12 @@ public class FishermanShelf {
         return stock;
     }
 
-
     protected static void redeem(List<String> stock) {
         List<Long> pending = getPending();
 
         for (int i = pending.size() - 1; i >= 0; i--) {
             if (Global.getSector().getClock().getElapsedDaysSince(pending.get(i))
                     < FishermanConstants.SHARED_REGEN_DAYS) {
-
                 continue;
             }
 
@@ -100,7 +90,6 @@ public class FishermanShelf {
 
         roll(stock, Math.max(0, getSlots() - pending.size()));
     }
-
 
     @SuppressWarnings("unchecked")
     public static List<Long> getPending() {
@@ -114,7 +103,6 @@ public class FishermanShelf {
 
         return pending;
     }
-
 
     public static void roll(List<String> stock, int upTo) {
         if (stock == null || stock.size() >= upTo) return;
@@ -141,7 +129,6 @@ public class FishermanShelf {
         }
     }
 
-
     @SuppressWarnings("unchecked")
     public static List<String> getListed() {
         Object stored = Global.getSector().getMemoryWithoutUpdate()
@@ -154,13 +141,11 @@ public class FishermanShelf {
         return listed;
     }
 
-
     public static void release(List<String> ids) {
         if (ids == null || ids.isEmpty()) return;
 
         getListed().removeAll(ids);
     }
-
 
     @SuppressWarnings("unchecked")
     public static void releaseFor(SectorEntityToken fleet) {
@@ -169,7 +154,6 @@ public class FishermanShelf {
         Object stored = fleet.getMemoryWithoutUpdate().get(FishermanConstants.SURVEY_STOCK_KEY);
         if (stored instanceof List) release((List<String>) stored);
     }
-
 
     public static List<SurveyOffer> getOffers(SectorEntityToken fleet) {
         List<SurveyOffer> offers = new ArrayList<>();
@@ -200,7 +184,6 @@ public class FishermanShelf {
         return offers;
     }
 
-
     public static void take(SectorEntityToken fleet, String specId) {
         getStock(fleet).remove(specId);
         getListed().remove(specId);
@@ -209,7 +192,6 @@ public class FishermanShelf {
             getPending().add(Global.getSector().getClock().getTimestamp());
         }
     }
-
 
     public static void putBack(SectorEntityToken fleet, String specId, int index) {
         List<String> stock = getStock(fleet);

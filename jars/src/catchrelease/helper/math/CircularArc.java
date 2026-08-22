@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CircularArc extends Circle{
-
     public float startAngle;
     public float endAngle;
 
@@ -169,4 +168,3 @@ public class CircularArc extends Circle{
         return (getAngleTravelDir() == 1) ? diff : 360f - diff;
     }
 }
-

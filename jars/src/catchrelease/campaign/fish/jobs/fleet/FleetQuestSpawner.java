@@ -15,30 +15,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 public class FleetQuestSpawner implements EveryFrameScript {
-
-
     public static final float CHECK_MIN_DAYS = 3f;
     public static final float CHECK_MAX_DAYS = 7f;
-
-
     public static final float CHANCE = 0.07f;
-
-
     public static final int MAX_ACTIVE = 1;
-
-
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
     public static final float COOLDOWN_DAYS = 45f;
 
+    protected IntervalUtil interval = new IntervalUtil(CHECK_MIN_DAYS, CHECK_MAX_DAYS);
+    protected Random random = new Random();
 
     public static void register() {
         Global.getSector().addTransientScript(new FleetQuestSpawner());
     }
-
-    protected IntervalUtil interval = new IntervalUtil(CHECK_MIN_DAYS, CHECK_MAX_DAYS);
-    protected Random random = new Random();
 
     @Override
     public boolean isDone() {
@@ -67,7 +57,6 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (adopt(type)) markOffered();
     }
 
-
     protected boolean canOffer() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -83,12 +72,10 @@ public class FleetQuestSpawner implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
     }
 
-
     protected int countActive() {
         return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size()
                 + FleetQuestEncounter.countLive();
     }
-
 
     protected boolean adopt(FleetQuestType type) {
         LocationAPI location = Global.getSector().getPlayerFleet().getContainingLocation();
@@ -120,7 +107,6 @@ public class FleetQuestSpawner implements EveryFrameScript {
         return true;
     }
 
-
     protected static boolean isScavenger(CampaignFleetAPI fleet) {
         String type = fleet.getMemoryWithoutUpdate().getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
 
@@ -128,7 +114,6 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 || FleetTypes.SCAVENGER_MEDIUM.equals(type)
                 || FleetTypes.SCAVENGER_LARGE.equals(type);
     }
-
 
     protected boolean canCarryAnOffer(CampaignFleetAPI fleet) {
         if (!isScavenger(fleet)) return false;

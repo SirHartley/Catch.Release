@@ -6,11 +6,9 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class TrigHelper {
-
     public static float randomWithinArc(float arc) {
         return (float) Math.random() * arc - arc / 2f;
     }
-
 
     public static float quadFuncSmooth(float fract) {
         return (float) (0.5f * Math.sin(1.5f + Math.PI * fract) + 0.5f);
@@ -24,7 +22,6 @@ public class TrigHelper {
     public static Vector2f findClosestCircleIntersectToPoint(Vector2f center0, double r0,
                                                              Vector2f center1, double r1,
                                                              Vector2f targetPoint) {
-
         float a, dx, dy, d, h, rx, ry;
         float x2, y2;
 

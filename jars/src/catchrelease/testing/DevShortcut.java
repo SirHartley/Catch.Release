@@ -16,13 +16,8 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 
-
 public class DevShortcut implements CampaignInputListener {
-
-
     public static final char KEY = 'j';
-
-
     public static final int PRIORITY = -1000;
 
     public static void register() {
@@ -75,9 +70,7 @@ public class DevShortcut implements CampaignInputListener {
 
     @Override
     public void processCampaignInputPostCore(List<InputEventAPI> events) {
-
     }
-
 
     protected void addBackgrounds(){
         for (Backdrop backdrop : BackdropLoader.getAll()) Backdrops.own(backdrop.id);
@@ -87,7 +80,6 @@ public class DevShortcut implements CampaignInputListener {
                 Misc.getHighlightColor());
     }
 
-
     protected void addSchematics() {
         ShopSchematics.unlockAll();
 
@@ -95,7 +87,6 @@ public class DevShortcut implements CampaignInputListener {
                 "Dev shortcut: all module and upgrade tier schematics unlocked.",
                 Misc.getHighlightColor());
     }
-
 
     protected void addEquipment() {
         FishingIntro.skip(null);

@@ -11,9 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.io.IOException;
 
 public class MaskedWarpedSpriteRenderer {
-
     private final WarpGrid warp;
-
     private transient int program = 0;
     private transient int uTex = -1;
     private transient int uMaskTex = -1;
@@ -25,14 +23,9 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uWellGamma = -1;
     private transient int uWellDim = -1;
     private transient int uMaskToFill = -1;
-
     private float maskThreshold = 0f;
-
-
     private float swirl = 0f;
     private float swirlEdge = 0.55f;
-
-
     private float well = 0f;
     private float wellGamma = 1f;
     private float wellDim = 0f;
@@ -45,12 +38,10 @@ public class MaskedWarpedSpriteRenderer {
         this.maskThreshold = threshold;
     }
 
-
     public void setSwirl(float twist, float edge) {
         this.swirl = twist;
         this.swirlEdge = edge;
     }
-
 
     public void setWell(float depth, float gamma, float dim) {
         this.well = depth;
@@ -65,7 +56,6 @@ public class MaskedWarpedSpriteRenderer {
                        float maskSize,
                        float alphaMult,
                        Vector2f fillUvOffsetPx) {
-
         if (fillSprite == null || maskSprite == null || center == null) return;
         if (fillSize <= 0f || maskSize <= 0f) return;
 
@@ -150,7 +140,6 @@ public class MaskedWarpedSpriteRenderer {
                 GL11.glVertex2f(0f, h);
             }
             GL11.glEnd();
-
         } else {
             int wide = warp.getWide();
             int tall = warp.getTall();
@@ -166,7 +155,6 @@ public class MaskedWarpedSpriteRenderer {
             for (int i = 0; i < wide - 1; i++) {
                 GL11.glBegin(GL11.GL_QUAD_STRIP);
                 for (int j = 0; j < tall; j++) {
-
                     float x1 = cw * i;
                     float y1 = ch * j;
                     float x2 = cw * (i + 1f);

@@ -10,12 +10,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-
 public class ShopSchematics {
-
     public static final String KEY = "$catchrelease_shop_schematics";
-
-
     public static final String FRESH_KEY = "$catchrelease_shop_schematics_fresh";
 
     public static String getKey(Tackle tackle) {
@@ -26,7 +22,6 @@ public class ShopSchematics {
         return statId == null || targetLevel <= 0
                 ? null : "upgrade:" + statId + ":" + targetLevel;
     }
-
 
     public static boolean has(Tackle tackle) {
         if (tackle == null) return false;
@@ -40,14 +35,12 @@ public class ShopSchematics {
         if (key != null && tackle != Tackle.NONE && getKnown().add(key)) getFresh().add(key);
     }
 
-
     public static boolean requires(UpgradeStat stat, int targetLevel) {
         if (stat == null || stat.maxLevel <= 0) return false;
 
         return targetLevel > 0 && targetLevel <= stat.maxLevel
                 && targetLevel >= Math.max(1, stat.maxLevel - 1);
     }
-
 
     public static boolean has(UpgradeStat stat, int targetLevel) {
         if (stat == null || targetLevel <= 0) return false;
@@ -65,7 +58,6 @@ public class ShopSchematics {
             getFresh().add(key);
         }
     }
-
 
     public static void unlockAll() {
         if (Global.getSector() == null) return;
@@ -85,7 +77,6 @@ public class ShopSchematics {
         // a dev grant of everything is setup, not news
         clearAllFresh();
     }
-
 
     public static boolean isFresh(ShopEntry entry) {
         if (entry == null) return false;
@@ -110,7 +101,6 @@ public class ShopSchematics {
     public static void clearAllFresh() {
         getFresh().clear();
     }
-
 
     public static int getNextRequiredLevel(UpgradeStat stat) {
         if (stat == null) return -1;

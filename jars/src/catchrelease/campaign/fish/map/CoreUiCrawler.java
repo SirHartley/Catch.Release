@@ -2,15 +2,12 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.reflection.ReflectionUtils;
 
-
 public final class CoreUiCrawler {
-
     public static final String APP_DRIVER = "com.fs.state.AppDriver";
     public static final String CAMPAIGN_STATE = "com.fs.starfarer.campaign.CampaignState";
 
     private CoreUiCrawler() {
     }
-
 
     public static Object getCoreUi() {
         try {
@@ -29,7 +26,6 @@ public final class CoreUiCrawler {
             return null;
         }
     }
-
 
     public static Object getIntelScreen(Object core) {
         try {

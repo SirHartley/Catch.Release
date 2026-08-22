@@ -18,34 +18,16 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class LampPatrolResponse implements EveryFrameScript {
-
-
     public static final String REASON = "catchreleaseLamps";
-
-
     public static final String FACTION_KEY = "$catchrelease_lampPatrolFaction";
-
-
     public static final String SYSTEM_KEY = "$catchrelease_lampPatrolSystem";
-
-
     public static final float CHASE_DAYS = 8f;
-
-
     public static final float RETRY_DAYS = 3f;
-
-
     public static final String RETRY_KEY = "$catchrelease_lampPatrolWait";
 
-
     protected final IntervalUtil interval = new IntervalUtil(0.1f, 0.3f);
-
-
     protected final List<CampaignFleetAPI> stopping = new ArrayList<>();
-
-
     protected transient boolean lit = false;
 
     public static void register() {
@@ -69,7 +51,6 @@ public class LampPatrolResponse implements EveryFrameScript {
         look();
     }
 
-
     protected void reacquire() {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CampaignFleetAPI fleet : location.getFleets()) {
@@ -80,7 +61,6 @@ public class LampPatrolResponse implements EveryFrameScript {
             }
         }
     }
-
 
     protected void look() {
         final CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -106,7 +86,6 @@ public class LampPatrolResponse implements EveryFrameScript {
             if (canObject(curr, player)) send(curr);
         }
     }
-
 
     protected static boolean canObject(CampaignFleetAPI curr, CampaignFleetAPI player) {
         FactionAPI faction = curr.getFaction();
@@ -161,7 +140,6 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (!stopping.contains(patrol)) stopping.add(patrol);
     }
 
-
     protected void maintain() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
@@ -195,7 +173,6 @@ public class LampPatrolResponse implements EveryFrameScript {
             }
         }
     }
-
 
     protected void end(CampaignFleetAPI patrol) {
         if (patrol == null) return;
@@ -245,7 +222,6 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         stopping.remove(patrol);
     }
-
 
     protected static String retryKey(LocationAPI location, String factionId) {
         return location == null ? null : retryKey(location.getId(), factionId);

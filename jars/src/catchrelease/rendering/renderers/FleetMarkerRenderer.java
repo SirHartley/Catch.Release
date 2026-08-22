@@ -12,14 +12,9 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.util.EnumSet;
 
-
 public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
-
-
     public static final float SIZE = 20f;
     public static final float OFFSET_DIVISOR = 1.41f;
-
-
     public static final float PULSE_RATE = 1.6f;
     public static final float PULSE_DEPTH = 0.25f;
 
@@ -28,21 +23,8 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
     protected final String spriteId;
     protected final Color color;
     protected final float size;
-
     protected float elapsed = 0f;
     protected boolean expired = false;
-
-
-    public static FleetMarkerRenderer addTo(CampaignFleetAPI fleet, String spriteCategory,
-                                            String spriteId, Color color, float size) {
-
-        FleetMarkerRenderer marker =
-                new FleetMarkerRenderer(fleet, spriteCategory, spriteId, color, size);
-
-        LunaCampaignRenderer.addTransientRenderer(marker);
-
-        return marker;
-    }
 
     public FleetMarkerRenderer(CampaignFleetAPI fleet, String spriteCategory, String spriteId,
                                Color color, float size) {
@@ -51,6 +33,16 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
         this.spriteId = spriteId;
         this.color = color;
         this.size = size;
+    }
+
+    public static FleetMarkerRenderer addTo(CampaignFleetAPI fleet, String spriteCategory,
+                                            String spriteId, Color color, float size) {
+        FleetMarkerRenderer marker =
+                new FleetMarkerRenderer(fleet, spriteCategory, spriteId, color, size);
+
+        LunaCampaignRenderer.addTransientRenderer(marker);
+
+        return marker;
     }
 
     public void expire() {

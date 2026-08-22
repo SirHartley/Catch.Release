@@ -9,13 +9,9 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-
 public class FishItemRenderer {
-
-
     public static void renderIcon(float x, float y, float w, float h, float alphaMult, float glowMult,
                                   String path) {
-
         SpriteAPI sprite = SpriteLoader.loadSprite(path);
         if (sprite == null || alphaMult <= 0f) return;
 
@@ -40,12 +36,10 @@ public class FishItemRenderer {
         sprite.setNormalBlend();
     }
 
-
     public static void renderIconWithCorners(String path,
                                              float blX, float blY, float tlX, float tlY,
                                              float trX, float trY, float brX, float brY,
                                              float alphaMult, float glowMult) {
-
         SpriteAPI sprite = SpriteLoader.loadSprite(path);
         if (sprite == null || alphaMult <= 0f) return;
 
@@ -64,10 +58,8 @@ public class FishItemRenderer {
         sprite.setAlphaMult(1f);
     }
 
-
     public static void render(float x, float y, float w, float h, float alphaMult,
                               FishRarity rarity, FishGrade grade) {
-
         if (alphaMult <= 0f) return;
 
         float size = FishConstants.ITEM_GRADE_PIP_SIZE;
@@ -99,10 +91,8 @@ public class FishItemRenderer {
         GL11.glPopAttrib();
     }
 
-
     protected static void renderPips(float pipX, float pipY, float size, float gap, float total,
                                      float alphaMult, FishGrade grade) {
-
         int steps = FishGrade.values().length;
         int filled = grade.rank + 1;
 
@@ -116,7 +106,6 @@ public class FishItemRenderer {
             quad(pipX + i * (size + gap), pipY, size, size, color, alpha);
         }
     }
-
 
     protected static void backing(float x, float y, float w, float h, float alphaMult) {
         float pad = FishConstants.ITEM_MARK_BACKING_PAD;

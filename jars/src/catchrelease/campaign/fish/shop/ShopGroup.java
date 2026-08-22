@@ -5,9 +5,7 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 
-
 public enum ShopGroup {
-
     SEARCHLIGHTS("Breach lamps", "Lamps", "shop_lights", "catchrelease_searchlights"),
     DRONES("Drones", "Drones", "shop_rod", "catchrelease_rod"),
     HARPOON("Harpoon", "Harpoon", "shop_harpoon", "catchrelease_harpoon"),
@@ -18,12 +16,9 @@ public enum ShopGroup {
 
     public final String title;
 
-
     public final String tabTitle;
 
-
     public final String iconId;
-
 
     public final String needsAbility;
 
@@ -38,7 +33,6 @@ public enum ShopGroup {
         this.needsAbility = needsAbility;
     }
 
-
     public boolean isUnlocked() {
         if (needsAbility == null) return true;
 
@@ -47,7 +41,6 @@ public enum ShopGroup {
 
         return catchrelease.campaign.fish.tutorial.FishingIntro.isShelfOpen(this);
     }
-
 
     public static ShopGroup forStat(UpgradeStat stat) {
         if (stat.category == UpgradeStat.Category.MINIGAME) return THE_CATCH;
@@ -60,7 +53,6 @@ public enum ShopGroup {
 
         return THE_CATCH;
     }
-
 
     public static ShopGroup forWare(CrabWares ware) {
         return THE_CATCH;
@@ -76,7 +68,6 @@ public enum ShopGroup {
             default: return null;
         }
     }
-
 
     public static String getModuleType(Tackle.Fit rig) {
         if (rig == null) return "rig module";

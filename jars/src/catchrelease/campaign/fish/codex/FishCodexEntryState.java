@@ -5,9 +5,7 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 
-
 public final class FishCodexEntryState {
-
     public enum Unlock {
         UNKNOWN,
         RANGE_DATA,
@@ -41,16 +39,13 @@ public final class FishCodexEntryState {
         return new FishCodexEntryState(speciesId, spec, log, unlock);
     }
 
-
     public boolean isKnown() {
         return unlock != Unlock.UNKNOWN;
     }
 
-
     public boolean isCaught() {
         return unlock == Unlock.CAUGHT;
     }
-
 
     public boolean hasRangeData() {
         return unlock != Unlock.UNKNOWN;
@@ -59,7 +54,6 @@ public final class FishCodexEntryState {
     public boolean isRangeDataOnly() {
         return unlock == Unlock.RANGE_DATA;
     }
-
 
     public boolean canShowOnMap() {
         return spec != null && hasRangeData();

@@ -9,9 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.List;
 
-
 public abstract class ListRow extends BaseCustomUIPanelPlugin {
-
     public static final float ACCENT_WIDTH = 3f;
 
     protected PositionAPI pos;
@@ -21,30 +19,23 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-
     protected abstract PositionAPI getViewport();
 
     protected abstract boolean isSelected();
 
-
     protected abstract Color getAccentColor();
-
 
     protected abstract void renderContent(float x, float y, float width, float height,
                                           boolean selected, boolean hovered, float alphaMult);
 
-
     protected abstract void onRowClick(float pointX, float pointY);
-
 
     protected float getSelectedFieldAlpha() {
         return 0.4f;
     }
 
-
     protected void beforeCull(float x, float y, float width, float height) {
     }
-
 
     protected boolean handleKey(InputEventAPI event) {
         return false;
@@ -104,7 +95,6 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
             return;
         }
     }
-
 
     protected boolean contains(float pointX, float pointY) {
         PositionAPI view = getViewport();

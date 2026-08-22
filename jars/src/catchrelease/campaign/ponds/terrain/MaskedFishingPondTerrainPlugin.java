@@ -37,18 +37,36 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.util.EnumSet;
 
-
 public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
+    public static final float ACTIVATION_SPOOL_UP_TIME = 5f;
+    public static final String TERRAIN_ID = "catchrelease_StaticPond";
+    public static final String NAME = "Unstable Substrate";
+
+    public UnstableFabricRippleTerrainRenderer rippleRenderer;
+    public IntervalUtil moteSpawnInterval = new IntervalUtil(1f, 5f);
+    public boolean isActive = false;
+    public float activity = 0;
+    protected PondParams params;
+    protected boolean temporary = false;
+    protected float lifeLeft = 0f;
+    protected boolean wasOpened = false;
+    protected boolean expiring = false;
+    protected boolean visualOnly = false;
+    transient protected SpriteAPI starfield;
+    transient protected SpriteAPI mask;
+    protected float elapsed = 0f;
+    transient protected PondDepthField depthField;
+    transient protected WarpGrid warpGrid;
+    transient protected MaskedWarpedSpriteRenderer maskedRenderer;
+    transient protected MaskGlowRenderer maskGlowRenderer;
+    transient protected PondHoleRenderer holeRenderer;
+    transient protected EnumSet<CampaignEngineLayers> layers = createLayers();
 
     public static class PondParams {
         public long seed;
         public float radius;
-
-
         public boolean temporary = false;
         public float lifetime = 0f;
-
-
         public boolean visualOnly = false;
 
         public PondParams(long seed, float radius) {
@@ -63,43 +81,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
             this.lifetime = lifetime;
         }
     }
-
-    public static final float ACTIVATION_SPOOL_UP_TIME = 5f;
-
-
-    public static final String TERRAIN_ID = "catchrelease_StaticPond";
-
-    public static final String NAME = "Unstable Substrate";
-
-    public UnstableFabricRippleTerrainRenderer rippleRenderer;
-    public IntervalUtil moteSpawnInterval = new IntervalUtil(1f, 5f);
-    public boolean isActive = false;
-    public float activity = 0;
-
-    protected PondParams params;
-
-    protected boolean temporary = false;
-    protected float lifeLeft = 0f;
-    protected boolean wasOpened = false;
-    protected boolean expiring = false;
-
-
-    protected boolean visualOnly = false;
-
-    transient protected SpriteAPI starfield;
-    transient protected SpriteAPI mask;
-
-
-    protected float elapsed = 0f;
-
-    transient protected PondDepthField depthField;
-    transient protected WarpGrid warpGrid;
-    transient protected MaskedWarpedSpriteRenderer maskedRenderer;
-    transient protected MaskGlowRenderer maskGlowRenderer;
-    transient protected PondHoleRenderer holeRenderer;
-
-    transient protected EnumSet<CampaignEngineLayers> layers = createLayers();
-
 
     public static MaskedFishingPondTerrainPlugin getPondPlugin(SectorEntityToken entity) {
         if (!(entity instanceof CampaignTerrainAPI)) return null;
@@ -161,7 +142,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         return false;
     }
 
-
     @Override
     public String getEffectCategory() {
         return TERRAIN_ID;
@@ -176,7 +156,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public boolean hasMapIcon() {
         return !visualOnly;
     }
-
 
     @Override
     public boolean hasTooltip() {
@@ -253,7 +232,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         advanceTemporary(amount);
     }
 
-
     protected void advanceTemporary(float amount) {
         if (!temporary || expiring) return;
 
@@ -295,7 +273,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!visualOnly) Global.getSector().addScript(new PondCameraFocusScript(entity));
     }
 
-
     protected void throwOpeningDistortion() {
         if (!CampaignDistortionRenderer.isSupported()) return;
 
@@ -309,7 +286,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
         CampaignDistortionRenderer.addDistortion(ripple);
     }
-
 
     public void deactivate(){
         if (!isActive) return;
@@ -351,7 +327,6 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         float maskSize = entity.getRadius() * 2f * activity;
 
         if (layer == CampaignEngineLayers.TERRAIN_1) {
-
             starfield.setAlphaMult(1f);
             starfield.setNormalBlend();
 

@@ -9,19 +9,11 @@ import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class FishermanIdentity {
-
-
     public static final String PERSON_KEY = "$catchrelease_fisherman_person";
-
     public static final String FIRST_NAME = "The";
     public static final String LAST_NAME = "Fisherman";
-
-
     public static final String FORMER_NAME = "Baha";
-
-
     private static final String[] PORTRAIT_IDS = {
             "catchrelease_fisherman_stable",
             "catchrelease_fisherman_unsettled",
@@ -29,15 +21,10 @@ public class FishermanIdentity {
             "catchrelease_fisherman_unstable",
             "catchrelease_fisherman_barely_holding"
     };
-
-
     public static final float DRIFT_SLIPPING = 0.3f;
     public static final float DRIFT_UNSTABLE = 0.55f;
     public static final float DRIFT_FAILING = 0.8f;
-
-
     public static final char[] STATIC_GLYPHS = {'#', '/', '\\', '~', '=', '*', '+', '-'};
-
 
     public static PersonAPI get() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
@@ -60,12 +47,10 @@ public class FishermanIdentity {
         return person;
     }
 
-
     private static void refreshTitles(PersonAPI person) {
         person.setRankId(null);
         person.setPostId(null);
     }
-
 
     public static void crew(CampaignFleetAPI fleet) {
         if (fleet == null) return;
@@ -76,7 +61,6 @@ public class FishermanIdentity {
 
         if (fleet.getFlagship() != null) fleet.getFlagship().setCaptain(person);
     }
-
 
     public static float getDrift(LocationAPI where) {
         if (where == null) return 0f;
@@ -91,13 +75,11 @@ public class FishermanIdentity {
         return fleet == null ? 0f : getDrift(fleet.getContainingLocation());
     }
 
-
     public static String getPortrait(float drift) {
         int band = FishItemPlugin.getAberrationBand(drift);
         String id = PORTRAIT_IDS[Math.max(0, Math.min(PORTRAIT_IDS.length - 1, band))];
         return Global.getSettings().getSpriteName("characters", id);
     }
-
 
     public static void preparePortrait(CampaignFleetAPI hailed) {
         if (hailed == null || !hailed.getMemoryWithoutUpdate()
@@ -109,7 +91,6 @@ public class FishermanIdentity {
         if (!portrait.equals(person.getPortraitSprite())) person.setPortraitSprite(portrait);
     }
 
-
     public static int getDialogueBand(float drift) {
         if (drift >= DRIFT_FAILING) return 3;
         if (drift >= DRIFT_UNSTABLE) return 2;
@@ -118,14 +99,12 @@ public class FishermanIdentity {
         return 0;
     }
 
-
     public static String getDisplayName(float drift) {
         int band = getDialogueBand(drift);
         if (band <= 0) return FishermanConstants.FLEET_NAME;
 
         return corrupt(FishermanConstants.FLEET_NAME, band);
     }
-
 
     public static String corrupt(String text, int band) {
         if (text == null || band <= 0) return text;
@@ -142,5 +121,4 @@ public class FishermanIdentity {
 
         return out.toString();
     }
-
 }

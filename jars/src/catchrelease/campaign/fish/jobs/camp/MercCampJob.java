@@ -1,8 +1,6 @@
 package catchrelease.campaign.fish.jobs.camp;
 
-
 public class MercCampJob extends CampedSpotJob {
-
     @Override
     protected CampType getType() {
         return CampType.MERCENARIES;

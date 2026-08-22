@@ -92,6 +92,22 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   comment or document claim. Player-facing prose and rules still follow the lore and rules
   workflows above.
 
+## Java class layout
+
+- **Order members for the reader, not for a sorter.** The default is nested enums, static fields
+  and initializers, instance fields and initializers, nested types, constructors, lifecycle or
+  public entry points in the order they run or are used, then supporting helpers near their
+  callers. Keep the relative order of initializers when changing it could alter behavior.
+- **Functional flow may beat the default.** A cohesive subsystem can stay together when splitting
+  it across declaration categories would make the class harder to follow. The result should read
+  naturally from setup through operation to details.
+- **Keep spacing deliberate.** Use one blank line between sections and methods, none between
+  simple related fields or enum constants, and never stack empty lines. Do not leave an empty line
+  just inside an opening or closing brace.
+- **Use section headers sparingly.** A short header such as `// Rendering` is useful when a long
+  class contains distinct subsystems. Do not add one where member names and order already make the
+  grouping obvious.
+
 ## ChatGPT app workflow (ChatGPT only)
 
 This section applies only when ChatGPT is working on Catch.Release in the ChatGPT app. It is

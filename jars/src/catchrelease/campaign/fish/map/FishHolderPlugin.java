@@ -17,9 +17,7 @@ import org.lwjgl.input.Keyboard;
 import java.awt.Color;
 import java.util.List;
 
-
 public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
-
     public static final float ICON_SHARE = 0.66f;
 
     protected final FishSpec spec;
@@ -66,7 +64,6 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
             ShopMarks.drawDot(x + off, y - off, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
-
 
     @Override
     public void processInput(List<InputEventAPI> events) {

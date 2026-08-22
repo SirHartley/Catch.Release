@@ -15,27 +15,18 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.EnumSet;
 
-
 public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin {
-
-
     public static final float OPEN_TIME = SearchlightBreachRenderer.OPEN_TIME;
     public static final float CENTER_ALPHA = SearchlightBreachRenderer.CENTER_ALPHA;
-
     public static final int STEPS_ACROSS = SearchlightFanRenderer.STEPS_ACROSS;
     public static final int STEPS_ALONG = SearchlightFanRenderer.STEPS_ALONG;
 
     public transient SpriteAPI fill;
-
-
     private final Vector2f origin;
     private final Vector2f aim;
-
     private float timePassed = 0f;
     private float open = 0f;
-
     private boolean expired = false;
-
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -121,10 +112,8 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
                 alpha * CENTER_ALPHA, fillSizeWorld, uOff, vOff);
     }
 
-
     protected void drawWedge(float direction, float length, float aimDistance, float alpha,
                              float fillSizeWorld, float uOff, float vOff) {
-
         float aimFract = aimDistance / length;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT
@@ -168,7 +157,6 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
         GL11.glPopAttrib();
     }
 
-
     protected float along(float u, float aimFract) {
         float base = Searchlight.FAN_TIP_STRENGTH
                 + (1f - Searchlight.FAN_TIP_STRENGTH) * TrigHelper.smootherStep(1f - u);
@@ -177,7 +165,6 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
 
         return base * TrigHelper.smootherStep((1f - u) / (1f - aimFract));
     }
-
 
     protected void emit(float x, float y, float fillSizeWorld, float uOff, float vOff, float alpha) {
         GL11.glColor4f(1f, 1f, 1f, alpha);

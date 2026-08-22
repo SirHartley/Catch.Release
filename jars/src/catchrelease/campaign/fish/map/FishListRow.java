@@ -15,15 +15,12 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 
-
 public abstract class FishListRow extends ListRow {
-
     public static final float PAD_SIDE = 8f;
     public static final float MARK_RADIUS = 3.5f;
     public static final float MARK_GAP = 7f;
 
     protected final FishSpec spec;
-
     protected transient LazyFont.DrawableString name;
 
     protected FishListRow(FishSpec spec) {
@@ -38,7 +35,6 @@ public abstract class FishListRow extends ListRow {
     @Override
     protected void renderContent(float x, float y, float width, float height,
                                  boolean selected, boolean hovered, float alphaMult) {
-
         Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         // filled = caught, hollow = range-only; a shape rather than a shade, since every shade here already means selection or rarity
@@ -75,11 +71,9 @@ public abstract class FishListRow extends ListRow {
         }
     }
 
-
     protected void renderTag(float x, float y, float width, float height, boolean marked,
                              float alphaMult) {
     }
-
 
     @Override
     protected boolean handleKey(InputEventAPI event) {

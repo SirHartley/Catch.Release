@@ -12,17 +12,14 @@ import java.awt.Color;
 import java.io.IOException;
 
 public class MaskGlowRenderer {
-
     private transient int program = 0;
     private transient int uMaskTex = -1;
     private transient int uGlowColor = -1;
     private transient int uGlowAlpha = -1;
-
     private transient int uThreshold = -1;
     private transient int uRadiusOutPx = -1;
     private transient int uRadiusInPx = -1;
     private transient int uMaskTexelSize = -1;
-
     private float threshold = 0f;
 
     public void setThreshold(float threshold) {
@@ -36,7 +33,6 @@ public class MaskGlowRenderer {
                                float glowAlpha,
                                float radiusOutPx,
                                float radiusInPx) {
-
         if (maskSprite == null || center == null || glowColor == null) return;
         if (size <= 0f || glowAlpha <= 0f) return;
         if (radiusOutPx <= 0f && radiusInPx <= 0f) return;

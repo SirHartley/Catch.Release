@@ -17,27 +17,18 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.EnumSet;
 
-
 public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
-
     protected static final String VERT = "data/catchrelease/shaders/coherence_overlay_vertex.shader";
     protected static final String FRAG = "data/catchrelease/shaders/coherence_overlay_fragment.shader";
-
-
     protected static final Color COLOR = new Color(170, 20, 200);
-
-
     protected static final float WARP_MAX_PX = 10f;
-
     protected static CoherenceOverlayRenderer instance;
 
     protected float level = 0f;
     protected float time = 0f;
-
     protected boolean loaded = false;
     protected boolean usable = false;
     protected boolean validated = false;
-
     protected int program = 0;
     protected int uLevel = -1;
     protected int uTime = -1;
@@ -45,16 +36,13 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
     protected int uWarp = -1;
     protected int uInnerClear = -1;
 
-
     public static void setLevel(float level) {
         get().level = MathUtils.clamp(level, 0f, 1f);
     }
 
-
     public static float getLevel() {
         return instance == null ? 0f : instance.level;
     }
-
 
     protected static CoherenceOverlayRenderer get() {
         if (instance == null) instance = new CoherenceOverlayRenderer();
@@ -67,12 +55,10 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
         return instance;
     }
 
-
     @Override
     public boolean isExpired() {
         return false;
     }
-
 
     @Override
     public void advance(float amount) {
@@ -127,7 +113,6 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
         ShaderLib.exitDraw();
     }
-
 
     protected boolean load() {
         if (loaded) return usable;

@@ -5,32 +5,8 @@ import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.util.DelayedActionScript;
 
-
 public final class FishIntelNotifications {
-
-    private FishIntelNotifications() {
-    }
-
-
-    public static void queue(BaseIntelPlugin intel) {
-        if (intel == null || Global.getSector() == null) return;
-
-        IntelManagerAPI manager = Global.getSector().getIntelManager();
-        if (manager.hasIntel(intel) || manager.hasIntelQueued(intel)) return;
-
-        intel.setForceAddNextFrame(true);
-        manager.queueIntel(intel);
-    }
-
-
-    public static void update(BaseIntelPlugin intel, Object listInfoParam) {
-        if (intel == null || Global.getSector() == null) return;
-
-        Global.getSector().addScript(new DeferredUpdate(intel, listInfoParam));
-    }
-
     protected static final class DeferredUpdate extends DelayedActionScript {
-
         private final BaseIntelPlugin intel;
         private final Object listInfoParam;
 
@@ -47,5 +23,24 @@ public final class FishIntelNotifications {
 
             intel.sendUpdateIfPlayerHasIntel(listInfoParam, false);
         }
+    }
+
+    private FishIntelNotifications() {
+    }
+
+    public static void queue(BaseIntelPlugin intel) {
+        if (intel == null || Global.getSector() == null) return;
+
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        if (manager.hasIntel(intel) || manager.hasIntelQueued(intel)) return;
+
+        intel.setForceAddNextFrame(true);
+        manager.queueIntel(intel);
+    }
+
+    public static void update(BaseIntelPlugin intel, Object listInfoParam) {
+        if (intel == null || Global.getSector() == null) return;
+
+        Global.getSector().addScript(new DeferredUpdate(intel, listInfoParam));
     }
 }

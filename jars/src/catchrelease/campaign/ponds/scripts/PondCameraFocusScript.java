@@ -11,24 +11,13 @@ import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class PondCameraFocusScript implements EveryFrameScript {
-
     protected SectorEntityToken pond;
-
-
     protected float focus = 0f;
-
     protected boolean done = false;
-
-
     transient protected boolean holdingCamera = false;
-
-
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;
-
-
     transient protected Vector2f transitionOffset = null;
 
     public PondCameraFocusScript(SectorEntityToken pond) {
@@ -121,7 +110,6 @@ public class PondCameraFocusScript implements EveryFrameScript {
         holdCameraAt(center);
     }
 
-
     protected void acquireCamera(CampaignFleetAPI fleet) {
         ViewportAPI viewport = Global.getSector().getViewport();
         float zoom = Global.getSector().getCampaignUI().getZoomFactor();
@@ -142,13 +130,11 @@ public class PondCameraFocusScript implements EveryFrameScript {
         holdingCamera = true;
     }
 
-
     protected boolean isUiUp() {
         CampaignUIAPI ui = Global.getSector().getCampaignUI();
 
         return ui.getCurrentInteractionDialog() != null || ui.getCurrentCoreTab() != null;
     }
-
 
     protected boolean shouldFocus(CampaignFleetAPI fleet) {
         if (fleet.getContainingLocation() != pond.getContainingLocation()) return false;
@@ -157,18 +143,15 @@ public class PondCameraFocusScript implements EveryFrameScript {
                 <= pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;
     }
 
-
     protected boolean isOutOfSight() {
         return !Global.getSector().getViewport().isNearViewport(pond.getLocation(), pond.getRadius());
     }
-
 
     protected Vector2f getFocusedCenter(Vector2f fleetLocation, Vector2f pondLocation) {
         return new Vector2f(
                 fleetLocation.x + (pondLocation.x - fleetLocation.x) * focus,
                 fleetLocation.y + (pondLocation.y - fleetLocation.y) * focus);
     }
-
 
     protected void keepFleetOnScreen(Vector2f center, Vector2f fleetLocation) {
         ViewportAPI viewport = Global.getSector().getViewport();
@@ -185,20 +168,17 @@ public class PondCameraFocusScript implements EveryFrameScript {
         return Math.max(min, Math.min(max, value));
     }
 
-
     protected float approach(float current, float target, float delta, float timeConstant) {
         float travelled = 1f - (float) Math.exp(-delta / Math.max(0.01f, timeConstant));
 
         return current + (target - current) * travelled;
     }
 
-
     protected float getTimeConstant(float target) {
         return target > focus
                 ? PondConstants.POND_FOCUS_TIME_CONSTANT
                 : PondConstants.POND_FOCUS_RETURN_TIME_CONSTANT;
     }
-
 
     protected void holdCameraAt(Vector2f center) {
         ViewportAPI viewport = Global.getSector().getViewport();
@@ -212,7 +192,6 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         viewport.set(center.x - width * 0.5f, center.y - height * 0.5f, width, height);
     }
-
 
     protected void releaseCamera() {
         if (!holdingCamera) return;

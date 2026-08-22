@@ -13,23 +13,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class CrabBackdrops {
-
-
     public static final String OFFER_KEY = "$catchrelease_crabBackdropAt";
-
-
     public static final String TURN_KEY = "$catchrelease_crabBackdropTurn";
-
-
     public static final String SOLD_AT_KEY = "$catchrelease_crabBackdropSoldAt";
     public static final float RESTOCK_DAYS = 60f;
-
-
     public static final int[] CREDITS_BY_RARITY = {12000, 25000, 45000, 75000, 120000};
     public static final int[] CRABS_BY_RARITY = {2, 3, 5, 7, 10};
-
 
     public static Backdrop getOffer(MarketAPI market) {
         if (market == null || Global.getSector() == null) return null;
@@ -50,7 +40,6 @@ public class CrabBackdrops {
 
         return next;
     }
-
 
     public static List<Backdrop> getPool() {
         List<Backdrop> pool = new ArrayList<>();
@@ -73,7 +62,6 @@ public class CrabBackdrops {
         return backdrop == null ? 0 : CRABS_BY_RARITY[backdrop.rarity.rank];
     }
 
-
     public static FishRequirement getCatch(Backdrop backdrop) {
         FishRequirement req = new FishRequirement();
 
@@ -92,7 +80,6 @@ public class CrabBackdrops {
                 >= getCredits(backdrop);
     }
 
-
     public static boolean buy(MarketAPI market) {
         Backdrop offer = getOffer(market);
         if (offer == null || !canAfford(offer)) return false;
@@ -109,7 +96,6 @@ public class CrabBackdrops {
 
         return true;
     }
-
 
     public static boolean isRestocking(MarketAPI market) {
         if (market == null || Global.getSector() == null) return false;

@@ -52,9 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-
 public class FishingIntro {
-
     public static final int UNSTARTED = 0;
     public static final int POINTED = 1;
     public static final int RODDED = 2;
@@ -63,147 +61,7 @@ public class FishingIntro {
     public static final int FISH_THREE = 5;
     public static final int DONE = 6;
 
-    public static int getStage() {
-        return Global.getSector().getMemoryWithoutUpdate().getInt(TutorialConstants.STAGE_KEY);
-    }
-
-    public static boolean isAtLeast(int stage) {
-        return getStage() >= stage;
-    }
-
-    protected static void setStage(int stage) {
-        if (getStage() >= stage) return;
-
-        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.STAGE_KEY, stage);
-    }
-
-
-    public static boolean isOpenForWork() {
-        return isAtLeast(FISH_ONE);
-    }
-
-
-    public static boolean isShelfOpen(catchrelease.campaign.fish.shop.ShopGroup shelf) {
-        if (shelf == null) return true;
-
-        boolean deep = shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHTS
-                || shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHT_RIG
-                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON
-                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON_TIPS;
-
-        return !deep || isAtLeast(FISH_THREE);
-    }
-
-
-    public static boolean hasGear(String abilityId) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-
-        return player != null && player.hasAbility(abilityId);
-    }
-
-
-    public static void rememberSeen() {
-        try {
-            Global.getSettings().writeTextFileToCommon(TutorialConstants.SEEN_FILE, "1");
-        } catch (Exception e) {
-            // a shortcut nobody can offer is a slower first hour, not a broken campaign
-            Global.getLogger(FishingIntro.class).warn("Could not record the tutorial as seen", e);
-        }
-    }
-
-    public static boolean hasSeenBefore() {
-        try {
-            String seen = Global.getSettings().readTextFileFromCommon(TutorialConstants.SEEN_FILE);
-
-            return seen != null && !seen.trim().isEmpty();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-
-    public static void skip(TextPanelAPI text) {
-        grant(TutorialConstants.ROD, text);
-        for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-
-        giveCharts(TutorialConstants.FREE_COMMONS, null, text);
-        for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.ofRank(rung),
-                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
-        }
-
-        clearTarget();
-        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.STAGE_KEY, DONE);
-        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
-
-        dropNote();
-        rememberSeen();
-        FishRumors.ensureTutorialLead();
-    }
-
-
-    public static void point() {
-        if (isAtLeast(POINTED)) return;
-
-        setStage(POINTED);
-
-        IntroIntel intel = new IntroIntel();
-        FishIntelNotifications.queue(intel);
-    }
-
-
-    public static void giveRod(TextPanelAPI text) {
-        point();
-        setStage(RODDED);
-
-        grant(TutorialConstants.ROD, text);
-
-        setTarget(rollTarget(RODDED));
-    }
-
-
-    public static void sendOut(TextPanelAPI text) {
-        setStage(FISH_ONE);
-
-        Target target = rollTarget(FISH_ONE);
-        setTarget(target);
-        ensureTargetBoat(target);
-    }
-
-
-    protected static void ensureTargetBoat(Target target) {
-        if (target == null || target.stage != FISH_ONE || target.systemId == null) return;
-
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!target.systemId.equals(system.getId())) continue;
-
-            CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
-
-            if (boat != null) {
-                Object reserved = boat.getMemoryWithoutUpdate()
-                        .get(FishermanConstants.TUTORIAL_TARGET_KEY);
-                if (target.systemId.equals(reserved)) return;
-
-                // Only an uninhabited-system standing boat is the disposable directed posting. A visitor or an ordinary core trawler returns to its normal lifecycle afterwards.
-                boolean temporary = !FishermanSpawner.isVisiting(boat)
-                        && !OuterReaches.isPopulated(system);
-                boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TARGET_KEY,
-                        target.systemId);
-                if (temporary) {
-                    boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TEMPORARY_KEY,
-                            true);
-                }
-
-                boat.addScript(new TutorialBoatKeeper(boat, target.systemId, temporary));
-            }
-
-            return;
-        }
-    }
-
-
     public static class TutorialBoatKeeper implements EveryFrameScript, Serializable {
-
         private final CampaignFleetAPI boat;
         private final String systemId;
         private final boolean temporary;
@@ -247,634 +105,20 @@ public class FishingIntro {
         }
     }
 
-
-    public static void giveOutfitter(TextPanelAPI text) {
-        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
-    }
-
-
-    public static boolean isDeepHandoffPending() {
-        return Global.getSector().getMemoryWithoutUpdate()
-                .getBoolean(TutorialConstants.DEEP_HANDOFF_KEY);
-    }
-
-
-    public static void giveDeepGear(TextPanelAPI text) {
-        setStage(FISH_TWO);
-
-        for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
-        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
-
-        setTarget(rollTarget(FISH_TWO));
-    }
-
-
-    public static void giveCharts(TextPanelAPI text) {
-        setStage(FISH_THREE);
-
-        List<String> given = new ArrayList<>();
-        giveCharts(TutorialConstants.FREE_COMMONS, given, text);
-
-        Target target = new Target();
-        target.stage = FISH_THREE;
-        target.speciesIds = given;
-
-        setTarget(target);
-    }
-
-
-    public static void finish(TextPanelAPI text) {
-        setStage(DONE);
-
-        clearTarget();
-        dropNote();
-
-        for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.ofRank(rung),
-                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
-        }
-
-        rememberSeen();
-        FishRumors.ensureTutorialLead();
-    }
-
-
     public static class Target implements Serializable {
         public int stage;
         public List<String> speciesIds = new ArrayList<>();
-
         public String systemId;
         public String systemName;
-
         public float x;
         public float y;
         public boolean atPond;
-
-
         public boolean needsDeepGear;
-
-
         public boolean anySpecies;
-
-
         public boolean landed;
     }
 
-    public static Target getTarget() {
-        Object stored = Global.getSector().getPersistentData().get(TutorialConstants.TARGET_KEY);
-
-        return stored instanceof Target ? (Target) stored : null;
-    }
-
-    protected static void setTarget(Target target) {
-        if (target == null) {
-            clearTarget();
-            return;
-        }
-
-        // the outgoing errand lets go of its water before the incoming one is stored, or the mark on the old rupture outlives every reference to what put it there
-        letGo(getTarget());
-
-        Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
-        updateIntel();
-    }
-
-    protected static void clearTarget() {
-        letGo(getTarget());
-
-        Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
-    }
-
-
-    protected static void updateIntel() {
-        IntelManagerAPI manager = Global.getSector().getIntelManager();
-
-        if (!manager.getCommQueue(IntroIntel.class).isEmpty()
-                || manager.getIntel(IntroIntel.class).isEmpty()) return;
-
-        sendIntelUpdate();
-    }
-
-    protected static void sendIntelUpdate() {
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class)) {
-
-            FishIntelNotifications.update((IntroIntel) intel, null);
-        }
-    }
-
-
-    protected static void letGo(Target target) {
-        if (target == null) return;
-
-        QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
-        QuestPond.clearMotes(TutorialConstants.TARGET_KEY);
-    }
-
-
-    protected static void setLanded(Target target, boolean landed) {
-        if (target == null || target.landed == landed) return;
-
-        target.landed = landed;
-
-        if (landed) letGo(target);
-
-        updateIntel();
-    }
-
-
-    public static void onCatchStored(FishCatch caught) {
-        Target target = getTarget();
-        if (target == null || caught == null || target.anySpecies) return;
-        if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
-        if (target.needsDeepGear
-                && (caught.method != FishLogEntry.Method.HARPOON
-                || caught.implement != CatchImplement.BREACH_LAMP)) return;
-
-        if (isTargetMet()) {
-            setLanded(target, true);
-        } else if (target.speciesIds.size() > 1) {
-            updateIntel();
-        }
-    }
-
-
-    public static boolean isLanded() {
-        Target target = getTarget();
-
-        return target != null && target.landed;
-    }
-
-
-    protected static Target rollTarget(int stage) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return null;
-
-        StarSystemAPI system = stage == RODDED
-                ? asSystem(player.getContainingLocation())
-                : pickSystem(stage);
-
-        if (system == null) system = asSystem(player.getContainingLocation());
-        if (system == null) return null;
-
-        Target target = new Target();
-        target.stage = stage;
-        target.systemId = system.getId();
-        target.systemName = system.getName();
-        target.needsDeepGear = stage == FISH_TWO;
-        target.anySpecies = stage == RODDED;
-
-        CatchImplement implement = target.needsDeepGear
-                ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
-        FishSpec spec = pickSpecies(stage, system, implement);
-        if (spec == null) {
-            StarSystemAPI fallbackSystem = pickFallbackSystem(stage, implement);
-            FishSpec fallbackSpec = pickFallbackSpecies(stage, fallbackSystem, implement);
-
-            if (fallbackSystem == null || fallbackSpec == null) {
-                Global.getLogger(FishingIntro.class).warn("No valid "
-                        + getMaxTargetRarity(stage).name().toLowerCase()
-                        + "-or-below tutorial target for stage " + stage
-                        + "; refusing to create an impossible target.");
-                return null;
-            }
-
-            Global.getLogger(FishingIntro.class).warn("No valid "
-                    + getMaxTargetRarity(stage).name().toLowerCase()
-                    + "-or-below tutorial target in " + system.getName()
-                    + " for stage " + stage + "; using deterministic fallback "
-                    + fallbackSpec.id + " in " + fallbackSystem.getName() + ".");
-            system = fallbackSystem;
-            target.systemId = system.getId();
-            target.systemName = system.getName();
-            spec = fallbackSpec;
-        }
-        target.speciesIds.add(spec.id);
-
-        SectorEntityToken pond = target.needsDeepGear ? null : QuestPond.findFreePond(system);
-
-        if (pond != null) {
-            target.atPond = true;
-            target.x = pond.getLocation().x;
-            target.y = pond.getLocation().y;
-        } else {
-            Vector2f at = catchrelease.campaign.fish.fisherman.OuterReaches.center(system);
-
-            target.atPond = false;
-            target.x = at.x + Misc.getUnitVectorAtDegreeAngle(
-                    (float) Math.random() * 360f).x * 6000f;
-            target.y = at.y + Misc.getUnitVectorAtDegreeAngle(
-                    (float) Math.random() * 360f).y * 6000f;
-        }
-
-        return target;
-    }
-
-    protected static StarSystemAPI asSystem(Object location) {
-        return location instanceof StarSystemAPI ? (StarSystemAPI) location : null;
-    }
-
-
-    protected static StarSystemAPI pickSystem(int stage) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
-
-        WeightedRandomPicker<StarSystemAPI> thin = new WeightedRandomPicker<>();
-        WeightedRandomPicker<StarSystemAPI> any = new WeightedRandomPicker<>();
-
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (system.getCenter() == null) continue;
-
-            float distance = Misc.getDistanceLY(from, system.getLocation());
-            if (distance < TutorialConstants.SECOND_MIN_LY) continue;
-            if (distance > TutorialConstants.SECOND_MAX_LY) continue;
-
-            any.add(system, 1f);
-
-            if (Aberration.baseAt(system.getLocation(), system)
-                    >= TutorialConstants.SECOND_MIN_DRIFT) {
-
-                thin.add(system, 1f);
-            }
-        }
-
-        StarSystemAPI pick = thin.pick();
-
-        return pick != null ? pick : any.pick();
-    }
-
-
-    protected static FishSpec pickSpecies(int stage, StarSystemAPI system,
-                                          CatchImplement implement) {
-        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
-        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
-
-        for (FishSpec spec : candidates) {
-            picker.add(spec, spec.spawnWeight
-                    * (spec.rarity == FishRarity.COMMON ? 4f : 1f));
-        }
-
-        return picker.pick();
-    }
-
-
-    protected static FishRarity getMaxTargetRarity(int stage) {
-        if (stage == RODDED || stage == FISH_ONE) return FishRarity.COMMON;
-        if (stage == FISH_TWO || stage == FISH_THREE) return FishRarity.UNCOMMON;
-        return FishRarity.COMMON;
-    }
-
-
-    protected static List<FishSpec> getSpeciesCandidates(int stage, StarSystemAPI system,
-                                                          CatchImplement implement) {
-        List<FishSpec> candidates = new ArrayList<>();
-        if (system == null) return candidates;
-
-        FishHabitat habitat = FishHabitat.of(system);
-        FishRarity maximum = getMaxTargetRarity(stage);
-
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
-            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
-            if (!isHarpoonLessonCandidate(stage, spec)) continue;
-            if (spec.rarity.rank > maximum.rank) continue;
-
-            candidates.add(spec);
-        }
-
-        return candidates;
-    }
-
-
-    protected static boolean isHarpoonLessonCandidate(int stage, FishSpec spec) {
-        if (stage != FISH_TWO) return true;
-
-        return spec.reachedBy.size() == 1 && spec.reachedBy.contains(CatchImplement.BREACH_LAMP);
-    }
-
-
-    protected static FishSpec pickFallbackSpecies(int stage, StarSystemAPI system,
-                                                  CatchImplement implement) {
-        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
-        candidates.sort(Comparator.comparing(spec -> spec.id));
-
-        return candidates.isEmpty() ? null : candidates.get(0);
-    }
-
-
-    protected static StarSystemAPI pickFallbackSystem(int stage, CatchImplement implement) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        StarSystemAPI current = player == null ? null : asSystem(player.getContainingLocation());
-
-        if (stage == RODDED) {
-            return getSpeciesCandidates(stage, current, implement).isEmpty() ? null : current;
-        }
-
-        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
-        List<StarSystemAPI> thin = new ArrayList<>();
-        List<StarSystemAPI> any = new ArrayList<>();
-
-        for (StarSystemAPI candidate : Global.getSector().getStarSystems()) {
-            if (candidate == null || candidate.getId() == null) continue;
-            if (candidate.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (candidate.hasTag(Tags.THEME_SPECIAL) || candidate.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (candidate.getCenter() == null) continue;
-
-            float distance = Misc.getDistanceLY(from, candidate.getLocation());
-            if (distance < TutorialConstants.SECOND_MIN_LY) continue;
-            if (distance > TutorialConstants.SECOND_MAX_LY) continue;
-            if (getSpeciesCandidates(stage, candidate, implement).isEmpty()) continue;
-
-            any.add(candidate);
-            if (Aberration.baseAt(candidate.getLocation(), candidate)
-                    >= TutorialConstants.SECOND_MIN_DRIFT) {
-                thin.add(candidate);
-            }
-        }
-
-        thin.sort(Comparator.comparing(StarSystemAPI::getId));
-        any.sort(Comparator.comparing(StarSystemAPI::getId));
-        return !thin.isEmpty() ? thin.get(0) : any.isEmpty() ? null : any.get(0);
-    }
-
-
-    public static boolean isTargetMet() {
-        Target target = getTarget();
-        if (target == null) return false;
-
-        if (target.anySpecies) return findAny(target.needsDeepGear) != null;
-
-        for (String speciesId : target.speciesIds) {
-            if (find(speciesId, target.needsDeepGear) == null) return false;
-        }
-
-        return true;
-    }
-
-
-    protected static FishCatch findAny(boolean deepGear) {
-        return find(null, deepGear);
-    }
-
-
-    protected static FishCatch find(String speciesId, boolean deepGear) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return null;
-
-        for (CargoStackAPI stack : player.getCargo().getStacksCopy()) {
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (!FishItems.isCatch(data)) continue;
-
-            for (FishCatch entry : FishItems.read(data)) {
-                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
-
-                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
-                        || entry.method != FishLogEntry.Method.HARPOON)) {
-
-                    continue;
-                }
-
-                return entry;
-            }
-        }
-
-        return null;
-    }
-
-
-    public static boolean takeTarget() {
-        Target target = getTarget();
-        if (target == null || !isTargetMet()) return false;
-
-        if (target.anySpecies) {
-            FishCatch any = findAny(target.needsDeepGear);
-            if (any != null) spend(any.speciesId, target.needsDeepGear);
-        } else {
-            for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
-        }
-
-        clearTarget();
-
-        return true;
-    }
-
-    protected static boolean spend(String speciesId, boolean deepGear) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return false;
-
-        CargoAPI cargo = player.getCargo();
-
-        for (CargoStackAPI stack : cargo.getStacksCopy()) {
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (!FishItems.isCatch(data)) continue;
-
-            List<FishCatch> contents = FishItems.read(data);
-
-            int found = -1;
-            for (int i = 0; i < contents.size(); i++) {
-                FishCatch entry = contents.get(i);
-                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
-
-                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
-                        || entry.method != FishLogEntry.Method.HARPOON)) {
-
-                    continue;
-                }
-
-                found = i;
-                break;
-            }
-            if (found < 0) continue;
-
-            if (!FishItems.isContainer(data)) {
-                cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
-                return true;
-            }
-
-            contents.remove(found);
-            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
-
-            // a container's contents are its identity, so a part-spent one is a different item
-            if (!contents.isEmpty()) {
-                cargo.addSpecial(FishItems.repack(data.getId(), contents), 1);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-
-    public static void giveCharts(int count, List<String> givenOut) {
-        giveCharts(count, givenOut, null);
-    }
-
-    protected static void giveCharts(int count, List<String> givenOut, TextPanelAPI text) {
-        giveChartsOfRarity(FishRarity.COMMON, count, givenOut, text);
-    }
-
-    public static void giveChartsOfRarity(FishRarity rarity, int count) {
-        giveChartsOfRarity(rarity, count, null, null);
-    }
-
-    protected static void giveChartsOfRarity(FishRarity rarity, int count,
-                                             List<String> givenOut, TextPanelAPI text) {
-        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
-
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (spec.rarity != rarity) continue;
-            if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
-
-            picker.add(spec, 1f);
-        }
-
-        for (int i = 0; i < count && !picker.isEmpty(); i++) {
-            FishSpec spec = picker.pickAndRemove();
-
-            FishLog.unlockLocationData(spec.id);
-            if (givenOut != null) givenOut.add(spec.id);
-            if (text != null) addRangeDataGainText(spec, text);
-        }
-    }
-
-
-    protected static void addRangeDataGainText(FishSpec spec, TextPanelAPI text) {
-        String pattern = spec.getDisplayName();
-
-        text.setFontSmallInsignia();
-        text.addParagraph("Gained: Range data for " + pattern, Misc.getPositiveHighlightColor());
-        text.highlightInLastPara(spec.rarity.color, pattern);
-        text.setFontInsignia();
-    }
-
-
-    public static void grant(String abilityId, TextPanelAPI text) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null || abilityId == null) return;
-
-        boolean had = player.hasAbility(abilityId);
-
-        Global.getSector().getCharacterData().addAbility(abilityId);
-        Global.getSector().getCharacterData().getMemoryWithoutUpdate()
-                .set("$ability:" + abilityId, true, 0);
-
-        if (had) return;
-
-        assignSlot(abilityId);
-
-        if (text != null) AddRemoveCommodity.addAbilityGainText(abilityId, text);
-    }
-
-    protected static void assignSlot(String abilityId) {
-        AbilitySlotsAPI slots = Global.getSector().getUIData().getAbilitySlotsAPI();
-        if (slots == null) return;
-
-        int was = slots.getCurrBarIndex();
-
-        for (int bar = 0; bar < 5; bar++) {
-            slots.setCurrBarIndex(bar);
-
-            for (AbilitySlotAPI slot : slots.getCurrSlotsCopy()) {
-                if (slot.getAbilityId() != null) continue;
-
-                slot.setAbilityId(abilityId);
-                slots.setCurrBarIndex(was);
-
-                return;
-            }
-        }
-
-        slots.setCurrBarIndex(was);
-    }
-
-
-    public static boolean isCarryingFisherProperty() {
-        com.fs.starfarer.api.campaign.rules.MemoryAPI memory =
-                Global.getSector().getMemoryWithoutUpdate();
-
-        if (memory.getBoolean(TutorialConstants.FISHER_PROPERTY_KEY)) return true;
-
-        // A pre-overhaul save carrying the old breadcrumb is carrying the new fiction's assembly.
-        if (memory.getBoolean(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY)) {
-            memory.set(TutorialConstants.FISHER_PROPERTY_KEY, true);
-            memory.unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
-            return true;
-        }
-
-        return false;
-    }
-
-    public static void takeFisherProperty() {
-        Global.getSector().getMemoryWithoutUpdate()
-                .set(TutorialConstants.FISHER_PROPERTY_KEY, true);
-
-        point();
-    }
-
-    public static void dropFisherProperty() {
-        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.FISHER_PROPERTY_KEY);
-        Global.getSector().getMemoryWithoutUpdate()
-                .unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
-    }
-
-
-    public static CampaignFleetAPI getNearestBoat() {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return null;
-
-        CampaignFleetAPI best = null;
-        float bestDistance = Float.MAX_VALUE;
-
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            CampaignFleetAPI boat = CoreFisherSpawner.getBoat(system);
-            if (boat == null) continue;
-
-            float distance = Misc.getDistanceLY(player.getLocationInHyperspace(),
-                    system.getLocation());
-
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                best = boat;
-            }
-        }
-
-        return best;
-    }
-
-    protected static void dropNote() {
-        IntelManagerAPI manager = Global.getSector().getIntelManager();
-        List<IntelInfoPlugin> notes = new ArrayList<>(manager.getIntel(IntroIntel.class));
-        notes.addAll(manager.getCommQueue(IntroIntel.class));
-
-        for (IntelInfoPlugin intel : notes) {
-
-            manager.removeIntel(intel);
-        }
-    }
-
-
-    public static String describeTarget() {
-        Target target = getTarget();
-        if (target == null) return "";
-
-        if (target.anySpecies) return "anything you can land";
-
-        List<String> names = new ArrayList<>();
-        for (String id : target.speciesIds) {
-            FishSpec spec = FishSpecLoader.getFishSpec(id);
-            names.add(spec == null ? "a specimen" : spec.getDisplayName());
-        }
-
-        return String.join(" and ", names);
-    }
-
-
     public static class Keeper implements com.fs.starfarer.api.EveryFrameScript {
-
         protected final com.fs.starfarer.api.util.IntervalUtil interval =
                 new com.fs.starfarer.api.util.IntervalUtil(
                         TutorialConstants.KEEP_CHECK_SECONDS, TutorialConstants.KEEP_CHECK_SECONDS);
@@ -920,75 +164,8 @@ public class FishingIntro {
         }
     }
 
-
-    protected static boolean isPlanted(StarSystemAPI system, String speciesId) {
-        for (SectorEntityToken mote : system.getEntitiesWithTag(
-                catchrelease.campaign.fish.entities.FishEntityPlugin.MOTE_TAG)) {
-
-            if (mote.isExpired()) continue;
-            if (!mote.getMemoryWithoutUpdate().getBoolean(QuestPond.QUEST_MOTE_FLAG)) continue;
-
-            if (mote.getCustomPlugin()
-                    instanceof catchrelease.campaign.fish.entities.FishEntityPlugin fish
-                    && speciesId.equals(fish.getFishId())) {
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
-    protected static void plant(Target target, StarSystemAPI system, String speciesId) {
-        Vector2f mark = new Vector2f(target.x, target.y);
-
-        SectorEntityToken mote = null;
-
-        if (target.atPond) {
-            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
-                if (Misc.getDistance(pond.getLocation(), mark) > TutorialConstants.SPOT_SPREAD) {
-                    continue;
-                }
-
-                if (!target.anySpecies) {
-                    QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
-                }
-
-                mote = QuestPond.placeMote(pond, speciesId, true,
-                        TutorialConstants.TARGET_KEY);
-                break;
-            }
-        }
-
-        if (mote == null) {
-            float across = (float) Math.random() * 360f;
-
-            Vector2f at = new Vector2f(mark);
-            Vector2f offset = Misc.getUnitVectorAtDegreeAngle(across);
-            at.x += offset.x * TutorialConstants.SPOT_SPREAD;
-            at.y += offset.y * TutorialConstants.SPOT_SPREAD;
-
-            Vector2f to = new Vector2f(mark);
-            to.x -= offset.x * TutorialConstants.SPOT_SPREAD;
-            to.y -= offset.y * TutorialConstants.SPOT_SPREAD;
-
-            mote = system.addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                    new catchrelease.campaign.fish.entities.FishEntityPlugin.Params(to, speciesId));
-
-            mote.setLocation(at.x, at.y);
-        }
-
-        if (mote == null) return;
-
-        QuestPond.markPlanted(mote, TutorialConstants.TARGET_KEY);
-    }
-
-
     public static class IntroIntel extends BaseIntelPlugin
             implements catchrelease.campaign.fish.shop.FishAsker {
-
-
         @Override
         public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
             List<catchrelease.campaign.fish.shop.FishRequirement> out = new ArrayList<>();
@@ -1012,7 +189,6 @@ public class FishingIntro {
 
             return out;
         }
-
 
         @Override
         public String getAskerName() {
@@ -1047,7 +223,6 @@ public class FishingIntro {
             addBulletPoints(info, mode);
         }
 
-
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
             Color text = getBulletColorForMode(mode);
@@ -1081,7 +256,6 @@ public class FishingIntro {
             unindent(info);
         }
 
-
         protected float addProgressLines(TooltipMakerAPI info, Target target, Color text,
                                          float pad) {
             if (target.anySpecies) {
@@ -1103,7 +277,6 @@ public class FishingIntro {
 
             return pad;
         }
-
 
         protected float addDestinationLine(TooltipMakerAPI info, Target target, Color text,
                                            float pad) {
@@ -1211,12 +384,10 @@ public class FishingIntro {
             super.buttonPressConfirmed(buttonId, ui);
         }
 
-
         @Override
         public String getIcon() {
             return FishermanIdentity.getPortrait(0f);
         }
-
 
         @Override
         public FactionAPI getFactionForUIColors() {
@@ -1237,7 +408,6 @@ public class FishingIntro {
 
             return tags;
         }
-
 
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
@@ -1266,5 +436,764 @@ public class FishingIntro {
 
             return getNearestBoat();
         }
+    }
+
+    public static int getStage() {
+        return Global.getSector().getMemoryWithoutUpdate().getInt(TutorialConstants.STAGE_KEY);
+    }
+
+    public static boolean isAtLeast(int stage) {
+        return getStage() >= stage;
+    }
+
+    protected static void setStage(int stage) {
+        if (getStage() >= stage) return;
+
+        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.STAGE_KEY, stage);
+    }
+
+    public static boolean isOpenForWork() {
+        return isAtLeast(FISH_ONE);
+    }
+
+    public static boolean isShelfOpen(catchrelease.campaign.fish.shop.ShopGroup shelf) {
+        if (shelf == null) return true;
+
+        boolean deep = shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHTS
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.SEARCHLIGHT_RIG
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON
+                || shelf == catchrelease.campaign.fish.shop.ShopGroup.HARPOON_TIPS;
+
+        return !deep || isAtLeast(FISH_THREE);
+    }
+
+    public static boolean hasGear(String abilityId) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+
+        return player != null && player.hasAbility(abilityId);
+    }
+
+    public static void rememberSeen() {
+        try {
+            Global.getSettings().writeTextFileToCommon(TutorialConstants.SEEN_FILE, "1");
+        } catch (Exception e) {
+            // a shortcut nobody can offer is a slower first hour, not a broken campaign
+            Global.getLogger(FishingIntro.class).warn("Could not record the tutorial as seen", e);
+        }
+    }
+
+    public static boolean hasSeenBefore() {
+        try {
+            String seen = Global.getSettings().readTextFileFromCommon(TutorialConstants.SEEN_FILE);
+
+            return seen != null && !seen.trim().isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void skip(TextPanelAPI text) {
+        grant(TutorialConstants.ROD, text);
+        for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
+
+        giveCharts(TutorialConstants.FREE_COMMONS, null, text);
+        for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
+            giveChartsOfRarity(FishRarity.ofRank(rung),
+                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
+        }
+
+        clearTarget();
+        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.STAGE_KEY, DONE);
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
+
+        dropNote();
+        rememberSeen();
+        FishRumors.ensureTutorialLead();
+    }
+
+    public static void point() {
+        if (isAtLeast(POINTED)) return;
+
+        setStage(POINTED);
+
+        IntroIntel intel = new IntroIntel();
+        FishIntelNotifications.queue(intel);
+    }
+
+    public static void giveRod(TextPanelAPI text) {
+        point();
+        setStage(RODDED);
+
+        grant(TutorialConstants.ROD, text);
+
+        setTarget(rollTarget(RODDED));
+    }
+
+    public static void sendOut(TextPanelAPI text) {
+        setStage(FISH_ONE);
+
+        Target target = rollTarget(FISH_ONE);
+        setTarget(target);
+        ensureTargetBoat(target);
+    }
+
+    protected static void ensureTargetBoat(Target target) {
+        if (target == null || target.stage != FISH_ONE || target.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!target.systemId.equals(system.getId())) continue;
+
+            CampaignFleetAPI boat = CoreFisherSpawner.ensureBoat(system);
+
+            if (boat != null) {
+                Object reserved = boat.getMemoryWithoutUpdate()
+                        .get(FishermanConstants.TUTORIAL_TARGET_KEY);
+                if (target.systemId.equals(reserved)) return;
+
+                // Only an uninhabited-system standing boat is the disposable directed posting. A visitor or an ordinary core trawler returns to its normal lifecycle afterwards.
+                boolean temporary = !FishermanSpawner.isVisiting(boat)
+                        && !OuterReaches.isPopulated(system);
+                boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TARGET_KEY,
+                        target.systemId);
+                if (temporary) {
+                    boat.getMemoryWithoutUpdate().set(FishermanConstants.TUTORIAL_TEMPORARY_KEY,
+                            true);
+                }
+
+                boat.addScript(new TutorialBoatKeeper(boat, target.systemId, temporary));
+            }
+
+            return;
+        }
+    }
+
+    public static void giveOutfitter(TextPanelAPI text) {
+        Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
+    }
+
+    public static boolean isDeepHandoffPending() {
+        return Global.getSector().getMemoryWithoutUpdate()
+                .getBoolean(TutorialConstants.DEEP_HANDOFF_KEY);
+    }
+
+    public static void giveDeepGear(TextPanelAPI text) {
+        setStage(FISH_TWO);
+
+        for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
+
+        setTarget(rollTarget(FISH_TWO));
+    }
+
+    public static void giveCharts(TextPanelAPI text) {
+        setStage(FISH_THREE);
+
+        List<String> given = new ArrayList<>();
+        giveCharts(TutorialConstants.FREE_COMMONS, given, text);
+
+        Target target = new Target();
+        target.stage = FISH_THREE;
+        target.speciesIds = given;
+
+        setTarget(target);
+    }
+
+    public static void finish(TextPanelAPI text) {
+        setStage(DONE);
+
+        clearTarget();
+        dropNote();
+
+        for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
+            giveChartsOfRarity(FishRarity.ofRank(rung),
+                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
+        }
+
+        rememberSeen();
+        FishRumors.ensureTutorialLead();
+    }
+
+    public static Target getTarget() {
+        Object stored = Global.getSector().getPersistentData().get(TutorialConstants.TARGET_KEY);
+
+        return stored instanceof Target ? (Target) stored : null;
+    }
+
+    protected static void setTarget(Target target) {
+        if (target == null) {
+            clearTarget();
+            return;
+        }
+
+        // the outgoing errand lets go of its water before the incoming one is stored, or the mark on the old rupture outlives every reference to what put it there
+        letGo(getTarget());
+
+        Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
+        updateIntel();
+    }
+
+    protected static void clearTarget() {
+        letGo(getTarget());
+
+        Global.getSector().getPersistentData().remove(TutorialConstants.TARGET_KEY);
+    }
+
+    protected static void updateIntel() {
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+
+        if (!manager.getCommQueue(IntroIntel.class).isEmpty()
+                || manager.getIntel(IntroIntel.class).isEmpty()) return;
+
+        sendIntelUpdate();
+    }
+
+    protected static void sendIntelUpdate() {
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(IntroIntel.class)) {
+            FishIntelNotifications.update((IntroIntel) intel, null);
+        }
+    }
+
+    protected static void letGo(Target target) {
+        if (target == null) return;
+
+        QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
+        QuestPond.clearMotes(TutorialConstants.TARGET_KEY);
+    }
+
+    protected static void setLanded(Target target, boolean landed) {
+        if (target == null || target.landed == landed) return;
+
+        target.landed = landed;
+
+        if (landed) letGo(target);
+
+        updateIntel();
+    }
+
+    public static void onCatchStored(FishCatch caught) {
+        Target target = getTarget();
+        if (target == null || caught == null || target.anySpecies) return;
+        if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
+        if (target.needsDeepGear
+                && (caught.method != FishLogEntry.Method.HARPOON
+                || caught.implement != CatchImplement.BREACH_LAMP)) return;
+
+        if (isTargetMet()) {
+            setLanded(target, true);
+        } else if (target.speciesIds.size() > 1) {
+            updateIntel();
+        }
+    }
+
+    public static boolean isLanded() {
+        Target target = getTarget();
+
+        return target != null && target.landed;
+    }
+
+    protected static Target rollTarget(int stage) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return null;
+
+        StarSystemAPI system = stage == RODDED
+                ? asSystem(player.getContainingLocation())
+                : pickSystem(stage);
+
+        if (system == null) system = asSystem(player.getContainingLocation());
+        if (system == null) return null;
+
+        Target target = new Target();
+        target.stage = stage;
+        target.systemId = system.getId();
+        target.systemName = system.getName();
+        target.needsDeepGear = stage == FISH_TWO;
+        target.anySpecies = stage == RODDED;
+
+        CatchImplement implement = target.needsDeepGear
+                ? CatchImplement.BREACH_LAMP : CatchImplement.POND;
+        FishSpec spec = pickSpecies(stage, system, implement);
+        if (spec == null) {
+            StarSystemAPI fallbackSystem = pickFallbackSystem(stage, implement);
+            FishSpec fallbackSpec = pickFallbackSpecies(stage, fallbackSystem, implement);
+
+            if (fallbackSystem == null || fallbackSpec == null) {
+                Global.getLogger(FishingIntro.class).warn("No valid "
+                        + getMaxTargetRarity(stage).name().toLowerCase()
+                        + "-or-below tutorial target for stage " + stage
+                        + "; refusing to create an impossible target.");
+                return null;
+            }
+
+            Global.getLogger(FishingIntro.class).warn("No valid "
+                    + getMaxTargetRarity(stage).name().toLowerCase()
+                    + "-or-below tutorial target in " + system.getName()
+                    + " for stage " + stage + "; using deterministic fallback "
+                    + fallbackSpec.id + " in " + fallbackSystem.getName() + ".");
+            system = fallbackSystem;
+            target.systemId = system.getId();
+            target.systemName = system.getName();
+            spec = fallbackSpec;
+        }
+        target.speciesIds.add(spec.id);
+
+        SectorEntityToken pond = target.needsDeepGear ? null : QuestPond.findFreePond(system);
+
+        if (pond != null) {
+            target.atPond = true;
+            target.x = pond.getLocation().x;
+            target.y = pond.getLocation().y;
+        } else {
+            Vector2f at = catchrelease.campaign.fish.fisherman.OuterReaches.center(system);
+
+            target.atPond = false;
+            target.x = at.x + Misc.getUnitVectorAtDegreeAngle(
+                    (float) Math.random() * 360f).x * 6000f;
+            target.y = at.y + Misc.getUnitVectorAtDegreeAngle(
+                    (float) Math.random() * 360f).y * 6000f;
+        }
+
+        return target;
+    }
+
+    protected static StarSystemAPI asSystem(Object location) {
+        return location instanceof StarSystemAPI ? (StarSystemAPI) location : null;
+    }
+
+    protected static StarSystemAPI pickSystem(int stage) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
+
+        WeightedRandomPicker<StarSystemAPI> thin = new WeightedRandomPicker<>();
+        WeightedRandomPicker<StarSystemAPI> any = new WeightedRandomPicker<>();
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
+            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
+            if (system.getCenter() == null) continue;
+
+            float distance = Misc.getDistanceLY(from, system.getLocation());
+            if (distance < TutorialConstants.SECOND_MIN_LY) continue;
+            if (distance > TutorialConstants.SECOND_MAX_LY) continue;
+
+            any.add(system, 1f);
+
+            if (Aberration.baseAt(system.getLocation(), system)
+                    >= TutorialConstants.SECOND_MIN_DRIFT) {
+                thin.add(system, 1f);
+            }
+        }
+
+        StarSystemAPI pick = thin.pick();
+
+        return pick != null ? pick : any.pick();
+    }
+
+    protected static FishSpec pickSpecies(int stage, StarSystemAPI system,
+                                          CatchImplement implement) {
+        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+
+        for (FishSpec spec : candidates) {
+            picker.add(spec, spec.spawnWeight
+                    * (spec.rarity == FishRarity.COMMON ? 4f : 1f));
+        }
+
+        return picker.pick();
+    }
+
+    protected static FishRarity getMaxTargetRarity(int stage) {
+        if (stage == RODDED || stage == FISH_ONE) return FishRarity.COMMON;
+        if (stage == FISH_TWO || stage == FISH_THREE) return FishRarity.UNCOMMON;
+        return FishRarity.COMMON;
+    }
+
+    protected static List<FishSpec> getSpeciesCandidates(int stage, StarSystemAPI system,
+                                                          CatchImplement implement) {
+        List<FishSpec> candidates = new ArrayList<>();
+        if (system == null) return candidates;
+
+        FishHabitat habitat = FishHabitat.of(system);
+        FishRarity maximum = getMaxTargetRarity(stage);
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
+            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
+            if (!isHarpoonLessonCandidate(stage, spec)) continue;
+            if (spec.rarity.rank > maximum.rank) continue;
+
+            candidates.add(spec);
+        }
+
+        return candidates;
+    }
+
+    protected static boolean isHarpoonLessonCandidate(int stage, FishSpec spec) {
+        if (stage != FISH_TWO) return true;
+
+        return spec.reachedBy.size() == 1 && spec.reachedBy.contains(CatchImplement.BREACH_LAMP);
+    }
+
+    protected static FishSpec pickFallbackSpecies(int stage, StarSystemAPI system,
+                                                  CatchImplement implement) {
+        List<FishSpec> candidates = getSpeciesCandidates(stage, system, implement);
+        candidates.sort(Comparator.comparing(spec -> spec.id));
+
+        return candidates.isEmpty() ? null : candidates.get(0);
+    }
+
+    protected static StarSystemAPI pickFallbackSystem(int stage, CatchImplement implement) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        StarSystemAPI current = player == null ? null : asSystem(player.getContainingLocation());
+
+        if (stage == RODDED) {
+            return getSpeciesCandidates(stage, current, implement).isEmpty() ? null : current;
+        }
+
+        Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
+        List<StarSystemAPI> thin = new ArrayList<>();
+        List<StarSystemAPI> any = new ArrayList<>();
+
+        for (StarSystemAPI candidate : Global.getSector().getStarSystems()) {
+            if (candidate == null || candidate.getId() == null) continue;
+            if (candidate.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
+            if (candidate.hasTag(Tags.THEME_SPECIAL) || candidate.hasTag(Tags.THEME_HIDDEN)) continue;
+            if (candidate.getCenter() == null) continue;
+
+            float distance = Misc.getDistanceLY(from, candidate.getLocation());
+            if (distance < TutorialConstants.SECOND_MIN_LY) continue;
+            if (distance > TutorialConstants.SECOND_MAX_LY) continue;
+            if (getSpeciesCandidates(stage, candidate, implement).isEmpty()) continue;
+
+            any.add(candidate);
+            if (Aberration.baseAt(candidate.getLocation(), candidate)
+                    >= TutorialConstants.SECOND_MIN_DRIFT) {
+                thin.add(candidate);
+            }
+        }
+
+        thin.sort(Comparator.comparing(StarSystemAPI::getId));
+        any.sort(Comparator.comparing(StarSystemAPI::getId));
+        return !thin.isEmpty() ? thin.get(0) : any.isEmpty() ? null : any.get(0);
+    }
+
+    public static boolean isTargetMet() {
+        Target target = getTarget();
+        if (target == null) return false;
+
+        if (target.anySpecies) return findAny(target.needsDeepGear) != null;
+
+        for (String speciesId : target.speciesIds) {
+            if (find(speciesId, target.needsDeepGear) == null) return false;
+        }
+
+        return true;
+    }
+
+    protected static FishCatch findAny(boolean deepGear) {
+        return find(null, deepGear);
+    }
+
+    protected static FishCatch find(String speciesId, boolean deepGear) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return null;
+
+        for (CargoStackAPI stack : player.getCargo().getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isCatch(data)) continue;
+
+            for (FishCatch entry : FishItems.read(data)) {
+                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
+
+                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
+                        || entry.method != FishLogEntry.Method.HARPOON)) {
+                    continue;
+                }
+
+                return entry;
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean takeTarget() {
+        Target target = getTarget();
+        if (target == null || !isTargetMet()) return false;
+
+        if (target.anySpecies) {
+            FishCatch any = findAny(target.needsDeepGear);
+            if (any != null) spend(any.speciesId, target.needsDeepGear);
+        } else {
+            for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
+        }
+
+        clearTarget();
+
+        return true;
+    }
+
+    protected static boolean spend(String speciesId, boolean deepGear) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return false;
+
+        CargoAPI cargo = player.getCargo();
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isCatch(data)) continue;
+
+            List<FishCatch> contents = FishItems.read(data);
+
+            int found = -1;
+            for (int i = 0; i < contents.size(); i++) {
+                FishCatch entry = contents.get(i);
+                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
+
+                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
+                        || entry.method != FishLogEntry.Method.HARPOON)) {
+                    continue;
+                }
+
+                found = i;
+                break;
+            }
+            if (found < 0) continue;
+
+            if (!FishItems.isContainer(data)) {
+                cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+                return true;
+            }
+
+            contents.remove(found);
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+
+            // a container's contents are its identity, so a part-spent one is a different item
+            if (!contents.isEmpty()) {
+                cargo.addSpecial(FishItems.repack(data.getId(), contents), 1);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void giveCharts(int count, List<String> givenOut) {
+        giveCharts(count, givenOut, null);
+    }
+
+    protected static void giveCharts(int count, List<String> givenOut, TextPanelAPI text) {
+        giveChartsOfRarity(FishRarity.COMMON, count, givenOut, text);
+    }
+
+    public static void giveChartsOfRarity(FishRarity rarity, int count) {
+        giveChartsOfRarity(rarity, count, null, null);
+    }
+
+    protected static void giveChartsOfRarity(FishRarity rarity, int count,
+                                             List<String> givenOut, TextPanelAPI text) {
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.rarity != rarity) continue;
+            if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
+
+            picker.add(spec, 1f);
+        }
+
+        for (int i = 0; i < count && !picker.isEmpty(); i++) {
+            FishSpec spec = picker.pickAndRemove();
+
+            FishLog.unlockLocationData(spec.id);
+            if (givenOut != null) givenOut.add(spec.id);
+            if (text != null) addRangeDataGainText(spec, text);
+        }
+    }
+
+    protected static void addRangeDataGainText(FishSpec spec, TextPanelAPI text) {
+        String pattern = spec.getDisplayName();
+
+        text.setFontSmallInsignia();
+        text.addParagraph("Gained: Range data for " + pattern, Misc.getPositiveHighlightColor());
+        text.highlightInLastPara(spec.rarity.color, pattern);
+        text.setFontInsignia();
+    }
+
+    public static void grant(String abilityId, TextPanelAPI text) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || abilityId == null) return;
+
+        boolean had = player.hasAbility(abilityId);
+
+        Global.getSector().getCharacterData().addAbility(abilityId);
+        Global.getSector().getCharacterData().getMemoryWithoutUpdate()
+                .set("$ability:" + abilityId, true, 0);
+
+        if (had) return;
+
+        assignSlot(abilityId);
+
+        if (text != null) AddRemoveCommodity.addAbilityGainText(abilityId, text);
+    }
+
+    protected static void assignSlot(String abilityId) {
+        AbilitySlotsAPI slots = Global.getSector().getUIData().getAbilitySlotsAPI();
+        if (slots == null) return;
+
+        int was = slots.getCurrBarIndex();
+
+        for (int bar = 0; bar < 5; bar++) {
+            slots.setCurrBarIndex(bar);
+
+            for (AbilitySlotAPI slot : slots.getCurrSlotsCopy()) {
+                if (slot.getAbilityId() != null) continue;
+
+                slot.setAbilityId(abilityId);
+                slots.setCurrBarIndex(was);
+
+                return;
+            }
+        }
+
+        slots.setCurrBarIndex(was);
+    }
+
+    public static boolean isCarryingFisherProperty() {
+        com.fs.starfarer.api.campaign.rules.MemoryAPI memory =
+                Global.getSector().getMemoryWithoutUpdate();
+
+        if (memory.getBoolean(TutorialConstants.FISHER_PROPERTY_KEY)) return true;
+
+        // A pre-overhaul save carrying the old breadcrumb is carrying the new fiction's assembly.
+        if (memory.getBoolean(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY)) {
+            memory.set(TutorialConstants.FISHER_PROPERTY_KEY, true);
+            memory.unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void takeFisherProperty() {
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(TutorialConstants.FISHER_PROPERTY_KEY, true);
+
+        point();
+    }
+
+    public static void dropFisherProperty() {
+        Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.FISHER_PROPERTY_KEY);
+        Global.getSector().getMemoryWithoutUpdate()
+                .unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
+    }
+
+    public static CampaignFleetAPI getNearestBoat() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return null;
+
+        CampaignFleetAPI best = null;
+        float bestDistance = Float.MAX_VALUE;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            CampaignFleetAPI boat = CoreFisherSpawner.getBoat(system);
+            if (boat == null) continue;
+
+            float distance = Misc.getDistanceLY(player.getLocationInHyperspace(),
+                    system.getLocation());
+
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = boat;
+            }
+        }
+
+        return best;
+    }
+
+    protected static void dropNote() {
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        List<IntelInfoPlugin> notes = new ArrayList<>(manager.getIntel(IntroIntel.class));
+        notes.addAll(manager.getCommQueue(IntroIntel.class));
+
+        for (IntelInfoPlugin intel : notes) {
+            manager.removeIntel(intel);
+        }
+    }
+
+    public static String describeTarget() {
+        Target target = getTarget();
+        if (target == null) return "";
+
+        if (target.anySpecies) return "anything you can land";
+
+        List<String> names = new ArrayList<>();
+        for (String id : target.speciesIds) {
+            FishSpec spec = FishSpecLoader.getFishSpec(id);
+            names.add(spec == null ? "a specimen" : spec.getDisplayName());
+        }
+
+        return String.join(" and ", names);
+    }
+
+    protected static boolean isPlanted(StarSystemAPI system, String speciesId) {
+        for (SectorEntityToken mote : system.getEntitiesWithTag(
+                catchrelease.campaign.fish.entities.FishEntityPlugin.MOTE_TAG)) {
+            if (mote.isExpired()) continue;
+            if (!mote.getMemoryWithoutUpdate().getBoolean(QuestPond.QUEST_MOTE_FLAG)) continue;
+
+            if (mote.getCustomPlugin()
+                    instanceof catchrelease.campaign.fish.entities.FishEntityPlugin fish
+                    && speciesId.equals(fish.getFishId())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected static void plant(Target target, StarSystemAPI system, String speciesId) {
+        Vector2f mark = new Vector2f(target.x, target.y);
+
+        SectorEntityToken mote = null;
+
+        if (target.atPond) {
+            for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+                if (Misc.getDistance(pond.getLocation(), mark) > TutorialConstants.SPOT_SPREAD) {
+                    continue;
+                }
+
+                if (!target.anySpecies) {
+                    QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+                }
+
+                mote = QuestPond.placeMote(pond, speciesId, true,
+                        TutorialConstants.TARGET_KEY);
+                break;
+            }
+        }
+
+        if (mote == null) {
+            float across = (float) Math.random() * 360f;
+
+            Vector2f at = new Vector2f(mark);
+            Vector2f offset = Misc.getUnitVectorAtDegreeAngle(across);
+            at.x += offset.x * TutorialConstants.SPOT_SPREAD;
+            at.y += offset.y * TutorialConstants.SPOT_SPREAD;
+
+            Vector2f to = new Vector2f(mark);
+            to.x -= offset.x * TutorialConstants.SPOT_SPREAD;
+            to.y -= offset.y * TutorialConstants.SPOT_SPREAD;
+
+            mote = system.addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                    new catchrelease.campaign.fish.entities.FishEntityPlugin.Params(to, speciesId));
+
+            mote.setLocation(at.x, at.y);
+        }
+
+        if (mote == null) return;
+
+        QuestPond.markPlanted(mote, TutorialConstants.TARGET_KEY);
     }
 }

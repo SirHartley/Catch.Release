@@ -15,16 +15,13 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.function.Supplier;
 
-
 public final class FishTooltips {
-
     private FishTooltips() {
     }
 
     public static TooltipMakerAPI.TooltipCreator create(FishSpec spec) {
         return create(spec, null);
     }
-
 
     public static TooltipMakerAPI.TooltipCreator create(FishSpec spec,
                                                         Supplier<String> actionLine) {

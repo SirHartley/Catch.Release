@@ -8,23 +8,12 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-
 public class CoherenceHeatField {
-
-
     public static final float CELL = 2000f;
-
-
     public static final int SAMPLES_PER_FRAME = 500;
-
-
     public static final float SHOW_FLOOR = 0.08f;
-
-
     public static final float ALPHA_CAP = 0.2f;
     public static final float HEAT_EASE = 1.8f;
-
-
     public static final Color THIN = new Color(150, 30, 190);
     public static final Color WORST = new Color(255, 120, 235);
 
@@ -32,7 +21,6 @@ public class CoherenceHeatField {
     protected final int cols, rows;
     protected final float[] values;
     protected int filled = 0;
-
 
     public CoherenceHeatField() {
         float w = Global.getSettings().getFloat("sectorWidth");
@@ -47,7 +35,6 @@ public class CoherenceHeatField {
         values = new float[cols * rows];
     }
 
-
     public void sampleSome() {
         int budget = SAMPLES_PER_FRAME;
         Vector2f at = new Vector2f();
@@ -57,7 +44,6 @@ public class CoherenceHeatField {
             values[filled++] = Aberration.baseAt(at, null);
         }
     }
-
 
     public void render(float factor, float centerX, float centerY, float alphaMult) {
         int fullRows = filled / cols;
@@ -95,7 +81,6 @@ public class CoherenceHeatField {
 
         GL11.glEnd();
     }
-
 
     protected void corner(float value, float alphaMult) {
         float heat = MathUtils.clamp((value - SHOW_FLOOR) / (1f - SHOW_FLOOR), 0f, 1f);

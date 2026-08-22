@@ -21,6 +21,13 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 
 public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
+    public static final String ENTITY_ID = "catchrelease_StaticPond";
+
+    public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
+    transient protected SpriteAPI starfield;
+    transient protected SpriteAPI stencil;
+    transient protected SpriteAPI background;
+    transient protected WarpingSpriteRendererUtil warp;
 
     public static class PondParams {
         public long seed;
@@ -29,16 +36,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
             this.seed = seed;
         }
     }
-
-    public static final String ENTITY_ID = "catchrelease_StaticPond";
-
-    public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
-
-    transient protected SpriteAPI starfield;
-    transient protected SpriteAPI stencil;
-    transient protected SpriteAPI background;
-
-    transient protected WarpingSpriteRendererUtil warp;
 
     @Override
     public void advance(float amount) {
@@ -132,7 +129,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
         Stencil.endDepthMask();
     }
-
 
     public void spawnRandomMote() {
         Vector2f loc = entity.getLocation();

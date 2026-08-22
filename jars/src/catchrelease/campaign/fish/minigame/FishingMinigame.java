@@ -12,9 +12,7 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 
-
 public class FishingMinigame {
-
     public enum State {
         RUNNING,
         CAUGHT,
@@ -22,45 +20,29 @@ public class FishingMinigame {
     }
 
     protected FishSpec fish;
-
-
     protected float difficulty;
     protected float motionSpeed;
     protected float restlessness;
     protected float progressRateMult;
     protected float escapeRateMult;
     protected FishMotion motion;
-
-
     protected float barPosition = 0.4f;
     protected float barHeight;
     protected float barVelocity = 0f;
-
-
     protected float fishPosition = 0.5f;
     protected float fishTarget = 0.5f;
     protected float fishThinkTimer = 0f;
     protected float fishVelocity = 0f;
-
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
-
-
     protected MinigameTreasure treasure;
     protected final java.util.List<MinigameTreasure> takenTreasures = new java.util.ArrayList<>();
     protected int treasuresLeft = 0;
     protected float treasureClock = 0f;
-
-
     protected Tackle tackle = Tackle.NONE;
     protected State state = State.RUNNING;
-
-
     protected boolean cannotLose = false;
-
-
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
-
 
     public FishingMinigame(FishSpec fish, Tackle tackle) {
         this.fish = fish;
@@ -82,7 +64,6 @@ public class FishingMinigame {
         rollTreasure();
     }
 
-
     protected void rollTreasure() {
         takenTreasures.clear();
         treasureClock = 0f;
@@ -92,14 +73,12 @@ public class FishingMinigame {
         treasure = spawnTreasure();
     }
 
-
     protected MinigameTreasure spawnTreasure() {
         if (treasuresLeft <= 0) return null;
 
         treasuresLeft--;
         return new MinigameTreasure(TreasureRoller.rollRarity());
     }
-
 
     public void restart() {
         barPosition = 0.4f;
@@ -116,7 +95,6 @@ public class FishingMinigame {
         timeTotal = 0f;
     }
 
-
     public static float getBarHeight() {
         float pixels = UpgradeManager.getValue(
                 StatIds.FISHING_BAR_SIZE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK);
@@ -124,7 +102,6 @@ public class FishingMinigame {
         return MathUtils.clamp(pixels / FishConstants.MINIGAME_TRACK_HEIGHT,
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
     }
-
 
     public void advance(float amount, boolean reeling) {
         if (state != State.RUNNING) return;
@@ -137,7 +114,6 @@ public class FishingMinigame {
         advanceProgress(amount);
     }
 
-
     protected void advanceBar(float amount, boolean reeling) {
         barVelocity += (reeling
                 ? FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult
@@ -148,7 +124,6 @@ public class FishingMinigame {
 
         bounce(0f, 1f - barHeight);
     }
-
 
     protected void bounce(float lowest, float highest) {
         if (barPosition < lowest) {
@@ -163,7 +138,6 @@ public class FishingMinigame {
 
         if (Math.abs(barVelocity) < FishConstants.MINIGAME_BAR_REST_SPEED) barVelocity = 0f;
     }
-
 
     protected void advanceFish(float amount) {
         fishThinkTimer -= amount;
@@ -190,7 +164,6 @@ public class FishingMinigame {
         if (fishPosition < margin || fishPosition > 1f - margin) fishVelocity = 0f;
         fishPosition = MathUtils.clamp(fishPosition, margin, 1f - margin);
     }
-
 
     protected void advanceProgress(float amount) {
         if (isFishInBar()) {
@@ -226,11 +199,9 @@ public class FishingMinigame {
         return covers(fishPosition);
     }
 
-
     public boolean covers(float position) {
         return position >= barPosition && position <= barPosition + barHeight;
     }
-
 
     protected void advanceTreasure(float amount) {
         if (treasure != null && treasure.isActive()) {
@@ -252,16 +223,13 @@ public class FishingMinigame {
         return tackle;
     }
 
-
     public MinigameTreasure getTreasure() {
         return treasure;
     }
 
-
     public java.util.List<MinigameTreasure> getTakenTreasures() {
         return takenTreasures;
     }
-
 
     protected float pickFishTarget() {
         FishMotion motion = this.motion == FishMotion.MIXED ? pickMixedMotion() : this.motion;
@@ -290,7 +258,6 @@ public class FishingMinigame {
         return options[(int) MathUtils.getRandomNumberInRange(0, options.length - 0.001f)];
     }
 
-
     protected float pickThinkTime() {
         float base = MathUtils.getRandomNumberInRange(
                 FishConstants.MINIGAME_THINK_TIME_MIN, FishConstants.MINIGAME_THINK_TIME_MAX);
@@ -302,7 +269,6 @@ public class FishingMinigame {
 
         return base / divisor;
     }
-
 
     protected float getDifficultyMult() {
         float scaled = FishConstants.MINIGAME_DIFFICULTY_FLOOR
@@ -318,7 +284,6 @@ public class FishingMinigame {
     public float getDifficulty() {
         return difficulty;
     }
-
 
     public void setDifficulty(float value) {
         difficulty = MathUtils.clamp(value, FishConstants.MINIGAME_DIFFICULTY_MIN, FishConstants.MINIGAME_DIFFICULTY_MAX);
@@ -366,17 +331,14 @@ public class FishingMinigame {
         state = State.ESCAPED;
     }
 
-
     public void setCaught() {
         progress = 1f;
         state = State.CAUGHT;
     }
 
-
     public void devTakeTreasure() {
         takenTreasures.add(new MinigameTreasure(TreasureRoller.rollRarity()));
     }
-
 
     public void devSpawnTreasure() {
         treasuresLeft++;

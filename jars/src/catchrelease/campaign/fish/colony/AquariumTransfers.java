@@ -14,24 +14,32 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 
-
 public final class AquariumTransfers {
-
-
     public interface OnMoved {
         void moved(int count);
     }
 
-    private AquariumTransfers() {
+    protected abstract static class PickerListener implements CargoPickerListener {
+        protected final OnMoved after;
+
+        public PickerListener(OnMoved after) {
+            this.after = after;
+        }
+
+        @Override
+        public void cancelledCargoSelection() {
+            after.moved(0);
+        }
     }
 
+    private AquariumTransfers() {
+    }
 
     public static int countFishAboard() {
         int count = 0;
 
         for (CargoStackAPI stack : Global.getSector().getPlayerFleet()
                 .getCargo().getStacksCopy()) {
-
             count += FishItems.countSpecimens(stack);
         }
 
@@ -40,21 +48,18 @@ public final class AquariumTransfers {
 
     public static void openAddPicker(InteractionDialogAPI dialog,
                                      BreachConservatory conservatory, OnMoved after) {
-
         FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
 
         CargoAPI offer = Global.getFactory().createCargo(true);
 
         for (CargoStackAPI stack : Global.getSector().getPlayerFleet()
                 .getCargo().getStacksCopy()) {
-
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (FishItems.isCatch(data)) offer.addSpecial(data, stack.getSize());
         }
 
         dialog.showCargoPickerDialog("Select specimens for the tank", "Add", "Never mind",
                 false, 330f, offer, new PickerListener(after) {
-
                     @Override
                     public void pickedCargo(CargoAPI picked) {
                         after.moved(addToTank(picked, conservatory));
@@ -72,7 +77,6 @@ public final class AquariumTransfers {
 
     public static void openTakePicker(InteractionDialogAPI dialog,
                                       BreachConservatory conservatory, OnMoved after) {
-
         CargoAPI offer = Global.getFactory().createCargo(true);
 
         for (String encoded : conservatory.getAquariumFish()) {
@@ -81,7 +85,6 @@ public final class AquariumTransfers {
 
         dialog.showCargoPickerDialog("Select specimens to take back", "Take", "Never mind",
                 false, 330f, offer, new PickerListener(after) {
-
                     @Override
                     public void pickedCargo(CargoAPI picked) {
                         after.moved(takeFromTank(picked, conservatory));
@@ -96,7 +99,6 @@ public final class AquariumTransfers {
                     }
                 });
     }
-
 
     public static int addToTank(CargoAPI picked, BreachConservatory conservatory) {
         if (picked == null) return 0;
@@ -124,7 +126,6 @@ public final class AquariumTransfers {
         return moved;
     }
 
-
     public static int takeFromTank(CargoAPI picked, BreachConservatory conservatory) {
         if (picked == null) return 0;
 
@@ -145,20 +146,5 @@ public final class AquariumTransfers {
         }
 
         return moved;
-    }
-
-
-    protected abstract static class PickerListener implements CargoPickerListener {
-
-        protected final OnMoved after;
-
-        public PickerListener(OnMoved after) {
-            this.after = after;
-        }
-
-        @Override
-        public void cancelledCargoSelection() {
-            after.moved(0);
-        }
     }
 }

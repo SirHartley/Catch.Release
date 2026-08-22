@@ -21,17 +21,29 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CatchResultPanel {
+    protected final FishCatch entry;
+    protected final SectorEntityToken where;
+    protected final FishLogEntry.Method method;
+    protected final List<Line> lines = new ArrayList<>();
+    protected float elapsed = 0f;
+    protected int shown = 0;
+    protected boolean skipped = false;
+    protected boolean record = false;
+    protected boolean newSpecies = false;
+    protected final List<Bubble> bubbles = new ArrayList<>();
+    transient protected LazyFont font;
+    transient protected LazyFont titleFont;
+    transient protected LazyFont.DrawableString title;
+    transient protected LazyFont.DrawableString prompt;
+    transient protected LazyFont.DrawableString recordText;
+    transient protected boolean fontsChecked = false;
 
     protected static class Line {
         final String label;
         final String value;
         final Color color;
-
-
         boolean record;
-
         transient LazyFont.DrawableString labelText;
         transient LazyFont.DrawableString valueText;
         transient LazyFont.DrawableString markText;
@@ -43,25 +55,6 @@ public class CatchResultPanel {
         }
     }
 
-    protected final FishCatch entry;
-    protected final SectorEntityToken where;
-    protected final FishLogEntry.Method method;
-
-    protected final List<Line> lines = new ArrayList<>();
-
-    protected float elapsed = 0f;
-    protected int shown = 0;
-
-
-    protected boolean skipped = false;
-
-
-    protected boolean record = false;
-
-
-    protected boolean newSpecies = false;
-
-
     protected static class Bubble {
         float fx;
         float startY;
@@ -70,15 +63,6 @@ public class CatchResultPanel {
         float phase;
     }
 
-    protected final List<Bubble> bubbles = new ArrayList<>();
-
-    transient protected LazyFont font;
-    transient protected LazyFont titleFont;
-    transient protected LazyFont.DrawableString title;
-    transient protected LazyFont.DrawableString prompt;
-    transient protected LazyFont.DrawableString recordText;
-    transient protected boolean fontsChecked = false;
-
     public CatchResultPanel(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
         this.entry = entry;
         this.where = where;
@@ -86,7 +70,6 @@ public class CatchResultPanel {
 
         buildLines();
     }
-
 
     protected void buildLines() {
         if (entry == null) return;
@@ -119,7 +102,6 @@ public class CatchResultPanel {
 
         while (shown < lines.size()
                 && elapsed >= (shown + 1) * FishConstants.MINIGAME_RESULT_LINE_DELAY) {
-
             shown++;
             CatchCelebration.playHook(FishConstants.SOUND_RESULT_LINE);
         }
@@ -129,7 +111,6 @@ public class CatchResultPanel {
         shown = lines.size();
         skipped = true;
     }
-
 
     public boolean isComplete() {
         return shown >= lines.size();
@@ -155,14 +136,12 @@ public class CatchResultPanel {
         renderPrompt(layout, y, alphaMult);
     }
 
-
     protected float getRecordHeadroom() {
         if (!record || recordText == null) return 0f;
 
         return FishConstants.MINIGAME_RESULT_RECORD_GAP + recordText.getHeight()
                 + FishConstants.MINIGAME_RESULT_RECORD_BOUNCE;
     }
-
 
     protected float getContentWidth() {
         float widest = 0f;
@@ -183,7 +162,6 @@ public class CatchResultPanel {
         return widest;
     }
 
-
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -203,7 +181,6 @@ public class CatchResultPanel {
         return height;
     }
 
-
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         drawQuad(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight,
                 Color.BLACK, 0.85f * alphaMult);
@@ -219,7 +196,6 @@ public class CatchResultPanel {
 
         dress(layout.panelX, layout.panelY, layout.panelWidth, layout.panelHeight, alphaMult);
     }
-
 
     protected void renderGodRays(FishingMinigameLayout layout, float alphaMult) {
         Color color = FishConstants.MINIGAME_RESULT_GOD_RAY_COLOR;
@@ -254,7 +230,6 @@ public class CatchResultPanel {
 
     protected static void drawGodRay(float topX, float bottomX, float topY, float bottomY,
                                      float topHalf, float bottomHalf, Color color, float alpha) {
-
         float r = color.getRed() / 255f;
         float g = color.getGreen() / 255f;
         float b = color.getBlue() / 255f;
@@ -268,7 +243,6 @@ public class CatchResultPanel {
         GL11.glVertex2f(bottomX - bottomHalf, bottomY);
         GL11.glEnd();
     }
-
 
     protected void renderBubbles(FishingMinigameLayout layout, float alphaMult) {
         if (bubbles.isEmpty()) spawnBubbles();
@@ -284,7 +258,6 @@ public class CatchResultPanel {
                     FishConstants.MINIGAME_RESULT_BUBBLE_ALPHA * alphaMult, 1f);
         }
     }
-
 
     protected void spawnBubbles() {
         for (int i = 0; i < FishConstants.MINIGAME_RESULT_BUBBLES; i++) {
@@ -315,12 +288,10 @@ public class CatchResultPanel {
 
     protected static void outline(float x, float y, float width, float height, float offset,
                                   Color color, float alpha) {
-
         RoundedBorder.draw(x - offset, y - offset, width + offset * 2f, height + offset * 2f,
                 FishConstants.MINIGAME_BORDER_RADIUS + offset, color, alpha,
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
-
 
     protected void renderBox(FishingMinigameLayout layout, SpriteAPI sprite, float alphaMult) {
         FishSpec spec = entry.getSpec();
@@ -352,7 +323,6 @@ public class CatchResultPanel {
         dress(x, y, size, size, alphaMult);
     }
 
-
     protected void renderRecord(FishingMinigameLayout layout, float alphaMult) {
         if (!record || recordText == null || !isComplete()) return;
 
@@ -366,7 +336,6 @@ public class CatchResultPanel {
                         + recordText.getHeight() + bounce);
     }
 
-
     protected float renderTitle(FishingMinigameLayout layout, float y, float alphaMult) {
         loadFonts();
         if (title == null) return y;
@@ -376,7 +345,6 @@ public class CatchResultPanel {
 
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
-
 
     protected float renderLines(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
@@ -411,7 +379,6 @@ public class CatchResultPanel {
         return y;
     }
 
-
     protected void renderPrompt(FishingMinigameLayout layout, float y, float alphaMult) {
         if (!isComplete() || prompt == null) return;
 
@@ -423,7 +390,6 @@ public class CatchResultPanel {
                 alphaMult * FishConstants.MINIGAME_RESULT_PROMPT_ALPHA));
         prompt.draw(layout.resultX + layout.resultWidth * 0.5f, y - FishConstants.MINIGAME_RESULT_TITLE_GAP);
     }
-
 
     protected void build(Line line) {
         if (line.labelText != null) return;
@@ -440,7 +406,6 @@ public class CatchResultPanel {
                 FishConstants.MINIGAME_RESULT_TEXT_SIZE);
         line.markText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
     }
-
 
     protected void loadFonts() {
         if (fontsChecked) return;

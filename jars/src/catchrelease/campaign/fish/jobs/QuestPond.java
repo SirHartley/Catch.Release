@@ -17,21 +17,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class QuestPond {
-
-
     public static final String IMPORTANT_FLAG = "$catchrelease_questPond";
-
-
     public static final String CLAIMED_BY_KEY = "$catchrelease_questPondJob";
-
-
     public static final String QUEST_MOTE_FLAG = "$catchrelease_questMote";
-
-
     public static final String PLANTED_BY_KEY = "$catchrelease_questMoteJob";
-
 
     public static boolean claim(SectorEntityToken pond, String jobId) {
         if (pond == null || jobId == null) return false;
@@ -47,7 +37,6 @@ public class QuestPond {
 
         return true;
     }
-
 
     public static void release(SectorEntityToken pond, String jobId) {
         if (pond == null || jobId == null) return;
@@ -65,7 +54,6 @@ public class QuestPond {
         }
     }
 
-
     public static void releaseAll(String jobId) {
         if (jobId == null || Global.getSector() == null) return;
 
@@ -73,7 +61,6 @@ public class QuestPond {
             for (SectorEntityToken pond : getPonds(system)) release(pond, jobId);
         }
     }
-
 
     public static void sweep(Collection<String> known, Collection<String> live) {
         if (Global.getSector() == null) return;
@@ -107,7 +94,6 @@ public class QuestPond {
         return pond != null && pond.getMemoryWithoutUpdate().getBoolean(IMPORTANT_FLAG);
     }
 
-
     @SuppressWarnings("unchecked")
     public static Set<String> getClaims(SectorEntityToken pond) {
         if (pond == null) return new LinkedHashSet<>();
@@ -125,12 +111,10 @@ public class QuestPond {
         return jobId != null && getClaims(pond).contains(jobId);
     }
 
-
     public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId,
                                               String jobId) {
         return placeMote(pond, speciesId, false, jobId);
     }
-
 
     public static SectorEntityToken placeMote(SectorEntityToken pond, String speciesId,
                                               boolean holds, String jobId) {
@@ -161,7 +145,6 @@ public class QuestPond {
         return mote;
     }
 
-
     public static void markPlanted(SectorEntityToken mote, String jobId) {
         if (mote == null) return;
 
@@ -172,11 +155,9 @@ public class QuestPond {
         if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
     }
 
-
     public static boolean isQuestMote(SectorEntityToken mote) {
         return mote != null && mote.getMemoryWithoutUpdate().getBoolean(QUEST_MOTE_FLAG);
     }
-
 
     public static void clearMotes(String jobId) {
         if (jobId == null || Global.getSector() == null) return;
@@ -195,11 +176,9 @@ public class QuestPond {
         }
     }
 
-
     public static String getPlanter(SectorEntityToken mote) {
         return mote == null ? null : mote.getMemoryWithoutUpdate().getString(PLANTED_BY_KEY);
     }
-
 
     public static List<SectorEntityToken> getPonds(LocationAPI location) {
         List<SectorEntityToken> ponds = new ArrayList<>();
@@ -207,13 +186,11 @@ public class QuestPond {
 
         for (SectorEntityToken entity
                 : location.getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
-
             if (!entity.isExpired()) ponds.add(entity);
         }
 
         return ponds;
     }
-
 
     public static SectorEntityToken findPondAt(LocationAPI location, float x, float y, float spread) {
         Vector2f mark = new Vector2f(x, y);
@@ -224,7 +201,6 @@ public class QuestPond {
 
         return null;
     }
-
 
     public static SectorEntityToken findFreePond(LocationAPI location) {
         for (SectorEntityToken pond : getPonds(location)) {
@@ -237,7 +213,6 @@ public class QuestPond {
     protected static boolean isPond(SectorEntityToken entity) {
         return MaskedFishingPondTerrainPlugin.getPondPlugin(entity) != null;
     }
-
 
     protected static boolean hasSector() {
         return Global.getSector() != null;

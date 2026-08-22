@@ -13,25 +13,19 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.util.EnumSet;
 
-
 public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
-    public transient SpriteAPI sprite;
-
-    private boolean expired = false;
-
     public static final float SUPERLUMINAL_TIME = 0.4f;
 
+    public transient SpriteAPI sprite;
+    private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
-
     private float size;
     private Color color;
     private Vector2f loc;
-
     private float timePassed = 0f;
     private float extraAlphaMult = 1f;
-
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightGlowRenderer(Vector2f loc, float size, Color color) {

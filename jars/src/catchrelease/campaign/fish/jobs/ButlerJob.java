@@ -5,11 +5,8 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-
 public class ButlerJob extends FishJob {
-
     public static final int VALUE_PER_KILO = 45;
-
     public static final float DAYS = 45f;
 
     @Override

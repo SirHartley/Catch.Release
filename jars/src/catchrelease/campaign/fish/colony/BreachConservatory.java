@@ -9,11 +9,12 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class BreachConservatory extends BaseIndustry {
-
     public static final String ID = "catchrelease_conservatory";
 
+    protected List<String> aquariumFish = new ArrayList<>();
+    protected boolean aquariumEnabled = true;
+    protected String backdropId = null;
 
     @Override
     public boolean isAvailableToBuild() {
@@ -22,20 +23,10 @@ public class BreachConservatory extends BaseIndustry {
         return super.isAvailableToBuild();
     }
 
-
     @Override
     public boolean showWhenUnavailable() {
         return Global.getSector().getPlayerFaction().knowsIndustry(getId());
     }
-
-
-    protected List<String> aquariumFish = new ArrayList<>();
-
-
-    protected boolean aquariumEnabled = true;
-
-
-    protected String backdropId = null;
 
     @Override
     public void apply() {
@@ -79,7 +70,6 @@ public class BreachConservatory extends BaseIndustry {
         }
     }
 
-
     public List<String> getAquariumFish() {
         if (aquariumFish == null) aquariumFish = new ArrayList<>();
 
@@ -101,7 +91,6 @@ public class BreachConservatory extends BaseIndustry {
     public void setBackdropId(String id) {
         backdropId = id;
     }
-
 
     public static BreachConservatory get(MarketAPI market) {
         if (market == null) return null;

@@ -15,16 +15,33 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class ShopMarks {
-
     public static final String KEY = "$catchrelease_shop_marks";
-
-
     public static final float DOT_RADIUS = 3.5f;
-
-
     public static final float DOT_INSET = 8f;
+    protected static final long WANTED_CACHE_MS = 250L;
+    protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
+            new catchrelease.helper.cache.TimedValue<>(WANTED_CACHE_MS);
+
+    public static class Ask {
+        public final String name;
+        public final FishRequirement requirement;
+
+        public Ask(String name, FishRequirement requirement) {
+            this.name = name;
+            this.requirement = requirement;
+        }
+    }
+
+    protected static class UpgradeMark {
+        final UpgradeStat stat;
+        final int targetLevel;
+
+        UpgradeMark(UpgradeStat stat, int targetLevel) {
+            this.stat = stat;
+            this.targetLevel = targetLevel;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public static Set<String> getMarkedKeys() {
@@ -44,7 +61,6 @@ public class ShopMarks {
         return marked;
     }
 
-
     public static String getMarkKey(ShopEntry entry) {
         if (entry == null) return null;
 
@@ -57,7 +73,6 @@ public class ShopMarks {
         return statId == null || targetLevel <= 0
                 ? null : "stat:" + statId + ":" + targetLevel;
     }
-
 
     protected static void migrateLegacyUpgradeKeys(Set<String> marked) {
         if (marked == null || marked.isEmpty() || UpgradeManager.getInstance() == null) return;
@@ -123,7 +138,6 @@ public class ShopMarks {
         toggle(getMarkKey(entry));
     }
 
-
     public static boolean isMarkable(ShopEntry entry) {
         if (entry == null) return false;
         if (entry.isPurchaseLocked() && !entry.isUpgrade()) return false;
@@ -132,7 +146,6 @@ public class ShopMarks {
 
         return price != null && price.fish != null;
     }
-
 
     public static List<FishRequirement> getMarkedRequirements() {
         List<FishRequirement> out = new ArrayList<>();
@@ -169,7 +182,6 @@ public class ShopMarks {
         return out;
     }
 
-
     public static boolean isMarked(FishCatch entry) {
         if (entry == null) return false;
 
@@ -179,7 +191,6 @@ public class ShopMarks {
 
         return false;
     }
-
 
     public static boolean isMarked(FishSpec spec) {
         if (spec == null) return false;
@@ -191,16 +202,9 @@ public class ShopMarks {
         return false;
     }
 
-
-    protected static final long WANTED_CACHE_MS = 250L;
-
-    protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
-            new catchrelease.helper.cache.TimedValue<>(WANTED_CACHE_MS);
-
     protected static void invalidateWantedCache() {
         wantedAsks.invalidate();
     }
-
 
     protected static List<Ask> getWantedAsks() {
         return wantedAsks.get(System.currentTimeMillis(), () -> {
@@ -209,7 +213,6 @@ public class ShopMarks {
             if (Global.getSector() != null) {
                 for (com.fs.starfarer.api.campaign.comm.IntelInfoPlugin intel
                         : Global.getSector().getIntelManager().getIntel()) {
-
                     if (intel.isEnding() || intel.isEnded()) continue;
                     if (!(intel instanceof FishAsker asker)) continue;
                     String name = asker.getAskerName();
@@ -225,7 +228,6 @@ public class ShopMarks {
         });
     }
 
-
     public static boolean isWanted(FishCatch entry) {
         if (entry == null) return false;
 
@@ -236,7 +238,6 @@ public class ShopMarks {
         return false;
     }
 
-
     public static boolean isWanted(FishSpec spec) {
         if (spec == null) return false;
 
@@ -246,18 +247,6 @@ public class ShopMarks {
 
         return false;
     }
-
-
-    public static class Ask {
-        public final String name;
-        public final FishRequirement requirement;
-
-        public Ask(String name, FishRequirement requirement) {
-            this.name = name;
-            this.requirement = requirement;
-        }
-    }
-
 
     public static List<Ask> getMarkedAsks() {
         List<Ask> out = new ArrayList<>();
@@ -316,17 +305,6 @@ public class ShopMarks {
         }
     }
 
-    protected static class UpgradeMark {
-        final UpgradeStat stat;
-        final int targetLevel;
-
-        UpgradeMark(UpgradeStat stat, int targetLevel) {
-            this.stat = stat;
-            this.targetLevel = targetLevel;
-        }
-    }
-
-
     public static List<String> getRequiredBy(FishSpec spec) {
         List<String> out = new ArrayList<>();
         if (spec == null) return out;
@@ -340,7 +318,6 @@ public class ShopMarks {
         return out;
     }
 
-
     public static List<String> getRequiredBy(FishCatch entry) {
         List<String> out = new ArrayList<>();
         if (entry == null) return out;
@@ -353,7 +330,6 @@ public class ShopMarks {
 
         return out;
     }
-
 
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
         Disc.draw(centerX, centerY, radius + 1.2f, java.awt.Color.BLACK,

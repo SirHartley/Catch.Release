@@ -14,16 +14,13 @@ import java.awt.Color;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-
 public final class QuestDialogMap {
-
     private QuestDialogMap() {
     }
 
     public static boolean showRemote(InteractionDialogAPI dialog, String targetSystemId,
                                      SectorEntityToken mapLocation, String title,
                                      FactionAPI uiFaction, String icon, Set<String> intelTags) {
-
         if (dialog == null || dialog.getVisualPanel() == null) return false;
 
         hide(dialog);

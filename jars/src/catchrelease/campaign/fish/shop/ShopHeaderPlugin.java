@@ -12,18 +12,8 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.util.EnumMap;
 import java.util.Map;
 
-
 public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
-
-
-    public interface Purse {
-        Map<FishRarity, Integer> getWallet();
-
-        int getCredits();
-    }
-
     public static final String TITLE = "THE OUTFITTER";
-
     public static final float CHIP_WIDTH = 64f;
     public static final float CREDITS_CHIP_WIDTH = 110f;
     public static final float CHIP_HEIGHT = 30f;
@@ -31,15 +21,18 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     public static final float ICON_SIZE = 20f;
 
     protected final Purse purse;
-
     protected PositionAPI pos;
-
     protected transient LazyFont.DrawableString title;
     protected final Map<FishRarity, LazyFont.DrawableString> counts = new EnumMap<>(FishRarity.class);
     protected final Map<FishRarity, Integer> drawnCounts = new EnumMap<>(FishRarity.class);
-
     protected transient LazyFont.DrawableString creditsText;
     protected int drawnCredits = -1;
+
+    public interface Purse {
+        Map<FishRarity, Integer> getWallet();
+
+        int getCredits();
+    }
 
     public ShopHeaderPlugin(Purse purse) {
         this.purse = purse;
@@ -64,7 +57,6 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         ShopUi.drawQuad(x, y, width, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
     }
-
 
     protected void renderTitle(float x, float y, float height, float alphaMult) {
         LazyFont font = ShopUi.getTitleFont();
@@ -98,7 +90,6 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
             chipX += CHIP_WIDTH + CHIP_GAP;
         }
     }
-
 
     protected void renderCredits(float x, float y, float alphaMult) {
         ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
@@ -144,7 +135,6 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         text.setBaseColor(ShopUi.withAlpha(rarity.color, presence * alphaMult));
         text.draw(Math.round(x + CHIP_WIDTH - 7f), Math.round(y + CHIP_HEIGHT * 0.5f + text.getHeight() * 0.5f));
     }
-
 
     protected LazyFont.DrawableString getCount(FishRarity rarity, int count) {
         LazyFont font = ShopUi.getBodyFont();

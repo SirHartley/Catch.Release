@@ -9,9 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 import java.util.Map;
 
-
 public class AquariumManageDialog implements InteractionDialogPlugin {
-
     protected enum Option {
         ADD,
         REMOVE,
@@ -23,12 +21,11 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         LEAVE
     }
 
+    protected static final int BACKDROPS_PER_PAGE = 6;
+
     protected final BreachConservatory conservatory;
     protected InteractionDialogAPI dialog;
     protected int backdropPage;
-
-
-    protected static final int BACKDROPS_PER_PAGE = 6;
 
     public AquariumManageDialog(BreachConservatory conservatory) {
         this.conservatory = conservatory;
@@ -72,7 +69,6 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         }
     }
 
-
     protected void showBackdrops() {
         dialog.getOptionPanel().clearOptions();
 
@@ -108,7 +104,6 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
 
         preview(hanging);
     }
-
 
     protected void preview(Backdrop backdrop) {
         AquariumTankPanel tank = new AquariumTankPanel(conservatory, dialog);
@@ -174,7 +169,6 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
 
         showMain();
     }
-
 
     @Override
     public void optionMousedOver(String optionText, Object optionData) {

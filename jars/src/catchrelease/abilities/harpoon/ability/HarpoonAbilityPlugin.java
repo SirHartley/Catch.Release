@@ -25,22 +25,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
-
-
     public static final String CHARGE_ID = "catchrelease_harpoon";
-
-    @Override
-    public String getChargeId() {
-        return CHARGE_ID;
-    }
-
-    @Override
-    public ChargeManager.Refill getRefill() {
-        return new HarpoonRefill();
-    }
-
 
     protected static class HarpoonRefill extends ChargeManager.Refill {
         protected HarpoonRefill() {
@@ -56,11 +42,19 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         }
     }
 
+    @Override
+    public String getChargeId() {
+        return CHARGE_ID;
+    }
+
+    @Override
+    public ChargeManager.Refill getRefill() {
+        return new HarpoonRefill();
+    }
 
     public static boolean retrieveCharge() {
         return ChargeManager.gain(CHARGE_ID, new HarpoonRefill());
     }
-
 
     protected static boolean shouldPlayChargeReload() {
         String mode = LunaSettings.getString("catchrelease", HarpoonConstants.RELOAD_SOUND_SETTING);
@@ -111,7 +105,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_FIRE, 1f, 1f);
     }
 
-
     @Override
     public void pressButton() {
         if (cutIfHauling()) return;
@@ -119,12 +112,10 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         super.pressButton();
     }
 
-
     @Override
     public boolean showReticuleOnActivation() {
         return !HarpoonEntityPlugin.isAnyHauling();
     }
-
 
     @Override
     protected void onActivatedWithoutReticule() {
@@ -146,7 +137,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         return super.isUsable();
     }
-
 
     protected Vector2f applyAimAssist(Vector2f from, Vector2f worldTarget) {
         float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
@@ -177,7 +167,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         return MathUtils.getPointOnCircumference(from, distance,
                 Misc.getAngleInDegrees(from, best.getLocation()));
     }
-
 
     protected List<SectorEntityToken> getStrikeableNearby(CampaignFleetAPI fleet, Vector2f from) {
         List<SectorEntityToken> out = new ArrayList<>();

@@ -38,7 +38,6 @@ import java.util.Set;
 public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
 
-
     @Override
     public void onCodexDataGenerated() {
         super.onCodexDataGenerated();
@@ -81,15 +80,12 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new FishIntelPlanetPanel());
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
-
         // housekeeping, once, before anything is looked at
         sweepPondClaims();
 
         // an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();
-
     }
-
 
     protected void sweepPondClaims() {
         Set<String> known = new LinkedHashSet<>();

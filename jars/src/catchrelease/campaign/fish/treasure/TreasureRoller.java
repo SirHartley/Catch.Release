@@ -20,14 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 public class TreasureRoller {
-
     public static boolean rollForTreasure(float chanceMult) {
         return MathUtils.getRandomNumberInRange(0f, 1f)
                 < FishConstants.TREASURE_CHANCE * Math.max(0f, chanceMult);
     }
-
 
     public static int rollCount(float chanceMult) {
         if (!rollForTreasure(chanceMult)) return 0;
@@ -47,7 +44,6 @@ public class TreasureRoller {
 
         return picker.pick();
     }
-
 
     public static TreasureAward award(TreasureRarity rarity, boolean hasShipTackle) {
         TreasureAward award = new TreasureAward(rarity);
@@ -74,7 +70,6 @@ public class TreasureRoller {
         return award;
     }
 
-
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
@@ -87,7 +82,6 @@ public class TreasureRoller {
         WeightedRandomPicker<String> picker = new WeightedRandomPicker<>();
 
         for (CommoditySpecAPI spec : Global.getSettings().getAllCommoditySpecs()) {
-
             if (spec.isNonEcon() || spec.isMeta() || spec.isPersonnel()) continue;
             if (spec.getBasePrice() <= 0f) continue;
 
@@ -147,14 +141,12 @@ public class TreasureRoller {
         award.items.add(new TreasureAward.Item(wingName(spec), getWingSprite(spec), 1));
     }
 
-
     protected static String wingName(FighterWingSpecAPI spec) {
         String name = spec.getWingName();
         if (name == null || name.isEmpty()) return "fighter wing";
 
         return name.toLowerCase().endsWith("wing") ? name : name + " wing";
     }
-
 
     protected static String getWingSprite(FighterWingSpecAPI spec) {
         try {
@@ -164,13 +156,11 @@ public class TreasureRoller {
         }
     }
 
-
     protected static void awardHull(TreasureAward award, HullSize maxSize) {
         WeightedRandomPicker<ShipHullSpecAPI> picker =
                 new WeightedRandomPicker<>();
 
         for (ShipHullSpecAPI spec : Global.getSettings().getAllShipHullSpecs()) {
-
             if (spec.getHullId() == null) continue;
             if (spec.hasTag("restricted") || spec.hasTag("no_drop")) continue;
             if (spec.isCivilianNonCarrier() && MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f) continue;
@@ -195,7 +185,6 @@ public class TreasureRoller {
         award.items.add(new TreasureAward.Item(spec.getHullName() + "-class hull",
                 spec.getSpriteName(), 1));
     }
-
 
     protected static void awardFromDropGroup(TreasureAward award, CargoAPI cargo, String group) {
         DropData drop = new DropData();
@@ -222,7 +211,6 @@ public class TreasureRoller {
                     Math.max(1, Math.round(stack.getSize()))));
         }
     }
-
 
     protected static String getStackSprite(CargoStackAPI stack) {
         try {

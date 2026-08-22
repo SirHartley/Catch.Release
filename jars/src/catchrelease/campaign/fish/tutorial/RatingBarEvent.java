@@ -6,17 +6,12 @@ import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
 import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
-
 public class RatingBarEvent {
-
-
     public static class VisitCounter implements ColonyInteractionListener {
-
         public static void register() {
             Global.getSector().getListenerManager().removeListenerOfClass(VisitCounter.class);
             Global.getSector().getListenerManager().addListener(new VisitCounter(), true);
         }
-
 
         @Override
         public void reportPlayerOpenedMarket(MarketAPI market) {

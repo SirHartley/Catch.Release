@@ -15,9 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class BackdropLoader {
-
     public static final String PATH = "data/campaign/backdrops.csv";
 
     @SuppressWarnings("unchecked")
@@ -83,7 +81,6 @@ public class BackdropLoader {
         v = v.trim();
         return v.isEmpty() ? def : v;
     }
-
 
     private static boolean optBoolean(JSONObject row, String key, boolean def) {
         String v = optString(row, key, null);

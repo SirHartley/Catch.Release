@@ -19,9 +19,7 @@ import static catchrelease.helper.math.TrigHelper.smootherStep;
 
 // one renderer instance per ripple; not pooled
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
-
     public static final float MAX_ALPHA = 0.7f;
-
     public static final float START_RADIUS_OFFSET = 0.7f;
     public static final float FEATHER_PX = 2f;
     public static final float RING_WIDTH_PX = 2f;
@@ -29,24 +27,18 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
     transient protected SpriteAPI noise;
     transient protected NoiseMappedCircularRingRenderer ringRenderer;
-
     private float age = 0f;
     private boolean expired = false;
-
     public float startWidth = RING_WIDTH_PX;
     public float currentWidth;
     public float growTime = GROW_TIME;
     public float startRadiusOffsetMult = START_RADIUS_OFFSET;
-
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
-
     public Vector2f location;
     public float size;
     public Color color;
-
-
     public LocationAPI home;
 
     public RippleRingRenderer(Vector2f loc, float size, Color color) {
@@ -54,7 +46,6 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         this.size = size;
         this.color = color;
     }
-
 
     public RippleRingRenderer(Color color, float maxSize, Vector2f location, float startWidth, float growTime, float startRadiusOffsetMult) {
         this.color = color;

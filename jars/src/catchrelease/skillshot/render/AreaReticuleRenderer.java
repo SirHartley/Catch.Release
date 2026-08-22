@@ -9,17 +9,13 @@ import catchrelease.skillshot.SkillshotSettings;
 
 import java.awt.*;
 
-
 public class AreaReticuleRenderer extends BaseReticuleRenderer {
-
     transient private SpriteAPI area;
-
     protected float size;
 
     public AreaReticuleRenderer() {
         this(SkillshotSettings.DEFAULT_AREA_SIZE);
     }
-
 
     public AreaReticuleRenderer(float size) {
         this.size = size;
@@ -36,7 +32,6 @@ public class AreaReticuleRenderer extends BaseReticuleRenderer {
         area.setColor(colour);
         area.renderAtCenter(cursorPos.x, cursorPos.y);
     }
-
 
     @Override
     protected float getGuideLineEndPadding() {

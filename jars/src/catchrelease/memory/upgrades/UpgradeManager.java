@@ -52,7 +52,6 @@ public class UpgradeManager {
         return stat != null ? stat.maxLevel : 0;
     }
 
-
     public static float getValue(String statId, float fallback) {
         UpgradeManager manager = getInstance();
 
@@ -61,11 +60,9 @@ public class UpgradeManager {
         return manager.getCurrentValue(statId);
     }
 
-
     public static boolean isUnlocked(String statId) {
         return getValue(statId, 0f) > 0f;
     }
-
 
     public java.util.List<UpgradeStat> getByCategory(UpgradeStat.Category category) {
         java.util.List<UpgradeStat> out = new java.util.ArrayList<>();
@@ -111,7 +108,6 @@ public class UpgradeManager {
     public void loadInitialValues(){
         for (UpgradeStat stat : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) levelMap.put(stat.id, stat);
     }
-
 
     public void updateBaseValues(){
         for (UpgradeStat loaded : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) {

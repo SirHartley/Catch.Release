@@ -17,25 +17,14 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 import java.util.Map;
 
-
 public class KidsJob extends FishJob {
-
     public static final String GROUP_PORTRAIT_ID = "catchrelease_duel_group";
-
-
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
-
     public static final int VALUE = 2200;
-
     public static final float DAYS = 30f;
-
-
     public static final FishGrade BONUS_GRADE = FishGrade.FINE;
 
-
     protected boolean toLoud = true;
-
-
     protected transient FishHandoffPicker.Selection pendingSelection;
 
     @Override
@@ -51,7 +40,6 @@ public class KidsJob extends FishJob {
         // The giver only anchors the comm-directory entry; it is not one of the two children.
         getPerson().setPortraitSprite(Global.getSettings()
                 .getSpriteName("characters", GROUP_PORTRAIT_ID));
-
 
         days = DAYS;
 
@@ -75,7 +63,6 @@ public class KidsJob extends FishJob {
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
-
         if ("showBarBackdrop".equals(action)) {
             if (dialog != null && dialog.getVisualPanel() != null) {
                 dialog.getVisualPanel().restoreSavedVisual();
@@ -109,7 +96,6 @@ public class KidsJob extends FishJob {
 
     protected void showContenderPicker(final InteractionDialogAPI dialog,
                                        final Map<String, MemoryAPI> memoryMap) {
-
         pendingSelection = null;
 
         boolean opened = FishHandoffPicker.show(dialog, "Select two contenders", "Choose", asks,
@@ -139,7 +125,6 @@ public class KidsJob extends FishJob {
 
     protected void finishContenders(InteractionDialogAPI dialog,
                                     Map<String, MemoryAPI> memoryMap) {
-
         if (pendingSelection == null) {
             showContenderPicker(dialog, memoryMap);
             return;
@@ -156,11 +141,9 @@ public class KidsJob extends FishJob {
         pendingSelection = null;
     }
 
-
     @Override
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
-
         MemoryAPI mem = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
         if (mem != null) mem.unset("$menuState");
 
@@ -170,7 +153,6 @@ public class KidsJob extends FishJob {
 
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
     }
-
 
     @Override
     protected boolean payBonus(FishCatch offered) {

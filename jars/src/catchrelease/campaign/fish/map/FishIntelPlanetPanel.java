@@ -30,27 +30,70 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishIntelPlanetPanel implements EveryFrameScript {
-
     public static final float GAP = 10f;
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
     public static final float ICON_SHARE = 0.66f;
-
-
     public static final float TITLE_HEIGHT = 30f;
-
     public static final float INNER_PAD = 10f;
 
-
     protected Object detailCard;
-
     protected Object planetsPanel;
     protected CustomPanelAPI fishPanel;
-
-
     protected boolean failed = false;
+
+    protected static class BoxPlugin extends BaseCustomUIPanelPlugin {
+        protected PositionAPI pos;
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void renderBelow(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            float x = pos.getX();
+            float y = pos.getY();
+            float w = pos.getWidth();
+            float h = pos.getHeight();
+
+            // the field is transparent black, the way the screen's own panels sit on it
+            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
+
+            float titleAlpha = 0.65f;
+            ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
+                    Misc.getDarkPlayerColor(), titleAlpha * alphaMult);
+
+            LazyFont body = ShopUi.getBodyFont();
+            if (body != null) {
+                LazyFont.DrawableString title = body.createText("Patterns",
+                        ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult),
+                        body.getBaseHeight());
+
+                int titleX = Math.round(x + (w - title.getWidth()) * 0.5f);
+                int titleY = Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f);
+
+                LazyFont.DrawableString rim = body.createText("Patterns",
+                        ShopUi.withAlpha(Color.BLACK, alphaMult), body.getBaseHeight());
+                rim.draw(titleX - 1, titleY);
+                rim.draw(titleX + 1, titleY);
+                rim.draw(titleX, titleY - 1);
+                rim.draw(titleX, titleY + 1);
+
+                title.draw(titleX, titleY);
+            }
+
+            // the border wears exactly the title bar's colour, so the bar reads as part of the frame
+            Color border = Misc.getDarkPlayerColor();
+            ShopUi.drawQuad(x, y, w, 1f, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x, y, 1f, h, border, titleAlpha * alphaMult);
+            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, titleAlpha * alphaMult);
+        }
+    }
 
     @Override
     public boolean isDone() {
@@ -95,7 +138,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         }
     }
 
-
     protected Object findPlanetsPanel() {
         if (Global.getSector() == null) return null;
 
@@ -110,7 +152,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
 
         for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
                 tab.getClass(), null, null, null, null, false)) {
-
             Object value = field.get(tab);
             if (value != null && ReflectionUtils.hasMethodOfName(value, "getPlanetList2")) {
                 return value;
@@ -120,11 +161,9 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         return null;
     }
 
-
     protected Object findDetailCard(Object planets) {
         for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
                 planets.getClass(), null, null, null, null, false)) {
-
             Object value = field.get(planets);
             if (value != null && ReflectionUtils.hasMethodOfName(value, "getLayInCourse")) {
                 return value;
@@ -133,7 +172,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
 
         return null;
     }
-
 
     protected void attachPanel(Object card) {
         Object entity = ReflectionUtils.invokeIfExists(card, "getEntity");
@@ -184,10 +222,8 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 .inTL(x, y);
     }
 
-
     protected void buildContent(CustomPanelAPI panel, float innerWidth, float contentHeight,
                                 boolean scrolls, int perRow, List<FishSpec> known, int unknown) {
-
         TooltipMakerAPI content = panel.createUIElement(innerWidth, contentHeight, scrolls);
 
         int total = known.size() + unknown;
@@ -241,59 +277,4 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         planetsPanel = null;
         failed = false;
     }
-
-
-    protected static class BoxPlugin extends BaseCustomUIPanelPlugin {
-
-        protected PositionAPI pos;
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            pos = position;
-        }
-
-        @Override
-        public void renderBelow(float alphaMult) {
-            if (pos == null || alphaMult <= 0f) return;
-
-            float x = pos.getX();
-            float y = pos.getY();
-            float w = pos.getWidth();
-            float h = pos.getHeight();
-
-            // the field is transparent black, the way the screen's own panels sit on it
-            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
-
-            float titleAlpha = 0.65f;
-            ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
-                    Misc.getDarkPlayerColor(), titleAlpha * alphaMult);
-
-            LazyFont body = ShopUi.getBodyFont();
-            if (body != null) {
-                LazyFont.DrawableString title = body.createText("Patterns",
-                        ShopUi.withAlpha(Misc.getBasePlayerColor(), alphaMult),
-                        body.getBaseHeight());
-
-                int titleX = Math.round(x + (w - title.getWidth()) * 0.5f);
-                int titleY = Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f);
-
-                LazyFont.DrawableString rim = body.createText("Patterns",
-                        ShopUi.withAlpha(Color.BLACK, alphaMult), body.getBaseHeight());
-                rim.draw(titleX - 1, titleY);
-                rim.draw(titleX + 1, titleY);
-                rim.draw(titleX, titleY - 1);
-                rim.draw(titleX, titleY + 1);
-
-                title.draw(titleX, titleY);
-            }
-
-            // the border wears exactly the title bar's colour, so the bar reads as part of the frame
-            Color border = Misc.getDarkPlayerColor();
-            ShopUi.drawQuad(x, y, w, 1f, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x, y, 1f, h, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, titleAlpha * alphaMult);
-        }
-    }
-
 }

@@ -8,29 +8,21 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-
 public class PondDepthField {
+    protected final Particle[] particles;
+    protected transient SpriteAPI sprite;
+    protected float time = 0f;
 
     protected static class Particle {
-
         float depth;
-
         float angle;
         float radius;
         float size;
         float phase;
-
-
         float spin;
-
-
         float bob;
         float bobRate;
     }
-
-    protected final Particle[] particles;
-    protected transient SpriteAPI sprite;
-    protected float time = 0f;
 
     public PondDepthField() {
         particles = new Particle[PondConstants.DEPTH_PARTICLES];
@@ -39,7 +31,6 @@ public class PondDepthField {
             particles[i] = spawn(true);
         }
     }
-
 
     protected Particle spawn(boolean anywhere) {
         Particle p = new Particle();
@@ -67,7 +58,6 @@ public class PondDepthField {
         return p;
     }
 
-
     public void advance(float amount) {
         time += amount;
 
@@ -91,19 +81,16 @@ public class PondDepthField {
         }
     }
 
-
     protected float getSpeedMult(Particle p) {
         return PondConstants.DEPTH_SPEED_FLOOR
                 + (1f - PondConstants.DEPTH_SPEED_FLOOR) * getDepth(p);
     }
-
 
     protected float getDepth(Particle p) {
         float bobbed = p.depth + (float) Math.sin(time * p.bobRate + p.phase) * p.bob;
 
         return MathUtils.clamp(bobbed, 0f, 1f);
     }
-
 
     public void render(Vector2f center, float pondRadius, float alphaMult) {
         if (alphaMult <= 0f || pondRadius <= 0f) return;
@@ -138,7 +125,6 @@ public class PondDepthField {
             sprite.renderAtCenter(x, y);
         }
     }
-
 
     protected static Color getColor(float depth) {
         Color deep = PondConstants.DEPTH_COLOR_DEEP;

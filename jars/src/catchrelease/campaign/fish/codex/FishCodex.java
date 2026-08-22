@@ -8,15 +8,12 @@ import com.fs.starfarer.api.impl.codex.CodexDataV2;
 import com.fs.starfarer.api.impl.codex.CodexEntryV2;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
-
 public class FishCodex {
-
     public static final String CATEGORY_ID = "catchrelease_fish";
 
     public static String getEntryId(String speciesId) {
         return "catchrelease_fish_" + speciesId;
     }
-
 
     public static void install() {
         if (CodexDataV2.getEntry(CATEGORY_ID) != null) return;
@@ -35,7 +32,6 @@ public class FishCodex {
         CodexDataV2.rebuildIdToEntryMap();
     }
 
-
     public static boolean show(String speciesId) {
         if (!Global.getSettings().isDevMode()
                 && !FishCodexEntryState.resolve(speciesId).isKnown()) {
@@ -46,14 +42,12 @@ public class FishCodex {
         return true;
     }
 
-
     public static boolean link(TooltipMakerAPI tooltip, String speciesId) {
         if (tooltip == null || !FishCodexEntryState.resolve(speciesId).isKnown()) return false;
 
         tooltip.setCodexEntryId(getEntryId(speciesId));
         return true;
     }
-
 
     public static String getIcon(FishSpec spec) {
         if (spec.icon == null || spec.icon.isEmpty()) return FishConstants.ITEM_ICON_FALLBACK;

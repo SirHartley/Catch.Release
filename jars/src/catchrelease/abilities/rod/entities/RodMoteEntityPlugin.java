@@ -24,24 +24,21 @@ import org.magiclib.plugins.MagicTrailPlugin;
 import java.awt.*;
 
 public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
-
     public static final String ENTITY_ID = "catchrelease_RodMote";
-
     public static final float GLOW_SIZE = 15f;
     public static final float VELOCITY = 200f;
     public static final float SINE_WAVE_MAX_VARIANCE = 100f;
 
     protected float timePassedSeconds = 0f;
     protected FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
-
     protected float cadence;
     protected Vector2f origin;
     protected SectorEntityToken target;
     protected Color color;
-
     protected boolean flashed = false;
-
     transient SpriteAPI moteSprite;
+    public Flash flash;
+    public SimpleRippleDataRunner ripples;
 
     public static class RodMoteEntityPluginData {
         Vector2f origin;
@@ -54,7 +51,6 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
             this.color = color;
         }
     }
-
 
     public static boolean isOpening(SectorEntityToken pond) {
         if (pond == null || pond.getContainingLocation() == null) return false;
@@ -112,9 +108,6 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         advanceLocation(amount, target, VELOCITY);
     }
 
-    public Flash flash;
-    public SimpleRippleDataRunner ripples;
-
     private void triggerFlash() {
         flash = new Flash(color, entity.getLocation(), Flash.DEFAULT_EXPLOSION_SIZE);
         LunaCampaignRenderer.addRenderer(flash);
@@ -138,7 +131,6 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         flashed = true;
-
     }
 
     public void advanceLocation(float amt, SectorEntityToken target, float vel) {

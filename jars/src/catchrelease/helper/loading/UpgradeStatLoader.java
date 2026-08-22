@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class UpgradeStatLoader {
-
     public static final String PATH = "data/config/UpgradeData.csv";
 
     public static Map<String, UpgradeStat> getUpgradeStatsFromMemory() {

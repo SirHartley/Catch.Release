@@ -9,60 +9,15 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public final class BlackHoleSpiralWarp {
-
     public static final String RANGE_SETTING = "catchreleaseBlackHoleSpiralWarpRange";
     public static final float DEFAULT_RANGE = CircularSpiralWarpRenderer.DEFAULT_RANGE;
     public static final String BLACK_HOLE_TYPE = "black_hole";
-
     protected static final BlackHoleProvider provider = new BlackHoleProvider();
     protected static CircularSpiralWarpRenderer renderer;
 
-    private BlackHoleSpiralWarp() {
-    }
-
-
-    public static void install() {
-        install(readRange());
-    }
-
-
-    public static void install(float range) {
-        if (renderer == null) {
-            CircularSpiralWarpRenderer.Config config = new CircularSpiralWarpRenderer.Config();
-            config.range = Math.max(0f, range);
-            renderer = new CircularSpiralWarpRenderer(provider, config);
-        } else {
-            renderer.setRange(range);
-        }
-
-        provider.reset();
-        if (!LunaCampaignRenderer.hasRenderer(renderer)) {
-            LunaCampaignRenderer.addTransientRenderer(renderer);
-        }
-    }
-
-    public static float getRange() {
-        return renderer == null ? readRange() : renderer.getRange();
-    }
-
-    public static void setRange(float range) {
-        install(range);
-    }
-
-    protected static float readRange() {
-        try {
-            return Global.getSettings().getFloat(RANGE_SETTING);
-        } catch (RuntimeException ignored) {
-            return DEFAULT_RANGE;
-        }
-    }
-
-
     protected static final class BlackHoleProvider
             implements CircularSpiralWarpRenderer.SourceProvider {
-
         protected LocationAPI location;
         protected final List<CircularSpiralWarpRenderer.Source> cached = new ArrayList<>();
 
@@ -92,6 +47,44 @@ public final class BlackHoleSpiralWarp {
         protected void reset() {
             location = null;
             cached.clear();
+        }
+    }
+
+    private BlackHoleSpiralWarp() {
+    }
+
+    public static void install() {
+        install(readRange());
+    }
+
+    public static void install(float range) {
+        if (renderer == null) {
+            CircularSpiralWarpRenderer.Config config = new CircularSpiralWarpRenderer.Config();
+            config.range = Math.max(0f, range);
+            renderer = new CircularSpiralWarpRenderer(provider, config);
+        } else {
+            renderer.setRange(range);
+        }
+
+        provider.reset();
+        if (!LunaCampaignRenderer.hasRenderer(renderer)) {
+            LunaCampaignRenderer.addTransientRenderer(renderer);
+        }
+    }
+
+    public static float getRange() {
+        return renderer == null ? readRange() : renderer.getRange();
+    }
+
+    public static void setRange(float range) {
+        install(range);
+    }
+
+    protected static float readRange() {
+        try {
+            return Global.getSettings().getFloat(RANGE_SETTING);
+        } catch (RuntimeException ignored) {
+            return DEFAULT_RANGE;
         }
     }
 }
