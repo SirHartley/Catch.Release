@@ -28,21 +28,27 @@ import java.util.List;
 import java.util.Set;
 
 public class FishMapPane extends BaseCustomUIPanelPlugin {
+
     public static final float WIDTH = 250f;
     public static final float PAD = 14f;
+
     public static final float PLANNER_HEIGHT = 22f;
     public static final float SEARCH_HEIGHT = 22f;
+
     public static final float CHIP_HEIGHT = 34f;
     public static final float CHIP_GAP = 4f;
+
     public static final float DESELECT_HEIGHT = 20f;
     public static final float HEADER_HEIGHT = 20f;
     public static final float CONTROLS_HEIGHT = 154f;
     public static final float ROW_HEIGHT = 24f;
+
     public static final String NO_DATA_TEXT = "No data for entry";
     public static final float NO_DATA_NOTE_HEIGHT = 20f;
     public static final float NO_DATA_RESET_WIDTH = 110f;
     public static final float NO_DATA_RESET_HEIGHT = 22f;
     public static final float NO_DATA_GAP = 8f;
+
     public static final float COHERENCE_HEIGHT = 22f;
     public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
     public static final String SEARCH_GHOST = "Search...";
@@ -53,16 +59,19 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     protected final FishPresence.Filter filter = new FishPresence.Filter();
     protected CustomPanelAPI panel;
     protected float width, height;
+
     protected PositionAPI pos;
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
+
     protected final Set<String> selectedIds = new LinkedHashSet<>();
     protected int shownCount = 0;
     protected boolean resetRequested = false;
 
     public interface Host {
+
         void onPresenceChanged();
 
         void onSpeciesFocused(FishSpec spec);
@@ -73,6 +82,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected class RowPlugin extends FishListRow {
+
         public RowPlugin(FishSpec spec) {
             super(spec);
         }

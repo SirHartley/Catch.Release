@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CatchCelebration {
+
     protected final FishSpec fish;
     protected final List<Confetto> confetti = new ArrayList<>();
     protected float elapsed = 0f;
@@ -25,6 +26,7 @@ public class CatchCelebration {
     protected boolean confettiSpawned = false;
 
     protected static class Confetto {
+
         float x, y, vx, vy, spin, angle, size;
         Color color;
     }

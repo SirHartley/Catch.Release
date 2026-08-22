@@ -16,6 +16,7 @@ import org.lwjgl.input.Keyboard;
 import java.awt.Color;
 
 public abstract class FishListRow extends ListRow {
+
     public static final float PAD_SIDE = 8f;
     public static final float MARK_RADIUS = 3.5f;
     public static final float MARK_GAP = 7f;

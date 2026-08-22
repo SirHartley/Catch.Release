@@ -6,6 +6,7 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 
 public enum ShopGroup {
+
     SEARCHLIGHTS("Breach lamps", "Lamps", "shop_lights", "catchrelease_searchlights"),
     DRONES("Drones", "Drones", "shop_rod", "catchrelease_rod"),
     HARPOON("Harpoon", "Harpoon", "shop_harpoon", "catchrelease_harpoon"),

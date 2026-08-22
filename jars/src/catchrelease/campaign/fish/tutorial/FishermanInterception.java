@@ -18,6 +18,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class FishermanInterception implements EveryFrameScript {
+
     public static final String INTERCEPTED_KEY = "$catchrelease_intercepted";
     public static final String CHASING_KEY = "$catchrelease_fisherClosing";
     public static final float CHASE_DAYS = 3f;

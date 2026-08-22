@@ -13,6 +13,7 @@ import catchrelease.skillshot.util.DelayedActionScriptRunWhilePaused;
 import catchrelease.skillshot.util.SkillshotUtils;
 
 public abstract class BaseSkillshotAbility extends BaseDurationAbility implements SkillshotAbility {
+
     protected abstract void onSkillshotFired(Vector2f worldTarget, float angleFromFleet);
 
     protected void onConsume() {

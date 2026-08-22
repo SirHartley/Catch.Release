@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 
 public class ArchedTrajectoryFollowingMote extends BaseCircleTrajectoryFollowingParticle {
+
     public static final float GLOW_SIZE = 15f;
 
     protected FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);

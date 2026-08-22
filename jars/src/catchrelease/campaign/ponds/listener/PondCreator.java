@@ -17,6 +17,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.Random;
 
 public class PondCreator {
+
     private final StarSystemAPI system;
     private int pondsToCreate;
     private final Random random;

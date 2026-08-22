@@ -10,6 +10,7 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import java.awt.Color;
 
 public final class FishIcons {
+
     public static final float BACKLIGHT_ALPHA = 0.35f;
     public static final float RIM_ALPHA = 0.45f;
     public static final float RIM_OFFSET = 1f;

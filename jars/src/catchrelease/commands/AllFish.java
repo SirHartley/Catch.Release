@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AllFish implements BaseCommand {
+
     @Override
     public CommandResult runCommand(String args, CommandContext context) {
         if (!context.isInCampaign() || Global.getSector() == null

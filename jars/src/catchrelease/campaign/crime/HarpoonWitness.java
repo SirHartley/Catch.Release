@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
 
 public class HarpoonWitness implements EveryFrameScript {
+
     public static final String REPORTING_FLAG = "$catchrelease_harpoonReporting";
     public static final float REPORT_DISTANCE = 400f;
     public static final float TRAVEL_DAYS = 12f;

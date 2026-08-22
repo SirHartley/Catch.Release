@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public class AquariumManageDialog implements InteractionDialogPlugin {
+
     protected enum Option {
+
         ADD,
         REMOVE,
         BACKDROP,

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MafiaJob extends FishJob {
+
     public static final String BET_FLAG = "$catchrelease_ringBet";
     public static final int VALUE = 3000;
     public static final float DAYS = 35f;

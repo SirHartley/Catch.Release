@@ -13,12 +13,14 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.EnumSet;
 
 public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float OPEN_TIME = 0.6f;
     public static final float RADIUS_MULT = 0.9f;
     public static final float CENTER_ALPHA = 0.85f;
     public static final int RINGS = 4;
     public static final int SEGMENTS = 48;
     public static final float PARALLAX_MAX_DISPLACEMENT = 60f;
+
     public static final float DRIFT = 25f;
     public static final float DRIFT_PERIOD = 17f;
 
@@ -27,6 +29,7 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
     private final float size;
     private float timePassed = 0f;
     private float open = 0f;
+
     private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;

@@ -6,7 +6,9 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.util.DelayedActionScript;
 
 public final class FishIntelNotifications {
+
     protected static final class DeferredUpdate extends DelayedActionScript {
+
         private final BaseIntelPlugin intel;
         private final Object listInfoParam;
 

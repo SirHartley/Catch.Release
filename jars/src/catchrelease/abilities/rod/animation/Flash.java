@@ -13,11 +13,13 @@ import java.awt.*;
 import java.util.EnumSet;
 
 public class Flash implements LunaCampaignRenderingPlugin {
+
     public static final float ANIM_TIME = 0.2f;
     public static float DEFAULT_EXPLOSION_SIZE = 200f;
 
     protected float animProgress = 0f;
     transient private SpriteAPI glow;
+
     public Color color;
     public Vector2f loc;
     public float size;

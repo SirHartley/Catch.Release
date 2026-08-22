@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class Disc {
+
     public static final int SEGMENTS = 32;
 
     public static void draw(float x, float y, float radius, Color color,

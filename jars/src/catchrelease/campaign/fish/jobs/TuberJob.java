@@ -8,6 +8,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class TuberJob extends FishJob {
+
     public static final int VALUE = 1600;
     public static final float DAYS = 45f;
 

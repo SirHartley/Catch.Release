@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import java.awt.Color;
 
 public abstract class BaseChargedSkillshotAbility extends BaseSkillshotAbility {
+
     public static final float REARM_SECONDS = 0.2f;
     public static final int AVAILABLE_REGEN_COOLDOWN_ALPHA = 90;
 

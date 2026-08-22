@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
+
     protected static final String VERT = "data/shaders/distortion/distortion.vert";
     protected static final String FRAG = "data/shaders/distortion/distortion.frag";
     protected static final String VERT_AUX = "data/shaders/distortion/2dtangent.vert";
@@ -41,6 +42,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected final List<DistortionAPI> distortions = new ArrayList<>();
     protected boolean loaded = false;
     protected boolean usable = false;
+
     protected int program = 0;
     protected int programAux = 0;
     protected final int[] index = new int[4];

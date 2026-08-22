@@ -6,7 +6,9 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 
 public final class FishCodexEntryState {
+
     public enum Unlock {
+
         UNKNOWN,
         RANGE_DATA,
         CAUGHT

@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.util.List;
 
 public abstract class ListRow extends BaseCustomUIPanelPlugin {
+
     public static final float ACCENT_WIDTH = 3f;
 
     protected PositionAPI pos;

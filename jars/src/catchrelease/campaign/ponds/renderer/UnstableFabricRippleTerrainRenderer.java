@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
+
     public static final Color BASE_RIPPLE_COLOR = new Color(100, 120, 160);
     public static final float INNER_SIZE_MULT = 0.05f;
+
     public static final float EXTRA_RIPPLE_BASE_MIN_INTERVAL = 1f;
     public static final float EXTRA_RIPPLE_BASE_MAX_INTERVAL = 6f;
     public static final float EXTRA_RIPPLE_BASE_SIZE = 150f;

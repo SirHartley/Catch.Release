@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpriteLoader {
+
     protected static final Map<String, Boolean> LOADED = new HashMap<>();
 
     public static SpriteAPI getSprite(String id) {

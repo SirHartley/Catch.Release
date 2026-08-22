@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class PondHoleRenderer {
+
     public static final int FAN_SEGMENTS = 48;
 
     public void render(SpriteAPI starfield, SpriteAPI mask, WarpGrid warp, Vector2f loc,

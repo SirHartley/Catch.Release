@@ -10,6 +10,7 @@ import catchrelease.skillshot.SkillshotSettings;
 import java.awt.*;
 
 public class DirectionReticuleRenderer extends BaseReticuleRenderer {
+
     transient private SpriteAPI arrow;
     protected float size;
 

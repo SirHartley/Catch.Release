@@ -35,7 +35,9 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.Collections;
 
 public abstract class FishReward {
+
     public static class Credits extends FishReward {
+
         public final int amount;
 
         public Credits(int amount) {
@@ -55,6 +57,7 @@ public abstract class FishReward {
     }
 
     public static class Upgrade extends FishReward {
+
         public final String statId;
         public final int levels;
 
@@ -82,6 +85,7 @@ public abstract class FishReward {
     }
 
     public static class TackleReward extends FishReward {
+
         public final Tackle tackle;
 
         public TackleReward(Tackle tackle) {
@@ -104,6 +108,7 @@ public abstract class FishReward {
     }
 
     public static class UpgradeSchematic extends FishReward {
+
         public final String statId;
         public final int targetLevel;
 
@@ -161,6 +166,7 @@ public abstract class FishReward {
     }
 
     protected static class SchematicMarkOverlay extends BaseCustomUIPanelPlugin {
+
         protected final String statId;
         protected final int targetLevel;
         protected PositionAPI pos;
@@ -186,6 +192,7 @@ public abstract class FishReward {
     }
 
     public static class TackleSchematic extends FishReward {
+
         public final Tackle tackle;
 
         public TackleSchematic(Tackle tackle) {
@@ -232,6 +239,7 @@ public abstract class FishReward {
     }
 
     public static class BackdropReward extends FishReward {
+
         public final String backdropId;
 
         public BackdropReward(String backdropId) {
@@ -253,6 +261,7 @@ public abstract class FishReward {
     }
 
     public static class LocationData extends FishReward {
+
         public final String speciesId;
         public final int fallbackCredits;
 
@@ -318,6 +327,7 @@ public abstract class FishReward {
     }
 
     protected static class RangeDataSilhouetteOverlay extends BaseCustomUIPanelPlugin {
+
         protected final FishSpec spec;
         protected PositionAPI pos;
 
@@ -341,6 +351,7 @@ public abstract class FishReward {
     }
 
     public static class Blueprint extends FishReward {
+
         public final String itemId;
         public final String data;
 
@@ -390,6 +401,7 @@ public abstract class FishReward {
     }
 
     public static class Commodity extends FishReward {
+
         public final String commodityId;
         public final int quantity;
 

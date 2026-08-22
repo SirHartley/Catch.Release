@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.data;
 
 public enum FishMotion {
+
     SMOOTH,
     DARTER,
     SINKER,

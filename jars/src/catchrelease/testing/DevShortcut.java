@@ -17,6 +17,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 
 public class DevShortcut implements CampaignInputListener {
+
     public static final char KEY = 'j';
     public static final int PRIORITY = -1000;
 

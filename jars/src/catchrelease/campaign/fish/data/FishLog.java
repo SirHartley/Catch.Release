@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FishLog {
+
     public static final String KEY = "$catchrelease_log";
 
     public static boolean record(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {

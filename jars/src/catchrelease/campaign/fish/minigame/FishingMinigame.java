@@ -13,7 +13,9 @@ import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 
 public class FishingMinigame {
+
     public enum State {
+
         RUNNING,
         CAUGHT,
         ESCAPED
@@ -26,13 +28,16 @@ public class FishingMinigame {
     protected float progressRateMult;
     protected float escapeRateMult;
     protected FishMotion motion;
+
     protected float barPosition = 0.4f;
     protected float barHeight;
     protected float barVelocity = 0f;
+
     protected float fishPosition = 0.5f;
     protected float fishTarget = 0.5f;
     protected float fishThinkTimer = 0f;
     protected float fishVelocity = 0f;
+
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
     protected MinigameTreasure treasure;
     protected final java.util.List<MinigameTreasure> takenTreasures = new java.util.ArrayList<>();
@@ -41,6 +46,7 @@ public class FishingMinigame {
     protected Tackle tackle = Tackle.NONE;
     protected State state = State.RUNNING;
     protected boolean cannotLose = false;
+
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
 

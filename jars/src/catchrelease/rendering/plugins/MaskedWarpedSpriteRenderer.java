@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.io.IOException;
 
 public class MaskedWarpedSpriteRenderer {
+
     private final WarpGrid warp;
     private transient int program = 0;
     private transient int uTex = -1;
@@ -24,8 +25,10 @@ public class MaskedWarpedSpriteRenderer {
     private transient int uWellDim = -1;
     private transient int uMaskToFill = -1;
     private float maskThreshold = 0f;
+
     private float swirl = 0f;
     private float swirlEdge = 0.55f;
+
     private float well = 0f;
     private float wellGamma = 1f;
     private float wellDim = 0f;

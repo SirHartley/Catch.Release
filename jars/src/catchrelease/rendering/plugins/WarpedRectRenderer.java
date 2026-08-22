@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class WarpedRectRenderer {
+
     public static void render(SpriteAPI sprite, WarpGrid warp,
                               float x, float y, float width, float height,
                               Color tint, float alpha, float zoom) {

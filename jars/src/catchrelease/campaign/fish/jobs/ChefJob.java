@@ -10,6 +10,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import java.util.List;
 
 public class ChefJob extends FishJob {
+
     public static final int VALUE_PER_TYPE = 1400;
     public static final float DAYS = 40f;
     protected static final String[] DISHES = {

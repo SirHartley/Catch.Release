@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CrabBackdrops {
+
     public static final String OFFER_KEY = "$catchrelease_crabBackdropAt";
     public static final String TURN_KEY = "$catchrelease_crabBackdropTurn";
     public static final String SOLD_AT_KEY = "$catchrelease_crabBackdropSoldAt";

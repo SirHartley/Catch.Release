@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class FishSpec {
+
     public String id;
     public String name;
     public String icon;
@@ -13,19 +14,25 @@ public class FishSpec {
     public Set<String> tags = new LinkedHashSet<>();
     public FishRarity rarity = FishRarity.COMMON;
     public float spawnWeight = 10f;
+
     public FishMotion motion = FishMotion.SMOOTH;
     public float motionSpeed = 1f;
+
     public float restlessness = 1f;
     public float jitter = 1f;
     public float spriteDirection = 180f;
+
     public float difficulty = 50f;
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;
     public float baseValue = 100f;
+
     public float lengthMin = 0.3f;
     public float lengthMax = 0.6f;
+
     public float weightMin = 0.5f;
     public float weightMax = 2f;
+
     public Set<StarColour> starColours = new LinkedHashSet<>();
     public Set<String> systemTags = new LinkedHashSet<>();
     public Set<SectorRegion> regions = new LinkedHashSet<>();

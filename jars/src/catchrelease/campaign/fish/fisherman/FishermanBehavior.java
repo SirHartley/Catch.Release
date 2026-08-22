@@ -30,24 +30,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishermanBehavior implements EveryFrameScript {
+
     protected final CampaignFleetAPI fleet;
     protected float daysOut = 0f;
     protected boolean windingDown = false;
     protected float windDownLeft = 0f;
     protected boolean done = false;
+
     protected final IntervalUtil moteInterval = new IntervalUtil(
             FishermanConstants.MOTE_INTERVAL_MIN, FishermanConstants.MOTE_INTERVAL_MAX);
     protected transient List<Lamp> lamps;
+
     protected SectorEntityToken marker;
     protected transient boolean markerReconciled = false;
+
     protected transient boolean litSoundPlayed = false;
     protected transient TimedValue<String> named;
 
     protected static class Lamp {
+
         protected final CircularArc arc;
         protected float baseAngle;
         protected int direction = 1;
         protected float oscillation = 0f;
+
         protected final Vector2f renderLoc = new Vector2f();
         protected transient SearchlightFanRenderer fan;
 

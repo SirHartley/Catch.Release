@@ -9,8 +9,8 @@ the same commit as the change. A map that is wrong is worse than no map, because
 
 `CLAUDE.md` owns the comment, documentation, and Java class-layout policy. Source comments
 stay sparse: keep engine quirks, save compatibility, and non-obvious math or lifecycle
-constraints; names and reader-first member order carry the rest. This map records the current
-shape, not change history.
+constraints; names, reader-first member order, and responsibility-based field groups carry the
+rest. This map records the current shape, not change history.
 
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.

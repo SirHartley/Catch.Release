@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
+
     public static final String ID = "catchrelease_campaignPlugin";
 
     public static void register() {

@@ -14,8 +14,10 @@ import java.awt.Color;
 import java.util.List;
 
 public class FishSystemPane extends BaseCustomUIPanelPlugin {
+
     public static final float WIDTH = 76f;
     public static final float PAD = 8f;
+
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
     public static final float HEADING_HEIGHT = 22f;

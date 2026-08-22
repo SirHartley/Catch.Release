@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CircularArc extends Circle{
+
     public float startAngle;
     public float endAngle;
 

@@ -21,6 +21,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 
 public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
+
     public static final String ENTITY_ID = "catchrelease_StaticPond";
 
     public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
@@ -30,6 +31,7 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
     transient protected WarpingSpriteRendererUtil warp;
 
     public static class PondParams {
+
         public long seed;
 
         public PondParams(long seed){

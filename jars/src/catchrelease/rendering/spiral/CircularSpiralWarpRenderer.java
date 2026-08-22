@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float DEFAULT_RANGE = 6000f;
     public static final float DEFAULT_TWIST = 2.4f;
     public static final float DEFAULT_MOTION = 0.3f;
@@ -30,9 +31,11 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
     protected final Config config;
     protected final List<Source> sources = new ArrayList<>();
     protected float time = 0f;
+
     protected boolean loaded = false;
     protected boolean usable = false;
     protected boolean validated = false;
+
     protected int program = 0;
     protected int uVisibleUV = -1;
     protected int uCenterUV = -1;
@@ -44,10 +47,12 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
     protected int uSpeed = -1;
 
     public interface SourceProvider {
+
         void collect(List<Source> out);
     }
 
     public static final class Source {
+
         public final Vector2f location;
         public final float strength;
 
@@ -62,6 +67,7 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
     }
 
     public static class Config {
+
         public float range = DEFAULT_RANGE;
         public float twist = DEFAULT_TWIST;
         public float motion = DEFAULT_MOTION;

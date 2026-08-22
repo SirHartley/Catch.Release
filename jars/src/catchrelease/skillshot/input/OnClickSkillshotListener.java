@@ -15,6 +15,7 @@ import catchrelease.skillshot.render.SkillshotRenderer;
 import java.util.List;
 
 public class OnClickSkillshotListener implements SkillshotInputListener, CampaignInputListener {
+
     protected boolean active = false;
     protected SkillshotRenderer renderer;
     protected SkillshotAbility ability;

@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.SpecialItemData;
 import java.util.Map;
 
 public class ShopStorage {
+
     public static final String KEY = "$catchrelease_shop_storage";
 
     public static int reclaim() {

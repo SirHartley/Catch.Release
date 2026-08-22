@@ -53,15 +53,18 @@ import java.util.List;
 import java.util.Set;
 
 public class FishingIntro {
+
     public static final int UNSTARTED = 0;
     public static final int POINTED = 1;
     public static final int RODDED = 2;
+
     public static final int FISH_ONE = 3;
     public static final int FISH_TWO = 4;
     public static final int FISH_THREE = 5;
     public static final int DONE = 6;
 
     public static class TutorialBoatKeeper implements EveryFrameScript, Serializable {
+
         private final CampaignFleetAPI boat;
         private final String systemId;
         private final boolean temporary;
@@ -106,10 +109,13 @@ public class FishingIntro {
     }
 
     public static class Target implements Serializable {
+
         public int stage;
         public List<String> speciesIds = new ArrayList<>();
+
         public String systemId;
         public String systemName;
+
         public float x;
         public float y;
         public boolean atPond;
@@ -119,6 +125,7 @@ public class FishingIntro {
     }
 
     public static class Keeper implements com.fs.starfarer.api.EveryFrameScript {
+
         protected final com.fs.starfarer.api.util.IntervalUtil interval =
                 new com.fs.starfarer.api.util.IntervalUtil(
                         TutorialConstants.KEEP_CHECK_SECONDS, TutorialConstants.KEEP_CHECK_SECONDS);
@@ -166,6 +173,7 @@ public class FishingIntro {
 
     public static class IntroIntel extends BaseIntelPlugin
             implements catchrelease.campaign.fish.shop.FishAsker {
+
         @Override
         public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
             List<catchrelease.campaign.fish.shop.FishRequirement> out = new ArrayList<>();

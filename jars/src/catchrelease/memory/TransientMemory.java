@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class TransientMemory extends BaseGenericPlugin {
+
     private final transient LinkedHashMap<String, Object> data = new LinkedHashMap<>();
 
     public TransientMemory() {

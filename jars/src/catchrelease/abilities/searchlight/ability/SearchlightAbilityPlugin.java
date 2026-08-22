@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchlightAbilityPlugin extends BaseToggleAbility {
+
     public static final String ABILITY_ID = "catchrelease_searchlights";
     public static float DETECTABILITY_PERCENT = 100f;
     public static float SPOOL_UP_TIME = 1.5f;

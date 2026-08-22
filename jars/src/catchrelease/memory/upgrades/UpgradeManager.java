@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UpgradeManager {
+
     public static final String MEMORY_ID = "$catchrelease_upgrades";
 
     public Map<String, UpgradeStat> levelMap = new HashMap<>();

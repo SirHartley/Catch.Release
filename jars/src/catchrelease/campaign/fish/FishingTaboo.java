@@ -6,6 +6,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 
 public class FishingTaboo {
+
     public static boolean isTaboo(String factionId) {
         return Factions.LUDDIC_CHURCH.equals(factionId) || Factions.LUDDIC_PATH.equals(factionId);
     }

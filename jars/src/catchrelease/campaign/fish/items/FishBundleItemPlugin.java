@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
+
     public static final float BOX_ICON_GRID = 80f;
     public static final float BOX_ICON_UL_X = 49f;
     public static final float BOX_ICON_UL_Y = 35f;

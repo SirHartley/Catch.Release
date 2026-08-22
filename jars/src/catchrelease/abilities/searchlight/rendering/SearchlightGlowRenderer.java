@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.EnumSet;
 
 public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float SUPERLUMINAL_TIME = 0.4f;
 
     public transient SpriteAPI sprite;
@@ -21,6 +22,7 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
+
     private float size;
     private Color color;
     private Vector2f loc;

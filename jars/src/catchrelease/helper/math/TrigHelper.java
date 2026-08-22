@@ -6,6 +6,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class TrigHelper {
+
     public static float randomWithinArc(float arc) {
         return (float) Math.random() * arc - arc / 2f;
     }

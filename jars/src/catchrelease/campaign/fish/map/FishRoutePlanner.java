@@ -23,11 +23,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class FishRoutePlanner {
+
     public static final int MAX_PICKS = 5;
     public static final float INSTABILITY_PENALTY_LY = 8f;
     public static final float SLIPSTREAM_LEG_DISCOUNT = 0.3f;
 
     public static class Suggestion {
+
         public final String speciesId;
         public final String reason;
 

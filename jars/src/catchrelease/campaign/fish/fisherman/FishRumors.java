@@ -28,22 +28,27 @@ import java.util.List;
 import java.util.Set;
 
 public class FishRumors {
+
     public static final String STATE_KEY = "$catchrelease_rumor";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
     public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
+
     public static final int TYPE_RARITY = 0;
     public static final int TYPE_LOOT = 1;
     public static final int TYPE_STRANGER = 2;
 
     public static class Saved implements Serializable {
+
         public String systemId;
         public String systemName;
+
         public int type;
         public String strangerId;
         public long started;
     }
 
     public static class RumorIntel extends BaseIntelPlugin {
+
         protected final Saved rumor;
 
         public RumorIntel(Saved rumor) {

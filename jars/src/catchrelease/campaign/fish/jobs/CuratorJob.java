@@ -8,6 +8,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class CuratorJob extends FishJob {
+
     public static final int VALUE_PER_FISH = 2600;
     public static final float DAYS = 70f;
 

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 public class FishJobAsks {
+
     public static final String[] TYPES = {"fish", "crab", "mollusc", "other"};
 
     public static float rollWeightFloor(Random random, float hardness) {

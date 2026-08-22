@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.EnumSet;
 
 public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
+
     protected static final String VERT = "data/catchrelease/shaders/coherence_overlay_vertex.shader";
     protected static final String FRAG = "data/catchrelease/shaders/coherence_overlay_fragment.shader";
     protected static final Color COLOR = new Color(170, 20, 200);
@@ -26,9 +27,11 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
     protected float level = 0f;
     protected float time = 0f;
+
     protected boolean loaded = false;
     protected boolean usable = false;
     protected boolean validated = false;
+
     protected int program = 0;
     protected int uLevel = -1;
     protected int uTime = -1;

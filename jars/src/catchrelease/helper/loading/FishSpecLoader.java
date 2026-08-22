@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class FishSpecLoader {
+
     public static final String PATH = "data/campaign/fish.csv";
 
     public static Map<String, FishSpec> getFishSpecsFromMemory() {

@@ -15,11 +15,14 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 
 public final class AquariumTransfers {
+
     public interface OnMoved {
+
         void moved(int count);
     }
 
     protected abstract static class PickerListener implements CargoPickerListener {
+
         protected final OnMoved after;
 
         public PickerListener(OnMoved after) {

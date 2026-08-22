@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
+
     public static final String CHARGE_ID = "catchrelease_harpoon";
 
     protected static class HarpoonRefill extends ChargeManager.Refill {
+
         protected HarpoonRefill() {
             super(StatIds.HARPOON_CHARGES, HarpoonConstants.CHARGES_FALLBACK,
                     StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK);

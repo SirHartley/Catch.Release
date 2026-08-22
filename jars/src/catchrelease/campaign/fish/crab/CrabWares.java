@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum CrabWares {
+
     CELEBRATION("Celebration Charges", 15000, 3,
             "Goes off over the catch card when something is landed: a flash behind it, the specimen"
                     + " thrown up over its own box, paper everywhere, and the word for it at an"

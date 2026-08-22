@@ -27,12 +27,15 @@ import java.util.Map;
 
 public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishRoutePopup.Host {
+
     public static final String MEMORY_KEY = "$catchrelease_map_fish_filter";
     public static final float BUTTON_WIDTH = 120f;
     public static final float BUTTON_HEIGHT = 25f;
     public static final float BUTTON_PAD = 3f;
+
     public static final float PANE_GAP = 8f;
     public static final float BLOB_RADIUS = 3200f;
+
     public static final long PENDING_SPECIES_MILLIS = 10_000L;
     protected static String pendingSpeciesId;
     protected static List<FishRequirement> pendingRequirements;
@@ -44,19 +47,24 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected Object mapScreen;
     protected boolean failed = false;
     protected ButtonAPI fishButton;
+
     protected boolean applied = false;
     protected boolean paneStanding = false;
     protected float originalScrollerWidth = 0f;
     protected FishMapPane pane;
+
     protected CustomPanelAPI panePanel;
     protected CustomPanelAPI overlayPanel;
+
     protected FishPresenceOverlay overlay;
     protected FishSystemPane systemPane;
     protected CustomPanelAPI systemPanePanel;
+
     protected boolean systemApplied = false;
     protected Object shownSystem;
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
+
     protected float paneX, paneY, paneHeight;
     protected Object arrowList;
     protected final List<Object> injectedArrows = new ArrayList<>();

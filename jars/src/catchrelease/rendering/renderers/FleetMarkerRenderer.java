@@ -13,14 +13,17 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float SIZE = 20f;
     public static final float OFFSET_DIVISOR = 1.41f;
+
     public static final float PULSE_RATE = 1.6f;
     public static final float PULSE_DEPTH = 0.25f;
 
     protected final CampaignFleetAPI fleet;
     protected final String spriteCategory;
     protected final String spriteId;
+
     protected final Color color;
     protected final float size;
     protected float elapsed = 0f;

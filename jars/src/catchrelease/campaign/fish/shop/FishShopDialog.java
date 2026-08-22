@@ -38,21 +38,27 @@ import java.util.List;
 import java.util.Map;
 
 public class FishShopDialog implements InteractionDialogPlugin {
+
     public static final float WIDTH = 920f;
     public static final float HEIGHT = 640f;
     public static final float PAD = 12f;
+
     public static final float HEADER_HEIGHT = 46f;
     public static final float LIST_WIDTH = 320f;
+
     public static final float ROW_WIDTH = LIST_WIDTH - 6f;
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
+
     public static final float TOOLTIP_WIDTH = 320f;
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
+
     public static final float LEAVE_WIDTH = 120f;
     public static final float LEAVE_HEIGHT = 26f;
+
     public static final float UNDO_WIDTH = 200f;
     public static final float UNDO_HEIGHT = 26f;
     public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
@@ -63,11 +69,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
     protected final OnClose onClose;
 
     public interface OnClose {
+
         void onShopClosed(InteractionDialogAPI dialog);
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
             ShopRowPlugin.Host, ShopTabPlugin.Host, ShopHeaderPlugin.Purse {
+
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
         protected final List<ShopEntry> entries = new ArrayList<>();
@@ -75,15 +83,18 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
         protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
         protected TooltipMakerAPI list;
+
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
         protected int credits = 0;
         protected final List<UIComponentAPI> added = new ArrayList<>();
         protected final List<Receipt> purchases = new ArrayList<>();
+
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
         protected PositionAPI pos;
 
         protected class Receipt {
+
             final String entryKey;
             final String markKey;
             final List<Object[]> fishAboard;

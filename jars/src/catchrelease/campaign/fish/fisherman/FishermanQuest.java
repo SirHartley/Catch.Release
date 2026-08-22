@@ -50,25 +50,32 @@ import java.util.Map;
 import java.util.Set;
 
 public class FishermanQuest {
+
     public static final String STATE_KEY = "$catchrelease_fisherQuest";
     public static final String OFFER_KEY = "$catchrelease_fisherQuestOffer";
     public static final String ROUND_KEY = "$catchrelease_fisherQuestRound";
     public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
     public static final float COOLDOWN_DAYS = 90f;
+
     public static final String QUEST_FISH_FLAG = "$catchrelease_questFish";
     public static final String QUEST_TARGET_ID_KEY = "$catchrelease_questTargetId";
+
     public static final int[] RUNG_BY_ROUND = {1, 2, 2, 3, 3, 4};
     public static final float[] MIN_LY_BY_ROUND = {0f, 4f, 8f, 12f, 16f, 20f};
+
     public static final int CREDITS_BASE = 40000;
     public static final int CREDITS_PER_ROUND = 25000;
+
     public static final int SLOTS_PER_JOB = 1;
     public static final float KEEP_CHECK_SECONDS = 2f;
     public static final float SPOT_SPREAD = 400f;
 
     public static class Saved implements Serializable {
+
         public String speciesId;
         public String systemId;
         public String systemName;
+
         public float x;
         public float y;
         public boolean atPond;
@@ -80,6 +87,7 @@ public class FishermanQuest {
     }
 
     protected static class Target {
+
         public final FishSpec spec;
         public final StarSystemAPI system;
 
@@ -90,6 +98,7 @@ public class FishermanQuest {
     }
 
     public static class Keeper implements EveryFrameScript {
+
         protected final IntervalUtil interval =
                 new IntervalUtil(KEEP_CHECK_SECONDS, KEEP_CHECK_SECONDS);
 
@@ -133,6 +142,7 @@ public class FishermanQuest {
 
     public static class QuestIntel extends BaseIntelPlugin
             implements catchrelease.campaign.fish.shop.FishAsker {
+
         protected final Saved quest;
 
         public QuestIntel(Saved quest) {

@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.tackle;
 
 public enum Tackle {
+
     NONE("None", Fit.BOTH,
             "Nothing fitted."),
     SPOOL_GOVERNOR("Spool Governor", Fit.DRONE,
@@ -123,6 +124,7 @@ public enum Tackle {
     };
 
     public enum Fit {
+
         DRONE,
         HARPOON,
         SEARCHLIGHT,

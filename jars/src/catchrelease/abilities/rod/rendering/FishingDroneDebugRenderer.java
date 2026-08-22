@@ -17,6 +17,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
+
     public static final int CIRCLE_SEGMENTS = 72;
     public static final Color RING_COLOR = new Color(0, 255, 255);
     public static final Color SPOKE_COLOR = new Color(255, 200, 0);

@@ -5,6 +5,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class Circle {
+
     public Vector2f center;
     public float radius;
 

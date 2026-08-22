@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class FishItemRenderer {
+
     public static void renderIcon(float x, float y, float w, float h, float alphaMult, float glowMult,
                                   String path) {
         SpriteAPI sprite = SpriteLoader.loadSprite(path);

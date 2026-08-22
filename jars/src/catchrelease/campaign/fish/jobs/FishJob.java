@@ -31,7 +31,9 @@ import java.util.Random;
 
 public abstract class FishJob extends HubMissionWithBarEvent
         implements catchrelease.campaign.fish.shop.FishAsker {
+
     public enum Stage {
+
         WANTED,
         DONE,
         FAILED,
@@ -41,10 +43,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String REF_KEY = "$catchrelease_jobRef";
     public static final String DELIVER_FLAG = "$catchrelease_jobDeliver";
     public static final String HAS_FISH_KEY = "$catchreleaseHasFish";
+
     public static final String ASK_KEY = "$catchreleaseAsk";
     public static final String ASK_CAP_KEY = "$catchreleaseAskCap";
+
     public static final String REWARD_KEY = "$catchreleaseReward";
     public static final String REWARD_CAP_KEY = "$catchreleaseRewardCap";
+
     public static final String PAID_KEY = "$catchreleasePaid";
     public static final String BONUS_KEY = "$catchreleaseBonus";
     public static final String MORE_KEY = "$catchreleaseMore";

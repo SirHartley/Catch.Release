@@ -4,27 +4,34 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.ui.PositionAPI;
 
 public class FishingMinigameLayout {
+
     public float trackX;
     public float trackY;
     public float trackWidth;
     public float trackHeight;
+
     public float meterX;
     public float meterY;
     public float meterWidth;
     public float meterHeight;
+
     public float frameX;
     public float frameY;
     public float frameWidth;
     public float frameHeight;
+
     public float panelX;
     public float panelY;
     public float panelWidth;
     public float panelHeight;
+
     public float resultX;
     public float resultWidth;
+
     public float boxX;
     public float boxY;
     public float boxSize;
+
     public float lootPanelX;
     public float lootPanelY;
     public float lootPanelWidth;

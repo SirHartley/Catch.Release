@@ -13,15 +13,20 @@ import java.util.Map;
 import java.util.Set;
 
 public final class ReflectionUtils {
+
     private static final MethodHandle GET_FIELD;
     private static final MethodHandle SET_FIELD;
+
     private static final MethodHandle GET_FIELD_TYPE;
     private static final MethodHandle GET_FIELD_NAME;
+
     private static final MethodHandle SET_FIELD_ACCESSIBLE;
     private static final MethodHandle INVOKE_METHOD;
+
     private static final MethodHandle GET_METHOD_NAME;
     private static final MethodHandle GET_METHOD_RETURN;
     private static final MethodHandle GET_METHOD_PARAMS;
+
     private static final MethodHandle SET_METHOD_ACCESSIBLE;
     private static final MethodHandle NEW_INSTANCE;
     private static final MethodHandle GET_CONSTRUCTOR_PARAMS;
@@ -80,6 +85,7 @@ public final class ReflectionUtils {
     }
 
     public static final class ReflectedField {
+
         private final Object field;
         public final Class<?> type;
         public final String name;
@@ -110,6 +116,7 @@ public final class ReflectionUtils {
     }
 
     public static final class ReflectedMethod {
+
         private final Object method;
         public final Class<?>[] parameterTypes;
         public final Class<?> returnType;
@@ -134,6 +141,7 @@ public final class ReflectionUtils {
     }
 
     public static final class ReflectedConstructor {
+
         private final Object constructor;
         public final Class<?>[] parameterTypes;
 

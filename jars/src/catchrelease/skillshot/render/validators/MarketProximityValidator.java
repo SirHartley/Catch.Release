@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector2f;
 import catchrelease.skillshot.render.PositionValidator;
 
 public class MarketProximityValidator implements PositionValidator {
+
     protected float safeRadius;
 
     public MarketProximityValidator(float safeRadius) {

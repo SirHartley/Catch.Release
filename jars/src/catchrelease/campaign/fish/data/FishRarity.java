@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.data;
 import java.awt.Color;
 
 public enum FishRarity {
+
     COMMON(0, new Color(232, 211, 168), 1f, 1f),
     UNCOMMON(1, Color.GREEN, 1.15f, 1.3f),
     RARE(2, Color.BLUE, 1.35f, 1.7f),

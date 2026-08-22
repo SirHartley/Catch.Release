@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TackleManager {
+
     public static final String KEY = "$catchrelease_tackle";
     public static final String OWNED_KEY = "$catchrelease_tackleOwned";
 

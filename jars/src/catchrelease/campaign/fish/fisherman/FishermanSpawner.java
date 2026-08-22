@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishermanSpawner implements EveryFrameScript {
+
     protected transient LocationAPI lastLocation;
     protected transient boolean placed = false;
 

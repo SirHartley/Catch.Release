@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 public class FishBuyer {
+
     protected static class Stack {
+
         SpecialItemData data;
         int items;
         int count;
@@ -39,6 +41,7 @@ public class FishBuyer {
     }
 
     protected static final class SaleEntry {
+
         final SpecialItemData data;
         final int items;
         final int count;
@@ -70,6 +73,7 @@ public class FishBuyer {
     }
 
     protected static final class SalePreview {
+
         final List<SaleEntry> entries;
         final int count;
         final float value;
@@ -88,12 +92,14 @@ public class FishBuyer {
     }
 
     protected static class DescriptionSpecies {
+
         String name;
         int count;
         FishRarity rarity;
     }
 
     protected static final class PickerPackingSession {
+
         protected static final float BUTTON_WIDTH = 250f;
         protected static final float BUTTON_HEIGHT = 24f;
 
@@ -137,9 +143,11 @@ public class FishBuyer {
     }
 
     protected static final class PackButton extends BaseCustomUIPanelPlugin {
+
         protected final Object buttonId = new Object();
         protected final PickerPackingSession session;
         protected final CargoAPI selected;
+
         protected CustomPanelAPI panel;
         protected ButtonAPI button;
 
@@ -158,6 +166,7 @@ public class FishBuyer {
     }
 
     protected static final class PickerCargoRefresh {
+
         protected static final int MAX_PARENT_DEPTH = 16;
 
         static void refreshFrom(CustomPanelAPI panel) {
@@ -199,6 +208,7 @@ public class FishBuyer {
     }
 
     protected static final class ContainerSnapshot {
+
         final String id;
         final List<FishCatch> contents;
         final int items;
@@ -211,6 +221,7 @@ public class FishBuyer {
     }
 
     protected static final class ReopenBulkSaleConfirm implements EveryFrameScript {
+
         private final InteractionDialogAPI dialog;
         private final FishRarity cap;
         private final SalePreview preview;

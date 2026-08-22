@@ -29,16 +29,20 @@ import java.util.List;
 import java.util.Map;
 
 public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugin {
+
     public transient SpriteAPI sprite;
     public transient SpriteAPI moteSprite;
     private final List<Searchlight> lights;
+
     private final SearchlightAbilityPlugin owner;
     private final LocationAPI home;
     private final Map<SectorEntityToken, Float> marks = new HashMap<>();
+
     private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
+
     private float timePassed = 0f;
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 

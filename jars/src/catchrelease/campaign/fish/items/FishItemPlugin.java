@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishItemPlugin extends BaseSpecialItemPlugin {
+
     public FishCatch getCatch() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
 

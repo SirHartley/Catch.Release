@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import org.lazywizard.lazylib.MathUtils;
 
 public class MinigameTreasure {
+
     public final TreasureRarity rarity;
     public final float position;
     protected float lifetime;

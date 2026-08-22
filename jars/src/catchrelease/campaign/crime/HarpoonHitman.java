@@ -21,6 +21,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 public class HarpoonHitman implements EveryFrameScript {
+
     public static final String HITMAN_FLAG = "$catchrelease_harpoonHitman";
     public static final String HIRED_BY_KEY = "$catchrelease_harpoonHitmanFor";
     public static final String CLIENT_NAME_KEY = "$catchrelease_harpoonHitmanClient";
@@ -28,20 +29,26 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String ORIGIN_NAME_KEY = "$catchrelease_harpoonHitmanOrigin";
     public static final String OFFENCE_KEY = "$catchrelease_harpoonHitmanOffence";
     public static final String CLIENT_GONE_KEY = "$catchrelease_harpoonHitmanClientGone";
+
     public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
     public static final int BRIBE_MIN = 80_000;
     public static final int BRIBE_MAX = 120_000;
     public static final int BRIBE_STEP = 5_000;
     public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
+
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
     public static final float COOLDOWN_DAYS = 30f;
+
     public static final String PENDING_KEY = "$catchrelease_harpoonHitmanPending";
     public static final float RESPONSE_DELAY_DAYS = 30f;
+
     public static final float FP_MIN = 25f;
     public static final float FP_MAX = 60f;
+
     public static final float SPAWN_RANGE_MIN = 2500f;
     public static final float SPAWN_RANGE_MAX = 4500f;
+
     public static final float INTERCEPT_DAYS = 30f;
     public static final float CHANCE = 0.30f;
 

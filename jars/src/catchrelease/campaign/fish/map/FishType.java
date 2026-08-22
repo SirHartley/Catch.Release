@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import java.awt.Color;
 
 public enum FishType {
+
     FISH("Fish", new Color(100, 165, 255), "pane_fish"),
     CRAB("Crab", new Color(255, 140, 80), "pane_crab"),
     MOLLUSC("Mollusc", new Color(190, 115, 240), "pane_mollusc"),

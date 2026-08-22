@@ -16,17 +16,21 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class PaneWidgets {
+
     public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
     public static final String CLICK_SOUND = "ui_button_pressed";
+
     protected static transient LazyFont tinyFont;
     protected static transient boolean tinyChecked = false;
 
     public static class Chip extends BaseCustomUIPanelPlugin {
+
         public static final float ICON_SIZE = 16f;
 
         protected final String label;
         protected final Color color;
         protected final String iconId;
+
         protected final Supplier<Boolean> on;
         protected final Runnable onToggle;
         protected PositionAPI chipPos;
@@ -136,6 +140,7 @@ public final class PaneWidgets {
     }
 
     public static class Note extends BaseCustomUIPanelPlugin {
+
         protected final String text;
         protected PositionAPI notePos;
 
@@ -158,6 +163,7 @@ public final class PaneWidgets {
     }
 
     public static class TitleRow extends BaseCustomUIPanelPlugin {
+
         protected final String label;
         protected PositionAPI titlePos;
         protected transient LazyFont.DrawableString text;
@@ -196,8 +202,10 @@ public final class PaneWidgets {
     }
 
     public static class ListHeader extends BaseCustomUIPanelPlugin {
+
         protected final Supplier<String> label;
         protected PositionAPI headerPos;
+
         protected transient LazyFont.DrawableString text;
         protected transient String written;
         protected transient LazyFont.DrawableString help;
@@ -252,6 +260,7 @@ public final class PaneWidgets {
     }
 
     public static class HelpMark extends BaseCustomUIPanelPlugin {
+
         protected PositionAPI markPos;
         protected transient LazyFont.DrawableString mark;
 
@@ -285,10 +294,12 @@ public final class PaneWidgets {
     }
 
     public static class TextButton extends BaseCustomUIPanelPlugin {
+
         protected final Supplier<String> label;
         protected final Supplier<Boolean> live;
         protected final Runnable onClick;
         protected PositionAPI buttonPos;
+
         protected transient LazyFont.DrawableString text;
         protected transient String written;
 

@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ModPlugin extends BaseModPlugin {
+
     public static final String MOD_ID = "catchrelease";
 
     @Override

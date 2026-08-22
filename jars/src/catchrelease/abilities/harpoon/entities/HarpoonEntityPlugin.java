@@ -41,7 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
+
     public enum State {
+
         OUTBOUND,
         PUSHING,
         HAULING,
@@ -59,21 +61,26 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected float distanceOut = 0f;
     protected float stateTime = 0f;
     protected float age = 0f;
+
     protected Vector2f slack;
     protected Vector2f slackVelocity = new Vector2f();
+
     protected float paidOut = 0f;
     protected SectorEntityToken hooked;
     protected boolean haulingTarget = false;
     protected boolean minigameOpened = false;
+
     protected Vector2f blastThrow;
     protected FishCatch caught;
     protected CampaignFleetAPI owner;
     protected float trailId;
+
     transient protected SpriteAPI headSprite;
     transient protected float headSpriteWidth;
     transient protected float headSpriteHeight;
 
     public static class Params {
+
         public final Vector2f from;
         public final Vector2f target;
         public final CampaignFleetAPI owner;

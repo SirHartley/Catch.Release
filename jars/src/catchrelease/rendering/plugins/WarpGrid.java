@@ -1,14 +1,17 @@
 package catchrelease.rendering.plugins;
 
 public class WarpGrid {
+
     private final int wide;
     private final int tall;
     private final WSVertex[][] v;
 
     public static final class MutatingValue {
+
         public float value;
         public float min;
         public float max;
+
         public float rate;
         public float rateSign;
         public float sign = 0f;
@@ -56,6 +59,7 @@ public class WarpGrid {
     }
 
     public static final class WSVertex {
+
         public final MutatingValue theta;
         public final MutatingValue radius;
 
@@ -79,6 +83,7 @@ public class WarpGrid {
     }
 
     public static final class WarpOffset {
+
         public float dx;
         public float dy;
 

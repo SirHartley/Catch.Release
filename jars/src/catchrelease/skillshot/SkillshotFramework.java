@@ -5,6 +5,7 @@ import catchrelease.skillshot.input.OnKeyPressSkillshotListener;
 import catchrelease.skillshot.input.SkillshotActivationManager;
 
 public class SkillshotFramework {
+
     public static void register() {
         OnKeyPressSkillshotListener.getInstanceOrRegister();
         SkillshotActivationManager.getInstanceOrRegister();

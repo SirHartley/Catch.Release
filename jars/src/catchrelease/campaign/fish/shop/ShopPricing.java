@@ -16,14 +16,17 @@ import java.util.Random;
 import java.util.Set;
 
 public class ShopPricing {
+
     public static final String SEED_KEY = "$catchrelease_shop_seed";
     public static final int CREDITS_BASE = 2500;
     public static final float CREDITS_PER_LEVEL = 1.7f;
     public static final int TACKLE_CREDITS_PER_TIER = 4000;
+
     public static final int PREMIUM_TIER_BUMP = 2;
     protected static final Set<String> PREMIUM_STATS = Set.of(StatIds.SEARCHLIGHT_SLOW);
 
     public static class Price {
+
         public final int credits;
         public final FishRequirement fish;
 

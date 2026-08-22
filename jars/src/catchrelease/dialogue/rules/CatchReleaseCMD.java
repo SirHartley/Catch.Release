@@ -50,8 +50,10 @@ import java.util.List;
 import java.util.Map;
 
 public class CatchReleaseCMD extends BaseCommandPlugin {
+
     public static final String DRIFT = "$catchreleaseDrift";
     public static final String STAGE = "$catchreleaseStage";
+
     public static final String TARGET = "$catchreleaseTarget";
     public static final String TARGET_WHERE = "$catchreleaseTargetWhere";
     public static final String TARGET_MET = "$catchreleaseTargetMet";
@@ -60,10 +62,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_HERE = "$catchreleaseTargetHere";
     public static final String TARGET_SET = "$catchreleaseTargetSet";
     public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
+
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
+
     public static final String WORK = "$catchreleaseWork";
     public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
     public static final String WORK_MET = "$catchreleaseWorkMet";
@@ -72,12 +76,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_PAY = "$catchreleaseWorkPay";
     public static final String WORK_POND = "$catchreleaseWorkPond";
     public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
+
     public static final String SHELF = "$catchreleaseShelf";
     public static final String HAS_FISH = "$catchreleaseHoldHasFish";
+
     public static final String SELL_COMMON = "$catchreleaseSellCommon";
     public static final String SELL_UNCOMMON = "$catchreleaseSellUncommon";
     public static final String SELL_RARE = "$catchreleaseSellRare";
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
+
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
@@ -85,9 +92,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String RUMOR_LOOT = "$catchreleaseRumorLoot";
     public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
+
     protected static final String FISHER_ASK_PAGE = "$catchreleaseFisherAskPage";
     protected static final String FISHER_ASK_COUNT = "$catchreleaseFisherAskCount";
     protected static final int FISHER_ASK_PAGE_SIZE = 6;
+
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
     public static final String CRAB_CRAB_NAME = "$catchreleaseCrabBassName";
@@ -100,6 +109,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String CRAB_BACKDROP_CRABS = "$catchreleaseCrabBackdropCrabs";
     public static final String CRAB_BACKDROP_AFFORD = "$catchreleaseCrabBackdropAfford";
     public static final String FISH_WELCOME = "$catchreleaseFishWelcome";
+
     public static final String LAMP_CONV = "$catchrelease_lampConv";
     public static final String LAMP_RUNG = "$catchrelease_lampRung";
     public static final String LAMP_FINE = "$catchrelease_lampFine";

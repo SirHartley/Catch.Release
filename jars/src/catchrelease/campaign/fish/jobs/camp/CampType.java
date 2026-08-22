@@ -4,6 +4,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 
 public enum CampType {
+
     PIRATES("pirates", Factions.PIRATES, FleetTypes.PATROL_SMALL, "Free Fleet", 1f),
     MERCENARIES("mercenaries", Factions.MERCENARY, FleetTypes.MERC_BOUNTY_HUNTER,
             "Contracted Escort", 1.5f),

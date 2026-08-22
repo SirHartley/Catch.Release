@@ -5,6 +5,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import java.util.Random;
 
 public enum CampSize {
+
     SMALL("a couple of hulls", 25f, 40f, 20000, 9000),
     MEDIUM("the better part of a squadron", 55f, 85f, 45000, 18000),
     LARGE("a raiding pack", 100f, 150f, 90000, 34000);

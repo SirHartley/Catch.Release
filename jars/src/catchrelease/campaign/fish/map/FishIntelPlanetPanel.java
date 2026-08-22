@@ -31,9 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishIntelPlanetPanel implements EveryFrameScript {
+
     public static final float GAP = 10f;
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
+
     public static final float ICON_SHARE = 0.66f;
     public static final float TITLE_HEIGHT = 30f;
     public static final float INNER_PAD = 10f;
@@ -44,6 +46,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     protected boolean failed = false;
 
     protected static class BoxPlugin extends BaseCustomUIPanelPlugin {
+
         protected PositionAPI pos;
 
         @Override

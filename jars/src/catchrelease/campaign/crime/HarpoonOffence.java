@@ -24,23 +24,30 @@ import java.util.List;
 import java.util.Map;
 
 public class HarpoonOffence {
+
     public static final String INCIDENTS_KEY = "$catchrelease_harpoonIncidents";
     public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
     public static final String EVASIONS_KEY = "$catchrelease_harpoonEvasions";
+
     public static final float EVASION_DELAY_DAYS = 4f;
     public static final float EVASION_REP_LOSS = 0.1f;
+
     public static final String VICTIM_FLAG = "$catchrelease_harpooned";
     public static final String HIT_COUNT_KEY = "$catchrelease_harpoonHits";
     public static final String HOSTILE_FLAG = "$catchrelease_harpoonHostile";
+
     public static final int HITS_BEFORE_HOSTILE = 2;
     public static final int HITS_BEFORE_DEMAND = 2;
     public static final int HITS_BEFORE_FLIGHT = 3;
+
     public static final int DAMAGES = 8000;
     public static final float DEMAND_DAYS = 10f;
     public static final float FLIGHT_DAYS = 20f;
     public static final String DEMAND_FLAG = "$catchrelease_harpoonDemand";
+
     public static final String DAMAGES_KEY = "$catchrelease_harpoonDamages";
     public static final String DAMAGES_TEXT_KEY = "$catchrelease_harpoonDamagesDGS";
+
     public static final String DEMAND_DONE_KEY = "$catchrelease_harpoonDemandDone";
     public static final String FLEEING_FLAG = "$catchrelease_harpoonFleeing";
     public static final String PAID_FLAG = "$catchrelease_harpoonDamagesPaid";

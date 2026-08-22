@@ -34,17 +34,22 @@ import java.util.List;
 import java.util.Map;
 
 public class FishermanSurveyDialog implements InteractionDialogPlugin {
+
     public static final float WIDTH = 700f;
     public static final float HEIGHT = 540f;
     public static final float PAD = 16f;
+
     public static final float TITLE_HEIGHT = 20f;
     public static final float CLOSE_WIDTH = 20f;
     public static final float HELP_WIDTH = 20f;
     public static final int COLUMNS = 3;
+
     public static final float CARD_GAP = 12f;
     public static final float CARD_HEIGHT = 200f;
+
     public static final float DISC_RADIUS = 56f;
     public static final float ART_SIZE = 78f;
+
     public static final float UNDO_WIDTH = 200f;
     public static final float UNDO_HEIGHT = 26f;
     public static final float LEAVE_WIDTH = 120f;
@@ -55,21 +60,26 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
     protected boolean closed;
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin {
+
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
+
         protected PositionAPI pos;
         protected final List<UIComponentAPI> gridParts = new ArrayList<>();
         protected Receipt lastPurchase;
 
         protected static class Receipt {
+
             String specId;
             int stockIndex;
             List<Object[]> fishAboard;
         }
 
         protected class CardPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
+
             protected final FishermanShelf.SurveyOffer offer;
             protected PositionAPI cardPos;
+
             protected transient LazyFont.DrawableString name;
             protected transient LazyFont.DrawableString price;
             protected transient String pricedAs;

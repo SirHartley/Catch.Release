@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class FishLocationSummary {
+
     protected static final String[] QUADRANTS = {"NE", "NW", "SE", "SW"};
 
     public static String describe(FishSpec spec) {

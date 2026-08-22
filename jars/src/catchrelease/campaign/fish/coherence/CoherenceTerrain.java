@@ -18,6 +18,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class CoherenceTerrain extends StarCoronaTerrainPlugin {
+
     public static final String TERRAIN_ID = "catchrelease_coherence_field";
     public static final float FIELD_RADIUS = 50000f;
     public static final float IDLE_EXPIRE = 5f;
@@ -28,6 +29,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
     protected transient TimedValue<Reading> reading;
 
     protected record Reading(float aberration, String source) {
+
     }
 
     @Override

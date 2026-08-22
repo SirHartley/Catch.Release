@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class KidsJob extends FishJob {
+
     public static final String GROUP_PORTRAIT_ID = "catchrelease_duel_group";
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
     public static final int VALUE = 2200;

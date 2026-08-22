@@ -15,7 +15,9 @@ import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 
 public class ShopEntry {
+
     public enum Kind {
+
         UPGRADE("Upgrades", "shop_upgrade"),
         TACKLE("Modifiers", "shop_modifiers"),
         CURIO("Extras", "pane_misc");

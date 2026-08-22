@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoundedBorder {
+
     public static final int CORNER_SEGMENTS = 6;
 
     public static void draw(float x, float y, float width, float height, float radius,

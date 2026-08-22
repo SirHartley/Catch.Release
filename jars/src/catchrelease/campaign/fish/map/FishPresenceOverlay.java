@@ -20,18 +20,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
+
     public static final float FILL_ALPHA = 0.1f;
     public static final float OUTLINE_ALPHA = 0.6f;
     public static final float OUTLINE_WIDTH = 1.5f;
     public static final float STRIPE_SPACING_WORLD = 600f;
+
     public static final int STYLE_SOLID = 0;
     public static final int STYLE_STRIPE_RIGHT = 1;
     public static final int STYLE_STRIPE_LEFT = 2;
+
     public static final float ROUTE_BADGE_RADIUS = 14f;
     public static final float ROUTE_BADGE_LIFT = 14f;
     public static final float ROUTE_ICON = 16f;
     public static final float ROUTE_ICON_GAP = 2f;
     public static final float ROUTE_BADGE_PAD = 5f;
+
     public static final String NO_DATA_TEXT = "NO DATA";
     public static final float NO_DATA_WIDTH = 180f;
     public static final float NO_DATA_HEIGHT = 54f;
@@ -41,16 +45,20 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     protected boolean noDataShown;
     protected Object mapWidget;
     protected transient float[] scratch = new float[512];
+
     protected float mouseX = -1f;
     protected float mouseY = -1f;
     protected PositionAPI panelPos;
+
     protected transient CoherenceHeatField heat;
     protected boolean coherenceShown = false;
 
     public static class Blob {
+
         public final FishPresenceField.Mesh mesh;
         public final Color color;
         public final int style;
+
         public final boolean drawFill;
         public final boolean drawOutline;
 

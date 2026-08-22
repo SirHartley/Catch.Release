@@ -5,6 +5,7 @@ import catchrelease.helper.loading.FishSpecLoader;
 import org.lazywizard.lazylib.MathUtils;
 
 public class FishCatch {
+
     public static final String SEPARATOR = "|";
 
     public String speciesId;
@@ -15,6 +16,7 @@ public class FishCatch {
     public FishLogEntry.Method method;
     public CatchImplement implement;
     public String sourceId;
+
     public long caughtAt;
     public String caughtSystemId;
     public String questTargetId;

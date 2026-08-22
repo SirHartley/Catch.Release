@@ -5,8 +5,10 @@ import com.fs.starfarer.api.util.Pair;
 import java.awt.Color;
 
 public class FishConstants {
+
     public static final float CORE_BAND_HALF_WIDTH = 27000f;
     public static final float CORE_BAND_HALF_HEIGHT = 17000f;
+
     public static final float MINIGAME_RESULT_GAP = 26f;
     public static final float MINIGAME_RESULT_WIDTH = 210f;
     public static final float MINIGAME_RESULT_PAD = 16f;
@@ -56,6 +58,7 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_GOD_RAY_ALPHA_SWING = 0.02f;
     public static final float MINIGAME_RESULT_GOD_RAY_PULSE_RATE = 0.4f;
     public static final float MINIGAME_RESULT_GOD_RAY_PULSE_PHASE_STEP = 1.3f;
+
     public static final float MINIGAME_PANEL_WIDTH = 140f;
     public static final float MINIGAME_PANEL_HEIGHT = 480f;
     public static final float MINIGAME_TRACK_WIDTH = 52f;
@@ -63,6 +66,7 @@ public class FishConstants {
     public static final float MINIGAME_METER_WIDTH = 10f;
     public static final float MINIGAME_METER_GAP = 16f;
     public static final float MINIGAME_METER_DANGER = 0.3f;
+
     public static final float MINIGAME_END_LINGER = 0.9f;
     public static final float MINIGAME_FISH_ICON_SIZE = 38f;
     public static final String MINIGAME_CHICKEN_ICON =
@@ -75,6 +79,7 @@ public class FishConstants {
     public static final float MINIGAME_MOTE_INNER_ALPHA = 0.67f;
     public static final float MINIGAME_MOTE_CORE_SIZE = 4f;
     public static final float MINIGAME_MOTE_CORE_ALPHA = 0.95f;
+
     public static final float TREASURE_CHANCE = 0.12f;
     public static final int TREASURE_MAX_PER_CATCH = 3;
     public static final float TREASURE_COUNT_WEIGHT_1 = 80f;
@@ -124,6 +129,7 @@ public class FishConstants {
     public static final float MINIGAME_LOOT_COIN_SPIN_RATE_MIN = 0.6f;
     public static final float MINIGAME_LOOT_COIN_SPIN_RATE_MAX = 2.2f;
     public static final Color MINIGAME_LOOT_COIN_COLOR = new Color(212, 172, 64);
+
     public static final float MINIGAME_BAR_SIZE_FALLBACK = 120f;
     public static final float MINIGAME_BAR_MIN_FRACTION = 0.08f;
     public static final float MINIGAME_BAR_MAX_FRACTION = 0.6f;
@@ -150,9 +156,11 @@ public class FishConstants {
     public static final float MINIGAME_SPEED_MIN = 0.1f;
     public static final float MINIGAME_SPEED_MAX = 4f;
     public static final float MINIGAME_DEV_PROGRESS_FLOOR = 0.02f;
+
     public static final float MINIGAME_FRAME_PAD = 12f;
     public static final float MINIGAME_FRAME_EXTRA_LEFT = 10f;
     public static final float VALUE_FLOOR_MULT = 0.35f;
+
     public static final float CELEBRATION_TIME = 1.6f;
     public static final float CELEBRATION_FADE_FROM = 0.7f;
     public static final float CELEBRATION_FLASH_TIME = 0.35f;
@@ -185,6 +193,7 @@ public class FishConstants {
     public static final float CELEBRATION_TEXT_RISE = 110f;
     public static final float CELEBRATION_POP_TIME = 0.18f;
     public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
+
     public static final String SOUND_CAUGHT = "catchrelease_minigame_success";
     public static final String SOUND_FAILED = "catchrelease_minigame_failure";
     public static final String SOUND_INDICATOR_CROSS = "catchrelease_minigame_bar_click";
@@ -193,15 +202,18 @@ public class FishConstants {
     public static final String SOUND_LINE_CLICK = "catchrelease_minigame_line_click";
     public static final boolean PLAY_LINE_CLICK_ON_RELEASE = false;
     public static final String SOUND_LINE_LOOP = "catchrelease_minigame_loop";
+
     public static final float LINE_LOOP_BASE_VOLUME = 0.1f;
     public static final float LINE_LOOP_HELD_VOLUME = 0.3f;
     public static final float LINE_LOOP_HELD_FADE_IN = 0.1f;
     public static final float LINE_LOOP_HELD_FADE_OUT = 0.2f;
+
     public static final float MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT = 0.5f;
     public static final String SOUND_TREASURE_OPEN = "catchrelease_minigame_chest_open";
     public static final String SOUND_TREASURE_SPAWN = "catchrelease_minigame_treasure_spawn";
     public static final String SOUND_TREASURE_GOT = "catchrelease_minigame_treasure_get";
     public static final String SOUND_RESULT_LINE = "ui_cargo_supplies";
+
     public static final float BAR_ALPHA_HOLDING = 0.5f;
     public static final float BAR_ALPHA_EMPTY = 0.4f;
     public static final float BAR_CENTER_MULT = 0.75f;
@@ -210,6 +222,7 @@ public class FishConstants {
     public static final float BAR_BORDER_MULT = 2.2f;
     public static final float BAR_BORDER_INNER_INSET = 2f;
     public static final float BAR_BORDER_INNER_ALPHA = 0.45f;
+
     public static final float ITEM_MARK_INSET = 3f;
     public static final float ITEM_GRADE_PIP_SIZE = 3f;
     public static final float ITEM_GRADE_PIP_GAP = 2f;
@@ -222,8 +235,10 @@ public class FishConstants {
     public static final String ITEM_ICON_FALLBACK = "graphics/catchrelease/icon/small_icon_catchrelease.png";
     public static final float ITEM_ICON_INSET = 5f;
     public static final float ITEM_ICON_MOUSEOVER_MULT = 0.5f;
+
     public static final String CODEX_CATEGORY_TITLE = "Fish";
     public static final String CODEX_CATEGORY_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+
     public static final String BURIED_ENTITY_ID = "catchrelease_BuriedMote";
     public static final int BURIED_POPULATION = 14;
     public static final float BURIED_SPAWN_CLEARANCE = 160f;
@@ -236,6 +251,7 @@ public class FishConstants {
     public static final float BURIED_HEADING_TIME_MIN = 2.5f;
     public static final float BURIED_HEADING_TIME_MAX = 6f;
     public static final float BURIED_SURFACE_RUN = 900f;
+
     public static final float IMPRESSION_SIZE = 34f;
     public static final float IMPRESSION_ALPHA = 0.85f;
     public static final float IMPRESSION_RING_SIZE = 1.9f;
@@ -246,6 +262,7 @@ public class FishConstants {
     public static final float IMPRESSION_EXPOSED_GLOW_SIZE = 25f;
     public static final float IMPRESSION_DETECT_FALLBACK = 400f;
     public static final float IMPRESSION_NEAR_DENT_MAX = 0.75f;
+
     public static final float ABERRATION_ABYSS_WEIGHT = 1f;
     public static final float ABERRATION_ABYSS_SPAN = 8f;
     public static final float ABERRATION_BLACKHOLE_WEIGHT = 0.85f;
@@ -261,21 +278,25 @@ public class FishConstants {
     public static final float ABERRATION_ENGINE_WEIGHT = 0.3f;
     public static final float ABERRATION_ENGINE_LY = 1f;
     public static final float COHESION_COLONY_REACH_LY = 5f;
+
     public static final float ABERRATION_SPREAD = 0.05f;
     public static final float ABERRATION_LOCAL_BASE = 2000f;
     public static final float ABERRATION_LOCAL_PER_LY = 300f;
     public static final float ABERRATION_STREAM_SAMPLE_LY = 0.5f;
     public static final float ABERRATION_LOCAL_LIFT = 0.5f;
+
     public static final float COHERENCE_OVERLAY_FLOOR = 0.12f;
     public static final float COHERENCE_OVERLAY_CEIL = 0.8f;
     public static final float COHERENCE_OVERLAY_INNER_CLEAR = 0.4f;
     public static final float COHERENCE_OVERLAY_EASE_IN = 2f;
     public static final float COHERENCE_OVERLAY_EASE_OUT = 1.5f;
     public static final String SOUND_COHERENCE_WHISPERS = "catchrelease_coherence_whispers";
+
     public static final float COHERENCE_WHISPER_VOLUME = 0.7f;
     public static final float COHERENCE_FISHERMAN_RANGE = 2500f;
     public static final float COHERENCE_FISHERMAN_ABERRATION = 0.1f;
     public static final float COHERENCE_POND_RANGE_MULT = 4f;
+
     public static final float MINIGAME_TRACK_BG_ALPHA = 0.7f;
     public static final float MINIGAME_TRACK_BG_ZOOM = 1f;
     public static final int MINIGAME_TRACK_BG_WARP_CELLS = 6;
@@ -290,6 +311,7 @@ public class FishConstants {
     public static final float MINIGAME_BORDER_WIDTH = 1f;
     public static final float MINIGAME_BORDER_ALPHA = 0.9f;
     public static final float MINIGAME_BORDER_OUTER_ALPHA = 0.35f;
+
     public static final float MINIGAME_PROGRESS_START = 0.4f;
     public static final float MINIGAME_CATCH_RATE = 0.2f;
     public static final float MINIGAME_ESCAPE_RATE = 0.21f;

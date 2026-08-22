@@ -12,9 +12,11 @@ import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 public class PondCameraFocusScript implements EveryFrameScript {
+
     protected SectorEntityToken pond;
     protected float focus = 0f;
     protected boolean done = false;
+
     transient protected boolean holdingCamera = false;
     transient protected float widthAtZoomOne = 0f;
     transient protected float heightAtZoomOne = 0f;

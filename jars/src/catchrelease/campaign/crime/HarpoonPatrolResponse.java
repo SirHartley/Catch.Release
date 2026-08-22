@@ -18,15 +18,19 @@ import com.fs.starfarer.api.util.Misc.FleetFilter;
 import java.util.List;
 
 public class HarpoonPatrolResponse implements EveryFrameScript {
+
     public static final String REASON = "catchreleasePatrol";
     public static final String PATROL_FLAG = "$catchrelease_harpoonPatrol";
     public static final String PATROL_FACTION_KEY = "$catchrelease_harpoonPatrolFaction";
+
     public static final String DEALT_WITH_KEY = "$catchrelease_harpoonPatrolDone";
     public static final String ANSWERED_KEY = "$catchrelease_harpoonPatrolAnswered";
     public static final String PAID_KEY = "$catchrelease_harpoonFinePaid";
     public static final String FORCED_KEY = "$catchrelease_harpoonForced";
+
     public static final String FINE_KEY = "$catchrelease_harpoonFine";
     public static final String FINE_TEXT_KEY = "$catchrelease_harpoonFineDGS";
+
     public static final String REPEAT_KEY = "$catchrelease_harpoonRepeat";
     public static final String COUNT_KEY = "$catchrelease_harpoonCount";
     public static final String RETRY_KEY = "$catchrelease_harpoonPatrolWait";

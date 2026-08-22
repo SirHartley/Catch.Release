@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public class FishPresenceField {
+
     public static final float REACH = 1.84f;
     public static final float THRESHOLD = 0.35f;
     public static final float CELLS_PER_RADIUS = 3f;
     public static final int SMOOTHING_ROUNDS = 2;
 
     public static class Mesh {
+
         public final List<float[]> loops = new ArrayList<>();
         public float minX, minY, maxX, maxY;
 
@@ -23,6 +25,7 @@ public class FishPresenceField {
     }
 
     protected static class Segment {
+
         final float x1, y1, x2, y2;
         boolean used = false;
 

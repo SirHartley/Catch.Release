@@ -9,17 +9,20 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class PondDepthField {
+
     protected final Particle[] particles;
     protected transient SpriteAPI sprite;
     protected float time = 0f;
 
     protected static class Particle {
+
         float depth;
         float angle;
         float radius;
         float size;
         float phase;
         float spin;
+
         float bob;
         float bobRate;
     }

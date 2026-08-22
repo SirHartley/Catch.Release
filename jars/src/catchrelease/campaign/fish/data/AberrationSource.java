@@ -6,6 +6,7 @@ import com.fs.starfarer.api.impl.campaign.GateEntityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 
 public enum AberrationSource {
+
     ABYSS("the abyss", Find.DEPTH, 0f, FishConstants.ABERRATION_ABYSS_WEIGHT, false),
     BLACK_HOLE("a collapsed star", Find.STAR, FishConstants.ABERRATION_BLACKHOLE_LY,
             FishConstants.ABERRATION_BLACKHOLE_WEIGHT, false),
@@ -32,12 +33,10 @@ public enum AberrationSource {
             FishConstants.ABERRATION_ENGINE_WEIGHT, true, null, "aotd_pluto_station");
 
     public enum Find {
+
         TAG,
-
         STAR,
-
         STREAM,
-
         DEPTH
     }
 

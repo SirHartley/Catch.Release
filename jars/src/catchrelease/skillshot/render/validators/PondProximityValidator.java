@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 public class PondProximityValidator implements PositionValidator {
+
     protected float safeRadius;
 
     public PondProximityValidator(float safeRadius) {

@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LampPatrolResponse implements EveryFrameScript {
+
     public static final String REASON = "catchreleaseLamps";
     public static final String FACTION_KEY = "$catchrelease_lampPatrolFaction";
     public static final String SYSTEM_KEY = "$catchrelease_lampPatrolSystem";
     public static final float CHASE_DAYS = 8f;
+
     public static final float RETRY_DAYS = 3f;
     public static final String RETRY_KEY = "$catchrelease_lampPatrolWait";
 

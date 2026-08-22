@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ShopSchematics {
+
     public static final String KEY = "$catchrelease_shop_schematics";
     public static final String FRESH_KEY = "$catchrelease_shop_schematics_fresh";
 

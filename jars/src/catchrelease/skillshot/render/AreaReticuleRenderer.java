@@ -10,6 +10,7 @@ import catchrelease.skillshot.SkillshotSettings;
 import java.awt.*;
 
 public class AreaReticuleRenderer extends BaseReticuleRenderer {
+
     transient private SpriteAPI area;
     protected float size;
 

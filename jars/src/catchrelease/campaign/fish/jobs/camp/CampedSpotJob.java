@@ -25,7 +25,9 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import java.util.Map;
 
 public abstract class CampedSpotJob extends FishJob {
+
     protected enum Update {
+
         CAMP_CLEARED,
         RECEIPT_CAUGHT,
         RECEIPT_LOST

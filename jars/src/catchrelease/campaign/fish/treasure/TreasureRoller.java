@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 public class TreasureRoller {
+
     public static boolean rollForTreasure(float chanceMult) {
         return MathUtils.getRandomNumberInRange(0f, 1f)
                 < FishConstants.TREASURE_CHANCE * Math.max(0f, chanceMult);

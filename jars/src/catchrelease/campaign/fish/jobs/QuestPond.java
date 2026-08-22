@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 public class QuestPond {
+
     public static final String IMPORTANT_FLAG = "$catchrelease_questPond";
     public static final String CLAIMED_BY_KEY = "$catchrelease_questPondJob";
     public static final String QUEST_MOTE_FLAG = "$catchrelease_questMote";

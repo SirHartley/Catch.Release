@@ -10,6 +10,7 @@ import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 
 public class ExampleSkillshotAbility extends BaseSkillshotAbility {
+
     @Override
     public SkillshotRenderer createReticule() {
         return new DirectionReticuleRenderer();

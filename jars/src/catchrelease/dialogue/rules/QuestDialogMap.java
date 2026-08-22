@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public final class QuestDialogMap {
+
     private QuestDialogMap() {
     }
 

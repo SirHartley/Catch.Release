@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 public class Castaway {
+
     public static boolean isPlaced() {
         return Global.getSector().getMemoryWithoutUpdate()
                 .getBoolean(TutorialConstants.CASTAWAY_PLACED_KEY);

@@ -22,7 +22,9 @@ import java.awt.Color;
 import java.util.logging.Logger;
 
 public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
+
     public enum Mode {
+
         LAUNCHING,
         ORBITING,
         CHASING,
@@ -37,8 +39,10 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected boolean roaming;
     protected float ringPhase;
     protected float slotOffset;
+
     protected float currentAngle;
     protected float currentRadius;
+
     protected float facingOffset;
     protected Vector2f velocity = new Vector2f();
     protected float wanderPhase;
@@ -51,8 +55,10 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     transient protected SpriteAPI sprite;
 
     public static class Params {
+
         public final Vector2f orbitCenter;
         public final float orbitAngle;
+
         public final Color color;
         public final boolean roaming;
 
