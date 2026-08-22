@@ -9,28 +9,14 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * One trawler to every inhabited system, kept there.
- * <p>
- * A boat that only turns up is a poor shape for the only place to buy a chart, because a player who
- * wants one has nothing to do but wait and travel. These are the other half: always somewhere, never
- * far, and all selling off the one shelf, so the trade reads as a trade rather than as a series of
- * lucky encounters. What is left worth crossing the sector for is the visiting boat's own stock -
- * see {@link FishermanShelf}.
- * <p>
- * They are crewed by the same man as the visiting one, and they do not explain how. That is the
- * point of them.
- * <p>
- * They are posted rather than spawned: the sweep re-posts a system that has lost its boat, so one
- * killed in a fight is replaced in a week rather than leaving a hole for the rest of the campaign.
- */
+
 public class CoreFisherSpawner implements EveryFrameScript {
 
     protected final IntervalUtil interval =
             new IntervalUtil(FishermanConstants.CORE_CHECK_DAYS * 0.8f,
                     FishermanConstants.CORE_CHECK_DAYS * 1.2f);
 
-    /** Registered every load; transient, so a save never carries the watcher. */
+
     public static void register() {
         Global.getSector().addTransientScript(new CoreFisherSpawner());
     }
@@ -45,16 +31,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return false;
     }
 
-    /**
-     * Swept on the first tick after a load as well as weekly, so a new campaign posts them at once -
-     * and again the moment the player arrives somewhere, which is the case the weekly sweep is too
-     * slow for.
-     * <p>
-     * A boat can be destroyed, and everything the trade offers in that system goes with it: the
-     * outfitter, the chart counter, the hand-in for whatever errand is open. Waiting up to a week
-     * for the sweep to notice reads as the trade having abandoned the system. Arriving to find one
-     * back at its work reads as it never having been gone, which is the truer of the two.
-     */
+
     @Override
     public void advance(float amount) {
         boolean arrived = hasJustArrived();
@@ -67,15 +44,10 @@ public class CoreFisherSpawner implements EveryFrameScript {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (!OuterReaches.isPopulated(system)) continue;
 
-            //a boat in a system the Church or the Path runs has nowhere to land a catch and nobody
-            //to sell it to, so there is no boat
             if (catchrelease.campaign.fish.FishingTaboo.holds(system)) continue;
 
             FishermanSpawner.reconcileSystem(system);
 
-            //A visiting boat in a populated system is a legacy arrival. It remains the system's
-            //only boat until it leaves; posting another here is the collision this sweep exists to
-            //repair, not repeat.
             if (getAnyBoat(system) != null) continue;
 
             post(system);
@@ -84,16 +56,11 @@ public class CoreFisherSpawner implements EveryFrameScript {
 
     protected transient boolean swept = false;
 
-    /** Where the player was last look, so arriving somewhere can be told from sitting in it. */
+
     protected transient com.fs.starfarer.api.campaign.LocationAPI lastLocation;
     protected transient boolean placed = false;
 
-    /**
-     * Whether the player has just changed system.
-     * <p>
-     * The first tick after a load is not an arrival - it is wherever the save was left - but that
-     * tick is swept anyway by {@link #swept}, so nothing is missed by sitting it out.
-     */
+
     protected boolean hasJustArrived() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -113,7 +80,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return true;
     }
 
-    /** The system's own trawler, if it still has one. */
+
     public static CampaignFleetAPI getBoat(StarSystemAPI system) {
         if (system == null) return null;
 
@@ -125,13 +92,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return null;
     }
 
-    /**
-     * Returns the system's standing boat, posting one immediately when a directed tutorial errand
-     * cannot wait for the ordinary inhabited-system sweep.
-     * <p>
-     * The caller owns any lifecycle shorter than a normal core posting. This method only preserves
-     * the one-boat-per-system invariant and performs the standard placement and setup.
-     */
+
     public static CampaignFleetAPI ensureBoat(StarSystemAPI system) {
         FishermanSpawner.reconcileSystem(system);
         CampaignFleetAPI existing = getAnyBoat(system);
@@ -139,7 +100,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         return existing != null ? existing : post(system);
     }
 
-    /** Any live trade boat in the system, selected with the same role priorities as migration. */
+
     public static CampaignFleetAPI getAnyBoat(StarSystemAPI system) {
         if (system == null) return null;
 
@@ -147,17 +108,8 @@ public class CoreFisherSpawner implements EveryFrameScript {
                 FishermanSpawner.getLiveFishermen(system));
     }
 
-    /**
-     * A small working boat, started somewhere in its own band.
-     * <p>
-     * Placed out in the reaches from the first frame rather than at the edge and told to travel -
-     * these are not arriving from anywhere, they have been out there the whole time, and a fleet
-     * flying in from the rim on the first day of the campaign says the opposite.
-     */
+
     protected static CampaignFleetAPI post(StarSystemAPI system) {
-        //Every creation path owns the location-level invariant at its mutation boundary. This is
-        //normally reached after a sweep/ensure check, but keeping the guard here prevents a new
-        //caller from placing a standing boat beside a visitor or directed tutorial posting.
         FishermanSpawner.reconcileSystem(system);
         CampaignFleetAPI existing = getAnyBoat(system);
         if (existing != null) return existing;
@@ -177,7 +129,7 @@ public class CoreFisherSpawner implements EveryFrameScript {
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.FLEET_FLAG, true);
         fleet.getMemoryWithoutUpdate().set(FishermanConstants.SHARED_SHELF_FLAG, true);
 
-        //the same man at the wheel of this one too, which is the part nobody is meant to explain
+        // the same man at the wheel of this one too, which is the part nobody is meant to explain
         FishermanIdentity.crew(fleet);
 
         system.addEntity(fleet);

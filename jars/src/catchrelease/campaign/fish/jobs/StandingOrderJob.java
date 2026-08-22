@@ -7,24 +7,21 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * The plain fish-buying job: a person, an ask, a payment, a clock. Other job types add more (size
- * floors, wagers, faction gating) but build on the same mechanics this one exercises.
- */
+
 public class StandingOrderJob extends FishJob {
 
-    /** What the order is worth per specimen, before the ask turns out to be hard or easy. */
+
     public static final int VALUE_PER_FISH = 900;
 
-    /** Days to fill it. Long enough that it is a standing order rather than an errand. */
+
     public static final float DAYS = 60f;
 
-    /** Whether this one named a way of catching, which is worth paying for. */
+
     protected boolean catchTermsAsked = false;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        //only one active sector-wide - two at once would read as the game repeating itself
+        // only one active sector-wide - two at once would read as the game repeating itself
         if (!setGlobalReference("$catchrelease_orderRef", "$catchrelease_orderInProgress")) {
             return false;
         }
@@ -51,7 +48,7 @@ public class StandingOrderJob extends FishJob {
         return true;
     }
 
-    /** Rolled from the job's seeded random, not a fresh one, so re-opening it doesn't reroll into an easier ask. */
+
     protected FishRequirement rollAsk() {
         FishRequirement ask = new FishRequirement();
 
@@ -66,12 +63,11 @@ public class StandingOrderJob extends FishJob {
             ask.minRarity = FishRarity.UNCOMMON;
         }
 
-        //grade floor, not size - a bulk buyer cares about quality, not individual weight
+        // grade floor, not size - a bulk buyer cares about quality, not individual weight
         if (genRandom.nextFloat() > 0.6f) ask.minGrade = FishGrade.FINE;
 
         if (genRandom.nextFloat() > 0.7f) ask.sameSpecies = true;
 
-        //a buyer who cares how it was landed is a fussier buyer, and the order is worth more for it
         if (FishJobAsks.rollCatchTerms(genRandom, ask, 0.3f)) catchTermsAsked = true;
 
         return ask;

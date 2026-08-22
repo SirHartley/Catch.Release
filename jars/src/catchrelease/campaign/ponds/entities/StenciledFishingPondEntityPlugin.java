@@ -54,7 +54,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
 
         loadSpritesIfNeeded();
 
-        //30% faux parallax using a circular approximation around the viewport
         Vector2f center = viewport.getCenter();
         Vector2f spriteLoc = new Vector2f(entity.getLocation());
 
@@ -68,7 +67,6 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
             float halfH = viewport.getVisibleHeight() * 0.5f;
             float radius = (float) Math.sqrt(halfW * halfW + halfH * halfH);
 
-            //center = 0, radius = 1
             float t = distToCenter / radius;
             if (t > 1f) t = 1f;
 

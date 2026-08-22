@@ -17,29 +17,25 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Two children running a fiercely serious fish tournament. The player first chooses the exact two
- * contenders, then decides which child receives the better specimen. No credits reward - items
- * only, since children do not have money.
- */
+
 public class KidsJob extends FishJob {
 
     public static final String GROUP_PORTRAIT_ID = "catchrelease_duel_group";
 
-    /** The flag that puts this job's own pair of options up instead of the shared hand-over. */
+
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
 
     public static final int VALUE = 2200;
 
     public static final float DAYS = 30f;
 
-    /** What the better specimen has to grade to earn the extra. */
+
     public static final FishGrade BONUS_GRADE = FishGrade.FINE;
 
-    /** Which of them ends up with the better fish. Flavour, and the only thing the choice moves. */
+
     protected boolean toLoud = true;
 
-    /** Dialog-only selection; nothing leaves cargo until the player confirms its allocation. */
+
     protected transient FishHandoffPicker.Selection pendingSelection;
 
     @Override
@@ -59,7 +55,6 @@ public class KidsJob extends FishJob {
 
         days = DAYS;
 
-        //two specimens, one per kid
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
 
@@ -161,7 +156,7 @@ public class KidsJob extends FishJob {
         pendingSelection = null;
     }
 
-    /** The tournament has an authored terminal exchange; generic person options must not replace it. */
+
     @Override
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
@@ -176,7 +171,7 @@ public class KidsJob extends FishJob {
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
     }
 
-    /** Bonus for specimen grade, not for the (consequence-free) loud/quiet choice. */
+
     @Override
     protected boolean payBonus(FishCatch offered) {
         if (offered == null || offered.getGrade().rank < BONUS_GRADE.rank) return false;

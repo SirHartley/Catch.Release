@@ -27,12 +27,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
 
-    /** Movement archetype tuning; pause shrinks and speed multipliers grow with rarity's wander ladder. */
+
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
 
-    /** Darter's resting speed; kept high enough that it isn't a stationary target between dashes. */
+
     private static final float DARTER_CREEP_MULT = 0.55f;
     private static final float SINKER_SPEED_MULT = 0.75f;
     private static final float SINKER_CURVE = 14f;
@@ -41,16 +41,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float FLOATER_JINK = 10f;
     private static final float MIXED_REROLL = 6f;
 
-    /**
-     * From {@link FishRarity#EPIC} upward, a mote dives on a fixed beat (invisible and unspearable
-     * while under) rather than at random, so the timing is learnable. Interval scales with the
-     * rarity ladder, so legendary dives more often than epic.
-     */
+
     private static final FishRarity DIVE_FROM = FishRarity.EPIC;
     private static final float DIVE_INTERVAL = 4.5f;
     private static final float DIVE_TIME = 1.6f;
 
-    /** Fade duration on the way down and back up. */
+
     private static final float DIVE_FADE = 0.35f;
 
     private float time = 0f;
@@ -58,28 +54,21 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private Vector2f target;
     private Color color;
 
-    /** Which fish this mote is - the thing the minigame will be played against. */
+
     private String fishId;
 
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
 
-    /**
-     * Set while something (e.g. a harpoon head) has hold of this mote. A held mote does not move
-     * itself, since the holder writes its position each frame; without this it would fight the
-     * holder for position.
-     */
+
     private boolean held = false;
 
-    /** Stun is a hard stop; slow eases speed back to normal afterward. Breach lamps apply slow here. */
+
     private float stunLeft = 0f;
     private float slowLeft = 0f;
     private float slowStrength = 0f;
 
-    /**
-     * Motion archetype, same column the catch minigame reads. Transient: only {@link #fishId} is
-     * saved, the archetype is re-derived from it.
-     */
+
     private transient FishMotion activeMode;
     private transient float phaseLeft = 0f;
     private transient boolean dashing = false;
@@ -87,14 +76,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float curveSign = 1f;
     private transient float curveFlipLeft = 0f;
 
-    /** Dive cycle state. Transient like the rest of the swimming state. */
+
     private transient boolean diving = false;
     private transient float diveClock = 0f;
 
-    /**
-     * Pond this mote came from, carried rather than looked up - a system can hold more than one
-     * pond, and looking up "nearest pond" would give the wrong answer once more than one exists.
-     */
+
     private SectorEntityToken pond;
 
     public static class Params {
@@ -102,7 +88,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         public final String fishId;
         public final SectorEntityToken pond;
 
-        /** For a mote with no pond - unbounded, since there is no mask it could leave. */
+
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
         }
@@ -114,44 +100,32 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /**
-     * Set on a mote that is meant to still be there when the player arrives.
-     * <p>
-     * Every other mote is scenery with a lifespan - it crosses its water once and goes, and the
-     * spawners keep putting new ones out. That is right for a pond somebody is fishing and wrong for
-     * a specimen an errand has named, because a named fish that fades and is replanted somewhere
-     * else reads as teleporting rather than as swimming. One that holds picks a new corner of its
-     * own pond instead of expiring, so it mills about inside the water it was planted in and is
-     * still there in an hour.
-     * <p>
-     * Read off the entity's memory rather than held as a field, because the flag is set by whoever
-     * planted it after construction, and a mote is rebuilt from its params on load.
-     */
+
     public static final String HOLDS_KEY = "$catchrelease_moteHolds";
 
     public boolean holdsStation() {
         return entity != null && entity.getMemoryWithoutUpdate().getBoolean(HOLDS_KEY);
     }
 
-    /** How far into the pond a holding mote will wander, as a fraction of the pond's radius. */
+
     public static final float HOLD_RANGE = 0.5f;
 
-    /** Whether this mote came from a pond, as opposed to loose in open water. Fixed at creation. */
+
     public boolean isFromPond() {
         return pond != null;
     }
 
-    /** The exact rupture this mote came from; nearest-pond lookup is ambiguous. */
+
     public SectorEntityToken getPond() {
         return pond;
     }
 
-    /** Asks the mote to look at itself again, for anything that changes what it is after it exists. */
+
     public void refreshColor() {
         this.color = resolveColor();
     }
 
-    /** The fish this mote carries, or null if it was spawned without one or its row has since gone. */
+
     public FishSpec getFishSpec() {
         return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
     }
@@ -160,7 +134,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return fishId;
     }
 
-    /** Whether something already has this one. Anything looking for a mote to take should skip it. */
+
     public boolean isHeld() {
         return held;
     }
@@ -169,10 +143,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.held = held;
     }
 
-    /** Quest mote color, off the rarity ladder (which runs grey through orange) so it stands out. */
+
     public static final Color QUEST_COLOR = new Color(90, 240, 255);
 
-    /** Rarity decides the colour, so a mote reads as what it is before it is ever caught. */
+
     protected Color resolveColor() {
         if (entity != null && QuestPond.isQuestMote(entity)) return QUEST_COLOR;
 
@@ -219,8 +193,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
-            //a holding mote has nowhere to be going, so arriving is just a reason to pick somewhere
-            //else in the same water. Anything else has finished its crossing
+            // a holding mote has nowhere to be going, so arriving is just a reason to pick somewhere else in the same water. Anything else has finished its crossing
             if (holdsStation() && pickNewTargetInPond()) return;
 
             Misc.fadeAndExpire(entity);
@@ -238,24 +211,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         entity.setLocation(next.x, next.y);
 
-        //a holding mote that has been pushed past the mask - by a pond closing around it rather
-        //than by its own course - is turned back rather than lost
+        // a holding mote that has been pushed past the mask - by a pond closing around it rather than by its own course - is turned back rather than lost
         if (hasLeftThePond() && !(holdsStation() && pickNewTargetInPond())) {
             Misc.fadeAndExpire(entity);
         }
     }
 
-    /**
-     * Somewhere else inside the same pond to swim to, well within the mask.
-     * <p>
-     * Well inside the mask rather than across all of it, so a course through the middle cannot clip
-     * the boundary and end the crossing early. The reach is measured against how open the pond
-     * currently is and not against its full radius: a pond closing around a mote shrinks the mask
-     * below the fixed fraction, and a target chosen outside the boundary would put the mote back
-     * over the line the moment it arrived - repicking every frame and never getting home.
-     *
-     * @return whether a new course was set, which is false only when there is no pond to swim in
-     */
+
     protected boolean pickNewTargetInPond() {
         if (pond == null) return false;
 
@@ -273,10 +235,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return true;
     }
 
-    /**
-     * Whether it has drifted past the pond's mask, which is drawn at the pond radius scaled by
-     * how open the pond currently is (opening/closing ponds shrink or grow this boundary).
-     */
+
     protected boolean hasLeftThePond() {
         if (pond == null) return false;
 
@@ -287,10 +246,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 > pond.getRadius() * plugin.activity;
     }
 
-    /**
-     * Off-course offset in degrees: two sines with incommensurate rates so the weave isn't
-     * predictable; the second term only applies above common rarity.
-     */
+
     protected float getWander() {
         FishRarity rarity = getRarity();
 
@@ -300,11 +256,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult + getModeWander();
     }
 
-    /**
-     * The archetype's clock: what it is doing right now, and the speed that comes of it. This is
-     * where a darter sits, bolts, and sits again, where a sinker decides which way its long arc
-     * bends, and where a mixed one changes its mind about what it is.
-     */
+
     protected float advanceMode(float amount) {
         float difficulty = getRarity().wanderMult;
 
@@ -314,7 +266,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 if (phaseLeft <= 0f) {
                     dashing = !dashing;
 
-                    //a rarer darter waits less and is gone faster - the pattern is the difficulty
                     phaseLeft = dashing ? DARTER_DASH_TIME
                             : DARTER_PAUSE / difficulty
                                     * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
@@ -339,7 +290,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /** Advances the dive cycle. A held mote is forced to surface and stay surfaced. */
+
     protected void advanceDive(float amount) {
         if (!dives()) {
             diving = false;
@@ -367,11 +318,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected float getDiveInterval() {
-        //scaled by rarity's wander ladder, so rarer motes dive more often
         return DIVE_INTERVAL * DIVE_FROM.wanderMult / Math.max(0.01f, getRarity().wanderMult);
     }
 
-    /** Visibility fraction: 0 at dive midpoint, easing to 1 at the fade edges. */
+
     public float getVisibility() {
         if (!diving) return 1f;
 
@@ -381,22 +331,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return 1f - MathUtils.clamp(nearestEdge / DIVE_FADE, 0f, 1f);
     }
 
-    /** Whether it is far enough under that a line would pass straight through it. */
+
     public boolean isDiving() {
         return diving && getVisibility() <= 0f;
     }
 
-    /** Whether anything may take this mote right now (not expired, held, or diving). */
+
     public static boolean isAvailable(SectorEntityToken mote) {
         return isAvailable(mote, false);
     }
 
-    /**
-     * As {@link #isAvailable(SectorEntityToken)}, but a diving mote is still available to rigs
-     * that can reach it underwater. Being held is never waived.
-     *
-     * @param reachesUnder whether the rig asking can take a mote that has gone under
-     */
+
     public static boolean isAvailable(SectorEntityToken mote, boolean reachesUnder) {
         if (mote == null || mote.isExpired()) return false;
         if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) return true;
@@ -406,7 +351,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return reachesUnder || !fish.isDiving();
     }
 
-    /** The archetype's signature on the course, in degrees, over the shared weave. */
+
     protected float getModeWander() {
         float difficulty = getRarity().wanderMult;
 
@@ -415,7 +360,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         switch (mode) {
             case DARTER:
-                //straight while sitting, hard jink while dashing
                 return dashing ? (float) Math.sin(time * 7.1f + sineVariance) * 5f * difficulty : 0f;
 
             case SINKER:
@@ -429,7 +373,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /** Current motion archetype; MIXED rerolls between the others over time, faster at higher rarity. */
+
     protected FishMotion getActiveMode(float amount) {
         FishMotion motion = getMotion();
 
@@ -453,14 +397,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return activeMode;
     }
 
-    /** The table's word for how this one moves, or SMOOTH where the row has gone. */
+
     protected FishMotion getMotion() {
         FishSpec spec = getFishSpec();
 
         return spec == null || spec.motion == null ? FishMotion.SMOOTH : spec.motion;
     }
 
-    /** Stuns then slows. Values take the max with what's already applied, so hits don't stack. */
+
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
 
@@ -470,14 +414,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /** 1 when it is fine, less while it is still shaken. */
+
     protected float getSlowMult() {
         if (slowLeft <= 0f) return 1f;
 
         return Math.max(0.1f, 1f - slowStrength);
     }
 
-    /** COMMON where the row has gone, so a missing spec cannot make a mote stand still. */
+
     protected FishRarity getRarity() {
         FishSpec spec = getFishSpec();
 
@@ -511,10 +455,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
-        //Pond motes are drawn by their terrain plugin while its stencil is active; drawing them
-        //here as well would put an unmasked copy over the fabric. A surfaced buried mote has no
-        //pond and no terrain renderer, so it must draw itself or the harpoon visibly shoves an
-        //empty point after unearth() replaces the hidden entity.
         if (!isFromPond()) externalRender(viewport);
     }
 }

@@ -55,9 +55,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /** Whether a live opener is already travelling to, or resolving against, this rupture. The
-     * entity is the state: it covers the flight and the short delayed activation without putting a
-     * second flag on the pond that would need separate cleanup or save repair. */
+
     public static boolean isOpening(SectorEntityToken pond) {
         if (pond == null || pond.getContainingLocation() == null) return false;
 
@@ -103,9 +101,8 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
                 true,
                 new Vector2f(0, 0));
 
-        //clear flash/ripples if the entity left this system
         if (!entity.isInCurrentLocation()){
-            if (flash != null) flash.expire(); //so short we don't need fade
+            if (flash != null) flash.expire();
             if (ripples != null) ripples.fadeAndExpire(0f);
         }
 
@@ -135,7 +132,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
             }
         });
 
-        //The supplied opening report is stereo, so RC8 requires the non-positional UI path.
+        // The supplied opening report is stereo, so RC8 requires the non-positional UI path.
         if (entity.isInCurrentLocation()) {
             Global.getSoundPlayer().playUISound(RodConstants.SOUND_POND_OPEN, 1f, 1f);
         }
@@ -160,7 +157,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
         Vector2f nextPos = MathUtils.getPointOnCircumference(entity.getLocation(), dist, angle);
         entity.setLocation(nextPos.x, nextPos.y);
 
-        //trail is laid out relative to facing; this mote flies a curve, so facing must track heading
+        // trail is laid out relative to facing; this mote flies a curve, so facing must track heading
         entity.setFacing(angle);
     }
 

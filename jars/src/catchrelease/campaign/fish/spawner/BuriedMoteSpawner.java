@@ -20,18 +20,13 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Keeps a population of buried motes around the player, so a searchlight always has a chance of
- * finding something. Seeded out of sight and culled once well behind the player. A population
- * target rather than a spawn rate, so sitting still does not accumulate them and travel does not
- * outrun them.
- */
+
 public class BuriedMoteSpawner implements EveryFrameScript {
 
     protected IntervalUtil interval = new IntervalUtil(
             FishConstants.BURIED_CHECK_INTERVAL * 0.75f, FishConstants.BURIED_CHECK_INTERVAL * 1.25f);
 
-    /** Installed once. Idempotent, so calling it on every load is safe. */
+
     public static void register() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
             if (script instanceof BuriedMoteSpawner) return;
@@ -58,7 +53,6 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null) return;
 
-        //no fishing gear works in hyperspace, so nothing is seeded there
         if (fleet.isInHyperspace()) return;
 
         LocationAPI location = fleet.getContainingLocation();
@@ -73,19 +67,17 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /** Just past what the lights can see, measured off their own reach so it stays out of sight
-     * as the area upgrade widens them. */
+
     protected static float getSpawnMinRange() {
         return Searchlight.getMaxReach() + FishConstants.BURIED_SPAWN_CLEARANCE;
     }
 
-    /** A band rather than the whole surrounding disc, so motes stay reachable rather than seeded
-     * too far out to ever drift in. */
+
     protected static float getSpawnMaxRange() {
         return getSpawnMinRange() + FishConstants.BURIED_SPAWN_BAND;
     }
 
-    /** Everything inside the band counts towards the population, so the target is what is reachable. */
+
     protected static float getPopulationRange() {
         return getSpawnMaxRange();
     }
@@ -104,7 +96,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         return nearby;
     }
 
-    /** Anything the player has left far enough behind stops being worth keeping in the world. */
+
     protected void cullDistant(LocationAPI location, Vector2f around) {
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
@@ -115,16 +107,14 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-    /** Applied where the population is seeded, not where a beam passes over one - a buried mote is
-     * a fixed species from the moment it exists, so this buys a better class of thing, not a re-roll. */
+
     protected static float getRareChance() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
     }
 
-    /** Out past the light's reach, in a ring rather than a disc - one appearing inside the
-     * searchlight would read as the light making it rather than finding it. */
+
     protected void spawn(LocationAPI location, Vector2f around) {
-        //a buried mote is what the lights find, so only what the lights can find is offered
+        // a buried mote is what the lights find, so only what the lights can find is offered
         String fishId = PondFishSpawner.pickFishId(location, CatchImplement.BREACH_LAMP,
                 getRareChance());
         if (fishId == null) return;

@@ -33,19 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The Fisherman's chart counter: the range data on sale, in the sidebar's own language.
- * <p>
- * Which shelf is being sold off, how it was rolled and when it comes back are all
- * {@link FishermanShelf}'s - this is the counter, not the stock room. All it needs to know is that
- * a boat has offers and that buying one takes it off whichever shelf it stood on.
- * <p>
- * Built from the map panes' parts rather than painted: a titled header with the way out and the
- * explaining on a {@code ?}, the charts as component cards in a grid - each the species'
- * {@link FishIcons} silhouette on the minigame's fading colour disc, wearing a chip's rarity
- * underline - and the undo as the shared text button, lower left, dim until there is a purchase
- * to take back. Closing hands the frame back to the conversation it was opened from.
- */
+
 public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
     public static final float WIDTH = 700f;
@@ -60,19 +48,18 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
     public static final float CARD_GAP = 12f;
     public static final float CARD_HEIGHT = 200f;
 
-    /** The silhouette's stage: the fading disc under it, and the art's box. */
+
     public static final float DISC_RADIUS = 56f;
     public static final float ART_SIZE = 78f;
 
-    /** The undo button, lower left, dim until there is a purchase to take back. */
+
     public static final float UNDO_WIDTH = 200f;
     public static final float UNDO_HEIGHT = 26f;
 
-    /** The way out, bottom right - same size as the outfitter's. */
+
     public static final float LEAVE_WIDTH = 120f;
     public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
 
-    //---------------------------------------------------------------- the panel
 
     protected InteractionDialogAPI dialog;
     protected final FishShopDialog.OnClose onClose;
@@ -92,13 +79,11 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         dialog.hideTextPanel();
         dialog.setBackgroundDimAmount(0.6f);
 
-        //Custom visuals leave the interaction's option panel alone; clear it through the public
-        //API immediately before opening this counter so no dialogue rows show under the cards.
         dialog.getOptionPanel().clearOptions();
         dialog.showCustomVisualDialog(WIDTH, HEIGHT, new Delegate());
     }
 
-    /** Delivers the custom visual's dismissal once, regardless of which close control reached it. */
+
     protected void close() {
         if (closed || dialog == null) return;
 
@@ -119,7 +104,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
         protected PositionAPI pos;
 
-        /** The grid's components, tracked by what actually removes them, for the rebuild. */
+
         protected final List<UIComponentAPI> gridParts = new ArrayList<>();
 
         @Override
@@ -151,7 +136,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         public void advance(float amount) {
         }
 
-        /** The sidebar's dressing - this counter wears the same face as every other panel. */
+
         @Override
         public void renderBelow(float alphaMult) {
             if (pos == null || alphaMult <= 0f) return;
@@ -164,7 +149,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         public void render(float alphaMult) {
         }
 
-        /** Back to the boat - the shop's own hand-back, reused word for word. */
+
         @Override
         public void reportDismissed(int option) {
             FishermanSurveyDialog.this.close();
@@ -186,9 +171,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         public void buttonPressed(Object buttonId) {
         }
 
-        //---------------------------------------------------------------- building
 
-        /** The title row: name, underline, the explaining on the ?, and the X out. */
         protected void buildHeader() {
             float innerWidth = WIDTH - PAD * 2f;
             TooltipMakerAPI header = panel.createUIElement(innerWidth, TITLE_HEIGHT, false);
@@ -213,7 +196,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             panel.addUIElement(header).inTL(PAD, PAD);
         }
 
-        /** The way back out of a slip: the shared text button, dim while there is nothing to undo. */
+
         protected void buildFooter() {
             TooltipMakerAPI footer = panel.createUIElement(UNDO_WIDTH, UNDO_HEIGHT, false);
 
@@ -228,14 +211,14 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
             panel.addUIElement(footer).inTL(PAD, HEIGHT - PAD - UNDO_HEIGHT);
 
-            //the way out, bottom right - the same door every panel in the mod has
+            // the way out, bottom right - the same door every panel in the mod has
             CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, UNDO_HEIGHT,
                     new PaneWidgets.TextButton(() -> "LEAVE", () -> true,
                             () -> callbacks.dismissDialog()));
             panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - UNDO_HEIGHT);
         }
 
-        /** The shelf as cards, three to a row - rebuilt whenever the stock changes. */
+
         protected void rebuildGrid() {
             for (UIComponentAPI part : gridParts) panel.removeComponent(part);
             gridParts.clear();
@@ -254,7 +237,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 grid.addCustom(note, gridHeight * 0.4f);
             }
 
-            //floored to the pixel: a card on a fractional edge is a card with a soft edge
             float cardWidth = (float) Math.floor(
                     (innerWidth - CARD_GAP * (COLUMNS - 1)) / COLUMNS);
 
@@ -283,7 +265,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     ? (UIComponentAPI) grid.getExternalScroller() : grid);
         }
 
-        // --- Tooltips, which is where all the explaining lives. ---
 
         protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
             return new BaseTooltipCreator() {
@@ -318,10 +299,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             };
         }
 
-        /**
-         * A chart's card, and no more than the counter already says - the species tooltip the
-         * rest of the UI shares tells where a fish lives, which is exactly what is for sale here.
-         */
+
         protected TooltipMakerAPI.TooltipCreator createCardTooltip(FishermanShelf.SurveyOffer offer) {
             return new BaseTooltipCreator() {
                 @Override
@@ -355,13 +333,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     + (offer.costCount == 1 ? " specimen" : " specimens");
         }
 
-        //---------------------------------------------------------------- buying and undoing
 
-        /**
-         * The last purchase, held so it can be taken back. The spend walks worst-first through
-         * stacks and crates, so the receipt is the hold's whole fish inventory as it stood -
-         * putting the price back means putting that picture back, not re-adding a count.
-         */
         protected static class Receipt {
             String specId;
             int stockIndex;
@@ -371,7 +343,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         protected Receipt lastPurchase;
 
         protected void buy(FishermanShelf.SurveyOffer clicked) {
-            //re-resolved rather than trusted: the card's offer could be a frame stale
+            // re-resolved rather than trusted: the card's offer could be a frame stale
             List<FishermanShelf.SurveyOffer> offers =
                     FishermanShelf.getOffers(dialog.getInteractionTarget());
 
@@ -405,7 +377,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             rebuildGrid();
         }
 
-        /** Every fish stack aboard - loose specimens and crates - as data plus count. */
+
         protected List<Object[]> snapshotFish() {
             List<Object[]> stacks = new ArrayList<>();
 
@@ -426,7 +398,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             rebuildGrid();
         }
 
-        /** The purchase taken back: fish restored as they were, chart relocked and reshelved. */
+
         protected void undo() {
             if (lastPurchase == null) return;
 
@@ -459,13 +431,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
         }
 
-        //---------------------------------------------------------------- the drawn controls
 
-        /**
-         * One chart for sale, a chip at card scale: dark field that lights under the mouse, the
-         * rarity's underline along the bottom, the {@link FishIcons} silhouette on its fading
-         * disc, the name, the price.
-         */
         protected class CardPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
 
             protected final FishermanShelf.SurveyOffer offer;
@@ -501,7 +467,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 boolean hovered = ShopUi.contains(x, y, w, h,
                         Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
 
-                //the chip's grammar at card scale: dark field, the identity colour underlining
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered && afford ? 0.35f : 0.15f) * alphaMult);
                 ShopUi.drawQuad(x, y, w, 2f, offer.spec.rarity.color,
@@ -510,7 +475,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 float cx = x + w * 0.5f;
                 float discY = y + h - PAD - DISC_RADIUS;
 
-                //the shared rarity stage and knowledge-aware face - the shape is what is for sale
                 FishIcons.drawBacklit(offer.spec, cx, discY, DISC_RADIUS, ART_SIZE, alphaMult);
 
                 if (name == null) {
@@ -523,8 +487,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 name.draw(Math.round(cx - name.getWidth() * 0.5f),
                         Math.round(discY - DISC_RADIUS - 8f));
 
-                //the price alone - what is aboard lives in the tooltip, where it cannot wrap
-                //the label onto a second line
+                // the price alone - what is aboard lives in the tooltip, where it cannot wrap the label onto a second line
                 String cost = describeCost(offer);
                 if (price == null || !cost.equals(pricedAs)) {
                     pricedAs = cost;
@@ -532,7 +495,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     price.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
                 }
 
-                //the cost speaks in the rarity it is asking for; red stays what can't be paid
+                // the cost speaks in the rarity it is asking for; red stays what can't be paid
                 price.setBaseColor(ShopUi.withAlpha(afford ? offer.costRarity.color
                         : Misc.getNegativeHighlightColor(), alphaMult));
                 price.draw(Math.round(cx - price.getWidth() * 0.5f),
@@ -559,7 +522,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
     }
 
-    //---------------------------------------------------------------- plumbing
 
     @Override
     public void optionSelected(String optionText, Object optionData) {

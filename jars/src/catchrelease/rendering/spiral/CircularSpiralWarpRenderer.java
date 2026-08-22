@@ -16,14 +16,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-/**
- * A portable campaign post-process that bends the completed world inside circles supplied by a
- * caller. It owns the screen copy, shader lifecycle and world-to-screen conversion; the host mod
- * only supplies live world locations and chooses the range.
- * <p>
- * Sources are collected into a reused list. A provider may cache them by location, as the black
- * hole adapter does, so the renderer performs no sector crawl and no allocation each frame.
- */
+
 public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
 
     public static final float DEFAULT_RANGE = 6000f;
@@ -36,12 +29,12 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
     public static final String DEFAULT_FRAGMENT_SHADER =
             "data/catchrelease/shaders/circular_spiral_warp_fragment.shader";
 
-    /** Writes the sources relevant to the current campaign location into {@code out}. */
+
     public interface SourceProvider {
         void collect(List<Source> out);
     }
 
-    /** One live world-space centre. The vector is retained, not copied. */
+
     public static final class Source {
         public final Vector2f location;
         public final float strength;
@@ -56,7 +49,7 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    /** Mutable setup so a port can tune or relocate the shaders without opening the renderer. */
+
     public static class Config {
         public float range = DEFAULT_RANGE;
         public float twist = DEFAULT_TWIST;
@@ -108,13 +101,13 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         return false;
     }
 
-    /** Runs while paused: a frozen post-process reads as a broken frame, not a standing field. */
+
     @Override
     public void advance(float amount) {
         time += amount;
     }
 
-    /** The world must be complete before it is sampled and bent; campaign UI draws afterwards. */
+
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
         return EnumSet.of(CampaignEngineLayers.ABOVE);
@@ -128,7 +121,7 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         provider.collect(sources);
         if (sources.isEmpty()) return;
 
-        //Do not compile a post-process in campaigns that never put a black hole on screen.
+        // Do not compile a post-process in campaigns that never put a black hole on screen.
         if (!load() || ShaderLib.getScreenTexture() == 0) return;
 
         for (Source source : sources) {
@@ -140,7 +133,7 @@ public class CircularSpiralWarpRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    /** Each visible source is a composited pass, so binary black holes bend each other's result. */
+
     protected void draw(Source source, ViewportAPI viewport) {
         ShaderLib.copyScreen(ShaderLib.getScreenTexture(), GL13.GL_TEXTURE0);
         ShaderLib.beginDraw(program);

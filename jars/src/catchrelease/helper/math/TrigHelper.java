@@ -11,10 +11,7 @@ public class TrigHelper {
         return (float) Math.random() * arc - arc / 2f;
     }
 
-    /**
-     * @param fract 0..1
-     * @return smoothed, 0.5 at 0.5
-     */
+
     public static float quadFuncSmooth(float fract) {
         return (float) (0.5f * Math.sin(1.5f + Math.PI * fract) + 0.5f);
     }
@@ -27,7 +24,6 @@ public class TrigHelper {
     public static Vector2f findClosestCircleIntersectToPoint(Vector2f center0, double r0,
                                                              Vector2f center1, double r1,
                                                              Vector2f targetPoint) {
-        //https://stackoverflow.com/questions/29596319/find-the-intersection-points-of-two-circles
 
         float a, dx, dy, d, h, rx, ry;
         float x2, y2;
@@ -54,7 +50,6 @@ public class TrigHelper {
     }
 
     public static Circle findThreePointCircle(Vector2f p1, Vector2f p2, Vector2f p3) {
-        //https://stackoverflow.com/questions/62488827/solving-equation-to-find-center-point-of-circle-from-3-points/71045382#71045382
         double x1 = p1.x;
         double y1 = p1.y;
         double x2 = p2.x;
@@ -113,7 +108,6 @@ public class TrigHelper {
         return new Pair<>(thirdPoint, radius);
     }
 
-    //roughly 1 @ 1 with s=0.4, m=1; more even distribution at s=0.7, m=2
     public static float getNormalDistributionCurve(float x, float s, float m) {
         if (s <= 0) {
             s = 0;

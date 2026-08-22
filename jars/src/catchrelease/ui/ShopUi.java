@@ -11,11 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-/**
- * Shared rendering helpers for the shop UI: fonts, quads, and the dressed-box look established by
- * the minigame panels. The outfitter draws its own state each frame, rather than using stock
- * widgets, so it never goes stale.
- */
+
 public class ShopUi {
 
     public static final String FONT_TITLE = FishConstants.MINIGAME_RESULT_TITLE_FONT;
@@ -27,7 +23,7 @@ public class ShopUi {
     protected static LazyFont small;
     protected static boolean fontsChecked = false;
 
-    /** Loaded once and kept. A missing font costs the text and nothing else. */
+
     protected static void loadFonts() {
         if (fontsChecked) return;
         fontsChecked = true;
@@ -56,10 +52,7 @@ public class ShopUi {
         return small;
     }
 
-    /**
-     * Text at the one size a bitmap font is sharp at: its own. Anything else is the texture
-     * scaled, which is the blur.
-     */
+
     public static LazyFont.DrawableString createText(LazyFont font, String text) {
         return font.createText(text, java.awt.Color.WHITE, font.getBaseHeight());
     }
@@ -90,13 +83,13 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-    /** Quad with alpha interpolated bottom-to-top; colour stays constant. */
+
     public static void drawVerticalGradient(float x, float y, float width, float height,
                                             Color color, float bottomAlpha, float topAlpha) {
         drawVerticalGradient(x, y, width, height, color, color, bottomAlpha, topAlpha);
     }
 
-    /** Quad interpolating colour and alpha bottom-to-top - water wants both ends its own. */
+
     public static void drawVerticalGradient(float x, float y, float width, float height,
                                             Color bottom, Color top,
                                             float bottomAlpha, float topAlpha) {
@@ -122,10 +115,7 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-    /**
-     * The sidebar's dressing, the mod's one panel face: transparent black under a one-pixel
-     * player-colour border at half strength, corners square.
-     */
+
     public static void drawPanel(float x, float y, float width, float height,
                                  float bgAlpha, float alphaMult) {
         drawQuad(x, y, width, height, Color.BLACK, bgAlpha * alphaMult);
@@ -137,7 +127,7 @@ public class ShopUi {
         drawQuad(x + width - 1f, y, 1f, height, border, 0.55f * alphaMult);
     }
 
-    /** The bright outline just off a box and the dimmer one outside it, as the catch's panels have. */
+
     public static void dress(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
         float spacing = FishConstants.MINIGAME_BORDER_SPACING;
@@ -157,18 +147,13 @@ public class ShopUi {
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
 
-    /** Draws an upgrade pip row, lit pips up to {@code level}. */
+
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha) {
         drawPips(x, y, size, gap, level, max, lit, alpha, null);
     }
 
-    /**
-     * As above, with the ladder's gates drawn in: a bought rung is always the lit colour, an
-     * open rung the ordinary dark square, and a rung whose schematic is still missing goes grey.
-     *
-     * @param missingSchematic asked per 1-based rung; null means no rung is gated
-     */
+
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha,
                                 java.util.function.IntPredicate missingSchematic) {
@@ -193,10 +178,7 @@ public class ShopUi {
         return max <= 0 ? 0f : max * size + (max - 1) * gap;
     }
 
-    /**
-     * Clips drawing to a rectangle in UI coordinates, for rows living inside a scroller - the
-     * scroller clips its stock children, but knows nothing about what a plugin paints.
-     */
+
     public static void startClip(float x, float y, float width, float height) {
         float scale = Display.getPixelScaleFactor();
 
@@ -210,11 +192,7 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-    /**
-     * The dressed box a hover card is drawn in, and nothing else - the text is the caller's, since
-     * only the caller knows when it changed and a {@code DrawableString} is a display list rather
-     * than something worth rebuilding sixty times a second.
-     */
+
     public static void drawCard(float x, float y, float width, float height, float alphaMult) {
         drawQuad(x, y, width, height, java.awt.Color.BLACK, 0.9f * alphaMult);
         drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);

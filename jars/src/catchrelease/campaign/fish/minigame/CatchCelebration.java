@@ -15,15 +15,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Plays out over the catch card's specimen box when a fish is landed: a flash, the specimen
- * growing in, confetti, and the catch text at an angle. Centered on {@code layout.getBoxCenter*}
- * each frame, and every part times itself off {@link #elapsed} / {@link FishConstants#CELEBRATION_TIME}
- * so nothing can drift out of sync.
- * <p>
- * Never built at all unless the charges have been bought and are switched on - see
- * {@link CrabWares#CELEBRATION}. Nothing in here asks; whoever builds one has already decided.
- */
+
 public class CatchCelebration {
 
     protected static class Confetto {
@@ -40,7 +32,7 @@ public class CatchCelebration {
     transient protected LazyFont.DrawableString text;
     transient protected boolean fontChecked = false;
 
-    /** Set on first render, not construction - only then is the settled layout center known. */
+
     protected boolean confettiSpawned = false;
 
     public CatchCelebration(FishSpec fish) {
@@ -54,7 +46,7 @@ public class CatchCelebration {
         float angle = 90f + MathUtils.getRandomNumberInRange(-arc, arc);
         float spread = FishConstants.CELEBRATION_CONFETTI_SPREAD;
 
-        //speed varies so pieces spread across the burst radius instead of moving as one ring
+        // speed varies so pieces spread across the burst radius instead of moving as one ring
         float speed = MathUtils.getRandomNumberInRange(
                 FishConstants.CELEBRATION_CONFETTI_SPEED * 0.35f, FishConstants.CELEBRATION_CONFETTI_SPEED);
 
@@ -70,7 +62,7 @@ public class CatchCelebration {
         return c;
     }
 
-    /** Most confetti is random hue; a fraction takes the fish's own rarity colour. */
+
     protected Color pickColor(FishSpec fish) {
         if (fish != null
                 && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
@@ -97,7 +89,7 @@ public class CatchCelebration {
         return elapsed >= FishConstants.CELEBRATION_TIME;
     }
 
-    /** 0 at the start, 1 at the end. */
+
     protected float getProgress() {
         return MathUtils.clamp(elapsed / Math.max(0.01f, FishConstants.CELEBRATION_TIME), 0f, 1f);
     }
@@ -131,7 +123,7 @@ public class CatchCelebration {
         renderText(centerX, centerY, progress, alpha);
     }
 
-    /** A disc of light behind everything, thrown out fast and gone before the rest. */
+
     protected void renderFlash(float centerX, float centerY, float progress, float alpha) {
         float share = MathUtils.clamp(progress / FishConstants.CELEBRATION_FLASH_TIME, 0f, 1f);
         if (share >= 1f) return;
@@ -140,7 +132,7 @@ public class CatchCelebration {
                 getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha, 0f, true);
     }
 
-    /** Backing disc in the fish's rarity colour, ringed in the player's UI bright/dim border colours. */
+
     protected void renderBacklight(float centerX, float centerY, float progress, float alpha) {
         float radius = getBacklightRadius(progress);
 
@@ -163,7 +155,7 @@ public class CatchCelebration {
         return FishConstants.CELEBRATION_BACKLIGHT_SIZE * (0.55f + 0.45f * ease(progress)) * pulse;
     }
 
-    /** The specimen sprite, centered over the backlight and growing in. */
+
     protected void renderFish(SpriteAPI sprite, float centerX, float centerY, float progress, float alpha) {
         if (sprite == null) return;
 
@@ -188,7 +180,7 @@ public class CatchCelebration {
 
             GL11.glColor4f(c.color.getRed() / 255f, c.color.getGreen() / 255f, c.color.getBlue() / 255f, alpha);
 
-            //oblong, not square, so the spin is visible
+            // oblong, not square, so the spin is visible
             float w = c.size, h = c.size * 0.45f;
             GL11.glBegin(GL11.GL_QUADS);
             GL11.glVertex2f(-w, -h);
@@ -203,7 +195,7 @@ public class CatchCelebration {
         GL11.glPopAttrib();
     }
 
-    /** Catch text, slanted, popping past full size before settling. */
+
     protected void renderText(float centerX, float centerY, float progress, float alpha) {
         LazyFont.DrawableString drawable = getText();
         if (drawable == null) return;
@@ -222,7 +214,7 @@ public class CatchCelebration {
         drawable.drawAtAngle(centerX - drawable.getWidth() * 0.5f, y, FishConstants.CELEBRATION_TEXT_ANGLE);
     }
 
-    /** The rarity colour, shared by text, flash and confetti. */
+
     protected Color getAccentColor() {
         return fish == null ? Color.WHITE : fish.rarity.color;
     }
@@ -232,7 +224,7 @@ public class CatchCelebration {
                 (int) MathUtils.clamp(alpha * 255f, 0f, 255f));
     }
 
-    /** Loaded once; a missing font just means no text renders. */
+
     protected LazyFont.DrawableString getText() {
         if (!fontChecked) {
             fontChecked = true;
@@ -248,19 +240,19 @@ public class CatchCelebration {
         return text;
     }
 
-    /** Sound hook; a no-op until sound ids are filled in {@link FishConstants}. */
+
     public static void playHook(String soundId) {
         playHook(soundId, 1f);
     }
 
-    /** Same hook with a caller-selected pitch, used for deliberately subtle repeated variation. */
+
     public static void playHook(String soundId, float pitch) {
         if (soundId == null || soundId.isEmpty()) return;
 
         Global.getSoundPlayer().playUISound(soundId, pitch, 1f);
     }
 
-    /** Ease-out curve. */
+
     protected static float ease(float t) {
         return 1f - (1f - t) * (1f - t);
     }

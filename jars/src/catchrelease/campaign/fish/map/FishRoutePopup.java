@@ -28,23 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * The fishing planner in the sidebar's slot, asking one question - which fish do you need? -
- * and turning the answer into a plotted route.
- * <p>
- * Built the way the sidebar itself is built, from the same parts: a title row with the way out
- * in its corner, the search field, {@link PaneWidgets.Chip} per type, a counted header wearing
- * the explanation as a hover on its {@code ?}, and the species as component rows in a scrolling
- * list - wanted ones (open jobs and the shop's next rungs) pinned first. Up to
- * {@link FishRoutePlanner#MAX_PICKS} picks; the PLOT ROUTE button along the bottom hands them
- * to the planner, with a notice line above it for the refusals that need a reason.
- * <p>
- * Also the panel's own plugin - the host mounts it via {@link #mount}. Controls are built once;
- * only the row list rebuilds on a filter change, so the search field keeps the keyboard.
- */
+
 public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
-    /** What the popup needs from whoever put it in the sidebar's slot. */
+
     public interface Host {
         void onRoutePlotted(FishRoute.Saved route);
 
@@ -61,7 +48,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     public static final float CONTROLS_HEIGHT = 124f;
     public static final float ROW_HEIGHT = 24f;
 
-    /** The floor of the card: the answer-back line and the one button under it. */
+
     public static final float NOTICE_HEIGHT = 18f;
     public static final float BUTTON_HEIGHT = 26f;
     public static final float FOOTER_HEIGHT = NOTICE_HEIGHT + 4f + BUTTON_HEIGHT;
@@ -70,10 +57,10 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
     protected final Host host;
 
-    /** Who is asking for a species, for the tag on its row - the pin order is the ask order. */
+
     protected final Map<String, String> reasons = new LinkedHashMap<>();
 
-    /** What the current filter lets through, wanted species first. */
+
     protected final List<Row> rows = new ArrayList<>();
     protected final Set<String> selected = new LinkedHashSet<>();
 
@@ -88,7 +75,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
 
-    /** The card talking back: why a click did nothing, or why a plot refused. */
+
     protected String notice;
     protected Color noticeColor;
 
@@ -105,7 +92,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** Builds the controls and the first list into the popup's own panel. Call once. */
+
     public void mount(CustomPanelAPI panel, float width, float height) {
         this.panel = panel;
         this.width = width;
@@ -121,7 +108,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-    /** The sidebar's own dressing, verbatim - this card stands in the sidebar's slot. */
+
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -134,7 +121,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
 
-    /** Same hand-worked ghost text as the sidebar's field - there is no change callback. */
+
     @Override
     public void advance(float amount) {
         if (searchField == null) return;
@@ -148,13 +135,12 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The part that never rebuilds: the title row, search, the type chips, and the header. */
+
     protected void buildControls() {
-        //the same right edge as the list's rows below, which sit 6px in for their scroller
+        // the same right edge as the list's rows below, which sit 6px in for their scroller
         float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI controls = panel.createUIElement(innerWidth, CONTROLS_HEIGHT, false);
 
-        //the title carries the way out in its right corner
         CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
                 new PaneWidgets.TitleRow("FISHING PLANNER"));
         CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
@@ -174,7 +160,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         FishType[] types = FishType.values();
 
-        //floored to the pixel: a chip on a fractional edge is a chip with a soft edge
         float chipWidth = (float) Math.floor(
                 (innerWidth - CHIP_GAP * (types.length - 1)) / types.length);
 
@@ -203,7 +188,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
 
-    /** The floor, built once and anchored from the bottom: the notice line, then PLOT ROUTE. */
+
     protected void buildFooter() {
         float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI footer = panel.createUIElement(innerWidth, FOOTER_HEIGHT, false);
@@ -224,15 +209,14 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         panel.addUIElement(footer).inTL(PAD, height - PAD - FOOTER_HEIGHT);
     }
 
-    /** Fresh rows for the current filter: pinned asks first, then the rest of what is known.
-     *  The controls stay put, and so does the keyboard. */
+
     protected void rebuildList() {
         if (listRemovable != null) panel.removeComponent(listRemovable);
 
         rebuildRows();
 
         float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f - 8f;
-        //same air on both sides - the list's slot is inset PAD left and right alike
+        // same air on both sides - the list's slot is inset PAD left and right alike
         listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
 
         for (Row row : rows) {
@@ -247,7 +231,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         listViewport = panel.addUIElement(listElement);
         listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
 
-        //a scrollable element comes back wrapped in a scroller - that's what's removed/stored
         listRemovable = listElement.getExternalScroller() != null
                 ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
     }
@@ -285,7 +268,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         rebuildList();
     }
 
-    /** A click toggles the pick; the cap refuses with a reason rather than silently. */
+
     protected void onRowClicked(FishSpec spec) {
         if (selected.remove(spec.id)) {
             notice = null;
@@ -312,8 +295,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //refuse rather than quietly go without: a route that silently dropped a pick would
-        //read as the fish being on it
+        // refuse rather than quietly go without: a route that silently dropped a pick would read as the fish being on it
         List<String> stranded = FishRoutePlanner.getUnplaceable(new ArrayList<>(selected));
         if (!stranded.isEmpty()) {
             List<String> names = new ArrayList<>();
@@ -322,7 +304,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 names.add(spec == null ? id : spec.getDisplayName());
             }
 
-            //the notice is one line; a long roll call gets counted instead of read out
+            // the notice is one line; a long roll call gets counted instead of read out
             String listed = names.size() > 2
                     ? names.get(0) + ", " + names.get(1) + " +" + (names.size() - 2) + " more"
                     : String.join(", ", names);
@@ -341,7 +323,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         host.onRoutePlotted(route);
     }
 
-    // --- Tooltips, which is where all the explaining lives. ---
 
     protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
         return new BaseTooltipCreator() {
@@ -401,7 +382,6 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected TooltipMakerAPI.TooltipCreator createRowTooltip(FishSpec spec) {
-        //the shared species card, with this card's own action line read live at hover time
         return FishTooltips.create(spec, () -> {
             if (selected.contains(spec.id)) return "Click to drop it from the route plan.";
             if (selected.size() >= FishRoutePlanner.MAX_PICKS) {
@@ -411,9 +391,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         });
     }
 
-    // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the sidebar. ---
 
-    /** The answer-back line above the button, gone the moment there is nothing to answer. */
     protected class NoticePlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI noticePos;
@@ -430,8 +408,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             LazyFont small = ShopUi.getSmallFont();
             if (small == null) return;
 
-            //grows upward from its floor - a wrapped second line eats into the list rather
-            //than lying across the button it explains
+            // grows upward from its floor - a wrapped second line eats into the list rather than lying across the button it explains
             LazyFont.DrawableString line = small.createText(notice,
                     ShopUi.withAlpha(noticeColor == null ? Misc.getGrayColor() : noticeColor,
                             alphaMult), small.getBaseHeight(), noticePos.getWidth());
@@ -441,9 +418,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** One species row in the shared dress; the field stays lit while picked. The dot is the
-     *  whole of the who-wants-it story here - the job/errand tag that used to sit beside it is
-     *  the tooltip's to tell (its Required-by section already names the askers). */
+
     protected class RowPlugin extends FishListRow {
 
         public RowPlugin(Row row) {

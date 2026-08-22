@@ -28,20 +28,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Selling the catch at market price: the picker, the batch rungs, and the arithmetic.
- * <p>
- * Machinery, not dialogue - the sheet says who is buying and why, and calls in here for the part
- * that involves counting a hold and driving vanilla's cargo picker. Wanted fish are stepped around
- * by every batch route: whether a shop mark or an open errand put the yellow dot there, a bulk sale
- * should not eat them.
- */
+
 public class FishBuyer {
 
-    /** One stack's worth: how many, their shared rarity, what they are worth together. */
+
     protected static class Stack {
         SpecialItemData data;
-        /** Number of special items represented by this cargo stack. */
+
         int items;
         int count;
         FishRarity rarity;
@@ -49,18 +42,14 @@ public class FishBuyer {
         boolean wanted;
     }
 
-    /**
-     * One exact cargo removal in a bulk-sale preview. A whole-stack entry removes the stack as it
-     * stands; a partial one opens a container, sells the eligible specimens and repacks the rest -
-     * which is what lets one wanted fish in the pile protect itself instead of the whole pile.
-     */
+
     protected static final class SaleEntry {
         final SpecialItemData data;
         final int items;
         final int count;
         final float value;
 
-        /** The container's split, or null for a stack sold whole. */
+
         final List<FishCatch> sell;
         final List<FishCatch> keep;
 
@@ -87,10 +76,7 @@ public class FishBuyer {
         }
     }
 
-    /**
-     * An immutable snapshot of a bulk sale, including the exact whole stacks it will consume.
-     * Its fingerprint lets the confirmation reject a hold that changed while the prompt was open.
-     */
+
     protected static final class SalePreview {
         final List<SaleEntry> entries;
         final int count;
@@ -109,7 +95,7 @@ public class FishBuyer {
         }
     }
 
-    /** One named species in a batch-sale preview, keyed by its stable data id. */
+
     protected static class DescriptionSpecies {
         String name;
         int count;
@@ -120,7 +106,7 @@ public class FishBuyer {
         return !read().isEmpty();
     }
 
-    /** Every fish aboard, stack by stack - containers valued by their contents. */
+
     protected static List<Stack> read() {
         List<Stack> out = new ArrayList<>();
 
@@ -152,8 +138,7 @@ public class FishBuyer {
                     held.count++;
                     held.value += entry.getValue();
 
-                    //a crate sells as its rarest content, so a mixed one is never quietly sold
-                    //below what is in it
+                    // a crate sells as its rarest content, so a mixed one is never quietly sold below what is in it
                     if (worst == null || entry.getSpec().rarity.rank > worst.rank) {
                         worst = entry.getSpec().rarity;
                     }
@@ -174,9 +159,7 @@ public class FishBuyer {
         return out;
     }
 
-    /** The vanilla cargo picker over a copy of the hold that only carries fish. The containers
-     *  opened for the picker are put back afterwards, minus whatever sold - the unpacking is the
-     *  picker's need, not a lasting rearrangement of the hold. */
+
     public static boolean show(final InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -230,7 +213,7 @@ public class FishBuyer {
         return true;
     }
 
-    /** The left-column control and its one-way compacting transaction. */
+
     protected static final class PickerPackingSession {
         protected static final float BUTTON_WIDTH = 250f;
         protected static final float BUTTON_HEIGHT = 24f;
@@ -261,8 +244,7 @@ public class FishBuyer {
             if (packed) return false;
             packed = true;
 
-            //Selection lives in a second cargo object. Put it back before rebuilding the source so
-            //nothing remains stranded under the old loose-item identity.
+            // Selection lives in a second cargo object. Put it back before rebuilding the source so nothing remains stranded under the old loose-item identity.
             if (selected != null && !selected.isEmpty()) {
                 offer.addAll(selected);
                 selected.clear();
@@ -296,16 +278,7 @@ public class FishBuyer {
         }
     }
 
-    /**
-     * Vanilla's cargo picker does not watch its backing cargo for structural changes. Its two
-     * grids are rebuilt by an internal cargo panel's stable {@code updateCargoViews()} method,
-     * but neither that panel nor the refresh is exposed through the public picker API.
-     * <p>
-     * Start at our custom button panel, walk stable {@code getParent()} links to the picker, and
-     * inspect each ancestor's direct fields by capability. The field and concrete class names are
-     * deliberately never used: both are obfuscated. Failure is soft; the transaction remains
-     * correct even if a later game version moves the refresh owner.
-     */
+
     protected static final class PickerCargoRefresh {
         protected static final int MAX_PARENT_DEPTH = 16;
 
@@ -321,7 +294,7 @@ public class FishBuyer {
                         Object value = field.get(current);
                         if (value != null && invokeRefresh(value)) return;
                     } catch (Throwable ignored) {
-                        //One inaccessible or invalid field does not invalidate the capability crawl.
+                        // One inaccessible or invalid field does not invalidate the capability crawl.
                     }
                 }
 
@@ -372,7 +345,7 @@ public class FishBuyer {
         finish(dialog, sold, credits);
     }
 
-    /** One container as it stood before the picker's unboxing: its id, contents and stack count. */
+
     protected static final class ContainerSnapshot {
         final String id;
         final List<FishCatch> contents;
@@ -385,7 +358,7 @@ public class FishBuyer {
         }
     }
 
-    /** The hold's containers as they stand, taken immediately before {@code unbox} opens them. */
+
     protected static List<ContainerSnapshot> snapshotContainers(CargoAPI cargo) {
         List<ContainerSnapshot> out = new ArrayList<>();
         if (cargo == null) return out;
@@ -401,24 +374,15 @@ public class FishBuyer {
         return out;
     }
 
-    /**
-     * Puts the picker's unboxing back the way it stood, minus whatever sold: each snapshotted
-     * container reclaims its own specimens from the loose fish - matched by their exact encoded
-     * form, the same string {@code unbox} put them out under - and repacks under its own id.
-     * A specimen that is no longer aboard was sold, and simply stays out of the rebuilt box.
-     */
+
     protected static void restoreContainers(List<ContainerSnapshot> boxed) {
         if (Global.getSector().getPlayerFleet() == null) return;
 
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
 
-        //The buyer's Pack button is transactional too. Open its temporary species crates before
-        //putting the pre-picker boxes back; if there were none originally, this still restores the
-        //loose hold the player opened the buyer with.
         FishItems.unbox(cargo);
         if (boxed == null || boxed.isEmpty()) return;
 
-        //what is loose right now, as a countable pool keyed by encoded specimen
         Map<String, Integer> loose = new HashMap<>();
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
@@ -451,10 +415,7 @@ public class FishBuyer {
         }
     }
 
-    /**
-     * Opens a confirmation for everything unmarked at or below the rung. The actual removal is
-     * deliberately delayed until confirmation, then verified against a fresh hold snapshot.
-     */
+
     public static boolean sellUpTo(InteractionDialogAPI dialog, String rarityName) {
         FishRarity cap = CatchReleaseCMD.parseRarity(rarityName);
         if (cap == null) return false;
@@ -466,7 +427,7 @@ public class FishBuyer {
         return true;
     }
 
-    /** What a batch option at this rung would take, so the sheet can price its own row. */
+
     public static int countUpTo(FishRarity cap) {
         return previewUpTo(cap).count;
     }
@@ -475,13 +436,7 @@ public class FishBuyer {
         return previewUpTo(cap).value;
     }
 
-    /**
-     * The exact specimens the current batch-sale route would take, in hold order.
-     * <p>
-     * This deliberately walks the same preview as {@link #sellUpTo}, including every copy in an
-     * identical-container stack. The old one-container assumption sold and described different
-     * quantities whenever two identical crates stacked together in the cargo hold.
-    */
+
     public static String describeUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = describeSpeciesUpTo(cap);
 
@@ -495,11 +450,7 @@ public class FishBuyer {
         return description.toString();
     }
 
-    /**
-     * Adds the batch contents as real tooltip rows so every species name can carry its own rarity.
-     * A plain option tooltip can only colour matched substrings, which makes overlapping names
-     * ambiguous; one highlighted name per paragraph cannot colour the wrong span.
-     */
+
     public static void addDescriptionTooltip(InteractionDialogAPI dialog, Object optionId,
                                              FishRarity cap) {
         if (dialog == null || dialog.getOptionPanel() == null) return;
@@ -519,7 +470,7 @@ public class FishBuyer {
                 });
     }
 
-    /** The exact named contents behind both the plain description and the coloured tooltip. */
+
     protected static Map<String, DescriptionSpecies> describeSpeciesUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = new LinkedHashMap<>();
 
@@ -545,12 +496,7 @@ public class FishBuyer {
         return counts;
     }
 
-    /**
-     * Builds the one source of truth used by the label, tooltip, confirmation and sale.
-     * <p>
-     * Containers are read specimen by specimen: the eligible contents sell and the rest repack,
-     * so a single wanted fish - or one rare over the rung - keeps itself, not the whole pile.
-     */
+
     protected static SalePreview previewUpTo(FishRarity cap) {
         List<SaleEntry> entries = new ArrayList<>();
         int count = 0;
@@ -591,9 +537,7 @@ public class FishBuyer {
         return new SalePreview(entries, count, value, fingerprint.toString());
     }
 
-    /** Length prefixes make two distinct payloads unable to blur together in the snapshot key.
-     *  Count and value ride along so a partial container whose split moved - a mark flipped
-     *  while the prompt was open - reads as a different sale. */
+
     protected static void appendFingerprint(StringBuilder out, SaleEntry entry) {
         String id = entry.data.getId();
         String data = entry.data.getData();
@@ -613,8 +557,7 @@ public class FishBuyer {
                 TooltipMakerAPI text = panel.createUIElement(360f, 100f, false);
                 String credits = Misc.getDGSCredits(expected.value) + " credits";
 
-                //Vanilla confirmation prompts explicitly opt into the large Insignia paragraph
-                //face; a bare custom UI element otherwise reads like small tooltip copy.
+                // Vanilla confirmation prompts explicitly opt into the large Insignia paragraph face; a bare custom UI element otherwise reads like small tooltip copy.
                 text.setParaInsigniaLarge();
                 text.addPara("Sell " + expected.count + " fish for %s?", 0f,
                         Misc.getHighlightColor(), credits);
@@ -646,8 +589,7 @@ public class FishBuyer {
                         return;
                     }
 
-                    //The hold (or a protection mark) changed under the prompt. Show the player
-                    //the new exact sale rather than silently spending a different set of fish.
+                    // The hold (or a protection mark) changed under the prompt. Show the player the new exact sale rather than silently spending a different set of fish.
                     reopenBulkSaleConfirm(dialog, cap, current);
                     return;
                 }
@@ -657,11 +599,7 @@ public class FishBuyer {
         });
     }
 
-    /**
-     * A custom dialog is still installed while its confirm callback runs, so Starsector ignores a
-     * second {@code showCustomDialog()} from that callback. RC8 invokes the callback before it
-     * dismisses the current dialog, so queue the fresh prompt for the following campaign update.
-     */
+
     protected static void reopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap,
                                                 SalePreview preview) {
         Global.getSector().addTransientScript(new ReopenBulkSaleConfirm(dialog, cap, preview));
@@ -698,15 +636,13 @@ public class FishBuyer {
         }
     }
 
-    /** Performs only the already-confirmed, freshly recomputed transaction. */
+
     protected static void execute(InteractionDialogAPI dialog, SalePreview preview) {
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
 
         for (SaleEntry entry : preview.entries) {
             cargo.removeItems(CargoItemType.SPECIAL, entry.data, entry.items);
 
-            //a partly-sold container goes back with what it kept, under its own id - a crate
-            //stays a crate and the pile stays the pile
             if (entry.keep != null) {
                 SpecialItemData rest = FishItems.repack(entry.data.getId(), entry.keep);
                 for (int i = 0; i < entry.items; i++) cargo.addSpecial(rest, 1);

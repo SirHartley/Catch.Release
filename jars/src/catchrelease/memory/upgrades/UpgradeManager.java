@@ -52,7 +52,7 @@ public class UpgradeManager {
         return stat != null ? stat.maxLevel : 0;
     }
 
-    /** Current value of a stat, or fallback if it has no row in the sheet. The one call to use. */
+
     public static float getValue(String statId, float fallback) {
         UpgradeManager manager = getInstance();
 
@@ -61,12 +61,12 @@ public class UpgradeManager {
         return manager.getCurrentValue(statId);
     }
 
-    /** For the ones that are on or off rather than more or less. */
+
     public static boolean isUnlocked(String statId) {
         return getValue(statId, 0f) > 0f;
     }
 
-    /** Everything in one category, for a shop that shows them apart. */
+
     public java.util.List<UpgradeStat> getByCategory(UpgradeStat.Category category) {
         java.util.List<UpgradeStat> out = new java.util.ArrayList<>();
 
@@ -112,14 +112,7 @@ public class UpgradeManager {
         for (UpgradeStat stat : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) levelMap.put(stat.id, stat);
     }
 
-    /**
-     * Re-reads the sheet into the save on every load: sheet-owned figures refresh on stats the
-     * save already holds, and a stat that is in the sheet but not in the save is seeded fresh -
-     * without that, an upgrade added to {@code UpgradeData.csv} after a campaign began would
-     * never reach its outfitter, because the shop reads this map and not the sheet. Only the
-     * level itself belongs to the save. A stat the sheet no longer carries keeps its last-known
-     * figures rather than tripping over the missing row.
-     */
+
     public void updateBaseValues(){
         for (UpgradeStat loaded : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) {
             UpgradeStat held = levelMap.get(loaded.id);

@@ -4,11 +4,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 
 import java.awt.Color;
 
-/**
- * The categories a player actually filters by: what kind of thing it is, read off the table's
- * tags the same way {@link FishSpec#getTypeName()} reads them. Each carries the colour its
- * merged waters are drawn in - four hues far enough apart to survive being striped together.
- */
+
 public enum FishType {
 
     FISH("Fish", new Color(100, 165, 255), "pane_fish"),

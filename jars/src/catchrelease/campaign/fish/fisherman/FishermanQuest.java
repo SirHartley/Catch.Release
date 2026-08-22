@@ -49,24 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Work the trade puts out: one named specimen, from one named place, and it will be there.
- * <p>
- * Not a bar job. A bar job is somebody who wants a fish; this is the people who <i>chart</i> the
- * water asking for a reading from a spot they cannot get to, and the difference shows in every part
- * of it - the target is a specific animal at a specific rupture rather than a species and a count,
- * it does not expire, and what it pays is the thing nothing else sells.
- * <p>
- * <b>The fish is put there and kept there.</b> A quest that says "go to Kumari and catch a Marlin"
- * and then leaves it to the spawn tables is a quest that can be arrived at correctly and fail for
- * an hour, so {@link Keeper} replaces the specimen whenever the player is in the system and it is
- * missing. It only ever comes up <i>barely holding</i> - see {@link #isQuestFish} - because that is
- * what is being asked about: not the animal, the water it is in.
- * <p>
- * <b>The pay is a wider shelf.</b> Credits too, but the shelf is the point: two charts on offer is
- * the floor, and the only thing that ever raises it is having done this. Each round is further out,
- * rarer, and worth more than the last.
- */
+
 public class FishermanQuest {
 
     public static final String STATE_KEY = "$catchrelease_fisherQuest";
@@ -75,32 +58,32 @@ public class FishermanQuest {
     public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
     public static final float COOLDOWN_DAYS = 90f;
 
-    /** Set on the specimen this quest planted, so the catch pipeline knows to force the water. */
+
     public static final String QUEST_FISH_FLAG = "$catchrelease_questFish";
     public static final String QUEST_TARGET_ID_KEY = "$catchrelease_questTargetId";
 
-    /** Rarity the ladder reaches for at each round, clamped to what exists. */
+
     public static final int[] RUNG_BY_ROUND = {1, 2, 2, 3, 3, 4};
 
-    /** How far off the target may be, in light-years, and what it pays. */
+
     public static final float[] MIN_LY_BY_ROUND = {0f, 4f, 8f, 12f, 16f, 20f};
     public static final int CREDITS_BASE = 40000;
     public static final int CREDITS_PER_ROUND = 25000;
 
-    /** Always exactly one more chart on the shelf. The ladder is in the money, not in this. */
+
     public static final int SLOTS_PER_JOB = 1;
 
-    /** How often the keeper looks, and how far from the mark the specimen is put. */
+
     public static final float KEEP_CHECK_SECONDS = 2f;
     public static final float SPOT_SPREAD = 400f;
 
-    /** The quest as the save knows it. */
+
     public static class Saved implements Serializable {
         public String speciesId;
         public String systemId;
         public String systemName;
 
-        /** Where in the system, and whether the mark is a rupture or open water for the lamps. */
+
         public float x;
         public float y;
         public boolean atPond;
@@ -108,18 +91,11 @@ public class FishermanQuest {
         public int round;
         public int credits;
 
-        /** Identity and start of this exact request; zero/null are healed for an older active save. */
+
         public String targetFishId;
         public long acceptedAt;
 
-        /**
-         * Whether the hold has the specimen, as opposed to the request being finished.
-         * <p>
-         * The request finishes at the boat. Landing the thing is where the player did the part
-         * they were asked to do, and nothing marked that moment: the rupture kept its mission
-         * marker, the note kept saying it was still in there, and the only confirmation was flying
-         * back and finding a new option waiting.
-         */
+
         public boolean landed;
     }
 
@@ -129,14 +105,14 @@ public class FishermanQuest {
         return stored instanceof Saved ? (Saved) stored : null;
     }
 
-    /** The request already shown to the player, held unchanged until it is accepted. */
+
     public static Saved getOffer() {
         Object stored = Global.getSector().getPersistentData().get(OFFER_KEY);
 
         return stored instanceof Saved ? (Saved) stored : null;
     }
 
-    /** The wanted species as a name, for the rows that talk about it. */
+
     public static String describe(Saved quest) {
         if (quest == null) return "";
 
@@ -149,7 +125,7 @@ public class FishermanQuest {
         return Global.getSector().getMemoryWithoutUpdate().getInt(ROUND_KEY);
     }
 
-    /** Three campaign months after the previous hand-in; the first request has no wait. */
+
     public static boolean isAvailable() {
         if (getActive() != null) return false;
 
@@ -158,16 +134,7 @@ public class FishermanQuest {
                 .getElapsedDaysSince((Long) last) >= COOLDOWN_DAYS;
     }
 
-    //---------------------------------------------------------------- the offer
 
-    /**
-     * Rolls one without committing to it, so the conversation can describe it before it is taken.
-     * <p>
-     * The specimen and its destination are chosen as one pair. A chart-reading job that sends
-     * somebody to the one system its target could never be in reads as the trade not knowing its
-     * own business; choosing pairs also lets the location itself be the reason a request is worth
-     * making.
-     */
     public static Saved roll() {
         if (!isAvailable()) return null;
 
@@ -193,8 +160,6 @@ public class FishermanQuest {
             quest.x = pond.getLocation().x;
             quest.y = pond.getLocation().y;
         } else {
-            //no rupture to send them to, so it is lamp work: a marked patch of open water out
-            //where the boats themselves would be
             Vector2f at = MathUtils.getPointOnCircumference(OuterReaches.center(system),
                     MathUtils.getRandomNumberInRange(OuterReaches.getInnerLimit(system),
                             OuterReaches.getOuterLimit(system)),
@@ -208,7 +173,7 @@ public class FishermanQuest {
         return quest;
     }
 
-    /** Returns the existing offer, or rolls and persists the first one the player is shown. */
+
     public static Saved getOrRollOffer() {
         Saved offer = getOffer();
         if (offer != null) return offer;
@@ -219,7 +184,7 @@ public class FishermanQuest {
         return offer;
     }
 
-    /** A qualifying specimen and a system it naturally inhabits. */
+
     protected static class Target {
         public final FishSpec spec;
         public final StarSystemAPI system;
@@ -230,12 +195,7 @@ public class FishermanQuest {
         }
     }
 
-    /**
-     * A request is for something that asks more of the player than an ordinary catch: difficult
-     * water, a rare or epic specimen, a pulsar system, or something a camp is currently holding
-     * out of reach. The rarity ladder biases the roll instead of excluding other valid pairs, so
-     * the later rounds still lean upward without making a sparse sector run out of offers.
-     */
+
     protected static Target pickTarget(int round) {
         int want = RUNG_BY_ROUND[Math.min(round, RUNG_BY_ROUND.length - 1)];
 
@@ -263,7 +223,7 @@ public class FishermanQuest {
         return picker.pick();
     }
 
-    /** Existing range and theme protections, plus the current round's distance requirement. */
+
     protected static boolean isEligibleSystem(StarSystemAPI system, Vector2f from, float minLY) {
         if (system == null) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
@@ -273,7 +233,7 @@ public class FishermanQuest {
         return Misc.getDistanceLY(from, system.getLocation()) >= minLY;
     }
 
-    /** Whether this naturally possible pair has a reason to be a Chart Request. */
+
     protected static boolean isChartRequest(FishSpec spec, StarSystemAPI system) {
         if (spec.difficulty >= 65f) return true;
         if (spec.rarity == FishRarity.RARE || spec.rarity == FishRarity.EPIC) return true;
@@ -286,7 +246,7 @@ public class FishermanQuest {
         return false;
     }
 
-    /** Taken. The mark goes up and the keeper starts putting the specimen back. */
+
     public static void accept(Saved quest) {
         if (quest == null) return;
 
@@ -297,9 +257,7 @@ public class FishermanQuest {
         FishIntelNotifications.queue(new QuestIntel(quest));
     }
 
-    //---------------------------------------------------------------- the hand-in
 
-    /** Opens the named-specimen picker and resumes the Fisherman's sheet after a real transfer. */
     public static boolean showTurnInPicker(final InteractionDialogAPI dialog,
                                            final Map<String, MemoryAPI> memoryMap) {
 
@@ -344,7 +302,7 @@ public class FishermanQuest {
         return opened;
     }
 
-    /** Whether the hold has this request's exact post-acceptance specimen aboard. */
+
     public static boolean isSatisfied() {
         Saved quest = getActive();
         if (quest == null) return false;
@@ -354,7 +312,7 @@ public class FishermanQuest {
         return findAboard(quest) != null;
     }
 
-    /** The specimen itself, so the hand-in can take exactly the one that was asked for. */
+
     protected static FishCatch findAboard(Saved quest) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
@@ -371,12 +329,7 @@ public class FishermanQuest {
         return null;
     }
 
-    /**
-     * The specimen changes hands: money, a wider shelf, and the next round is now harder.
-     * <p>
-     * The fish is spent out of whatever it was in - loose stack or crate - the same careful way
-     * every other spend in the mod works, so a part-emptied crate goes back as a crate.
-     */
+
     public static boolean turnIn(TextPanelAPI text) {
         Saved quest = getActive();
         if (quest == null || !spend(quest)) return false;
@@ -405,8 +358,6 @@ public class FishermanQuest {
         letGo(quest);
         Global.getSector().getPersistentData().remove(STATE_KEY);
 
-        //IntelManager returns its backing repository list. removeIntel() mutates that same list,
-        //so iterate a snapshot; duplicate notes from an older save must all come out safely.
         for (IntelInfoPlugin intel : new ArrayList<>(Global.getSector().getIntelManager()
                 .getIntel(QuestIntel.class))) {
 
@@ -414,8 +365,6 @@ public class FishermanQuest {
         }
 
         if (text != null) {
-            //Vanilla reward/loss notices use small Insignia type, a positive/negative face, and
-            //yellow only for the value inside the line. Keep both permanent rewards in that face.
             text.setFontSmallInsignia();
             String credits = Misc.getDGSCredits(quest.credits);
             text.addPara("Gained " + credits, Misc.getPositiveHighlightColor());
@@ -428,7 +377,7 @@ public class FishermanQuest {
         return true;
     }
 
-    /** Takes only this request's exact specimen, repacking whatever it came out of. */
+
     protected static boolean spend(Saved quest) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -458,7 +407,7 @@ public class FishermanQuest {
             contents.remove(found);
             cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
 
-            //a container's contents are its identity, so a part-spent one is a different item
+            // a container's contents are its identity, so a part-spent one is a different item
             if (!contents.isEmpty()) {
                 cargo.addSpecial(FishItems.repack(data.getId(), contents), 1);
             }
@@ -469,15 +418,7 @@ public class FishermanQuest {
         return false;
     }
 
-    /**
-     * Takes this request's claim off whatever rupture it was using.
-     * <p>
-     * {@link #plant} claims one and nothing ever let it go, so vanilla's own mission marker - the
-     * gold ring and the exclamation - stayed burned onto that rupture for the rest of the campaign,
-     * pointing at a request that was over. Asked of every rupture in the sector rather than of the
-     * one system the request remembers: the claim is named, so a wide sweep cannot take anybody
-     * else's marker off, and the remembered place is not reliably where the claim ended up.
-     */
+
     protected static void letGo(Saved quest) {
         if (quest == null) return;
 
@@ -485,12 +426,7 @@ public class FishermanQuest {
         QuestPond.clearMotes(STATE_KEY);
     }
 
-    /**
-     * The moment the hold answers the request: the water is done with, and the note says so.
-     * <p>
-     * Unbooked again if the specimen leaves the hold, so the mark and the note follow what is
-     * aboard rather than what was aboard once.
-     */
+
     protected static void setLanded(Saved quest, boolean landed) {
         if (quest == null || quest.landed == landed) return;
 
@@ -505,14 +441,12 @@ public class FishermanQuest {
         }
     }
 
-    //---------------------------------------------------------------- the fish itself
 
-    /** Whether this mote is the one a quest planted, which is what forces the water it reads as. */
     public static boolean isQuestFish(SectorEntityToken mote) {
         return mote != null && mote.getMemoryWithoutUpdate().getBoolean(QUEST_FISH_FLAG);
     }
 
-    /** Carries the planted mote's exact request identity into the item that reaches cargo. */
+
     public static void markCatch(FishCatch fish, SectorEntityToken mote) {
         if (fish == null || !isQuestFish(mote)) return;
 
@@ -529,11 +463,7 @@ public class FishermanQuest {
                 ? null : mote.getContainingLocation().getId();
     }
 
-    /**
-     * Updates the note at the moment the requested specimen enters the hold. The keeper still
-     * polls so selling or otherwise removing it can reopen the request, but landing one no longer
-     * waits for that interval before the intel and rupture marker change.
-     */
+
     public static void onCatchStored(FishCatch fish) {
         Saved quest = getActive();
         if (quest != null && isEligible(quest, fish)) setLanded(quest, true);
@@ -549,7 +479,7 @@ public class FishermanQuest {
                 && quest.systemId != null && quest.systemId.equals(fish.caughtSystemId);
     }
 
-    /** Save-compatible identity repair for requests accepted before exact provenance was recorded. */
+
     protected static void ensureIdentity(Saved quest) {
         if (quest.targetFishId == null || quest.targetFishId.isEmpty()) {
             quest.targetFishId = Misc.genUID();
@@ -559,13 +489,7 @@ public class FishermanQuest {
         }
     }
 
-    /**
-     * Puts the specimen back wherever it is meant to be.
-     * <p>
-     * At a rupture it goes in through {@link QuestPond}, which is the machinery the bar jobs already
-     * use. In open water it is a bare mote at the marked spot, which is what the lamps are for -
-     * nothing else out there will show it.
-     */
+
     protected static void plant(Saved quest, StarSystemAPI system) {
         Vector2f mark = new Vector2f(quest.x, quest.y);
 
@@ -582,9 +506,6 @@ public class FishermanQuest {
         }
 
         if (mote == null) {
-            //born on one side of the marked patch and swimming to the other, the same way the
-            //boats stage their own catch - a mote swims to its target and expires there, so one
-            //spawned on top of its own destination would blink out immediately
             float across = MathUtils.getRandomNumberInRange(0f, 360f);
 
             Vector2f at = MathUtils.getPointOnCircumference(mark, SPOT_SPREAD, across);
@@ -605,7 +526,7 @@ public class FishermanQuest {
         QuestPond.markPlanted(mote, STATE_KEY);
     }
 
-    /** Whether the planted specimen is still out there somewhere in the system. */
+
     protected static boolean isPlanted(StarSystemAPI system) {
         for (SectorEntityToken mote : system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (isQuestFish(mote) && !mote.isExpired()) return true;
@@ -614,13 +535,7 @@ public class FishermanQuest {
         return false;
     }
 
-    /**
-     * Keeps the asked-for specimen in the water while the player is there to look for it.
-     * <p>
-     * Only while they are in the system: a mote is an entity with a plugin on it, and keeping one
-     * alive in a system nobody is standing in for the rest of the campaign is upkeep bought for
-     * nothing. Arriving is what puts it back, which is indistinguishable from its having been there.
-     */
+
     public static class Keeper implements EveryFrameScript {
 
         protected final IntervalUtil interval =
@@ -648,9 +563,6 @@ public class FishermanQuest {
             Saved quest = getActive();
             if (quest == null) return;
 
-            //asked before anything about where the player is: the answer is about the hold, and
-            //this is the only thing watching for it - the catch minigame has no idea what any
-            //request wants
             setLanded(quest, isSatisfied());
             if (quest.landed) return;
 
@@ -667,9 +579,7 @@ public class FishermanQuest {
         }
     }
 
-    //---------------------------------------------------------------- the note
 
-    /** Where to go and what to bring back. */
     public static class QuestIntel extends BaseIntelPlugin
             implements catchrelease.campaign.fish.shop.FishAsker {
 
@@ -679,12 +589,7 @@ public class FishermanQuest {
             this.quest = quest;
         }
 
-        /**
-         * The named specimen, so it wears the same mark a job's ask would - see
-         * {@link catchrelease.campaign.fish.shop.FishAsker}. The species alone: what makes this
-         * particular animal the right one is the water it came out of, which is
-         * {@link #QUEST_FISH_FLAG}'s business and not something the hold can be asked about.
-         */
+
         @Override
         public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
             List<catchrelease.campaign.fish.shop.FishRequirement> out = new java.util.ArrayList<>();
@@ -730,11 +635,7 @@ public class FishermanQuest {
             addBulletPoints(info, mode);
         }
 
-        /**
-         * The facts under the title, the same on the list row and the open panel: the quarry,
-         * the water, and what the mark is. No day count - the quest does not expire - and no pay
-         * line: the note reads like an accepted bar job, and those keep the price out of it.
-         */
+
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
             Color h = Misc.getHighlightColor();
@@ -762,9 +663,6 @@ public class FishermanQuest {
             String name = spec == null ? "the named species" : spec.getDisplayName();
             float opad = 10f;
 
-            //the poster's face and colours, exactly where the bar jobs put their giver's - and
-            //always the held portrait, never the water-read one: the note keeps the face even
-            //when the boat does not
             FactionAPI faction = getFactionForUIColors();
             info.addImages(width, 128, opad, opad,
                     FishermanIdentity.getPortrait(0f), faction.getCrest());
@@ -812,7 +710,7 @@ public class FishermanQuest {
             super.buttonPressConfirmed(buttonId, ui);
         }
 
-        /** The poster's face, the way every bar job wears its giver's - and always the held one. */
+
         @Override
         public String getIcon() {
             return FishermanIdentity.getPortrait(0f);
@@ -823,7 +721,7 @@ public class FishermanQuest {
             return getSortStringNewestFirst();
         }
 
-        /** The Fisherman's colours - the request is his, whichever boat happens to carry it. */
+
         @Override
         public FactionAPI getFactionForUIColors() {
             return Global.getSector().getFaction(FishermanConstants.FACTION);
@@ -840,11 +738,10 @@ public class FishermanQuest {
             return tags;
         }
 
-        /** The marked rupture where there is one - it wears the mission marker, so the note should
-         *  point at it rather than at the system around it. */
+
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
-            //once it is aboard the water is not where the player is being sent
+            // once it is aboard the water is not where the player is being sent
             if (quest.landed) return null;
 
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {

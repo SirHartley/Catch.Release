@@ -22,32 +22,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Turns "I need these fish" into "fly here, then here": picks the systems that cover the chosen
- * species and orders them for the least travel.
- * <p>
- * Two decisions, made separately. Which systems to stand in is a greedy cover - most
- * still-uncovered picks first, ties broken by distance and known instability
- * ({@link Aberration#knownInstability}, so only hazards the player has actually found count
- * against a system). What order to fly them in is solved exactly, since five stops is at most
- * 120 orders. Legs riding a slipstream are costed cheaper.
- */
+
 public class FishRoutePlanner {
 
-    /** How many species one plan can chase. Matches the popup's selection cap. */
+
     public static final int MAX_PICKS = 5;
 
-    /**
-     * The instability penalty, in light-year-equivalents at fully unstable. High enough that a
-     * calm system a few jumps further wins over parking on a hazard, low enough that the only
-     * host of a species is still visited however bad its neighbourhood.
-     */
+
     public static final float INSTABILITY_PENALTY_LY = 8f;
 
-    /** How much of a leg's cost a slipstream running along it can forgive. */
+
     public static final float SLIPSTREAM_LEG_DISCOUNT = 0.3f;
 
-    /** A species somebody is already asking for, and who is asking. */
+
     public static class Suggestion {
         public final String speciesId;
         public final String reason;
@@ -58,19 +45,7 @@ public class FishRoutePlanner {
         }
     }
 
-    /**
-     * Every species with an open ask: every {@link FishAsker} in the log and the shop's marked
-     * upgrade and tackle rungs. Only species the player knows make the list.
-     * <p>
-     * Both halves go through {@link #suggest}, which they did not used to. The errand half asked
-     * the intel manager for {@link FishJob}s and took only asks that named a species outright,
-     * which missed two whole things at once. The introduction's ladder and the trade's chart
-     * requests are notes rather than bar jobs and are not {@code FishJob}s at all - which is the
-     * reason {@code FishAsker} exists - so nothing either of them wanted was ever suggested. And
-     * an errand asking for a kind of fish rather than a named one - any crab, anything rare or
-     * better - named nothing and so suggested nothing, on the one screen built to answer "where
-     * do I go for that".
-     */
+
     public static List<Suggestion> getSuggestions() {
         Map<String, String> byId = new LinkedHashMap<>();
 
@@ -78,14 +53,14 @@ public class FishRoutePlanner {
             for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
                 if (!(intel instanceof FishAsker asker)) continue;
 
-                //what the row's right-hand tag says; a bar job is a job, the notes are not
+                // what the row's right-hand tag says; a bar job is a job, the notes are not
                 String reason = asker instanceof FishJob ? "job" : "errand";
 
                 for (FishRequirement ask : asker.getAsks()) suggest(byId, ask, reason);
             }
         }
 
-        //the shop side is the shopping list: only what the player has marked asks for fish here
+        // the shop side is the shopping list: only what the player has marked asks for fish here
         for (FishRequirement ask : ShopMarks.getMarkedRequirements()) {
             suggest(byId, ask, "marked");
         }
@@ -102,16 +77,7 @@ public class FishRoutePlanner {
         return out;
     }
 
-    /**
-     * Puts every known species that could pay this ask on the list, under the given reason. First
-     * reason wins, so an errand's own tag survives a marked ware wanting the same fish later.
-     * <p>
-     * An ask that every known species could pay is dropped rather than listed. It is not wrong -
-     * anything really would do - but it singles out nothing, which is the same case
-     * {@link FishAsker#getAsks} calls a legitimate empty answer, and a suggestion list holding
-     * the entire table is a suggestion list holding nothing. The introduction's opening rung is
-     * exactly this: any common fish or better, which is every fish there is.
-     */
+
     protected static void suggest(Map<String, String> byId, FishRequirement ask, String reason) {
         if (ask == null) return;
 
@@ -131,17 +97,13 @@ public class FishRoutePlanner {
         for (String id : could) byId.putIfAbsent(id, reason);
     }
 
-    /**
-     * The plan itself. Null when nothing picked can be placed anywhere - a route with no stops
-     * is not a route.
-     */
+
     public static FishRoute.Saved plan(List<String> speciesIds) {
         if (speciesIds == null || speciesIds.isEmpty() || Global.getSector() == null) return null;
         if (Global.getSector().getPlayerFleet() == null) return null;
 
         Vector2f from = Global.getSector().getPlayerFleet().getLocationInHyperspace();
 
-        //what covers what: every system in the sector, against every pick that lives there
         Map<StarSystemAPI, Set<String>> covers = new LinkedHashMap<>();
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
@@ -162,7 +124,7 @@ public class FishRoutePlanner {
             if (hosted != null) covers.put(system, hosted);
         }
 
-        //the cover: most still-uncovered picks first, then the calmest and nearest of the ties
+        // the cover: most still-uncovered picks first, then the calmest and nearest of the ties
         Set<String> remaining = new LinkedHashSet<>(speciesIds);
         List<FishRoute.Stop> stops = new ArrayList<>();
         List<StarSystemAPI> stopSystems = new ArrayList<>();
@@ -190,7 +152,6 @@ public class FishRoutePlanner {
                 }
             }
 
-            //a pick nothing hosts is simply dropped - the rest of the plan still stands
             if (best == null) break;
 
             FishRoute.Stop stop = new FishRoute.Stop();
@@ -206,7 +167,6 @@ public class FishRoutePlanner {
 
         if (stops.isEmpty()) return null;
 
-        //the order: exact, since five stops is at most 120 ways round
         int[] order = bestOrder(from, stopSystems);
 
         FishRoute.Saved route = new FishRoute.Saved();
@@ -215,15 +175,9 @@ public class FishRoutePlanner {
         return route;
     }
 
-    /**
-     * Whether a system is somewhere a route should send anyone: proc-gen, reachable from
-     * hyperspace, not the abyss, nothing hand-made or hidden - the same standard everything
-     * else that points the player somewhere holds itself to. A stop the player cannot fly to
-     * is not a stop.
-     */
+
     protected static boolean isPlannable(StarSystemAPI system) {
-        //the standing exception, same as vanilla carves it out of its own skips: Limbo is
-        //hand-made and abyssal and stays a destination anyway
+        // the standing exception, same as vanilla carves it out of its own skips: Limbo is hand-made and abyssal and stays a destination anyway
         if ("Limbo".equals(system.getBaseName())) return true;
 
         if (!system.isProcgen()) return false;
@@ -235,10 +189,7 @@ public class FishRoutePlanner {
         return true;
     }
 
-    /**
-     * The picks with no plannable water anywhere in the sector, so the planner card can say
-     * which fish a plot would strand instead of quietly going without them.
-     */
+
     public static List<String> getUnplaceable(List<String> speciesIds) {
         List<String> out = new ArrayList<>();
         if (speciesIds == null || Global.getSector() == null) return out;
@@ -267,7 +218,7 @@ public class FishRoutePlanner {
         return out;
     }
 
-    /** Every order tried, the cheapest kept. The chain starts wherever the player is standing. */
+
     protected static int[] bestOrder(Vector2f from, List<StarSystemAPI> systems) {
         int count = systems.size();
 
@@ -311,11 +262,7 @@ public class FishRoutePlanner {
         }
     }
 
-    /**
-     * One leg's cost: the distance, forgiven a share where a slipstream runs along it. Sampled at
-     * three points rather than integrated - the number only has to prefer a leg that rides a
-     * stream over one that does not.
-     */
+
     protected static float legCost(Vector2f a, Vector2f b) {
         float distance = Misc.getDistance(a, b);
 

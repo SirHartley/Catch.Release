@@ -11,36 +11,18 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
 
-/**
- * A boat's mark on the system map, and nowhere else.
- * <p>
- * Its spec draws on the map and not in the campaign - {@code showInCampaign} false,
- * {@code showIconOnMap} true, which is the pair vanilla's own {@code base_intel_icon} is built
- * from. That is the whole point of it: a mark painted over the hull in space says nothing the hull
- * did not already say, whereas the map is the one screen where a boat somewhere out in the dark is
- * a blip among forty other blips and cannot be told from any of them.
- * <p>
- * It has no sensor profile, so it is never a contact to be found - it is simply drawn, which is
- * what makes the boat locatable on the map while it is out of sight.
- * <p>
- * Rides the fleet rather than orbiting anything, and appears only while the player shares its
- * location. The marker is deliberately reconciled rather than blindly added: old saves can carry
- * more than one from before that lifetime was tied to the player's location.
- */
+
 public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
 
-    /** The map only needs to hand a selected mark to the real moving fleet promptly, not per frame. */
+
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
 
     private static final String SERVICE_LINE =
             "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
 
-    /**
-     * Finds this boat's one current-location mark, removing duplicate survivors from older saves,
-     * or creates it when the player has come alongside a boat with no mark yet.
-     */
+
     public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
         if (fleet == null) return null;
 
@@ -73,7 +55,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         return icon;
     }
 
-    /** Removes every surviving mark bound to this exact boat, wherever an old save left it. */
+
     public static void removeFor(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
@@ -88,11 +70,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         }
     }
 
-    /**
-     * The player can only read a boat from the map of the place they are in. Remove every old
-     * marker from somewhere else immediately after a load or transition; the watched boat's own
-     * behaviour restores exactly one in the newly current location.
-     */
+
     public static void removeOutside(LocationAPI playerLocation) {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             if (location == playerLocation) continue;
@@ -109,10 +87,10 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     protected CampaignFleetAPI fleet;
 
-    /** Real-time campaign seconds since the last course-target check; zero is safe for old saves. */
+
     protected float autopilotCheckElapsed = 0f;
 
-    /** Object identity is the fleet identity here: plugin parameters serialize that exact hull. */
+
     protected boolean isFor(CampaignFleetAPI other) {
         return fleet == other;
     }
@@ -124,10 +102,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (pluginParams instanceof CampaignFleetAPI) fleet = (CampaignFleetAPI) pluginParams;
     }
 
-    /**
-     * Sits where the boat sits. A mark whose boat has gone - died, left, or jumped out of the
-     * system without it - takes itself off rather than standing over empty water.
-     */
+
     @Override
     public void advance(float amount) {
         if (entity == null) return;
@@ -143,13 +118,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         redirectAutopilot(amount);
     }
 
-    /**
-     * Makes the map mark a way to select the boat, rather than a stationary destination painted
-     * over it. The map's ordinary click handling first lays in a course to this custom entity. On
-     * the next check, replace that ultimate endpoint through the public campaign UI API; vanilla
-     * then owns the course to the moving fleet and keeps updating it after the mark disappears at
-     * sensor range.
-     */
+
     protected void redirectAutopilot(float amount) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null || player.getContainingLocation() != entity.getContainingLocation()) {
@@ -183,13 +152,11 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         return 280f;
     }
 
-    /** Says which boat it is, since the icon itself is the same one on every fishing fleet. */
+
     @Override
     public void createMapTooltip(TooltipMakerAPI tooltip, boolean expanded) {
         if (fleet == null) return;
 
-        //getNameWithFaction() deliberately lower-cases ordinary fleet names; this is a named
-        //contact, so keep the fleet's authored casing and apply vanilla's title-style ucFirst.
         tooltip.addTitle(Misc.ucFirst(fleet.getName()));
         int band = FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(fleet));
         tooltip.addPara(FishermanIdentity.corrupt(SERVICE_LINE, band), Misc.getGrayColor(), 10f);

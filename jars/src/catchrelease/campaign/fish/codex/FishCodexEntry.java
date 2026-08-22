@@ -33,21 +33,14 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.List;
 
-/**
- * One species in the codex - a fish.csv row, not a loaded game item, so the page is built by hand:
- * one box per informational area (description, catch data, record, location), plus the species'
- * art beside the topmost box.
- * <p>
- * {@link #isVisible()} is checked at draw time, not build time - the codex is generated once at
- * load, so build-time visibility would freeze at whatever had been caught at that moment.
- */
+
 public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin {
 
-    /** The right column is vanilla's related-entries width; the boxes take what is left. */
+
     public static final float RIGHT_WIDTH = 290f;
     public static final float BOX_GAP = 10f;
 
-    /** The art gets its own pixels, but not the whole page - past this it is scaled to fit. */
+
     public static final float ART_MAX = 240f;
     public static final float CARD_PAD = 16f;
 
@@ -56,11 +49,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     protected transient CustomPanelAPI panel;
     protected transient CodexDialogAPI codex;
 
-    /** A fresh identity per build, so a press on a stale page cannot match a live button. */
+
     protected transient Object mapButtonId;
 
     public FishCodexEntry(String id, FishSpec spec) {
-        //spec passed only so isCategory() sees a leaf; never read back - see getSpec()
+        // spec passed only so isCategory() sees a leaf; never read back - see getSpec()
         super(id, spec.getDisplayName(), FishCodex.getIcon(spec), spec);
 
         this.speciesId = spec.id;
@@ -78,12 +71,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishCodexEntryState.resolve(speciesId);
     }
 
-    /**
-     * The species shape is visible with range data; colour remains locked until it is caught.
-     * <p>
-     * The list row is drawn by vanilla from a path plus one tint - no hook for the FishIcons
-     * compositing, so the list uses vanilla's tint for the same alpha-shaped black body.
-     */
+
     @Override
     public String getIcon() {
         FishCodexEntryState state = getState();
@@ -94,7 +82,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishCodex.getIcon(spec);
     }
 
-    /** Vanilla tints its own private list sprite, so the silhouette cannot leak into other UI. */
+
     @Override
     public Color getIconColor() {
         FishCodexEntryState state = getState();
@@ -187,11 +175,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         panel.getPosition().setSize(width, Math.max(y, rightHeight));
     }
 
-    /** One boxed area: heading, content, box - all via the game's own text machinery. */
+
     protected UIPanelAPI addBox(float width, float y, String title,
                                 java.util.function.Consumer<TooltipMakerAPI> content) {
 
-        //15px padding each side
         TooltipMakerAPI text = panel.createUIElement(width - 30f, 0, false);
         text.setParaSmallInsignia();
 
@@ -208,7 +195,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return box;
     }
 
-    /** Type, rarity, and description text. */
+
     protected void addDescription(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.isCaught()) {
             text.addPara("Known only from range data. Nothing of this species has been seen"
@@ -234,7 +221,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** Difficulty, behaviour, and times caught. */
+
     protected void addCatchData(TooltipMakerAPI text, FishCodexEntryState state) {
         FishSpec spec = state.spec;
         FishLogEntry logged = state.log;
@@ -253,9 +240,9 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** Best catch's length, weight, grade, and where/when/how it was taken. */
+
     protected void addRecord(TooltipMakerAPI text, FishLogEntry logged) {
-        //grade recomputed from stored numbers, not stored itself, so table retuning regrades old catches
+        // grade recomputed from stored numbers, not stored itself, so table retuning regrades old catches
         FishGrade best = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
                 logged.recordAberration).getGrade();
 
@@ -277,7 +264,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
 
-    /** Location box: sealed until caught or range data is bought, then range summary + record system. */
+
     protected void addLocationData(TooltipMakerAPI text, FishCodexEntryState state) {
         FishSpec spec = state.spec;
         FishLogEntry logged = state.log;
@@ -302,7 +289,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         addMapButton(text, state);
     }
 
-    /** Shown for every known range in the campaign proper, caught or range-data-only. */
+
     protected void addMapButton(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.canShowOnMap() || Global.getCurrentState() != GameState.CAMPAIGN) return;
 
@@ -312,11 +299,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 Misc.getDarkPlayerColor(), Alignment.MID, CutStyle.TL_BR, 240f, 24f, BOX_GAP);
     }
 
-    /**
-     * Parks a species focus request with {@link FishMapFilterScript} and closes the codex via
-     * {@code dismiss(1)}. The map script waits for the codex's asynchronous dismissal callback
-     * before opening the map, then applies the filter once the real map screen exists.
-     */
+
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
 
@@ -335,16 +318,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /**
-     * Species art card - dark field, rarity backlight, rarity/grade marks - wrapped in the same box
-     * style as the other panels rather than the catch card's rounded dressing. Art is drawn at
-     * native size and only scaled down if it wouldn't fit the column.
-     */
+
     protected UIPanelAPI buildIconCard(FishSpec spec, FishLogEntry logged, float maxWidth) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) return null;
 
-        //load through the cache first to ensure the texture exists, then fetch fresh since the
-        //cached instance is shared and gets resized by other draws
+        // load through the cache first to ensure the texture exists, then fetch fresh since the cached instance is shared and gets resized by other draws
         if (SpriteLoader.loadSprite(spec.icon) == null) return null;
 
         SpriteAPI fresh = Global.getSettings().getSprite(spec.icon);
@@ -352,7 +330,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         float artWidth = fresh.getWidth();
         float artHeight = fresh.getHeight();
 
-        //30px box padding reserved before the card gets any width
+        // 30px box padding reserved before the card gets any width
         float artMax = Math.min(ART_MAX, maxWidth - 30f - CARD_PAD * 2f);
         if (artMax <= 0f) return null;
 
@@ -371,7 +349,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         CustomPanelAPI card = panel.createCustomPanel(cardSize, cardSize,
                 new IconCard(spec, artWidth, artHeight, best));
 
-        //wrapped in a tooltip since that's what wrapTooltipWithBox requires
         TooltipMakerAPI holder = panel.createUIElement(cardSize, cardSize, false);
         holder.addCustom(card, 0f);
 
@@ -380,7 +357,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return panel.wrapTooltipWithBox(holder);
     }
 
-    /** Renders the field, backlight, and sprite for {@link #buildIconCard}. */
+
     protected static class IconCard extends BaseCustomUIPanelPlugin {
 
         protected final FishSpec spec;
@@ -421,14 +398,14 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-    /** Epoch is cycle 206 (before 1970, so a real stamp is negative); only exact 0 means unset. */
+
     protected static String getDate(long timestamp) {
         if (Global.getSector() == null || timestamp == 0L) return "an unrecorded date";
 
         return Global.getSector().getClock().createClock(timestamp).getDateString();
     }
 
-    /** Difficulty tier as a word rather than the raw tuning value. */
+
     protected static String getDifficultyLabel(float difficulty) {
         if (difficulty >= 150f) return "extreme";
         if (difficulty >= 100f) return "very high";

@@ -14,14 +14,7 @@ import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 
-/**
- * One thing on a shelf - an upgrade (a ladder), a tackle (a slot), or a curio (a switch) - wrapped
- * so the list, rows, and detail pane are written once instead of once per kind.
- * <p>
- * Holds no state of its own: level, fit, switch and price are read fresh from what it wraps on every
- * call. A curio is the odd one out in that nothing about it is for sale - it was bought elsewhere,
- * and what the shop offers is the only thing left to do with it, which is turn it off.
- */
+
 public class ShopEntry {
 
     public enum Kind {
@@ -29,10 +22,10 @@ public class ShopEntry {
         TACKLE("Modifiers", "shop_modifiers"),
         CURIO("Extras", "pane_misc");
 
-        /** What the main tab row calls this. Held here so a fourth kind is one line, not two. */
+
         public final String tabTitle;
 
-        /** Settings-registered art for the main tab. */
+
         public final String iconId;
 
         Kind(String tabTitle, String iconId) {
@@ -57,10 +50,7 @@ public class ShopEntry {
         return new ShopEntry(Kind.TACKLE, ShopGroup.forRig(rig), null, tackle, rig, null);
     }
 
-    /**
-     * A module entry for displays that are not tied to one particular slot. Dual-fit modules use
-     * the first rig the player actually owns, matching the first shop row they can see.
-     */
+
     public static ShopEntry of(Tackle tackle) {
         Tackle.Fit rig = tackle == null ? null : tackle.fit;
 
@@ -102,7 +92,7 @@ public class ShopEntry {
         return Misc.ucFirst(id.replace('_', ' '));
     }
 
-    /** List name with the gear prefix cut, since the shelf tab already says which gear it is. Detail pane keeps the full name. */
+
     public String getListName() {
         if (kind == Kind.CURIO) return ware.name;
         if (kind == Kind.TACKLE) return tackle.name;
@@ -127,11 +117,7 @@ public class ShopEntry {
         }
     }
 
-    /**
-     * A fresh portrait sprite for the outfitter. Item-authored art is a texture path, matching the
-     * rest of the mod's data tables; when none is authored the shelf's registered category mark
-     * gives both the list tab and its detail pane the same visual identity.
-     */
+
     public SpriteAPI getIcon() {
         String path = null;
 
@@ -144,10 +130,7 @@ public class ShopEntry {
         return SpriteLoader.getSprite(group.iconId);
     }
 
-    /**
-     * Texture name for stock tooltip image APIs, resolved by the same authored-art then shelf-art
-     * rule as {@link #getIcon()}.
-     */
+
     public String getIconName() {
         String path = null;
 
@@ -164,7 +147,7 @@ public class ShopEntry {
         return kind == Kind.CURIO;
     }
 
-    /** Whether a curio is switched on. Meaningless, and false, for anything else. */
+
     public boolean isOn() {
         return isCurio() && ware.isOn();
     }
@@ -189,12 +172,12 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.get(rig) == tackle;
     }
 
-    /** Whether this module is already the player's, so moving it into a slot costs nothing. */
+
     public boolean isOwned() {
         return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
     }
 
-    /** Visible upgrade rung whose quest-earned purchase schematic is not known yet. */
+
     public boolean isLocked() {
         if (!isUpgrade()) return false;
 
@@ -204,22 +187,22 @@ public class ShopEntry {
                 && !ShopSchematics.has(stat, targetLevel);
     }
 
-    /** Purchase guard also covering tackle, which the outfitter hides until this becomes false. */
+
     public boolean isPurchaseLocked() {
         return kind == Kind.TACKLE ? !ShopSchematics.has(tackle) : isLocked();
     }
 
-    /** Next purchase's price, or null if free / nothing left to buy. An owned module is free to re-fit. */
+
     public ShopPricing.Price getPrice() {
         if (isOwned()) return null;
 
-        //a curio was paid for in a bar; the shop is only where the switch on it lives
+        // a curio was paid for in a bar; the shop is only where the switch on it lives
         if (isCurio()) return null;
 
         return isUpgrade() ? ShopPricing.getPrice(stat) : ShopPricing.getPrice(tackle);
     }
 
-    /** The colour the ask wears in the UI. Null when the catch half has no rarity to speak of. */
+
     public FishRarity getPriceRarity() {
         ShopPricing.Price price = getPrice();
 
@@ -243,19 +226,12 @@ public class ShopEntry {
         return Global.getSector().getPlayerFleet().getCargo().getCredits().get();
     }
 
-    /**
-     * Nothing left to sell here: an upgrade at its ceiling, or a tackle already in its slot. Never a
-     * curio - its button is a switch, and a switch is never finished with.
-     */
+
     public boolean isDone() {
         return isMaxed() || isFitted();
     }
 
-    /**
-     * Takes the money and hands the thing over.
-     *
-     * @return false if it could not be paid for, in which case nothing changed
-     */
+
     public boolean buy() {
         if (isDone() || isPurchaseLocked() || !canAfford()) return false;
 
@@ -273,9 +249,7 @@ public class ShopEntry {
         return true;
     }
 
-    /** What actually happened, in the top-left message line: a rung unlocks, a module is
-     *  fitted, a curio's switch is thrown. Read after {@link #grant()}, so the curio reports
-     *  the state it just switched to. */
+
     protected String getBoughtMessage() {
         if (isCurio()) return (ware.isOn() ? "Switched on " : "Switched off ") + getName();
         if (isUpgrade()) return "Unlocked " + getName();
@@ -283,10 +257,7 @@ public class ShopEntry {
         return "Fitted " + getName();
     }
 
-    /**
-     * Dev mode's buy: grant without paying. Skips price/affordability but not {@link #isDone()} -
-     * a maxed or fitted entry has nothing to hand over regardless.
-     */
+
     public boolean devBuy() {
         if (isDone()) return false;
 
@@ -295,21 +266,12 @@ public class ShopEntry {
         return true;
     }
 
-    /**
-     * Hands the thing over and stops whatever it changes. Abilities read their numbers once at
-     * activation, so a running rig has to be deactivated rather than reconfigured mid-flight.
-     * <p>
-     * Public because it is the only place that knows that, and not everything sold is sold here -
-     * anything granting a module or a rung from outside the shop still has to come through it.
-     */
+
     public void grant() {
-        //the shopping-list mark and the New! tag belong to this exact purchase, and every route
-        //to it - paid, dev grant, a quest handing gear over - comes through here. Cleared before
-        //the level moves, while getMarkKey still names the rung being bought
         ShopMarks.unmark(ShopMarks.getMarkKey(this));
         ShopSchematics.clearFresh(this);
 
-        //a curio is not handed over, it is flipped - it was already bought before the shop saw it
+        // a curio is not handed over, it is flipped - it was already bought before the shop saw it
         if (isCurio()) {
             ware.setOn(!ware.isOn());
 
@@ -331,7 +293,7 @@ public class ShopEntry {
         stopAbility(getRigAbilityId());
     }
 
-    /** Which ability this entry's rig is, or null for a rig with no ability of its own. */
+
     protected String getRigAbilityId() {
         if (rig == null) return null;
 
@@ -343,7 +305,7 @@ public class ShopEntry {
         }
     }
 
-    /** Turns an ability off if it is running, and says nothing if it is not. */
+
     protected static void stopAbility(String abilityId) {
         if (abilityId == null) return;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return;
@@ -354,10 +316,7 @@ public class ShopEntry {
         ability.deactivate();
     }
 
-    /**
-     * Stat's value at a hypothetical level, for a "now vs next" display - same arithmetic as
-     * {@link UpgradeStat#getCurrentValue()}, at a level it isn't at.
-     */
+
     public String getValueAt(int level) {
         if (!isUpgrade()) return "";
 
@@ -377,7 +336,7 @@ public class ShopEntry {
         return text;
     }
 
-    /** One string that survives a rebuild, for remembering what was selected. */
+
     public String getKey() {
         switch (kind) {
             case CURIO: return "ware:" + ware.name();

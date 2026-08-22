@@ -5,11 +5,7 @@ import org.lwjgl.util.vector.Vector2f;
 
 public class ParallaxUtil {
 
-    /**
-     * Slow drift offset, in the same UV pixels as {@link #computeFillUvOffsetPx} so they can be
-     * added: fakes parallax for things the camera is snapped to, since that method's camera term is
-     * zero when centered. Two sines with incommensurate periods so the path never visibly repeats.
-     */
+
     public static Vector2f computeDriftUvOffsetPx(float time,
                                                   float amplitudeWorld,
                                                   float periodSeconds,

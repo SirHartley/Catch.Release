@@ -2,15 +2,7 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.reflection.ReflectionUtils;
 
-/**
- * The short walk from the running game to the screen the player is looking at. Names on this path
- * ({@code AppDriver}, {@code CampaignState}, {@code getCore}) are stable across versions, but
- * reached via reflection since the declared types are obfuscated - a compiled call descriptor
- * naming them breaks on the next release.
- * <p>
- * Everything here returns null rather than throwing; the caller treats a failed crawl the same as
- * the screen not being open.
- */
+
 public final class CoreUiCrawler {
 
     public static final String APP_DRIVER = "com.fs.state.AppDriver";
@@ -19,10 +11,7 @@ public final class CoreUiCrawler {
     private CoreUiCrawler() {
     }
 
-    /**
-     * Core UI currently on screen - docked inside an encounter dialog if one is up (the core lives
-     * in a different parent while docked), else the campaign's own. Null if neither exists.
-     */
+
     public static Object getCoreUi() {
         try {
             Object driver = ReflectionUtils.invokeStatic(Class.forName(APP_DRIVER), "getInstance");
@@ -41,10 +30,7 @@ public final class CoreUiCrawler {
         }
     }
 
-    /**
-     * Intel screen, if that's the current tab. Identified by capability ({@code getEventsPanel},
-     * unique to this screen) rather than by class, since the Command screen has look-alike members.
-     */
+
     public static Object getIntelScreen(Object core) {
         try {
             Object tab = ReflectionUtils.invokeIfExists(core, "getCurrentTab");

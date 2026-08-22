@@ -7,10 +7,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * TriPad creator job, two rounds: round one asks for the best specimen available; round two
- * (after delivery) instead asks for a low-coherence (aberrant-looking) specimen, at higher reward.
- */
+
 public class TuberJob extends FishJob {
 
     public static final int VALUE = 1600;
@@ -44,7 +41,7 @@ public class TuberJob extends FishJob {
         return true;
     }
 
-    /** Replaces the ask/reward with round two; only fires once. */
+
     @Override
     protected boolean onDelivered() {
         if (getRound() > 1) return false;

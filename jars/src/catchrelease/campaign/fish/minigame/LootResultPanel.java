@@ -16,17 +16,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * What else came up, on a card of its own - the catch readout's mirror, hung off the other side
- * of the track, shown only once the game is over. Same anatomy as the readout (icon square,
- * title, list arriving a line at a time to the same sound) but sized to its own content rather
- * than the readout's fixed frame, with its square pinned level with the readout's specimen so
- * the two read as a pair of exhibits. Each line wears the cargo icon the hold will show it
- * under, in its tier's colour.
- */
+
 public class LootResultPanel {
 
-    /** One thing that was handed over: its icon, its name in its tier's colour, and how many. */
+
     protected static class Row {
         final String name;
         final String spriteName;
@@ -47,37 +40,31 @@ public class LootResultPanel {
     protected final List<TreasureAward> awards;
     protected final List<Row> rows = new ArrayList<>();
 
-    /** The readout's own clock: how long the list has been arriving, a line at a time. */
+
     protected float elapsed = 0f;
 
-    /**
-     * The weather's clock, which is not the readout's.
-     * <p>
-     * The card is on screen from the moment the catch lands, but its list is held back until the
-     * specimen has finished being read out - so a rain driven off {@link #elapsed} hung motionless
-     * over an open card for the whole of the first tally. The backdrop starts when the card does.
-     */
+
     protected float backdrop = 0f;
 
     protected int shown = 0;
     protected boolean skipped = false;
     protected boolean chestSoundPlayed = false;
 
-    /** One coin of the rain: where it falls, how fast, and the tumble that makes it a coin. */
+
     protected static class Coin {
-        float fx;          //where across the card it falls, as a fraction of the panel's width
-        float startY;      //how far into the fall it began, in pixels, so they never start in a row
-        float speed;       //pixels per second, downward
-        float size;        //radius when face-on, in pixels
-        float flipRate;    //radians per second of the main flip
-        float phase;       //where in that flip it began
-        float wobbleRate;  //radians per second of the second, slower flip across the other axis
-        float wobblePhase; //where in the wobble it began
-        float spinRate;    //radians per second the whole ellipse turns in the plane, signed
-        float spinPhase;   //the tilt it fell in at
+        float fx;
+        float startY; // how far into the fall it began, in pixels, so they never start in a row
+        float speed;
+        float size;
+        float flipRate; // radians per second of the main flip
+        float phase;
+        float wobbleRate; // radians per second of the second, slower flip across the other axis
+        float wobblePhase;
+        float spinRate; // radians per second the whole ellipse turns in the plane, signed
+        float spinPhase;
     }
 
-    /** Straight cuts around a coin. Half of what {@link Disc} uses - smooth at radii this small. */
+
     protected static final int COIN_SEGMENTS = 16;
 
     protected final List<Coin> coins = new ArrayList<>();
@@ -101,7 +88,7 @@ public class LootResultPanel {
         return rows.isEmpty();
     }
 
-    /** The rain, which runs from the moment there is a card to rain on. */
+
     public void advanceBackdrop(float amount) {
         backdrop += amount;
     }
@@ -118,14 +105,14 @@ public class LootResultPanel {
         }
     }
 
-    /** Everything at once, for a player who would rather not be read to. */
+
     public void revealAll() {
         if (shown == 0 && !rows.isEmpty()) playChestOpenSound();
         shown = rows.size();
         skipped = true;
     }
 
-    /** The sound belongs to the same first-visible-row edge that swaps the box sprite. */
+
     protected void playChestOpenSound() {
         if (chestSoundPlayed) return;
 
@@ -133,7 +120,7 @@ public class LootResultPanel {
         CatchCelebration.playHook(FishConstants.SOUND_TREASURE_OPEN);
     }
 
-    /** True once there is nothing left to arrive. */
+
     public boolean isComplete() {
         return shown >= rows.size();
     }
@@ -154,7 +141,7 @@ public class LootResultPanel {
         renderRows(layout, y, alphaMult);
     }
 
-    /** The widest wrapped row, measured up front so the card never changes while it reads out. */
+
     protected float getContentWidth() {
         float widest = 0f;
 
@@ -177,7 +164,7 @@ public class LootResultPanel {
         return widest;
     }
 
-    /** Box top to last row's bottom, including extra height claimed by wrapped names. */
+
     protected float getContentHeight() {
         float height = FishConstants.MINIGAME_RESULT_BOX;
 
@@ -194,8 +181,7 @@ public class LootResultPanel {
         return height;
     }
 
-    /** The readout's field and dressing on the loot card's own rectangle - but coin rain where the
-     *  readout has bubbles. The frames match on purpose; the weather is what tells the cards apart. */
+
     protected void renderPanel(FishingMinigameLayout layout, float alphaMult) {
         CatchResultPanel.drawQuad(layout.lootPanelX, layout.lootPanelY, layout.lootPanelWidth,
                 layout.lootPanelHeight, Color.BLACK, 0.85f * alphaMult);
@@ -209,12 +195,7 @@ public class LootResultPanel {
                 layout.lootPanelHeight, alphaMult);
     }
 
-    /**
-     * Gold coins raining down the card, tumbling as they fall and wrapping to the top for as
-     * long as the card is read. Three independent motions per coin - flip (width on |cos| while
-     * height holds), wobble (same, slower/shallower, across the other axis), spin (whole ellipse
-     * turning) - each at its own rolled rate and phase, so no two coins fall alike.
-     */
+
     protected void renderCoins(FishingMinigameLayout layout, float alphaMult) {
         if (coins.isEmpty()) spawnCoins();
 
@@ -234,22 +215,19 @@ public class LootResultPanel {
             float x = layout.lootPanelX + c.fx * layout.lootPanelWidth;
             float y = layout.lootPanelY + layout.lootPanelHeight - fallen;
 
-            //1 face-on, 0 edge-on; the floor keeps a sliver of rim rather than a blink
+            // 1 face-on, 0 edge-on; the floor keeps a sliver of rim rather than a blink
             float face = Math.abs((float) Math.cos(backdrop * c.flipRate + c.phase));
             float width = c.size * Math.max(face, FishConstants.MINIGAME_LOOT_COIN_EDGE);
 
-            //second axis held off edge-on by the depth - both axes collapsing at once would
-            //flatten the coin to a point
             float wobble = Math.abs((float) Math.cos(backdrop * c.wobbleRate + c.wobblePhase));
             float height = c.size * (1f - FishConstants.MINIGAME_LOOT_COIN_WOBBLE_DEPTH
                     * (1f - wobble));
 
-            //the tilt of the whole ellipse this frame
+            // the tilt of the whole ellipse this frame
             float tilt = c.spinPhase + backdrop * c.spinRate;
             float cosT = (float) Math.cos(tilt);
             float sinT = (float) Math.sin(tilt);
 
-            //the rim catches the light as the face turns away, which is what sells the turn
             float alpha = FishConstants.MINIGAME_LOOT_COIN_ALPHA * alphaMult
                     * (1f + FishConstants.MINIGAME_LOOT_COIN_EDGE_SHINE * (1f - face) * (1f - face));
 
@@ -290,7 +268,6 @@ public class LootResultPanel {
                     FishConstants.MINIGAME_LOOT_COIN_WOBBLE_RATE_MAX);
             c.wobblePhase = MathUtils.getRandomNumberInRange(0f, (float) (Math.PI * 2.0));
 
-            //signed so half spin each way - all-clockwise would read as a pattern
             c.spinRate = MathUtils.getRandomNumberInRange(
                     FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MIN,
                     FishConstants.MINIGAME_LOOT_COIN_SPIN_RATE_MAX)
@@ -301,8 +278,7 @@ public class LootResultPanel {
         }
     }
 
-    /** Square at the top, readout's height/size: the salvage marker washed in the best tier's
-     *  colour - the square says "cargo", the wash says how good. */
+
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
         Color accent = getBestRarity().color;
 
@@ -338,7 +314,7 @@ public class LootResultPanel {
         return best;
     }
 
-    /** @return the y the next thing down should start at */
+
     protected float renderTitle(FishingMinigameLayout layout, float y, float alphaMult) {
         if (title == null) return y;
 
@@ -348,8 +324,7 @@ public class LootResultPanel {
         return y - title.getHeight() - FishConstants.MINIGAME_RESULT_TITLE_GAP;
     }
 
-    /** Each award fading in as it lands: cargo icon, name in the tier's colour, and the count in
-     *  the readout's own number column. */
+
     protected float renderRows(FishingMinigameLayout layout, float y, float alphaMult) {
         if (font == null) return y;
 
@@ -370,9 +345,6 @@ public class LootResultPanel {
 
             float centerY = y - rowHeight * 0.5f;
 
-            //a line with a count has two ends, and the split is what lines the numbers up in a
-            //column. A single piece has nothing in that column, and icon and name hard against the
-            //left of a card sized for the longest row read as a list that stopped halfway
             float left = row.countText != null ? layout.lootX
                     : layout.lootX + (layout.lootWidth - getRowWidth(row)) * 0.5f;
 
@@ -402,25 +374,19 @@ public class LootResultPanel {
         return y;
     }
 
-    /**
-     * Icon, gap and name - the part of a row that travels together. Not the count, which is pinned
-     * to the far edge rather than following the name, and so is not part of what gets centred.
-     */
+
     protected float getRowWidth(Row row) {
         return FishConstants.MINIGAME_LOOT_ICON + FishConstants.MINIGAME_LOOT_ICON_GAP
                 + row.nameText.getWidth();
     }
 
-    /** A wrapped name can claim more than the ordinary one-line row, with a small gutter below it. */
+
     protected float getRowHeight(Row row) {
         return Math.max(FishConstants.MINIGAME_LOOT_LINE_HEIGHT,
                 row.nameText.getHeight() + FishConstants.MINIGAME_LOOT_ROW_PAD);
     }
 
-    /**
-     * Names wrap inside the default card instead of asking {@link FishingMinigameLayout} to grow
-     * towards the screen edge. A count, when present, keeps its own right-aligned column.
-     */
+
     protected float getNameMaxWidth(Row row) {
         float width = FishConstants.MINIGAME_RESULT_WIDTH
                 - FishConstants.MINIGAME_RESULT_PAD * 2f
@@ -434,7 +400,7 @@ public class LootResultPanel {
         return width;
     }
 
-    /** Built on first sight rather than up front, so a row that is never shown is never made. */
+
     protected void build(Row row) {
         if (row.nameText != null) return;
 
@@ -449,8 +415,7 @@ public class LootResultPanel {
         row.nameText.setMaxWidth(getNameMaxWidth(row));
     }
 
-    /** The row's cargo icon, through the shared loader so it arrives neutral and at its own
-     *  size; the salvage marker when there is none to load. */
+
     protected SpriteAPI getRowSprite(Row row) {
         SpriteAPI sprite = SpriteLoader.loadSprite(row.spriteName);
 
@@ -463,7 +428,7 @@ public class LootResultPanel {
         return SpriteLoader.loadSprite(icon);
     }
 
-    /** Loaded once and kept. A missing font costs the text and nothing else. */
+
     protected void loadFonts() {
         if (fontsChecked) return;
         fontsChecked = true;

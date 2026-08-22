@@ -49,34 +49,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The one rule command the mod ships, and the only place the sheet reaches into Java.
- * <p>
- * Everything the mod says lives in {@code rules.csv}; everything it <i>does</i> that a sheet cannot -
- * counting a hold, pricing a ladder, opening a panel, planting a fish, handing over an ability -
- * comes through here. One class with a switch rather than a class per verb, so the package the game
- * scans stays one entry long.
- * <p>
- * <b>Registered by {@code data/config/settings.json}.</b> {@code ruleCommandPackages} arrays merge
- * across mods like every other settings array, so ours lists only
- * {@code catchrelease.dialogue.rules} - vanilla's own packages stay registered by vanilla.
- * <p>
- * Two shapes, both {@code CatchReleaseCMD <verb> [arg]}:
- * <ul>
- * <li>in a row's <b>conditions</b>, {@code tokens} writes the dozen booleans and strings the rows
- * branch on and returns true, so it never changes whether a row matches;
- * <li>in a row's <b>script</b>, a verb does the thing and returns whether it worked, which a
- * follow-up row can key off.
- * </ul>
- */
+
 public class CatchReleaseCMD extends BaseCommandPlugin {
 
-    //---------------------------------------------------------------- tokens the sheet reads
 
-    /** How far gone the water is here, 0-3, for the rows that pick a greeting. */
     public static final String DRIFT = "$catchreleaseDrift";
 
-    /** The introduction: which rung, what it wants, and whether the hold has it. */
+
     public static final String STAGE = "$catchreleaseStage";
     public static final String TARGET = "$catchreleaseTarget";
     public static final String TARGET_WHERE = "$catchreleaseTargetWhere";
@@ -85,14 +64,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String TARGET_DEEP = "$catchreleaseTargetDeep";
     public static final String TARGET_HERE = "$catchreleaseTargetHere";
 
-    /**
-     * Whether there is an errand at all, and whether it has a place attached.
-     * <p>
-     * Both exist so that a row which names the errand can refuse to print rather than print a
-     * sentence with holes in it. The second is not paranoia: the chart rung asks for two specimens
-     * the player has to go and find with the charts, so it deliberately has no system to name, and
-     * a line reading "out of" and then nothing is the shape that bug takes.
-     */
+
     public static final String TARGET_SET = "$catchreleaseTargetSet";
     public static final String TARGET_PLACED = "$catchreleaseTargetPlaced";
     public static final String CARRYING = "$catchreleaseCarrying";
@@ -100,7 +72,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
 
-    /** The chart requests, which are the ordinary work and nothing to do with the ladder. */
+
     public static final String WORK = "$catchreleaseWork";
     public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
     public static final String WORK_MET = "$catchreleaseWorkMet";
@@ -110,17 +82,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_POND = "$catchreleaseWorkPond";
     public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
 
-    /** Whether there is anything on the shelf, and anything in the hold. */
+
     public static final String SHELF = "$catchreleaseShelf";
     public static final String HAS_FISH = "$catchreleaseHoldHasFish";
 
-    /** Whether each bulk-sale rung has an unmarked fish to take. */
+
     public static final String SELL_COMMON = "$catchreleaseSellCommon";
     public static final String SELL_UNCOMMON = "$catchreleaseSellUncommon";
     public static final String SELL_RARE = "$catchreleaseSellRare";
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
-    /** Whether a rumor is going spare. */
+
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
@@ -128,15 +100,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String RUMOR_LOOT = "$catchreleaseRumorLoot";
     public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
 
-    /** Whether the Fisherman still needs to name the player's first recovered treasure. */
+
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
-    /** Conversation-local paging state for the dynamically ordered Fisherman question list. */
+
     protected static final String FISHER_ASK_PAGE = "$catchreleaseFisherAskPage";
     protected static final String FISHER_ASK_COUNT = "$catchreleaseFisherAskCount";
     protected static final int FISHER_ASK_PAGE_SIZE = 6;
 
-    /** Crablobab's stall: whether anything is left, and per-ware owned/affordable/price. */
+
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
     public static final String CRAB_CRAB_NAME = "$catchreleaseCrabBassName";
@@ -144,37 +116,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String CRAB_CRAB_CRAB_PRICE = "$catchreleaseCrabBassCrabPrice";
     public static final String CRAB_CRAB_AFFORD = "$catchreleaseCrabBassAfford";
 
-    /**
-     * The rolled-up scene he happens to have at this port - see {@link CrabBackdrops}.
-     * <p>
-     * Tokens rather than a per-constant set like the wares get, because there is no constant: the
-     * table decides how many there are and the port decides which one, so the sheet can only be
-     * written about "the one he has".
-     */
+
     public static final String CRAB_BACKDROP = "$catchreleaseCrabBackdrop";
     public static final String CRAB_BACKDROP_NAME = "$catchreleaseCrabBackdropName";
     public static final String CRAB_BACKDROP_PRICE = "$catchreleaseCrabBackdropPrice";
     public static final String CRAB_BACKDROP_CRABS = "$catchreleaseCrabBackdropCrabs";
     public static final String CRAB_BACKDROP_AFFORD = "$catchreleaseCrabBackdropAfford";
 
-    /**
-     * Whether this is a port where anybody would admit to fishing.
-     * <p>
-     * False in Church and Path space, which is what keeps the bar events that are <i>about</i> the
-     * trade - the rating with a boat behind them, the man selling gear out of a coat - out of ports
-     * where the trade is the objection. See {@code FishingTaboo}.
-     */
+
     public static final String FISH_WELCOME = "$catchreleaseFishWelcome";
 
-    /**
-     * A patrol stopping the player about the lamps: which rung, what it wants, and what it is
-     * objecting to.
-     * <p>
-     * Written onto the patrol's own memory rather than into local, because the stop begins at
-     * {@code BeginFleetEncounter} and is spoken at {@code OpenCommLink} - two triggers with two
-     * different local scopes, and only the fleet is the same thing at both. The rows read them as
-     * {@code $entity.} once the link is open.
-     */
+
     public static final String LAMP_CONV = "$catchrelease_lampConv";
     public static final String LAMP_RUNG = "$catchrelease_lampRung";
     public static final String LAMP_FINE = "$catchrelease_lampFine";
@@ -206,7 +158,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "bribeHitman":
                 return bribeHitman(dialog);
 
-            //---- panels. Machinery rather than dialogue, and the one thing not in the sheet
             case "openShop":
                 return openPanel(dialog, new FishShopDialog(this::resume));
             case "openCharts":
@@ -242,7 +193,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                         ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
                         : null);
 
-            //---- the ladder
             case "point":
                 FishingIntro.point();
                 return true;
@@ -281,17 +231,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                         instanceof com.fs.starfarer.api.campaign.PlanetAPI planet
                         && Castaway.start(planet);
 
-            //---- the hulk
             case "carryFisherProperty":
                 FishingIntro.takeFisherProperty();
-                //the scene's flag and marker come off with the assembly; ordinary salvage remains
                 if (dialog != null) TutorialWreck.retire(dialog.getInteractionTarget());
                 return true;
             case "dropFisherProperty":
                 FishingIntro.dropFisherProperty();
                 return true;
 
-            //Aliases keep an old rules sheet usable during a hot reload of this update.
+            // Aliases keep an old rules sheet usable during a hot reload of this update.
             case "carryHarpoon":
                 FishingIntro.takeFisherProperty();
                 return true;
@@ -299,7 +247,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 FishingIntro.dropFisherProperty();
                 return true;
 
-            //---- chart requests
             case "rollWork":
                 return rollWork(memoryMap);
             case "takeWork":
@@ -315,7 +262,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 FishermanBycatch.markExplained();
                 return true;
 
-            //---- the lamps, and who objects to them
             case "lampStop":
                 return openLampStop(dialog);
             case "lampsOff":
@@ -327,7 +273,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "seizeFish":
                 return seizeFish(dialog);
 
-            //---- the man with the crate
             case "crabBarAvailable":
                 return CrablobabBarPresence.isAvailable(dialog);
             case "showCrabPortrait":
@@ -357,7 +302,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-    /** Shows the current tutorial destination only while it is in another star system. */
+
     protected boolean showIntroMap(InteractionDialogAPI dialog, String title) {
         FishingIntro.Target target = FishingIntro.getTarget();
         FishingIntro.IntroIntel intel = new FishingIntro.IntroIntel();
@@ -369,7 +314,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
 
-    /** Shows the persisted chart-request offer or accepted destination, never a freshly rerolled one. */
+
     protected boolean showWorkMap(InteractionDialogAPI dialog, String title) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
         if (work == null) work = FishermanQuest.getOffer();
@@ -381,15 +326,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
 
-    /**
-     * Unrolls the scene he is carrying into the visual slot, as the tank itself rather than as the
-     * bare picture - the same pane the conservatory's own rack previews with, so what he is selling
-     * and what you would be looking at are demonstrably the same thing.
-     * <p>
-     * No conservatory behind it: he sells scenes to people who have nowhere to hang them yet, and
-     * the pane copes. The stall rules remount his portrait directly so the saved bar visual remains
-     * available for the encounter exit.
-     */
+
     protected boolean showBackdrop(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -405,7 +342,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Crablobab's stock changing hands. The sheet says what he says; this counts the crabs. */
+
     protected boolean buyCrabWare(String wareName) {
         if (wareName == null) return false;
 
@@ -416,7 +353,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-    /** Starts the rules-authored stall menu before its option rows stream in. */
+
     protected boolean beginCrabOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
@@ -424,12 +361,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * Adds one rules-authored stall option immediately, then gives merchandise a structured cost
-     * tooltip. Static rule options are added only after the parent rule's script has finished, which
-     * is too late for that same script to attach a tooltip; direct addition keeps the label in the
-     * sheet while making the option available to decorate now.
-     */
+
     protected boolean addCrabOption(InteractionDialogAPI dialog, List<Token> params,
                                     Map<String, MemoryAPI> memoryMap) {
         if (dialog == null || dialog.getOptionPanel() == null || params.size() < 3) return false;
@@ -469,7 +401,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-    /** One paragraph of purpose and one exact, highlighted credits-and-crabs ask. */
+
     protected void addCrabCostTooltip(OptionPanelAPI panel, Object optionId, String description,
                                       int credits, int crabs) {
         final String creditText = Misc.getDGSCredits(credits);
@@ -485,13 +417,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         });
     }
 
-    /**
-     * Gives every bulk-sale shortcut its rarity colour, including the Common rung.
-     * <p>
-     * The rule sheet owns both labels; this colours their existing option ids after the
-     * Fisherman's sale menu has put them on the panel, then lets {@link FishBuyer} render the exact
-     * cargo preview as tooltip rows whose fish names use their own rarity colours.
-     */
+
     protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
@@ -519,7 +445,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Starts one rules-authored question stream; the two trigger passes supply its order. */
+
     protected boolean beginFisherQuestions(InteractionDialogAPI dialog,
                                            Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -530,12 +456,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * Adds one relevant topic to the current page of the ordered stream.
-     * <p>
-     * The option id, label and asked state are parameters from rules.csv; Java owns only the page
-     * arithmetic and the canonical Common colour used to make completed topics recede.
-     */
+
     protected boolean addFisherQuestion(InteractionDialogAPI dialog, List<Token> params,
                                         Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -555,8 +476,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
             if (asked) {
-                //Colour is part of option creation. A follow-up mutation could lose to the
-                //surrounding FireAll option batch on some dialog rebuilds.
                 dialog.getOptionPanel().addOption(label, optionId, FishRarity.COMMON.color, null);
             } else {
                 dialog.getOptionPanel().addOption(label, optionId);
@@ -567,7 +486,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Adds version-safe navigation after the topic stream, with every label still from rules. */
+
     protected boolean finishFisherQuestions(InteractionDialogAPI dialog, List<Token> params,
                                              Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -594,7 +513,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Finds the active bar/fleet job and colours the rarity-bearing part of its ask. */
+
     protected boolean highlightJobText(String ruleId, InteractionDialogAPI dialog,
                                        List<Token> params, Map<String, MemoryAPI> memoryMap) {
         if (memoryMap == null) return false;
@@ -614,13 +533,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 job.getAsks(), job.describeAsks());
     }
 
-    /** The Fisherman's chart request is not a {@link FishJob}, but uses the same visual language. */
+
     protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
                                         List<Token> params, Map<String, MemoryAPI> memoryMap) {
         FishermanQuest.Saved work = FishermanQuest.getActive();
-        //The offer has been rolled but is deliberately not active until the player accepts it.
-        //Using only getActive() made the pitch's fish and rewards stay plain even though reminders
-        //after acceptance used the same verb correctly.
         if (work == null) work = FishermanQuest.getOffer();
         if (work == null || work.speciesId == null) return false;
 
@@ -633,7 +549,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 FishermanQuest.describe(work));
     }
 
-    /** Every named target in the tutorial ladder, including the two-chart rung. */
+
     protected boolean highlightIntroText(String ruleId, InteractionDialogAPI dialog,
                                          List<Token> params, Map<String, MemoryAPI> memoryMap) {
         FishingIntro.Target target = FishingIntro.getTarget();
@@ -652,10 +568,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 FishingIntro.describeTarget());
     }
 
-    /**
-     * Mirrors vanilla Highlight plus SetTextHighlightColors, while replacing the full yellow ask
-     * with its species names (or rarity floor) in rarity colours. Other tokens remain yellow.
-     */
+
     protected boolean highlightQuestText(String ruleId, InteractionDialogAPI dialog,
                                          List<Token> params, Map<String, MemoryAPI> memoryMap,
                                          List<FishRequirement> asks, String fullAsk) {
@@ -706,21 +619,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return dialog == null ? null : dialog.getTextPanel();
     }
 
-    //---------------------------------------------------------------- the lamps
 
-    /**
-     * Opens a patrol's stop about the lamps: books it, and lays out what the rows need to say it.
-     * <p>
-     * All of it onto the patrol's memory, since this runs at {@code BeginFleetEncounter} and the
-     * conversation happens at {@code OpenCommLink} - the fleet is the only scope both triggers agree
-     * on. A day's life on the values, which is what vanilla gives the same handoff in the cargo
-     * scan and comfortably longer than any conversation.
-     * <p>
-     * The standing cost is charged here rather than from the rows, because there are nine rows per
-     * rung and a charge repeated in thirty-six places is a charge that will eventually be missing
-     * from one of them. Vanilla charges the transponder stop at the moment the link opens; this is
-     * the same moment, one trigger earlier.
-     */
     protected boolean openLampStop(InteractionDialogAPI dialog) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         if (patrol == null) return false;
@@ -731,7 +630,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         String factionId = mem.getString(LampPatrolResponse.FACTION_KEY);
         if (factionId == null && patrol.getFaction() != null) factionId = patrol.getFaction().getId();
 
-        //read before record(), which is what moves this faction's ladder in this system on
+        // read before record(), which is what moves this faction's ladder in this system on
         int rung = LampOffence.getRung(player, factionId);
         LampOffence.record(player, factionId);
 
@@ -746,9 +645,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             LampOffence.applyRepLoss(factionId, LampOffence.REP_LOSS, text(dialog));
         }
 
-        //The patrol committed while the lamps were lit, so powering them down during the approach
-        //does not change the stop. Bridge that state into the unchanged faction/rung dialogue which
-        //OpenComms fires immediately after this command.
         if (!SearchlightAbilityPlugin.isBreaching()) {
             text(dialog).addParagraph("The lamps are already dark. The patrol has the earlier "
                     + "sensor return on display and proceeds with the stop.");
@@ -757,12 +653,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * The player putting the lamps out, which is the only thing any of this was ever about.
-     * <p>
-     * Straight at the ability rather than through the button, because the button is a UI press with
-     * a spool-up behind it and this is somebody killing the power.
-     */
+
     protected boolean putLampsOut() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
@@ -775,7 +666,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** What the stop costs in standing, printed into the conversation it happened in. */
+
     protected boolean chargeLampStanding(InteractionDialogAPI dialog, boolean refused) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         if (patrol == null || patrol.getFaction() == null) return false;
@@ -786,7 +677,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Removes this stop from this faction's ladder in this system after a story-point escape. */
+
     protected boolean forgiveLampStop(InteractionDialogAPI dialog) {
         CampaignFleetAPI patrol = getOtherFleet(dialog);
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -796,13 +687,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * The inspection, which is the one thing a patrol can do about the lamps that hurts.
-     * <p>
-     * Vanilla's own {@code CargoScan} is no use here - it looks for illegal <i>commodities</i> and
-     * the hold is full of special items - so the taking is done by hand and reported the way vanilla
-     * reports a confiscation, in the small font and in the negative colour.
-     */
+
     protected boolean seizeFish(InteractionDialogAPI dialog) {
         int taken = FishCurrency.seizeAll();
         if (taken <= 0) return false;
@@ -819,43 +704,27 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * The market the conversation is happening at, when there is one.
-     * <p>
-     * Off the interaction target rather than off {@code $market}, because the bar triggers this is
-     * read at run before a market scope is put in the memory map and the target is the port itself.
-     */
+
     protected MarketAPI getMarket(InteractionDialogAPI dialog) {
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
         return target == null ? null : target.getMarket();
     }
 
-    /** The fleet on the other side of the link, when there is one. */
+
     protected CampaignFleetAPI getOtherFleet(InteractionDialogAPI dialog) {
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
         return target instanceof CampaignFleetAPI ? (CampaignFleetAPI) target : null;
     }
 
-    //---------------------------------------------------------------- the tokens
 
-    /**
-     * Writes everything the rows branch on, into local memory.
-     * <p>
-     * Called from a row's conditions, which run before the row is picked - so a row that reads a
-     * token is always looking at a fresh one. Zero expiry: they unset the moment the game unpauses,
-     * which is exactly the life of a conversation.
-     */
     protected void writeTokens(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap.get("local");
         if (local == null) return;
 
         SectorEntityToken target = dialog == null ? null : dialog.getInteractionTarget();
 
-        //FleetInteractionDialogPluginImpl draws the commander's portrait after OpenCommLink's
-        //winning rule returns. Update the shared person from this hailed boat, never from the many
-        //off-screen Fisherman behaviours that all hold the same PersonAPI.
         FishermanIdentity.preparePortrait(getOtherFleet(dialog));
 
         local.set(DRIFT, FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(
@@ -940,29 +809,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-    //---------------------------------------------------------------- panels
 
-    /** The plugin the frame had before a panel took it, so closing can hand it straight back. */
     protected transient InteractionDialogPlugin behind;
 
-    /** A visual panel gets one hand-back, even if its dismissal is reported more than once. */
+
     protected transient boolean panelOpen;
 
-    /**
-     * Leaves a fleet encounter the way vanilla's own Leave leaves one.
-     * <p>
-     * {@code DismissDialog} closes the window and nothing else. That is not enough here, because
-     * {@code FleetInteractionDialogPluginImpl.init} has already built a real {@code BattleAPI}
-     * between the player and the other fleet - it does that for every encounter, fight or no fight -
-     * and vanilla only takes it apart again in its {@code LEAVE} handler, which calls
-     * {@code cleanUpBattle()} before dismissing. Skip that and the battle stays attached to both
-     * hulls, so the <i>next</i> approach finds {@code otherFleet.getBattle() != null}, decides an
-     * engagement is already under way, and opens on the join-battle screen instead of a
-     * conversation.
-     * <p>
-     * {@code cleanUpBattle} is public and guards itself with a {@code cleanedUp} flag, so this is
-     * vanilla's own teardown called at vanilla's own moment, and calling it twice is harmless.
-     */
+
     protected boolean leaveEncounter(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -977,7 +830,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Clears every pursuit source before a paid contract hunter leaves the encounter. */
+
     protected boolean bribeHitman(InteractionDialogAPI dialog) {
         if (dialog == null || !(dialog.getInteractionTarget() instanceof CampaignFleetAPI fleet)) {
             return false;
@@ -986,9 +839,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return HarpoonHitman.acceptBribe(fleet);
     }
 
-    /** Gives the stranded rating a berth and completes the host world's scene. The dialog stays
-     *  up - the row that called this shows the berth being found and offers the planet or the
-     *  door, the way vanilla's planet-bound errands hand the dialog back rather than slam it. */
+
     protected boolean rescueCastaway(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -997,18 +848,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /**
-     * Takes vanilla's "Cut the comm link" back off the list.
-     * <p>
-     * The Fisherman's screen is a conversation that happens to be reached through a fleet encounter,
-     * while a bar mission temporarily gives the market an active person. Both make vanilla append a
-     * comm-link exit to menus that already own their exits. On the boat it also lands the player back
-     * on the engage/disengage screen of a fleet nobody is fighting.
-     * <p>
-     * Removed rather than suppressed: the option is added by whatever fired before this, and the
-     * option panel is the one place both can be seen. {@code OptionId} is public on vanilla's
-     * plugin, so the same enum value it was added under is the one taken away.
-     */
+
     protected boolean dropCutComm(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getOptionPanel() == null) return false;
 
@@ -1048,14 +888,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return false;
     }
 
-    /**
-     * Out of a panel and back into the conversation, which is the sheet's again.
-     * <p>
-     * The panel hid and dimmed the frame on the way in and nothing reads back what it was, so it is
-     * put back to the figure vanilla uses for its own comm screens. Then the rules engine is asked
-     * to rebuild the conversation, which is what returns the text and the options without this class
-     * knowing a word of either.
-     */
+
     protected void resume(InteractionDialogAPI dialog) {
         if (dialog == null || !panelOpen) return;
 
@@ -1069,15 +902,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if (behind != null) dialog.setPlugin(behind);
 
-        //FireAll PopulateOptions only adds rows. Start clean so a repeated UI callback cannot
-        //leave the Fisherman's menu duplicated, while the custom visual is already gone.
         dialog.getOptionPanel().clearOptions();
 
         com.fs.starfarer.api.impl.campaign.rulecmd.FireBest.fire(null, dialog,
                 behind == null ? null : behind.getMemoryMap(), "CatchReleaseFisherResume");
     }
 
-    //---------------------------------------------------------------- chart requests
 
     protected boolean rollWork(Map<String, MemoryAPI> memoryMap) {
         MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
@@ -1106,7 +936,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    /** Convenience for rows that want a rarity by name without the sheet knowing the enum. */
+
     public static FishRarity parseRarity(String name) {
         if (name == null) return null;
 

@@ -8,52 +8,23 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-/**
- * The coherence heat map: how well the fabric is holding, painted over the hyperspace map as a
- * gradient - clear where it holds, purple where it runs thin, leaning hot where it is barely
- * there. Colonies cut clear, five-light-year stabilizing basins into that field through the same
- * centralized reading. What it shows is {@link Aberration#baseAt}, the same reading every specimen
- * and the thin-fabric terrain already answer to.
- * <p>
- * The reading is a walk of the whole sector's sources, so the field is sampled onto a
- * one-light-year grid on a budget - a few hundred nodes per rendered frame - and sweeps in as a
- * front while the survey completes. The sources are static or seasonal; a field sampled once is
- * good for the whole map session.
- * <p>
- * It samples bare points rather than systems, deliberately: what it paints is the water
- * <i>between</i> the stars as much as at them, and a gate's reach is a disc that does not care
- * whose system it crosses. {@code Aberration} has to answer a point that belongs to nothing with
- * everything it knows for this to mean anything, and for two commits it did not.
- */
+
 public class CoherenceHeatField {
 
-    /** One light-year per grid node; GL interpolates the gradient across each cell. */
+
     public static final float CELL = 2000f;
 
-    /** Sampling budget per rendered frame - the whole sector fills in about a second. */
+
     public static final int SAMPLES_PER_FRAME = 500;
 
-    /** Below this the fabric counts as holding and the map stays clear. */
+
     public static final float SHOW_FLOOR = 0.08f;
 
-    /**
-     * The ceiling on this layer, and the shape of the climb to it.
-     * <p>
-     * {@code ALPHA_CAP} is the only alpha number here and nothing on the layer ever exceeds it -
-     * the worst water in the sector paints at exactly this and everywhere else paints at less, so
-     * turning it down turns the whole overlay down and nothing else has to be touched.
-     * <p>
-     * {@code HEAT_EASE} shapes what "less" means. It was 0.7, and an exponent under one <i>front
-     * loads</i>: a tenth of the way up the scale was already a fifth of the way up the alpha, a
-     * third of the way up was nearly half. So most of the sector arrived at once at close to full
-     * strength and the range between "mildly thin" and "barely holding" had nothing left to say.
-     * Above one it does the opposite - mild thinness is a hint you have to look for, and the colour
-     * is earned.
-     */
+
     public static final float ALPHA_CAP = 0.2f;
     public static final float HEAT_EASE = 1.8f;
 
-    /** The pond glow's purple for thin water, leaning hot where it is barely holding. */
+
     public static final Color THIN = new Color(150, 30, 190);
     public static final Color WORST = new Color(255, 120, 235);
 
@@ -62,20 +33,7 @@ public class CoherenceHeatField {
     protected final float[] values;
     protected int filled = 0;
 
-    /**
-     * The sector rectangle, exactly, and not one node past it.
-     * <p>
-     * It used to be the systems' own bounding box with six light-years of margin thrown around it,
-     * on the reasoning that the abyss reaches past where anybody lives. It does - but the abyss it
-     * was reaching into is not water. Outside the map rectangle {@code getAbyssalDepth} stops
-     * describing hyperspace and starts describing how far off the edge you have wandered: it climbs
-     * a full point every two thousand units and caps. So of the twelve thousand units of margin,
-     * ten thousand were a flat maximum reading, and the map wore a saturated purple frame all the
-     * way round that had nothing whatever to do with the fabric.
-     * <p>
-     * The map draws the rectangle, so the field paints the rectangle. The last node lands on the
-     * boundary rather than past it, where the out-of-map term is still exactly zero.
-     */
+
     public CoherenceHeatField() {
         float w = Global.getSettings().getFloat("sectorWidth");
         float h = Global.getSettings().getFloat("sectorHeight");
@@ -89,7 +47,7 @@ public class CoherenceHeatField {
         values = new float[cols * rows];
     }
 
-    /** A budget of samples toward completion; call once per rendered frame until done. */
+
     public void sampleSome() {
         int budget = SAMPLES_PER_FRAME;
         Vector2f at = new Vector2f();
@@ -100,11 +58,7 @@ public class CoherenceHeatField {
         }
     }
 
-    /**
-     * The gradient, world-anchored like everything else on the map. Complete rows only, so the
-     * survey sweeps in as a front rather than a torn edge; cells where every corner holds are
-     * skipped outright, which is most of the sector.
-     */
+
     public void render(float factor, float centerX, float centerY, float alphaMult) {
         int fullRows = filled / cols;
         if (fullRows < 2) return;
@@ -142,11 +96,10 @@ public class CoherenceHeatField {
         GL11.glEnd();
     }
 
-    /** One corner's colour: purple rising with the thinness, hot only near the top of it. */
+
     protected void corner(float value, float alphaMult) {
         float heat = MathUtils.clamp((value - SHOW_FLOOR) / (1f - SHOW_FLOOR), 0f, 1f);
 
-        //eased so the bottom of the range is faint and the top of it is earned - see HEAT_EASE
         float alpha = ALPHA_CAP * (float) Math.pow(heat, HEAT_EASE) * alphaMult;
 
         float r = (THIN.getRed() + (WORST.getRed() - THIN.getRed()) * heat) / 255f;

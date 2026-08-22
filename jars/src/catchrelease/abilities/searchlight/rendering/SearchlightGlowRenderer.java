@@ -13,13 +13,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.util.EnumSet;
 
-/**
- * The beam: a sprite, flickering, with the switch-on flash over it.
- * <p>
- * What the beam finds is not drawn here. The dents live in {@link SearchlightImpressionRenderer},
- * one renderer across every light - drawn per light, as they used to be, a mote under two crossing
- * beams was dented twice as deep as one that had actually been found twice as well.
- */
+
 public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     public transient SpriteAPI sprite;
 
@@ -68,7 +62,6 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     public void advance(float amount) {
         if (expired) return;
 
-        // superluminance
         timePassed += amount;
         float progress = Math.min(timePassed / SUPERLUMINAL_TIME, 1f);
         extraAlphaMult = 0.8f * TrigHelper.smootherStep(1f - progress);

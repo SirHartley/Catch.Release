@@ -19,35 +19,22 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Draws the fish waters over the sector map, riding the map's own pan and zoom.
- * <p>
- * Each blob is painted by stencil parity: rings are fanned into the stencil buffer (crossings
- * flip a bit), then filled in one flat pass wherever the bit is set - exactly once per pixel
- * regardless of how the rings fold. With more than one blob up, the fill is diagonal stripes
- * (offset per blob) instead of a solid sheet, so overlapping waters interleave rather than stack.
- * <p>
- * Geometry is world-space and cached; only the transform ({@code world * factor + centre}, read
- * off the map widget) is per-frame. The panel rides the map scroller's overlay layer.
- */
+
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     public static final float FILL_ALPHA = 0.1f;
     public static final float OUTLINE_ALPHA = 0.6f;
     public static final float OUTLINE_WIDTH = 1.5f;
 
-    /** Between stripe centres, in world units - the pattern is anchored to the map, not the
-     *  screen, so it neither crawls when panning nor rescales against the waters when zooming.
-     *  Roughly ten bands across a lone system's blob. */
+
     public static final float STRIPE_SPACING_WORLD = 600f;
 
-    /** How a blob's fill is painted. The three picks each get their own, so overlaps read. */
+
     public static final int STYLE_SOLID = 0;
     public static final int STYLE_STRIPE_RIGHT = 1;
     public static final int STYLE_STRIPE_LEFT = 2;
 
-    /** One set of waters: cached rings, colour, fill style, and which of fill/outline actually
-     *  draw - a same-coloured group shares one merged outline while each member keeps its own fill. */
+
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
         public final Color color;
@@ -65,8 +52,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The route badges: a ringed disc lifted off its system, sized from the icon row it
-     *  carries so the outermost fish always keeps clear water to the ring. */
+
     public static final float ROUTE_BADGE_RADIUS = 14f;
     public static final float ROUTE_BADGE_LIFT = 14f;
     public static final float ROUTE_ICON = 16f;
@@ -81,13 +67,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     protected List<Blob> blobs = new ArrayList<>();
     protected boolean noDataShown;
 
-    /** The map's inner render widget - the thing that knows the camera. */
+
     protected Object mapWidget;
 
-    /** Scratch for transformed rings, grown on demand - per-frame allocation is a stutter tax. */
+
     protected transient float[] scratch = new float[512];
 
-    /** Where the cursor was last seen, for the close label's hover glow. */
+
     protected float mouseX = -1f;
     protected float mouseY = -1f;
 
@@ -120,7 +106,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 mouseY = event.getY();
             }
 
-            //the route's close label, top centre of the map - the one clickable thing out here
             if (event.isLMBDownEvent() && FishRoute.get() != null
                     && isInCloseLabel(event.getX(), event.getY())) {
 
@@ -138,18 +123,18 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 && y >= bounds[1] && y <= bounds[1] + bounds[3];
     }
 
-    /** The coherence heat map, built on first show and kept for the session's map. */
+
     protected transient CoherenceHeatField heat;
     protected boolean coherenceShown = false;
 
-    /** The sidebar's toggle lands here; the field is surveyed lazily, on the first show. */
+
     public void setCoherenceShown(boolean shown) {
         coherenceShown = shown;
 
         if (shown && heat == null) heat = new CoherenceHeatField();
     }
 
-    /** The close label's rectangle as {x, y, width, height}, or null with nowhere to put it. */
+
     protected float[] getCloseLabelBounds() {
         if (panelPos == null) return null;
 
@@ -170,7 +155,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         Object location = ReflectionUtils.invokeIfExists(mapWidget, "getLocation");
         if (!(location instanceof LocationAPI)) return;
 
-        //the whole camera, in two numbers: everything on the map is world * factor + centre
+        // the whole camera, in two numbers: everything on the map is world * factor + centre
         Object factorValue = ReflectionUtils.invokeIfExists(mapWidget, "getFactor");
         if (!(factorValue instanceof Float)) return;
 
@@ -179,11 +164,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float centerX = mapPos.getCenterX();
         float centerY = mapPos.getCenterY();
 
-        //the waters and the route are hyperspace geometry; the system view's catch lives on
-        //its own component pane now, mounted by the filter script
         if (!((LocationAPI) location).isHyperspace()) return;
 
-        //the heat map goes down first - it is the water the waters sit on
+        // the heat map goes down first - it is the water the waters sit on
         if (coherenceShown && heat != null) {
             heat.sampleSome();
 
@@ -204,7 +187,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            //fills first, outlines over all of them - a merged border belongs above every member's fill
+            // fills first, outlines over all of them - a merged border belongs above every member's fill
             for (Blob blob : blobs) {
                 if (blob.drawFill) renderFill(blob, factor, centerX, centerY, alphaMult);
             }
@@ -219,7 +202,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         renderNoData(alphaMult);
     }
 
-    /** A deliberately blunt chart-state notice, centred over the visible map and drawn last. */
+
     protected void renderNoData(float alphaMult) {
         if (!noDataShown || panelPos == null) return;
 
@@ -246,11 +229,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
 
-    /**
-     * Plotted route's stops: a ringed badge above each system carrying its fish, a stub down to
-     * the system, and the close label. Arrows between stops ride the map's own arrow list (the
-     * one intel arrows use) rather than being drawn here.
-     */
     protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
         FishRoute.Saved route = FishRoute.get();
         if (route == null || route.stops.isEmpty()) return;
@@ -266,8 +244,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             int count = Math.max(1, stop.fishIds.size());
 
-            //full-size icons packed as a cluster - pair, triangle, square, pentagon - so the
-            //ring hugs the cluster's reach plus breathing room, never tighter than the base
+            // full-size icons packed as a cluster - pair, triangle, square, pentagon - so the ring hugs the cluster's reach plus breathing room, never tighter than the base
             float[][] offsets = clusterOffsets(count, ROUTE_ICON + ROUTE_ICON_GAP);
 
             float reach = 0f;
@@ -280,7 +257,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             float bx = sx;
             float by = sy + ROUTE_BADGE_LIFT + radius;
 
-            //the stub that says which system the badge belongs to
             ShopUi.drawQuad(sx - 0.5f, sy + 2f, 1f, by - radius - sy - 2f,
                     player, 0.6f * alphaMult);
 
@@ -294,7 +270,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 FishSpec spec = FishPresence.getSpec(id);
                 if (spec == null) continue;
 
-                //the art once landed, its rimmed silhouette while only surveyed
+                // the art once landed, its rimmed silhouette while only surveyed
                 FishIcons.draw(spec, bx + at[0], by + at[1], ROUTE_ICON, alphaMult);
             }
         }
@@ -302,12 +278,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         renderCloseLabel(alphaMult);
     }
 
-    /**
-     * Icon centres for a badge cluster, spaced one icon apart: one in the middle, a pair side by
-     * side, a two-by-two square at four (the ring's diamond wastes its corners), and otherwise a
-     * ring just wide enough that neighbours sit a spacing apart - triangle at three, pentagon at
-     * five - so the icons stay full-size and the badge stays as small as they allow.
-     */
+
     protected static float[][] clusterOffsets(int count, float spacing) {
         float[][] out = new float[count][2];
         if (count == 1) return out;
@@ -337,7 +308,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         return out;
     }
 
-    /** "X - CLOSE ROUTE", top centre of the map, the only way a route ever goes away. */
+
     protected void renderCloseLabel(float alphaMult) {
         float[] bounds = getCloseLabelBounds();
         if (bounds == null) return;
@@ -368,14 +339,13 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         float g = blob.color.getGreen() / 255f;
         float b = blob.color.getBlue() / 255f;
 
-        //the blob's box on screen, for the cover pass
+        // the blob's box on screen, for the cover pass
         float boxMinX = blob.mesh.minX * factor + centerX;
         float boxMinY = blob.mesh.minY * factor + centerY;
         float boxMaxX = blob.mesh.maxX * factor + centerX;
         float boxMaxY = blob.mesh.maxY * factor + centerY;
 
-        //parity pass: fan rings into the stencil, flipping a bit per crossing - a set bit is
-        //inside the shape, however the rings nest or fold
+        // parity pass: fan rings into the stencil, flipping a bit per crossing - a set bit is inside the shape, however the rings nest or fold
         GL11.glClearStencil(0);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
 
@@ -400,7 +370,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             GL11.glEnd();
         }
 
-        //cover pass: one flat sheet - or one set of bands - wherever the parity landed inside
         GL11.glColorMask(true, true, true, true);
         GL11.glStencilFunc(GL11.GL_EQUAL, 1, 1);
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
@@ -421,7 +390,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
-    /** The border, stroked straight from the rings - the fill's own, or a group's merged ones. */
+
     protected void renderOutline(Blob blob, float factor,
                                  float centerX, float centerY, float alphaMult) {
         if (blob.mesh == null || blob.mesh.isEmpty()) return;
@@ -444,23 +413,14 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnd();
     }
 
-    /**
-     * Diagonal bands clipped by the blob's stencil - rising right for pick two, left for pick
-     * three, so overlapping waters cross instead of piling.
-     * <p>
-     * Cut in <b>world</b> space and transformed like the mesh, so the pattern is paint on the
-     * map rather than a screen door in front of it: panning does not make the stripes crawl
-     * through the waters, and zooming scales them with the territory they mark instead of
-     * changing how much of it each band covers.
-     */
+
     protected void renderStripes(float minX, float minY, float maxX, float maxY, int style,
                                  float factor, float centerX, float centerY) {
-        //the diagonal's unit vectors: along the stripe, and across it
         float dirX = 0.70710678f;
         float dirY = style == STYLE_STRIPE_LEFT ? -0.70710678f : 0.70710678f;
         float normX = -dirY, normY = dirX;
 
-        //the box's reach along each axis, from its corners - all of it in world units
+        // the box's reach along each axis, from its corners - all of it in world units
         float alongMin = Float.MAX_VALUE, alongMax = -Float.MAX_VALUE;
         float acrossMin = Float.MAX_VALUE, acrossMax = -Float.MAX_VALUE;
 
@@ -500,7 +460,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glEnd();
     }
 
-    /** One edge of the outline as a quad - thickness as a decision, not a driver setting. */
+
     protected void strokeEdge(float x1, float y1, float x2, float y2) {
         float dx = x2 - x1;
         float dy = y2 - y1;

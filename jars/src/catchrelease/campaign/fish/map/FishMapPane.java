@@ -27,31 +27,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Filter pane beside the sector map when the Fish filter is on: a search field, one chip per
- * type, and the known species as rows, with the explaining pushed into tooltips instead.
- * <p>
- * No mode switch - the selection is the mode. Nothing picked shades each enabled type's whole
- * territory (the survey view); picking species narrows the shading to exactly those, up to
- * three at once, which is how a route gets planned. F2 over a row opens its codex page.
- * <p>
- * Also the panel's own plugin - the host mounts it via {@link #mount}. Controls are built once;
- * only the row list rebuilds on a filter change, so the search field keeps the keyboard.
- */
+
 public class FishMapPane extends BaseCustomUIPanelPlugin {
 
-    /** What the pane needs from whoever put it on the screen. */
+
     public interface Host {
-        /** The filter or the selection moved - the waters on the map need re-cutting. */
+
         void onPresenceChanged();
 
-        /** A row was clicked - point the map at this species. */
+
         void onSpeciesFocused(FishSpec spec);
 
-        /** The planner button was pressed - float the planner over the map. */
+
         void onPlannerRequested();
 
-        /** The coherence toggle moved - paint or clear the heat map over the sector. */
+
         void onCoherenceToggled(boolean shown);
     }
 
@@ -73,19 +63,19 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float NO_DATA_RESET_HEIGHT = 22f;
     public static final float NO_DATA_GAP = 8f;
 
-    /** The coherence toggle's strip along the pane's floor. */
+
     public static final float COHERENCE_HEIGHT = 22f;
     public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
 
     public static final String SEARCH_GHOST = "Search...";
 
-    /** How many species can be up at once. Three weaves exist, and a fourth would have to pile. */
+
     public static final int MAX_SELECTED = 3;
 
-    /** Static, so the choice survives the pane being rebuilt every time the map opens. */
+
     protected static boolean coherenceShown = false;
 
-    /** Whether the heat map is up - the host re-asks after rebuilding the overlay. */
+
     public static boolean isCoherenceShown() {
         return coherenceShown;
     }
@@ -114,12 +104,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return filter;
     }
 
-    /** The species whose waters are being shown, in the order they were picked. */
+
     public Set<String> getSelectedIds() {
         return selectedIds;
     }
 
-    /** Whether an outside handoff selected anything whose range the player has not learned. */
+
     public boolean hasSelectionWithoutRangeData() {
         for (String id : selectedIds) {
             FishSpec spec = FishPresence.getSpec(id);
@@ -129,22 +119,17 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return false;
     }
 
-    /** No selection means the range view: the selection itself is the mode switch. */
+
     public boolean isCategoryView() {
         return selectedIds.isEmpty();
     }
 
-    /**
-     * Picks a species without a click - how an outside request (the codex's jump) arrives.
-     * Existing picks stay, since a selection is a route being planned.
-     */
+
     public void showSpecies(String speciesId) {
         if (speciesId == null) return;
 
         resetRequested = false;
 
-        //A later Codex jump is an ordinary species selection, not a continuation of an intel
-        //request's category constraint. The same pane can survive beneath the Codex overlay.
         boolean wasRestricted = filter.speciesRestricted;
         filter.speciesRestricted = false;
         filter.allowedSpeciesIds.clear();
@@ -153,7 +138,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //the codex asked, so room is made: the oldest pick retires rather than the request failing
+        // the codex asked, so room is made: the oldest pick retires rather than the request failing
         if (selectedIds.size() >= MAX_SELECTED) {
             selectedIds.remove(selectedIds.iterator().next());
         }
@@ -162,11 +147,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         if (wasRestricted && panel != null) rebuildList();
     }
 
-    /**
-     * Replaces the pane's old state with one intel request. Exact named asks use the normal
-     * multi-species view; category/quality asks use a constrained survey union so every known
-     * species which could supply the order is represented, not merely the first three.
-     */
+
     public void showRequirements(List<FishRequirement> asks) {
         resetRequested = false;
         selectedIds.clear();
@@ -206,7 +187,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         rebuildList();
     }
 
-    /** Fresh un-narrowed survey view, used by intel that points at a place rather than a quarry. */
+
     public void showOverview() {
         resetRequested = false;
         selectedIds.clear();
@@ -229,7 +210,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         return false;
     }
 
-    /** Builds the controls and the first list into the pane's own panel. Call once. */
+
     public void mount(CustomPanelAPI panel, float width, float height) {
         this.panel = panel;
         this.width = width;
@@ -240,7 +221,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         rebuildList();
     }
 
-    /** The pane's floor: the coherence toggle, anchored from the bottom edge. */
+
     protected void buildFooter() {
         float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI footer = panel.createUIElement(innerWidth, COHERENCE_HEIGHT, false);
@@ -268,8 +249,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
-    /** Pane's own field and border, drawn under the widgets in vanilla's manner - 1px
-     *  player-colour border, square corners, since this pane sits among vanilla panels. */
+
     @Override
     public void renderBelow(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -282,14 +262,11 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         ShopUi.drawPanel(x, y, w, h, 0.7f, alphaMult);
     }
 
-    /** Text field has no change callback or placeholder, so both are worked by hand off
-     *  {@code hasFocus} - the ghost text fills the empty field and never reaches the filter. */
+
     @Override
     public void advance(float amount) {
         if (searchField == null) return;
 
-        //The reset button lives inside the list that resetting replaces. Defer the rebuild until
-        //advance rather than removing that component while Starsector is walking its input tree.
         if (resetRequested) {
             resetRequested = false;
             showOverview();
@@ -306,13 +283,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The part that never rebuilds: planner, search, the type chips, deselect, and the header. */
+
     protected void buildControls() {
-        //the same right edge as the list's rows below, which sit 6px in for their scroller
+        // the same right edge as the list's rows below, which sit 6px in for their scroller
         float innerWidth = width - PAD * 2f - 6f;
         TooltipMakerAPI controls = panel.createUIElement(innerWidth, CONTROLS_HEIGHT, false);
 
-        //planner sits above search - planning is the point, search is just how species get found
         CustomPanelAPI planner = panel.createCustomPanel(innerWidth, PLANNER_HEIGHT,
                 new PaneWidgets.TextButton(() -> "PLAN A ROUTE", () -> true,
                         host::onPlannerRequested));
@@ -331,7 +307,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         FishType[] types = FishType.values();
 
-        //floored to the pixel: a chip on a fractional edge is a chip with a soft edge
         float chipWidth = (float) Math.floor(
                 (innerWidth - CHIP_GAP * (types.length - 1)) / types.length);
 
@@ -370,7 +345,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
 
-    /** Fresh rows for the current filter. The controls stay put, and so does the keyboard. */
+
     protected void rebuildList() {
         if (listRemovable != null) panel.removeComponent(listRemovable);
 
@@ -382,7 +357,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         boolean noDataForEntry = filter.speciesRestricted
                 && filter.allowedSpeciesIds.isEmpty();
 
-        //same air on both sides - the list's slot is inset PAD left and right alike
+        // same air on both sides - the list's slot is inset PAD left and right alike
         listElement = panel.createUIElement(listWidth, listHeight, !noDataForEntry);
 
         if (noDataForEntry) {
@@ -419,7 +394,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         listViewport = panel.addUIElement(listElement);
         listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
 
-        //a scrollable element comes back wrapped in a scroller - that's what's removed/stored
         listRemovable = listElement.getExternalScroller() != null
                 ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
     }
@@ -431,8 +405,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         host.onPresenceChanged();
     }
 
-    /** A click toggles the row's waters in/out - several at once is the point, that's how a
-     *  route gets planned. */
+
     protected void onRowClicked(FishSpec spec) {
         if (selectedIds.contains(spec.id)) {
             selectedIds.remove(spec.id);
@@ -440,7 +413,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //three weaves, three picks - a fourth is refused rather than repainted over the others
+        // three weaves, three picks - a fourth is refused rather than repainted over the others
         if (selectedIds.size() >= MAX_SELECTED) return;
 
         selectedIds.add(spec.id);
@@ -455,8 +428,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         selectedIds.clear();
         filter.types.clear();
 
-        //An intel request owns more state than the visible selections. Leaving its scope clears
-        //the hidden allowlist too, while the empty type set deliberately leaves every chip off.
         if (wasRestricted) {
             filter.search = "";
             filter.allowedSpeciesIds.clear();
@@ -468,7 +439,6 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         host.onPresenceChanged();
     }
 
-    // --- Tooltips, which is where all the explaining lives. ---
 
     protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
         return new BaseTooltipCreator() {
@@ -532,17 +502,13 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected TooltipMakerAPI.TooltipCreator createRowTooltip(FishSpec spec) {
-        //the shared species card, with this pane's own action line read live at hover time
         return FishTooltips.create(spec, () ->
                 !selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED
                         ? "Three ranges are already up - deselect one first."
                         : "Click to toggle its range on the map. F2 opens the codex.");
     }
 
-    // --- The drawn controls. Chips and buttons are PaneWidgets', shared with the planner. ---
 
-    /** One species row in the shared dress; the field stays lit while its waters are on
-     *  the map. */
     protected class RowPlugin extends FishListRow {
 
         public RowPlugin(FishSpec spec) {

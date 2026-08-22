@@ -13,15 +13,12 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-/**
- * The drone swarm's working ring, same radius as the aim reticule. Dim while empty, brighter and
- * pulsing while a mote is in range; fades in on cast and out on recall.
- */
+
 public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
     protected FishingDroneSwarmScript swarm;
 
-    /** 0 to 1, eased, so the ring arrives and leaves rather than appearing. */
+
     protected float fade = 0f;
     protected float pulseTime = 0f;
 
@@ -31,7 +28,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
 
     @Override
     public boolean isExpired() {
-        return swarm == null || (swarm.isDone() && fade <= 0.01f); //outlives swarm until faded out
+        return swarm == null || (swarm.isDone() && fade <= 0.01f);
     }
 
     @Override
@@ -56,7 +53,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (swarm == null || fade <= 0.01f) return;
 
-        //queried fresh each frame so the ring follows a roaming swarm rather than its launch point
+        // queried fresh each frame so the ring follows a roaming swarm rather than its launch point
         Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 
@@ -71,7 +68,7 @@ public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
         return (float) (2f * Math.PI * swarm.getRingDrawRadius());
     }
 
-    /** Dim while empty; brighter and breathing while there is something in the ring to go after. */
+
     protected float getAlpha() {
         if (!swarm.isMoteInRing()) return RodConstants.RING_ALPHA_IDLE * fade;
 

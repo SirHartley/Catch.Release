@@ -14,11 +14,7 @@ import catchrelease.skillshot.render.SkillshotRenderer;
 
 import java.util.List;
 
-/**
- * The click path: the player clicked the ability button, so aiming stays open until they click the
- * map. Registered per session by {@link catchrelease.skillshot.ability.BaseSkillshotAbility#pressButton()} and
- * torn down as soon as the shot resolves.
- */
+
 public class OnClickSkillshotListener implements SkillshotInputListener, CampaignInputListener {
 
     protected boolean active = false;
@@ -48,15 +44,12 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
         if (!active) return;
 
-        //bail on an opened dialog, the reticule would render over it
         if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null) {
             reset();
             return;
         }
 
         for (InputEventAPI input : events) {
-            //any key-down other than the pause/hold-modifier keys cancels; key-up is ignored, since a
-            //session can open while its own hotkey is still held down
             if (input.getEventType().equals(InputEventType.KEY_DOWN)
                     && input.getEventValue() != Keyboard.KEY_SPACE && input.getEventValue() != Keyboard.KEY_LSHIFT) {
                 SkillshotActivationManager.getInstanceOrRegister().deregisterListenerOnNextTick(this);
@@ -64,7 +57,7 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
                 return;
             }
 
-            //eat the down event so it can't double as a movement order
+            // eat the down event so it can't double as a movement order
             if (input.getEventType().equals(InputEventType.MOUSE_DOWN) && input.getEventValue() == InputEventMouseButton.LEFT) {
                 input.consume();
                 continue;

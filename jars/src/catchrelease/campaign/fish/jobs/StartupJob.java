@@ -6,17 +6,14 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * Multi-stage job: three rounds of asks, each larger than the last, paid at every step - a pilot, a
- * scale-up, and a run.
- */
+
 public class StartupJob extends FishJob {
 
     public static final int VALUE_PER_FISH = 800;
 
     public static final int ROUNDS = 3;
 
-    /** How much bigger each round is than the last. */
+
     public static final float GROWTH = 2f;
 
     @Override
@@ -30,7 +27,7 @@ public class StartupJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = 0f; //no deadline - a time limit here would really be a limit on the third round
+        days = 0f;
 
         setAsk(2 + genRandom.nextInt(2));
 
@@ -39,7 +36,7 @@ public class StartupJob extends FishJob {
         return true;
     }
 
-    /** Replaces the ask and reward with this round's values. */
+
     protected void setAsk(int count) {
         asks.clear();
         rewards.clear();
@@ -50,7 +47,7 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        //pays 20% over VALUE_PER_FISH - he's buying proof of supply, not the fish
+        // pays 20% over VALUE_PER_FISH - he's buying proof of supply, not the fish
         addRewards(FishRewardRoller.roll(genRandom, (int) (VALUE_PER_FISH * count * 1.2f), true));
     }
 
@@ -63,7 +60,7 @@ public class StartupJob extends FishJob {
         return true;
     }
 
-    /** Lets the sheet distinguish the pilot, scale-up, and production receipts. */
+
     @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseRound", getRound());

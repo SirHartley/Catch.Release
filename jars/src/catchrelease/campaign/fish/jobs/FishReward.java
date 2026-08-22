@@ -34,21 +34,16 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.Collections;
 
-/**
- * A job's payout: an abstract thing that can describe and hand itself over.
- * <p>
- * Every kind here reuses an existing grant elsewhere in the mod (upgrades, tackle, shop items), so
- * a reward and a purchase put the same thing in the same place.
- */
+
 public abstract class FishReward {
 
-    /** What the offer says out loud, as a noun phrase: "2,000 credits", "a Barbed Head". */
+
     public abstract String describe();
 
-    /** Hands it over. Called once, when the job is paid out. */
+
     public abstract void grant();
 
-    /** Adds an offer-time visual explanation when a reward needs more than its noun phrase. */
+
     public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
         return false;
     }
@@ -57,12 +52,12 @@ public abstract class FishReward {
         return false;
     }
 
-    /** Stable identity for quest-pool reservation; null for rewards that are not schematics. */
+
     public String getSchematicKey() {
         return null;
     }
 
-    /** Shared bottom half of both schematic cards: what earning it does and what buying costs. */
+
     protected static void addSchematicPurchase(TooltipMakerAPI item, ShopPricing.Price price,
                                                String thing) {
         if (item == null) return;
@@ -72,7 +67,7 @@ public abstract class FishReward {
                 thing, thing);
     }
 
-    /** Player-facing name for the hardware a tackle schematic can be fitted to. */
+
     protected static String describeFit(Tackle.Fit fit) {
         if (fit == null) return "fishing rig";
 
@@ -130,7 +125,7 @@ public abstract class FishReward {
                 ? null : Global.getSector().getPlayerFleet().getCargo();
     }
 
-    /** Money, for the ones who only have money. */
+
     public static class Credits extends FishReward {
         public final int amount;
 
@@ -150,7 +145,7 @@ public abstract class FishReward {
         }
     }
 
-    /** An upgrade-stat level grant, clamped to the sheet's ceiling on the way in; levels (not a flat unlock) let small and large favours reuse the same reward type. */
+
     public static class Upgrade extends FishReward {
         public final String statId;
         public final int levels;
@@ -178,7 +173,7 @@ public abstract class FishReward {
         }
     }
 
-    /** A rig module: grants ownership and fits it, displacing whatever was in that slot (same as a purchase) - free to undo since the displaced module stays owned. */
+
     public static class TackleReward extends FishReward {
         public final Tackle tackle;
 
@@ -193,16 +188,15 @@ public abstract class FishReward {
 
         @Override
         public void grant() {
-            //BOTH fits either rig; default to drones, since everything fits there
             Tackle.Fit rig = tackle.fit == Tackle.Fit.BOTH ? Tackle.Fit.DRONE : tackle.fit;
 
-            //grants ownership, not just a fit - removing it later must not require buying it back
+            // grants ownership, not just a fit - removing it later must not require buying it back
             TackleManager.own(tackle);
             TackleManager.fit(rig, tackle);
         }
     }
 
-    /** Permission to buy one of the final two rungs on an outfitter upgrade ladder. */
+
     public static class UpgradeSchematic extends FishReward {
         public final String statId;
         public final int targetLevel;
@@ -260,7 +254,7 @@ public abstract class FishReward {
         }
     }
 
-    /** Live overlay on a job's schematic image; it shares the exact key used by the shop ring. */
+
     protected static class SchematicMarkOverlay extends BaseCustomUIPanelPlugin {
         protected final String statId;
         protected final int targetLevel;
@@ -286,7 +280,7 @@ public abstract class FishReward {
         }
     }
 
-    /** A purchase permission for one outfitter modifier; the hardware itself is still bought. */
+
     public static class TackleSchematic extends FishReward {
         public final Tackle tackle;
 
@@ -333,19 +327,7 @@ public abstract class FishReward {
         }
     }
 
-    /**
-     * A scene for the back of an aquarium: the one payment that is worth nothing whatsoever.
-     * <p>
-     * Deliberately. Every other reward here makes the rig better, the hold fuller or the map more
-     * legible, and a job that pays in one is a job that has moved the campaign along. A backdrop
-     * moves nothing: it is a picture, and the only thing it is good for is that somebody who has
-     * been fishing for a hundred hours has somewhere to put it. That is exactly why it can be
-     * handed out freely - there is no ladder for it to unbalance.
-     * <p>
-     * Granted to the player rather than to a colony, on {@link Backdrops}' split: which of your
-     * conservatories ends up hanging it is a decision for later, and possibly for a colony that
-     * does not exist yet.
-     */
+
     public static class BackdropReward extends FishReward {
         public final String backdropId;
 
@@ -367,7 +349,7 @@ public abstract class FishReward {
         }
     }
 
-    /** A word about where something lives, which is the reward only a fisherman would want. */
+
     public static class LocationData extends FishReward {
         public final String speciesId;
         public final int fallbackCredits;
@@ -422,12 +404,12 @@ public abstract class FishReward {
             }
         }
 
-        /** A landed specimen unlocks this data immediately, as does obtaining the chart elsewhere. */
+
         protected boolean isRedundant() {
             return FishLog.isLocationDataUnlocked(speciesId);
         }
 
-        /** Saves from before the fallback was stored deserialize it as zero. */
+
         protected int getFallbackCredits() {
             int value = fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
 
@@ -435,7 +417,7 @@ public abstract class FishReward {
         }
     }
 
-    /** Uses the mod's shared knowledge-aware fish portrait in a vanilla image-with-text slot. */
+
     protected static class RangeDataSilhouetteOverlay extends BaseCustomUIPanelPlugin {
         protected final FishSpec spec;
         protected PositionAPI pos;
@@ -459,7 +441,7 @@ public abstract class FishReward {
         }
     }
 
-    /** Any special item, blueprints included - a blueprint is a special item where id says the kind and data says which one. */
+
     public static class Blueprint extends FishReward {
         public final String itemId;
         public final String data;
@@ -471,7 +453,6 @@ public abstract class FishReward {
 
         @Override
         public String describe() {
-            //name the specific item when possible - better offer text for deciding whether to take the job
             if (Items.SHIP_BP.equals(itemId)) return named("blueprint", hullName());
             if (Items.WEAPON_BP.equals(itemId)) return named("weapon blueprint", weaponName());
             if (Items.FIGHTER_BP.equals(itemId)) return named("fighter blueprint", wingName());
@@ -510,10 +491,7 @@ public abstract class FishReward {
         }
     }
 
-    /**
-     * Old-save shell for jobs rolled before commodity rewards were removed. Kept under the same
-     * class name so XStream can load them, but paid out in the credit value the old roller used.
-     */
+
     public static class Commodity extends FishReward {
         public final String commodityId;
         public final int quantity;

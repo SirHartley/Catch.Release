@@ -6,7 +6,7 @@ import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
-/** The one face used whenever Crablobab opens his rules-driven bar stall. */
+
 public final class CrablobabIdentity {
 
     public static final String PERSON_KEY = "$catchrelease_crablobab_person";
@@ -16,10 +16,7 @@ public final class CrablobabIdentity {
     private CrablobabIdentity() {
     }
 
-    /**
-     * Keeps one person for the campaign, matching the Fisherman's identity pattern without adding
-     * a transient bar visitor to a market's people or comm directory.
-     */
+
     public static PersonAPI get() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
         if (stored instanceof PersonAPI) {
@@ -39,7 +36,7 @@ public final class CrablobabIdentity {
         return person;
     }
 
-    /** Mounts the portrait as a minimal person card, as vanilla bar events do. */
+
     public static boolean show(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getVisualPanel() == null) return false;
 
@@ -47,7 +44,7 @@ public final class CrablobabIdentity {
         return true;
     }
 
-    /** Refreshes data-owned presentation too, so an existing save receives the custom rank. */
+
     private static void refresh(PersonAPI person) {
         person.setRankId(RANK_ID);
         person.setPostId(null);

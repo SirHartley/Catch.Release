@@ -11,11 +11,7 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 
-/**
- * Detail pane header: portrait in a cargo-square, name beside it, ladder or slot info underneath.
- * Square backlight colour is the next purchase's price tier, or the done-colour once finished.
- * Item-specific art falls back to the category mark shared with its shelf tab.
- */
+
 public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
 
     public static final float BOX_SIZE = 72f;
@@ -54,7 +50,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         renderText(x + BOX_SIZE + TEXT_GAP, y, height, alphaMult);
     }
 
-    /** What the backlight says: the price tier while there is one, the done-colour once there is not. */
+
     protected Color getAccent() {
         if (entry.isCurio()) {
             return entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
@@ -86,7 +82,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
             art.renderAtCenter(x + BOX_SIZE * 0.5f, y + BOX_SIZE * 0.5f);
         }
 
-        //the panes' square one-pixel border rather than the minigame's rounded dress
+        // the panes' square one-pixel border rather than the minigame's rounded dress
         Color border = Misc.getBasePlayerColor();
         ShopUi.drawQuad(x, y, BOX_SIZE, 1f, border, 0.55f * alphaMult);
         ShopUi.drawQuad(x, y + BOX_SIZE - 1f, BOX_SIZE, 1f, border, 0.55f * alphaMult);
@@ -115,12 +111,11 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         else renderSlot(x, top, alphaMult);
     }
 
-    /** The ladder, drawn large: lit pips and the count said in words beside them. */
+
     protected void renderLadder(float x, float top, float alphaMult) {
         int level = entry.getLevel();
         int max = entry.getMaxLevel();
 
-        //bought rungs in the player's own colour; schematic-gated rungs grey until their plan
         ShopUi.drawPips(x, top - PIP_SIZE, PIP_SIZE, PIP_GAP, level, max,
                 Misc.getBasePlayerColor(), alphaMult,
                 rung -> ShopSchematics.requires(entry.stat, rung)
@@ -143,7 +138,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         sub.draw(Math.round(x + ShopUi.getPipRowWidth(max, PIP_SIZE, PIP_GAP) + 10f), Math.round(top + 1f));
     }
 
-    /** A curio has no slot and no ladder - only which way its switch is thrown. */
+
     protected void renderSwitch(float x, float top, float alphaMult) {
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
@@ -161,7 +156,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         sub.draw(Math.round(x), Math.round(top));
     }
 
-    /** What kind of slot a module goes in, and whether it is in it. */
+
     protected void renderSlot(float x, float top, float alphaMult) {
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;

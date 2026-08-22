@@ -9,18 +9,10 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-/**
- * The species' icon, plus the two marks a catch carries over it: rarity as a bar across the top
- * left, and the specimen's grade as pips after it. Drawn rather than authored as sprites since both
- * vary per specimen.
- */
+
 public class FishItemRenderer {
 
-    /**
-     * Species icon fitted (not stretched) to the cargo cell, never enlarged past native size -
-     * upscaling read as soft. Second pass mimics the cargo view's own hover-brighten additive pass,
-     * so a catch lights up under the cursor like the rest of the hold.
-     */
+
     public static void renderIcon(float x, float y, float w, float h, float alphaMult, float glowMult,
                                   String path) {
 
@@ -48,12 +40,7 @@ public class FishItemRenderer {
         sprite.setNormalBlend();
     }
 
-    /**
-     * Draws an icon into a four-corner surface, using the same normal and mouseover passes as a
-     * loose specimen. Vanilla's blueprint items use {@link SpriteAPI#renderWithCorners(float,
-     * float, float, float, float, float, float, float)} to lay art onto skewed cargo-icon faces;
-     * keeping that transform here lets a fish box use its label as the corresponding surface.
-     */
+
     public static void renderIconWithCorners(String path,
                                              float blX, float blY, float tlX, float tlY,
                                              float trX, float trY, float brX, float brY,
@@ -77,10 +64,7 @@ public class FishItemRenderer {
         sprite.setAlphaMult(1f);
     }
 
-    /**
-     * One row across the top left of the icon: the species' rarity as a single unbroken bar three
-     * pips long, then the specimen's grade as pips after it.
-     */
+
     public static void render(float x, float y, float w, float h, float alphaMult,
                               FishRarity rarity, FishGrade grade) {
 
@@ -104,7 +88,7 @@ public class FishItemRenderer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         if (rarity != null) {
-            //backing needed or the pale Common accent blends into the art instead of reading as a mark
+            // backing needed or the pale Common accent blends into the art instead of reading as a mark
             backing(barX, rowY, barWidth, size, alphaMult);
 
             quad(barX, rowY, barWidth, size, rarity.color, FishConstants.ITEM_MARK_ALPHA * alphaMult);
@@ -115,8 +99,7 @@ public class FishItemRenderer {
         GL11.glPopAttrib();
     }
 
-    /** One pip per grade step, filled up to this specimen's; empty pips stay faint so the mark
-     *  reads as a scale rather than a dot count. */
+
     protected static void renderPips(float pipX, float pipY, float size, float gap, float total,
                                      float alphaMult, FishGrade grade) {
 
@@ -134,7 +117,7 @@ public class FishItemRenderer {
         }
     }
 
-    /** A dark pad a pixel out from a mark, so the mark reads against the art rather than into it. */
+
     protected static void backing(float x, float y, float w, float h, float alphaMult) {
         float pad = FishConstants.ITEM_MARK_BACKING_PAD;
 

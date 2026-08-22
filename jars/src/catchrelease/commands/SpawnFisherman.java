@@ -9,7 +9,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import org.lazywizard.console.BaseCommand;
 import org.lazywizard.console.Console;
 
-/** Console Commands integration for placing the ordinary visiting Fisherman beside the player. */
+
 public class SpawnFisherman implements BaseCommand {
 
     @Override

@@ -15,12 +15,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 
-/**
- * One species as a list row, shared by the sidebar and the planner: rarity accent, a circle
- * marking caught (filled) versus range-only (hollow), the name, and the shopping-list dot at
- * the right end. F2 over the row opens the codex. What sits between name and dot - the
- * planner's who-is-asking tag - is {@link #renderTag}'s to add.
- */
+
 public abstract class FishListRow extends ListRow {
 
     public static final float PAD_SIDE = 8f;
@@ -46,8 +41,7 @@ public abstract class FishListRow extends ListRow {
 
         Color chrome = selected || hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-        //filled = caught, hollow = range-only; a shape rather than a shade, since every
-        //shade here already means selection or rarity
+        // filled = caught, hollow = range-only; a shape rather than a shade, since every shade here already means selection or rarity
         boolean caught = FishLog.isCaught(spec.id);
         float markX = x + ACCENT_WIDTH + PAD_SIDE + MARK_RADIUS;
         float markY = y + height * 0.5f;
@@ -56,7 +50,6 @@ public abstract class FishListRow extends ListRow {
             Disc.draw(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 0.9f * alphaMult, false);
         }
 
-        //drawn over the fill too - the outline is what keeps a circle this small round
         Disc.drawOutline(markX, markY, MARK_RADIUS, chrome, 0.9f * alphaMult, 1.5f);
 
         LazyFont body = ShopUi.getBodyFont();
@@ -71,8 +64,7 @@ public abstract class FishListRow extends ListRow {
                     Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
         }
 
-        //the wanted dot at the row's right end, centred on the row's own midline - asked of
-        //everything that wants a fish, errands included, not the shopping list alone
+        // the wanted dot at the row's right end, centred on the row's own midline - asked of everything that wants a fish, errands included, not the shopping list alone
         boolean marked = ShopMarks.isWanted(spec);
 
         renderTag(x, y, width, height, marked, alphaMult);
@@ -83,12 +75,12 @@ public abstract class FishListRow extends ListRow {
         }
     }
 
-    /** The right-hand end before the dot; nothing by default. */
+
     protected void renderTag(float x, float y, float width, float height, boolean marked,
                              float alphaMult) {
     }
 
-    /** The codex hotlink, the way the rest of the game's UI wears it. */
+
     @Override
     protected boolean handleKey(InputEventAPI event) {
         if (event.getEventValue() != Keyboard.KEY_F2) return false;

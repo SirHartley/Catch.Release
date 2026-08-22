@@ -15,15 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Reads data/campaign/backdrops.csv into {@link Backdrop}s, keyed by id, cached for the session.
- * Same shape as {@link FishSpecLoader}: merged across mods, so another mod can add its own scenes
- * or replace one of ours by repeating the id.
- * <p>
- * A row whose art is missing is still a row. The picker says so and the tank falls back to its own
- * gradient, which is what a mod adding scenes wants while the art is still being drawn - and what
- * this mod itself wants, since the table ships ahead of the pictures.
- */
+
 public class BackdropLoader {
 
     public static final String PATH = "data/campaign/backdrops.csv";
@@ -92,7 +84,7 @@ public class BackdropLoader {
         return v.isEmpty() ? def : v;
     }
 
-    /** TRUE/true/1/yes, the way every hand-written column in the game gets filled in. */
+
     private static boolean optBoolean(JSONObject row, String key, boolean def) {
         String v = optString(row, key, null);
         if (v == null) return def;

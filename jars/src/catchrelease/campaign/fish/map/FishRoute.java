@@ -6,23 +6,18 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * The plotted fishing route as the save knows it: ordered stops, each a system and the fish to
- * take there. Held as ids rather than live objects, since the route outlives every screen and
- * has to ride the save - systems are looked up when something wants to draw or fly it. At most
- * one route; plotting a new one replaces the old.
- */
+
 public class FishRoute {
 
     public static final String KEY = "$catchrelease_fish_route";
 
-    /** One system on the route, and which of the picked fish it covers. */
+
     public static class Stop implements Serializable {
         public String systemId;
         public ArrayList<String> fishIds = new ArrayList<>();
     }
 
-    /** The whole route, in travel order from wherever the player was when it was plotted. */
+
     public static class Saved implements Serializable {
         public ArrayList<Stop> stops = new ArrayList<>();
     }
@@ -52,7 +47,7 @@ public class FishRoute {
         Global.getSector().getPersistentData().remove(KEY);
     }
 
-    /** The stop's system as it exists right now, or null if the sector no longer has it. */
+
     public static StarSystemAPI getSystem(Stop stop) {
         if (stop == null || stop.systemId == null || Global.getSector() == null) return null;
 

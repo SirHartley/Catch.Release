@@ -7,12 +7,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * A conservationist wanting either kind of remarkable specimen - the job {@code anyOf} was written
- * for. A requirement's other fields (rarity, grade, coherence) all stack and can only narrow; this
- * wants uncommon-and-magnificent OR uncommon-and-barely-holding-shape, two opposite catches a plain
- * AND composition couldn't express.
- */
+
 public class CuratorJob extends FishJob {
 
     public static final int VALUE_PER_FISH = 2600;

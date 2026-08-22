@@ -12,9 +12,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 import java.util.EnumSet;
 
-/**
- * Expects to be expired externally if not in player loc
- */
+
 public class Flash implements LunaCampaignRenderingPlugin {
 
     public static final float ANIM_TIME = 0.2f;
@@ -67,7 +65,6 @@ public class Flash implements LunaCampaignRenderingPlugin {
 
         float fract = MathUtils.clamp(animProgress / ANIM_TIME, 0f, 1f);
 
-        // Expansion curve (0 -> peak -> 0)
         float scale = TrigHelper.quadFuncSmooth(fract) * size;
 
         float w = scale;

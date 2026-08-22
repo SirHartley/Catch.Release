@@ -15,35 +15,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * The player's shopping list: purchases - exact upgrade rungs and tackle both - marked in the
- * outfitter as the thing being saved for, via the ring on their list rows. Upgrade keys include
- * the target level, so a schematic reward and its eventual fish price can point at the same rung.
- * <p>
- * What a mark does lives elsewhere and reads through the questions here, and there are two of
- * them, asked by different screens for different reasons. {@link #isMarked} is the shopping list
- * alone - the outfitter asks it, because a ring on a shop row means "this is the ware I picked".
- * {@link #isWanted} is the shopping list <i>and</i> every open errand, which is what the
- * quest-yellow dot means everywhere it is drawn: something is asking for this, do not sell it.
- * <p>
- * Every screen outside the outfitter wants the second one. They did not all get it - the hold
- * asked {@code isWanted} while the sector map, its sidebar and the route planner asked
- * {@code isMarked}, so a specimen an errand had sent the player after wore a dot in the cargo bay
- * and none at all on the chart that was supposed to help find it. If a new screen has to choose,
- * the question is whether it is the shop; if not, it is {@link #isWanted}.
- * <p>
- * {@link #drawDot} draws it where the caller puts it: bottom right on cargo icons, on the ring's
- * lower right for the map holder, at the row's right end on the map pane and route popup.
- */
+
 public class ShopMarks {
 
     public static final String KEY = "$catchrelease_shop_marks";
 
-    /** The dot itself, relative to the icon it stands on. */
+
     public static final float DOT_RADIUS = 3.5f;
 
-    /** How far the dot's centre sits in from the cargo cell's corner - the one number all
-     *  three cargo icon plugins place it by. */
+
     public static final float DOT_INSET = 8f;
 
     @SuppressWarnings("unchecked")
@@ -64,7 +44,7 @@ public class ShopMarks {
         return marked;
     }
 
-    /** Exact shopping-list identity; the shelf identity deliberately remains ladder-wide. */
+
     public static String getMarkKey(ShopEntry entry) {
         if (entry == null) return null;
 
@@ -78,7 +58,7 @@ public class ShopMarks {
                 ? null : "stat:" + statId + ":" + targetLevel;
     }
 
-    /** Old saves marked whole ladders; preserve their intent by pinning the then-current rung. */
+
     protected static void migrateLegacyUpgradeKeys(Set<String> marked) {
         if (marked == null || marked.isEmpty() || UpgradeManager.getInstance() == null) return;
 
@@ -138,13 +118,12 @@ public class ShopMarks {
     }
 
     public static void toggle(ShopEntry entry) {
-        //marking is engaging with the ware, which is all the New! tag was waiting for
         ShopSchematics.clearFresh(entry);
 
         toggle(getMarkKey(entry));
     }
 
-    /** Whether an entry can carry a mark at all: something left to buy, and fish in its price. */
+
     public static boolean isMarkable(ShopEntry entry) {
         if (entry == null) return false;
         if (entry.isPurchaseLocked() && !entry.isUpgrade()) return false;
@@ -154,11 +133,7 @@ public class ShopMarks {
         return price != null && price.fish != null;
     }
 
-    /**
-     * The marked wares' current asks - upgrades and tackle both - keys resolved against the
-     * live sheet each time, so a bought rung is priced as its next and a finished, owned, or
-     * vanished ware contributes nothing.
-     */
+
     public static List<FishRequirement> getMarkedRequirements() {
         List<FishRequirement> out = new ArrayList<>();
 
@@ -179,7 +154,7 @@ public class ShopMarks {
                 try {
                     tackle = Tackle.valueOf(parts[2]);
                 } catch (IllegalArgumentException e) {
-                    continue; //a mark from a version that no longer makes this module
+                    continue;
                 }
 
                 if (TackleManager.isOwned(tackle)) continue;
@@ -194,7 +169,7 @@ public class ShopMarks {
         return out;
     }
 
-    /** Whether this specimen would go towards something marked - the inventory's question. */
+
     public static boolean isMarked(FishCatch entry) {
         if (entry == null) return false;
 
@@ -205,7 +180,7 @@ public class ShopMarks {
         return false;
     }
 
-    /** Whether this species could go towards something marked - every other screen's question. */
+
     public static boolean isMarked(FishSpec spec) {
         if (spec == null) return false;
 
@@ -216,7 +191,7 @@ public class ShopMarks {
         return false;
     }
 
-    /** How long the wanted-ask cache is trusted before {@link #getWantedAsks} rebuilds it. */
+
     protected static final long WANTED_CACHE_MS = 250L;
 
     protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
@@ -226,14 +201,7 @@ public class ShopMarks {
         wantedAsks.invalidate();
     }
 
-    /**
-     * Every current ask - marked wares and everything in the log that is waiting on a fish - with
-     * the name the cargo tooltip gives as its reason. Cached for
-     * {@link #WANTED_CACHE_MS}: {@link #isWanted} is asked per cargo cell per frame, and
-     * collecting the asks walks the whole intel manager, which a full hold would otherwise do
-     * dozens of times a frame. The dot and its explanation deliberately consume this same list,
-     * so one can never outlive the other during the cache window.
-     */
+
     protected static List<Ask> getWantedAsks() {
         return wantedAsks.get(System.currentTimeMillis(), () -> {
             List<Ask> out = new ArrayList<>(getMarkedAsks());
@@ -257,7 +225,7 @@ public class ShopMarks {
         });
     }
 
-    /** Whether anything at all - a marked ware or an open job - would take this specimen. */
+
     public static boolean isWanted(FishCatch entry) {
         if (entry == null) return false;
 
@@ -268,7 +236,7 @@ public class ShopMarks {
         return false;
     }
 
-    /** Whether anything at all - a marked ware or an open job - asks for this species. */
+
     public static boolean isWanted(FishSpec spec) {
         if (spec == null) return false;
 
@@ -279,7 +247,7 @@ public class ShopMarks {
         return false;
     }
 
-    /** One marked ware with the name it goes by, for saying who is asking. */
+
     public static class Ask {
         public final String name;
         public final FishRequirement requirement;
@@ -290,7 +258,7 @@ public class ShopMarks {
         }
     }
 
-    /** The marked asks with their wares' names attached, same resolution rules as the plain list. */
+
     public static List<Ask> getMarkedAsks() {
         List<Ask> out = new ArrayList<>();
 
@@ -358,10 +326,7 @@ public class ShopMarks {
         }
     }
 
-    /**
-     * Everything asking for this species, by name: marked wares off the shopping list, and every
-     * open job whose ask a specimen of it could pay. What the tooltips' "Required by" line says.
-     */
+
     public static List<String> getRequiredBy(FishSpec spec) {
         List<String> out = new ArrayList<>();
         if (spec == null) return out;
@@ -375,7 +340,7 @@ public class ShopMarks {
         return out;
     }
 
-    /** The same roll call for one particular specimen, tested against the actual asks. */
+
     public static List<String> getRequiredBy(FishCatch entry) {
         List<String> out = new ArrayList<>();
         if (entry == null) return out;
@@ -389,10 +354,8 @@ public class ShopMarks {
         return out;
     }
 
-    /** The quest-yellow dot a needed fish wears - bottom right on cargo icons, placed to fit the
-     *  layout on the map screens. */
+
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
-        //a dark seat under it, so the yellow reads on any icon
         Disc.draw(centerX, centerY, radius + 1.2f, java.awt.Color.BLACK,
                 0.85f * alphaMult, 0.85f * alphaMult, false);
         Disc.draw(centerX, centerY, radius, Misc.getHighlightColor(),

@@ -12,14 +12,10 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * The band across the top: shop name on the left, purse on the right. The purse is one chip per
- * rarity - specimen mark plus count - since every price below is quoted in exactly those terms.
- * Counts are read off the dialog's cache, so a purchase shows up the same frame it is paid.
- */
+
 public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
 
-    /** Where the counts come from - the dialog owns the cache, this only draws it. */
+
     public interface Purse {
         Map<FishRarity, Integer> getWallet();
 
@@ -66,11 +62,10 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         renderTitle(x, y, height, alphaMult);
         renderPurse(x, y, width, height, alphaMult);
 
-        //the rule the whole band sits on, in the pane headers' quiet hand
         ShopUi.drawQuad(x, y, width, 1f, Misc.getDarkPlayerColor(), 0.8f * alphaMult);
     }
 
-    /** The name, back in the large hand - a small-caps title read as a section label, not a shop sign. */
+
     protected void renderTitle(float x, float y, float height, float alphaMult) {
         LazyFont font = ShopUi.getTitleFont();
         if (font == null) return;
@@ -104,9 +99,8 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         }
     }
 
-    /** The other half of every price, so the purse tells the whole of it. */
+
     protected void renderCredits(float x, float y, float alphaMult) {
-        //the chip's grammar: dark field, the identity colour underlining
         ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
                 0.18f * alphaMult);
         ShopUi.drawQuad(x, y, CREDITS_CHIP_WIDTH, 2f, Misc.getHighlightColor(),
@@ -128,10 +122,9 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     }
 
     protected void renderChip(FishRarity rarity, int count, float x, float y, float alphaMult) {
-        //empty pockets go quiet rather than away, so the ladder stays readable
+        // empty pockets go quiet rather than away, so the ladder stays readable
         float presence = count > 0 ? 1f : 0.4f;
 
-        //the chip's grammar: dark field, the identity colour underlining
         ShopUi.drawQuad(x, y, CHIP_WIDTH, CHIP_HEIGHT, Misc.getDarkPlayerColor(),
                 0.18f * alphaMult);
         ShopUi.drawQuad(x, y, CHIP_WIDTH, 2f, rarity.color, 0.6f * presence * alphaMult);
@@ -152,7 +145,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         text.draw(Math.round(x + CHIP_WIDTH - 7f), Math.round(y + CHIP_HEIGHT * 0.5f + text.getHeight() * 0.5f));
     }
 
-    /** Rebuilt only when the number it shows stops being true. */
+
     protected LazyFont.DrawableString getCount(FishRarity rarity, int count) {
         LazyFont font = ShopUi.getBodyFont();
         if (font == null) return null;

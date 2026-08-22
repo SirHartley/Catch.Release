@@ -38,10 +38,7 @@ import java.util.Set;
 public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
 
-    /**
-     * The only moment the fish codex category can be added - the codex is generated at load and
-     * never rebuilt, so earlier has no ROOT to hang off and later is invisible.
-     */
+
     @Override
     public void onCodexDataGenerated() {
         super.onCodexDataGenerated();
@@ -53,36 +50,28 @@ public class ModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         super.onGameLoad(newGame);
 
-        // static fishing spots
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();
         ChargeManager.register();
 
-        // pointing fishing gear at a fleet
         CatchReleaseCampaignPlugin.register();
         HarpoonPatrolResponse.register();
         LampPatrolResponse.register();
 
-        // jobs offering fish for trade
         FleetQuestSpawner.register();
 
-        // the fishing trade - transient watchers, the fleets themselves are what persist
         FishermanSpawner.register();
         CoreFisherSpawner.register();
         FishermanQuest.Keeper.register();
 
-        // how anybody comes to be fishing at all - four hooks, none of them required; the
-        // rating's planet scene needs no watcher, the sheet takes eligible planets over itself
         TutorialWreck.Watcher.register();
         RatingBarEvent.VisitCounter.register();
         FishermanInterception.register();
         FishingIntro.Keeper.register();
 
-        // the colony conservatory's doors and its tank
         ConservatoryOptionProvider.register();
         AquariumTankScript.register();
 
-        // data - the aberration index fills on arriving somewhere and on opening the sector map
         Aberration.Watcher.register();
         UpgradeManager.getInstance().updateBaseValues();
         SkillshotFramework.register();
@@ -92,31 +81,16 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new FishIntelPlanetPanel());
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
-        //the recovered pond whirlpool, now a portable post-process around collapsed stars
-        //BlackHoleSpiralWarp.install();
 
-        //housekeeping, once, before anything is looked at
+        // housekeeping, once, before anything is looked at
         sweepPondClaims();
 
-        //an input listener rather than a script; inert unless dev mode is on
+        // an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();
 
-        //Testing
-        //LunaCampaignRenderer.addTransientRenderer(new TestMaskedWarpShaderRenderer());
-        //LunaCampaignRenderer.addTransientRenderer(new TestStencilRenderer());
-        //LunaCampaignRenderer.addTransientRenderer(new RippleRingRenderer());
     }
 
-    /**
-     * Takes the mission marker off every rupture nothing is using any more.
-     * <p>
-     * Four things claim ruptures and each of them lets go on its own transitions, which is enough
-     * from here on and cannot repair a save that already has a marker burned into it - see
-     * {@link QuestPond#sweep}. The list of claimants lives here rather than in {@code QuestPond},
-     * because knowing who claims what is wiring and wiring is what this class is.
-     * <p>
-     * One entity walk per system, on load. The three ids are all of them.
-     */
+
     protected void sweepPondClaims() {
         Set<String> known = new LinkedHashSet<>();
         known.add(TutorialConstants.TARGET_KEY);
@@ -127,7 +101,6 @@ public class ModPlugin extends BaseModPlugin {
         if (FishingIntro.getTarget() != null) live.add(TutorialConstants.TARGET_KEY);
         if (FishermanQuest.getActive() != null) live.add(FishermanQuest.STATE_KEY);
 
-        //every bar job shares the one reason, so one unfinished job holds the whole id
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
             if (intel instanceof FishJob && !intel.isEnded()) {
                 live.add(FishJob.REF_KEY);

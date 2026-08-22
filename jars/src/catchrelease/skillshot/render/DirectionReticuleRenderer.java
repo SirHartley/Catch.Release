@@ -9,13 +9,7 @@ import catchrelease.skillshot.SkillshotSettings;
 
 import java.awt.*;
 
-/**
- * The plain skillshot reticule: an arrow at the cursor pointing away from the fleet. Use it for
- * anything fired in a direction rather than at a spot.
- * <p>
- * Pairs well with the guide lines on {@link BaseReticuleRenderer} - {@code withTrajectory()} for a
- * line down the aim direction, {@code withBounds(30f)} for the edges of a spread.
- */
+
 public class DirectionReticuleRenderer extends BaseReticuleRenderer {
 
     transient private SpriteAPI arrow;
@@ -42,7 +36,7 @@ public class DirectionReticuleRenderer extends BaseReticuleRenderer {
         arrow.renderAtCenter(cursorPos.x, cursorPos.y);
     }
 
-    /** The arrow sits on the aim point, so the lines run all the way into it rather than stopping short. */
+
     @Override
     protected float getGuideLineEndPadding() {
         return 0f;

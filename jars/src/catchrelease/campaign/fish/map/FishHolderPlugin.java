@@ -17,13 +17,7 @@ import org.lwjgl.input.Keyboard;
 import java.awt.Color;
 import java.util.List;
 
-/**
- * One round fish holder, wherever a screen lines fish up in circles - the intel Planets panel
- * and the system view's sidebar both. A dark disc under the rarity's ring and the face: the art
- * for a landed species, its silhouette for one known only from range data, and a bare
- * question mark - no colour, no name, no answers - for one the player has never heard of.
- * F2 over a named holder opens its codex page, the same key every fish row answers.
- */
+
 public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
 
     public static final float ICON_SHARE = 0.66f;
@@ -48,7 +42,6 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
         float y = pos.getCenterY();
         float radius = pos.getWidth() * 0.5f;
 
-        //the ring wears the rarity; a species with no name yet wears no colour either
         Color ring = spec == null ? Misc.getDarkPlayerColor() : spec.rarity.color;
 
         Disc.draw(x, y, radius, Color.BLACK, 0.8f * alphaMult, 0.8f * alphaMult, false);
@@ -65,17 +58,16 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
             return;
         }
 
-        //the art as painted once landed, its rimmed silhouette while only surveyed
+        // the art as painted once landed, its rimmed silhouette while only surveyed
         FishIcons.draw(spec, x, y, pos.getWidth() * ICON_SHARE, alphaMult);
 
-        //the wanted dot, bottom right on the ring - a marked ware or an open errand wants this
         if (ShopMarks.isWanted(spec)) {
             float off = radius * 0.707f;
             ShopMarks.drawDot(x + off, y - off, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
 
-    /** The codex key, the same one the sidebar's rows answer. */
+
     @Override
     public void processInput(List<InputEventAPI> events) {
         if (pos == null || spec == null) return;

@@ -30,24 +30,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Puts a fish panel on the intel screen's Planets view, in the empty air to the right of the
- * planet detail card: which species can be caught in the viewed planet's system, as round
- * icon holders in a boxed panel styled after the card it stands beside - the title bar runs
- * border to border and matches the card's own header weight, and the box never grows taller
- * than the card; a stock that will not fit scrolls inside instead.
- * <p>
- * The knowledge rules are the map's: a caught species wears its art, one known only from range data
- * data wears the generic mark - both ringed in their rarity's colour, with the same species
- * tooltip the sidebar uses and the same F2-to-codex key - and a species the player has never
- * encountered shows as a bare question mark that answers nothing.
- * <p>
- * The crawl is by capability, like the sector map's: the planets view is the thing on the intel
- * tab with {@code getPlanetList2}, and the detail card inside it is the thing with
- * {@code getLayInCourse}. The card is rebuilt on every planet selection, so a new card instance
- * is the rebuild signal. Every step fails soft - a surprise means no panel, and the intel screen
- * is exactly as vanilla made it.
- */
+
 public class FishIntelPlanetPanel implements EveryFrameScript {
 
     public static final float GAP = 10f;
@@ -55,18 +38,18 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     public static final float CELL_GAP = 6f;
     public static final float ICON_SHARE = 0.66f;
 
-    /** The card's own header weight - half again the old heading, border to border. */
+
     public static final float TITLE_HEIGHT = 30f;
 
     public static final float INNER_PAD = 10f;
 
-    /** The detail card this panel is currently standing beside. A new card means a rebuild. */
+
     protected Object detailCard;
 
     protected Object planetsPanel;
     protected CustomPanelAPI fishPanel;
 
-    /** Latched when this tab-open went wrong; cleared when the intel tab is left. */
+
     protected boolean failed = false;
 
     @Override
@@ -112,7 +95,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         }
     }
 
-    /** The planets view, if the intel tab is up and showing it - the thing with getPlanetList2. */
+
     protected Object findPlanetsPanel() {
         if (Global.getSector() == null) return null;
 
@@ -137,7 +120,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         return null;
     }
 
-    /** The planet detail card inside the planets view - the thing with getLayInCourse. */
+
     protected Object findDetailCard(Object planets) {
         for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
                 planets.getClass(), null, null, null, null, false)) {
@@ -151,7 +134,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         return null;
     }
 
-    /** Builds the panel for the card's planet and hangs it in the air to the card's right. */
+
     protected void attachPanel(Object card) {
         Object entity = ReflectionUtils.invokeIfExists(card, "getEntity");
         if (!(entity instanceof SectorEntityToken)) return;
@@ -166,7 +149,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         int unknown = FishPresence.getUnknownCountIn(system);
         if (known.isEmpty() && unknown == 0) return;
 
-        //the card's slot, in the planets panel's own inTL coordinates
         PositionAPI cardPos = ((UIComponentAPI) card).getPosition();
         PositionAPI panelPos = ((UIComponentAPI) planetsPanel).getPosition();
 
@@ -175,9 +157,9 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 - (cardPos.getY() + cardPos.getHeight());
 
         float width = panelPos.getWidth() - x - GAP;
-        if (width < CELL + 30f) return; //no air to stand in on this resolution
+        if (width < CELL + 30f) return;
 
-        //the card it stands beside is the ceiling: never taller, scroll instead
+        // the card it stands beside is the ceiling: never taller, scroll instead
         float maxHeight = cardPos.getHeight();
 
         float innerWidth = width - INNER_PAD * 2f;
@@ -202,7 +184,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 .inTL(x, y);
     }
 
-    /** The cell grid, in its own element below the title bar - scrolling when the stock is deep. */
+
     protected void buildContent(CustomPanelAPI panel, float innerWidth, float contentHeight,
                                 boolean scrolls, int perRow, List<FishSpec> known, int unknown) {
 
@@ -227,7 +209,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                         new FishHolderPlugin(spec));
                 rowPanel.addComponent(cell).inTL(i * (CELL + CELL_GAP), 0f);
 
-                //the sidebar's own species card - the question marks stay questions
                 if (spec != null) {
                     content.addTooltipTo(FishTooltips.create(spec), cell,
                             TooltipMakerAPI.TooltipLocation.BELOW);
@@ -247,7 +228,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
             try {
                 ((UIPanelAPI) planetsPanel).removeComponent(fishPanel);
             } catch (Throwable ignored) {
-                //the screen is already gone, and the panel with it
+                // the screen is already gone, and the panel with it
             }
         }
 
@@ -261,7 +242,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         failed = false;
     }
 
-    /** The box itself: dark field, one-pixel border, and the border-to-border title bar. */
+
     protected static class BoxPlugin extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI pos;
@@ -280,10 +261,9 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
             float w = pos.getWidth();
             float h = pos.getHeight();
 
-            //the field is transparent black, the way the screen's own panels sit on it
+            // the field is transparent black, the way the screen's own panels sit on it
             ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
 
-            //the title bar: flush with the borders on every side, the card's own header weight
             float titleAlpha = 0.65f;
             ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
                     Misc.getDarkPlayerColor(), titleAlpha * alphaMult);
@@ -297,8 +277,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 int titleX = Math.round(x + (w - title.getWidth()) * 0.5f);
                 int titleY = Math.round(y + h - (TITLE_HEIGHT - title.getHeight()) * 0.5f);
 
-                //the black rim the game's own UI text wears - drawn as four offset copies,
-                //since the font itself has no outline baked in
                 LazyFont.DrawableString rim = body.createText("Patterns",
                         ShopUi.withAlpha(Color.BLACK, alphaMult), body.getBaseHeight());
                 rim.draw(titleX - 1, titleY);
@@ -309,7 +287,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 title.draw(titleX, titleY);
             }
 
-            //the border wears exactly the title bar's colour, so the bar reads as part of the frame
+            // the border wears exactly the title bar's colour, so the bar reads as part of the frame
             Color border = Misc.getDarkPlayerColor();
             ShopUi.drawQuad(x, y, w, 1f, border, titleAlpha * alphaMult);
             ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, titleAlpha * alphaMult);

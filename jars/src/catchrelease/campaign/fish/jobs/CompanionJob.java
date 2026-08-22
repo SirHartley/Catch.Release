@@ -7,17 +7,14 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * Fish job giver restricted to Hegemony space. Unlike {@link ButlerJob}'s flat pass/fail threshold,
- * the bonus here scales with size above {@link #BONUS_FRACTION}.
- */
+
 public class CompanionJob extends FishJob {
 
     public static final int VALUE = 3400;
 
     public static final float DAYS = 40f;
 
-    /** Where in its own range a specimen has to sit before the extra is paid. */
+
     public static final float BONUS_FRACTION = 0.6f;
 
     @Override
@@ -51,7 +48,7 @@ public class CompanionJob extends FishJob {
         return true;
     }
 
-    /** Paid for size above {@link #BONUS_FRACTION}, not for merely meeting it. */
+
     @Override
     protected boolean payBonus(FishCatch offered) {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;

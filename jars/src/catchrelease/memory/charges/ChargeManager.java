@@ -7,16 +7,12 @@ import com.fs.starfarer.api.Global;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Charge pools for abilities that fire in bursts rather than on a cooldown - spend some, keep some
- * in hand. Pools regenerate continuously as a float (not whole steps); size and refill rate come
- * off the upgrade sheet, so this class knows nothing about specific abilities.
- */
+
 public class ChargeManager implements EveryFrameScript {
 
     public static final String KEY = "$catchrelease_charges";
 
-    /** Installed once. Idempotent, so calling it on every load is safe. */
+
     public static void register() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
             if (script instanceof ChargeManager) return;
@@ -25,12 +21,7 @@ public class ChargeManager implements EveryFrameScript {
         Global.getSector().addScript(new ChargeManager());
     }
 
-    /**
-     * Rounded down - a pool at 2.9 can be spent twice.
-     *
-     * @param maxStat     upgrade id for pool size
-     * @param maxFallback used if the sheet has no row for it
-     */
+
     public static int getCharges(String abilityId, String maxStat, float maxFallback) {
         return (int) Math.floor(getPool(abilityId, maxStat, maxFallback));
     }
@@ -39,7 +30,7 @@ public class ChargeManager implements EveryFrameScript {
         return getCharges(abilityId, maxStat, maxFallback) >= 1;
     }
 
-    /** @return false if the pool was empty; nothing taken in that case */
+
     public static boolean spend(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
         if (pool < 1f) return false;
@@ -49,12 +40,7 @@ public class ChargeManager implements EveryFrameScript {
         return true;
     }
 
-    /**
-     * Adds one charge without exceeding the pool's live upgraded maximum. Fractional regeneration
-     * is preserved, so retrieving a shot at 0.4 leaves 1.4 rather than discarding progress.
-     *
-     * @return whether the pool changed; false when it was already full or the definition is invalid
-     */
+
     public static boolean gain(String abilityId, Refill refill) {
         if (abilityId == null || refill == null) return false;
 
@@ -74,14 +60,14 @@ public class ChargeManager implements EveryFrameScript {
         return true;
     }
 
-    /** 0 to 1 towards the next charge. */
+
     public static float getProgressToNext(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
 
         return pool - (float) Math.floor(pool);
     }
 
-    /** A new pool starts full - a save that never fired the ability shouldn't begin waiting. */
+
     protected static float getPool(String abilityId, String maxStat, float maxFallback) {
         Map<String, Float> pools = getPools();
 
@@ -93,7 +79,7 @@ public class ChargeManager implements EveryFrameScript {
             return max;
         }
 
-        //clamp: a downgrade shouldn't leave more in the pool than it now holds
+        // clamp: a downgrade shouldn't leave more in the pool than it now holds
         if (pool > max) {
             pools.put(abilityId, max);
             return max;
@@ -121,7 +107,7 @@ public class ChargeManager implements EveryFrameScript {
 
     protected final Map<String, Refill> refills = new HashMap<>();
 
-    /** Which upgrades say pool size and refill time; registered by the ability, not listed here. */
+
     public static class Refill {
         public final String maxStat;
         public final float maxFallback;
@@ -135,12 +121,12 @@ public class ChargeManager implements EveryFrameScript {
             this.rateFallback = rateFallback;
         }
 
-        /** Called once when a refill step crosses one or more whole-charge boundaries. */
+
         public void onChargeGained() {
         }
     }
 
-    /** Tells the manager how a pool refills. Safe to call repeatedly; the last call wins. */
+
     public static void define(String abilityId, Refill refill) {
         ChargeManager manager = getManager();
         if (manager == null) return;
@@ -161,7 +147,7 @@ public class ChargeManager implements EveryFrameScript {
         return false;
     }
 
-    /** Charges come back while the game is paused too - a pool is a clock, not an action. */
+
     @Override
     public boolean runWhilePaused() {
         return true;

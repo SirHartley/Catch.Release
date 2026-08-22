@@ -4,44 +4,32 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.helper.loading.FishSpecLoader;
 import org.lazywizard.lazylib.MathUtils;
 
-/**
- * One landed specimen, as opposed to the species it belongs to: how long, how heavy, how close to
- * true to form. Value and grade derive from these three numbers plus the species row.
- * <p>
- * Encoded to a string for a special item to carry (see {@link #encode()}) - keep the format
- * backward compatible, or fish already in a save become unreadable.
- */
+
 public class FishCatch {
 
-    /** Field separator in the encoded form. Not a character any fish id uses. */
+
     public static final String SEPARATOR = "|";
 
     public String speciesId;
 
-    /** Metres and kilograms. */
+
     public float length;
     public float weight;
 
-    /** 0 to 1 - how loosely the thing is holding its shape. Set from where it was taken. */
+
     public float aberration;
 
-    /**
-     * Which part of the sector this specimen came from, or null for older saves. Distinct from the
-     * species' habitat range - this is where this specimen was caught, not where its kind lives.
-     */
+
     public SectorRegion origin;
 
-    /**
-     * How it was hooked and what made it reachable - facts about the catch, not the species. Null
-     * on specimens landed before these were tracked.
-     */
+
     public FishLogEntry.Method method;
     public CatchImplement implement;
 
-    /** Exact rupture entity id this came from, or null for open-water and older catches. */
+
     public String sourceId;
 
-    /** Quest provenance, appended to the encoded tail so every older specimen still decodes. */
+
     public long caughtAt;
     public String caughtSystemId;
     public String questTargetId;
@@ -61,11 +49,7 @@ public class FishCatch {
         this.origin = origin;
     }
 
-    /**
-     * Rolls a specimen. Length and weight are each biased toward the middle of the species range
-     * (average of two uniform rolls) rather than flat; weight tracks length with some independent
-     * variance so two same-length specimens still differ.
-     */
+
     public static FishCatch roll(FishSpec spec, float aberration) {
         return roll(spec, aberration, 0f, null);
     }
@@ -74,16 +58,12 @@ public class FishCatch {
         return roll(spec, aberration, qualityBias, null);
     }
 
-    /**
-     * @param qualityBias 0 to 1; nudges the roll toward the top of its range without rerolling, so
-     *                    better tackle raises the floor without guaranteeing the ceiling
-     */
+
     public static FishCatch roll(FishSpec spec, float aberration, float qualityBias, SectorRegion origin) {
         if (spec == null) return null;
 
         float lengthFraction = centred();
 
-        // nudges toward the top, doesn't replace the roll
         if (qualityBias > 0f) {
             lengthFraction += (1f - lengthFraction) * MathUtils.clamp(qualityBias, 0f, 1f);
         }
@@ -97,12 +77,12 @@ public class FishCatch {
                 MathUtils.clamp(aberration, 0f, 1f));
     }
 
-    /** 0 to 1, bunched towards the middle. */
+
     protected static float centred() {
         return (MathUtils.getRandomNumberInRange(0f, 1f) + MathUtils.getRandomNumberInRange(0f, 1f)) * 0.5f;
     }
 
-    /** The row this came from, or null if the table no longer has it. */
+
     public FishSpec getSpec() {
         return FishSpecLoader.getFishSpec(speciesId);
     }
@@ -113,10 +93,7 @@ public class FishCatch {
         return spec == null ? speciesId : spec.getDisplayName();
     }
 
-    /**
-     * Where this specimen sits in its species' range, 0 to 1 (average of length and weight
-     * fraction); what grade and value are both derived from.
-     */
+
     public float getSizeFraction() {
         FishSpec spec = getSpec();
         if (spec == null) return 0.5f;
@@ -129,10 +106,7 @@ public class FishCatch {
         return FishGrade.of(getSizeFraction());
     }
 
-    /**
-     * Species base value scaled by size fraction, then by grade. Grade multiplies on top of size
-     * scaling (not instead of it), so a better grade is felt rather than just recorded.
-     */
+
     public float getValue() {
         FishSpec spec = getSpec();
         if (spec == null) return 0f;
@@ -150,12 +124,7 @@ public class FishCatch {
         return MathUtils.clamp((value - min) / (max - min), 0f, 1f);
     }
 
-    /**
-     * Encodes the specimen as a string for a special item to carry. Species first so a bundle can
-     * sort without decoding the rest; origin/method/implement/source are an optional tail appended
-     * after, so every older form still decodes. Quest provenance is the final optional tail and is
-     * absent on ordinary catches as well as specimens from older saves.
-     */
+
     public String encode() {
         StringBuilder encoded = new StringBuilder(speciesId)
                 .append(SEPARATOR).append(round(length))
@@ -183,7 +152,7 @@ public class FishCatch {
         return encoded.toString();
     }
 
-    /** Null for anything that does not parse - a fish from a build that wrote a different format. */
+
     public static FishCatch decode(String encoded) {
         if (encoded == null || encoded.isEmpty()) return null;
 
@@ -209,7 +178,7 @@ public class FishCatch {
         }
     }
 
-    /** One of the optional tail fields, or null where the encoded form stopped short of it. */
+
     protected static String field(String[] parts, int index) {
         if (index >= parts.length) return null;
 
@@ -235,7 +204,7 @@ public class FishCatch {
         }
     }
 
-    /** Three decimals is finer than anything is displayed at, and keeps the encoded form short. */
+
     protected static float round(float value) {
         return Math.round(value * 1000f) / 1000f;
     }

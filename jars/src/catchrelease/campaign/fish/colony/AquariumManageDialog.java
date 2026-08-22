@@ -9,19 +9,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The aquarium office: fish out of the hold and into the tank, fish out of the tank and back
- * into the hold, the scene behind the water, and the switch on the wall. The moving itself is
- * {@link AquariumTransfers}; this dialog is the counter it happens over.
- * <p>
- * The tank's stock and its scene both live on the {@link BreachConservatory} itself, so they are
- * saved with the colony and drown with it. Which scenes the player <i>has</i> is the other scope -
- * see {@link Backdrops}.
- * <p>
- * The scenery rack previews on hover. What it puts in the visual slot is an actual
- * {@link AquariumTankPanel} showing that scene, not a picture of the art: the question the player
- * is asking is what the tank will look like, and the only answer that cannot be wrong is the tank.
- */
+
 public class AquariumManageDialog implements InteractionDialogPlugin {
 
     protected enum Option {
@@ -39,7 +27,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
     protected InteractionDialogAPI dialog;
     protected int backdropPage;
 
-    /** Six leaves room for Previous, Next and Back under the option panel's nine-row ceiling. */
+
     protected static final int BACKDROPS_PER_PAGE = 6;
 
     public AquariumManageDialog(BreachConservatory conservatory) {
@@ -84,14 +72,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         }
     }
 
-    //---------------------------------------------------------------- the scenery rack
 
-    /**
-     * Every scene the player has, with the one currently up marked, previewing on hover.
-     * <p>
-     * Only what is owned. A rack that listed everything and greyed most of it out would be a shop
-     * pretending to be a cupboard, and the shop is Crablobab.
-     */
     protected void showBackdrops() {
         dialog.getOptionPanel().clearOptions();
 
@@ -128,7 +109,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         preview(hanging);
     }
 
-    /** Puts the tank itself in the visual slot, showing the scene being considered. */
+
     protected void preview(Backdrop backdrop) {
         AquariumTankPanel tank = new AquariumTankPanel(conservatory, dialog);
         tank.setPreview(backdrop);
@@ -194,9 +175,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         showMain();
     }
 
-    //---------------------------------------------------------------- plumbing
 
-    /** The rack's whole point: the scene under the cursor is the scene in the visual slot. */
     @Override
     public void optionMousedOver(String optionText, Object optionData) {
         if (optionData instanceof Backdrop backdrop) preview(backdrop);

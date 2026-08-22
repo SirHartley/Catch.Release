@@ -8,10 +8,6 @@ uniform float twist;
 uniform float motion;
 uniform float speed;
 
-// A bounded version of the pond's original centre-weighted whirlpool. Coordinates turn hardest
-// near the middle and meet the undisturbed screen at the circle's rim. The motion rocks within a
-// fixed angle instead of accumulating, so an hours-long campaign session cannot wind the image
-// into an ever-tighter smear.
 void main() {
     vec2 uv = gl_TexCoord[0].xy;
     vec2 d = (uv - centerUV) / radiusUV;
