@@ -34,6 +34,10 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   row misbehaves.
 - **One commit per change.** Several changes, or several things asked for at once, get split
   into separate commits rather than piled into one.
+- **Keep commit messages short and human.** The entire message is one concise summary of the
+  change, written in plain modder-programmer language. No validation or testing notes, agent or
+  model names, co-author trailers, session metadata, links, formatting, or other fluff. Never
+  include a session link anywhere. This applies equally to ChatGPT, Claude, and any other agent.
 - **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
   package gains or loses a file - any change that moves what a file does, what registers it,
   or how the pieces fit lands in the map in the same commit. A change is not done while the
