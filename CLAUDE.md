@@ -49,18 +49,24 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 - **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
   a missing or invalid CLI login must never block PR creation, inspection, or merging when the app
   is connected.
-- **Whoever merges a pull request deletes its branch.** Immediately after the merge, in the same
-  session, through the same GitHub app. A merged branch is finished work, and one left standing is
-  indistinguishable at a glance from work still in flight - which is how the repository reached a
-  hundred and fifty of them, none of which anybody could tell apart from the outside without
-  auditing each one. Tidying up after somebody else is nobody's job in particular, so it has to be
-  the job of the agent that merged. The session's own assigned task branch is the single exception:
-  it is reset onto the new master and reused under the same name rather than deleted.
-  If the deletion is refused, say so in the reply and name the branch. Some sessions hold
-  credentials that can create and update refs but not delete them; the refusal is an HTTP 403 on
-  the delete push while an ordinary push still succeeds. That is a permission boundary, not
-  something to route around - report it and leave the branch, so it is a known leftover rather than
-  a silent one.
+- **A merged branch does not stay standing.** GitHub does this by itself: the repository has
+  *Automatically delete head branches* switched on, so merging a pull request retires its branch
+  without anybody asking. Nothing to do in the ordinary case - merge and it is gone. The rule is
+  written down because it is worth knowing why the repository looks tidy, and because the setting
+  covers exactly one thing: a branch that was the head of a pull request, at the moment that
+  request is merged. It does not touch a branch pushed and never opened as a request, one whose
+  request was closed rather than merged, or anything merged before the setting was turned on.
+  Those are the cases an agent still has to see to, and the one that made them worth a rule: the
+  repository reached a hundred and fifty leftovers, and from the outside a finished branch and one
+  still being worked on look the same, so the pile could only be sorted out by auditing every
+  branch individually. Whoever leaves such a branch behind clears it up in the same session -
+  tidying up after somebody else is nobody's job in particular. The session's own assigned task
+  branch is the standing exception: it is reset onto the new master and reused under the same name.
+  If a deletion is refused, say so in the reply and name the branch. Some sessions hold credentials
+  that can create and update refs but not delete them; the refusal is an HTTP 403 on the delete
+  push, from GitHub rather than the proxy, while an ordinary push still succeeds. That is a
+  permission boundary, not something to route around - report it and leave the branch, so it is a
+  known leftover rather than a silent one.
 
 ## ChatGPT app workflow (ChatGPT only)
 
