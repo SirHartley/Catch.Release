@@ -44,6 +44,9 @@ public class FishermanIdentity {
     /** What the registry still has them down as, from before. Nobody aboard uses it. */
     public static final String FORMER_NAME = "Baha";
 
+    /** Stable no-rank label registered in data/world/factions/default_ranks.json. */
+    public static final String RANK_ID = "catchrelease_none";
+
     /** Sprite ids registered under {@code graphics.characters} in settings.json. */
     private static final String[] PORTRAIT_IDS = {
             "catchrelease_fisherman_stable",
@@ -69,7 +72,7 @@ public class FishermanIdentity {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
         if (stored instanceof PersonAPI) {
             PersonAPI person = (PersonAPI) stored;
-            clearTitles(person);
+            refreshTitles(person);
             return person;
         }
 
@@ -79,16 +82,16 @@ public class FishermanIdentity {
         person.setGender(FullName.Gender.ANY);
         person.setName(new FullName(FIRST_NAME, LAST_NAME, FullName.Gender.ANY));
         person.setPortraitSprite(getPortrait(0f));
-        clearTitles(person);
+        refreshTitles(person);
 
         Global.getSector().getMemoryWithoutUpdate().set(PERSON_KEY, person);
 
         return person;
     }
 
-    /** The person card is a name, not a naval billet; also repairs titles persisted by old saves. */
-    private static void clearTitles(PersonAPI person) {
-        person.setRankId(null);
+    /** The person card always says no rank and carries no post; also repairs persisted old saves. */
+    private static void refreshTitles(PersonAPI person) {
+        person.setRankId(RANK_ID);
         person.setPostId(null);
     }
 
