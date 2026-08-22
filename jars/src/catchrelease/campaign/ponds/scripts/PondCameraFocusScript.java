@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.util.Misc;
+import lunalib.lunaSettings.LunaSettings;
 import org.lwjgl.util.vector.Vector2f;
 
 public class PondCameraFocusScript implements EveryFrameScript {
@@ -61,6 +62,18 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         boolean uiUp = isUiUp();
         boolean focusRequested = shouldFocus(fleet);
+
+        if (!isViewportSnapEnabled()) {
+            releaseCamera();
+            focus = 0f;
+
+            if (!focusRequested && isOutOfSight()) {
+                plugin.deactivate();
+                stop();
+            }
+
+            return;
+        }
 
         if (!uiUp && focusRequested && !holdingCamera) acquireCamera(fleet);
 
@@ -143,6 +156,12 @@ public class PondCameraFocusScript implements EveryFrameScript {
 
         return Misc.getDistance(fleet.getLocation(), pond.getLocation())
                 <= pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;
+    }
+
+    protected boolean isViewportSnapEnabled() {
+        Boolean enabled = LunaSettings.getBoolean("catchrelease", PondConstants.VIEWPORT_SNAP_SETTING);
+
+        return enabled == null || enabled;
     }
 
     protected boolean isOutOfSight() {

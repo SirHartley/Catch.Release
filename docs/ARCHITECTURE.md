@@ -229,9 +229,9 @@ The minigame success and failure ids currently point at vanilla's reputation-rai
 files, respectively, so replacing those placeholders later needs no Java change.
 Ability sounds are named in `abilities.csv` (`uiOn`/`uiOff`/`uiLoop`/`world*`), not in code.
 
-**data/config/LunaSettings.csv** — one Audio radio setting for the harpoon charge-ready
-report: never, only while the breach lamps are lit or an open pond is in interaction range
-(the default), or always.
+**data/config/LunaSettings.csv** — the Audio radio setting for the harpoon charge-ready
+report, plus an Accessibility toggle for the pond camera snap. The snap remains on by default;
+turning it off leaves the viewport under manual control while a pond is open.
 
 **`data/console/commands.csv`** — optional Console Commands integration. `AllFish` maps to
 `catchrelease.commands.AllFish` — compiled into the jar since the commands moved out of the loose
@@ -760,12 +760,12 @@ The pond, as terrain.
 | `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds; discoverable ponds return the registered unstable-fabric map glyph while look-only ponds remain iconless |
 | `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
-| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. Each external-control acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
+| `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. The Luna setting can keep the viewport under manual control without disabling the lifecycle half of the script; changing it live releases or reacquires external control while the pond remains open, and missing settings data preserves the default snap. Each acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |
 | `renderer/PondHoleRenderer.java` | The stencil-and-gradient hole look. Dormant: `PondConstants.POND_HOLE_LOOK` is off, so the shader swirl in the terrain plugin - the pond's rolled-back original look - is what draws |
 | `renderer/RippleData.java` | One ripple emitter, spawning ring renderers into LunaLib's list |
 | `renderer/UnstableFabricRippleTerrainRenderer.java` | Extra randomised ripples around the main one |
-| `constants/PondConstants.java` | Placement, camera timing, depth field, hole, opening distortion |
+| `constants/PondConstants.java` | Placement, pond-camera setting and timing, depth field, hole, opening distortion |
 | `entities/StenciledFishingPondEntityPlugin.java` | **Dead.** The old custom-entity pond |
 
 ### `campaign/crime`
