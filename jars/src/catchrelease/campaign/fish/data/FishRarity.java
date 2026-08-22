@@ -4,10 +4,10 @@ import java.awt.Color;
 
 public enum FishRarity {
 
-    COMMON(0, new Color(232, 211, 168), 1f, 1f),
-    UNCOMMON(1, Color.GREEN, 1.15f, 1.3f),
-    RARE(2, Color.BLUE, 1.35f, 1.7f),
-    EPIC(3, new Color(163, 53, 238), 1.6f, 2.2f),
+    COMMON(0, new Color(237, 221, 190), 1f, 1f),
+    UNCOMMON(1, new Color(30,240,10), 1.15f, 1.3f),
+    RARE(2, new Color(0,112,221), 1.35f, 1.7f),
+    EPIC(3, new Color(163,53,238), 1.6f, 2.2f),
     LEGENDARY(4, new Color(235, 55, 50), 1.9f, 2.8f);
 
     public final int rank;

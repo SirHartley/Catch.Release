@@ -16,10 +16,9 @@ qa_
 
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
-- Tackle is the code-only word for upgrade. It should always be either "Harpoon Tip" / "Drone Core" / "Lens Array" for player-facing text
 
-Fisherman
-- Add question "why can't I use the drones on the searchlights" - A: drones can't return because lights not a full breach, would get stuck in hyperspace. That's why the harpoon has a line. Q: okay / any way to change that: A: Yes, rare schematic. (heard rumor there's a...)
+Outfitter
+- Add on-hover tooltip to the "rank indicators" - both on the list entry and in the main panel explaining "Locked - Find a schematic to unlock"
 
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
@@ -41,6 +40,10 @@ The LYNE drone Auto-Dispatcher
 ---------------------
 
 handed off_
+
+Fisherman
+- Rank isn't consistent and sometimes shows none, sometimes empty - should always be "none"
+- Tutorial stage "range data" - when given the range data, should have the small slug like the "skill gained" thing: "Gained: Range data for [pattern]" for each one you got
 
 Bar quests
 - "camped rupture" - harpooning a fish doesn't seem to count for fishing from the rupture - should count for quest completion

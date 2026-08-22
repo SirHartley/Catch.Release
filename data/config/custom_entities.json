@@ -49,6 +49,7 @@
 
 	# Map-only marker for fishing boats.
 	"catchrelease_FisherMapIcon":{
+		"defaultName":"The Fisherman",
 		"defaultRadius":10,
 		"showInCampaign":false,
 		"showIconOnMap":true,
