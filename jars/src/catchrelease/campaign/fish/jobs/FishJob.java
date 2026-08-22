@@ -396,11 +396,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     /**
-     * Live contact gate used by rules instead of a newly serialized stage flag. This makes the
-     * route work for accepted jobs from older saves and excludes entity-given fleet quests.
+     * Live contact gate used by rules instead of a newly serialized stage flag. BaseHubMission
+     * leaves currentStage null until accept() installs the starting stage, so WANTED is both the
+     * acceptance and active-delivery check. Requiring a person excludes entity-given fleet quests.
      */
     protected boolean isContactActive() {
-        return isAccepted() && Stage.WANTED.equals(currentStage) && getPerson() != null;
+        return Stage.WANTED.equals(currentStage) && getPerson() != null;
     }
 
     /**
