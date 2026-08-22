@@ -1,5 +1,6 @@
 {
     "ranks": {
-        "catchrelease_crabMerchant": {"name": "Crab Merchant"}
+        "catchrelease_crabMerchant": {"name": "Crab Merchant"},
+        "catchrelease_none": {"name": "none"}
     }
 }

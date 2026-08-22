@@ -171,10 +171,10 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
 
         //Exactly what the long route pays: its two teaching charts, then 2/1/1 by rarity.
-        giveCharts(TutorialConstants.FREE_COMMONS, null);
+        giveCharts(TutorialConstants.FREE_COMMONS, null, text);
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
             giveChartsOfRarity(FishRarity.ofRank(rung),
-                    TutorialConstants.GRADUATION_CHARTS[rung]);
+                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
         }
 
         clearTarget();
@@ -329,7 +329,7 @@ public class FishingIntro {
         setStage(FISH_THREE);
 
         List<String> given = new ArrayList<>();
-        giveCharts(TutorialConstants.FREE_COMMONS, given);
+        giveCharts(TutorialConstants.FREE_COMMONS, given, text);
 
         Target target = new Target();
         target.stage = FISH_THREE;
@@ -346,7 +346,8 @@ public class FishingIntro {
         dropNote();
 
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
-            giveChartsOfRarity(FishRarity.ofRank(rung), TutorialConstants.GRADUATION_CHARTS[rung]);
+            giveChartsOfRarity(FishRarity.ofRank(rung),
+                    TutorialConstants.GRADUATION_CHARTS[rung], null, text);
         }
 
         rememberSeen();
@@ -833,14 +834,19 @@ public class FishingIntro {
 
     /** Charts on the house, at the bottom rung, recording what was given if anybody is listening. */
     public static void giveCharts(int count, List<String> givenOut) {
-        giveChartsOfRarity(FishRarity.COMMON, count, givenOut);
+        giveCharts(count, givenOut, null);
+    }
+
+    protected static void giveCharts(int count, List<String> givenOut, TextPanelAPI text) {
+        giveChartsOfRarity(FishRarity.COMMON, count, givenOut, text);
     }
 
     public static void giveChartsOfRarity(FishRarity rarity, int count) {
-        giveChartsOfRarity(rarity, count, null);
+        giveChartsOfRarity(rarity, count, null, null);
     }
 
-    protected static void giveChartsOfRarity(FishRarity rarity, int count, List<String> givenOut) {
+    protected static void giveChartsOfRarity(FishRarity rarity, int count,
+                                             List<String> givenOut, TextPanelAPI text) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
@@ -856,7 +862,18 @@ public class FishingIntro {
 
             FishLog.unlockLocationData(spec.id);
             if (givenOut != null) givenOut.add(spec.id);
+            if (text != null) addRangeDataGainText(spec, text);
         }
+    }
+
+    /** Vanilla-style compact receipt for each range-data entry handed over in dialogue. */
+    protected static void addRangeDataGainText(FishSpec spec, TextPanelAPI text) {
+        String pattern = spec.getDisplayName();
+
+        text.setFontSmallInsignia();
+        text.addParagraph("Gained: Range data for " + pattern, Misc.getPositiveHighlightColor());
+        text.highlightInLastPara(spec.rarity.color, pattern);
+        text.setFontInsignia();
     }
 
     /**
