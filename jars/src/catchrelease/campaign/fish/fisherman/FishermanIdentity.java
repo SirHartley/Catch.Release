@@ -44,9 +44,6 @@ public class FishermanIdentity {
     /** What the registry still has them down as, from before. Nobody aboard uses it. */
     public static final String FORMER_NAME = "Baha";
 
-    /** Stable no-rank label registered in data/world/factions/default_ranks.json. */
-    public static final String RANK_ID = "catchrelease_none";
-
     /** Sprite ids registered under {@code graphics.characters} in settings.json. */
     private static final String[] PORTRAIT_IDS = {
             "catchrelease_fisherman_stable",
@@ -89,9 +86,14 @@ public class FishermanIdentity {
         return person;
     }
 
-    /** The person card always says no rank and carries no post; also repairs persisted old saves. */
+    /**
+     * No rank and no post, which is vanilla's own way of saying "not a naval billet": the person
+     * card falls back to a single muted None and hides the duplicate line itself - it dedups the
+     * post against the rank by string, so any invented "none" rank label breaks the dedup and
+     * prints the no-rank label twice. Also repairs persisted old saves either way.
+     */
     private static void refreshTitles(PersonAPI person) {
-        person.setRankId(RANK_ID);
+        person.setRankId(null);
         person.setPostId(null);
     }
 
