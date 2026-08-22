@@ -58,13 +58,10 @@ public class TutorialConstants {
 
     //---------------------------------------------------------------- the rating
 
-    /** The same person, found two ways: on a surveyed world's surface, or nursing a drink in a bar. */
-    public static final String CASTAWAY_ENTITY_ID = "catchrelease_Castaway";
+    /** The same person, found two ways: on an unsurveyed world's surface, or in a bar. */
     public static final String CASTAWAY_PLACED_KEY = "$catchrelease_castawayPlaced";
-    public static final String CASTAWAY_NAME = "Distress Beacon";
-    public static final String CASTAWAY_TAG = "catchrelease_castaway";
 
-    /** Planet-market flags for the survey-hosted scene and its one-way completion. */
+    /** Planet-market flags for the planet-hosted scene and its one-way completion. */
     public static final String CASTAWAY_HOST_KEY = "$catchrelease_castawayHost";
     public static final String CASTAWAY_RESCUED_KEY = "$catchrelease_castawayRescued";
 

@@ -13,7 +13,6 @@ import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestPond;
-import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.RatingBarEvent;
@@ -72,9 +71,9 @@ public class ModPlugin extends BaseModPlugin {
         CoreFisherSpawner.register();
         FishermanQuest.Keeper.register();
 
-        // how anybody comes to be fishing at all - four hooks, none of them required
+        // how anybody comes to be fishing at all - four hooks, none of them required; the
+        // rating's planet scene needs no watcher, the sheet takes eligible planets over itself
         TutorialWreck.Watcher.register();
-        Castaway.Watcher.register();
         RatingBarEvent.VisitCounter.register();
         FishermanInterception.register();
         FishingIntro.Keeper.register();
