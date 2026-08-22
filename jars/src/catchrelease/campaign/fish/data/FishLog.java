@@ -129,7 +129,8 @@ public class FishLog {
         return Global.getSector().getClock().getTimestamp();
     }
 
-    protected static String getSystemName(SectorEntityToken where) {
+    /** Public because the per-catch ledger files the same reading - one definition of "where". */
+    public static String getSystemName(SectorEntityToken where) {
         if (where == null) return null;
 
         LocationAPI location = where.getContainingLocation();
