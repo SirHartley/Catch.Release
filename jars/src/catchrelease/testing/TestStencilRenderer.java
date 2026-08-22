@@ -23,14 +23,11 @@ import java.io.IOException;
 import java.util.EnumSet;
 
 public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
-
     public static final float SIZE = 500f;
 
     public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
-
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI stencil;
-
     transient protected WarpingSpriteRendererUtil warp;
 
     @Override
@@ -64,7 +61,6 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
         return EnumSet.of(CampaignEngineLayers.TERRAIN_1, CampaignEngineLayers.ABOVE);
     }
-
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {

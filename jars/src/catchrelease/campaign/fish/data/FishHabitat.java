@@ -12,24 +12,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-
 public class FishHabitat {
-
     public static final String CACHE_KEY = "$catchrelease_habitats";
 
-
     public final StarColour star;
-
-
     public final String starType;
-
     public final Set<String> tags;
     public final SectorRegion region;
-
-
     public final StarAge age;
-
-
     public final float aberration;
 
     protected FishHabitat(StarColour star, String starType, Set<String> tags, SectorRegion region,
@@ -77,7 +67,6 @@ public class FishHabitat {
                 Aberration.baseAt(location.getLocation(), location));
     }
 
-
     public static String getStarType(LocationAPI location) {
         if (!(location instanceof StarSystemAPI)) return null;
 
@@ -86,7 +75,6 @@ public class FishHabitat {
 
         return star.getSpec().getPlanetType();
     }
-
 
     public static StarAge getAge(LocationAPI location) {
         if (!(location instanceof StarSystemAPI)) return null;

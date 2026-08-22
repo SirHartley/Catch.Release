@@ -34,98 +34,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.Collections;
 
-
 public abstract class FishReward {
-
-
-    public abstract String describe();
-
-
-    public abstract void grant();
-
-
-    public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
-        return false;
-    }
-
-    public boolean hasOfferDetails() {
-        return false;
-    }
-
-
-    public String getSchematicKey() {
-        return null;
-    }
-
-
-    protected static void addSchematicPurchase(TooltipMakerAPI item, ShopPricing.Price price,
-                                               String thing) {
-        if (item == null) return;
-
-        item.addPara("This unlocks %s for purchase at the Fishing Outfitter. It does not include"
-                        + " the %s itself.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                thing, thing);
-    }
-
-
-    protected static String describeFit(Tackle.Fit fit) {
-        if (fit == null) return "fishing rig";
-
-        switch (fit) {
-            case DRONE: return "LYNE drone rig";
-            case HARPOON: return "harpoon line";
-            case SEARCHLIGHT: return "breach lamp rig";
-            case BOTH: return "LYNE drone rig or harpoon line";
-            default: return "fishing rig";
-        }
-    }
-
-    public static FishReward credits(int amount) {
-        return new Credits(amount);
-    }
-
-    public static FishReward upgrade(String statId, int levels) {
-        return new Upgrade(statId, levels);
-    }
-
-    public static FishReward upgradeSchematic(String statId, int targetLevel) {
-        return new UpgradeSchematic(statId, targetLevel);
-    }
-
-    public static FishReward tackle(Tackle tackle) {
-        return new TackleReward(tackle);
-    }
-
-    public static FishReward tackleSchematic(Tackle tackle) {
-        return new TackleSchematic(tackle);
-    }
-
-    public static FishReward locationData(String speciesId, int fallbackCredits) {
-        return new LocationData(speciesId, fallbackCredits);
-    }
-
-    public static FishReward backdrop(String backdropId) {
-        return new BackdropReward(backdropId);
-    }
-
-    public static FishReward blueprint(String itemId, String data) {
-        return new Blueprint(itemId, data);
-    }
-
-    public static FishReward shipBlueprint(String hullId) {
-        return new Blueprint(Items.SHIP_BP, hullId);
-    }
-
-    public static FishReward specialItem(String itemId, String data) {
-        return new Blueprint(itemId, data);
-    }
-
-    protected static CargoAPI getPlayerCargo() {
-        return Global.getSector().getPlayerFleet() == null
-                ? null : Global.getSector().getPlayerFleet().getCargo();
-    }
-
-
     public static class Credits extends FishReward {
         public final int amount;
 
@@ -144,7 +53,6 @@ public abstract class FishReward {
             if (cargo != null) cargo.getCredits().add(amount);
         }
     }
-
 
     public static class Upgrade extends FishReward {
         public final String statId;
@@ -173,7 +81,6 @@ public abstract class FishReward {
         }
     }
 
-
     public static class TackleReward extends FishReward {
         public final Tackle tackle;
 
@@ -195,7 +102,6 @@ public abstract class FishReward {
             TackleManager.fit(rig, tackle);
         }
     }
-
 
     public static class UpgradeSchematic extends FishReward {
         public final String statId;
@@ -254,7 +160,6 @@ public abstract class FishReward {
         }
     }
 
-
     protected static class SchematicMarkOverlay extends BaseCustomUIPanelPlugin {
         protected final String statId;
         protected final int targetLevel;
@@ -279,7 +184,6 @@ public abstract class FishReward {
                     pos.getY() + ShopMarks.DOT_INSET, ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
-
 
     public static class TackleSchematic extends FishReward {
         public final Tackle tackle;
@@ -327,7 +231,6 @@ public abstract class FishReward {
         }
     }
 
-
     public static class BackdropReward extends FishReward {
         public final String backdropId;
 
@@ -348,7 +251,6 @@ public abstract class FishReward {
             Backdrops.own(backdropId);
         }
     }
-
 
     public static class LocationData extends FishReward {
         public final String speciesId;
@@ -404,11 +306,9 @@ public abstract class FishReward {
             }
         }
 
-
         protected boolean isRedundant() {
             return FishLog.isLocationDataUnlocked(speciesId);
         }
-
 
         protected int getFallbackCredits() {
             int value = fallbackCredits > 0 ? fallbackCredits : FishRewardRoller.VALUE_PER_FISH;
@@ -416,7 +316,6 @@ public abstract class FishReward {
             return FishRewardRoller.creditPayout(value);
         }
     }
-
 
     protected static class RangeDataSilhouetteOverlay extends BaseCustomUIPanelPlugin {
         protected final FishSpec spec;
@@ -440,7 +339,6 @@ public abstract class FishReward {
                     size * 0.5f, size * 0.7f, alphaMult);
         }
     }
-
 
     public static class Blueprint extends FishReward {
         public final String itemId;
@@ -491,7 +389,6 @@ public abstract class FishReward {
         }
     }
 
-
     public static class Commodity extends FishReward {
         public final String commodityId;
         public final int quantity;
@@ -514,5 +411,87 @@ public abstract class FishReward {
         protected int getCreditValue() {
             return FishRewardRoller.creditPayout(quantity * 120);
         }
+    }
+
+    public abstract String describe();
+
+    public abstract void grant();
+
+    public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
+        return false;
+    }
+
+    public boolean hasOfferDetails() {
+        return false;
+    }
+
+    public String getSchematicKey() {
+        return null;
+    }
+
+    protected static void addSchematicPurchase(TooltipMakerAPI item, ShopPricing.Price price,
+                                               String thing) {
+        if (item == null) return;
+
+        item.addPara("This unlocks %s for purchase at the Fishing Outfitter. It does not include"
+                        + " the %s itself.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                thing, thing);
+    }
+
+    protected static String describeFit(Tackle.Fit fit) {
+        if (fit == null) return "fishing rig";
+
+        switch (fit) {
+            case DRONE: return "LYNE drone rig";
+            case HARPOON: return "harpoon line";
+            case SEARCHLIGHT: return "breach lamp rig";
+            case BOTH: return "LYNE drone rig or harpoon line";
+            default: return "fishing rig";
+        }
+    }
+
+    public static FishReward credits(int amount) {
+        return new Credits(amount);
+    }
+
+    public static FishReward upgrade(String statId, int levels) {
+        return new Upgrade(statId, levels);
+    }
+
+    public static FishReward upgradeSchematic(String statId, int targetLevel) {
+        return new UpgradeSchematic(statId, targetLevel);
+    }
+
+    public static FishReward tackle(Tackle tackle) {
+        return new TackleReward(tackle);
+    }
+
+    public static FishReward tackleSchematic(Tackle tackle) {
+        return new TackleSchematic(tackle);
+    }
+
+    public static FishReward locationData(String speciesId, int fallbackCredits) {
+        return new LocationData(speciesId, fallbackCredits);
+    }
+
+    public static FishReward backdrop(String backdropId) {
+        return new BackdropReward(backdropId);
+    }
+
+    public static FishReward blueprint(String itemId, String data) {
+        return new Blueprint(itemId, data);
+    }
+
+    public static FishReward shipBlueprint(String hullId) {
+        return new Blueprint(Items.SHIP_BP, hullId);
+    }
+
+    public static FishReward specialItem(String itemId, String data) {
+        return new Blueprint(itemId, data);
+    }
+
+    protected static CargoAPI getPlayerCargo() {
+        return Global.getSector().getPlayerFleet() == null
+                ? null : Global.getSector().getPlayerFleet().getCargo();
     }
 }

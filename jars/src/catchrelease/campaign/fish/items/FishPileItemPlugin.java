@@ -21,9 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishPileItemPlugin extends BaseSpecialItemPlugin {
-
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
 
@@ -45,7 +43,6 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
 
         return (int) total;
     }
-
 
     public static boolean sweep(RightClickActionHelper helper,
                                 com.fs.starfarer.api.campaign.CargoAPI cargo,
@@ -86,12 +83,10 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
     }
-
 
     @Override
     public void performRightClickAction(RightClickActionHelper helper) {
@@ -113,11 +108,9 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
-
         super.render(x, y, w, h, alphaMult, glowMult, renderer);
 
         List<FishCatch> contents = getContents();
@@ -146,7 +139,6 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
-
         List<FishCatch> contents = getContents();
         if (contents.isEmpty()) {
             super.createTooltip(tooltip, expanded, transferHandler, stackSource);

@@ -15,14 +15,11 @@ public abstract class BaseCircleTrajectoryFollowingParticle implements LunaCampa
     public Vector2f relativeCenter;
     public float totalAngle;
     public float radius;
-
     public float duration;
     public float elapsed = 0f;
-
     public Vector2f position;
     public float facing = 0f;
     public float currentAngle;
-
     public int turnDirection;
 
     public BaseCircleTrajectoryFollowingParticle(Vector2f start, Vector2f end, float radius, float travelDuration) {

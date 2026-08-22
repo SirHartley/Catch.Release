@@ -26,36 +26,25 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-
 public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
-
     protected static final String VERT = "data/shaders/distortion/distortion.vert";
     protected static final String FRAG = "data/shaders/distortion/distortion.frag";
     protected static final String VERT_AUX = "data/shaders/distortion/2dtangent.vert";
     protected static final String FRAG_AUX = "data/shaders/distortion/2dtangent.frag";
-
     protected static final String SETTINGS = "GRAPHICS_OPTIONS.ini";
-
-
     public static final int MAX_DISTORTIONS = 100;
-
     protected static boolean settingsRead = false;
     protected static boolean enableDistortion = false;
     protected static int maxDistortions = MAX_DISTORTIONS;
-
     protected static CampaignDistortionRenderer instance;
 
     protected final List<DistortionAPI> distortions = new ArrayList<>();
-
     protected boolean loaded = false;
     protected boolean usable = false;
-
     protected int program = 0;
     protected int programAux = 0;
-
     protected final int[] index = new int[4];
     protected final int[] indexAux = new int[7];
-
 
     public static void addDistortion(DistortionAPI distortion) {
         if (distortion == null) return;
@@ -67,20 +56,17 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         if (instance != null) instance.distortions.remove(distortion);
     }
 
-
     public static boolean isSupported() {
         readSettings();
 
         return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed() && enableDistortion;
     }
 
-
     public static int getMaxDistortions() {
         readSettings();
 
         return maxDistortions;
     }
-
 
     protected static void readSettings() {
         if (settingsRead) return;
@@ -98,7 +84,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-
     public static CampaignDistortionRenderer get() {
         if (instance == null) instance = new CampaignDistortionRenderer();
 
@@ -109,7 +94,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
         return instance;
     }
-
 
     @Override
     public boolean isExpired() {
@@ -126,7 +110,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
         return EnumSet.of(CampaignEngineLayers.ABOVE);
@@ -142,7 +125,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
         draw(viewport);
     }
-
 
     protected boolean load() {
         if (loaded) return usable;
@@ -207,7 +189,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
         ShaderLib.exitDraw();
     }
-
 
     protected Vector2f renderOffsetField(ViewportAPI viewport) {
         ShaderLib.copyScreen(ShaderLib.getScreenTexture(), GL13.GL_TEXTURE0);
@@ -277,7 +258,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return norm;
     }
 
-
     protected boolean anyOnScreen(ViewportAPI viewport) {
         for (DistortionAPI distortion : distortions) {
             Vector2f location = distortion.getLocation();
@@ -290,7 +270,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
         return false;
     }
-
 
     protected float getMaxScale(ViewportAPI viewport) {
         float max = 0f;
@@ -307,7 +286,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return max;
     }
 
-
     protected static void bindAuxiliaryBuffer(boolean bind) {
         int id = bind ? ShaderLib.getAuxiliaryBufferId() : 0;
 
@@ -320,14 +298,12 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-
     protected static float unitsToUV(ViewportAPI viewport, float units) {
         float zoom = viewport.getViewMult();
         if (zoom <= 0f) return 0f;
 
         return units / (ShaderLib.getInternalHeight() * zoom);
     }
-
 
     protected static boolean isOnScreen(ViewportAPI viewport, Vector2f location, float radius) {
         return viewport.isNearViewport(location, radius);

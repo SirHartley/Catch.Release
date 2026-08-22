@@ -20,10 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public enum CrabWares {
-
-
     CELEBRATION("Celebration Charges", 15000, 3,
             "Goes off over the catch card when something is landed: a flash behind it, the specimen"
                     + " thrown up over its own box, paper everywhere, and the word for it at an"
@@ -43,8 +40,6 @@ public enum CrabWares {
             return true;
         }
     },
-
-
     EARMUFFS("Earmuffs", 8000, 2,
             "Worn out where the fabric is thin, against the sound that comes with it. Thick, warm,"
                     + " and by all accounts very comfortable. You stop hearing it.") {
@@ -63,8 +58,6 @@ public enum CrabWares {
             return true;
         }
     },
-
-
     CHICKEN_PROFILE("Chicken Profile", 12000, 3,
             "Replaces the unidentified catch marker in the fishing minigame with a chicken. A"
                     + " Sonar Head still shows the hooked species instead.") {
@@ -83,8 +76,6 @@ public enum CrabWares {
             return true;
         }
     },
-
-
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
             "A shaped charge behind the barb. Fitted in the harpoon's own slot until it goes off;"
                     + " an unfired one can still be taken off and put back on.") {
@@ -98,8 +89,6 @@ public enum CrabWares {
             ShopEntry.of(Tackle.EXPLOSIVE_HEAD, Tackle.Fit.HARPOON).grant();
         }
     },
-
-
     CONSERVATORY("Breach Conservatory Plans", 60000, 8,
             "A blueprint chip for a hall of pressure glass and dim water. Half fish market, half"
                     + " public aquarium, and the only way a colony gets into the trade at all.") {
@@ -118,21 +107,16 @@ public enum CrabWares {
         }
     };
 
-
     public static final String BOUGHT_KEY = "$catchrelease_crabWares";
 
-
     public static final String OFF_KEY = "$catchrelease_crabWaresOff";
-
 
     public static final String LAST_EXPLOSIVE_TARGET_KEY = "$catchrelease_crabLastExplosiveTarget";
     public static final String EXPLOSIVE_TARGET_PENDING_KEY = "$catchrelease_crabExplosiveTargetPending";
 
-
     public static final String FALLBACK_CRAB_ID = "crab";
     public static final int FALLBACK_CRAB_CREDITS = 10000;
     public static final int FALLBACK_CRAB_CRABS = 1;
-
 
     public final String name;
     public final int credits;
@@ -150,11 +134,9 @@ public enum CrabWares {
 
     public abstract void grant();
 
-
     public boolean isSwitchable() {
         return false;
     }
-
 
     public boolean isOn() {
         if (!isOwned()) return false;
@@ -168,7 +150,6 @@ public enum CrabWares {
         if (on) getFlags(OFF_KEY).remove(name());
         else getFlags(OFF_KEY).add(name());
     }
-
 
     public FishRequirement getCatch() {
         FishRequirement req = new FishRequirement();
@@ -193,7 +174,6 @@ public enum CrabWares {
         return hasCredits() && hasCatch();
     }
 
-
     public boolean buy() {
         if (isOwned() || !canAfford()) return false;
 
@@ -210,7 +190,6 @@ public enum CrabWares {
         return true;
     }
 
-
     public static boolean isAnythingLeft() {
         for (CrabWares ware : values()) {
             if (!ware.isOwned()) return true;
@@ -218,7 +197,6 @@ public enum CrabWares {
 
         return false;
     }
-
 
     public static FishRequirement getFallbackBassCatch() {
         FishRequirement req = new FishRequirement();
@@ -234,7 +212,6 @@ public enum CrabWares {
                 >= FALLBACK_CRAB_CREDITS
                 && FishCurrency.count(getFallbackBassCatch()) >= FALLBACK_CRAB_CRABS;
     }
-
 
     public static FishCatch createFallbackBass() {
         FishSpec bass = FishSpecLoader.getFishSpec(FALLBACK_CRAB_ID);
@@ -253,7 +230,6 @@ public enum CrabWares {
                 + ". It is extravagantly overpriced.";
     }
 
-
     public static boolean buyFallbackBass() {
         FishCatch bass = createFallbackBass();
         if (bass == null || !canAffordFallbackBass()) return false;
@@ -265,7 +241,6 @@ public enum CrabWares {
         return true;
     }
 
-
     public static List<CrabWares> getSwitchable() {
         List<CrabWares> out = new ArrayList<>();
 
@@ -275,7 +250,6 @@ public enum CrabWares {
 
         return out;
     }
-
 
     public static void recordExplosiveUse(String target) {
         if (Global.getSector() == null) return;
@@ -311,7 +285,6 @@ public enum CrabWares {
     protected static void markBought(String id) {
         getFlags(BOUGHT_KEY).add(id);
     }
-
 
     @SuppressWarnings("unchecked")
     protected static Set<String> getFlags(String key) {

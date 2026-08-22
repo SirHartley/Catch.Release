@@ -5,19 +5,14 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.util.Misc;
 
-
 public class FishingTaboo {
-
-
     public static boolean isTaboo(String factionId) {
         return Factions.LUDDIC_CHURCH.equals(factionId) || Factions.LUDDIC_PATH.equals(factionId);
     }
 
-
     public static boolean isTaboo(MarketAPI market) {
         return market != null && isTaboo(market.getFactionId());
     }
-
 
     public static boolean holds(StarSystemAPI system) {
         if (system == null) return false;

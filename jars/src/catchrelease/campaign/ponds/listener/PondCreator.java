@@ -17,7 +17,6 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.Random;
 
 public class PondCreator {
-
     private final StarSystemAPI system;
     private int pondsToCreate;
     private final Random random;
@@ -52,7 +51,6 @@ public class PondCreator {
         // ponds intentionally do not orbit - following them around is tedious
     }
 
-
     private Vector2f getPondSpawnLoc() {
         float radius = PondConstants.MIN_DISTANCE;
         if (!system.isNebula()) radius += system.getStar().getRadius();
@@ -75,7 +73,6 @@ public class PondCreator {
                 MathUtils.getRandomNumberInRange(0f, 360f));
     }
 
-
     private boolean isClear(Vector2f point) {
         for (PlanetAPI planet : system.getPlanets()) {
             if (Misc.getDistance(planet.getLocation(), point) < PondConstants.MIN_EMPTY_RADIUS_AROUND_POND) {
@@ -91,7 +88,6 @@ public class PondCreator {
 
         return !isInNebula(point) && !isOnRingBand(point);
     }
-
 
     private boolean isOnRingBand(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
@@ -121,7 +117,6 @@ public class PondCreator {
         return false;
     }
 
-
     private boolean isInNebula(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
             if (!(terrain.getPlugin() instanceof NebulaTerrainPlugin)) continue;
@@ -131,5 +126,4 @@ public class PondCreator {
 
         return false;
     }
-
 }

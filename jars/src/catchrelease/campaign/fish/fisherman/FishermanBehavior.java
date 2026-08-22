@@ -29,28 +29,90 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishermanBehavior implements EveryFrameScript {
-
     protected final CampaignFleetAPI fleet;
-
     protected float daysOut = 0f;
     protected boolean windingDown = false;
     protected float windDownLeft = 0f;
     protected boolean done = false;
-
     protected final IntervalUtil moteInterval = new IntervalUtil(
             FishermanConstants.MOTE_INTERVAL_MIN, FishermanConstants.MOTE_INTERVAL_MAX);
-
-
     protected transient List<Lamp> lamps;
-
-
     protected SectorEntityToken marker;
-
-
     protected transient boolean markerReconciled = false;
     protected transient boolean litSoundPlayed = false;
+    protected transient TimedValue<String> named;
+
+    protected static class Lamp {
+        protected final CircularArc arc;
+        protected float baseAngle;
+        protected int direction = 1;
+        protected float oscillation = 0f;
+        protected final Vector2f renderLoc = new Vector2f();
+        protected transient SearchlightFanRenderer fan;
+
+        public Lamp(CircularArc arc) {
+            this.arc = arc;
+            baseAngle = arc.startAngle;
+            renderLoc.set(arc.getPointForAngle(baseAngle));
+        }
+
+        public void advance(float amount) {
+            oscillation += amount;
+
+            float progress = arc.getTraversalProgress(baseAngle);
+            float normalized = (direction < 0) ? 1f - progress : progress;
+            if (normalized > 0.99f) direction *= -1;
+
+            float degPerSec = arc.convertToDegreesPerSecond(
+                    FishermanConstants.SWEEP_DEGREES_PER_SECOND * Searchlight.FAN_SWEEP_MULT);
+            baseAngle = Misc.normalizeAngle(baseAngle + degPerSec * amount * direction);
+
+            Vector2f base = arc.getPointForAngle(baseAngle);
+            float offset = (float) Math.sin(oscillation * Searchlight.OSCILLATION_TIME_MULT)
+                    * Searchlight.SINE_CADENCE;
+
+            Vector2f at = MathUtils.getPointOnCircumference(base, offset, baseAngle + 90f);
+            renderLoc.set(at);
+
+            if (fan == null) {
+                fan = new SearchlightFanRenderer(arc.center, renderLoc,
+                        Searchlight.getArea(), FishermanConstants.LIGHT_COLOR);
+                LunaCampaignRenderer.addTransientRenderer(fan);
+            }
+        }
+
+        public float litStrength(Vector2f at) {
+            float size = Searchlight.getArea();
+            Vector2f origin = arc.center;
+
+            float length = Misc.getDistance(origin, renderLoc) + size;
+            if (length <= 1f) return 0f;
+
+            float distance = Misc.getDistance(origin, at);
+            if (distance > length) return 0f;
+
+            float off = Math.abs(Misc.getAngleDiff(
+                    Misc.getAngleInDegrees(origin, renderLoc),
+                    Misc.getAngleInDegrees(origin, at)));
+
+            if (off > Searchlight.getFanHalfAngle()) return 0f;
+
+            float acrossShare = 1f - off / Searchlight.getFanHalfAngle();
+            float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
+
+            return acrossShare * acrossShare
+                    * (Searchlight.FAN_TIP_STRENGTH
+                    + (1f - Searchlight.FAN_TIP_STRENGTH) * along);
+        }
+
+        public void expire(float fadeSeconds) {
+            if (fan != null) {
+                fan.fadeAndExpire(fadeSeconds);
+                fan = null;
+            }
+        }
+    }
 
     public FishermanBehavior(CampaignFleetAPI fleet) {
         this.fleet = fleet;
@@ -120,17 +182,14 @@ public class FishermanBehavior implements EveryFrameScript {
         if (moteInterval.intervalElapsed()) seedMote();
     }
 
-
     protected boolean isVisiting() {
         return true;
     }
-
 
     protected boolean isReservedForTutorial() {
         return fleet.getMemoryWithoutUpdate().get(FishermanConstants.TUTORIAL_TARGET_KEY)
                 instanceof String;
     }
-
 
     protected void beginWindDown() {
         windingDown = true;
@@ -144,7 +203,6 @@ public class FishermanBehavior implements EveryFrameScript {
         }
     }
 
-
     protected void keepVisible(boolean watched) {
         fleet.getStats().getDetectedRangeMod().modifyFlat(FishermanConstants.VISIBILITY_ID,
                 FishermanConstants.DETECTED_RANGE);
@@ -156,7 +214,6 @@ public class FishermanBehavior implements EveryFrameScript {
         // a boat out there since before there were two kinds of schedule. Written once, and only because the shelf and the spawner both ask which kind of boat this is
         if (isVisiting()
                 && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.VISITING_FLAG)) {
-
             fleet.getMemoryWithoutUpdate().set(FishermanConstants.VISITING_FLAG, true);
         }
 
@@ -167,7 +224,6 @@ public class FishermanBehavior implements EveryFrameScript {
         fleet.forceSensorFaderBrightness(1f);
     }
 
-
     protected void keepMarker(boolean watched) {
         if (!watched || fleet.isVisibleToPlayerFleet()) {
             dropMarker();
@@ -176,12 +232,10 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (!markerReconciled || marker == null
                 || marker.getContainingLocation() != fleet.getContainingLocation()) {
-
             marker = FishermanMapIcon.findOrAdd(fleet);
             markerReconciled = true;
         }
     }
-
 
     protected void keepPace() {
         float target = catchrelease.campaign.fish.tutorial.FishermanInterception.isClosing(fleet)
@@ -195,7 +249,6 @@ public class FishermanBehavior implements EveryFrameScript {
                     .modifyFlat(FishermanConstants.BURN_ID, target - natural);
         }
     }
-
 
     protected void keepStanding() {
         MemoryAPI memory = fleet.getMemoryWithoutUpdate();
@@ -242,7 +295,6 @@ public class FishermanBehavior implements EveryFrameScript {
         keepOutOfEverybodysWay(memory);
     }
 
-
     protected void keepOutOfEverybodysWay(MemoryAPI memory) {
         if (!memory.getBoolean(MemFlags.FLEET_IGNORES_OTHER_FLEETS)) {
             memory.set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
@@ -252,10 +304,6 @@ public class FishermanBehavior implements EveryFrameScript {
             memory.set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         }
     }
-
-
-    protected transient TimedValue<String> named;
-
 
     protected void keepNamed() {
         // lazily built - the field is transient, so a loaded save starts without one
@@ -273,11 +321,9 @@ public class FishermanBehavior implements EveryFrameScript {
         });
     }
 
-
     protected boolean isPlayerHere() {
         return catchrelease.helper.CampaignHelper.isPlayerHere(fleet);
     }
-
 
     protected void keepWorking() {
         if (fleet.getCurrentAssignment() != null) return;
@@ -287,7 +333,6 @@ public class FishermanBehavior implements EveryFrameScript {
                 ((StarSystemAPI) fleet.getContainingLocation()).getCenter(),
                 FishermanConstants.STAY_DAYS, "fishing the deep");
     }
-
 
     protected void advanceWindDown(float amount) {
         if (isPlayerHere()) {
@@ -310,7 +355,6 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (!fleet.isExpired()) fleet.despawn();
     }
-
 
     protected void ensureLamps() {
         if (lamps != null) return;
@@ -341,7 +385,6 @@ public class FishermanBehavior implements EveryFrameScript {
         lamps = null;
     }
 
-
     protected void dropMarker() {
         if (marker == null || marker.getContainingLocation() == null) {
             marker = null;
@@ -354,11 +397,9 @@ public class FishermanBehavior implements EveryFrameScript {
         markerReconciled = false;
     }
 
-
     protected void dropShelf() {
         FishermanShelf.releaseFor(fleet);
     }
-
 
     protected void seedMote() {
         if (lamps == null || lamps.isEmpty()) return;
@@ -380,81 +421,5 @@ public class FishermanBehavior implements EveryFrameScript {
                 new FishEntityPlugin.Params(target, fishId));
 
         mote.setLocation(spawn.x, spawn.y);
-    }
-
-
-    protected static class Lamp {
-
-        protected final CircularArc arc;
-        protected float baseAngle;
-        protected int direction = 1;
-        protected float oscillation = 0f;
-
-        protected final Vector2f renderLoc = new Vector2f();
-
-        protected transient SearchlightFanRenderer fan;
-
-        public Lamp(CircularArc arc) {
-            this.arc = arc;
-            baseAngle = arc.startAngle;
-            renderLoc.set(arc.getPointForAngle(baseAngle));
-        }
-
-        public void advance(float amount) {
-            oscillation += amount;
-
-            float progress = arc.getTraversalProgress(baseAngle);
-            float normalized = (direction < 0) ? 1f - progress : progress;
-            if (normalized > 0.99f) direction *= -1;
-
-            float degPerSec = arc.convertToDegreesPerSecond(
-                    FishermanConstants.SWEEP_DEGREES_PER_SECOND * Searchlight.FAN_SWEEP_MULT);
-            baseAngle = Misc.normalizeAngle(baseAngle + degPerSec * amount * direction);
-
-            Vector2f base = arc.getPointForAngle(baseAngle);
-            float offset = (float) Math.sin(oscillation * Searchlight.OSCILLATION_TIME_MULT)
-                    * Searchlight.SINE_CADENCE;
-
-            Vector2f at = MathUtils.getPointOnCircumference(base, offset, baseAngle + 90f);
-            renderLoc.set(at);
-
-            if (fan == null) {
-                fan = new SearchlightFanRenderer(arc.center, renderLoc,
-                        Searchlight.getArea(), FishermanConstants.LIGHT_COLOR);
-                LunaCampaignRenderer.addTransientRenderer(fan);
-            }
-        }
-
-
-        public float litStrength(Vector2f at) {
-            float size = Searchlight.getArea();
-            Vector2f origin = arc.center;
-
-            float length = Misc.getDistance(origin, renderLoc) + size;
-            if (length <= 1f) return 0f;
-
-            float distance = Misc.getDistance(origin, at);
-            if (distance > length) return 0f;
-
-            float off = Math.abs(Misc.getAngleDiff(
-                    Misc.getAngleInDegrees(origin, renderLoc),
-                    Misc.getAngleInDegrees(origin, at)));
-
-            if (off > Searchlight.getFanHalfAngle()) return 0f;
-
-            float acrossShare = 1f - off / Searchlight.getFanHalfAngle();
-            float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
-
-            return acrossShare * acrossShare
-                    * (Searchlight.FAN_TIP_STRENGTH
-                    + (1f - Searchlight.FAN_TIP_STRENGTH) * along);
-        }
-
-        public void expire(float fadeSeconds) {
-            if (fan != null) {
-                fan.fadeAndExpire(fadeSeconds);
-                fan = null;
-            }
-        }
     }
 }

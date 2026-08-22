@@ -5,21 +5,16 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public enum SectorRegion {
-
     CORE_NE,
     CORE_NW,
     CORE_SE,
     CORE_SW,
-
     RIM_NE,
     RIM_NW,
     RIM_SE,
     RIM_SW,
-
     ABYSSAL;
-
 
     public static SectorRegion of(LocationAPI location) {
         if (location == null) return null;
@@ -44,7 +39,6 @@ public enum SectorRegion {
         return east ? RIM_SE : RIM_SW;
     }
 
-
     public float[] getBounds(float sectorHalfWidth, float sectorHalfHeight) {
         if (this == ABYSSAL) return null;
 
@@ -63,11 +57,9 @@ public enum SectorRegion {
         return new float[]{minX, minY, maxX, maxY};
     }
 
-
     public boolean isCore() {
         return name().startsWith("CORE");
     }
-
 
     public static SectorRegion parse(String name) {
         if (name == null) return null;

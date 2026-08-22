@@ -25,72 +25,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishRoutePopup.Host {
-
     public static final String MEMORY_KEY = "$catchrelease_map_fish_filter";
-
-
     public static final float BUTTON_WIDTH = 120f;
     public static final float BUTTON_HEIGHT = 25f;
     public static final float BUTTON_PAD = 3f;
-
     public static final float PANE_GAP = 8f;
-
-
     public static final float BLOB_RADIUS = 3200f;
-
-
     public static final long PENDING_SPECIES_MILLIS = 10_000L;
-
-
     protected static String pendingSpeciesId;
     protected static List<FishRequirement> pendingRequirements;
     protected static boolean pendingOverview;
     protected static String pendingSystemId;
     protected static long pendingFocusSetAt;
-
-
     protected static boolean pendingMapOpen;
 
-
     protected Object mapScreen;
-
-
     protected boolean failed = false;
-
     protected ButtonAPI fishButton;
     protected boolean applied = false;
-
-
     protected boolean paneStanding = false;
     protected float originalScrollerWidth = 0f;
-
     protected FishMapPane pane;
     protected CustomPanelAPI panePanel;
     protected CustomPanelAPI overlayPanel;
     protected FishPresenceOverlay overlay;
-
-
     protected FishSystemPane systemPane;
     protected CustomPanelAPI systemPanePanel;
     protected boolean systemApplied = false;
     protected Object shownSystem;
-
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
-
-
     protected float paneX, paneY, paneHeight;
-
-
     protected Object arrowList;
     protected final List<Object> injectedArrows = new ArrayList<>();
     protected Object lastRouteSeen;
     protected boolean arrowsIn = false;
-
-
     protected final Map<String, FishPresenceField.Mesh> meshCache = new HashMap<>();
 
     @Override
@@ -166,7 +137,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected void syncRouteArrows() {
         FishRoute.Saved route = FishRoute.get();
         boolean hyper = isHyperViewShown();
@@ -189,7 +159,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             Object target = null;
             for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
                     params.getClass(), null, null, List.class, null, false)) {
-
                 Object value = field.get(params);
                 if (value == null) continue;
 
@@ -227,7 +196,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected StarSystemAPI getViewedSystem() {
         if (mapScreen == null) return null;
 
@@ -241,12 +209,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected boolean hasAnyFish(StarSystemAPI system) {
         return !FishPresence.getKnownFishIn(system).isEmpty()
                 || FishPresence.getUnknownCountIn(system) > 0;
     }
-
 
     protected void activateSystemPane(StarSystemAPI system) {
         try {
@@ -289,7 +255,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected void deactivateSystemPane() {
         try {
             Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
@@ -322,7 +287,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected boolean isHyperViewShown() {
         if (mapScreen == null) return false;
 
@@ -337,12 +301,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     @Override
     public void onCoherenceToggled(boolean shown) {
         if (overlay != null) overlay.setCoherenceShown(shown);
     }
-
 
     @Override
     public void onPlannerRequested() {
@@ -387,7 +349,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         closePlanner();
     }
 
-
     protected void closePlanner() {
         if (popupPanel != null && mapScreen != null) {
             try {
@@ -411,7 +372,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         popupPanel = null;
     }
 
-
     protected void ensurePaneStanding() {
         if (panePanel == null || mapScreen == null) return;
 
@@ -426,7 +386,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         paneStanding = true;
     }
 
-
     public static void requestSpeciesFocus(String speciesId) {
         pendingSpeciesId = speciesId;
         pendingRequirements = null;
@@ -438,7 +397,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, true);
         }
     }
-
 
     public static void requestRequirementsFocus(List<FishRequirement> asks) {
         pendingMapOpen = false;
@@ -453,7 +411,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     public static void requestOverviewFocus(String systemId) {
         pendingMapOpen = false;
         pendingSpeciesId = null;
@@ -467,12 +424,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     public static void requestSpeciesFocusFromCodex(String speciesId) {
         requestSpeciesFocus(speciesId);
         pendingMapOpen = true;
     }
-
 
     protected void openPendingMapWhenCodexCloses() {
         if (!pendingMapOpen) return;
@@ -505,7 +460,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         return hasPendingFocus()
                 && System.currentTimeMillis() - pendingFocusSetAt <= PENDING_SPECIES_MILLIS;
     }
-
 
     protected void applyPendingFocus() {
         boolean fresh = hasFreshPendingFocus();
@@ -563,7 +517,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected Object findMapScreen() {
         if (Global.getSector() == null) return null;
 
@@ -578,7 +531,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         return ReflectionUtils.hasMethodOfName(tab, "updateMapAndScrollerSize") ? tab : null;
     }
-
 
     protected void insertButton() {
         Object filterRow = ReflectionUtils.invoke(mapScreen, "getFilter");
@@ -595,7 +547,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
                 renderer.getClass(), null, null, null, null, false)) {
-
             Object value = field.get(renderer);
             if (value != null) candidates.add(value);
         }
@@ -669,7 +620,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 .rightOfMid((UIComponentAPI) template, BUTTON_PAD);
     }
 
-
     protected void mountOverlay() {
         Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
         Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
@@ -729,7 +679,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-
     protected void deactivate() {
         try {
             // a planner holding the pane's slot goes down with it, without handing the slot back
@@ -775,7 +724,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             fail(t);
         }
     }
-
 
     protected void rebuildBlobs() {
         if (pane == null || overlay == null) return;
@@ -848,7 +796,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay.setNoDataShown(pane.hasSelectionWithoutRangeData());
     }
 
-
     protected int getStyle(int index) {
         switch (index % 3) {
             case 1: return FishPresenceOverlay.STYLE_STRIPE_RIGHT;
@@ -870,7 +817,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         return mesh.isEmpty() ? null : mesh;
     }
-
 
     protected FishPresenceField.Mesh getUnionMesh(List<FishSpec> group) {
         List<String> ids = new ArrayList<>();
@@ -918,7 +864,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, on);
     }
 
-
     protected void drop() {
         clearComponents();
         mapScreen = null;
@@ -948,7 +893,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         injectedArrows.clear();
         lastRouteSeen = new Object();
     }
-
 
     protected void fail(Throwable t) {
         Global.getLogger(FishMapFilterScript.class)

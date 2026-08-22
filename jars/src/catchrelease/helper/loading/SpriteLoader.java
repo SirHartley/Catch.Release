@@ -8,17 +8,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class SpriteLoader {
-
-
     protected static final Map<String, Boolean> LOADED = new HashMap<>();
-
 
     public static SpriteAPI getSprite(String id) {
         return Global.getSettings().getSprite(ModPlugin.MOD_ID, id);
     }
-
 
     public static SpriteAPI loadSprite(String path) {
         if (path == null || path.isEmpty()) return null;

@@ -14,16 +14,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishItems {
-
     public static final String FISH = "catchrelease_fish";
     public static final String BUNDLE = "catchrelease_fish_bundle";
     public static final String PILE = "catchrelease_fish_pile";
-
-
     public static final String BUNDLE_SEPARATOR = ";";
-
 
     public static boolean isCatch(SpecialItemData data) {
         if (data == null) return false;
@@ -31,11 +26,9 @@ public class FishItems {
         return FISH.equals(data.getId()) || isContainer(data);
     }
 
-
     public static boolean isContainer(SpecialItemData data) {
         return data != null && (BUNDLE.equals(data.getId()) || PILE.equals(data.getId()));
     }
-
 
     public static List<FishCatch> read(SpecialItemData data) {
         List<FishCatch> out = new ArrayList<>();
@@ -54,11 +47,9 @@ public class FishItems {
         return out;
     }
 
-
     public static SpecialItemData repack(String id, List<FishCatch> contents) {
         return new SpecialItemData(PILE.equals(id) ? PILE : BUNDLE, encodeBundle(contents));
     }
-
 
     public static CargoAPI copyFishStacks(CargoAPI source) {
         CargoAPI out = Global.getFactory().createCargo(true);
@@ -73,7 +64,6 @@ public class FishItems {
 
         return out;
     }
-
 
     public static int unbox(CargoAPI cargo) {
         if (cargo == null) return 0;
@@ -99,7 +89,6 @@ public class FishItems {
 
         return opened;
     }
-
 
     public static int packIntoCrates(CargoAPI cargo) {
         if (cargo == null) return 0;
@@ -132,7 +121,6 @@ public class FishItems {
         return bySpecies.size();
     }
 
-
     public static float getStackValue(CargoStackAPI stack) {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
         if (data == null) return 0f;
@@ -149,7 +137,6 @@ public class FishItems {
 
         return total * stack.getSize();
     }
-
 
     public static int countSpecimens(CargoStackAPI stack) {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -184,7 +171,6 @@ public class FishItems {
         return encoded.toString();
     }
 
-
     public static List<FishCatch> decodeBundle(String data) {
         List<FishCatch> contents = new ArrayList<>();
         if (data == null || data.isEmpty()) return contents;
@@ -197,7 +183,6 @@ public class FishItems {
         return contents;
     }
 
-
     public static void addToPlayerCargo(FishCatch catchData) {
         if (catchData == null || Global.getSector().getPlayerFleet() == null) return;
 
@@ -206,7 +191,6 @@ public class FishItems {
         FishingIntro.onCatchStored(catchData);
         FishJob.onCatchStored(catchData);
     }
-
 
     public static void stow(CargoAPI cargo, FishCatch catchData) {
         if (cargo == null || catchData == null) return;
@@ -232,7 +216,6 @@ public class FishItems {
         cargo.addSpecial(toItem(catchData), 1);
     }
 
-
     protected static void grow(CargoAPI cargo, CargoStackAPI stack, FishCatch catchData, String id) {
         SpecialItemData data = stack.getSpecialDataIfSpecial();
 
@@ -243,7 +226,6 @@ public class FishItems {
         cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
         cargo.addSpecial(repack(id, contents), 1);
     }
-
 
     protected static void crate(CargoAPI cargo, List<CargoStackAPI> loose, FishCatch catchData) {
         List<FishCatch> contents = new ArrayList<>();
@@ -264,7 +246,6 @@ public class FishItems {
         cargo.addSpecial(toBundle(contents), 1);
     }
 
-
     public static CargoStackAPI getPileStack(CargoAPI cargo) {
         if (cargo == null) return null;
 
@@ -275,7 +256,6 @@ public class FishItems {
 
         return null;
     }
-
 
     public static List<CargoStackAPI> getFishStacks(CargoAPI cargo, String speciesId) {
         List<CargoStackAPI> found = new ArrayList<>();
@@ -291,7 +271,6 @@ public class FishItems {
 
         return found;
     }
-
 
     public static CargoStackAPI getBundleStack(CargoAPI cargo, String speciesId) {
         if (cargo == null) return null;

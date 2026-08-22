@@ -4,22 +4,16 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 
-
 public enum CatchImplement {
-
     POND("a pond"),
     BREACH_LAMP("a breach lamp"),
-
-
     UNKNOWN("nothing anyone wrote down");
-
 
     public final String name;
 
     CatchImplement(String name) {
         this.name = name;
     }
-
 
     public static CatchImplement of(SectorEntityToken anchor) {
         if (anchor == null) return UNKNOWN;

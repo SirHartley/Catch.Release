@@ -9,11 +9,8 @@ import catchrelease.skillshot.SkillshotSettings;
 
 import java.awt.*;
 
-
 public class DirectionReticuleRenderer extends BaseReticuleRenderer {
-
     transient private SpriteAPI arrow;
-
     protected float size;
 
     public DirectionReticuleRenderer() {
@@ -35,7 +32,6 @@ public class DirectionReticuleRenderer extends BaseReticuleRenderer {
         arrow.setColor(colour);
         arrow.renderAtCenter(cursorPos.x, cursorPos.y);
     }
-
 
     @Override
     protected float getGuideLineEndPadding() {

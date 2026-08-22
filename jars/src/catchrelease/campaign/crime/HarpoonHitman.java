@@ -20,13 +20,8 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.TransmitterTra
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class HarpoonHitman implements EveryFrameScript {
-
-
     public static final String HITMAN_FLAG = "$catchrelease_harpoonHitman";
-
-
     public static final String HIRED_BY_KEY = "$catchrelease_harpoonHitmanFor";
     public static final String CLIENT_NAME_KEY = "$catchrelease_harpoonHitmanClient";
     public static final String VICTIM_NAME_KEY = "$catchrelease_harpoonHitmanVictim";
@@ -35,33 +30,19 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String CLIENT_GONE_KEY = "$catchrelease_harpoonHitmanClientGone";
     public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
-
-
     public static final int BRIBE_MIN = 80_000;
     public static final int BRIBE_MAX = 120_000;
     public static final int BRIBE_STEP = 5_000;
-
-
     public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
-
-
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
     public static final float COOLDOWN_DAYS = 30f;
-
-
     public static final String PENDING_KEY = "$catchrelease_harpoonHitmanPending";
     public static final float RESPONSE_DELAY_DAYS = 30f;
-
-
     public static final float FP_MIN = 25f;
     public static final float FP_MAX = 60f;
-
-
     public static final float SPAWN_RANGE_MIN = 2500f;
     public static final float SPAWN_RANGE_MAX = 4500f;
     public static final float INTERCEPT_DAYS = 30f;
-
-
     public static final float CHANCE = 0.30f;
 
     protected String hiredBy;
@@ -79,16 +60,13 @@ public class HarpoonHitman implements EveryFrameScript {
         this.explosive = explosive;
     }
 
-
     public static boolean send(String hiredBy) {
         return send(hiredBy, null, null, false, false);
     }
 
-
     public static boolean send(String hiredBy, boolean bypassCooldown) {
         return send(hiredBy, null, null, false, bypassCooldown);
     }
-
 
     public static boolean send(String hiredBy, String victimName, String originName,
                                boolean explosive, boolean bypassCooldown) {
@@ -116,7 +94,6 @@ public class HarpoonHitman implements EveryFrameScript {
 
         return true;
     }
-
 
     @Override
     public void advance(float amount) {
@@ -167,7 +144,6 @@ public class HarpoonHitman implements EveryFrameScript {
         Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);
         if (pending == this) Global.getSector().getMemoryWithoutUpdate().unset(PENDING_KEY);
     }
-
 
     protected static CampaignFleetAPI create(CampaignFleetAPI player, String hiredBy,
                                               String victimName, String originName,
@@ -225,7 +201,6 @@ public class HarpoonHitman implements EveryFrameScript {
         return BRIBE_MIN + (int) (Math.random() * (steps + 1)) * BRIBE_STEP;
     }
 
-
     public static boolean acceptBribe(CampaignFleetAPI fleet) {
         if (fleet == null || !fleet.getMemoryWithoutUpdate().getBoolean(HITMAN_FLAG)) return false;
 
@@ -253,7 +228,6 @@ public class HarpoonHitman implements EveryFrameScript {
         return true;
     }
 
-
     public static boolean isEligibleVictim(CampaignFleetAPI victim) {
         if (victim == null) return false;
 
@@ -268,7 +242,6 @@ public class HarpoonHitman implements EveryFrameScript {
                 && !memory.getBoolean(MAGIC_BOUNTY_TARGET_FLAG);
     }
 
-
     public static boolean hasEstablishedColony(String factionId) {
         if (factionId == null || Global.getSector() == null) return false;
 
@@ -280,7 +253,6 @@ public class HarpoonHitman implements EveryFrameScript {
         return false;
     }
 
-
     public static boolean isOut() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null || player.getContainingLocation() == null) return false;
@@ -291,7 +263,6 @@ public class HarpoonHitman implements EveryFrameScript {
 
         return false;
     }
-
 
     public static boolean isPending() {
         Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);

@@ -7,32 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishPresenceField {
-
-
     public static final float REACH = 1.84f;
-
     public static final float THRESHOLD = 0.35f;
-
-
     public static final float CELLS_PER_RADIUS = 3f;
-
-
     public static final int SMOOTHING_ROUNDS = 2;
 
-
     public static class Mesh {
-
         public final List<float[]> loops = new ArrayList<>();
-
         public float minX, minY, maxX, maxY;
 
         public boolean isEmpty() {
             return loops.isEmpty();
         }
     }
-
 
     protected static class Segment {
         final float x1, y1, x2, y2;
@@ -45,7 +33,6 @@ public class FishPresenceField {
             this.y2 = y2;
         }
     }
-
 
     public static Mesh build(List<Vector2f> centers, float visualRadius) {
         Mesh mesh = new Mesh();
@@ -66,7 +53,6 @@ public class FishPresenceField {
         measure(mesh);
         return mesh;
     }
-
 
     protected static List<Segment> cutSegments(List<Vector2f> centers, float visualRadius) {
         List<Segment> segments = new ArrayList<>();
@@ -137,7 +123,6 @@ public class FishPresenceField {
         return row;
     }
 
-
     protected static float sample(List<Vector2f> centers, float reach, float x, float y) {
         float reachSq = reach * reach;
         float total = 0f;
@@ -156,10 +141,8 @@ public class FishPresenceField {
         return total;
     }
 
-
     protected static void cut(List<Segment> segments, float x0, float y0, float v0, float x1,
                               float y1, float v1, float x2, float y2, float v2) {
-
         boolean in0 = v0 >= THRESHOLD, in1 = v1 >= THRESHOLD, in2 = v2 >= THRESHOLD;
         int count = (in0 ? 1 : 0) + (in1 ? 1 : 0) + (in2 ? 1 : 0);
 
@@ -178,13 +161,11 @@ public class FishPresenceField {
 
     protected static void addSegment(List<Segment> segments, float x0, float y0, float v0,
                                      float x1, float y1, float v1, float x2, float y2, float v2) {
-
         float[] a = lerp(x0, y0, v0, x1, y1, v1);
         float[] b = lerp(x0, y0, v0, x2, y2, v2);
 
         segments.add(new Segment(a[0], a[1], b[0], b[1]));
     }
-
 
     protected static float[] lerp(float xA, float yA, float vA, float xB, float yB, float vB) {
         if (xB < xA || (xB == xA && yB < yA)) {
@@ -202,7 +183,6 @@ public class FishPresenceField {
 
         return new float[]{xA + (xB - xA) * t, yA + (yB - yA) * t};
     }
-
 
     protected static List<float[]> chainLoops(List<Segment> segments) {
         Map<Long, List<Segment>> byPoint = new HashMap<>(segments.size() * 2);
@@ -261,11 +241,9 @@ public class FishPresenceField {
         return loops;
     }
 
-
     protected static long key(float x, float y) {
         return ((long) Float.floatToIntBits(x) << 32) | (Float.floatToIntBits(y) & 0xFFFFFFFFL);
     }
-
 
     protected static float[] chaikin(float[] loop) {
         int count = loop.length / 2;

@@ -17,12 +17,8 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySp
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
-
 public class TutorialWreck {
-
-
     public static class Watcher implements EveryFrameScript {
-
         public static void register() {
             Global.getSector().addTransientScript(new Watcher());
         }
@@ -54,7 +50,6 @@ public class TutorialWreck {
             for (SectorEntityToken pond : QuestPond.getPonds(system)) {
                 if (Misc.getDistance(player.getLocation(), pond.getLocation())
                         > TutorialConstants.WRECK_SPOT_RANGE) {
-
                     continue;
                 }
 
@@ -68,7 +63,6 @@ public class TutorialWreck {
         return Global.getSector().getMemoryWithoutUpdate()
                 .getBoolean(TutorialConstants.WRECK_PLACED_KEY);
     }
-
 
     protected static void place(StarSystemAPI system, SectorEntityToken pond) {
         Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.WRECK_PLACED_KEY, true);
@@ -95,12 +89,10 @@ public class TutorialWreck {
         Misc.makeImportant(wreck, TutorialConstants.WRECK_IMPORTANT);
     }
 
-
     public static boolean isWreck(SectorEntityToken entity) {
         return entity != null
                 && entity.getMemoryWithoutUpdate().getBoolean(TutorialConstants.WRECK_FLAG);
     }
-
 
     public static void retire(SectorEntityToken wreck) {
         if (!isWreck(wreck)) return;

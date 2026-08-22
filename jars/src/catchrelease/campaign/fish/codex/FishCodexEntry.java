@@ -33,24 +33,54 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.List;
 
-
 public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin {
-
-
     public static final float RIGHT_WIDTH = 290f;
     public static final float BOX_GAP = 10f;
-
-
     public static final float ART_MAX = 240f;
     public static final float CARD_PAD = 16f;
 
     protected final String speciesId;
-
     protected transient CustomPanelAPI panel;
     protected transient CodexDialogAPI codex;
-
-
     protected transient Object mapButtonId;
+
+    protected static class IconCard extends BaseCustomUIPanelPlugin {
+        protected final FishSpec spec;
+        protected final float artWidth;
+        protected final float artHeight;
+        protected final FishGrade grade;
+        protected PositionAPI pos;
+
+        public IconCard(FishSpec spec, float artWidth, float artHeight, FishGrade grade) {
+            this.spec = spec;
+            this.artWidth = artWidth;
+            this.artHeight = artHeight;
+            this.grade = grade;
+        }
+
+        @Override
+        public void positionChanged(PositionAPI position) {
+            pos = position;
+        }
+
+        @Override
+        public void render(float alphaMult) {
+            if (pos == null || alphaMult <= 0f) return;
+
+            float x = pos.getX();
+            float y = pos.getY();
+            float size = pos.getWidth();
+
+            ShopUi.drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
+
+            FishIcons.drawBacklit(spec, x + size * 0.5f, y + size * 0.5f,
+                    size * 0.5f, Math.max(artWidth, artHeight), alphaMult);
+
+            if (grade != null) {
+                FishItemRenderer.render(x, y, size, size, alphaMult, spec.rarity, grade);
+            }
+        }
+    }
 
     public FishCodexEntry(String id, FishSpec spec) {
         // spec passed only so isCategory() sees a leaf; never read back - see getSpec()
@@ -71,7 +101,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return FishCodexEntryState.resolve(speciesId);
     }
 
-
     @Override
     public String getIcon() {
         FishCodexEntryState state = getState();
@@ -81,7 +110,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         return FishCodex.getIcon(spec);
     }
-
 
     @Override
     public Color getIconColor() {
@@ -175,10 +203,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         panel.getPosition().setSize(width, Math.max(y, rightHeight));
     }
 
-
     protected UIPanelAPI addBox(float width, float y, String title,
                                 java.util.function.Consumer<TooltipMakerAPI> content) {
-
         TooltipMakerAPI text = panel.createUIElement(width - 30f, 0, false);
         text.setParaSmallInsignia();
 
@@ -194,7 +220,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         return box;
     }
-
 
     protected void addDescription(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.isCaught()) {
@@ -221,7 +246,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         }
     }
 
-
     protected void addCatchData(TooltipMakerAPI text, FishCodexEntryState state) {
         FishSpec spec = state.spec;
         FishLogEntry logged = state.log;
@@ -239,7 +263,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                     logged.caught + (logged.caught == 1 ? " specimen" : " specimens"));
         }
     }
-
 
     protected void addRecord(TooltipMakerAPI text, FishLogEntry logged) {
         // grade recomputed from stored numbers, not stored itself, so table retuning regrades old catches
@@ -263,7 +286,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 getDate(logged.firstTimestamp),
                 logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
-
 
     protected void addLocationData(TooltipMakerAPI text, FishCodexEntryState state) {
         FishSpec spec = state.spec;
@@ -289,7 +311,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         addMapButton(text, state);
     }
 
-
     protected void addMapButton(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.canShowOnMap() || Global.getCurrentState() != GameState.CAMPAIGN) return;
 
@@ -298,7 +319,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         text.addButton("Show on the sector map", mapButtonId, Misc.getBasePlayerColor(),
                 Misc.getDarkPlayerColor(), Alignment.MID, CutStyle.TL_BR, 240f, 24f, BOX_GAP);
     }
-
 
     protected void showOnSectorMap() {
         CodexDialogAPI shown = codex;
@@ -317,7 +337,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                     .warn("Could not jump from the codex to the sector map", t);
         }
     }
-
 
     protected UIPanelAPI buildIconCard(FishSpec spec, FishLogEntry logged, float maxWidth) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) return null;
@@ -357,54 +376,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         return panel.wrapTooltipWithBox(holder);
     }
 
-
-    protected static class IconCard extends BaseCustomUIPanelPlugin {
-
-        protected final FishSpec spec;
-        protected final float artWidth;
-        protected final float artHeight;
-        protected final FishGrade grade;
-
-        protected PositionAPI pos;
-
-        public IconCard(FishSpec spec, float artWidth, float artHeight, FishGrade grade) {
-            this.spec = spec;
-            this.artWidth = artWidth;
-            this.artHeight = artHeight;
-            this.grade = grade;
-        }
-
-        @Override
-        public void positionChanged(PositionAPI position) {
-            pos = position;
-        }
-
-        @Override
-        public void render(float alphaMult) {
-            if (pos == null || alphaMult <= 0f) return;
-
-            float x = pos.getX();
-            float y = pos.getY();
-            float size = pos.getWidth();
-
-            ShopUi.drawQuad(x, y, size, size, Color.BLACK, 0.75f * alphaMult);
-
-            FishIcons.drawBacklit(spec, x + size * 0.5f, y + size * 0.5f,
-                    size * 0.5f, Math.max(artWidth, artHeight), alphaMult);
-
-            if (grade != null) {
-                FishItemRenderer.render(x, y, size, size, alphaMult, spec.rarity, grade);
-            }
-        }
-    }
-
-
     protected static String getDate(long timestamp) {
         if (Global.getSector() == null || timestamp == 0L) return "an unrecorded date";
 
         return Global.getSector().getClock().createClock(timestamp).getDateString();
     }
-
 
     protected static String getDifficultyLabel(float difficulty) {
         if (difficulty >= 150f) return "extreme";

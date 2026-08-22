@@ -16,13 +16,8 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.util.EnumSet;
 
-
 public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
-
-
     public static final float TEAR_TIME = 1.2f;
-
-
     public static final Color RIM_DEEP = new Color(170, 20, 200);
     public static final Color RIM_HOT = new Color(255, 120, 255);
     public static final float RIM_DEEP_ALPHA = 0.15f;
@@ -31,49 +26,28 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
     public static final float RIM_HOT_THRESHOLD = 0.1f;
     public static final float RIM_DEEP_SIZE_MULT = 1.1f;
     public static final float RIM_HOT_SIZE_MULT = 1.15f;
-
-
     public static final float EMBER_ALPHA = 0.1f;
     public static final float EMBER_SIZE_MULT = 1.2f;
     public static final float EMBER_RADIUS_PX = 14f;
-
-
     public static final Color RING_COLOR = RIM_HOT;
-
-
     public static final float FILL_LAG_TAU = 1.5f;
     public static final float FILL_LAG_MAX_MULT = 0.5f;
-
-
     public static final float FILL_SNAP_DISTANCE = 2000f;
-
-
     public static final float FILL_DRIFT = 40f;
     public static final float FILL_DRIFT_PERIOD = 17f;
-
-
     public static final float FILL_COVER_MULT = 2f;
 
     transient protected SpriteAPI mask;
     transient protected SpriteAPI fill;
     transient protected MaskGlowRenderer maskGlow;
     transient protected PondDepthField depthField;
-
-
     transient protected float fillNaturalSize = 0f;
-
-
     private final Vector2f loc;
     private final float size;
-
-
     private final Vector2f fillCenter;
-
     private float elapsed = 0f;
     private float tear = 0f;
-
     private boolean expired = false;
-
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -115,7 +89,6 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
             }
         }
     }
-
 
     protected void advanceFill(float amount) {
         Vector2f gap = Vector2f.sub(loc, fillCenter, null);
@@ -181,7 +154,6 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-
     protected void renderFill(float alpha, float maskSize) {
         float fillSize = Math.max(fillNaturalSize, size * 2f * FILL_COVER_MULT);
         Vector2f wander = computeWander();
@@ -199,7 +171,6 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
 
         GL11.glPopAttrib();
     }
-
 
     protected void renderRim(float alpha, float maskSize) {
         if (maskGlow == null) maskGlow = new MaskGlowRenderer();
@@ -220,7 +191,6 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
         GL11.glPopAttrib();
     }
 
-
     protected void renderContents(float alpha, float maskSize) {
         if (depthField == null) depthField = new PondDepthField();
 
@@ -230,7 +200,6 @@ public class SearchlightBurnRenderer implements LunaCampaignRenderingPlugin {
 
         Stencil.endDepthMask();
     }
-
 
     protected Vector2f computeWander() {
         double rate = 2.0 * Math.PI / FILL_DRIFT_PERIOD;

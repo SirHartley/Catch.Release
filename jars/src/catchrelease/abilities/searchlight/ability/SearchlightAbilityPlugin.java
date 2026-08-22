@@ -28,28 +28,19 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class SearchlightAbilityPlugin extends BaseToggleAbility {
-
-
     public static final String ABILITY_ID = "catchrelease_searchlights";
-
     public static float DETECTABILITY_PERCENT = 100f;
-
     public static float SPOOL_UP_TIME = 1.5f;
     public static float SEARCHLIGHT_ACTIVATION_PAUSE = 1f;
+    public static final float SLOW_LINGER = 0.5f;
 
     private float timePassed = 0f;
     private int lightsToActivate = 0;
     private boolean spoolDone = false;
-
     private List<Searchlight> activeSearchlights = new ArrayList<>();
     private List<CircularArc> searchlightArcs = new ArrayList<>();
-
-
     private transient SearchlightImpressionRenderer impressionRenderer;
-
-
     private transient LocationAPI activationLocation;
 
     @Override
@@ -68,20 +59,17 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         if (searchlightArcs == null) searchlightArcs = new ArrayList<>();
     }
 
-
     public static boolean isLit(SectorEntityToken mote) {
         SearchlightImpressionRenderer renderer = getImpressions();
 
         return renderer != null && mote != null && renderer.getMarkStrength(mote) > 0f;
     }
 
-
     public static boolean isDetected(SectorEntityToken mote) {
         SearchlightImpressionRenderer renderer = getImpressions();
 
         return renderer != null && mote != null && renderer.getDentStrength(mote) > 0f;
     }
-
 
     protected static SearchlightImpressionRenderer getImpressions() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
@@ -165,7 +153,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         applyBeamSlow(fleet);
 
         fleet.getStats().getDetectedRangeMod().modifyPercent(getModId(), DETECTABILITY_PERCENT * level, "Breach lamps");
-
     }
 
     protected void ensureImpressionRenderer() {
@@ -188,10 +175,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
     }
 
-
-    public static final float SLOW_LINGER = 0.5f;
-
-
     protected void applyBeamSlow(CampaignFleetAPI fleet) {
         float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
         if (slow <= 0f || activeSearchlights.isEmpty()) return;
@@ -199,7 +182,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         for (SectorEntityToken mote : fleet.getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-
             if (mote.isExpired()) continue;
             if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
 
@@ -231,7 +213,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return true;
     }
 
-
     public static boolean canRunHere(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return false;
         if (fleet.getContainingLocation().isHyperspace()) return false;
@@ -239,13 +220,11 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return !isNearActivePond(fleet);
     }
 
-
     public static boolean isNearActivePond(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return false;
 
         for (SectorEntityToken pond : fleet.getContainingLocation()
                 .getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
-
             MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
             if (plugin == null || !plugin.isActive()) continue;
 
@@ -257,7 +236,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         return false;
     }
-
 
     public static boolean isBreaching() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
@@ -274,16 +252,13 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
     }
 
-
     public boolean owns(Searchlight light) {
         return light != null && activeSearchlights != null && activeSearchlights.contains(light);
     }
 
-
     public void recoverRuntimeLocation(LocationAPI location) {
         if (activationLocation == null) activationLocation = location;
     }
-
 
     public boolean isRuntimeCurrent() {
         CampaignFleetAPI fleet = getFleet();
@@ -295,7 +270,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                 && Global.getSector().getCurrentLocation() == activationLocation
                 && canRunHere(fleet);
     }
-
 
     public int getSearchlightNum(){
         return Math.max(1, Math.round(UpgradeManager.getValue(StatIds.SEARCHLIGHT_COUNT, 2f)));
@@ -375,9 +349,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         float pad = 10f;
 
-
         tooltip.addPara("Toggle the breach lamps installed on fishing trawlers.", pad);
-
 
         tooltip.addPara("Each lamp burns a window through the fabric as it sweeps. Whatever swims"
                         + " under one is %s and can be harpooned before the mark fades."
@@ -395,7 +367,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         addIncompatibleToTooltip(tooltip, expanded);
     }
-
 
     protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
         Color highlight = Misc.getHighlightColor();
@@ -455,7 +426,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     @Override
     public void fleetLeftBattle(BattleAPI battle, boolean engagedInHostilities) {
     }
-
 
     @Override
     public void fleetJoinedBattle(BattleAPI battle) {

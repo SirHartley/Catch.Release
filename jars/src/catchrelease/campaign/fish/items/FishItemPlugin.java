@@ -21,9 +21,7 @@ import org.lwjgl.input.Keyboard;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishItemPlugin extends BaseSpecialItemPlugin {
-
     public FishCatch getCatch() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
 
@@ -49,7 +47,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
     public boolean hasRightClickAction() {
         return getCatch() != null;
     }
-
 
     @Override
     public boolean shouldRemoveOnRightClickAction() {
@@ -109,7 +106,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
-
         FishCatch entry = getCatch();
         FishSpec spec = entry == null ? null : entry.getSpec();
 
@@ -127,7 +123,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-
     protected String getIconPath(FishSpec spec) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) {
             return FishConstants.ITEM_ICON_FALLBACK;
@@ -136,11 +131,9 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return spec.icon;
     }
 
-
     protected boolean isBulkDown() {
         return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
-
 
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
@@ -197,7 +190,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-
     public static int getAberrationBand(float aberration) {
         if (aberration >= 0.8f) return 4;
         if (aberration >= 0.55f) return 3;
@@ -206,7 +198,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         return 0;
     }
-
 
     public static String getAberrationLabel(float aberration) {
         return switch (getAberrationBand(aberration)) {

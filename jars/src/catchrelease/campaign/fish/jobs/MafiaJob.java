@@ -21,49 +21,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 public class MafiaJob extends FishJob {
-
-
     public static final String BET_FLAG = "$catchrelease_ringBet";
-
     public static final int VALUE = 3000;
-
     public static final float DAYS = 35f;
-
-
     public static final float BASE_ODDS = 0.38f;
-
-
     public static final float QUALITY_SWING = 0.30f;
-
-
     public static final float WIN_MULT = 2f;
-
     protected static final String LEFT_FIRST_NAME = "Salvatore";
     protected static final String RIGHT_FIRST_NAME = "Enzo";
 
-
     protected String left = LEFT_FIRST_NAME;
     protected String right = RIGHT_FIRST_NAME;
-
-
     protected PersonAPI partner;
-
-
     protected transient FishHandoffPicker.Selection pendingSelection;
-
-
     protected transient FishCatch leftFighter;
     protected transient FishCatch rightFighter;
-
     protected float leftOdds = BASE_ODDS;
     protected float rightOdds = BASE_ODDS;
-
-
     protected String wager = null;
-
-
     protected boolean won = false;
 
     @Override
@@ -103,7 +79,6 @@ public class MafiaJob extends FishJob {
     @Override
     protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
                                  List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
-
         if ("chooseFighters".equals(action)) {
             showFighterPicker(dialog, memoryMap);
 
@@ -112,7 +87,6 @@ public class MafiaJob extends FishJob {
 
         if ("turnInFlat".equals(action) || "turnInLeft".equals(action)
                 || "turnInRight".equals(action)) {
-
             if ("turnInLeft".equals(action)) wager = left;
             else if ("turnInRight".equals(action)) wager = right;
             else wager = null;
@@ -131,7 +105,6 @@ public class MafiaJob extends FishJob {
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
-
 
     protected void setUpPeople(MarketAPI market) {
         PersonAPI giver = getPerson();
@@ -156,7 +129,6 @@ public class MafiaJob extends FishJob {
         }
     }
 
-
     @Override
     protected void showContactVisual(InteractionDialogAPI dialog) {
         setUpPeople(getGiverMarket());
@@ -169,7 +141,6 @@ public class MafiaJob extends FishJob {
 
     protected void showFighterPicker(final InteractionDialogAPI dialog,
                                      final Map<String, MemoryAPI> memoryMap) {
-
         clearFighters();
 
         boolean opened = FishHandoffPicker.show(dialog, "Select two fighters", "Enter", asks,
@@ -212,7 +183,6 @@ public class MafiaJob extends FishJob {
 
     protected void finishFighters(InteractionDialogAPI dialog,
                                   Map<String, MemoryAPI> memoryMap) {
-
         if (pendingSelection == null || leftFighter == null || rightFighter == null) {
             showFighterPicker(dialog, memoryMap);
             return;
@@ -250,7 +220,6 @@ public class MafiaJob extends FishJob {
         return Math.max(0.10f, Math.min(0.85f,
                 BASE_ODDS + (backedQuality - opponentQuality) * QUALITY_SWING));
     }
-
 
     @Override
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {

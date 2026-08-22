@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SkillshotUtils {
-
+    protected static final float JOIN_TOLERANCE = 0.01f;
 
     public static Vector2f getCursorWorldPosition() {
         return new Vector2f(
@@ -19,21 +19,15 @@ public class SkillshotUtils {
                 Global.getSector().getViewport().convertScreenYToWorldY(Global.getSettings().getMouseY()));
     }
 
-
-    protected static final float JOIN_TOLERANCE = 0.01f;
-
-
     public static void drawLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx) {
         drawLines(vertices, colour, alpha, widthPx, GuideLineStyle.SOLID);
     }
-
 
     public static void drawLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx, GuideLineStyle style) {
         if (vertices == null || vertices.size() < 2) return;
 
         drawCut(cutDashes(vertices, style), colour, alpha, widthPx);
     }
-
 
     public static void drawDashedLines(List<Vector2f> vertices, Color colour, float alpha, float widthPx,
                                        float dashWorld, float gapWorld) {
@@ -69,7 +63,6 @@ public class SkillshotUtils {
         GL11.glPopAttrib();
     }
 
-
     protected static List<Vector2f> cutDashes(List<Vector2f> vertices, GuideLineStyle style) {
         if (style == null || style == GuideLineStyle.SOLID) return vertices;
 
@@ -80,7 +73,6 @@ public class SkillshotUtils {
                 viewport.convertScreenWidthToWorldWidth(style.getSegmentPx()),
                 viewport.convertScreenWidthToWorldWidth(style.getGapPx()));
     }
-
 
     protected static List<Vector2f> cutDashes(List<Vector2f> vertices, float dash, float gap) {
         if (dash <= 0f || gap <= 0f) return vertices;
@@ -104,7 +96,6 @@ public class SkillshotUtils {
 
         return dashes;
     }
-
 
     protected static float cutSegment(List<Vector2f> dashes, Vector2f from, Vector2f to,
                                       float dash, float period, float phase) {

@@ -14,9 +14,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public final class FishIntelMapButton {
-
     public static final String BUTTON_ID = "catchrelease_open_fishing_map";
     public static final String PLOT_ROUTE_BUTTON_ID = "catchrelease_plot_fish_route";
     public static final String SET_AUTOPILOT_BUTTON_ID = "catchrelease_set_intel_autopilot";
@@ -54,7 +52,6 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
-
     public static void addPlotRoute(TooltipMakerAPI info, float width,
                                     SectorEntityToken destination) {
         if (info == null || destination == null
@@ -77,7 +74,6 @@ public final class FishIntelMapButton {
             }
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
-
 
     public static void addSetAutopilot(TooltipMakerAPI info, float width,
                                        SectorEntityToken destination) {
@@ -102,7 +98,6 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
-
     public static List<FishRequirement> forSpecies(String speciesId) {
         if (speciesId == null) return null;
 
@@ -112,7 +107,6 @@ public final class FishIntelMapButton {
         asks.add(ask);
         return asks;
     }
-
 
     public static boolean handle(Object buttonId, IntelUIAPI ui, List<FishRequirement> asks,
                                  SectorEntityToken center, String systemId) {
@@ -133,14 +127,12 @@ public final class FishIntelMapButton {
         return true;
     }
 
-
     public static boolean handleSetAutopilot(Object buttonId, SectorEntityToken destination) {
         if (!SET_AUTOPILOT_BUTTON_ID.equals(buttonId)) return false;
 
         layInCourse(destination);
         return true;
     }
-
 
     public static boolean handlePlotRoute(Object buttonId, SectorEntityToken destination) {
         if (!PLOT_ROUTE_BUTTON_ID.equals(buttonId)) return false;

@@ -22,18 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class FishRoutePlanner {
-
-
     public static final int MAX_PICKS = 5;
-
-
     public static final float INSTABILITY_PENALTY_LY = 8f;
-
-
     public static final float SLIPSTREAM_LEG_DISCOUNT = 0.3f;
-
 
     public static class Suggestion {
         public final String speciesId;
@@ -44,7 +36,6 @@ public class FishRoutePlanner {
             this.reason = reason;
         }
     }
-
 
     public static List<Suggestion> getSuggestions() {
         Map<String, String> byId = new LinkedHashMap<>();
@@ -77,7 +68,6 @@ public class FishRoutePlanner {
         return out;
     }
 
-
     protected static void suggest(Map<String, String> byId, FishRequirement ask, String reason) {
         if (ask == null) return;
 
@@ -96,7 +86,6 @@ public class FishRoutePlanner {
 
         for (String id : could) byId.putIfAbsent(id, reason);
     }
-
 
     public static FishRoute.Saved plan(List<String> speciesIds) {
         if (speciesIds == null || speciesIds.isEmpty() || Global.getSector() == null) return null;
@@ -175,7 +164,6 @@ public class FishRoutePlanner {
         return route;
     }
 
-
     protected static boolean isPlannable(StarSystemAPI system) {
         // the standing exception, same as vanilla carves it out of its own skips: Limbo is hand-made and abyssal and stays a destination anyway
         if ("Limbo".equals(system.getBaseName())) return true;
@@ -188,7 +176,6 @@ public class FishRoutePlanner {
 
         return true;
     }
-
 
     public static List<String> getUnplaceable(List<String> speciesIds) {
         List<String> out = new ArrayList<>();
@@ -217,7 +204,6 @@ public class FishRoutePlanner {
 
         return out;
     }
-
 
     protected static int[] bestOrder(Vector2f from, List<StarSystemAPI> systems) {
         int count = systems.size();
@@ -261,7 +247,6 @@ public class FishRoutePlanner {
             swap(order, at, i);
         }
     }
-
 
     protected static float legCost(Vector2f a, Vector2f b) {
         float distance = Misc.getDistance(a, b);

@@ -13,22 +13,17 @@ import java.io.IOException;
 
 public class NoiseMappedCircularRingRenderer {
     private transient int program = 0;
-
     private transient int uNoiseTex = -1;
     private transient int uTime = -1;
     private transient int uAlphaMult = -1;
-
     private transient int uRadius = -1;
     private transient int uRingWidth = -1;
     private transient int uFeather = -1;
-
     private transient int uAngularTiling = -1;
     private transient int uRadialTiling = -1;
     private transient int uNoiseScroll = -1;
-
     private transient int uNoiseCutoff = -1;
     private transient int uNoiseSoft = -1;
-
     private transient int uRingColor = -1;
 
     public void renderRing(SpriteAPI noiseSprite,
@@ -45,7 +40,6 @@ public class NoiseMappedCircularRingRenderer {
                            float noiseCutoff,
                            float noiseSoft,
                            Color color) {
-
         if (noiseSprite == null || center == null) return;
         if (sizePx <= 0f) return;
 
@@ -113,7 +107,6 @@ public class NoiseMappedCircularRingRenderer {
         GL11.glEnd();
 
         GL11.glPopMatrix();
-
 
         GL20.glUseProgram(0);
 

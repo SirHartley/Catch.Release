@@ -34,47 +34,24 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.Map;
 
-
 public class FleetQuest extends FishJob {
-
-
     public static final String QUEST_FLAG = "$catchrelease_fleetQuest";
-
-
     public static final String PITCH_KEY = "$catchrelease_fleetQuestPitch";
-
-
     public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
-
-
     public static final String REWARD_KEY = "$catchrelease_fleetQuestReward";
-
-
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
-
-
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
-
-
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
-
-
     public static final float DELIVERY_DAYS = 60f;
-
-
     public static final float HOLD_DAYS = 100000f;
-
-    protected FleetQuestType type;
-    protected CampaignFleetAPI giver;
-
-
     public static final String OFFER_SPRITE_CATEGORY = "systemMap";
     public static final String OFFER_SPRITE = "mission_indicator";
     public static final Color OFFER_COLOR = new Color(95, 200, 215);
 
-
+    protected FleetQuestType type;
+    protected CampaignFleetAPI giver;
     protected transient FleetMarkerRenderer marker;
-
+    protected boolean takenUp = false;
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         if (giver == null || giver.isExpired() || type == null) return null;
@@ -88,7 +65,6 @@ public class FleetQuest extends FishJob {
 
         return quest;
     }
-
 
     public void take() {
         if (takenUp) return;
@@ -109,7 +85,6 @@ public class FleetQuest extends FishJob {
 
         accept(null, null);
     }
-
 
     protected CampaignFleetAPI supplant(CampaignFleetAPI original) {
         if (original == null || original.isExpired()) return null;
@@ -166,14 +141,9 @@ public class FleetQuest extends FishJob {
         return copy;
     }
 
-
-    protected boolean takenUp = false;
-
-
     public void abandon() {
         release();
     }
-
 
     public void ensureMarked() {
         if (takenUp || giver == null || giver.isExpired()) return;
@@ -188,7 +158,6 @@ public class FleetQuest extends FishJob {
 
         marker = null;
     }
-
 
     public static boolean isQuestFleet(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(QUEST_FLAG);
@@ -233,7 +202,6 @@ public class FleetQuest extends FishJob {
         return true;
     }
 
-
     protected void offer() {
         giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
         giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
@@ -245,7 +213,6 @@ public class FleetQuest extends FishJob {
 
         ensureMarked();
     }
-
 
     protected void mark() {
         Misc.makeImportant(giver, IMPORTANT_REASON);
@@ -265,7 +232,6 @@ public class FleetQuest extends FishJob {
         giver.setName(type.title);
     }
 
-
     protected void hold() {
         if (giver == null || giver.isExpired()) return;
 
@@ -275,14 +241,12 @@ public class FleetQuest extends FishJob {
         giver.addAssignment(FleetAssignment.HOLD, null, HOLD_DAYS, type.actionText);
     }
 
-
     @Override
     protected void markDeliverable() {
         if (!takenUp || giver == null) return;
 
         makeImportant(giver, getDeliverFlag(), Stage.WANTED);
     }
-
 
     @Override
     protected String getDeliverFlag() {
@@ -292,7 +256,6 @@ public class FleetQuest extends FishJob {
     @Override
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
-
         MemoryAPI local = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
         token(local, "$option", "catchrelease_fqTurnIn");
         token(local, "$catchreleaseFleetHandoffPaid", true);
@@ -303,10 +266,8 @@ public class FleetQuest extends FishJob {
     @Override
     protected void afterPickerCancelled(InteractionDialogAPI dialog,
                                         Map<String, MemoryAPI> memoryMap) {
-
         FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestTurnIn");
     }
-
 
     protected void release() {
         if (giver == null) return;
@@ -332,7 +293,6 @@ public class FleetQuest extends FishJob {
         if (!giver.isExpired()) Misc.giveStandardReturnToSourceAssignments(giver);
     }
 
-
     @Override
     protected void notifyEnded() {
         super.notifyEnded();
@@ -347,7 +307,6 @@ public class FleetQuest extends FishJob {
     public CampaignFleetAPI getGiver() {
         return giver;
     }
-
 
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
@@ -383,10 +342,8 @@ public class FleetQuest extends FishJob {
         return type == null ? "Fleet in Need" : type.title;
     }
 
-
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
         return false;
     }
-
 }

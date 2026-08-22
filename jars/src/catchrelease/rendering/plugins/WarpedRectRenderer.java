@@ -5,13 +5,10 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-
 public class WarpedRectRenderer {
-
     public static void render(SpriteAPI sprite, WarpGrid warp,
                               float x, float y, float width, float height,
                               Color tint, float alpha, float zoom) {
-
         if (sprite == null || warp == null) return;
         if (width <= 0f || height <= 0f || alpha <= 0f) return;
 
@@ -64,19 +61,16 @@ public class WarpedRectRenderer {
                                float x, float y, float width, float height,
                                int wide, int tall,
                                float u0, float v0, float uSpan, float vSpan, float[] vertex) {
-
         getVertex(warp, i, j, x, y, width, height, wide, tall, u0, v0, uSpan, vSpan, vertex);
 
         GL11.glTexCoord2f(vertex[2], vertex[3]);
         GL11.glVertex2f(vertex[0], vertex[1]);
     }
 
-
     protected static void getVertex(WarpGrid warp, int i, int j,
                                     float x, float y, float width, float height,
                                     int wide, int tall,
                                     float u0, float v0, float uSpan, float vSpan, float[] out) {
-
         float alongX = i / (float) (wide - 1);
         float alongY = j / (float) (tall - 1);
 

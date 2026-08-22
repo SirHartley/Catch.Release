@@ -15,22 +15,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-
 public class ShopPricing {
-
     public static final String SEED_KEY = "$catchrelease_shop_seed";
-
-
     public static final int CREDITS_BASE = 2500;
     public static final float CREDITS_PER_LEVEL = 1.7f;
-
-
     public static final int TACKLE_CREDITS_PER_TIER = 4000;
-
-
     public static final int PREMIUM_TIER_BUMP = 2;
     protected static final Set<String> PREMIUM_STATS = Set.of(StatIds.SEARCHLIGHT_SLOW);
-
 
     public static class Price {
         public final int credits;
@@ -42,7 +33,6 @@ public class ShopPricing {
         }
     }
 
-
     public static long getSeed() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(SEED_KEY);
         if (stored instanceof Long) return (Long) stored;
@@ -53,13 +43,11 @@ public class ShopPricing {
         return seed;
     }
 
-
     public static Price getPrice(UpgradeStat stat) {
         if (stat == null || isMaxed(stat)) return null;
 
         return getPrice(stat, stat.level + 1);
     }
-
 
     public static Price getPrice(UpgradeStat stat, int targetLevel) {
         if (stat == null || targetLevel < 1 || targetLevel > stat.maxLevel) return null;
@@ -73,7 +61,6 @@ public class ShopPricing {
         return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
     }
 
-
     public static Price getPrice(Tackle tackle) {
         if (tackle == null || tackle == Tackle.NONE) return null;
 
@@ -82,7 +69,6 @@ public class ShopPricing {
         return new Price(TACKLE_CREDITS_PER_TIER * (tier + 1),
                 generate(rngFor("tackle_" + tackle.name(), tier), tier + 1, false));
     }
-
 
     protected static int getTackleTier(Tackle tackle) {
         if (tackle.breachCoupling) return 4;
@@ -109,7 +95,6 @@ public class ShopPricing {
     protected static int round100(int credits) {
         return Math.max(100, (credits / 100) * 100);
     }
-
 
     protected static FishRequirement generate(Random rng, int tier, boolean last) {
         FishRequirement req = new FishRequirement();
@@ -152,7 +137,6 @@ public class ShopPricing {
 
         return tags[rng.nextInt(tags.length)];
     }
-
 
     protected static String pickSpecies(Random rng) {
         List<FishSpec> pool = new ArrayList<>();

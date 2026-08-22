@@ -16,30 +16,20 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-
 public abstract class BaseReticuleRenderer implements SkillshotRenderer {
-
     transient private SpriteAPI fleetReticule;
-
     private boolean done = false;
-
-
     protected Vector2f cursorPos = new Vector2f();
-
     protected boolean showTrajectory = false;
     protected boolean showBounds = false;
     protected float boundsSpread = 0f;
     protected float length = 0f;
-
-
     protected GuideLineStyle lineStyle = null;
-
 
     public BaseReticuleRenderer withTrajectory() {
         showTrajectory = true;
         return this;
     }
-
 
     public BaseReticuleRenderer withBounds(float spreadDegrees) {
         showBounds = true;
@@ -47,18 +37,15 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
         return this;
     }
 
-
     public BaseReticuleRenderer withLength(float worldUnits) {
         length = worldUnits;
         return this;
     }
 
-
     public BaseReticuleRenderer withLineStyle(GuideLineStyle style) {
         lineStyle = style;
         return this;
     }
-
 
     protected float getGuideLineEndPadding() {
         return 0f;
@@ -123,7 +110,6 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
         renderCursorBoundObject(layer, viewport, angleToCursor, cursorPos, color);
     }
 
-
     protected void renderGuideLines(CampaignFleetAPI fleet, float reticuleSize, float angleToCursor, Vector2f cursorPos, Color colour) {
         if (!showTrajectory && !showBounds) return;
 
@@ -154,14 +140,12 @@ public abstract class BaseReticuleRenderer implements SkillshotRenderer {
                 lineStyle != null ? lineStyle : SkillshotSettings.GUIDE_LINE_STYLE);
     }
 
-
     protected void addLine(List<Vector2f> vertices, Vector2f origin, float angle, float from, float to) {
         Vector2f direction = Misc.getUnitVectorAtDegreeAngle(angle);
 
         vertices.add(new Vector2f(origin.x + direction.x * from, origin.y + direction.y * from));
         vertices.add(new Vector2f(origin.x + direction.x * to, origin.y + direction.y * to));
     }
-
 
     public abstract void renderCursorBoundObject(CampaignEngineLayers layer, ViewportAPI viewport, float angleToCursor, Vector2f cursorPos, Color colour);
 }

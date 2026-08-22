@@ -20,10 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 public class FishRequirement {
-
-
     public static final float LOW_COHERENCE = 0.55f;
 
     public int count = 1;
@@ -33,29 +30,24 @@ public class FishRequirement {
     public FishRarity minRarity = null;
     public FishGrade minGrade = null;
     public boolean lowCoherence = false;
-
-
     public float minLength = 0f;
     public float minWeight = 0f;
-
-
     public SectorRegion origin = null;
-
-
     public FishLogEntry.Method method = null;
-
-
     public CatchImplement implement = null;
-
-
     public String sourceId = null;
-
-
     public long minCaughtAt = 0L;
-
-
     public List<FishRequirement> anyOf = new ArrayList<>();
 
+    public static class RarityHighlight {
+        public final String text;
+        public final FishRarity rarity;
+
+        public RarityHighlight(String text, FishRarity rarity) {
+            this.text = text;
+            this.rarity = rarity;
+        }
+    }
 
     public FishRequirement addAlternative(FishRequirement alternative) {
         if (alternative != null) anyOf.add(alternative);
@@ -101,7 +93,6 @@ public class FishRequirement {
         return true;
     }
 
-
     public boolean couldBeSatisfiedBy(FishSpec spec) {
         if (spec == null) return false;
 
@@ -135,7 +126,6 @@ public class FishRequirement {
         return true;
     }
 
-
     public FishRarity getDisplayRarity() {
         if (speciesId != null) {
             FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
@@ -144,18 +134,6 @@ public class FishRequirement {
 
         return minRarity;
     }
-
-
-    public static class RarityHighlight {
-        public final String text;
-        public final FishRarity rarity;
-
-        public RarityHighlight(String text, FishRarity rarity) {
-            this.text = text;
-            this.rarity = rarity;
-        }
-    }
-
 
     public static List<RarityHighlight> getFishNameHighlights(String... texts) {
         if (texts == null || texts.length == 0) return Collections.emptyList();
@@ -228,7 +206,6 @@ public class FishRequirement {
         return false;
     }
 
-
     public List<RarityHighlight> getRarityHighlights() {
         Map<String, FishRarity> found = new LinkedHashMap<>();
         collectRarityHighlights(found);
@@ -259,7 +236,6 @@ public class FishRequirement {
         }
     }
 
-
     public static List<RarityHighlight> getRarityHighlights(List<FishRequirement> asks) {
         if (asks == null || asks.isEmpty()) return Collections.emptyList();
 
@@ -274,7 +250,6 @@ public class FishRequirement {
         }
         return out;
     }
-
 
     public static void highlight(LabelAPI label, List<FishRequirement> asks, String fallbackAsk,
                                  String... normalHighlights) {
@@ -321,7 +296,6 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
-
     public static void highlightFishNames(LabelAPI label, String... texts) {
         if (label == null) return;
 
@@ -339,7 +313,6 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
-
     public String describeProgress(int aboard) {
         int shown = Math.max(0, Math.min(count, aboard));
         String description = describe();
@@ -349,7 +322,6 @@ public class FishRequirement {
 
         return shown + "/" + count + " aboard - " + Misc.ucFirst(subject);
     }
-
 
     public String describe() {
         StringBuilder text = new StringBuilder();
@@ -386,7 +358,6 @@ public class FishRequirement {
         return text.toString();
     }
 
-
     public String describeCatch() {
         StringBuilder text = new StringBuilder();
 
@@ -398,7 +369,6 @@ public class FishRequirement {
         return text.toString();
     }
 
-
     protected static void append(StringBuilder text, String clause) {
         if (clause.isEmpty()) return;
 
@@ -407,7 +377,6 @@ public class FishRequirement {
         text.append(clause);
     }
 
-
     protected String getMethodName() {
         switch (method) {
             case HARPOON: return "a harpoon";
@@ -415,7 +384,6 @@ public class FishRequirement {
             default: return "no recorded gear";
         }
     }
-
 
     protected String getOriginName() {
         if (origin == SectorRegion.ABYSSAL) return "in the Abyss";
@@ -426,12 +394,10 @@ public class FishRequirement {
         return "in " + band + " of the " + FishLocationSummary.getDirectionName(quadrant);
     }
 
-
     protected static String trim(float value) {
         return value == Math.round(value) ? String.valueOf(Math.round(value))
                 : String.valueOf(Math.round(value * 10f) / 10f);
     }
-
 
     public String describeQualities() {
         StringBuilder text = new StringBuilder();

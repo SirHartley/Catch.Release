@@ -1,6 +1,9 @@
 package catchrelease.rendering.plugins;
 
 public class WarpGrid {
+    private final int wide;
+    private final int tall;
+    private final WSVertex[][] v;
 
     public static final class MutatingValue {
         public float value;
@@ -78,12 +81,9 @@ public class WarpGrid {
     public static final class WarpOffset {
         public float dx;
         public float dy;
+
         public WarpOffset(float dx, float dy) { this.dx = dx; this.dy = dy; }
     }
-
-    private final int wide;
-    private final int tall;
-    private final WSVertex[][] v;
 
     public WarpGrid(int verticesWide, int verticesTall,
                     float minWarpRadius, float maxWarpRadius,
@@ -103,6 +103,7 @@ public class WarpGrid {
     }
 
     public int getWide() { return wide; }
+
     public int getTall() { return tall; }
 
     public void advance(float amount) {
@@ -112,7 +113,6 @@ public class WarpGrid {
             }
         }
     }
-
 
     public WarpOffset getOffset(int i, int j) {
         if (i <= 0 || j <= 0 || i >= wide - 1 || j >= tall - 1) return new WarpOffset(0f, 0f);

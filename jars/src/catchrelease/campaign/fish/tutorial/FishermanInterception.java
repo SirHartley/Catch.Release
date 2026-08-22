@@ -17,16 +17,9 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-
 public class FishermanInterception implements EveryFrameScript {
-
-
     public static final String INTERCEPTED_KEY = "$catchrelease_intercepted";
-
-
     public static final String CHASING_KEY = "$catchrelease_fisherClosing";
-
-
     public static final float CHASE_DAYS = 3f;
 
     protected final IntervalUtil interval = new IntervalUtil(
@@ -70,19 +63,16 @@ public class FishermanInterception implements EveryFrameScript {
         cutOff(boat, player);
     }
 
-
     protected boolean isNosingAroundARupture(CampaignFleetAPI player, StarSystemAPI system) {
         for (SectorEntityToken pond : QuestPond.getPonds(system)) {
             if (Misc.getDistance(player.getLocation(), pond.getLocation())
                     <= TutorialConstants.INTERCEPT_TRIGGER_RANGE) {
-
                 return true;
             }
         }
 
         return false;
     }
-
 
     protected void cutOff(CampaignFleetAPI boat, CampaignFleetAPI player) {
         boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
@@ -118,11 +108,9 @@ public class FishermanInterception implements EveryFrameScript {
                 + " is closing on your position.", Misc.getHighlightColor());
     }
 
-
     public static boolean isClosing(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CHASING_KEY);
     }
-
 
     public static boolean hasIntercepted(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(INTERCEPTED_KEY);

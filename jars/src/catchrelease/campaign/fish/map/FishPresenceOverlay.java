@@ -19,21 +19,33 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
-
     public static final float FILL_ALPHA = 0.1f;
     public static final float OUTLINE_ALPHA = 0.6f;
     public static final float OUTLINE_WIDTH = 1.5f;
-
-
     public static final float STRIPE_SPACING_WORLD = 600f;
-
-
     public static final int STYLE_SOLID = 0;
     public static final int STYLE_STRIPE_RIGHT = 1;
     public static final int STYLE_STRIPE_LEFT = 2;
+    public static final float ROUTE_BADGE_RADIUS = 14f;
+    public static final float ROUTE_BADGE_LIFT = 14f;
+    public static final float ROUTE_ICON = 16f;
+    public static final float ROUTE_ICON_GAP = 2f;
+    public static final float ROUTE_BADGE_PAD = 5f;
+    public static final String NO_DATA_TEXT = "NO DATA";
+    public static final float NO_DATA_WIDTH = 180f;
+    public static final float NO_DATA_HEIGHT = 54f;
+    public static final float NO_DATA_BORDER = 2f;
 
+    protected List<Blob> blobs = new ArrayList<>();
+    protected boolean noDataShown;
+    protected Object mapWidget;
+    protected transient float[] scratch = new float[512];
+    protected float mouseX = -1f;
+    protected float mouseY = -1f;
+    protected PositionAPI panelPos;
+    protected transient CoherenceHeatField heat;
+    protected boolean coherenceShown = false;
 
     public static class Blob {
         public final FishPresenceField.Mesh mesh;
@@ -51,33 +63,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             this.drawOutline = drawOutline;
         }
     }
-
-
-    public static final float ROUTE_BADGE_RADIUS = 14f;
-    public static final float ROUTE_BADGE_LIFT = 14f;
-    public static final float ROUTE_ICON = 16f;
-    public static final float ROUTE_ICON_GAP = 2f;
-    public static final float ROUTE_BADGE_PAD = 5f;
-
-    public static final String NO_DATA_TEXT = "NO DATA";
-    public static final float NO_DATA_WIDTH = 180f;
-    public static final float NO_DATA_HEIGHT = 54f;
-    public static final float NO_DATA_BORDER = 2f;
-
-    protected List<Blob> blobs = new ArrayList<>();
-    protected boolean noDataShown;
-
-
-    protected Object mapWidget;
-
-
-    protected transient float[] scratch = new float[512];
-
-
-    protected float mouseX = -1f;
-    protected float mouseY = -1f;
-
-    protected PositionAPI panelPos;
 
     public void setMapWidget(Object mapWidget) {
         this.mapWidget = mapWidget;
@@ -108,7 +93,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             if (event.isLMBDownEvent() && FishRoute.get() != null
                     && isInCloseLabel(event.getX(), event.getY())) {
-
                 FishRoute.clear();
                 event.consume();
             }
@@ -123,17 +107,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 && y >= bounds[1] && y <= bounds[1] + bounds[3];
     }
 
-
-    protected transient CoherenceHeatField heat;
-    protected boolean coherenceShown = false;
-
-
     public void setCoherenceShown(boolean shown) {
         coherenceShown = shown;
 
         if (shown && heat == null) heat = new CoherenceHeatField();
     }
-
 
     protected float[] getCloseLabelBounds() {
         if (panelPos == null) return null;
@@ -202,7 +180,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         renderNoData(alphaMult);
     }
 
-
     protected void renderNoData(float alphaMult) {
         if (!noDataShown || panelPos == null) return;
 
@@ -227,7 +204,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         text.draw(Math.round(x + (NO_DATA_WIDTH - text.getWidth()) * 0.5f),
                 Math.round(y + (NO_DATA_HEIGHT + text.getHeight()) * 0.5f));
     }
-
 
     protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
         FishRoute.Saved route = FishRoute.get();
@@ -278,7 +254,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         renderCloseLabel(alphaMult);
     }
 
-
     protected static float[][] clusterOffsets(int count, float spacing) {
         float[][] out = new float[count][2];
         if (count == 1) return out;
@@ -307,7 +282,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
         return out;
     }
-
 
     protected void renderCloseLabel(float alphaMult) {
         float[] bounds = getCloseLabelBounds();
@@ -390,7 +364,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
 
-
     protected void renderOutline(Blob blob, float factor,
                                  float centerX, float centerY, float alphaMult) {
         if (blob.mesh == null || blob.mesh.isEmpty()) return;
@@ -412,7 +385,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
         GL11.glEnd();
     }
-
 
     protected void renderStripes(float minX, float minY, float maxX, float maxY, int style,
                                  float factor, float centerX, float centerY) {
@@ -459,7 +431,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
         GL11.glEnd();
     }
-
 
     protected void strokeEdge(float x1, float y1, float x2, float y2) {
         float dx = x2 - x1;

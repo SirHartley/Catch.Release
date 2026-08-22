@@ -28,13 +28,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class FishBuyer {
-
-
     protected static class Stack {
         SpecialItemData data;
-
         int items;
         int count;
         FishRarity rarity;
@@ -42,14 +38,11 @@ public class FishBuyer {
         boolean wanted;
     }
 
-
     protected static final class SaleEntry {
         final SpecialItemData data;
         final int items;
         final int count;
         final float value;
-
-
         final List<FishCatch> sell;
         final List<FishCatch> keep;
 
@@ -76,7 +69,6 @@ public class FishBuyer {
         }
     }
 
-
     protected static final class SalePreview {
         final List<SaleEntry> entries;
         final int count;
@@ -95,124 +87,11 @@ public class FishBuyer {
         }
     }
 
-
     protected static class DescriptionSpecies {
         String name;
         int count;
         FishRarity rarity;
     }
-
-    public static boolean hasAnything() {
-        return !read().isEmpty();
-    }
-
-
-    protected static List<Stack> read() {
-        List<Stack> out = new ArrayList<>();
-
-        if (Global.getSector().getPlayerFleet() == null) return out;
-
-        for (CargoStackAPI stack : Global.getSector().getPlayerFleet().getCargo().getStacksCopy()) {
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (data == null) continue;
-
-            Stack held = new Stack();
-            held.data = data;
-            held.items = (int) stack.getSize();
-            if (held.items <= 0) continue;
-
-            if (FishItems.FISH.equals(data.getId())) {
-                FishCatch entry = FishCatch.decode(data.getData());
-                if (entry == null || entry.getSpec() == null) continue;
-
-                held.count = held.items;
-                held.rarity = entry.getSpec().rarity;
-                held.value = entry.getValue() * held.count;
-                held.wanted = ShopMarks.isWanted(entry);
-            } else if (FishItems.isContainer(data)) {
-                FishRarity worst = null;
-
-                for (FishCatch entry : FishItems.decodeBundle(data.getData())) {
-                    if (entry.getSpec() == null) continue;
-
-                    held.count++;
-                    held.value += entry.getValue();
-
-                    // a crate sells as its rarest content, so a mixed one is never quietly sold below what is in it
-                    if (worst == null || entry.getSpec().rarity.rank > worst.rank) {
-                        worst = entry.getSpec().rarity;
-                    }
-
-                    held.wanted |= ShopMarks.isWanted(entry);
-                }
-
-                held.rarity = worst;
-                held.count *= held.items;
-                held.value *= held.items;
-            } else {
-                continue;
-            }
-
-            if (held.count > 0) out.add(held);
-        }
-
-        return out;
-    }
-
-
-    public static boolean show(final InteractionDialogAPI dialog) {
-        if (dialog == null) return false;
-
-        final List<ContainerSnapshot> boxed =
-                snapshotContainers(Global.getSector().getPlayerFleet().getCargo());
-
-        FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
-
-        CargoAPI offer = Global.getFactory().createCargo(true);
-
-        for (Stack held : read()) {
-            offer.addSpecial(held.data, FishItems.isContainer(held.data) ? 1 : held.count);
-        }
-
-        final PickerPackingSession packing = new PickerPackingSession(offer);
-
-        dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
-                false, 330f, offer, new CargoPickerListener() {
-
-                    @Override
-                    public void pickedCargo(CargoAPI picked) {
-                        sellPicked(dialog, picked);
-                        restoreContainers(boxed);
-                    }
-
-                    @Override
-                    public void cancelledCargoSelection() {
-                        restoreContainers(boxed);
-                    }
-
-                    @Override
-                    public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo,
-                                                  CargoStackAPI pickedUp,
-                                                  boolean pickedUpFromSource, CargoAPI combined) {
-
-                        panel.setParaFontOrbitron();
-                        panel.addPara(dialog.getInteractionTarget().getName(),
-                                Misc.getBasePlayerColor(), 0f);
-                        panel.setParaFontDefault();
-
-                        panel.addPara("Sold at market price - what each specimen would fetch from a"
-                                + " buyer who wanted it.", Misc.getGrayColor(), 10f);
-
-                        panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
-                                Misc.getDGSCredits(valueOf(combined)));
-
-                        packing.addButton(panel, cargo);
-                    }
-                });
-
-        return true;
-    }
-
 
     protected static final class PickerPackingSession {
         protected static final float BUTTON_WIDTH = 250f;
@@ -278,7 +157,6 @@ public class FishBuyer {
         }
     }
 
-
     protected static final class PickerCargoRefresh {
         protected static final int MAX_PARENT_DEPTH = 16;
 
@@ -320,6 +198,156 @@ public class FishBuyer {
         }
     }
 
+    protected static final class ContainerSnapshot {
+        final String id;
+        final List<FishCatch> contents;
+        final int items;
+
+        ContainerSnapshot(String id, List<FishCatch> contents, int items) {
+            this.id = id;
+            this.contents = List.copyOf(contents);
+            this.items = items;
+        }
+    }
+
+    protected static final class ReopenBulkSaleConfirm implements EveryFrameScript {
+        private final InteractionDialogAPI dialog;
+        private final FishRarity cap;
+        private final SalePreview preview;
+        private boolean done;
+
+        ReopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap, SalePreview preview) {
+            this.dialog = dialog;
+            this.cap = cap;
+            this.preview = preview;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() == dialog) {
+                showBulkSaleConfirm(dialog, cap, preview);
+            }
+            done = true;
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return true;
+        }
+    }
+
+    public static boolean hasAnything() {
+        return !read().isEmpty();
+    }
+
+    protected static List<Stack> read() {
+        List<Stack> out = new ArrayList<>();
+
+        if (Global.getSector().getPlayerFleet() == null) return out;
+
+        for (CargoStackAPI stack : Global.getSector().getPlayerFleet().getCargo().getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (data == null) continue;
+
+            Stack held = new Stack();
+            held.data = data;
+            held.items = (int) stack.getSize();
+            if (held.items <= 0) continue;
+
+            if (FishItems.FISH.equals(data.getId())) {
+                FishCatch entry = FishCatch.decode(data.getData());
+                if (entry == null || entry.getSpec() == null) continue;
+
+                held.count = held.items;
+                held.rarity = entry.getSpec().rarity;
+                held.value = entry.getValue() * held.count;
+                held.wanted = ShopMarks.isWanted(entry);
+            } else if (FishItems.isContainer(data)) {
+                FishRarity worst = null;
+
+                for (FishCatch entry : FishItems.decodeBundle(data.getData())) {
+                    if (entry.getSpec() == null) continue;
+
+                    held.count++;
+                    held.value += entry.getValue();
+
+                    // a crate sells as its rarest content, so a mixed one is never quietly sold below what is in it
+                    if (worst == null || entry.getSpec().rarity.rank > worst.rank) {
+                        worst = entry.getSpec().rarity;
+                    }
+
+                    held.wanted |= ShopMarks.isWanted(entry);
+                }
+
+                held.rarity = worst;
+                held.count *= held.items;
+                held.value *= held.items;
+            } else {
+                continue;
+            }
+
+            if (held.count > 0) out.add(held);
+        }
+
+        return out;
+    }
+
+    public static boolean show(final InteractionDialogAPI dialog) {
+        if (dialog == null) return false;
+
+        final List<ContainerSnapshot> boxed =
+                snapshotContainers(Global.getSector().getPlayerFleet().getCargo());
+
+        FishItems.unbox(Global.getSector().getPlayerFleet().getCargo());
+
+        CargoAPI offer = Global.getFactory().createCargo(true);
+
+        for (Stack held : read()) {
+            offer.addSpecial(held.data, FishItems.isContainer(held.data) ? 1 : held.count);
+        }
+
+        final PickerPackingSession packing = new PickerPackingSession(offer);
+
+        dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
+                false, 330f, offer, new CargoPickerListener() {
+                    @Override
+                    public void pickedCargo(CargoAPI picked) {
+                        sellPicked(dialog, picked);
+                        restoreContainers(boxed);
+                    }
+
+                    @Override
+                    public void cancelledCargoSelection() {
+                        restoreContainers(boxed);
+                    }
+
+                    @Override
+                    public void recreateTextPanel(TooltipMakerAPI panel, CargoAPI cargo,
+                                                  CargoStackAPI pickedUp,
+                                                  boolean pickedUpFromSource, CargoAPI combined) {
+                        panel.setParaFontOrbitron();
+                        panel.addPara(dialog.getInteractionTarget().getName(),
+                                Misc.getBasePlayerColor(), 0f);
+                        panel.setParaFontDefault();
+
+                        panel.addPara("Sold at market price - what each specimen would fetch from a"
+                                + " buyer who wanted it.", Misc.getGrayColor(), 10f);
+
+                        panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
+                                Misc.getDGSCredits(valueOf(combined)));
+
+                        packing.addButton(panel, cargo);
+                    }
+                });
+
+        return true;
+    }
+
     protected static void sellPicked(InteractionDialogAPI dialog, CargoAPI picked) {
         if (picked == null) return;
 
@@ -345,20 +373,6 @@ public class FishBuyer {
         finish(dialog, sold, credits);
     }
 
-
-    protected static final class ContainerSnapshot {
-        final String id;
-        final List<FishCatch> contents;
-        final int items;
-
-        ContainerSnapshot(String id, List<FishCatch> contents, int items) {
-            this.id = id;
-            this.contents = List.copyOf(contents);
-            this.items = items;
-        }
-    }
-
-
     protected static List<ContainerSnapshot> snapshotContainers(CargoAPI cargo) {
         List<ContainerSnapshot> out = new ArrayList<>();
         if (cargo == null) return out;
@@ -373,7 +387,6 @@ public class FishBuyer {
 
         return out;
     }
-
 
     protected static void restoreContainers(List<ContainerSnapshot> boxed) {
         if (Global.getSector().getPlayerFleet() == null) return;
@@ -415,7 +428,6 @@ public class FishBuyer {
         }
     }
 
-
     public static boolean sellUpTo(InteractionDialogAPI dialog, String rarityName) {
         FishRarity cap = CatchReleaseCMD.parseRarity(rarityName);
         if (cap == null) return false;
@@ -427,7 +439,6 @@ public class FishBuyer {
         return true;
     }
 
-
     public static int countUpTo(FishRarity cap) {
         return previewUpTo(cap).count;
     }
@@ -435,7 +446,6 @@ public class FishBuyer {
     public static float valueUpTo(FishRarity cap) {
         return previewUpTo(cap).value;
     }
-
 
     public static String describeUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = describeSpeciesUpTo(cap);
@@ -449,7 +459,6 @@ public class FishBuyer {
 
         return description.toString();
     }
-
 
     public static void addDescriptionTooltip(InteractionDialogAPI dialog, Object optionId,
                                              FishRarity cap) {
@@ -470,12 +479,10 @@ public class FishBuyer {
                 });
     }
 
-
     protected static Map<String, DescriptionSpecies> describeSpeciesUpTo(FishRarity cap) {
         Map<String, DescriptionSpecies> counts = new LinkedHashMap<>();
 
         for (SaleEntry held : previewUpTo(cap).entries) {
-
             if (held.sell != null) {
                 for (FishCatch entry : held.sell) {
                     addDescriptionCount(counts, entry, held.items);
@@ -495,7 +502,6 @@ public class FishBuyer {
 
         return counts;
     }
-
 
     protected static SalePreview previewUpTo(FishRarity cap) {
         List<SaleEntry> entries = new ArrayList<>();
@@ -536,7 +542,6 @@ public class FishBuyer {
 
         return new SalePreview(entries, count, value, fingerprint.toString());
     }
-
 
     protected static void appendFingerprint(StringBuilder out, SaleEntry entry) {
         String id = entry.data.getId();
@@ -599,43 +604,10 @@ public class FishBuyer {
         });
     }
 
-
     protected static void reopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap,
                                                 SalePreview preview) {
         Global.getSector().addTransientScript(new ReopenBulkSaleConfirm(dialog, cap, preview));
     }
-
-    protected static final class ReopenBulkSaleConfirm implements EveryFrameScript {
-        private final InteractionDialogAPI dialog;
-        private final FishRarity cap;
-        private final SalePreview preview;
-        private boolean done;
-
-        ReopenBulkSaleConfirm(InteractionDialogAPI dialog, FishRarity cap, SalePreview preview) {
-            this.dialog = dialog;
-            this.cap = cap;
-            this.preview = preview;
-        }
-
-        @Override
-        public void advance(float amount) {
-            if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() == dialog) {
-                showBulkSaleConfirm(dialog, cap, preview);
-            }
-            done = true;
-        }
-
-        @Override
-        public boolean isDone() {
-            return done;
-        }
-
-        @Override
-        public boolean runWhilePaused() {
-            return true;
-        }
-    }
-
 
     protected static void execute(InteractionDialogAPI dialog, SalePreview preview) {
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();

@@ -12,14 +12,10 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
-
 public class PondFishSpawner {
-
-
     public static String pickFishId(LocationAPI location, CatchImplement how) {
         return pickFishId(location, how, 0f);
     }
-
 
     public static String pickFishId(LocationAPI location, CatchImplement how, float extraRarityBias) {
         FishSpec spec = pickFish(location, how, extraRarityBias);
@@ -61,7 +57,6 @@ public class PondFishSpawner {
         return picker.pick();
     }
 
-
     protected static String describe(FishHabitat where) {
         if (where == null) return "nowhere";
 
@@ -69,12 +64,10 @@ public class PondFishSpawner {
                 + ", aberration " + String.format("%.2f", where.aberration);
     }
 
-
     protected static float getRarityWeight(FishSpec spec, float extraBias) {
         float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias + extraBias;
         if (bias == 1f || spec.rarity == null) return 1f;
 
         return (float) Math.pow(bias, spec.rarity.rank);
     }
-
 }

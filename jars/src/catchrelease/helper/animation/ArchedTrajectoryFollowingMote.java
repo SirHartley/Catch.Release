@@ -11,19 +11,16 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.*;
 
 public class ArchedTrajectoryFollowingMote extends BaseCircleTrajectoryFollowingParticle {
-
     public static final float GLOW_SIZE = 15f;
 
     protected FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     protected Color color;
-
     transient SpriteAPI moteSprite;
 
     public ArchedTrajectoryFollowingMote(Vector2f start, Vector2f end, float radius, float travelDuration, Color color) {
         super(start, end, radius, travelDuration);
         this.color = color;
     }
-
 
     public void init(){
         moteSprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");

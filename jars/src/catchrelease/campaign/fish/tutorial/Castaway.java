@@ -6,14 +6,11 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
-
 public class Castaway {
-
     public static boolean isPlaced() {
         return Global.getSector().getMemoryWithoutUpdate()
                 .getBoolean(TutorialConstants.CASTAWAY_PLACED_KEY);
     }
-
 
     public static boolean isHost(PlanetAPI planet) {
         if (planet == null || planet.getMarket() == null) return false;
@@ -23,7 +20,6 @@ public class Castaway {
                 && !planet.getMarket().getMemoryWithoutUpdate()
                 .getBoolean(TutorialConstants.CASTAWAY_RESCUED_KEY);
     }
-
 
     public static boolean canStart(PlanetAPI host) {
         return host != null
@@ -35,11 +31,9 @@ public class Castaway {
                 && !OuterReaches.isPopulated(host.getStarSystem());
     }
 
-
     public static boolean isEligible(PlanetAPI planet) {
         return isHost(planet) || canStart(planet);
     }
-
 
     public static boolean start(PlanetAPI host) {
         if (isHost(host)) return true;
@@ -52,7 +46,6 @@ public class Castaway {
 
         return true;
     }
-
 
     public static boolean rescue(SectorEntityToken target) {
         FishingIntro.point();

@@ -6,16 +6,13 @@ import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
-
 public final class CrablobabIdentity {
-
     public static final String PERSON_KEY = "$catchrelease_crablobab_person";
     public static final String PORTRAIT_ID = "catchrelease_crabolabob";
     public static final String RANK_ID = "catchrelease_crabMerchant";
 
     private CrablobabIdentity() {
     }
-
 
     public static PersonAPI get() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(PERSON_KEY);
@@ -36,14 +33,12 @@ public final class CrablobabIdentity {
         return person;
     }
 
-
     public static boolean show(InteractionDialogAPI dialog) {
         if (dialog == null || dialog.getVisualPanel() == null) return false;
 
         dialog.getVisualPanel().showPersonInfo(get(), true);
         return true;
     }
-
 
     private static void refresh(PersonAPI person) {
         person.setRankId(RANK_ID);

@@ -8,11 +8,8 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class FishLog {
-
     public static final String KEY = "$catchrelease_log";
-
 
     public static boolean record(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
         if (entry == null || entry.speciesId == null) return false;
@@ -54,18 +51,15 @@ public class FishLog {
         return record;
     }
 
-
     public static FishLogEntry get(String speciesId) {
         return speciesId == null ? null : getLog().get(speciesId);
     }
-
 
     public static boolean isCaught(String speciesId) {
         FishLogEntry entry = get(speciesId);
 
         return entry != null && entry.caught > 0;
     }
-
 
     public static boolean unlockLocationData(String speciesId) {
         if (speciesId == null) return false;
@@ -90,7 +84,6 @@ public class FishLog {
         return entry != null && entry.locationDataUnlocked;
     }
 
-
     public static void relockLocationData(String speciesId) {
         FishLogEntry entry = get(speciesId);
         if (entry == null) return;
@@ -103,13 +96,11 @@ public class FishLog {
         entry.locationDataUnlocked = false;
     }
 
-
     protected static long getTimestamp() {
         if (Global.getSector() == null) return 0L;
 
         return Global.getSector().getClock().getTimestamp();
     }
-
 
     public static String getSystemName(SectorEntityToken where) {
         if (where == null) return null;
@@ -118,7 +109,6 @@ public class FishLog {
 
         return location == null ? null : location.getName();
     }
-
 
     protected static Vector2f getLocationInHyper(SectorEntityToken where) {
         if (where == null) return null;

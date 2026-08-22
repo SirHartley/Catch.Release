@@ -15,16 +15,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-
 public class FishPresence {
-
-
     public static class Filter {
-
         public String search = "";
         public final Set<FishType> types = new LinkedHashSet<>();
-
-
         public boolean speciesRestricted = false;
         public final Set<String> allowedSpeciesIds = new LinkedHashSet<>();
 
@@ -40,7 +34,6 @@ public class FishPresence {
         }
     }
 
-
     public static List<FishSpec> getShown(Filter filter) {
         List<FishSpec> shown = new ArrayList<>();
 
@@ -55,12 +48,10 @@ public class FishPresence {
         return shown;
     }
 
-
     public static boolean hasRangeData(FishSpec spec) {
         return spec != null && spec.id != null
                 && (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id));
     }
-
 
     public static boolean isKnown(FishSpec spec) {
         if (Global.getSettings().isDevMode()) return true;
@@ -68,18 +59,15 @@ public class FishPresence {
         return hasRangeData(spec);
     }
 
-
     public static boolean livesIn(FishSpec spec, StarSystemAPI system) {
         return spec != null && system != null && spec.matches(FishHabitat.of(system));
     }
-
 
     public static boolean showsRegions(FishSpec spec) {
         if (spec == null || !spec.hasHabitat()) return false;
 
         return hasRangeData(spec);
     }
-
 
     public static boolean isChartable(StarSystemAPI system) {
         if (system == null) return false;
@@ -90,7 +78,6 @@ public class FishPresence {
 
         return true;
     }
-
 
     public static List<Vector2f> getHostLocations(FishSpec spec) {
         List<Vector2f> hosts = new ArrayList<>();
@@ -104,7 +91,6 @@ public class FishPresence {
 
         return hosts;
     }
-
 
     public static List<Vector2f> getTypeHostLocations(FishType type) {
         Set<Vector2f> hosts = new LinkedHashSet<>();
@@ -120,7 +106,6 @@ public class FishPresence {
         return new ArrayList<>(hosts);
     }
 
-
     public static List<Vector2f> getTypeHostLocations(FishType type, Filter filter) {
         if (filter == null || !filter.speciesRestricted) return getTypeHostLocations(type);
 
@@ -132,7 +117,6 @@ public class FishPresence {
 
         return new ArrayList<>(hosts);
     }
-
 
     public static List<FishSpec> getKnownFishIn(StarSystemAPI system) {
         List<FishSpec> caught = new ArrayList<>();
@@ -151,7 +135,6 @@ public class FishPresence {
 
         return caught;
     }
-
 
     public static int getUnknownCountIn(StarSystemAPI system) {
         int count = 0;
@@ -177,7 +160,6 @@ public class FishPresence {
         return null;
     }
 
-
     public static Vector2f getFocusPoint(FishSpec spec) {
         if (!hasRangeData(spec)) return null;
 
@@ -187,7 +169,6 @@ public class FishPresence {
         List<Vector2f> hosts = getHostLocations(spec);
         return hosts.isEmpty() ? null : hosts.get(0);
     }
-
 
     public static String getStatus(FishSpec spec) {
         if (FishLog.isCaught(spec.id)) return "landed";

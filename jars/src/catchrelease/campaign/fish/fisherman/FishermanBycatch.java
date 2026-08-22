@@ -4,15 +4,12 @@ import com.fs.starfarer.api.Global;
 
 import java.util.Map;
 
-
 public final class FishermanBycatch {
-
     public static final String FOUND_KEY = "$catchrelease_bycatch_found";
     public static final String EXPLAINED_KEY = "$catchrelease_bycatch_explained";
 
     private FishermanBycatch() {
     }
-
 
     public static void recordFound() {
         if (Global.getSector() == null) return;
@@ -21,7 +18,6 @@ public final class FishermanBycatch {
         if (!Boolean.TRUE.equals(data.get(EXPLAINED_KEY))) data.put(FOUND_KEY, true);
     }
 
-
     public static boolean isPending() {
         if (Global.getSector() == null) return false;
 
@@ -29,7 +25,6 @@ public final class FishermanBycatch {
         return Boolean.TRUE.equals(data.get(FOUND_KEY))
                 && !Boolean.TRUE.equals(data.get(EXPLAINED_KEY));
     }
-
 
     public static void markExplained() {
         if (Global.getSector() == null) return;

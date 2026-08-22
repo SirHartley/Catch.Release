@@ -12,17 +12,12 @@ import java.util.List;
 
 public class RippleData {
     public boolean infinite = false;
-
     public Vector2f loc;
     public IntervalUtil interval;
     public int amount;
-
-
     public LocationAPI home;
-
     public Color color;
     public float maxSize, ringWidth, growTime, startRadiusOffsetMult;
-
     public List<RippleRingRenderer> renderers = new ArrayList<>();
 
     public RippleData(Vector2f loc, float minInterval, float maxInterval, Color color, float maxSize, float ringWidth, float growTime, float startRadiusOffsetMult, int amount) {

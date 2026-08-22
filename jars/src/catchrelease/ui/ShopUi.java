@@ -11,18 +11,14 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-
 public class ShopUi {
-
     public static final String FONT_TITLE = FishConstants.MINIGAME_RESULT_TITLE_FONT;
     public static final String FONT_BODY = FishConstants.MINIGAME_RESULT_FONT;
     public static final String FONT_SMALL = "graphics/fonts/orbitron12condensed.fnt";
-
     protected static LazyFont title;
     protected static LazyFont body;
     protected static LazyFont small;
     protected static boolean fontsChecked = false;
-
 
     protected static void loadFonts() {
         if (fontsChecked) return;
@@ -51,7 +47,6 @@ public class ShopUi {
         loadFonts();
         return small;
     }
-
 
     public static LazyFont.DrawableString createText(LazyFont font, String text) {
         return font.createText(text, java.awt.Color.WHITE, font.getBaseHeight());
@@ -83,12 +78,10 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-
     public static void drawVerticalGradient(float x, float y, float width, float height,
                                             Color color, float bottomAlpha, float topAlpha) {
         drawVerticalGradient(x, y, width, height, color, color, bottomAlpha, topAlpha);
     }
-
 
     public static void drawVerticalGradient(float x, float y, float width, float height,
                                             Color bottom, Color top,
@@ -115,7 +108,6 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-
     public static void drawPanel(float x, float y, float width, float height,
                                  float bgAlpha, float alphaMult) {
         drawQuad(x, y, width, height, Color.BLACK, bgAlpha * alphaMult);
@@ -126,7 +118,6 @@ public class ShopUi {
         drawQuad(x, y, 1f, height, border, 0.55f * alphaMult);
         drawQuad(x + width - 1f, y, 1f, height, border, 0.55f * alphaMult);
     }
-
 
     public static void dress(float x, float y, float width, float height, float alphaMult) {
         float inset = FishConstants.MINIGAME_BORDER_INSET;
@@ -141,23 +132,19 @@ public class ShopUi {
 
     protected static void outline(float x, float y, float width, float height, float offset,
                                   Color color, float alpha) {
-
         RoundedBorder.draw(x - offset, y - offset, width + offset * 2f, height + offset * 2f,
                 FishConstants.MINIGAME_BORDER_RADIUS + offset, color, alpha,
                 FishConstants.MINIGAME_BORDER_WIDTH);
     }
-
 
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha) {
         drawPips(x, y, size, gap, level, max, lit, alpha, null);
     }
 
-
     public static void drawPips(float x, float y, float size, float gap,
                                 int level, int max, Color lit, float alpha,
                                 java.util.function.IntPredicate missingSchematic) {
-
         for (int i = 0; i < max; i++) {
             float px = x + i * (size + gap);
 
@@ -178,7 +165,6 @@ public class ShopUi {
         return max <= 0 ? 0f : max * size + (max - 1) * gap;
     }
 
-
     public static void startClip(float x, float y, float width, float height) {
         float scale = Display.getPixelScaleFactor();
 
@@ -192,7 +178,6 @@ public class ShopUi {
         GL11.glPopAttrib();
     }
 
-
     public static void drawCard(float x, float y, float width, float height, float alphaMult) {
         drawQuad(x, y, width, height, java.awt.Color.BLACK, 0.9f * alphaMult);
         drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.12f * alphaMult);
@@ -200,10 +185,8 @@ public class ShopUi {
         dress(x, y, width, height, alphaMult);
     }
 
-
     public static boolean contains(float x, float y, float width, float height,
                                    float pointX, float pointY) {
-
         return pointX >= x && pointX <= x + width && pointY >= y && pointY <= y + height;
     }
 }

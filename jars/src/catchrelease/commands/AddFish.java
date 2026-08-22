@@ -19,10 +19,51 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-
 public class AddFish implements BaseCommandWithSuggestion {
-
     private static final int MAX_AMBIGUOUS_SUGGESTIONS = 12;
+
+    private static final class ParsedArguments {
+        private final String query;
+        private final int amount;
+
+        private ParsedArguments(String query, int amount) {
+            this.query = query;
+            this.amount = amount;
+        }
+    }
+
+    private static final class Match {
+        private final FishSpec spec;
+        private final boolean fuzzy;
+        private final List<FishSpec> suggestions;
+
+        private Match(FishSpec spec, boolean fuzzy, List<FishSpec> suggestions) {
+            this.spec = spec;
+            this.fuzzy = fuzzy;
+            this.suggestions = suggestions;
+        }
+
+        private static Match exact(FishSpec spec) {
+            return new Match(spec, false, Collections.emptyList());
+        }
+
+        private static Match fuzzy(FishSpec spec) {
+            return new Match(spec, true, Collections.emptyList());
+        }
+
+        private static Match ambiguous(Set<FishSpec> matches) {
+            List<FishSpec> suggestions = new ArrayList<>();
+            for (FishSpec match : matches) {
+                if (suggestions.size() >= MAX_AMBIGUOUS_SUGGESTIONS) break;
+                suggestions.add(match);
+            }
+            return new Match(null, false, suggestions);
+        }
+
+        private static Match none() {
+            return new Match(null, false, Collections.emptyList());
+        }
+    }
 
     @Override
     public CommandResult runCommand(String args, CommandContext context) {
@@ -70,7 +111,6 @@ public class AddFish implements BaseCommandWithSuggestion {
                 + " [" + match.spec.id + "] to the player fleet's cargo.");
         return CommandResult.SUCCESS;
     }
-
 
     @Override
     public List<String> getSuggestions(int parameter, List<String> previous, CommandContext context) {
@@ -194,48 +234,5 @@ public class AddFish implements BaseCommandWithSuggestion {
                 .replaceAll("[^a-z0-9]+", " ")
                 .trim()
                 .replaceAll("\\s+", " ");
-    }
-
-    private static final class ParsedArguments {
-        private final String query;
-        private final int amount;
-
-        private ParsedArguments(String query, int amount) {
-            this.query = query;
-            this.amount = amount;
-        }
-    }
-
-    private static final class Match {
-        private final FishSpec spec;
-        private final boolean fuzzy;
-        private final List<FishSpec> suggestions;
-
-        private Match(FishSpec spec, boolean fuzzy, List<FishSpec> suggestions) {
-            this.spec = spec;
-            this.fuzzy = fuzzy;
-            this.suggestions = suggestions;
-        }
-
-        private static Match exact(FishSpec spec) {
-            return new Match(spec, false, Collections.emptyList());
-        }
-
-        private static Match fuzzy(FishSpec spec) {
-            return new Match(spec, true, Collections.emptyList());
-        }
-
-        private static Match ambiguous(Set<FishSpec> matches) {
-            List<FishSpec> suggestions = new ArrayList<>();
-            for (FishSpec match : matches) {
-                if (suggestions.size() >= MAX_AMBIGUOUS_SUGGESTIONS) break;
-                suggestions.add(match);
-            }
-            return new Match(null, false, suggestions);
-        }
-
-        private static Match none() {
-            return new Match(null, false, Collections.emptyList());
-        }
     }
 }

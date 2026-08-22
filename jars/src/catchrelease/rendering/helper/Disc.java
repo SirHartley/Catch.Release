@@ -4,16 +4,11 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-
 public class Disc {
-
-
     public static final int SEGMENTS = 32;
-
 
     public static void draw(float x, float y, float radius, Color color,
                             float centerAlpha, float edgeAlpha, boolean additive) {
-
         if (radius <= 0f || (centerAlpha <= 0f && edgeAlpha <= 0f)) return;
 
         float r = color.getRed() / 255f;
@@ -41,7 +36,6 @@ public class Disc {
 
     public static void drawOutline(float x, float y, float radius, Color color, float alpha,
                                    float lineWidthPx) {
-
         if (radius <= 0f || alpha <= 0f) return;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_LINE_BIT | GL11.GL_COLOR_BUFFER_BIT);

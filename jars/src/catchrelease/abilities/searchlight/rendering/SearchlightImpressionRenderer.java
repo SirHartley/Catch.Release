@@ -28,41 +28,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
 public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugin {
     public transient SpriteAPI sprite;
     public transient SpriteAPI moteSprite;
-
-
     private final List<Searchlight> lights;
     private final SearchlightAbilityPlugin owner;
     private final LocationAPI home;
-
-
     private final Map<SectorEntityToken, Float> marks = new HashMap<>();
-
-
-    public float getMarkStrength(SectorEntityToken mote) {
-        Float held = marks.get(mote);
-
-        return held == null ? 0f : held;
-    }
-
-
-    public float getDentStrength(SectorEntityToken mote) {
-        if (mote == null || mote.isExpired()) return 0f;
-
-        return Math.max(getMarkStrength(mote), nearestBeamShadow(mote.getLocation()));
-    }
-
     private boolean expired = false;
-
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
-
     private float timePassed = 0f;
-
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightImpressionRenderer(List<Searchlight> lights,
@@ -70,6 +47,18 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         this.lights = lights;
         this.owner = owner;
         this.home = home;
+    }
+
+    public float getMarkStrength(SectorEntityToken mote) {
+        Float held = marks.get(mote);
+
+        return held == null ? 0f : held;
+    }
+
+    public float getDentStrength(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired()) return 0f;
+
+        return Math.max(getMarkStrength(mote), nearestBeamShadow(mote.getLocation()));
     }
 
     @Override
@@ -113,7 +102,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         }
     }
 
-
     protected void advanceMarks(float amount) {
         if (Global.getSector() == null) return;
 
@@ -145,7 +133,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
         for (SectorEntityToken buried
                 : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-
             if (buried.isExpired()) continue;
 
             float inBeam = strongestBeam(buried.getLocation());
@@ -155,7 +142,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
             if (held == null || held < inBeam) marks.put(buried, inBeam);
         }
     }
-
 
     protected float strongestBeam(Vector2f at) {
         float strongest = 0f;
@@ -200,7 +186,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         // every mote, not just marked ones - the lamps have passive reach (see nearestBeamShadow)
         for (SectorEntityToken buried
                 : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-
             if (buried.isExpired()) continue;
 
             float mark = getMarkStrength(buried);
@@ -217,7 +202,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         }
     }
 
-
     protected float revealStrength(Vector2f at) {
         float lit = strongestBeam(at);
         if (lit <= 0f) return 0f;
@@ -227,7 +211,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return MathUtils.clamp(
                 penetration / FishConstants.IMPRESSION_REVEAL_FULL_PENETRATION, 0f, 1f);
     }
-
 
     protected float nearestBeamShadow(Vector2f at) {
         float detect = UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
@@ -249,7 +232,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return strongest * FishConstants.IMPRESSION_NEAR_DENT_MAX;
     }
 
-
     protected Color revealColor(SectorEntityToken buried) {
         if (!(buried.getCustomPlugin() instanceof BuriedMoteEntityPlugin mote)) {
             return Searchlight.COLOR;
@@ -257,7 +239,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
         return mote.getRarity().color;
     }
-
 
     protected void renderImpression(Vector2f at, float alphaMult,
                                     float reveal, float revealMult, Color revealColor) {
@@ -306,7 +287,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
                 coreSize * FishConstants.IMPRESSION_RING_SIZE);
         sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_RING_ALPHA);
         sprite.renderAtCenter(at.x, at.y);
-
     }
 
     public void loadSpritesIfNeeded() {

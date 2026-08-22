@@ -33,22 +33,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Searchlight implements EveryFrameScript {
-
-
     public static final Color COLOR = new Color(185, 80, 255, 255);
     public static final Color RING_COLOR = new Color(255, 120, 255);
-
-
     public static final float LENS_SIZE_MULT = 0.8f;
     public static final float LENS_INTENSITY = 9f;
     public static final float LENS_FADE_IN = 0.6f;
-
     public static final float SINE_CADENCE = 90f;
     public static final float OSCILLATION_TIME_MULT = 0.7f;
-
-
     public static final float AREA_FALLBACK = 240f;
+    public static final float LOOK_SWAP_FADE = 1f;
+    public static final float FAN_HALF_ANGLE = 14.3f;
+    public static final float FAN_TIP_STRENGTH = 0.35f;
+    public static final float FAN_SWEEP_MULT = 0.7f;
+    public static final float LOCK_HOLD_RADIUS_SHARE = 0.5f;
+    public static final float LOCK_EASE_TIME = 1.6f;
+    public static final float LOCK_COOLDOWN = 4f;
+    public static final int FAN_LENS_STATIONS = 5;
+    public static final float FAN_LENS_INTENSITY = 6f;
 
+    private transient SearchlightGlowRenderer glow;
+    private transient SearchlightBreachRenderer breach;
+    private transient SearchlightFanRenderer fan;
+    private transient SearchlightFanBreachRenderer fanBreach;
+    private transient List<RippleRingRenderer> rings = new ArrayList<>();
+    private final Vector2f currentRenderLoc = new Vector2f();
+    private CircularArc arc;
+    private float baseArcAngle;
+    private int travelDirection = 1;
+    private float oscillationTime = 0f;
+    private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
+    private boolean expired = false;
+    private transient SectorEntityToken lockTarget;
+    private float lockLeft = 0f;
+    private float lockBlend = 0f;
+    private float lockCooldown = 0f;
+    private final Vector2f lockLoc = new Vector2f();
+    private float lockBearing = 0f;
+    private transient WaveDistortion lens;
+    private transient List<WaveDistortion> fanLenses;
+    private transient SearchlightAbilityPlugin owner;
+    private transient CampaignFleetAPI ownerFleet;
+    private transient LocationAPI home;
 
     public static float getMaxReach() {
         float size = getArea();
@@ -56,71 +81,9 @@ public class Searchlight implements EveryFrameScript {
         return size * 2f + SINE_CADENCE + size;
     }
 
-
     public static float getArea() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, AREA_FALLBACK);
     }
-
-
-    private transient SearchlightGlowRenderer glow;
-    private transient SearchlightBreachRenderer breach;
-    private transient SearchlightFanRenderer fan;
-    private transient SearchlightFanBreachRenderer fanBreach;
-
-
-    public static final float LOOK_SWAP_FADE = 1f;
-
-
-    private transient List<RippleRingRenderer> rings = new ArrayList<>();
-    private final Vector2f currentRenderLoc = new Vector2f();
-
-    private CircularArc arc;
-    private float baseArcAngle;
-    private int travelDirection = 1;
-    private float oscillationTime = 0f;
-
-    private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
-    private boolean expired = false;
-
-
-    private transient SectorEntityToken lockTarget;
-    private float lockLeft = 0f;
-    private float lockBlend = 0f;
-    private float lockCooldown = 0f;
-
-
-    private final Vector2f lockLoc = new Vector2f();
-
-
-    private float lockBearing = 0f;
-
-
-    public static final float FAN_HALF_ANGLE = 14.3f;
-    public static final float FAN_TIP_STRENGTH = 0.35f;
-
-
-    public static final float FAN_SWEEP_MULT = 0.7f;
-
-
-    public static final float LOCK_HOLD_RADIUS_SHARE = 0.5f;
-
-
-    public static final float LOCK_EASE_TIME = 1.6f;
-    public static final float LOCK_COOLDOWN = 4f;
-
-
-    private transient WaveDistortion lens;
-
-
-    public static final int FAN_LENS_STATIONS = 5;
-    public static final float FAN_LENS_INTENSITY = 6f;
-
-    private transient List<WaveDistortion> fanLenses;
-
-
-    private transient SearchlightAbilityPlugin owner;
-    private transient CampaignFleetAPI ownerFleet;
-    private transient LocationAPI home;
 
     @Override
     public boolean isDone() {
@@ -131,7 +94,6 @@ public class Searchlight implements EveryFrameScript {
     public boolean runWhilePaused() {
         return false;
     }
-
 
     public void init(CircularArc circularArc, SearchlightAbilityPlugin owner,
                      CampaignFleetAPI ownerFleet, LocationAPI home) {
@@ -185,7 +147,6 @@ public class Searchlight implements EveryFrameScript {
         if (arc != null && ownerFleet != null) arc.center = ownerFleet.getLocation();
     }
 
-
     public boolean isRuntimeCurrent() {
         if (expired) return false;
         if ((owner == null || ownerFleet == null || home == null) && !recoverOwnerAfterLoad()) {
@@ -199,7 +160,6 @@ public class Searchlight implements EveryFrameScript {
                 && owner.isRuntimeCurrent()
                 && ownerFleet.getContainingLocation() == home;
     }
-
 
     protected boolean recoverOwnerAfterLoad() {
         if (Global.getSector() == null) return false;
@@ -261,7 +221,6 @@ public class Searchlight implements EveryFrameScript {
         updateRenderLoc(renderPos);
     }
 
-
     protected void advanceLook() {
         if (!isRuntimeCurrent()) return;
 
@@ -308,7 +267,6 @@ public class Searchlight implements EveryFrameScript {
         }
     }
 
-
     protected void advanceLock(float amt) {
         if (lockCooldown > 0f) lockCooldown -= amt;
 
@@ -330,7 +288,6 @@ public class Searchlight implements EveryFrameScript {
         float step = LOCK_EASE_TIME <= 0f ? 1f : amt / LOCK_EASE_TIME;
         lockBlend = MathUtils.clamp(lockBlend + (lockTarget != null ? step : -step), 0f, 1f);
     }
-
 
     protected void acquire() {
         float lockTime = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
@@ -364,12 +321,10 @@ public class Searchlight implements EveryFrameScript {
         lockLoc.set(holdPointFor(best.getLocation()));
     }
 
-
     protected Vector2f holdPointFor(Vector2f target) {
         return MathUtils.getPointOnCircumference(target,
                 getArea() * LOCK_HOLD_RADIUS_SHARE, lockBearing);
     }
-
 
     protected void advanceLens() {
         if (!CampaignDistortionRenderer.isSupported()) return;
@@ -411,7 +366,6 @@ public class Searchlight implements EveryFrameScript {
         // skipped during fade-in, which owns size itself; otherwise picks up area upgrades
         if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
     }
-
 
     protected void advanceFanLenses() {
         Vector2f origin = getOrigin();
@@ -455,21 +409,17 @@ public class Searchlight implements EveryFrameScript {
         return currentRenderLoc;
     }
 
-
     public Vector2f getOrigin() {
         return arc == null ? currentRenderLoc : arc.center;
     }
-
 
     public static boolean isFanned() {
         return TackleManager.get(Tackle.Fit.SEARCHLIGHT).fanBeam;
     }
 
-
     public static float getFanHalfAngle() {
         return FAN_HALF_ANGLE * (getArea() / AREA_FALLBACK);
     }
-
 
     public float getLitStrength(Vector2f at) {
         float size = getArea();
@@ -552,5 +502,4 @@ public class Searchlight implements EveryFrameScript {
 
         expired = true;
     }
-
 }

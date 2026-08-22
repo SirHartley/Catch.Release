@@ -13,19 +13,14 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
-
 public class CoherenceOverlayScript implements EveryFrameScript {
-
     protected float level = 0f;
-
+    protected float aberration = 0f;
+    protected float pull = 0f;
 
     public static float getLevel() {
         return CoherenceOverlayRenderer.getLevel();
     }
-
-
-    protected float aberration = 0f;
-    protected float pull = 0f;
 
     @Override
     public void advance(float amount) {
@@ -54,7 +49,6 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         }
     }
 
-
     protected float getTargetLevel() {
         if (Global.getSector().getCampaignUI().isShowingDialog()) return 0f;
         if (Global.getSector().getCampaignUI().isShowingMenu()) return 0f;
@@ -67,11 +61,9 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         return target;
     }
 
-
     protected float here() {
         return Math.min(1f, aberration * (1f + FishConstants.ABERRATION_LOCAL_LIFT * pull));
     }
-
 
     protected float getPondWeight() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -81,7 +73,6 @@ public class CoherenceOverlayScript implements EveryFrameScript {
 
         for (SectorEntityToken pond : player.getContainingLocation()
                 .getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
-
             MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
             if (plugin == null || !plugin.isActive()) continue;
 
@@ -93,7 +84,6 @@ public class CoherenceOverlayScript implements EveryFrameScript {
 
         return best;
     }
-
 
     protected float getBoatWeight() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -111,13 +101,11 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         return best;
     }
 
-
     protected static float boatMinimum() {
         return MathUtils.clamp(
                 FishConstants.COHERENCE_FISHERMAN_ABERRATION / FishConstants.COHERENCE_OVERLAY_CEIL,
                 0f, 1f);
     }
-
 
     protected static float falloff(float distance, float range) {
         if (distance >= range || range <= 0f) return 0f;
@@ -126,7 +114,6 @@ public class CoherenceOverlayScript implements EveryFrameScript {
 
         return near * near;
     }
-
 
     public static float levelFor(float aberration) {
         return MathUtils.clamp((aberration - FishConstants.COHERENCE_OVERLAY_FLOOR)
@@ -138,7 +125,6 @@ public class CoherenceOverlayScript implements EveryFrameScript {
     public boolean isDone() {
         return false;
     }
-
 
     @Override
     public boolean runWhilePaused() {

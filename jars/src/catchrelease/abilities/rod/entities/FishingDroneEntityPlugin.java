@@ -21,21 +21,34 @@ import org.magiclib.plugins.MagicCampaignTrailPlugin;
 import java.awt.Color;
 import java.util.logging.Logger;
 
-
 public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
+    public enum Mode {
+        LAUNCHING,
+        ORBITING,
+        CHASING,
+        RETURNING
+    }
 
     public static final String ENTITY_ID = "catchrelease_FishingDrone";
 
-    public enum Mode {
-
-        LAUNCHING,
-
-        ORBITING,
-
-        CHASING,
-
-        RETURNING
-    }
+    protected Mode mode = Mode.LAUNCHING;
+    protected Vector2f orbitCenter;
+    protected Color color;
+    protected boolean roaming;
+    protected float ringPhase;
+    protected float slotOffset;
+    protected float currentAngle;
+    protected float currentRadius;
+    protected float facingOffset;
+    protected Vector2f velocity = new Vector2f();
+    protected float wanderPhase;
+    protected float returnTime = 0f;
+    protected float trailId;
+    protected SectorEntityToken chaseTarget;
+    protected boolean returningToPassiveOrbit = false;
+    protected SectorEntityToken carried;
+    protected boolean arrivedHome = false;
+    transient protected SpriteAPI sprite;
 
     public static class Params {
         public final Vector2f orbitCenter;
@@ -43,11 +56,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         public final Color color;
         public final boolean roaming;
 
-
         public Params(Vector2f orbitCenter, float orbitAngle, Color color) {
             this(orbitCenter, orbitAngle, color, false);
         }
-
 
         public Params(Vector2f orbitCenter, float orbitAngle, Color color, boolean roaming) {
             this.orbitCenter = orbitCenter;
@@ -56,46 +67,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
             this.roaming = roaming;
         }
     }
-
-    protected Mode mode = Mode.LAUNCHING;
-    protected Vector2f orbitCenter;
-    protected Color color;
-
-
-    protected boolean roaming;
-
-
-    protected float ringPhase;
-    protected float slotOffset;
-
-
-    protected float currentAngle;
-    protected float currentRadius;
-
-
-    protected float facingOffset;
-
-    protected Vector2f velocity = new Vector2f();
-    protected float wanderPhase;
-
-
-    protected float returnTime = 0f;
-
-
-    protected float trailId;
-
-
-    protected SectorEntityToken chaseTarget;
-
-
-    protected boolean returningToPassiveOrbit = false;
-
-
-    protected SectorEntityToken carried;
-
-    protected boolean arrivedHome = false;
-
-    transient protected SpriteAPI sprite;
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
@@ -114,7 +85,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.trailId = MagicCampaignTrailPlugin.getUniqueID();
     }
 
-
     protected Vector2f getOrbitCenter() {
         if (!roaming) return orbitCenter;
 
@@ -125,16 +95,13 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         return orbitCenter == null ? entity.getLocation() : orbitCenter;
     }
 
-
     protected float getOrbitRadius() {
         return roaming ? RodConstants.DRONE_ROAM_RADIUS : RodConstants.DRONE_ORBIT_RADIUS;
     }
 
-
     protected float getSpeed() {
         return UpgradeManager.getValue(StatIds.DRONE_SPEED, RodConstants.DRONE_SPEED);
     }
-
 
     protected float getSteerResponse() {
         return UpgradeManager.getValue(StatIds.DRONE_ACCELERATION, RodConstants.DRONE_STEER_RESPONSE);
@@ -169,7 +136,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         renderTrail();
     }
 
-
     protected Vector2f getGoal() {
         switch (mode) {
             case CHASING:
@@ -186,16 +152,13 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     public float getSlotAngle() {
         return ringPhase + slotOffset;
     }
 
-
     public Vector2f getOrbitSlot() {
         return MathUtils.getPointOnCircumference(getOrbitCenter(), getOrbitRadius(), getSlotAngle());
     }
-
 
     protected boolean isOnTheRing() {
         Vector2f center = getOrbitCenter();
@@ -207,7 +170,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         return Math.abs(getAngleDifference(getHeading(), tangent)) <= RodConstants.DRONE_JOIN_ALIGNMENT;
     }
-
 
     protected void joinCircle() {
         Vector2f center = getOrbitCenter();
@@ -224,11 +186,9 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         return (float) Math.toDegrees(Math.atan2(velocity.y, velocity.x));
     }
 
-
     protected static float getAngleDifference(float a, float b) {
         return ((a - b + 540f) % 360f) - 180f;
     }
-
 
     protected void flyCircle(float amount) {
         float settle = 1f - (float) Math.exp(-amount / RodConstants.DRONE_SETTLE_RESPONSE);
@@ -259,7 +219,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         entity.setFacing(currentAngle + 90f + facingOffset);
     }
-
 
     protected void steerTowards(Vector2f goal, float amount) {
         Vector2f offset = Vector2f.sub(goal, entity.getLocation(), null);
@@ -301,7 +260,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         velocity.y += (desired.y - velocity.y) * response;
     }
 
-
     protected float getTravelSpeed() {
         if (mode != Mode.RETURNING) return getSpeed();
 
@@ -310,7 +268,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         return getSpeed() * (1f + gain);
     }
-
 
     protected float getApproachSpeed(float distance) {
         float speed = getTravelSpeed();
@@ -327,7 +284,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         return speed * distance / RodConstants.DRONE_SLOWING_DISTANCE;
     }
 
-
     protected Vector2f getGoalVelocity() {
         // launching drone's slot circle may itself be moving (roaming) - match its velocity or it never converges
         if (mode == Mode.LAUNCHING) return getCenterVelocity();
@@ -338,7 +294,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
         return fleet == null ? null : fleet.getVelocity();
     }
-
 
     protected Vector2f getCenterVelocity() {
         if (!roaming) return null;
@@ -377,7 +332,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         if (Misc.getDistance(entity.getLocation(), fleet.getLocation()) <= arrival) expire();
     }
 
-
     public void chase(SectorEntityToken mote) {
         boolean isNewTarget = mote != null && mote != chaseTarget;
         boolean shouldReportLock = isNewTarget
@@ -393,13 +347,11 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     public void returnToOrbit() {
         this.chaseTarget = null;
         this.returningToPassiveOrbit = true;
         this.mode = Mode.LAUNCHING;
     }
-
 
     public void recall(SectorEntityToken carried) {
         if (this.carried != carried) setCarriedHeld(false);
@@ -439,7 +391,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     public boolean isOrbiting() {
         return mode == Mode.ORBITING;
     }
-
 
     public boolean isAvailable() {
         return mode == Mode.ORBITING || mode == Mode.LAUNCHING;

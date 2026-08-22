@@ -11,12 +11,9 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ConservatoryOptionProvider extends BaseIndustryOptionProvider {
-
     public static final Object SHOP = new Object();
     public static final Object AQUARIUM = new Object();
-
 
     public static void register() {
         Global.getSector().getListenerManager().addListener(

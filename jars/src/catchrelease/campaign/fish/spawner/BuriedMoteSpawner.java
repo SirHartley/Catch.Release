@@ -20,12 +20,9 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class BuriedMoteSpawner implements EveryFrameScript {
-
     protected IntervalUtil interval = new IntervalUtil(
             FishConstants.BURIED_CHECK_INTERVAL * 0.75f, FishConstants.BURIED_CHECK_INTERVAL * 1.25f);
-
 
     public static void register() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
@@ -67,16 +64,13 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-
     protected static float getSpawnMinRange() {
         return Searchlight.getMaxReach() + FishConstants.BURIED_SPAWN_CLEARANCE;
     }
 
-
     protected static float getSpawnMaxRange() {
         return getSpawnMinRange() + FishConstants.BURIED_SPAWN_BAND;
     }
-
 
     protected static float getPopulationRange() {
         return getSpawnMaxRange();
@@ -96,7 +90,6 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         return nearby;
     }
 
-
     protected void cullDistant(LocationAPI location, Vector2f around) {
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
@@ -107,11 +100,9 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         }
     }
 
-
     protected static float getRareChance() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
     }
-
 
     protected void spawn(LocationAPI location, Vector2f around) {
         // a buried mote is what the lights find, so only what the lights can find is offered

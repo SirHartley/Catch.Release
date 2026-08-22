@@ -15,24 +15,19 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
-
+    public RoamingDroneSwarmScript() {
+        super(null, null);
+    }
 
     public static RoamingDroneSwarmScript dispatch() {
         return launch(new RoamingDroneSwarmScript());
     }
 
-    public RoamingDroneSwarmScript() {
-        super(null, null);
-    }
-
-
     @Override
     protected FishingDroneEntityPlugin.Params createDroneParams(float slotAngle) {
         return new FishingDroneEntityPlugin.Params(null, slotAngle, RodConstants.DRONE_COLOR, true);
     }
-
 
     @Override
     public Vector2f getSearchCenter() {
@@ -40,7 +35,6 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
         return fleet == null ? null : fleet.getLocation();
     }
-
 
     @Override
     protected float getReach() {
@@ -57,7 +51,6 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
         return RodConstants.DRONE_ROAM_RADIUS;
     }
 
-
     @Override
     protected List<SectorEntityToken> getSearchArea() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
@@ -65,7 +58,6 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
         return fleet.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
     }
-
 
     @Override
     protected boolean isReachable(SectorEntityToken mote) {
@@ -75,7 +67,6 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
         return super.isReachable(mote);
     }
-
 
     @Override
     protected void onMoteReached(SectorEntityToken drone, SectorEntityToken mote) {
@@ -100,7 +91,6 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
 
         super.onMoteReached(drone, mote);
     }
-
 
     @Override
     protected boolean shouldRecall() {

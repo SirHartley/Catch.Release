@@ -40,42 +40,42 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
-
     public enum State {
-
         OUTBOUND,
-
         PUSHING,
-
-
         HAULING,
-
         TAUT,
-
         HELD,
-
         REELING,
-
         RETURNING,
-
-
         BLASTED,
-
-
         RETRACTING,
-
-
         DONE
     }
 
+    protected State state = State.OUTBOUND;
+    protected Vector2f heading = new Vector2f();
+    protected float distanceOut = 0f;
+    protected float stateTime = 0f;
+    protected float age = 0f;
+    protected Vector2f slack;
+    protected Vector2f slackVelocity = new Vector2f();
+    protected float paidOut = 0f;
+    protected SectorEntityToken hooked;
+    protected boolean haulingTarget = false;
+    protected boolean minigameOpened = false;
+    protected Vector2f blastThrow;
+    protected FishCatch caught;
+    protected CampaignFleetAPI owner;
+    protected float trailId;
+    transient protected SpriteAPI headSprite;
+    transient protected float headSpriteWidth;
+    transient protected float headSpriteHeight;
 
     public static class Params {
         public final Vector2f from;
         public final Vector2f target;
-
-
         public final CampaignFleetAPI owner;
 
         public Params(Vector2f from, Vector2f target) {
@@ -89,48 +89,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    protected State state = State.OUTBOUND;
-    protected Vector2f heading = new Vector2f();
-
-    protected float distanceOut = 0f;
-    protected float stateTime = 0f;
-
-
-    protected float age = 0f;
-
-
-    protected Vector2f slack;
-    protected Vector2f slackVelocity = new Vector2f();
-
-
-    protected float paidOut = 0f;
-
-
-    protected SectorEntityToken hooked;
-
-
-    protected boolean haulingTarget = false;
-
-
-    protected boolean minigameOpened = false;
-
-
-    protected Vector2f blastThrow;
-
-
-    protected FishCatch caught;
-
-
-    protected CampaignFleetAPI owner;
-
-    protected float trailId;
-
-    transient protected SpriteAPI headSprite;
-
-
-    transient protected float headSpriteWidth;
-    transient protected float headSpriteHeight;
-
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
         super.init(entity, pluginParams);
@@ -141,9 +99,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (p != null) heading = Vector2f.sub(p.target, p.from, null);
         if (p != null) owner = p.owner;
         if (heading.lengthSquared() > 0f) heading.normalise(heading);
-
     }
-
 
     protected CampaignFleetAPI getHomeFleet() {
         if (owner != null) return owner.isExpired() ? null : owner;
@@ -185,11 +141,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         renderTrail();
     }
 
-
     protected float getSpeed() {
         return UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
     }
-
 
     protected void advanceOutbound(float amount) {
         move(heading, getSpeed() * amount);
@@ -234,7 +188,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (distanceOut >= HarpoonConstants.RANGE) enter(State.RETURNING);
     }
 
-
     protected void beginHaul(CampaignFleetAPI struck) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
@@ -250,11 +203,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.HAULING);
     }
 
-
     public static boolean isExplosive() {
         return TackleManager.get(Tackle.Fit.HARPOON).explosive;
     }
-
 
     protected void blastMote(SectorEntityToken mote) {
         String targetName = "Pattern";
@@ -269,7 +220,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         detonate(ExplosionFleetDamage.NONE);
     }
 
-
     protected void blastFleet(CampaignFleetAPI struck) {
         CrabWares.recordExplosiveUse(struck.getName());
 
@@ -277,7 +227,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         detonate(ExplosionFleetDamage.MEDIUM);
     }
-
 
     protected void detonate(ExplosionFleetDamage damage) {
         LocationAPI where = entity.getContainingLocation();
@@ -296,7 +245,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         throwHead();
     }
 
-
     protected void throwHead() {
         float away = heading.lengthSquared() > 0f
                 ? Misc.getAngleInDegrees(heading) : (float) Math.random() * 360f;
@@ -310,7 +258,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         enter(State.BLASTED);
     }
-
 
     protected void advanceBlasted(float amount) {
         if (blastThrow == null) blastThrow = new Vector2f();
@@ -329,13 +276,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         expire();
     }
 
-
     protected float getBlastFade() {
         if (blastThrow == null) return 1f;
 
         return MathUtils.clamp(1f - stateTime / HarpoonConstants.BLAST_FADE_TIME, 0f, 1f);
     }
-
 
     public void cutLine() {
         CampaignFleetAPI struck = getHookedFleet();
@@ -344,11 +289,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.RETURNING);
     }
 
-
     public boolean isHauling() {
         return state == State.HAULING;
     }
-
 
     public static boolean cutAllLines() {
         boolean cut = false;
@@ -361,11 +304,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return cut;
     }
 
-
     public static boolean isAnyHauling() {
         return !getHauling().isEmpty();
     }
-
 
     public static boolean isAnyLineOut() {
         LocationAPI location = Global.getSector().getCurrentLocation();
@@ -379,7 +320,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         return false;
     }
-
 
     protected static List<HarpoonEntityPlugin> getHauling() {
         List<HarpoonEntityPlugin> hauling = new ArrayList<>();
@@ -401,7 +341,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return hauling;
     }
 
-
     protected void advancePushing(float amount) {
         if (!isHookedValid()) {
             enter(State.RETURNING);
@@ -415,7 +354,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         if (stateTime >= HarpoonConstants.PUSH_TIME) enter(State.TAUT);
     }
-
 
     protected void advanceHauling(float amount, CampaignFleetAPI player) {
         CampaignFleetAPI struck = getHookedFleet();
@@ -463,14 +401,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 toAnchor.y * HarpoonConstants.HAUL_SPEED);
     }
 
-
     protected CampaignFleetAPI getHookedFleet() {
         if (!isHookedValid()) return null;
         if (!(hooked instanceof CampaignFleetAPI)) return null;
 
         return (CampaignFleetAPI) hooked;
     }
-
 
     protected CampaignFleetAPI findFleet() {
         // an owned line never ties to a hull - the Fisherman throws at fish, and a rope between two NPC fleets is a physics problem nobody is playing
@@ -500,14 +436,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return closest;
     }
 
-
     public static boolean canHook(CampaignFleetAPI other) {
         if (FishermanSpawner.isFisherman(other)) return false;
 
         return isHaulable(other)
                 && !other.getMemoryWithoutUpdate().getBoolean(HarpoonConstants.HAULED_FLAG);
     }
-
 
     public static boolean isHaulable(CampaignFleetAPI other) {
         if (other.isExpired() || !other.isAlive()) return false;
@@ -516,7 +450,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         return other.getBattle() == null;
     }
-
 
     protected void advanceTaut() {
         if (!isHookedValid()) {
@@ -533,7 +466,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         openMinigame();
     }
-
 
     protected void advanceHomeward(float amount, CampaignFleetAPI fleet) {
         float speed = state == State.REELING ? HarpoonConstants.REEL_SPEED : HarpoonConstants.RETURN_SPEED;
@@ -552,7 +484,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (state == State.REELING) dragHooked();
     }
 
-
     protected void setHookedHeld(boolean held) {
         if (!isHookedValid()) return;
         if (!(hooked.getCustomPlugin() instanceof FishEntityPlugin)) return;
@@ -560,12 +491,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         ((FishEntityPlugin) hooked.getCustomPlugin()).setHeld(held);
     }
 
-
     protected void releaseHooked() {
         setHookedHeld(false);
         hooked = null;
     }
-
 
     protected void land() {
         boolean carrying = state == State.REELING && caught != null;
@@ -578,7 +507,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         // a fleet was never the catch; fade it out only if what's hooked isn't a fleet
         if (isHookedValid() && getHookedFleet() == null) Misc.fadeAndExpire(hooked, 0.3f);
     }
-
 
     protected void advanceRetract(float amount, CampaignFleetAPI fleet) {
         Vector2f toFleet = Vector2f.sub(fleet.getLocation(), entity.getLocation(), null);
@@ -637,7 +565,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         else enter(State.HELD);
     }
 
-
     protected void advanceSlack(float amount, CampaignFleetAPI fleet) {
         Vector2f rest = getRestPoint(amount, fleet);
 
@@ -672,7 +599,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     protected Vector2f getRestPoint(float amount, CampaignFleetAPI fleet) {
         Vector2f from = fleet.getLocation();
         Vector2f to = entity.getLocation();
@@ -697,7 +623,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return midpoint(from, to);
     }
 
-
     protected float getExcessShare(float distance) {
         if (distance <= 0f) return 0f;
 
@@ -721,16 +646,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         entity.setLocation(loc.x + direction.x * distance, loc.y + direction.y * distance);
         entity.setFacing(Misc.getAngleInDegrees(direction));
-
     }
-
 
     protected void dragHooked() {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
     }
-
 
     public static boolean canTake(SectorEntityToken target) {
         if (target == null || target.isExpired()) return false;
@@ -743,11 +665,9 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return FishEntityPlugin.isAvailable(target, reachesUnder());
     }
 
-
     public static boolean reachesUnder() {
         return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
     }
-
 
     protected SectorEntityToken findMote() {
         SectorEntityToken mote = findMoteWithTag(FishEntityPlugin.MOTE_TAG);
@@ -762,7 +682,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         return buried.unearth();
     }
-
 
     protected SectorEntityToken findMoteWithTag(String tag) {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
@@ -813,7 +732,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 new Vector2f(0f, 0f));
     }
 
-
     @Override
     public float getRenderRange() {
         return HarpoonConstants.RANGE + entity.getRadius() + 100f;
@@ -833,7 +751,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         renderHead(alpha);
     }
 
-
     protected void renderLine(CampaignFleetAPI fleet, float alpha) {
         List<Vector2f> path = getLinePath(fleet.getLocation(), entity.getLocation());
 
@@ -849,7 +766,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         SkillshotUtils.drawLines(pairs, HarpoonConstants.CORE_COLOR,
                 HarpoonConstants.LINE_ALPHA * alpha, HarpoonConstants.LINE_WIDTH);
     }
-
 
     protected List<Vector2f> getLinePath(Vector2f from, Vector2f to) {
         List<Vector2f> path = new ArrayList<>();
@@ -890,7 +806,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return path;
     }
 
-
     protected float getShiver(float distance) {
         float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
         float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
@@ -929,7 +844,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     protected void renderExplosiveHead(Vector2f loc, float alpha) {
         float pulse = 1f
                 + HarpoonConstants.EXPLOSIVE_PULSE
@@ -955,7 +869,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         headSprite.setAlphaMult(alpha);
         headSprite.renderAtCenter(loc.x, loc.y);
     }
-
 
     protected void loadHeadSprite() {
         if (headSprite != null) return;

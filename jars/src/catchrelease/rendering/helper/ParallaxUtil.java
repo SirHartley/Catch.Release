@@ -4,15 +4,12 @@ import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 public class ParallaxUtil {
-
-
     public static Vector2f computeDriftUvOffsetPx(float time,
                                                   float amplitudeWorld,
                                                   float periodSeconds,
                                                   float fillSizeWorld,
                                                   float fillTexW,
                                                   float fillTexH) {
-
         if (fillSizeWorld <= 0f || periodSeconds <= 0f) return new Vector2f(0f, 0f);
 
         double rate = 2.0 * Math.PI / periodSeconds;
@@ -29,7 +26,6 @@ public class ParallaxUtil {
                                                  float fillSizeWorld,
                                                  float fillTexW,
                                                  float fillTexH) {
-
         Vector2f center = viewport.getCenter();
         Vector2f direction = Vector2f.sub(center, entityLoc, null);
         float distToCenter = direction.length();

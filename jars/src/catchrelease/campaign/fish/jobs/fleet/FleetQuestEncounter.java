@@ -6,18 +6,19 @@ import com.fs.starfarer.api.campaign.BaseCampaignEventListenerAndScript;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
-
 public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript implements EveryFrameScript {
-
-
     public static final float OFFER_DAYS = 30f;
 
     protected CampaignFleetAPI fleet;
     protected FleetQuest quest;
-
     protected boolean talked = false;
     protected boolean done = false;
     protected float daysWaited = 0f;
+
+    public FleetQuestEncounter(CampaignFleetAPI fleet, FleetQuest quest) {
+        this.fleet = fleet;
+        this.quest = quest;
+    }
 
     public static FleetQuestEncounter attach(CampaignFleetAPI fleet, FleetQuest quest) {
         FleetQuestEncounter encounter = new FleetQuestEncounter(fleet, quest);
@@ -27,12 +28,6 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
 
         return encounter;
     }
-
-    public FleetQuestEncounter(CampaignFleetAPI fleet, FleetQuest quest) {
-        this.fleet = fleet;
-        this.quest = quest;
-    }
-
 
     public static int countLive() {
         int count = 0;
@@ -91,7 +86,6 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
                 && Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null;
     }
 
-
     protected void answer() {
         if (fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.TAKEN_FLAG)) {
             if (quest != null) quest.take();
@@ -102,7 +96,6 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
 
         turnedDown();
     }
-
 
     protected void turnedDown() {
         if (quest != null) quest.abandon();

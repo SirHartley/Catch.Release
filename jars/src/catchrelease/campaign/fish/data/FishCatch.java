@@ -4,32 +4,17 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.helper.loading.FishSpecLoader;
 import org.lazywizard.lazylib.MathUtils;
 
-
 public class FishCatch {
-
-
     public static final String SEPARATOR = "|";
 
     public String speciesId;
-
-
     public float length;
     public float weight;
-
-
     public float aberration;
-
-
     public SectorRegion origin;
-
-
     public FishLogEntry.Method method;
     public CatchImplement implement;
-
-
     public String sourceId;
-
-
     public long caughtAt;
     public String caughtSystemId;
     public String questTargetId;
@@ -49,7 +34,6 @@ public class FishCatch {
         this.origin = origin;
     }
 
-
     public static FishCatch roll(FishSpec spec, float aberration) {
         return roll(spec, aberration, 0f, null);
     }
@@ -57,7 +41,6 @@ public class FishCatch {
     public static FishCatch roll(FishSpec spec, float aberration, float qualityBias) {
         return roll(spec, aberration, qualityBias, null);
     }
-
 
     public static FishCatch roll(FishSpec spec, float aberration, float qualityBias, SectorRegion origin) {
         if (spec == null) return null;
@@ -77,11 +60,9 @@ public class FishCatch {
                 MathUtils.clamp(aberration, 0f, 1f));
     }
 
-
     protected static float centred() {
         return (MathUtils.getRandomNumberInRange(0f, 1f) + MathUtils.getRandomNumberInRange(0f, 1f)) * 0.5f;
     }
-
 
     public FishSpec getSpec() {
         return FishSpecLoader.getFishSpec(speciesId);
@@ -92,7 +73,6 @@ public class FishCatch {
 
         return spec == null ? speciesId : spec.getDisplayName();
     }
-
 
     public float getSizeFraction() {
         FishSpec spec = getSpec();
@@ -105,7 +85,6 @@ public class FishCatch {
     public FishGrade getGrade() {
         return FishGrade.of(getSizeFraction());
     }
-
 
     public float getValue() {
         FishSpec spec = getSpec();
@@ -123,7 +102,6 @@ public class FishCatch {
 
         return MathUtils.clamp((value - min) / (max - min), 0f, 1f);
     }
-
 
     public String encode() {
         StringBuilder encoded = new StringBuilder(speciesId)
@@ -152,7 +130,6 @@ public class FishCatch {
         return encoded.toString();
     }
 
-
     public static FishCatch decode(String encoded) {
         if (encoded == null || encoded.isEmpty()) return null;
 
@@ -178,7 +155,6 @@ public class FishCatch {
         }
     }
 
-
     protected static String field(String[] parts, int index) {
         if (index >= parts.length) return null;
 
@@ -203,7 +179,6 @@ public class FishCatch {
             return 0L;
         }
     }
-
 
     protected static float round(float value) {
         return Math.round(value * 1000f) / 1000f;

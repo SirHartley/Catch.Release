@@ -9,9 +9,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import org.lazywizard.console.BaseCommand;
 import org.lazywizard.console.Console;
 
-
 public class SpawnFisherman implements BaseCommand {
-
     @Override
     public CommandResult runCommand(String args, CommandContext context) {
         if (!context.isInCampaign() || Global.getSector() == null

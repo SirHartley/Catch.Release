@@ -27,12 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
 public class CatchLogIntel extends BaseIntelPlugin {
-
-
     public static final String TAG = "Catch log";
 
+    protected final FishCatch specimen;
+    protected final String systemName;
+    protected final List<Bycatch> bycatch = new ArrayList<>();
 
     public static class Bycatch implements Serializable {
         public final String rarityName;
@@ -45,10 +45,6 @@ public class CatchLogIntel extends BaseIntelPlugin {
             this.contents = contents;
         }
     }
-
-    protected final FishCatch specimen;
-    protected final String systemName;
-    protected final List<Bycatch> bycatch = new ArrayList<>();
 
     protected CatchLogIntel(FishCatch specimen, SectorEntityToken where,
                             List<TreasureAward> loot) {
@@ -63,7 +59,6 @@ public class CatchLogIntel extends BaseIntelPlugin {
             }
         }
     }
-
 
     public static void record(FishCatch specimen, SectorEntityToken where,
                               List<TreasureAward> loot) {
@@ -101,7 +96,6 @@ public class CatchLogIntel extends BaseIntelPlugin {
         addBulletPoints(info, mode);
     }
 
-
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
         Color h = Misc.getHighlightColor();
@@ -137,7 +131,6 @@ public class CatchLogIntel extends BaseIntelPlugin {
 
         unindent(info);
     }
-
 
     protected void addWhenAndWhere(TooltipMakerAPI info, Color tc, Color h) {
         String date = getDate();
@@ -244,7 +237,6 @@ public class CatchLogIntel extends BaseIntelPlugin {
             unindent(info);
         }
     }
-
 
     @Override
     public String getIcon() {

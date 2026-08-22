@@ -10,15 +10,11 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-
 public class PondHoleRenderer {
-
     public static final int FAN_SEGMENTS = 48;
-
 
     public void render(SpriteAPI starfield, SpriteAPI mask, WarpGrid warp, Vector2f loc,
                        float maskSize, float alpha, float elapsed) {
-
         if (starfield == null || mask == null || warp == null || alpha <= 0f || maskSize <= 0f) return;
 
         Stencil.startStencil(mask, maskSize, maskSize, loc, false);
@@ -48,7 +44,6 @@ public class PondHoleRenderer {
         Stencil.endStencil();
     }
 
-
     protected void drawDisc(Vector2f center, float radius, float innerRadius,
                             Color centerColor, float centerAlpha, Color edgeColor, float edgeAlpha) {
         if (radius <= 0f) return;
@@ -76,7 +71,6 @@ public class PondHoleRenderer {
         GL11.glEnd();
         GL11.glPopAttrib();
     }
-
 
     protected void drawRing(Vector2f center, float innerRadius, float outerRadius,
                             Color color, float innerAlpha, float outerAlpha) {

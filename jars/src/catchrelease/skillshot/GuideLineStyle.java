@@ -1,17 +1,9 @@
 package catchrelease.skillshot;
 
-
 public enum GuideLineStyle {
-
-
     SOLID,
-
-
     DASHED,
-
-
     DOTTED;
-
 
     public float getSegmentPx() {
         switch (this) {
@@ -23,7 +15,6 @@ public enum GuideLineStyle {
                 return 0f;
         }
     }
-
 
     public float getGapPx() {
         switch (this) {

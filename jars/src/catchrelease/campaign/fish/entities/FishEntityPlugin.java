@@ -20,19 +20,13 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class FishEntityPlugin extends BaseCustomEntityPlugin {
-
     public static final String MOTE_TAG = "catchrelease_mote";
-
     private static final float GLOW_SIZE = 25f;
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
-
-
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
-
-
     private static final float DARTER_CREEP_MULT = 0.55f;
     private static final float SINKER_SPEED_MULT = 0.75f;
     private static final float SINKER_CURVE = 14f;
@@ -40,54 +34,39 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float FLOATER_SPEED_MULT = 1.15f;
     private static final float FLOATER_JINK = 10f;
     private static final float MIXED_REROLL = 6f;
-
-
     private static final FishRarity DIVE_FROM = FishRarity.EPIC;
     private static final float DIVE_INTERVAL = 4.5f;
     private static final float DIVE_TIME = 1.6f;
-
-
     private static final float DIVE_FADE = 0.35f;
+    public static final String HOLDS_KEY = "$catchrelease_moteHolds";
+    public static final float HOLD_RANGE = 0.5f;
+    public static final Color QUEST_COLOR = new Color(90, 240, 255);
 
     private float time = 0f;
     private float sineVariance;
     private Vector2f target;
     private Color color;
-
-
     private String fishId;
-
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
-
-
     private boolean held = false;
-
-
     private float stunLeft = 0f;
     private float slowLeft = 0f;
     private float slowStrength = 0f;
-
-
     private transient FishMotion activeMode;
     private transient float phaseLeft = 0f;
     private transient boolean dashing = false;
     private transient float rerollLeft = 0f;
     private transient float curveSign = 1f;
     private transient float curveFlipLeft = 0f;
-
-
     private transient boolean diving = false;
     private transient float diveClock = 0f;
-
-
     private SectorEntityToken pond;
 
     public static class Params {
         public final Vector2f target;
         public final String fishId;
         public final SectorEntityToken pond;
-
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -100,31 +79,21 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
-    public static final String HOLDS_KEY = "$catchrelease_moteHolds";
-
     public boolean holdsStation() {
         return entity != null && entity.getMemoryWithoutUpdate().getBoolean(HOLDS_KEY);
     }
-
-
-    public static final float HOLD_RANGE = 0.5f;
-
 
     public boolean isFromPond() {
         return pond != null;
     }
 
-
     public SectorEntityToken getPond() {
         return pond;
     }
 
-
     public void refreshColor() {
         this.color = resolveColor();
     }
-
 
     public FishSpec getFishSpec() {
         return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
@@ -134,7 +103,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return fishId;
     }
 
-
     public boolean isHeld() {
         return held;
     }
@@ -142,10 +110,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void setHeld(boolean held) {
         this.held = held;
     }
-
-
-    public static final Color QUEST_COLOR = new Color(90, 240, 255);
-
 
     protected Color resolveColor() {
         if (entity != null && QuestPond.isQuestMote(entity)) return QUEST_COLOR;
@@ -217,7 +181,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     protected boolean pickNewTargetInPond() {
         if (pond == null) return false;
 
@@ -235,7 +198,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return true;
     }
 
-
     protected boolean hasLeftThePond() {
         if (pond == null) return false;
 
@@ -246,7 +208,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 > pond.getRadius() * plugin.activity;
     }
 
-
     protected float getWander() {
         FishRarity rarity = getRarity();
 
@@ -255,7 +216,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult + getModeWander();
     }
-
 
     protected float advanceMode(float amount) {
         float difficulty = getRarity().wanderMult;
@@ -290,7 +250,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     protected void advanceDive(float amount) {
         if (!dives()) {
             diving = false;
@@ -321,7 +280,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return DIVE_INTERVAL * DIVE_FROM.wanderMult / Math.max(0.01f, getRarity().wanderMult);
     }
 
-
     public float getVisibility() {
         if (!diving) return 1f;
 
@@ -331,16 +289,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return 1f - MathUtils.clamp(nearestEdge / DIVE_FADE, 0f, 1f);
     }
 
-
     public boolean isDiving() {
         return diving && getVisibility() <= 0f;
     }
 
-
     public static boolean isAvailable(SectorEntityToken mote) {
         return isAvailable(mote, false);
     }
-
 
     public static boolean isAvailable(SectorEntityToken mote, boolean reachesUnder) {
         if (mote == null || mote.isExpired()) return false;
@@ -350,7 +305,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         return reachesUnder || !fish.isDiving();
     }
-
 
     protected float getModeWander() {
         float difficulty = getRarity().wanderMult;
@@ -372,7 +326,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 return 0f;
         }
     }
-
 
     protected FishMotion getActiveMode(float amount) {
         FishMotion motion = getMotion();
@@ -397,13 +350,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return activeMode;
     }
 
-
     protected FishMotion getMotion() {
         FishSpec spec = getFishSpec();
 
         return spec == null || spec.motion == null ? FishMotion.SMOOTH : spec.motion;
     }
-
 
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
@@ -414,13 +365,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-
     protected float getSlowMult() {
         if (slowLeft <= 0f) return 1f;
 
         return Math.max(0.1f, 1f - slowStrength);
     }
-
 
     protected FishRarity getRarity() {
         FishSpec spec = getFishSpec();

@@ -13,12 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-
 public class FishJobAsks {
-
-
     public static final String[] TYPES = {"fish", "crab", "mollusc", "other"};
-
 
     public static float rollWeightFloor(Random random, float hardness) {
         List<Float> ceilings = new ArrayList<>();
@@ -39,7 +35,6 @@ public class FishJobAsks {
         return Math.max(1f, Math.round(ceilings.get(index) * 0.6f));
     }
 
-
     public static List<String> rollTypes(Random random, int howMany) {
         List<String> pool = new ArrayList<>();
         for (String type : TYPES) {
@@ -57,7 +52,6 @@ public class FishJobAsks {
 
         return pool.get(random.nextInt(pool.size())).id;
     }
-
 
     public static boolean rollCatchTerms(Random random, FishRequirement ask, float chance) {
         if (ask == null || random.nextFloat() > clamp(chance)) return false;
@@ -81,7 +75,6 @@ public class FishJobAsks {
         return true;
     }
 
-
     protected static CatchImplement pickImplement(Random random, String speciesId) {
         FishSpec spec = speciesId == null ? null : FishSpecLoader.getFishSpec(speciesId);
 
@@ -96,7 +89,6 @@ public class FishJobAsks {
 
         return null;
     }
-
 
     public static List<FishSpec> getSpecies(String type, FishRarity minRarity) {
         List<FishSpec> out = new ArrayList<>();

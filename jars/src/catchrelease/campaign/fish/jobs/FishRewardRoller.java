@@ -26,18 +26,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-
 public class FishRewardRoller {
-
-
     public static final int VALUE_PER_FISH = 1200;
-
-
     public static final float CREDIT_PAYOUT_MULT = 5f;
-
-
     public static final float SPREAD = 0.35f;
-
 
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
         List<FishReward> rewards = new ArrayList<>();
@@ -67,7 +59,6 @@ public class FishRewardRoller {
 
         return rewards;
     }
-
 
     protected static void coalesceCredits(List<FishReward> rewards) {
         int first = -1;
@@ -99,7 +90,6 @@ public class FishRewardRoller {
         return rollBlueprint(random);
     }
 
-
     protected static FishReward rollUpgrade(Random random, Set<String> reserved) {
         if (UpgradeManager.getInstance() == null) return null;
 
@@ -126,7 +116,6 @@ public class FishRewardRoller {
         return FishReward.upgradeSchematic(stat.id, ShopSchematics.getNextRequiredLevel(stat));
     }
 
-
     protected static FishReward rollTackle(Random random, Set<String> reserved) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
@@ -142,7 +131,6 @@ public class FishRewardRoller {
 
         return FishReward.tackleSchematic(options.get(random.nextInt(options.size())));
     }
-
 
     public static Set<String> getReservedSchematicKeys() {
         Set<String> reserved = new LinkedHashSet<>();
@@ -172,7 +160,6 @@ public class FishRewardRoller {
         String key = reward.getSchematicKey();
         if (key != null) reserved.add(key);
     }
-
 
     protected static boolean ownsRigFor(Tackle tackle) {
         if (tackle == null || tackle.fit == null) return false;
@@ -204,7 +191,6 @@ public class FishRewardRoller {
                 fallbackCredits);
     }
 
-
     protected static FishReward rollBackdrop(Random random) {
         WeightedRandomPicker<Backdrop> picker = new WeightedRandomPicker<>(random);
 
@@ -218,7 +204,6 @@ public class FishRewardRoller {
 
         return picked == null ? null : FishReward.backdrop(picked.id);
     }
-
 
     protected static FishReward rollBlueprint(Random random) {
         boolean weapon = random.nextBoolean();
@@ -247,20 +232,17 @@ public class FishRewardRoller {
                 options.get(random.nextInt(options.size())));
     }
 
-
     public static int creditPayout(int value) {
         int payout = Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
 
         return roundCreditReward(payout);
     }
 
-
     public static int roundCreditReward(int amount) {
         int step = amount > 100_000 ? 10_000 : 1_000;
 
         return Math.round(amount / (float) step) * step;
     }
-
 
     protected static int vary(Random random, int worth) {
         float mult = 1f + (random.nextFloat() * 2f - 1f) * SPREAD;

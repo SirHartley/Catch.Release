@@ -3,35 +3,19 @@ package catchrelease.abilities.harpoon.constants;
 import java.awt.Color;
 
 public class HarpoonConstants {
-
     public static final String ENTITY_ID = "catchrelease_Harpoon";
-
-
     public static final String SOUND_FIRE = "catchrelease_harpoon_fire";
-
-
     public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";
-
-
     public static final String SOUND_CHARGE_RELOAD = "catchrelease_harpoon_charge_reload";
-
     public static final String RELOAD_SOUND_SETTING = "catchrelease_harpoonChargeReloadSound";
     public static final String RELOAD_SOUND_NEVER = "Never play";
     public static final String RELOAD_SOUND_RELEVANT = "Play when relevant";
     public static final String RELOAD_SOUND_ALWAYS = "Always play";
-
-
     public static final String TAG = "catchrelease_harpoon_line";
-
-
     public static final float CHARGES_FALLBACK = 2f;
     public static final float RECHARGE_FALLBACK = 12f;
-
-
     public static final Color LINE_COLOR = new Color(120, 220, 255);
     public static final Color CORE_COLOR = new Color(230, 250, 255);
-
-
     public static final Color EXPLOSIVE_HALO_COLOR = new Color(255, 20, 10);
     public static final Color EXPLOSIVE_HEAD_COLOR = new Color(255, 55, 20);
     public static final Color EXPLOSIVE_CORE_COLOR = new Color(255, 220, 155);
@@ -44,88 +28,51 @@ public class HarpoonConstants {
     public static final float EXPLOSIVE_PULSE_RATE = 13f;
     public static final float EXPLOSIVE_FLICKER = 0.07f;
     public static final float EXPLOSIVE_FLICKER_RATE = 31f;
-
-
     public static final float SPEED = 900f;
     public static final float RANGE = 1200f;
-
-
     public static final float CATCH_RADIUS = 15f;
-
     public static final float PUSH_SPEED = 420f;
     public static final float PUSH_TIME = 0.25f;
-
-
     public static final float TAUT_TIME = 0.2f;
-
-
     public static final float REEL_SPEED = 1400f;
     public static final float RETURN_SPEED = 1400f;
-
-
     public static final float ARRIVAL_DISTANCE = 30f;
-
-
     public static final float HAUL_SPEED = 850f;
     public static final float HAUL_DELAY = PUSH_TIME;
     public static final float HAUL_TIME = 6f;
     public static final float HAUL_DONE_DISTANCE = 60f;
-
-
     public static final float HAUL_SHIVER = 0.3f;
-
-
     public static final float FLEET_ARM_DISTANCE = 220f;
-
-
     public static final float BLAST_RADIUS = 150f;
     public static final float BLAST_DURATION = 0.6f;
     public static final Color BLAST_COLOR = new Color(255, 190, 110);
-
-
     public static final float BLAST_THROW_SPEED = 700f;
     public static final float BLAST_THROW_DRAG = 1.6f;
     public static final float BLAST_SPIN = 540f;
     public static final float BLAST_FADE_TIME = 1.1f;
-
-
     public static final String HAULED_FLAG = "$catchrelease_hauled";
     public static final float HAULED_FLAG_EXPIRY_DAYS = 1f;
-
-
     public static final float RETRACT_DONE = 4f;
     public static final float RETRACT_MAX_TIME = 0.5f;
     public static final float RETRACT_FADE = 0.07f;
-
-
     public static final float RETRACT_SLACK_PULL = 14f;
-
-
     public static final float LINE_WIDTH = 1f;
     public static final float LINE_GLOW_WIDTH = 2f;
     public static final float LINE_ALPHA = 0.6f;
     public static final float LINE_GLOW_ALPHA = 0.1f;
-
     public static final int LINE_SEGMENTS = 32;
-
-
     public static final float LINE_SPRING = 150f;
     public static final float LINE_DRAG = 6f;
     public static final float LINE_MAX_STEP = 1f / 60f;
-
-
     public static final float LINE_PAYOUT = 1.06f;
     public static final float LINE_TAKEUP = 2500f;
     public static final float LINE_REEL_IN = 850f;
-
-
     public static final float WAVE_COUNT = 2.5f;
     public static final float WAVE_SPEED = 9f;
     public static final float WAVE_AMPLITUDE = 0.06f;
     public static final float WAVE_DAMPING = 0.5f;
     public static final float WAVE_REFERENCE_SPEED = 500f;
     public static final float WAVE_EXCESS_FULL = 0.12f;
-
     public static final float HEAD_SIZE = 14f;
     public static final float TRAIL_SIZE = 5f;
 }

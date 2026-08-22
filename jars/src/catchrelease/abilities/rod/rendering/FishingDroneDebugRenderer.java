@@ -16,9 +16,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-
 public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
-
     public static final int CIRCLE_SEGMENTS = 72;
     public static final Color RING_COLOR = new Color(0, 255, 255);
     public static final Color SPOKE_COLOR = new Color(255, 200, 0);
@@ -57,7 +55,6 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
         SkillshotUtils.drawLines(getSpokeVertices(), SPOKE_COLOR, ALPHA, WIDTH, GuideLineStyle.SOLID);
     }
 
-
     protected List<Vector2f> getRingVertices(Vector2f center) {
         List<Vector2f> vertices = new ArrayList<>();
 
@@ -71,7 +68,6 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
 
         return vertices;
     }
-
 
     protected List<Vector2f> getSpokeVertices() {
         List<Vector2f> vertices = new ArrayList<>();

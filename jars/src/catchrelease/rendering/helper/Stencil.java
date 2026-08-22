@@ -5,13 +5,11 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 public class Stencil {
-
     public static void startDepthMask(SpriteAPI mask,
                                       float width,
                                       float height,
                                       Vector2f center,
                                       boolean renderside) {
-
         final boolean alphaTestWasEnabled = GL11.glIsEnabled(GL11.GL_ALPHA_TEST);
         final boolean blendWasEnabled = GL11.glIsEnabled(GL11.GL_BLEND);
 
@@ -61,7 +59,6 @@ public class Stencil {
         GL11.glDepthRange(0.0, 1.0);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
     }
-
 
     @Deprecated
     public static void startStencil(SpriteAPI mask, float width, float height, Vector2f center, boolean reverse) {
@@ -117,5 +114,4 @@ public class Stencil {
     public static void endStencil() {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
     }
-
 }

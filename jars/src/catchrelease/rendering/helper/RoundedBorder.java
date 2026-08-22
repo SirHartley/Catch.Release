@@ -7,10 +7,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class RoundedBorder {
-
-
     public static final int CORNER_SEGMENTS = 6;
 
     public static void draw(float x, float y, float width, float height, float radius,
@@ -39,7 +36,6 @@ public class RoundedBorder {
         GL11.glPopAttrib();
     }
 
-
     protected static List<Vector2f> getOutline(float x, float y, float width, float height, float radius) {
         float r = Math.max(0f, Math.min(radius, Math.min(width, height) * 0.5f));
 
@@ -60,7 +56,6 @@ public class RoundedBorder {
 
         return outline;
     }
-
 
     protected static void addCorner(List<Vector2f> outline, float centerX, float centerY, float radius,
                                     float startAngle) {

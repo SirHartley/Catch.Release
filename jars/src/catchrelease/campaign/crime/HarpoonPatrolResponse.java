@@ -17,61 +17,26 @@ import com.fs.starfarer.api.util.Misc.FleetFilter;
 
 import java.util.List;
 
-
 public class HarpoonPatrolResponse implements EveryFrameScript {
-
-
     public static final String REASON = "catchreleasePatrol";
-
-
     public static final String PATROL_FLAG = "$catchrelease_harpoonPatrol";
-
-
     public static final String PATROL_FACTION_KEY = "$catchrelease_harpoonPatrolFaction";
-
-
     public static final String DEALT_WITH_KEY = "$catchrelease_harpoonPatrolDone";
-
-
     public static final String ANSWERED_KEY = "$catchrelease_harpoonPatrolAnswered";
-
-
     public static final String PAID_KEY = "$catchrelease_harpoonFinePaid";
-
-
     public static final String FORCED_KEY = "$catchrelease_harpoonForced";
-
-
     public static final String FINE_KEY = "$catchrelease_harpoonFine";
     public static final String FINE_TEXT_KEY = "$catchrelease_harpoonFineDGS";
-
-
     public static final String REPEAT_KEY = "$catchrelease_harpoonRepeat";
-
-
     public static final String COUNT_KEY = "$catchrelease_harpoonCount";
-
-
     public static final String RETRY_KEY = "$catchrelease_harpoonPatrolWait";
-
-
     public static final int FINE = 10000;
-
-
     public static final float SEARCH_RANGE = 2500f;
-
-
     public static final float CHASE_DAYS = 12f;
-
-
     public static final float RETRY_DAYS = 5f;
-
-
     public static final float DEALT_WITH_DAYS = HarpoonOffence.MEMORY_DAYS;
 
-
     protected final IntervalUtil interval = new IntervalUtil(0.1f, 0.3f);
-
     protected CampaignFleetAPI chasing = null;
 
     public static void register() {
@@ -106,7 +71,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         beginChase();
     }
 
-
     protected CampaignFleetAPI reacquire() {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CampaignFleetAPI fleet : location.getFleets()) {
@@ -118,7 +82,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         return null;
     }
-
 
     protected void beginChase() {
         final CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -138,7 +101,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             return;
         }
     }
-
 
     protected static boolean canBeSent(CampaignFleetAPI curr, FactionAPI faction,
                                        CampaignFleetAPI player) {
@@ -165,7 +127,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
     }
 
-
     public static boolean callForHelp(CampaignFleetAPI victim) {
         CampaignFleetAPI nearest = findNearbyPatrol(victim);
         if (nearest == null || victim.getFaction() == null) return false;
@@ -178,7 +139,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         return true;
     }
-
 
     public static CampaignFleetAPI findNearbyPatrol(CampaignFleetAPI victim) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -204,7 +164,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         return nearest;
     }
 
-
     protected CampaignFleetAPI findPatrol(final CampaignFleetAPI player, final FactionAPI faction) {
         List<CampaignFleetAPI> patrols = Misc.findNearbyFleets(player, SEARCH_RANGE, new FleetFilter() {
             @Override
@@ -227,12 +186,10 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         return closest;
     }
 
-
     protected static boolean hasAnsweredEverything(CampaignFleetAPI patrol, String factionId) {
         return patrol.getMemoryWithoutUpdate().getInt(ANSWERED_KEY)
                 >= HarpoonOffence.getIncidentCount(factionId);
     }
-
 
     public static void clearRetryWait(String factionId) {
         Global.getSector().getMemoryWithoutUpdate().unset(RETRY_KEY + factionId);
@@ -243,7 +200,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         chasing = patrol;
     }
-
 
     protected static void dispatch(CampaignFleetAPI patrol, String factionId) {
         MemoryAPI mem = patrol.getMemoryWithoutUpdate();
@@ -261,7 +217,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
         mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId), CHASE_DAYS);
     }
-
 
     protected void maintainChase() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -313,7 +268,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         }
     }
 
-
     protected void collect() {
         MemoryAPI mem = chasing.getMemoryWithoutUpdate();
 
@@ -338,7 +292,6 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         HarpoonOffence.noteEvasion(factionId);
     }
-
 
     protected void endChase() {
         if (chasing == null) return;

@@ -7,11 +7,27 @@ import com.fs.starfarer.api.Global;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class ChargeManager implements EveryFrameScript {
-
     public static final String KEY = "$catchrelease_charges";
 
+    protected final Map<String, Refill> refills = new HashMap<>();
+
+    public static class Refill {
+        public final String maxStat;
+        public final float maxFallback;
+        public final String rateStat;
+        public final float rateFallback;
+
+        public Refill(String maxStat, float maxFallback, String rateStat, float rateFallback) {
+            this.maxStat = maxStat;
+            this.maxFallback = maxFallback;
+            this.rateStat = rateStat;
+            this.rateFallback = rateFallback;
+        }
+
+        public void onChargeGained() {
+        }
+    }
 
     public static void register() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
@@ -21,7 +37,6 @@ public class ChargeManager implements EveryFrameScript {
         Global.getSector().addScript(new ChargeManager());
     }
 
-
     public static int getCharges(String abilityId, String maxStat, float maxFallback) {
         return (int) Math.floor(getPool(abilityId, maxStat, maxFallback));
     }
@@ -29,7 +44,6 @@ public class ChargeManager implements EveryFrameScript {
     public static boolean hasCharge(String abilityId, String maxStat, float maxFallback) {
         return getCharges(abilityId, maxStat, maxFallback) >= 1;
     }
-
 
     public static boolean spend(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
@@ -39,7 +53,6 @@ public class ChargeManager implements EveryFrameScript {
 
         return true;
     }
-
 
     public static boolean gain(String abilityId, Refill refill) {
         if (abilityId == null || refill == null) return false;
@@ -60,13 +73,11 @@ public class ChargeManager implements EveryFrameScript {
         return true;
     }
 
-
     public static float getProgressToNext(String abilityId, String maxStat, float maxFallback) {
         float pool = getPool(abilityId, maxStat, maxFallback);
 
         return pool - (float) Math.floor(pool);
     }
-
 
     protected static float getPool(String abilityId, String maxStat, float maxFallback) {
         Map<String, Float> pools = getPools();
@@ -105,28 +116,6 @@ public class ChargeManager implements EveryFrameScript {
         return pools;
     }
 
-    protected final Map<String, Refill> refills = new HashMap<>();
-
-
-    public static class Refill {
-        public final String maxStat;
-        public final float maxFallback;
-        public final String rateStat;
-        public final float rateFallback;
-
-        public Refill(String maxStat, float maxFallback, String rateStat, float rateFallback) {
-            this.maxStat = maxStat;
-            this.maxFallback = maxFallback;
-            this.rateStat = rateStat;
-            this.rateFallback = rateFallback;
-        }
-
-
-        public void onChargeGained() {
-        }
-    }
-
-
     public static void define(String abilityId, Refill refill) {
         ChargeManager manager = getManager();
         if (manager == null) return;
@@ -146,7 +135,6 @@ public class ChargeManager implements EveryFrameScript {
     public boolean isDone() {
         return false;
     }
-
 
     @Override
     public boolean runWhilePaused() {

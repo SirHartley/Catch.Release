@@ -14,38 +14,24 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.util.EnumSet;
 
-
 public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
-
-
     public static final int STEPS_ACROSS = 16;
     public static final int STEPS_ALONG = 24;
-
     public static final float SUPERLUMINAL_TIME = 0.4f;
-
-
     private static final Color EDGE_TINT = new Color(230, 35, 255);
-
-
     private static final float BAND_CENTER = 0.62f;
     private static final float BAND_WIDTH = 0.38f;
 
-
     private final Vector2f origin;
     private final Vector2f aim;
-
     private final float size;
     private final Color color;
-
     private boolean expired = false;
-
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
-
     private float timePassed = 0f;
     private float extraAlphaMult = 1f;
-
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size, Color color) {
@@ -120,7 +106,6 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         drawWedge(Misc.getAngleInDegrees(origin, aim), distance + Searchlight.getArea(), distance, alpha);
     }
 
-
     protected void drawWedge(float direction, float length, float aimDistance, float alpha) {
         float r = color.getRed() / 255f;
         float g = color.getGreen() / 255f;
@@ -171,7 +156,6 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
         GL11.glPopAttrib();
     }
-
 
     protected float along(float u, float aimFract) {
         float base = Searchlight.FAN_TIP_STRENGTH

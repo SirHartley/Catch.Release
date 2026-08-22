@@ -12,19 +12,13 @@ import catchrelease.skillshot.input.SkillshotActivationManager;
 import catchrelease.skillshot.util.DelayedActionScriptRunWhilePaused;
 import catchrelease.skillshot.util.SkillshotUtils;
 
-
 public abstract class BaseSkillshotAbility extends BaseDurationAbility implements SkillshotAbility {
-
-
     protected abstract void onSkillshotFired(Vector2f worldTarget, float angleFromFleet);
-
 
     protected void onConsume() {
     }
 
-
     public abstract void addTooltip(TooltipMakerAPI tooltip);
-
 
     protected void onActivatedWithoutReticule() {
     }
@@ -37,7 +31,6 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
         return super.isUsable() && !isTargetingBlocked();
     }
 
-
     public boolean isTargetingBlocked() {
         if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return true;
 
@@ -49,7 +42,6 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     public boolean isActiveOrInProgress() {
         return super.isActiveOrInProgress() || turnedOn;
     }
-
 
     @Override
     public void pressButton() {
@@ -87,7 +79,6 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
             Global.getSoundPlayer().playUISound(soundId, 1f, 1f);
         }
     }
-
 
     @Override
     public void forceActivation() {

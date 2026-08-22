@@ -8,16 +8,9 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
 
-
 public class HarpoonWitness implements EveryFrameScript {
-
-
     public static final String REPORTING_FLAG = "$catchrelease_harpoonReporting";
-
-
     public static final float REPORT_DISTANCE = 400f;
-
-
     public static final float TRAVEL_DAYS = 12f;
 
     protected CampaignFleetAPI victim;
@@ -28,14 +21,24 @@ public class HarpoonWitness implements EveryFrameScript {
     protected String originName;
     protected boolean explosive;
     protected boolean hitmanEligible;
-
     protected float daysSpent = 0f;
     protected boolean done = false;
 
+    public HarpoonWitness(CampaignFleetAPI victim, CampaignFleetAPI patrol, String factionId,
+                          boolean identified, String victimName, String originName,
+                          boolean explosive, boolean hitmanEligible) {
+        this.victim = victim;
+        this.patrol = patrol;
+        this.factionId = factionId;
+        this.identified = identified;
+        this.victimName = victimName;
+        this.originName = originName;
+        this.explosive = explosive;
+        this.hitmanEligible = hitmanEligible;
+    }
 
     public static void begin(CampaignFleetAPI victim, String factionId,
                              boolean identified, boolean explosive) {
-
         if (victim == null || factionId == null) return;
 
         String victimName = victim.getName();
@@ -71,20 +74,6 @@ public class HarpoonWitness implements EveryFrameScript {
         Global.getSector().addScript(
                 new HarpoonWitness(victim, patrol, factionId, identified,
                         victimName, originName, explosive, hitmanEligible));
-    }
-
-    public HarpoonWitness(CampaignFleetAPI victim, CampaignFleetAPI patrol, String factionId,
-                          boolean identified, String victimName, String originName,
-                          boolean explosive, boolean hitmanEligible) {
-
-        this.victim = victim;
-        this.patrol = patrol;
-        this.factionId = factionId;
-        this.identified = identified;
-        this.victimName = victimName;
-        this.originName = originName;
-        this.explosive = explosive;
-        this.hitmanEligible = hitmanEligible;
     }
 
     @Override
@@ -130,14 +119,12 @@ public class HarpoonWitness implements EveryFrameScript {
         return fleet != null && !fleet.isExpired() && fleet.isAlive();
     }
 
-
     protected void report() {
         HarpoonPatrolResponse.clearRetryWait(factionId);
         HarpoonPatrolResponse.dispatch(patrol, factionId);
 
         release();
     }
-
 
     protected void giveUp() {
         if (identified && hitmanEligible) {
@@ -147,7 +134,6 @@ public class HarpoonWitness implements EveryFrameScript {
         release();
     }
 
-
     protected void release() {
         abandon();
 
@@ -156,7 +142,6 @@ public class HarpoonWitness implements EveryFrameScript {
         victim.clearAssignments();
         Misc.giveStandardReturnToSourceAssignments(victim);
     }
-
 
     protected void abandon() {
         done = true;
