@@ -12,39 +12,30 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.EnumSet;
 
-/**
- * What the breach lamp's light is sweeping across: hyperspace, seen through the beam.
- * <p>
- * Drawn at natural size and world-anchored - UVs come from each vertex's sector position, so the
- * beam slides across a starfield that stays put. Cropped by a gradient (vertex-ring alpha falloff
- * matching the glow sprite's own falloff), not a stencil, so the window's edge is soft like the beam.
- * <p>
- * Parallax is borrowed from the pond: the fill leans on the camera and drifts on its own, since a
- * beam the player travels with otherwise reads as a hole cut in dead-still paper.
- */
+
 public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
 
-    /** Seconds the window takes to open; faster than the glow's flash fade so the burn reads as punching through, not fading up. */
+
     public static final float OPEN_TIME = 0.6f;
 
-    /** Window's reach as a share of beam radius, matched to where the glow sprite has visibly fallen off. */
+
     public static final float RADIUS_MULT = 0.9f;
 
-    /** Deep's visibility at beam center; short of full since the fabric thins rather than vanishes. */
+
     public static final float CENTER_ALPHA = 0.85f;
 
-    /** Gradient resolution: rings from centre to rim, segments per ring. */
+
     public static final int RINGS = 4;
     public static final int SEGMENTS = 48;
 
-    /** Camera lean and standing wander in world units - the pond's pair, scaled down. */
+
     public static final float PARALLAX_MAX_DISPLACEMENT = 60f;
     public static final float DRIFT = 25f;
     public static final float DRIFT_PERIOD = 17f;
 
     public transient SpriteAPI fill;
 
-    /** Live reference to the light's position, not a copy - travels with the beam. */
+
     private final Vector2f loc;
     private final float size;
 
@@ -125,7 +116,6 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         // natural size: 1 texture pixel = 1 world unit, matching how the deep is drawn elsewhere
         float fillSizeWorld = texW;
 
-        // both offsets are in texture pixels; converted to UV below
         Vector2f lean = ParallaxUtil.computeFillUvOffsetPx(viewport, loc,
                 PARALLAX_MAX_DISPLACEMENT, fillSizeWorld, texW, texH);
         Vector2f wander = ParallaxUtil.computeDriftUvOffsetPx(timePassed,
@@ -172,14 +162,14 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         GL11.glPopAttrib();
     }
 
-    /** Beam's own falloff (squared, like {@code getLitStrength}), so the window is as open as the light there is bright. */
+
     protected float falloff(float t) {
         float inBeam = 1f - t;
 
         return inBeam * inBeam;
     }
 
-    /** One vertex: world-anchored UV at natural scale, plus the parallax lean/drift offset. */
+
     protected void emit(float x, float y, float fillSizeWorld, float uOff, float vOff, float alpha) {
         GL11.glColor4f(1f, 1f, 1f, alpha);
         GL11.glTexCoord2f(x / fillSizeWorld + uOff, y / fillSizeWorld + vOff);

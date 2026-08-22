@@ -17,43 +17,21 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-/**
- * The coherence reading, as an entry in the terrain bar.
- * <p>
- * There is nowhere else to put it. The bar is built from the terrain the fleet is standing in, and
- * thin reality is not a place - it is a property of the whole system, and the rigs can be run
- * anywhere. So this is terrain that covers everything and is never seen: it draws nothing, blocks
- * nothing, and does nothing to a fleet.
- * <p>
- * The trick is IndEvo's, from the radiation field its meteor swarms leave behind. Rather than
- * following the fleet about, the terrain answers {@link #containsEntity} with a question instead of
- * a distance - you are inside it exactly when the overlay is up. Nothing has to be moved, and
- * nothing can drift out of step with what is on screen.
- * <p>
- * Extends the corona because that is the terrain vanilla writes its live readouts on, and every
- * corona behaviour that would otherwise come with it - the CR loss, the flares, the loops, the
- * blocked approach - is switched off below.
- */
+
 public class CoherenceTerrain extends StarCoronaTerrainPlugin {
 
-    /** As registered in data/campaign/terrain.json. */
+
     public static final String TERRAIN_ID = "catchrelease_coherence_field";
 
-    /** Wide enough to cover any system, since what it covers is "wherever the fleet is". */
+
     public static final float FIELD_RADIUS = 50000f;
 
-    /** Seconds of nothing to show before it takes itself away again. */
+
     public static final float IDLE_EXPIRE = 5f;
 
     protected float idle = 0f;
 
-    /**
-     * Tags the entity with the terrain id, which nothing else does.
-     * <p>
-     * {@code BaseTerrain.init} keeps the id in a field and never puts it on the entity, so a
-     * lookup by tag finds nothing - and this one is looked up before every add. Untagged, the
-     * field would be added again on every frame the overlay is up.
-     */
+
     @Override
     public void init(String terrainId, SectorEntityToken entity, Object param) {
         super.init(terrainId, entity, param);
@@ -61,13 +39,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         entity.addTag(TERRAIN_ID);
     }
 
-    /**
-     * Puts the field in a location, if it is not already there.
-     * <p>
-     * Added on demand rather than to every system at generation: the reading only exists while
-     * somebody is fishing, and a terrain in all four hundred systems is four hundred things to
-     * advance for one that is ever looked at.
-     */
+
     public static void ensureIn(LocationAPI location) {
         if (location == null) return;
 
@@ -81,11 +53,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         location.addTerrain(TERRAIN_ID, params);
     }
 
-    /**
-     * Inside it exactly when the overlay is up, and only for the player - nobody else's readout is
-     * being drawn, and a corona that claimed every hull in the system would be applying itself to
-     * traffic that has no idea what it is.
-     */
+
     @Override
     public boolean containsEntity(SectorEntityToken other) {
         return other != null && other == Global.getSector().getPlayerFleet() && getLevel() > 0f;
@@ -95,7 +63,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         return CoherenceOverlayScript.getLevel();
     }
 
-    /** Takes itself away once nothing has needed it for a while, rather than sitting in the save. */
+
     @Override
     public void advance(float amount) {
         super.advance(amount);
@@ -117,7 +85,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         return "Thin Fabric";
     }
 
-    /** The reading itself, since the bar shows this line whether or not anybody opens the tooltip. */
+
     @Override
     public String getTerrainName() {
         return "Thin Fabric - " + FishItemPlugin.getAberrationLabel(getAberration());
@@ -146,24 +114,19 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
                 + " worth more to some buyers and less to others.", pad);
     }
 
-    /**
-     * The reading, refreshed once a second rather than asked fresh - the bar calls
-     * {@link #getTerrainName()} and {@link #getNameColor()} every frame it is drawn, and each
-     * ask used to walk every system and slipstream in the sector twice over: a fifth of the
-     * whole frame in profiling. Same interval the overlay script already uses for the same read.
-     */
+
     public static final float READING_REFRESH = 1f;
 
-    /** What one refresh reads: the two halves of the same expensive walk, taken together. */
+
     protected record Reading(float aberration, String source) {
     }
 
-    /** Advanced in {@code advance} and never reset - the cache's clock, in real seconds. */
+
     protected transient float readingClock = 0f;
     protected transient TimedValue<Reading> reading;
 
     protected Reading getReading() {
-        //lazily built - the field is transient, so a loaded save starts without one
+        // lazily built - the field is transient, so a loaded save starts without one
         if (reading == null) reading = new TimedValue<>(READING_REFRESH);
 
         return reading.get(readingClock, () -> {
@@ -197,9 +160,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         return 350f;
     }
 
-    //--- everything a corona does that this must not
 
-    /** A readout, not a hazard. The corona's CR loss would come with it otherwise. */
     @Override
     public void applyEffect(SectorEntityToken entity, float days) {
     }
@@ -243,7 +204,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         return false;
     }
 
-    /** Zero, so nothing routes around a field that is not there to be avoided. */
+
     @Override
     public float getMaxEffectRadius(Vector2f locFrom) {
         return 0f;

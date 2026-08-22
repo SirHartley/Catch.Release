@@ -27,15 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * What the Fisherman has heard: one system, briefly better at one thing. A rumor makes its
- * system's ruptures roll rarer, its treasure turn up oftener, or host a species that has no
- * business being there - for a month, and there is only ever one rumor at a time.
- * <p>
- * The state lives in the save; the effects are read through the three static hooks by the
- * spawner and the treasure roll, so nothing else has to know rumors exist. The intel entry is
- * how the player is told, and it takes itself down when the rumor runs out.
- */
+
 public class FishRumors {
 
     public static final String STATE_KEY = "$catchrelease_rumor";
@@ -46,7 +38,7 @@ public class FishRumors {
     public static final int TYPE_LOOT = 1;
     public static final int TYPE_STRANGER = 2;
 
-    /** The rumor as the save knows it. */
+
     public static class Saved implements Serializable {
         public String systemId;
         public String systemName;
@@ -80,12 +72,12 @@ public class FishRumors {
                 && rumor.systemId != null && rumor.systemId.equals(((StarSystemAPI) location).getId());
     }
 
-    /** Extra rarity bias for ruptures in the whispered-about system; zero everywhere else. */
+
     public static float getRarityBias(LocationAPI location) {
         return appliesTo(location, TYPE_RARITY) ? FishermanConstants.RUMOR_RARITY_BIAS : 0f;
     }
 
-    /** Treasure chance multiplier where the player currently stands. */
+
     public static float getLootMultForPlayer() {
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return 1f;
 
@@ -93,7 +85,7 @@ public class FishRumors {
                 ? FishermanConstants.RUMOR_LOOT_MULT : 1f;
     }
 
-    /** The out-of-place species swimming in the whispered-about system, or null. */
+
     public static String getStrangerId(LocationAPI location) {
         Saved rumor = getActive();
         if (rumor == null || rumor.type != TYPE_STRANGER) return null;
@@ -102,7 +94,7 @@ public class FishRumors {
         return rumor.strangerId;
     }
 
-    /** Whether the Fisherman has anything new to say - one rumor a month, active or not. */
+
     public static boolean isAvailable() {
         if (Global.getSector() == null) return false;
 
@@ -113,13 +105,7 @@ public class FishRumors {
                 >= FishermanConstants.RUMOR_COOLDOWN_DAYS;
     }
 
-    /**
-     * Makes a new rumor: a system worth whispering about, one of the three flavours, a month on
-     * the clock, and an intel entry so it is not lost the moment the dialog closes. Replaces
-     * whatever rumor was running.
-     *
-     * @return the new rumor, or null if no system in the sector qualifies
-     */
+
     public static Saved create() {
         StarSystemAPI system = pickSystem();
         if (system == null) return null;
@@ -133,7 +119,6 @@ public class FishRumors {
         if (rumor.type == TYPE_STRANGER) {
             rumor.strangerId = pickStranger(system);
 
-            //nothing out of place to promise - a rarity run says something anywhere
             if (rumor.strangerId == null) rumor.type = TYPE_RARITY;
         }
 
@@ -147,10 +132,7 @@ public class FishRumors {
         return rumor;
     }
 
-    /**
-     * Gives tutorial graduates their first lead without consuming or checking the ordinary monthly
-     * ask gate. Idempotent across the live hand-in and completed-save migration on load.
-     */
+
     public static Saved ensureTutorialLead() {
         if (Global.getSector() == null) return null;
 
@@ -170,7 +152,7 @@ public class FishRumors {
         return rumor;
     }
 
-    /** Somewhere fishable and reachable: proc-gen, connected, not the abyss, nothing special. */
+
     protected static StarSystemAPI pickSystem() {
         List<StarSystemAPI> candidates = new ArrayList<>();
 
@@ -189,16 +171,13 @@ public class FishRumors {
         return candidates.get((int) MathUtils.getRandomNumberInRange(0f, candidates.size() - 0.01f));
     }
 
-    /** A species that could not normally turn up in the system - that being the whole rumor. */
+
     protected static String pickStranger(StarSystemAPI system) {
         List<FishSpec> strangers = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || spec.spawnWeight <= 0f) continue;
 
-            //the whole rumor is that it should not be here, so anything at home anywhere is out -
-            //asked of the full habitat, since a fish that is merely under the wrong sun is as much
-            //a stranger as one from the far side of the sector
             if (!spec.hasHabitat() || FishPresence.livesIn(spec, system)) continue;
 
             strangers.add(spec);
@@ -209,7 +188,7 @@ public class FishRumors {
         return strangers.get((int) MathUtils.getRandomNumberInRange(0f, strangers.size() - 0.01f)).id;
     }
 
-    /** Species name only; the rules sheet owns the spoken sentence built around it. */
+
     public static String getStrangerDisplayName(Saved rumor) {
         if (rumor == null || rumor.type != TYPE_STRANGER) return "";
 
@@ -217,7 +196,7 @@ public class FishRumors {
         return stranger == null ? "pattern" : stranger.getDisplayName();
     }
 
-    /** What a rumor promises, said the way the Fisherman would say it. */
+
     public static String describe(Saved rumor) {
         if (rumor == null) return "";
 
@@ -237,7 +216,7 @@ public class FishRumors {
         }
     }
 
-    /** The rumor in the intel tab: a name, a sentence, and the system on the map. */
+
     public static class RumorIntel extends BaseIntelPlugin {
 
         protected final Saved rumor;
@@ -263,11 +242,7 @@ public class FishRumors {
             addBulletPoints(info, mode);
         }
 
-        /**
-         * The clock under the title, the same on the list row and the open panel - counted off
-         * the saved timestamp rather than said as "about a month", because the number is right
-         * there and a rumor half spent should read as half spent.
-         */
+
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
             Color tc = getBulletColorForMode(mode);
@@ -329,7 +304,7 @@ public class FishRumors {
             return getSortStringNewestFirst();
         }
 
-        /** The Fisherman's colours - the rumor is his, whichever boat happened to pass it on. */
+
         @Override
         public FactionAPI getFactionForUIColors() {
             return Global.getSector().getFaction(FishermanConstants.FACTION);

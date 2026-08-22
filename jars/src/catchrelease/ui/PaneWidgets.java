@@ -15,14 +15,10 @@ import java.awt.Color;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * The map panes' shared widgets, lifted out of the hyperspace sidebar so the planner could wear
- * the same face instead of painting an imitation: the type chip, the text button, and the
- * hand-worked ghost text a bare {@link TextFieldAPI} does not provide.
- */
+
 public final class PaneWidgets {
 
-    /** The small label hand under each chip's category art. */
+
     public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
 
     public static final String CLICK_SOUND = "ui_button_pressed";
@@ -33,7 +29,7 @@ public final class PaneWidgets {
     private PaneWidgets() {
     }
 
-    /** The smallest hand the game writes in, for labels that were shouting at chip size. */
+
     public static LazyFont getTinyFont() {
         if (tinyChecked) return tinyFont;
         tinyChecked = true;
@@ -47,11 +43,7 @@ public final class PaneWidgets {
         return tinyFont;
     }
 
-    /**
-     * Works a text field's placeholder by hand - there is no change callback or ghost text in
-     * the API. Call every frame; returns what the player actually typed, with the ghost never
-     * leaking through as a search term.
-     */
+
     public static String tendGhost(TextFieldAPI field, String ghost) {
         String text = field.getText();
         boolean focused = field.hasFocus();
@@ -67,10 +59,7 @@ public final class PaneWidgets {
         return text == null || ghost.equals(text) ? "" : text;
     }
 
-    /** One filter category as a chip: its own mark over the name, lit in its own colour
-     *  while on. Reads state, never writes it - the
-     *  toggle is the owner's to make, which is also what keeps this class ignorant of what
-     *  it is filtering. */
+
     public static class Chip extends BaseCustomUIPanelPlugin {
 
         public static final float ICON_SIZE = 16f;
@@ -118,7 +107,7 @@ public final class PaneWidgets {
                 ShopUi.drawQuad(x, y, w, h, color, (hovered ? 0.5f : 0.35f) * alphaMult);
                 ShopUi.drawQuad(x, y, w, 2f, color, 0.95f * alphaMult);
             } else {
-                //off is absence, not another colour - dark field with just the underline remembering
+                // off is absence, not another colour - dark field with just the underline remembering
                 ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
                         (hovered ? 0.35f : 0.18f) * alphaMult);
                 ShopUi.drawQuad(x, y, w, 2f, color, 0.35f * alphaMult);
@@ -138,7 +127,7 @@ public final class PaneWidgets {
                         Math.round(y + h - 3f - ICON_SIZE * 0.5f));
             }
 
-            //the smallest native size there is: a chip is a label, not a heading
+            // the smallest native size there is: a chip is a label, not a heading
             LazyFont tiny = getTinyFont();
             if (tiny == null) return;
 
@@ -149,7 +138,6 @@ public final class PaneWidgets {
 
             text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
-            //held two pixels off the underline, which the label used to stand right on
             text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),
                     Math.round(y + 4f + text.getHeight()));
         }
@@ -189,8 +177,7 @@ public final class PaneWidgets {
         }
     }
 
-    /** The quiet centred line for a space with nothing in it - a bare shelf, an empty tank -
-     *  small and gray, saying so without making it news. */
+
     public static void drawNote(String text, float x, float y, float width, float height,
                                 float alphaMult) {
         LazyFont small = ShopUi.getSmallFont();
@@ -202,7 +189,7 @@ public final class PaneWidgets {
                 Math.round(y + (height + line.getHeight()) * 0.5f));
     }
 
-    /** {@link #drawNote} as a component, for a note that fills a panel slot of its own. */
+
     public static class Note extends BaseCustomUIPanelPlugin {
 
         protected final String text;
@@ -227,8 +214,7 @@ public final class PaneWidgets {
         }
     }
 
-    /** A pane's name, in the header hand the sidebar's sections write in: small caps at the
-     *  left, the quiet one-pixel rule along the bottom. */
+
     public static class TitleRow extends BaseCustomUIPanelPlugin {
 
         protected final String label;
@@ -270,11 +256,7 @@ public final class PaneWidgets {
         }
     }
 
-    /**
-     * Line over a list: what it is and how many match, with the help mark at the right end.
-     * The label is read every frame, so a count in it is never stale; the {@code ?} brightens
-     * under the mouse the way the standalone {@link HelpMark} does, since both wear a tooltip.
-     */
+
     public static class ListHeader extends BaseCustomUIPanelPlugin {
 
         protected final Supplier<String> label;
@@ -334,7 +316,7 @@ public final class PaneWidgets {
         }
     }
 
-    /** A lone {@code ?} wearing an explanation as a hover: gray until the mouse asks. */
+
     public static class HelpMark extends BaseCustomUIPanelPlugin {
 
         protected PositionAPI markPos;
@@ -370,11 +352,7 @@ public final class PaneWidgets {
         }
     }
 
-    /**
-     * A text button in the pane's manner: dark field, centred small-font label, brighter under
-     * the mouse. Label and liveness are read every frame, so a button whose words carry a count
-     * stays truthful and one whose job is spent goes quiet on its own.
-     */
+
     public static class TextButton extends BaseCustomUIPanelPlugin {
 
         protected final Supplier<String> label;

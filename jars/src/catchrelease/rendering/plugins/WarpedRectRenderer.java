@@ -5,12 +5,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-/**
- * Fills a rectangle with a sprite warped by a {@link WarpGrid}. Border vertices are pinned by
- * {@link WarpGrid#getOffset} so the fill stays inside the rectangle with no clipping/mask/shader -
- * usable directly from a UI panel's render pass. Sprite is scaled to cover and centred. GL state
- * pushed/popped.
- */
+
 public class WarpedRectRenderer {
 
     public static void render(SpriteAPI sprite, WarpGrid warp,
@@ -23,7 +18,6 @@ public class WarpedRectRenderer {
         float spriteAspect = sprite.getHeight() <= 0f ? 1f : sprite.getWidth() / sprite.getHeight();
         float rectAspect = width / height;
 
-        //cover: take the widest strip of the sprite that keeps its shape at this rectangle's aspect
         float uSpan = 1f;
         float vSpan = 1f;
         if (rectAspect < spriteAspect) uSpan = rectAspect / spriteAspect;
@@ -77,10 +71,7 @@ public class WarpedRectRenderer {
         GL11.glVertex2f(vertex[0], vertex[1]);
     }
 
-    /**
-     * One grid vertex as {x, y, u, v} - texture sampled at the unwarped position, vertex drawn at
-     * the warped one. Written into {@code out} rather than returned to avoid per-frame allocation.
-     */
+
     protected static void getVertex(WarpGrid warp, int i, int j,
                                     float x, float y, float width, float height,
                                     int wide, int tall,
@@ -94,7 +85,6 @@ public class WarpedRectRenderer {
         out[0] = x + alongX * width + offset.dx;
         out[1] = y + alongY * height + offset.dy;
 
-        //texture v runs down the image while the rectangle's y runs up it
         out[2] = u0 + alongX * uSpan;
         out[3] = v0 + (1f - alongY) * vSpan;
     }

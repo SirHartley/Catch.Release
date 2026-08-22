@@ -106,7 +106,7 @@ public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            starfield = Global.getSettings().getSprite("graphics/catchrelease/background/hyperspace.png"); //large, unload later!
+            starfield = Global.getSettings().getSprite("graphics/catchrelease/background/hyperspace.png");
         }
         if (stencil == null) {
             try {

@@ -13,14 +13,10 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.awt.Color;
 import java.util.List;
 
-/**
- * One tab over the shelf list: a quiet field that lights on hover and holds bright while active,
- * marked with an underline along its bottom edge. Main tabs show an icon beside the label; the
- * (taller) gear tab shows it above the label instead.
- */
+
 public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
-    /** What a tab needs from the pane it lives in. */
+
     public interface Host {
         boolean isActiveTab(Object id);
 
@@ -66,7 +62,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         boolean active = host.isActiveTab(id);
         boolean hovered = !active && isMouseOver();
 
-        //the chip's grammar: dark field, the underline remembering even while off
         if (active) {
             ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.5f * alphaMult);
             ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.95f * alphaMult);
@@ -96,7 +91,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             icon.renderAtCenter(Math.round(x + width * 0.5f),
                     Math.round(y + height - ACCENT_HEIGHT - 4f - ICON_SIZE * 0.5f));
 
-            //rounded to the pixel - bitmap fonts blur off-pixel
             text.draw(Math.round(x + (width - text.getWidth()) * 0.5f),
                     Math.round(y + 3f + text.getHeight()));
             return;
@@ -115,7 +109,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             left += ICON_SIZE + ICON_GAP;
         }
 
-        //on the pixel, since a bitmap font off the pixel is what blur is
         text.draw(Math.round(left), Math.round(y + height * 0.5f + text.getHeight() * 0.5f));
     }
 
@@ -132,7 +125,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
             event.consume();
 
-            //an already-open tab takes the click and does nothing with it
             if (!host.isActiveTab(id)) {
                 Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
                 host.onTabClicked(id);

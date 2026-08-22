@@ -12,26 +12,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Reflection that Starsector's classloader will actually let a mod perform.
- * <p>
- * The game rejects any mod class whose constant pool names {@code java.lang.reflect} directly, so every
- * reflective operation here goes through a {@link MethodHandle} bound once at class-init time via
- * {@link Class#forName(String, boolean, ClassLoader)} with {@code initialize=false} off the bootstrap
- * loader - the reflect classes are never named or loaded through the mod's own classloader.
- * <p>
- * Obfuscated member names differ per release and platform, so matching goes by shape instead (primitive
- * types, JDK types, implemented API interfaces), using the real JLS 5.3 invocation-compatibility rules
- * (widening, boxing) for parameter matching.
- * <p>
- * Ported from Starficz's ReflectionUtils.
- */
+
 public final class ReflectionUtils {
 
     private ReflectionUtils() {
     }
 
-    // --- Handles onto java.lang.reflect, none of which may be named directly. ---
 
     private static final MethodHandle GET_FIELD;
     private static final MethodHandle SET_FIELD;
@@ -61,7 +47,6 @@ public final class ReflectionUtils {
             SET_FIELD_ACCESSIBLE = handle(fieldClass, "setAccessible", void.class, boolean.class);
 
             Class<?> methodClass = Class.forName("java.lang.reflect.Method", false, bootstrap);
-            // invoke/newInstance are varargs; asFixedArity() stops the trailing array being wrapped again.
             INVOKE_METHOD = handle(methodClass, "invoke", Object.class, Object.class, Object[].class).asFixedArity();
             GET_METHOD_NAME = handle(methodClass, "getName", String.class);
             GET_METHOD_RETURN = handle(methodClass, "getReturnType", Class.class);
@@ -82,7 +67,6 @@ public final class ReflectionUtils {
         return MethodHandles.lookup().findVirtual(owner, name, MethodType.methodType(returnType, paramTypes));
     }
 
-    // --- Reading the reflect objects, each call laundered through a handle. ---
 
     private static String nameOf(Object field) {
         try {
@@ -132,26 +116,17 @@ public final class ReflectionUtils {
         }
     }
 
-    // --- Convenience entry points. Each demands exactly one match. ---
 
-    /** Reads the one field of the given name off the instance's own class. Throws if none or several match. */
     public static Object get(Object instance, String name) {
         return get(instance, name, null, false);
     }
 
-    /**
-     * Reads the one field named {@code name} whose declared type is assignable to {@code assignableTo} -
-     * for reaching an obfuscated field when only the API interface it implements is known. Either
-     * criterion may be null.
-     */
+
     public static Object get(Object instance, String name, Class<?> assignableTo) {
         return get(instance, name, assignableTo, false);
     }
 
-    /**
-     * Reads the one matching field, optionally walking the superclass chain up to (but not including)
-     * {@code Object}. Throws if nothing matches or more than one thing does.
-     */
+
     public static Object get(Object instance, String name, Class<?> assignableTo, boolean searchSuperclass) {
         Class<?> clazz = instance.getClass();
         List<ReflectedField> matches = getFieldsMatching(clazz, name, null, assignableTo, null, searchSuperclass);
@@ -166,16 +141,12 @@ public final class ReflectionUtils {
         return matches.get(0).get(instance);
     }
 
-    /** Writes the one field that carries the given name and can legally accept the value's type. */
+
     public static void set(Object instance, String name, Object value) {
         set(instance, name, value, false);
     }
 
-    /**
-     * Writes the one matching field, optionally walking the superclass chain. The value's runtime type
-     * is checked against each candidate's declared type under the ordinary assignment rules, so a boxed
-     * number will find a primitive field.
-     */
+
     public static void set(Object instance, String name, Object value, boolean searchSuperclass) {
         Class<?> clazz = instance.getClass();
         Class<?> valueType = value == null ? null : value.getClass();
@@ -191,10 +162,7 @@ public final class ReflectionUtils {
         matches.get(0).set(instance, value);
     }
 
-    /**
-     * Calls the one method named {@code name} whose parameters accept the given arguments. The overload
-     * is chosen from the arguments' runtime types; an ambiguous call throws rather than guessing.
-     */
+
     public static Object invoke(Object instance, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
         Class<?> clazz = instance.getClass();
@@ -212,7 +180,7 @@ public final class ReflectionUtils {
         return matches.get(0).invoke(instance, arguments);
     }
 
-    /** Calls the one static method named {@code name} whose parameters accept the given arguments. Same all-or-nothing matching as {@link #invoke}. */
+
     public static Object invokeStatic(Class<?> clazz, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
         Class<?>[] paramTypes = typesOf(arguments);
@@ -229,24 +197,22 @@ public final class ReflectionUtils {
         return matches.get(0).invoke(null, arguments);
     }
 
-    // --- Capability checks and forgiving calls, for crawling UI objects. ---
 
-    /** Whether the instance's class, or anything it inherits publicly from, declares this method name. */
     public static boolean hasMethodOfName(Object instance, String name) {
         return !getMethodsMatching(instance.getClass(), name, null, null, null).isEmpty();
     }
 
-    /** Whether the instance's class or any superclass below {@code Object} declares this field name. */
+
     public static boolean hasFieldOfName(Object instance, String name) {
         return !getFieldsMatching(instance.getClass(), name, null, null, null, true).isEmpty();
     }
 
-    /** Whether the instance carries a field whose declared type is assignable to the given type. */
+
     public static boolean hasFieldOfType(Object instance, Class<?> type) {
         return !getFieldsMatching(instance.getClass(), null, null, type, null, true).isEmpty();
     }
 
-    /** Calls the named method if exactly one match exists, else returns null instead of throwing. */
+
     public static Object invokeIfExists(Object instance, String name, Object... args) {
         Object[] arguments = args == null ? new Object[0] : args;
         List<ReflectedMethod> matches = getMethodsMatching(instance.getClass(), name, null, null, typesOf(arguments));
@@ -254,15 +220,7 @@ public final class ReflectionUtils {
         return matches.get(0).invoke(instance, arguments);
     }
 
-    // --- Matching. ---
 
-    /**
-     * Finds every field of the class matching whichever of {@code name}, {@code exactType},
-     * {@code assignableTo} and {@code accepts} are non-null; {@code assignableTo} is for reading
-     * (field type must be a subtype), {@code accepts} is for writing (field must legally hold a value of
-     * that type). Plain {@code Object}-typed fields are dropped unless requested by name or by
-     * {@code Object} type explicitly, since otherwise they'd match every type query.
-     */
     public static List<ReflectedField> getFieldsMatching(Class<?> clazz, String name, Class<?> exactType,
                                                         Class<?> assignableTo, Class<?> accepts,
                                                         boolean searchSuperclass) {
@@ -290,19 +248,14 @@ public final class ReflectionUtils {
         return matches;
     }
 
-    /** Instance-shaped {@link #getFieldsMatching(Class, String, Class, Class, Class, boolean)}. */
+
     public static List<ReflectedField> getFieldsMatching(Object instance, String name, Class<?> exactType,
                                                         Class<?> assignableTo, Class<?> accepts,
                                                         boolean searchSuperclass) {
         return getFieldsMatching(instance.getClass(), name, exactType, assignableTo, accepts, searchSuperclass);
     }
 
-    /**
-     * Finds every method of the class - declared, plus everything public it inherits - matching
-     * whichever criteria are given. {@code returnTypeAssignableTo} requires the actual return type be a
-     * subtype; {@code parameterTypes} is checked position by position under the invocation rules, with a
-     * null element meaning "any parameter null could be passed to". Any criterion may be null.
-     */
+
     public static List<ReflectedMethod> getMethodsMatching(Class<?> clazz, String name,
                                                           Class<?> returnTypeAssignableTo, Integer numOfParams,
                                                           Class<?>[] parameterTypes) {
@@ -325,14 +278,14 @@ public final class ReflectionUtils {
         return matches;
     }
 
-    /** Instance-shaped {@link #getMethodsMatching(Class, String, Class, Integer, Class[])}. */
+
     public static List<ReflectedMethod> getMethodsMatching(Object instance, String name,
                                                            Class<?> returnTypeAssignableTo, Integer numOfParams,
                                                            Class<?>[] parameterTypes) {
         return getMethodsMatching(instance.getClass(), name, returnTypeAssignableTo, numOfParams, parameterTypes);
     }
 
-    /** Finds every declared constructor whose parameter list matches by count or by type, same invocation rules as methods. Either criterion may be null. */
+
     public static List<ReflectedConstructor> getConstructorsMatching(Class<?> clazz, Integer numOfParams,
                                                                     Class<?>[] parameterTypes) {
         List<ReflectedConstructor> matches = new ArrayList<>();
@@ -363,7 +316,6 @@ public final class ReflectionUtils {
             Collections.addAll(fields, declared);
             return fields;
         }
-        // Stops at Object, whose own fields belong to nobody's search.
         Class<?> current = clazz;
         while (current != null && current != Object.class) {
             Object[] declared = current.getDeclaredFields();
@@ -382,15 +334,13 @@ public final class ReflectionUtils {
         return methods;
     }
 
-    // --- Assignment compatibility, JLS 5.3. ---
 
-    /** Every primitive paired with the class that boxes it. */
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
 
-    /** The same pairs read the other way. */
+
     private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = new HashMap<>();
 
-    /** Keyed by target primitive: the primitives that widen into it without a cast. */
+
     private static final Map<Class<?>, Set<Class<?>>> PRIMITIVE_WIDENS_FROM = new HashMap<>();
 
     static {
@@ -423,12 +373,7 @@ public final class ReflectionUtils {
         return set;
     }
 
-    /**
-     * Whether a value of {@code callerArgType} could be passed where {@code targetType} is declared,
-     * counting reference widening, primitive widening, boxing and unboxing exactly as the compiler
-     * would. A null caller type means "passing null", accepted by every reference parameter and no
-     * primitive one.
-     */
+
     private static boolean isParameterCompatible(Class<?> targetType, Class<?> callerArgType) {
         if (callerArgType == null) return !targetType.isPrimitive();
         if (targetType.equals(callerArgType)) return true;
@@ -436,12 +381,10 @@ public final class ReflectionUtils {
         boolean targetPrimitive = targetType.isPrimitive();
         boolean callerPrimitive = callerArgType.isPrimitive();
 
-        // Reference to reference: plain widening, Integer into Number.
         if (!callerPrimitive && !targetPrimitive) {
             return targetType.isAssignableFrom(callerArgType);
         }
 
-        // Primitive into primitive: widening, int into long.
         if (callerPrimitive && targetPrimitive) {
             Set<Class<?>> widens = PRIMITIVE_WIDENS_FROM.get(targetType);
             return widens != null && widens.contains(callerArgType);
@@ -461,7 +404,6 @@ public final class ReflectionUtils {
         return widens != null && widens.contains(unboxed);
     }
 
-    // --- Small formatting helpers for the ambiguity messages. ---
 
     private static Class<?>[] typesOf(Object[] args) {
         Class<?>[] types = new Class<?>[args.length];
@@ -492,19 +434,14 @@ public final class ReflectionUtils {
         return out.append(']').toString();
     }
 
-    // --- Wrappers. The reflect object inside each is only ever an Object here. ---
 
-    /**
-     * One field found by a search, held as an opaque object and reached only through the handles.
-     * Accessibility is forced open before every read and write.
-     */
     public static final class ReflectedField {
         private final Object field;
 
-        /** The field's declared type. */
+
         public final Class<?> type;
 
-        /** The field's declared name (often obfuscated in game code). */
+
         public final String name;
 
         private ReflectedField(Object field) {
@@ -513,7 +450,7 @@ public final class ReflectionUtils {
             this.name = nameOf(field);
         }
 
-        /** Reads the field off the given instance, or off the class itself when passed null. */
+
         public Object get(Object instance) {
             try {
                 SET_FIELD_ACCESSIBLE.invoke(field, true);
@@ -523,7 +460,7 @@ public final class ReflectionUtils {
             }
         }
 
-        /** Writes the field on the given instance, or on the class itself when passed null. */
+
         public void set(Object instance, Object value) {
             try {
                 SET_FIELD_ACCESSIBLE.invoke(field, true);
@@ -534,20 +471,17 @@ public final class ReflectionUtils {
         }
     }
 
-    /**
-     * One method found by a search. Accessibility is forced open before every call, and anything the
-     * method throws comes back wrapped.
-     */
+
     public static final class ReflectedMethod {
         private final Object method;
 
-        /** The method's declared parameter types, in order. */
+
         public final Class<?>[] parameterTypes;
 
-        /** The method's declared return type, {@code void.class} included. */
+
         public final Class<?> returnType;
 
-        /** The method's declared name (often obfuscated in game code). */
+
         public final String name;
 
         private ReflectedMethod(Object method) {
@@ -557,7 +491,7 @@ public final class ReflectionUtils {
             this.name = methodNameOf(method);
         }
 
-        /** Calls the method on the given instance, or as a static when passed null. Void and null-returning methods both come back null. */
+
         public Object invoke(Object instance, Object... arguments) {
             Object[] args = arguments == null ? new Object[0] : arguments;
             try {
@@ -569,11 +503,11 @@ public final class ReflectionUtils {
         }
     }
 
-    /** One constructor found by a search, for building instances of classes with obfuscated names or non-public constructors. */
+
     public static final class ReflectedConstructor {
         private final Object constructor;
 
-        /** The constructor's declared parameter types, in order. */
+
         public final Class<?>[] parameterTypes;
 
         private ReflectedConstructor(Object constructor) {
@@ -581,7 +515,7 @@ public final class ReflectionUtils {
             this.parameterTypes = constructorParamTypesOf(constructor);
         }
 
-        /** Builds a new instance with the given arguments. */
+
         public Object newInstance(Object... arguments) {
             Object[] args = arguments == null ? new Object[0] : arguments;
             try {

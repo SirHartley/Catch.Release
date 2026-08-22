@@ -7,32 +7,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Organic blob shape around a set of systems, built as a metaball field (each system contributes a
- * smooth falloff, summed) rather than overlapping circles - avoids the seams/hard corners that
- * circle overlap produces at intersections. The threshold contour is cut via marching triangles
- * (unambiguous, unlike marching squares) into closed loops, then smoothed with two rounds of
- * Chaikin corner-cutting. Depends only on which systems host fish, not camera position - cache it.
- */
+
 public class FishPresenceField {
 
-    /**
-     * Kernel reach vs. the visual radius the caller asked for. The falloff is (1-d^2/r^2)^3, which
-     * crosses {@link #THRESHOLD} at 0.543 of the kernel radius for a lone system, so REACH = 1/0.543.
-     */
+
     public static final float REACH = 1.84f;
 
     public static final float THRESHOLD = 0.35f;
 
-    /** Grid cells per visual radius. Chaikin does the smoothing; the grid only has to be honest. */
+
     public static final float CELLS_PER_RADIUS = 3f;
 
-    /** Rounds of corner cutting. Each round doubles the points and halves the corners. */
+
     public static final int SMOOTHING_ROUNDS = 2;
 
-    /** One blob's geometry: closed rings in world coordinates, and the box around all of them. */
+
     public static class Mesh {
-        /** Each ring is a flat x,y polyline; the last point connects back to the first. */
+
         public final List<float[]> loops = new ArrayList<>();
 
         public float minX, minY, maxX, maxY;
@@ -42,7 +33,7 @@ public class FishPresenceField {
         }
     }
 
-    /** A contour crossing, kept with the exact bits of its endpoints so chaining can match them. */
+
     protected static class Segment {
         final float x1, y1, x2, y2;
         boolean used = false;
@@ -55,12 +46,7 @@ public class FishPresenceField {
         }
     }
 
-    /**
-     * Cuts the merged shape around the given centres.
-     *
-     * @param centers      where the systems are, in world coordinates
-     * @param visualRadius how far from a lone system its blob edge should sit
-     */
+
     public static Mesh build(List<Vector2f> centers, float visualRadius) {
         Mesh mesh = new Mesh();
         if (centers == null || centers.isEmpty() || visualRadius <= 0f) return mesh;
@@ -81,7 +67,7 @@ public class FishPresenceField {
         return mesh;
     }
 
-    /** Marching triangles over the field, keeping only the contour crossings. */
+
     protected static List<Segment> cutSegments(List<Vector2f> centers, float visualRadius) {
         List<Segment> segments = new ArrayList<>();
 
@@ -101,12 +87,11 @@ public class FishPresenceField {
         int cols = (int) Math.ceil((maxX - minX) / cell);
         int rows = (int) Math.ceil((maxY - minY) / cell);
 
-        //row above is carried forward rather than recomputed - field evaluation is the expensive part
+        // row above is carried forward rather than recomputed - field evaluation is the expensive part
         float[] below = sampleRow(centers, reach, minX, minY, cols, cell);
 
         for (int row = 0; row < rows; row++) {
-            //always minX + n*cell, never neighbour+cell - float rounding differs and a vertex
-            //computed twice with different bits would break the chaining
+            // always minX + n*cell, never neighbour+cell - float rounding differs and a vertex computed twice with different bits would break the chaining
             float yBottom = minY + row * cell;
             float yTop = minY + (row + 1) * cell;
             float[] above = sampleRow(centers, reach, minX, yTop, cols, cell);
@@ -152,7 +137,7 @@ public class FishPresenceField {
         return row;
     }
 
-    /** Sum of every system's falloff at this point - the summing is the metaball merge. */
+
     protected static float sample(List<Vector2f> centers, float reach, float x, float y) {
         float reachSq = reach * reach;
         float total = 0f;
@@ -171,11 +156,7 @@ public class FishPresenceField {
         return total;
     }
 
-    /**
-     * A crossed triangle contributes one segment between its two crossed edges. Adjacent triangles
-     * compute a shared edge's crossing from the same two samples, so endpoints match bit-exact -
-     * required for {@link #chainLoops} to match them without a tolerance.
-     */
+
     protected static void cut(List<Segment> segments, float x0, float y0, float v0, float x1,
                               float y1, float v1, float x2, float y2, float v2) {
 
@@ -184,7 +165,6 @@ public class FishPresenceField {
 
         if (count == 0 || count == 3) return;
 
-        //rotated so the odd corner out is corner 0; crossed edges are then 0-1 and 0-2
         if (count == 1) {
             if (in1) addSegment(segments, x1, y1, v1, x2, y2, v2, x0, y0, v0);
             else if (in2) addSegment(segments, x2, y2, v2, x0, y0, v0, x1, y1, v1);
@@ -205,11 +185,7 @@ public class FishPresenceField {
         segments.add(new Segment(a[0], a[1], b[0], b[1]));
     }
 
-    /**
-     * Threshold crossing point on an edge, endpoints sorted into a canonical order first - the two
-     * triangles sharing this edge arrive with endpoints swapped, and unsorted arithmetic rounds
-     * differently from each end, breaking the bit-exact match {@link #chainLoops} relies on.
-     */
+
     protected static float[] lerp(float xA, float yA, float vA, float xB, float yB, float vB) {
         if (xB < xA || (xB == xA && yB < yA)) {
             float tx = xA, ty = yA, tv = vA;
@@ -227,11 +203,7 @@ public class FishPresenceField {
         return new float[]{xA + (xB - xA) * t, yA + (yB - yA) * t};
     }
 
-    /**
-     * Chains segments into closed rings. A marching contour is manifold (every endpoint shared by
-     * exactly two segments), so each walk is unambiguous: leave via the segment that didn't bring
-     * you there, until back at the start.
-     */
+
     protected static List<float[]> chainLoops(List<Segment> segments) {
         Map<Long, List<Segment>> byPoint = new HashMap<>(segments.size() * 2);
 
@@ -277,7 +249,7 @@ public class FishPresenceField {
                 current = next;
             }
 
-            //fewer than 3 points (6 floats) is grid noise, not a ring
+            // fewer than 3 points (6 floats) is grid noise, not a ring
             if (points.size() >= 6) {
                 float[] loop = new float[points.size()];
                 for (int i = 0; i < loop.length; i++) loop[i] = points.get(i);
@@ -289,12 +261,12 @@ public class FishPresenceField {
         return loops;
     }
 
-    /** The endpoint's exact bits as a key - matching floats, not nearby ones. */
+
     protected static long key(float x, float y) {
         return ((long) Float.floatToIntBits(x) << 32) | (Float.floatToIntBits(y) & 0xFFFFFFFFL);
     }
 
-    /** One round of Chaikin corner-cutting: each edge donates points a quarter in from each end. */
+
     protected static float[] chaikin(float[] loop) {
         int count = loop.length / 2;
         float[] out = new float[count * 4];

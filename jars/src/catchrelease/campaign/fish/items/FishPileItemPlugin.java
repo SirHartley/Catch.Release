@@ -21,19 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Everything caught, in one item.
- * <p>
- * Not a better crate - it holds no more than the crates it was made of and is worth exactly the
- * same - it is the hold's tidy-up. A campaign's fishing turns into a dozen crates that scroll, and
- * this is the one line they all go onto. There is only ever one; sweeping again folds into it.
- * <p>
- * Right-click puts it back into loose singletons and one crate per repeated species, which keeps a
- * lone specimen visible without turning every repeated catch back into cargo clutter.
- * <p>
- * Structurally a crate without the one-species rule, which is what let every buyer, job and picker
- * take fish out of it without knowing it exists - see {@link FishItems#repack}.
- */
+
 public class FishPileItemPlugin extends BaseSpecialItemPlugin {
 
     public List<FishCatch> getContents() {
@@ -58,14 +46,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         return (int) total;
     }
 
-    /**
-     * Gathers every fish, crate and existing pile in a hold into one pile.
-     * <p>
-     * Everything, not only crates: the point is a hold with nothing loose left in it, and a sweep
-     * that left the singles behind would have to be run twice to finish the job it is named for.
-     *
-     * @return whether there was anything to gather
-     */
+
     public static boolean sweep(RightClickActionHelper helper,
                                 com.fs.starfarer.api.campaign.CargoAPI cargo,
                                 SpecialItemData clickedData, int clickedCount) {
@@ -81,8 +62,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
 
             int count = (int) stack.getSize();
 
-            //a loose stack can be several of the same specimen; a container is one item however
-            //many swim in it, and its whole list comes across each time
+            // a loose stack can be several of the same specimen; a container is one item however many swim in it, and its whole list comes across each time
             for (int i = 0; i < count; i++) gathered.addAll(FishItems.read(data));
             sourceData.add(data);
             sourceCounts.add(count);
@@ -90,8 +70,6 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
 
         if (gathered.isEmpty()) return false;
 
-        //Reserve the cell the player acted on before emptying the rest of the hold. Vanilla's add
-        //then fills that exact hole, so filtering and transaction mirrors continue to work.
         helper.removeFromClickedStackFirst(clickedCount);
         helper.addItems(CargoItemType.SPECIAL, FishItems.toPile(gathered), 1);
 
@@ -108,13 +86,13 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-    /** Removal is explicit so the first unpacked item can inherit the pile's cargo cell. */
+
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
     }
 
-    /** Loose when a species appears once; crated when it appears more than once. */
+
     @Override
     public void performRightClickAction(RightClickActionHelper helper) {
         List<FishCatch> contents = getContents();
@@ -135,7 +113,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-    /** The crate's own art, since a pile is what a stack of crates looks like. */
+
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
@@ -153,10 +131,9 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             if (best == null || spec.rarity.rank > best.rank) best = spec.rarity;
         }
 
-        //no grade pip: a pile is not a specimen and has no single quality to report
+        // no grade pip: a pile is not a specimen and has no single quality to report
         FishItemRenderer.render(x, y, w, h, alphaMult, best, null);
 
-        //the wanted dot: a marked ware or an open job would take something in the pile
         for (FishCatch entry : contents) {
             if (ShopMarks.isWanted(entry)) {
                 ShopMarks.drawDot(x + w - ShopMarks.DOT_INSET, y + ShopMarks.DOT_INSET,
@@ -198,7 +175,6 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
                     line.getKey(), "x" + line.getValue());
         }
 
-        //who is asking for anything in the pile: marked gear and open jobs both
         List<String> requiredBy = new ArrayList<>();
         for (FishCatch entry : contents) {
             for (String name : ShopMarks.getRequiredBy(entry)) {

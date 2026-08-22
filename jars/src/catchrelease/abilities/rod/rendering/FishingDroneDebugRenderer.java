@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-/**
- * Dev-mode overlay: the ring drones fly, plus a spoke from each drone to its target slot. A visible
- * spoke is tracking error - a drone sitting in its slot has none.
- */
+
 public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
 
     public static final int CIRCLE_SEGMENTS = 72;
@@ -52,7 +49,7 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (isExpired()) return;
 
-        //live centre, not cast location - a roaming swarm was never cast at a fixed point
+        // live centre, not cast location - a roaming swarm was never cast at a fixed point
         Vector2f center = swarm.getSearchCenter();
         if (center == null) return;
 
@@ -60,7 +57,7 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
         SkillshotUtils.drawLines(getSpokeVertices(), SPOKE_COLOR, ALPHA, WIDTH, GuideLineStyle.SOLID);
     }
 
-    /** The ring itself, as a closed loop of straight segments. */
+
     protected List<Vector2f> getRingVertices(Vector2f center) {
         List<Vector2f> vertices = new ArrayList<>();
 
@@ -75,7 +72,7 @@ public class FishingDroneDebugRenderer implements LunaCampaignRenderingPlugin {
         return vertices;
     }
 
-    /** One line per drone, from where it is to where it is meant to be. */
+
     protected List<Vector2f> getSpokeVertices() {
         List<Vector2f> vertices = new ArrayList<>();
 

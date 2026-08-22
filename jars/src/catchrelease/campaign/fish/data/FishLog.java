@@ -8,21 +8,12 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * What the player has caught: species seen, records, and unlocked location data. Single source
- * the codex reads from. Lives in sector persistent data, so it survives without a script holding it.
- */
+
 public class FishLog {
 
     public static final String KEY = "$catchrelease_log";
 
-    /**
-     * Files a catch.
-     *
-     * @param where  entity the catch was taken near (pond/mote/break) - only its system and location are read
-     * @param method how it came out
-     * @return true if this beat the record (also true for the species' first catch)
-     */
+
     public static boolean record(FishCatch entry, SectorEntityToken where, FishLogEntry.Method method) {
         if (entry == null || entry.speciesId == null) return false;
 
@@ -39,7 +30,7 @@ public class FishLog {
         logged.caught++;
         logged.hintOnly = false;
 
-        logged.locationDataUnlocked = true; //landing a catch always unlocks its location too
+        logged.locationDataUnlocked = true;
 
         boolean record = first || logged.isRecord(entry);
 
@@ -63,31 +54,25 @@ public class FishLog {
         return record;
     }
 
-    /** Null for a species that has never been caught, which is how the codex knows to hide it. */
+
     public static FishLogEntry get(String speciesId) {
         return speciesId == null ? null : getLog().get(speciesId);
     }
 
-    /** Caught means landed at least once - a hint bought for something never seen does not count. */
+
     public static boolean isCaught(String speciesId) {
         FishLogEntry entry = get(speciesId);
 
-        //caught is the save-stable proof. Old saves predate hintOnly and deserialize that boolean
-        //as false, so using its inverse would turn their range-data-only entries into catches.
         return entry != null && entry.caught > 0;
     }
 
-    /**
-     * Unlocks a species' map location, e.g. from a purchased hint.
-     *
-     * @return true if it is now unlocked
-     */
+
     public static boolean unlockLocationData(String speciesId) {
         if (speciesId == null) return false;
 
         FishLogEntry entry = get(speciesId);
 
-        //creates a hint-only entry if the species was never caught, rather than refusing
+        // creates a hint-only entry if the species was never caught, rather than refusing
         if (entry == null) {
             entry = new FishLogEntry(speciesId);
             entry.hintOnly = true;
@@ -105,11 +90,7 @@ public class FishLog {
         return entry != null && entry.locationDataUnlocked;
     }
 
-    /**
-     * The inverse of {@link #unlockLocationData}, for a purchase taken back. A hint-only entry
-     * that exists solely because of that unlock is removed outright; a species with catches on
-     * the books keeps its record and only has the location flag lowered.
-     */
+
     public static void relockLocationData(String speciesId) {
         FishLogEntry entry = get(speciesId);
         if (entry == null) return;
@@ -122,14 +103,14 @@ public class FishLog {
         entry.locationDataUnlocked = false;
     }
 
-    /** Raw clock timestamp; formatted as a date only where displayed. */
+
     protected static long getTimestamp() {
         if (Global.getSector() == null) return 0L;
 
         return Global.getSector().getClock().getTimestamp();
     }
 
-    /** Public because the per-catch ledger files the same reading - one definition of "where". */
+
     public static String getSystemName(SectorEntityToken where) {
         if (where == null) return null;
 
@@ -138,7 +119,7 @@ public class FishLog {
         return location == null ? null : location.getName();
     }
 
-    /** Hyperspace location, used to draw the map circle. */
+
     protected static Vector2f getLocationInHyper(SectorEntityToken where) {
         if (where == null) return null;
 

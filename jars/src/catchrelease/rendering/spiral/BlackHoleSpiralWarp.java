@@ -9,11 +9,7 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Catch.Release wiring for {@link CircularSpiralWarpRenderer}: every black-hole star in the
- * player's current system is a source. The renderer itself knows nothing about stars, sector
- * traversal or this mod's settings, which is the seam used when the effect moves to another mod.
- */
+
 public final class BlackHoleSpiralWarp {
 
     public static final String RANGE_SETTING = "catchreleaseBlackHoleSpiralWarpRange";
@@ -26,12 +22,12 @@ public final class BlackHoleSpiralWarp {
     private BlackHoleSpiralWarp() {
     }
 
-    /** Registers the transient pass on each load, reading the merged settings value. */
+
     public static void install() {
         install(readRange());
     }
 
-    /** Public overload for another host or dev harness that wants to choose the reach directly. */
+
     public static void install(float range) {
         if (renderer == null) {
             CircularSpiralWarpRenderer.Config config = new CircularSpiralWarpRenderer.Config();
@@ -63,7 +59,7 @@ public final class BlackHoleSpiralWarp {
         }
     }
 
-    /** Caches the star list until the player changes location; star vectors themselves stay live. */
+
     protected static final class BlackHoleProvider
             implements CircularSpiralWarpRenderer.SourceProvider {
 

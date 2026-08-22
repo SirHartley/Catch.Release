@@ -11,25 +11,16 @@ import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
 
-/**
- * One line of the shelf list, on the shared {@link ListRow} skeleton: the shopping-list ring,
- * the name, and state readable without selecting it (lit pips for a ladder, a price-coloured
- * mark for a module, MAX/FITTED said outright).
- * <p>
- * The ring is the mark-for-later toggle, lived-in rather than a button in the detail pane:
- * hollow until clicked, filled quest-yellow while the ware is on the shopping list. Every row
- * indents past the ring's slot whether or not it draws one, so the names stay in a column.
- */
+
 public class ShopRowPlugin extends ListRow {
 
-    /** What a row needs from the pane it lives in. The ring's explanation is not on the list:
-     *  the pane hangs a stock tooltip off a hotspot over the ring's slot instead. */
+
     public interface Host {
         boolean isSelected(ShopEntry entry);
 
         void onRowClicked(ShopEntry entry);
 
-        /** The list's own rectangle, which is what rows clip and click against. */
+
         PositionAPI getListViewport();
     }
 
@@ -37,7 +28,7 @@ public class ShopRowPlugin extends ListRow {
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
 
-    /** The shopping-list ring's slot, sitting between the strip and the name. */
+
     public static final float MARK_SLOT = 18f;
     public static final float MARK_RADIUS = 5f;
 
@@ -64,13 +55,13 @@ public class ShopRowPlugin extends ListRow {
         return host.isSelected(entry);
     }
 
-    /** A shade brighter than the panes' rows - the shelf sits on a busier ground. */
+
     @Override
     protected float getSelectedFieldAlpha() {
         return 0.5f;
     }
 
-    /** The price's rarity as the identity colour. */
+
     @Override
     protected Color getAccentColor() {
         FishRarity tier = entry.getPriceRarity();
@@ -85,7 +76,7 @@ public class ShopRowPlugin extends ListRow {
         renderState(x, y, width, height, alphaMult);
     }
 
-    /** The shopping-list ring: hollow until clicked, filled quest-yellow while marked. */
+
     protected void renderMarkRing(float x, float y, float height, float alphaMult) {
         boolean marked = ShopMarks.isMarked(entry);
         if (!marked && !ShopMarks.isMarkable(entry)) return;
@@ -116,7 +107,7 @@ public class ShopRowPlugin extends ListRow {
             name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        //fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
+        // fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
         Color color = entry.isFitted() ? Misc.getPositiveHighlightColor()
                 : entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn())
                 ? Misc.getGrayColor()
@@ -124,14 +115,12 @@ public class ShopRowPlugin extends ListRow {
 
         name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
-        //rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot
-        //whether or not this row draws one, so the names stay in a column
+        // rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot whether or not this row draws one, so the names stay in a column
         name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT + 4f),
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
 
-    /** The right-hand end of the row: pips for a ladder, a mark or a price tag for a module.
-     *  A fresh upgrade's gold New! tag sits immediately left of its tier indicators. */
+
     protected void renderState(float x, float y, float width, float height, float alphaMult) {
         float right = x + width - PAD_SIDE;
 
@@ -139,8 +128,7 @@ public class ShopRowPlugin extends ListRow {
             float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
             float pipsLeft = right - pipsWidth;
 
-            //bought rungs always in the player's own colour; an unbought rung is grey only
-            //while its schematic is missing, and an ordinary dark square once it can be bought
+            // bought rungs always in the player's own colour; an unbought rung is grey only while its schematic is missing, and an ordinary dark square once it can be bought
             ShopUi.drawPips(Math.round(pipsLeft), Math.round(y + (height - PIP_SIZE) * 0.5f),
                     PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
                     Misc.getBasePlayerColor(), alphaMult,
@@ -153,8 +141,7 @@ public class ShopRowPlugin extends ListRow {
 
         right = drawFresh(right, y, height, alphaMult);
 
-        //a switch says which way it is thrown, both ways - OFF has to be as readable as ON, since
-        //an unmarked row would look like the shelf had simply not loaded
+        // a switch says which way it is thrown, both ways - OFF has to be as readable as ON, since an unmarked row would look like the shelf had simply not loaded
         if (entry.isCurio()) {
             drawMark(entry.isOn() ? "ON" : "OFF",
                     entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
@@ -173,7 +160,6 @@ public class ShopRowPlugin extends ListRow {
             return;
         }
 
-        //empty slot (NONE) counts as owned but stays unmarked - OWNED on an absence would claim there's a thing there
         if (entry.isOwned() && entry.tackle != Tackle.NONE) {
             drawMark("OWNED", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
@@ -186,8 +172,7 @@ public class ShopRowPlugin extends ListRow {
                 rarity.color, (entry.canAfford() ? 0.9f : 0.35f) * alphaMult);
     }
 
-    /** Draws the fresh-schematic tag with its right edge at {@code right}, then returns the next
-     *  indicator's right edge with the standard gap already removed. */
+
     protected float drawFresh(float right, float y, float height, float alphaMult) {
         if (!ShopSchematics.isFresh(entry)) return right;
 
@@ -221,7 +206,7 @@ public class ShopRowPlugin extends ListRow {
         mark.draw(Math.round(right), Math.round(y + height * 0.5f + mark.getHeight() * 0.5f));
     }
 
-    /** The ring's slot toggles the mark; everywhere else selects the row. */
+
     @Override
     protected void onRowClick(float pointX, float pointY) {
         if (isInMarkSlot(pointX) &&

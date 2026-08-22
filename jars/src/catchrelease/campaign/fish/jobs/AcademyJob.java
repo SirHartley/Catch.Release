@@ -6,17 +6,13 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * Galatian researcher job asking for a low-coherence (unstable) specimen - the only job whose ask
- * gets harder as the player's rig improves, since better tackle produces more stable fish. Offered
- * at Galatia and independent markets generally.
- */
+
 public class AcademyJob extends FishJob {
 
-    /** The market the Academy actually sits on, checked by name because it is a place and not a faction. */
+
     public static final String HOME = "galatia";
 
-    /** How large an independent market has to be before it is somewhere a researcher passes through. */
+
     public static final int MIN_SIZE = 5;
 
     public static final int VALUE_PER_FISH = 2400;
@@ -51,7 +47,6 @@ public class AcademyJob extends FishJob {
 
         addAsk(ask);
 
-        //a hard ask that also fights the player's own equipment, so it is paid like one
         addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, true));
 
         setUpSpine();

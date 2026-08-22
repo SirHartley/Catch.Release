@@ -12,10 +12,10 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.Random;
 
-/** Per-port roll and lifetime for Crablobab's rules-authored bar appearance. */
+
 public final class CrablobabBarPresence {
 
-    /** Vanilla's per-market bar selection cache; its expiry is the bar's ordinary re-roll. */
+
     public static final String VANILLA_ROLL_KEY = "$BarCMD_shownEvents";
     public static final String ROLL_KEY = "$catchrelease_crablobab_bar_roll";
     public static final float MAX_ROLL_DAYS = 60f;
@@ -24,12 +24,7 @@ public final class CrablobabBarPresence {
     private CrablobabBarPresence() {
     }
 
-    /**
-     * Dev mode deliberately puts the stall in every bar. In an ordinary campaign each eligible
-     * market owns its own saved result, so several ports can host him at once. The result lasts
-     * until vanilla expires that market's current bar selection, with an independent two-month
-     * ceiling in case another mod extends the bar cache beyond its normal 20-40 days.
-     */
+
     public static boolean isAvailable(InteractionDialogAPI dialog) {
         if (Global.getSettings().isDevMode()) return true;
 
@@ -48,7 +43,7 @@ public final class CrablobabBarPresence {
         return present;
     }
 
-    /** Uses vanilla's bar seed and its configured chance for one more event. */
+
     private static boolean roll(SectorEntityToken target, MarketAPI market) {
         BarEventManager manager = BarEventManager.getInstance();
         long seed = manager == null ? Misc.genRandomSeed()

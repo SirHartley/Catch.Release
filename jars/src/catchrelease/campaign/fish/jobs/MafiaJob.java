@@ -21,53 +21,49 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Delivery job for a fish-fighting ring. The player chooses the exact pair first, sees one randomly
- * assigned to each handler with odds based on within-species size, then takes the fee or backs one.
- * The only job in the mod where the reward can come to nothing.
- */
+
 public class MafiaJob extends FishJob {
 
-    /** The flag that puts the three doors up: take the fee, or back one of them. */
+
     public static final String BET_FLAG = "$catchrelease_ringBet";
 
     public static final int VALUE = 3000;
 
     public static final float DAYS = 35f;
 
-    /** Odds for a specimen with nothing to recommend it, before quality is read into them. */
+
     public static final float BASE_ODDS = 0.38f;
 
-    /** How far a magnificent specimen moves them. */
+
     public static final float QUALITY_SWING = 0.30f;
 
-    /** What a winning bet is worth against the flat fee. */
+
     public static final float WIN_MULT = 2f;
 
     protected static final String LEFT_FIRST_NAME = "Salvatore";
     protected static final String RIGHT_FIRST_NAME = "Enzo";
 
-    /** Names retained as strings because wager settlement persists them independently of the UI. */
+
     protected String left = LEFT_FIRST_NAME;
     protected String right = RIGHT_FIRST_NAME;
 
-    /** The second on-screen person; not placed in the comm directory as a duplicate contact. */
+
     protected PersonAPI partner;
 
-    /** Dialog-only pair; nothing leaves cargo until the player confirms fee or wager. */
+
     protected transient FishHandoffPicker.Selection pendingSelection;
 
-    /** The pair as assigned to the handlers, retained through the payout narration. */
+
     protected transient FishCatch leftFighter;
     protected transient FishCatch rightFighter;
 
     protected float leftOdds = BASE_ODDS;
     protected float rightOdds = BASE_ODDS;
 
-    /** Who the player backed, or null for taking the fee like a sensible person. */
+
     protected String wager = null;
 
-    /** How the fight went, settled before anything is paid and only read after. */
+
     protected boolean won = false;
 
     @Override
@@ -136,11 +132,7 @@ public class MafiaJob extends FishJob {
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
-    /**
-     * Gives both named men real PersonAPI records. The giver remains the only comm-directory
-     * contact; the partner lives with the mission and occupies vanilla's second portrait slot.
-     * The lazy path also repairs accepted jobs created by older saves.
-     */
+
     protected void setUpPeople(MarketAPI market) {
         PersonAPI giver = getPerson();
         if (giver != null) {
@@ -164,7 +156,7 @@ public class MafiaJob extends FishJob {
         }
     }
 
-    /** Uses the same secondary portrait slot as vanilla's Baird/Coureuse scene. */
+
     @Override
     protected void showContactVisual(InteractionDialogAPI dialog) {
         setUpPeople(getGiverMarket());
@@ -233,8 +225,7 @@ public class MafiaJob extends FishJob {
             afterPickerPaid(dialog, memoryMap);
             clearFighters();
         } else {
-            //beforePayment may have replaced the pool for a wager before spend discovered
-            //that one selected item had gone missing; a failed hand-in keeps the quoted fee
+            // beforePayment may have replaced the pool for a wager before spend discovered that one selected item had gone missing; a failed hand-in keeps the quoted fee
             rewards.clear();
             rewards.addAll(promisedRewards);
             clearFighters();
@@ -260,11 +251,7 @@ public class MafiaJob extends FishJob {
                 BASE_ODDS + (backedQuality - opponentQuality) * QUALITY_SWING));
     }
 
-    /**
-     * Settles the bet before payment, since deciding it after the fee is counted out would cost
-     * the player nothing on a loss. Rewards are re-rolled on a win rather than doubled, since a
-     * doubled non-credit reward (e.g. a blueprint) doesn't make sense.
-     */
+
     @Override
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
         if (wager == null) return;
@@ -284,8 +271,6 @@ public class MafiaJob extends FishJob {
 
         setUpPeople(getGiverMarket());
 
-        // Refresh vanilla's active-person first-name token as well, which repairs old accepted
-        // jobs whose randomly generated giver was named before this pair became explicit people.
         token(mem, "$personFirstName", left);
         token(mem, "$catchreleaseLeft", left);
         token(mem, "$catchreleaseRight", right);
@@ -301,7 +286,7 @@ public class MafiaJob extends FishJob {
         token(mem, "$catchreleaseRightOdds", percent(rightOdds));
         token(mem, "$catchreleaseWon", won);
 
-        //separate boolean since a rules-engine condition needs a true/false, not a name string
+        // separate boolean since a rules-engine condition needs a true/false, not a name string
         token(mem, "$catchreleaseHasWager", wager != null);
 
         token(mem, "$catchreleaseWager", wager == null ? "nobody" : wager);

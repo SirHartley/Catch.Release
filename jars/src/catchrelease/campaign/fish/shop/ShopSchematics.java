@@ -10,17 +10,12 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Purchase permissions earned from fishing jobs. A schematic is knowledge, not cargo: receiving
- * one adds a stable string key to the campaign, and the outfitter reads that key before selling
- * the corresponding hardware. Ownership implies knowledge for migrated saves and for equipment
- * obtained through a route outside the outfitter.
- */
+
 public class ShopSchematics {
 
     public static final String KEY = "$catchrelease_shop_schematics";
 
-    /** Schematics learned but not yet seen in the outfitter - what the New! tag reads. */
+
     public static final String FRESH_KEY = "$catchrelease_shop_schematics_fresh";
 
     public static String getKey(Tackle tackle) {
@@ -32,7 +27,7 @@ public class ShopSchematics {
                 ? null : "upgrade:" + statId + ":" + targetLevel;
     }
 
-    /** Empty slots and already-owned modules never need a plan shown to the player again. */
+
     public static boolean has(Tackle tackle) {
         if (tackle == null) return false;
         if (tackle == Tackle.NONE || TackleManager.isOwned(tackle)) return true;
@@ -45,7 +40,7 @@ public class ShopSchematics {
         if (key != null && tackle != Tackle.NONE && getKnown().add(key)) getFresh().add(key);
     }
 
-    /** The final two purchases on every upgrade ladder require their own sequential plans. */
+
     public static boolean requires(UpgradeStat stat, int targetLevel) {
         if (stat == null || stat.maxLevel <= 0) return false;
 
@@ -53,7 +48,7 @@ public class ShopSchematics {
                 && targetLevel >= Math.max(1, stat.maxLevel - 1);
     }
 
-    /** A rung already bought implies its plan for migrated campaigns. Earlier rungs stay open. */
+
     public static boolean has(UpgradeStat stat, int targetLevel) {
         if (stat == null || targetLevel <= 0) return false;
         if (stat.level >= targetLevel || !requires(stat, targetLevel)) return true;
@@ -71,7 +66,7 @@ public class ShopSchematics {
         }
     }
 
-    /** Every purchase permission the outfitter can learn, for developer campaign setup. */
+
     public static void unlockAll() {
         if (Global.getSector() == null) return;
 
@@ -87,15 +82,11 @@ public class ShopSchematics {
             }
         }
 
-        //a dev grant of everything is setup, not news
+        // a dev grant of everything is setup, not news
         clearAllFresh();
     }
 
-    /**
-     * Whether this entry's next purchase rides a schematic the outfitter has not shown yet -
-     * the New! tag's question. Cleared by {@code ShopEntry.grant}, by marking the entry, and
-     * wholesale when the shop closes: first-visit news, told once.
-     */
+
     public static boolean isFresh(ShopEntry entry) {
         if (entry == null) return false;
 
@@ -120,7 +111,7 @@ public class ShopSchematics {
         getFresh().clear();
     }
 
-    /** The next rung, but only when the player has reached the schematic-gated end of the ladder. */
+
     public static int getNextRequiredLevel(UpgradeStat stat) {
         if (stat == null) return -1;
 

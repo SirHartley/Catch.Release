@@ -20,17 +20,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * A shop purchase's fish requirement: a count plus stackable qualities (type, rarity/grade floors,
- * same-species, named species, low coherence). The shop's price generator picks which axes a given
- * rung uses.
- * <p>
- * Coherence is the odd axis: low coherence normally asks for a rare, unstable specimen, but
- * abyssal species are never stable, so they never satisfy it.
- */
+
 public class FishRequirement {
 
-    /** Aberration at or above this is "unstable or worse", which is what the shop means by low coherence. */
+
     public static final float LOW_COHERENCE = 0.55f;
 
     public int count = 1;
@@ -41,41 +34,29 @@ public class FishRequirement {
     public FishGrade minGrade = null;
     public boolean lowCoherence = false;
 
-    /**
-     * Absolute floors (metres/kg), independent of grade - grade is relative to species size, so
-     * "big" and "well-graded" are different asks. Zero means no floor.
-     */
+
     public float minLength = 0f;
     public float minWeight = 0f;
 
-    /**
-     * Region the specimen must have been caught in, or null for any. Per-fish, not per-species - a
-     * fish logged before origin tracking existed matches no origin filter.
-     */
+
     public SectorRegion origin = null;
 
-    /**
-     * Catch method required, or null for any - recorded at catch time since the specimen itself
-     * can't tell you how it was taken.
-     */
+
     public FishLogEntry.Method method = null;
 
-    /** Catch implement required, or null for any; combines with {@link #method} to describe how a catch happened. */
+
     public CatchImplement implement = null;
 
-    /** Exact rupture required, or null for any; compared against the catch-time source id. */
+
     public String sourceId = null;
 
-    /** Earliest accepted catch timestamp, inclusive; zero accepts catches from any time. */
+
     public long minCaughtAt = 0L;
 
-    /**
-     * Alternative ways to satisfy this ask (OR, unlike the other axes which AND). When non-empty,
-     * the parent's own axes are ignored except {@link #count}.
-     */
+
     public List<FishRequirement> anyOf = new ArrayList<>();
 
-    /** Adds an alternative and hands it back, so a caller can go on configuring it. */
+
     public FishRequirement addAlternative(FishRequirement alternative) {
         if (alternative != null) anyOf.add(alternative);
 
@@ -106,7 +87,7 @@ public class FishRequirement {
 
         if (origin != null && entry.origin != origin) return false;
 
-        //unset method/implement (predates tracking) never satisfies a specific requirement
+        // unset method/implement (predates tracking) never satisfies a specific requirement
         if (method != null && entry.method != method) return false;
         if (implement != null && entry.implement != implement) return false;
         if (sourceId != null && !sourceId.equals(entry.sourceId)) return false;
@@ -120,12 +101,7 @@ public class FishRequirement {
         return true;
     }
 
-    /**
-     * Whether a specimen of this species could ever satisfy the ask - the species-level echo of
-     * {@link #matches}, for screens that show species rather than catches. Species metadata can
-     * rule out a size floor or catch method, but a true result never promises the individual fish
-     * will meet its grade, size, origin or coherence terms.
-     */
+
     public boolean couldBeSatisfiedBy(FishSpec spec) {
         if (spec == null) return false;
 
@@ -148,8 +124,6 @@ public class FishRequirement {
         if (method == FishLogEntry.Method.DRONE) methodImplement = CatchImplement.POND;
         if (method == FishLogEntry.Method.HARPOON) methodImplement = CatchImplement.BREACH_LAMP;
 
-        //Method determines the opening it can be used at. Contradictory clauses can never be met,
-        //and a method-only ask still has to exclude species confined to the other kind of water.
         if (implement != null && methodImplement != null && implement != methodImplement) {
             return false;
         }
@@ -161,7 +135,7 @@ public class FishRequirement {
         return true;
     }
 
-    /** The colour the ask wears in the UI: the named species' own, else the rarity floor's. */
+
     public FishRarity getDisplayRarity() {
         if (speciesId != null) {
             FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
@@ -171,7 +145,7 @@ public class FishRequirement {
         return minRarity;
     }
 
-    /** One exact substring in an ask and the rarity colour it should wear. */
+
     public static class RarityHighlight {
         public final String text;
         public final FishRarity rarity;
@@ -182,11 +156,7 @@ public class FishRequirement {
         }
     }
 
-    /**
-     * Finds every species name embedded in arbitrary player-facing text and pairs it with the
-     * canonical rarity colour. Longer names claim their span first, so a mod-added species such as
-     * "Deepwater Pufferfish" cannot also be mistaken for "Pufferfish".
-     */
+
     public static List<RarityHighlight> getFishNameHighlights(String... texts) {
         if (texts == null || texts.length == 0) return Collections.emptyList();
 
@@ -258,7 +228,7 @@ public class FishRequirement {
         return false;
     }
 
-    /** Returns every exact rarity-bearing substring in this requirement. */
+
     public List<RarityHighlight> getRarityHighlights() {
         Map<String, FishRarity> found = new LinkedHashMap<>();
         collectRarityHighlights(found);
@@ -289,7 +259,7 @@ public class FishRequirement {
         }
     }
 
-    /** Collects rarity-bearing substrings across a complete order, preserving ask order. */
+
     public static List<RarityHighlight> getRarityHighlights(List<FishRequirement> asks) {
         if (asks == null || asks.isEmpty()) return Collections.emptyList();
 
@@ -305,11 +275,7 @@ public class FishRequirement {
         return out;
     }
 
-    /**
-     * Applies rarity colours to every species name and explicit rarity floor in an intel/UI label,
-     * while ordinary highlights stay yellow. Arbitrary highlighted values such as a rolled reward
-     * are inspected too, so a range-data reward cannot flatten its species name back to yellow.
-     */
+
     public static void highlight(LabelAPI label, List<FishRequirement> asks, String fallbackAsk,
                                  String... normalHighlights) {
         if (label == null) return;
@@ -355,7 +321,7 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
-    /** Applies only embedded fish-name colours, leaving all surrounding prose untouched. */
+
     public static void highlightFishNames(LabelAPI label, String... texts) {
         if (label == null) return;
 
@@ -373,7 +339,7 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
-    /** A compact live-progress line which retains every qualifier from {@link #describe()}. */
+
     public String describeProgress(int aboard) {
         int shown = Math.max(0, Math.min(count, aboard));
         String description = describe();
@@ -384,12 +350,11 @@ public class FishRequirement {
         return shown + "/" + count + " aboard - " + Misc.ucFirst(subject);
     }
 
-    /** The whole ask as one sentence fragment: "3 crabs, Rare or better, graded Fine or better". */
+
     public String describe() {
         StringBuilder text = new StringBuilder();
 
         if (!anyOf.isEmpty()) {
-            //described from the count outward, since the alternatives disagree about everything else
             text.append(count).append(" ").append(count == 1 ? "specimen" : "specimens").append(", ");
 
             for (int i = 0; i < anyOf.size(); i++) {
@@ -408,7 +373,7 @@ public class FishRequirement {
         }
         if (minGrade != null) text.append(", graded ").append(minGrade.name).append(" or better");
 
-        //weight and length are separate asks, described in their own units
+        // weight and length are separate asks, described in their own units
         if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
         if (minLength > 0f) text.append(", over ").append(trim(minLength)).append(" m");
 
@@ -421,20 +386,19 @@ public class FishRequirement {
         return text.toString();
     }
 
-    /** e.g. "caught with a harpoon through a breach lamp"; no leading separator (caller decides), empty when unspecified. */
+
     public String describeCatch() {
         StringBuilder text = new StringBuilder();
 
         if (method != null) text.append("caught with ").append(getMethodName());
         if (implement != null) {
-            //"through X" alone needs "taken" to read as a sentence; with a method it continues that clause
             text.append(method == null ? "taken through " : " through ").append(implement.name);
         }
 
         return text.toString();
     }
 
-    /** Adds a clause to a sentence already under way, with the comma only where one is needed. */
+
     protected static void append(StringBuilder text, String clause) {
         if (clause.isEmpty()) return;
 
@@ -443,7 +407,7 @@ public class FishRequirement {
         text.append(clause);
     }
 
-    /** The method said the way somebody would say it, rather than the way the log labels it. */
+
     protected String getMethodName() {
         switch (method) {
             case HARPOON: return "a harpoon";
@@ -452,7 +416,7 @@ public class FishRequirement {
         }
     }
 
-    /** The origin said the way the survey lines say it, so one vocabulary covers both. */
+
     protected String getOriginName() {
         if (origin == SectorRegion.ABYSSAL) return "in the Abyss";
 
@@ -462,13 +426,13 @@ public class FishRequirement {
         return "in " + band + " of the " + FishLocationSummary.getDirectionName(quadrant);
     }
 
-    /** Whole numbers without a trailing zero, because "over 2 kg" is what somebody would say. */
+
     protected static String trim(float value) {
         return value == Math.round(value) ? String.valueOf(Math.round(value))
                 : String.valueOf(Math.round(value * 10f) / 10f);
     }
 
-    /** Same as {@link #describe()} minus the count - alternatives share the parent's count. */
+
     public String describeQualities() {
         StringBuilder text = new StringBuilder();
 

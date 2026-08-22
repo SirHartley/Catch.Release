@@ -16,13 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Fish as money: shop prices are in specimens of a rarity, counted/spent by rarity rather than
- * species. Bundles count as their contents. Spending always takes the worst specimens first.
- */
+
 public class FishCurrency {
 
-    /** How many of each rarity are aboard, bundles included. */
+
     public static Map<FishRarity, Integer> count() {
         Map<FishRarity, Integer> counts = new EnumMap<>(FishRarity.class);
         for (FishRarity rarity : FishRarity.values()) counts.put(rarity, 0);
@@ -48,10 +45,7 @@ public class FishCurrency {
         return held == null ? 0 : held;
     }
 
-    /**
-     * How many aboard could go towards a requirement. For an all-of-one-species ask this is the
-     * best single species' count, since that is the most the requirement could actually take.
-     */
+
     public static int count(FishRequirement req) {
         if (req == null) return Integer.MAX_VALUE;
 
@@ -78,13 +72,7 @@ public class FishCurrency {
         return best;
     }
 
-    /**
-     * Takes payment against a requirement, if it can be paid in full. An all-of-one-species ask is
-     * paid from whichever species has the most matching aboard, so the ask never breaks into a
-     * second species when one could cover it.
-     *
-     * @return false if the hold could not cover it, in which case nothing was taken
-     */
+
     public static boolean spend(FishRequirement req) {
         if (req == null) return true;
         if (count(req) < req.count) return false;
@@ -104,7 +92,7 @@ public class FishCurrency {
         return left <= 0;
     }
 
-    /** The species with the most matching specimens aboard, for an all-of-one-species ask. */
+
     protected static String pickBestSpecies(FishRequirement req) {
         CargoAPI cargo = getCargo();
         if (cargo == null) return null;
@@ -128,10 +116,7 @@ public class FishCurrency {
         return best;
     }
 
-    /**
-     * Removes matching specimens, loose stacks or bundles as asked. A bundle that is partly taken
-     * from is put back with what is left in it, since a bundle's contents are its identity.
-     */
+
     public static int spendMatching(CargoAPI cargo, java.util.function.Predicate<FishCatch> matches,
                                     int amount, boolean bundles) {
 
@@ -174,11 +159,7 @@ public class FishCurrency {
         return amount;
     }
 
-    /**
-     * Takes payment, if it can be paid in full.
-     *
-     * @return false if there were not enough aboard, in which case nothing was taken
-     */
+
     public static boolean spend(FishRarity rarity, int amount) {
         if (rarity == null || amount <= 0) return true;
         if (count(rarity) < amount) return false;
@@ -188,18 +169,14 @@ public class FishCurrency {
 
         int left = amount;
 
-        //loose specimens first, so a bundle is only broken into when it has to be
+        // loose specimens first, so a bundle is only broken into when it has to be
         left = spendFromStacks(cargo, rarity, left, false);
         if (left > 0) left = spendFromStacks(cargo, rarity, left, true);
 
         return left <= 0;
     }
 
-    /**
-     * @param bundles whether to take from crates rather than from loose specimens. A crate that is
-     *                partly spent is put back with what is left in it, since a bundle's contents are
-     *                its identity and a smaller one is a different item
-     */
+
     protected static int spendFromStacks(CargoAPI cargo, FishRarity rarity, int amount, boolean bundles) {
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             if (amount <= 0) break;
@@ -221,7 +198,6 @@ public class FishCurrency {
                 continue;
             }
 
-            //a crate: take what is needed out of it and put the rest back
             int take = Math.min(amount, contents.size());
             cargo.removeItems(CargoItemType.SPECIAL, data, 1);
             amount -= take;
@@ -235,13 +211,7 @@ public class FishCurrency {
         return amount;
     }
 
-    /**
-     * Takes everything, crates included, and says how many specimens that was.
-     * <p>
-     * Not a spend: nothing is being paid for and there is no requirement to fall short of, so this
-     * empties the hold of fish whatever is in it and never puts a partial crate back. The one caller
-     * is a patrol's inspection, which is not shopping.
-     */
+
     public static int seizeAll() {
         CargoAPI cargo = getCargo();
         if (cargo == null) return 0;
@@ -255,8 +225,6 @@ public class FishCurrency {
             List<FishCatch> contents = read(stack);
             if (contents.isEmpty()) continue;
 
-            //read() already multiplies a loose stack out by its size, but reports a crate stack as
-            //one crate's contents - the whole stack is being taken either way
             taken += FishItems.isContainer(data)
                     ? contents.size() * (int) stack.getSize() : contents.size();
 
@@ -266,10 +234,7 @@ public class FishCurrency {
         return taken;
     }
 
-    /**
-     * Best specimen aboard matching a requirement (null if none), for buyers who pay on quality
-     * rather than count. Judged by where it sits in its own species' size range, not raw weight.
-     */
+
     public static FishCatch findBest(FishRequirement req) {
         CargoAPI cargo = getCargo();
         if (req == null || cargo == null) return null;
@@ -287,7 +252,7 @@ public class FishCurrency {
         return best;
     }
 
-    /** Everything a stack holds, whether it is one specimen or a crate of them. */
+
     protected static List<FishCatch> read(CargoStackAPI stack) {
         List<FishCatch> out = new ArrayList<>();
 
@@ -304,7 +269,7 @@ public class FishCurrency {
         FishCatch entry = FishCatch.decode(data.getData());
         if (entry == null) return out;
 
-        //a loose stack can be several of the same specimen
+        // a loose stack can be several of the same specimen
         for (int i = 0; i < (int) stack.getSize(); i++) out.add(entry);
 
         return out;

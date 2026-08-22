@@ -14,15 +14,7 @@ import java.awt.Color;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Vanilla-style mission map markers for rules-driven conversations that are not themselves
- * {@code BaseHubMission}s.
- * <p>
- * This deliberately mirrors {@code BaseHubMission.callEvent("showMap", ...)}: the marker uses the
- * intel icon and tags, derives its colour from the destination where possible, and occupies the
- * person-info map slot below the portrait. The remote guard is the mod-specific part; a destination
- * in the system the player is already in is not a useful sidebar map.
- */
+
 public final class QuestDialogMap {
 
     private QuestDialogMap() {

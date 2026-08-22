@@ -29,15 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * One cast: sends drones to the aimed spot, keeps them circling while watching for a mote to drift
- * into the ring, and brings them home when the trip ends. Only one swarm is out at a time - a new
- * cast recalls the old one. Does not run while paused, so drones hold still during the minigame.
- * <p>
- * Four hooks define a trip: {@link #getSearchCenter()}, {@link #getSearchArea()},
- * {@link #isReachable(SectorEntityToken)}, {@link #shouldRecall()} - overridden by
- * {@link RoamingDroneSwarmScript} to fish without a pond.
- */
+
 public class FishingDroneSwarmScript implements EveryFrameScript {
 
     protected SectorEntityToken pond;
@@ -45,37 +37,30 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     protected List<SectorEntityToken> drones = new ArrayList<>();
 
-    /** Launch plan is fixed at dispatch, so an upgrade change cannot reshape a sequence in flight. */
+
     protected int plannedDroneCount = 0;
     protected int nextDroneIndex = 0;
     protected float nextDroneLaunchIn = 0f;
     protected IntervalUtil searchInterval = new IntervalUtil(RodConstants.DRONE_SEARCH_INTERVAL, RodConstants.DRONE_SEARCH_INTERVAL);
 
-    /** Motes already dealt with, so a drone does not intercept the same one over and over. */
+
     protected Set<String> handled = new HashSet<>();
 
     protected boolean recalling = false;
     protected boolean done = false;
 
-    /** How many drones were still out when the recall started, so the trip home can be measured. */
+
     protected int recallCount = 0;
 
-    /** Whether anything catchable is currently inside the ring - drives the ring's own brightening. */
+
     protected boolean moteInRing = false;
 
-    /**
-     * Sends a swarm to a spot, recalling whatever was already out there. The drone count is the
-     * {@link StatIds#FISHING_DRONE_COUNT} upgrade.
-     */
+
     public static FishingDroneSwarmScript dispatch(SectorEntityToken pond, Vector2f target) {
         return launch(new FishingDroneSwarmScript(pond, target));
     }
 
-    /**
-     * Puts a swarm out: recalls anything already out, begins its timed launch sequence,
-     * registers it, and hangs its renderers on it. The recall lives here rather than in each
-     * caller so a subclass cannot forget it.
-     */
+
     protected static <T extends FishingDroneSwarmScript> T launch(T script) {
         recallExisting();
 
@@ -85,8 +70,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         LunaCampaignRenderer.addRenderer(new FishingRingRenderer(script));
 
-        //dev mode: shows each drone's intended position, so flight bugs are visible rather than
-        //inferred from how it looks
+        // dev mode: shows each drone's intended position, so flight bugs are visible rather than inferred from how it looks
         if (Global.getSettings().isDevMode()) {
             LunaCampaignRenderer.addRenderer(new FishingDroneDebugRenderer(script));
         }
@@ -94,7 +78,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return script;
     }
 
-    /** Sends any swarm already out back to the fleet, so a new cast never leaves strays behind. */
+
     public static void recallExisting() {
         for (EveryFrameScript script : new ArrayList<>(Global.getSector().getScripts())) {
             if (script instanceof FishingDroneSwarmScript) {
@@ -103,7 +87,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
-    /** The swarm currently out, or null if idle; a swarm retires itself once the last drone is home. */
+
     public static FishingDroneSwarmScript getExisting() {
         for (EveryFrameScript script : Global.getSector().getScripts()) {
             if (!(script instanceof FishingDroneSwarmScript)) continue;
@@ -120,7 +104,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         this.target = target;
     }
 
-    /** Launches the first drone now and leaves the upgraded remainder on the timed queue. */
+
     protected void beginDroneLaunches() {
         plannedDroneCount = getDroneCount();
         nextDroneIndex = 0;
@@ -130,7 +114,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         nextDroneLaunchIn = Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
     }
 
-    /** Creates exactly one queued drone at its stable slot around the eventual orbit. */
+
     protected boolean launchNextDrone() {
         if (!hasPendingDrones()) return false;
 
@@ -140,7 +124,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             return false;
         }
 
-        //spread the fixed plan evenly so sequential launches still fill distinct slots
         float slotAngle = 360f / plannedDroneCount * nextDroneIndex;
 
         SectorEntityToken drone = fleet.getContainingLocation().addCustomEntity(
@@ -157,10 +140,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return true;
     }
 
-    /**
-     * Releases at most one drone per campaign frame. Under time acceleration a late sequence
-     * catches up over successive frames instead of collapsing several launches back together.
-     */
+
     protected void advanceDroneLaunches(float amount) {
         if (!hasPendingDrones()) return;
 
@@ -185,13 +165,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 StatIds.FISHING_DRONE_COUNT, RodConstants.DRONE_COUNT_FALLBACK)));
     }
 
-    /** How far out the swarm will fish; the ring the player sees is drawn from the same number. */
+
     public static float getRingRadius() {
         return UpgradeManager.getValue(StatIds.DRONE_CATCH_AREA, RodConstants.RING_RADIUS_FALLBACK);
     }
 
-    /** How far past the ring a drone will notice and chase something, letting it meet a mote
-     * drifting in or finish a chase that carries past the line. */
+
     public static float getChaseMargin() {
         return UpgradeManager.getValue(StatIds.DRONE_CHASE_MARGIN,
                 RodConstants.CHASE_MARGIN_FALLBACK);
@@ -225,20 +204,20 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         advanceDroneLaunches(amount);
 
-        //an empty live list is not the end while upgraded drones are still queued
+        // an empty live list is not the end while upgraded drones are still queued
         if (drones.isEmpty() && !hasPendingDrones()) {
             done = true;
             return;
         }
 
-        //checked every frame so a caught-up mote is not left waiting a tick
+        // checked every frame so a caught-up mote is not left waiting a tick
         checkChasers();
 
         searchInterval.advance(amount);
         if (searchInterval.intervalElapsed()) lookForCatch();
     }
 
-    /** The trip is over once the player leaves the pond behind, or the pond closes under them. */
+
     protected boolean shouldRecall() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null || pond == null) return true;
@@ -253,7 +232,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
                 > pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT;
     }
 
-    /** Sends idle drones after any mote inside the ring. */
+
     protected void lookForCatch() {
         if (getSearchCenter() == null) return;
 
@@ -274,13 +253,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         for (SectorEntityToken mote : candidates) {
             SectorEntityToken drone = getClosestIdleDrone(mote);
-            if (drone == null) return; //everyone is busy, the rest can wait for a free one
+            if (drone == null) return;
 
             getPlugin(drone).chase(mote);
         }
     }
 
-    /** Sorts candidates rarest-first when the priority upgrade is bought; at 0 the order is untouched. */
+
     protected void sortByPriority(List<SectorEntityToken> motes) {
         final float priority = UpgradeManager.getValue(StatIds.DRONE_RARE_PRIORITY, 0f);
         if (priority <= 0f || motes.size() < 2) return;
@@ -293,7 +272,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         });
     }
 
-    /** Reads the species off either kind of mote, so the sort works on whatever is being fished. */
+
     protected static int getRarityOrdinal(SectorEntityToken mote) {
         FishSpec spec = null;
 
@@ -306,23 +285,22 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return spec == null ? 0 : spec.rarity.rank;
     }
 
-    /** The middle of the water being fished. Not always the cast point - a roaming swarm overrides
-     * this to follow the fleet. Null means nothing to fish around this tick. */
+
     public Vector2f getSearchCenter() {
         return pond == null ? null : target;
     }
 
-    /** Ring radius plus chase margin - the one number search and break-off are both measured against. */
+
     protected float getReach() {
         return getRingRadius() + getChaseMargin();
     }
 
-    /** The circle drawn for the player - the ring, not the reach; the chase margin stays undrawn. */
+
     public float getRingDrawRadius() {
         return getRingRadius();
     }
 
-    /** The circle the drones themselves fly, as opposed to the water they are fishing. */
+
     public float getPatrolRadius() {
         return RodConstants.DRONE_ORBIT_RADIUS;
     }
@@ -333,16 +311,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return pond.getContainingLocation().getEntitiesWithTag(FishEntityPlugin.MOTE_TAG);
     }
 
-    /**
-     * False while dived under the fabric; it resurfaces and can be picked up again then. Asked
-     * for the whole of a chase and not only when one is picked, since what a drone can reach is
-     * a thing that changes under it while it flies.
-     */
+
     protected boolean isReachable(SectorEntityToken mote) {
         return FishEntityPlugin.isAvailable(mote);
     }
 
-    /** A mote is worth going after while it is alive, inside the ring, and not already dealt with. */
+
     protected boolean isCatchable(SectorEntityToken mote) {
         if (mote.isExpired() || !mote.isAlive()) return false;
         if (handled.contains(mote.getId())) return false;
@@ -374,18 +348,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             SectorEntityToken mote = plugin.getChaseTarget();
             if (mote == null) continue;
 
-            //break off on the same terms the chase was taken on. Reachability used to be asked
-            //once, at pick-up, and never again - so a lamp mark that faded while the drone was in
-            //the air, or a specimen that dived to shake the line, was still landed on contact.
-            //Both are exactly the reach the harpoon's deep-strike head is sold for, and no rig
-            //without it has any business having it
             if (!isReachable(mote)) {
                 plugin.returnToOrbit();
                 continue;
             }
 
-            //measured against reach, not the tighter patrol orbit, or every chase past that inner
-            //circle would be called off immediately
+            // measured against reach, not the tighter patrol orbit, or every chase past that inner circle would be called off immediately
             if (center == null || Misc.getDistance(mote.getLocation(), center) > getReach()) {
                 plugin.returnToOrbit();
                 continue;
@@ -397,7 +365,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
-    /** Opens the catch minigame; the dialog pauses the campaign, holding the drones still until done. */
+
     protected void onMoteReached(final SectorEntityToken drone, final SectorEntityToken mote) {
         FishEntityPlugin plugin = mote.getCustomPlugin() instanceof FishEntityPlugin
                 ? (FishEntityPlugin) mote.getCustomPlugin()
@@ -405,7 +373,6 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         FishSpec fish = plugin == null ? null : plugin.getFishSpec();
 
-        //nothing to play against - an unidentified mote is simply taken
         if (fish == null) {
             playMoteHit(mote);
             handled.add(mote.getId());
@@ -423,27 +390,25 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
             }
         });
 
-        //the UI was busy - the drone stays on the mote and it comes round again next tick
+        // the UI was busy - the drone stays on the mote and it comes round again next tick
         if (!opened) return;
 
         playMoteHit(mote);
         handled.add(mote.getId());
     }
 
-    /** One confirmed contact report; callers invoke this only after the catch path accepts the mote. */
+
     protected void playMoteHit(SectorEntityToken mote) {
         Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
                 mote.getLocation(), mote.getVelocity());
     }
 
-    /** Drives the minigame's aberration/region colouring - the pond for a cast, the mote itself
-     * when there is no pond (a roaming swarm). */
+
     protected SectorEntityToken getCatchAnchor(SectorEntityToken mote) {
         return pond == null ? mote : pond;
     }
 
-    /** A landed fish rides home on its drone; one that got away takes its mote with it. Either way
-     * that drone is done for this trip. */
+
     protected void resolveCatch(SectorEntityToken drone, SectorEntityToken mote, boolean caught) {
         FishingDroneEntityPlugin plugin = getPlugin(drone);
         if (plugin == null) return;
@@ -473,14 +438,13 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return closest;
     }
 
-    /** Cancels the unlaunched remainder and sends every live drone home. */
+
     public void recall() {
-        //a second call would restart the count and make the trip home look longer than it is
         if (recalling) return;
 
         recalling = true;
 
-        //nothing new may leave after a recall, whether it was manual or automatic
+        // nothing new may leave after a recall, whether it was manual or automatic
         plannedDroneCount = nextDroneIndex;
         recallCount = drones.size();
 
@@ -490,7 +454,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         }
     }
 
-    /** 0 to 1, counted in drones landed rather than time. */
+
     public float getRecallProgress() {
         if (!recalling || recallCount <= 0) return 1f;
 
@@ -517,10 +481,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return recalling;
     }
 
-    /** Whether a press can cancel queued launches or tell a live drone to come home. A catch
-     * carrier already on its return leg has no command left to receive; once it is the last drone
-     * out, the ROD stays
-     * active but disabled until that delivery reaches the fleet. */
+
     public boolean hasRecallableDrones() {
         if (hasPendingDrones()) return true;
 

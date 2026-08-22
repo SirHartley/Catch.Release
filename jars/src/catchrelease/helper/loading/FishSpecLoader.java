@@ -22,11 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Reads data/campaign/fish.csv into {@link FishSpec}s, keyed by id, and caches the result for the
- * session. Same shape as {@link UpgradeStatLoader} - merged across mods, so another mod can add its
- * own fish or override ours by repeating the id.
- */
+
 public class FishSpecLoader {
 
     public static final String PATH = "data/campaign/fish.csv";
@@ -110,7 +106,7 @@ public class FishSpecLoader {
         return s;
     }
 
-    /** Comma separated cell to a set, empties dropped. */
+
     private static Set<String> parseList(String value) {
         Set<String> out = new LinkedHashSet<>();
         if (value == null) return out;
@@ -123,11 +119,7 @@ public class FishSpecLoader {
         return out;
     }
 
-    /**
-     * The named-enum cells, each warning on a name it does not know rather than dropping it
-     * quietly - a typo that silently widened a species' range to the whole sector is exactly the
-     * thing these columns exist to stop.
-     */
+
     private static Set<StarColour> parseStarColours(String value) {
         Set<StarColour> out = new LinkedHashSet<>();
 
@@ -152,7 +144,7 @@ public class FishSpecLoader {
             try {
                 StarAge age = StarAge.valueOf(name.trim().toUpperCase());
 
-                //ANY is vanilla's "undecided", not an age a fish can prefer
+                // ANY is vanilla's "undecided", not an age a fish can prefer
                 if (age != StarAge.ANY) out.add(age);
             } catch (IllegalArgumentException e) {
                 Global.getLogger(FishSpecLoader.class).warn("Unknown star age '" + name + "' in " + PATH);

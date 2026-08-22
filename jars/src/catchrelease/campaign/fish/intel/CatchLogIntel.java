@@ -27,27 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * One landed specimen, kept: what it was, when and where it came up, what took it, how well it
- * was holding, and whatever else surfaced with it. Filed once per catch from the minigame's
- * readout moment, so the ledger and the celebration can never disagree about what happened.
- * <p>
- * The entries live under their own {@link #TAG} category on the intel screen - the tag string
- * itself is the category button, the way vanilla's Fleet log works - and they are added silently
- * and never marked new: the catch was celebrated in full on the water, and a ledger that pinged
- * the comm sound after every fish would teach the player to hate it. Newest first, no map
- * location and no buttons - the water the specimen came out of has nothing left in it to point at.
- * <p>
- * Everything shown is captured at filing time or read off the {@link FishCatch} itself, which
- * already carries method, implement, and timestamp from the minigame's opening frame; bycatch is
- * copied down from the treasure receipts because those are otherwise thrown away with the dialog.
- */
+
 public class CatchLogIntel extends BaseIntelPlugin {
 
-    /** The category button on the intel screen, in vanilla's own Fleet log naming voice. */
+
     public static final String TAG = "Catch log";
 
-    /** One treasure receipt worth of bycatch, kept as words - the items are long since granted. */
+
     public static class Bycatch implements Serializable {
         public final String rarityName;
         public final Color rarityColor;
@@ -78,7 +64,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         }
     }
 
-    /** Files one catch into the ledger; quiet on every channel - see the class note. */
+
     public static void record(FishCatch specimen, SectorEntityToken where,
                               List<TreasureAward> loot) {
         if (specimen == null || Global.getSector() == null) return;
@@ -115,8 +101,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         addBulletPoints(info, mode);
     }
 
-    /** The facts under the title, the same on the list row and the open panel: what, how well it
-     *  held, what took it, when and where, and what else came up. */
+
     @Override
     protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
         Color h = Misc.getHighlightColor();
@@ -153,7 +138,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         unindent(info);
     }
 
-    /** Date and system on one row; either may be missing on a specimen from an odd route. */
+
     protected void addWhenAndWhere(TooltipMakerAPI info, Color tc, Color h) {
         String date = getDate();
 
@@ -190,7 +175,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         Color h = Misc.getHighlightColor();
         Color gray = Misc.getGrayColor();
 
-        //the specimen on the shared portrait stage, same as everywhere one named species is shown
+        // the specimen on the shared portrait stage, same as everywhere one named species is shown
         if (spec == null) {
             info.addImage(FishConstants.ITEM_ICON_FALLBACK, width, 80f, opad);
         } else {
@@ -260,7 +245,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         }
     }
 
-    /** The knowledge-aware face - always the real art here, since a log entry means it was landed. */
+
     @Override
     public String getIcon() {
         FishSpec spec = getSpec();

@@ -12,14 +12,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * A real entity with a real species, hidden until revealed - renders nothing itself; a breach lamp
- * shows its dent, or the mote plainly under the beam. {@link #unearth()} replaces it with an
- * ordinary mote once struck.
- * <p>
- * Never arrives anywhere: instead of swimming to a target and expiring, it repicks a heading
- * whenever the current one runs out, so it stays followable rather than blinking out.
- */
+
 public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String BURIED_TAG = "catchrelease_buried_mote";
@@ -38,7 +31,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     protected float headingLeft = 0f;
     protected float time = 0f;
 
-    /** Its own wander, so two of the same species do not move as one. */
+
     protected float sineVariance = 1f;
 
     @Override
@@ -62,14 +55,14 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         return fishId == null ? null : FishSpecLoader.getFishSpec(fishId);
     }
 
-    /** COMMON where the row has gone, so a missing spec cannot make one stand still. */
+
     public FishRarity getRarity() {
         FishSpec spec = getFishSpec();
 
         return spec == null ? FishRarity.COMMON : spec.rarity;
     }
 
-    /** Heading held then replaced periodically; rarity's {@code wanderMult} drives turn frequency and sharpness. */
+
     @Override
     public void advance(float amount) {
         time += amount;
@@ -94,18 +87,14 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         entity.setLocation(next.x, next.y);
     }
 
-    /** A rarer one changes its mind sooner, which is most of what makes it hard to stay with. */
+
     protected void pickHeadingTime() {
         headingLeft = MathUtils.getRandomNumberInRange(
                 FishConstants.BURIED_HEADING_TIME_MIN, FishConstants.BURIED_HEADING_TIME_MAX)
                 / Math.max(0.01f, getRarity().wanderMult);
     }
 
-    /**
-     * Replaces this entity with an ordinary mote swimming away from the surfacing point.
-     *
-     * @return the new mote, or null if it could not be made
-     */
+
     public SectorEntityToken unearth() {
         if (entity == null || entity.isExpired()) return null;
 
@@ -118,17 +107,12 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         mote.setLocation(loc.x, loc.y);
 
-        //The ordinary mote is the same fish continuing from this exact point. Expire the buried
-        //representation immediately: leaving it to fade lets the searchlight impression renderer
-        //draw a stationary second fish while the harpoon visibly shoves the replacement away.
-        //setExpired defers collection cleanup to the engine, so this is safe while a tagged entity
-        //list is being inspected.
         entity.setExpired(true);
 
         return mote;
     }
 
-    /** Nothing. It is under the fabric; the searchlight draws the dent, and that is all there is. */
+
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
     }

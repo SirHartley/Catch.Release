@@ -17,7 +17,7 @@ public class RippleData {
     public IntervalUtil interval;
     public int amount;
 
-    /** Handed to every ring this makes - see {@link RippleRingRenderer#home}. Saved, for the same reason. */
+
     public LocationAPI home;
 
     public Color color;

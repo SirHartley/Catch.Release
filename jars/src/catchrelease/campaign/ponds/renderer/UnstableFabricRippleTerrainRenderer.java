@@ -10,9 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * spawns extra ripples like water drops around the main one
- */
+
 public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
 
     public static final Color BASE_RIPPLE_COLOR = new Color(100, 120, 160);
@@ -32,9 +30,7 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
 
     private boolean expired = false;
 
-    /**
-     * @param mainRipple should be infinite
-     */
+
     public UnstableFabricRippleTerrainRenderer(RippleData mainRipple, SectorEntityToken attachedEntity){
         this.attachedEntity = attachedEntity;
         this.size = mainRipple.maxSize;
@@ -54,9 +50,6 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
     @Override
     public void advance(float amount) {
 
-        // Every pond in the sector runs this (terrain scripts advance everywhere), but ripples go into
-        // LunaLib's one sector-wide renderer list - without this check, a distant pond's ripples would
-        // paint over this one at its own world coordinates.
         if (!attachedEntity.isInCurrentLocation()) return;
 
         extraRippleInterval.advance(amount);
@@ -67,7 +60,6 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
             Vector2f loc = MathUtils.getPointOnCircumference(attachedEntity.getLocation(), radius, angle);
             int amt = MathUtils.getRandomNumberInRange(2, 6);
 
-            // Scales with distance from core: 0.5 near the centre to 1.5 at the rim.
             float mult = 0.5f + radius / size;
             float maxSize = EXTRA_RIPPLE_BASE_SIZE * mult;
 

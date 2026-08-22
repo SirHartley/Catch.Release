@@ -15,16 +15,10 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.EnumSet;
 
-/**
- * The fan's window: {@link SearchlightBreachRenderer} cut as a wedge instead of a disc. Same
- * construction - the deep is drawn at natural size with UVs taken from each vertex's world position,
- * so the wedge pivots across a starfield that stays put, and parallax lean/wander are the disc's own.
- * Geometry and both falloffs are {@link SearchlightFanRenderer}'s exactly, so the window opens where
- * the light over it is bright.
- */
+
 public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin {
 
-    /** The disc's numbers, so the two windows read as the same fabric giving way. */
+
     public static final float OPEN_TIME = SearchlightBreachRenderer.OPEN_TIME;
     public static final float CENTER_ALPHA = SearchlightBreachRenderer.CENTER_ALPHA;
 
@@ -33,7 +27,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
 
     public transient SpriteAPI fill;
 
-    /** The live vectors, not copies - the wedge rides the fleet and follows the sweep. */
+
     private final Vector2f origin;
     private final Vector2f aim;
 
@@ -42,7 +36,6 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
 
     private boolean expired = false;
 
-    //fadeAndExpire
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -128,7 +121,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
                 alpha * CENTER_ALPHA, fillSizeWorld, uOff, vOff);
     }
 
-    /** The fan's wedge, vertex for vertex, wearing the window's texture and alphas. */
+
     protected void drawWedge(float direction, float length, float aimDistance, float alpha,
                              float fillSizeWorld, float uOff, float vOff) {
 
@@ -175,7 +168,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
         GL11.glPopAttrib();
     }
 
-    /** The fan's brightness curve down the length, so window and light dim together. */
+
     protected float along(float u, float aimFract) {
         float base = Searchlight.FAN_TIP_STRENGTH
                 + (1f - Searchlight.FAN_TIP_STRENGTH) * TrigHelper.smootherStep(1f - u);
@@ -185,7 +178,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
         return base * TrigHelper.smootherStep((1f - u) / (1f - aimFract));
     }
 
-    /** One vertex, sampling the deep by where it stands - the disc renderer's emit exactly. */
+
     protected void emit(float x, float y, float fillSizeWorld, float uOff, float vOff, float alpha) {
         GL11.glColor4f(1f, 1f, 1f, alpha);
         GL11.glTexCoord2f(x / fillSizeWorld + uOff, y / fillSizeWorld + vOff);

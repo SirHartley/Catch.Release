@@ -20,26 +20,13 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.TransmitterTra
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * Somebody paid for, when nobody official would come.
- * <p>
- * The other end of a harpooning: a crew with a hole in the hull, no patrol in earshot to report it
- * to, and a name to put on the invoice. What they buy is not justice and does not pretend to be -
- * it arrives with its transponder off, recites the contract once contact is made, and leaves when
- * it stops finding you. The recital is not negotiation; it is there so the fight has a visible
- * cause.
- * <p>
- * Built the way vanilla builds the same thing for the scientist's alpha core: a fleet made off the
- * standard factory, told to intercept the player through
- * {@link TransmitterTrapSpecial#makeFleetInterceptPlayer}, and handed an {@link AutoDespawnScript}
- * so it takes itself away rather than becoming a permanent resident.
- */
+
 public class HarpoonHitman implements EveryFrameScript {
 
-    /** Set on the hull, so one contract cannot be filled twice over and the encounter knows them. */
+
     public static final String HITMAN_FLAG = "$catchrelease_harpoonHitman";
 
-    /** Who is being collected for, for anything that wants to name them. */
+
     public static final String HIRED_BY_KEY = "$catchrelease_harpoonHitmanFor";
     public static final String CLIENT_NAME_KEY = "$catchrelease_harpoonHitmanClient";
     public static final String VICTIM_NAME_KEY = "$catchrelease_harpoonHitmanVictim";
@@ -49,32 +36,32 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
 
-    /** A cancellation fee mercenaries might accept, rolled in tidy five-thousand-credit steps. */
+
     public static final int BRIBE_MIN = 80_000;
     public static final int BRIBE_MAX = 120_000;
     public static final int BRIBE_STEP = 5_000;
 
-    /** MagicLib's accepted-bounty marker; kept as data so this class has no library dependency. */
+
     public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
 
-    /** Kept on the sector so one refusal cannot buy the player an endless queue of these. */
+
     public static final String COOLDOWN_KEY = "$catchrelease_harpoonHitmanWait";
     public static final float COOLDOWN_DAYS = 30f;
 
-    /** The booked contract, while its crew takes a month to reach the player. */
+
     public static final String PENDING_KEY = "$catchrelease_harpoonHitmanPending";
     public static final float RESPONSE_DELAY_DAYS = 30f;
 
-    /** Combat strength bought, in fleet points. Enough to be a fight, not enough to be a raid. */
+
     public static final float FP_MIN = 25f;
     public static final float FP_MAX = 60f;
 
-    /** How far off the player they start, and how long they keep looking. */
+
     public static final float SPAWN_RANGE_MIN = 2500f;
     public static final float SPAWN_RANGE_MAX = 4500f;
     public static final float INTERCEPT_DAYS = 30f;
 
-    /** The chance a crew with nobody to report to buys one instead. */
+
     public static final float CHANCE = 0.30f;
 
     protected String hiredBy;
@@ -92,30 +79,17 @@ public class HarpoonHitman implements EveryFrameScript {
         this.explosive = explosive;
     }
 
-    /**
-     * Puts a contract out on the player, if the buyer has grounds and the sector has room for one.
-     *
-     * @param hiredBy the faction whose hull was holed, for the encounter's own use
-     * @return whether anybody was actually sent
-     */
+
     public static boolean send(String hiredBy) {
         return send(hiredBy, null, null, false, false);
     }
 
-    /**
-     * @param bypassCooldown allows a fresh explosive incident to make its own 30% roll during the
-     *                       ordinary retry wait. It does not skip the one-at-a-time rule or the
-     *                       roll itself
-     */
+
     public static boolean send(String hiredBy, boolean bypassCooldown) {
         return send(hiredBy, null, null, false, bypassCooldown);
     }
 
-    /**
-     * @param victimName the fleet whose damage bought the contract
-     * @param originName where that fleet was struck
-     * @param explosive whether the recovered projectile was a Fathom Head rather than a harpoon
-     */
+
     public static boolean send(String hiredBy, String victimName, String originName,
                                boolean explosive, boolean bypassCooldown) {
         if (!hasEstablishedColony(hiredBy)) return false;
@@ -143,7 +117,7 @@ public class HarpoonHitman implements EveryFrameScript {
         return true;
     }
 
-    /** Waits out the response month, then holds until the player is in a system that can host it. */
+
     @Override
     public void advance(float amount) {
         if (done) return;
@@ -166,9 +140,6 @@ public class HarpoonHitman implements EveryFrameScript {
         location.addEntity(fleet);
         fleet.setLocation(at.x, at.y);
 
-        //They mean the fight, but it belongs to the contract rather than the mercenary flag.
-        //Vanilla's low-impact switch still strains relations; no-impact is the separate promise
-        //that beating an unsanctioned hunter changes no faction reputation at all.
         TransmitterTrapSpecial.makeFleetInterceptPlayer(fleet, true, false, INTERCEPT_DAYS);
         Misc.makeNoRepImpact(fleet, "catchreleaseHarpoonHitman");
 
@@ -197,7 +168,7 @@ public class HarpoonHitman implements EveryFrameScript {
         if (pending == this) Global.getSector().getMemoryWithoutUpdate().unset(PENDING_KEY);
     }
 
-    /** Mercenaries, running dark, at a strength somebody could plausibly have afforded. */
+
     protected static CampaignFleetAPI create(CampaignFleetAPI player, String hiredBy,
                                               String victimName, String originName,
                                               boolean explosive) {
@@ -209,22 +180,22 @@ public class HarpoonHitman implements EveryFrameScript {
                 Factions.MERCENARY,
                 null,
                 FleetTypes.MERC_BOUNTY_HUNTER,
-                fp,          //combat
-                0f,          //freighter
-                fp * 0.1f,   //tanker
+                fp,
+                0f,
+                fp * 0.1f,
                 0f, 0f, 0f, 0f);
 
         CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
         if (fleet == null || fleet.isEmpty()) return null;
 
-        //dark, because a contract is not a thing anybody files
+        // dark, because a contract is not a thing anybody files
         fleet.setTransponderOn(false);
         fleet.setNoFactionInName(true);
         FactionAPI client = Global.getSector().getFaction(hiredBy);
         String clientName = client == null
                 ? "an undisclosed client" : client.getDisplayNameWithArticle();
 
-        //The name gives the fleet an origin before contact; the hail supplies the incident record.
+        // The name gives the fleet an origin before contact; the hail supplies the incident record.
         fleet.setName(client == null ? "Contracted Hunters"
                 : Misc.ucFirst(client.getDisplayName()) + " Contract Hunters");
 
@@ -232,8 +203,7 @@ public class HarpoonHitman implements EveryFrameScript {
         fleet.getMemoryWithoutUpdate().set(HIRED_BY_KEY, hiredBy, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(CLIENT_NAME_KEY, clientName, INTERCEPT_DAYS);
         if (!hasEstablishedColony(hiredBy)) {
-            //The money and instructions were placed before the client disappeared. Mercenaries
-            //finish a funded contract; the hail names the unusual provenance instead.
+            // The money and instructions were placed before the client disappeared. Mercenaries finish a funded contract; the hail names the unusual provenance instead.
             fleet.getMemoryWithoutUpdate().set(CLIENT_GONE_KEY, true, INTERCEPT_DAYS);
         }
         fleet.getMemoryWithoutUpdate().set(VICTIM_NAME_KEY,
@@ -255,14 +225,7 @@ public class HarpoonHitman implements EveryFrameScript {
         return BRIBE_MIN + (int) (Math.random() * (steps + 1)) * BRIBE_STEP;
     }
 
-    /**
-     * Cancels the live contract and sends its fleet away.
-     * <p>
-     * Returning assignments alone are not sufficient: the intercept helper has also written a
-     * hostile flag, a tactical target, a last-known player location and this class has added an
-     * always-pursue override. Clear every source of the chase before asking the tactical module to
-     * reconsider, or a paid hunter can immediately reacquire the player after the dialog closes.
-     */
+
     public static boolean acceptBribe(CampaignFleetAPI fleet) {
         if (fleet == null || !fleet.getMemoryWithoutUpdate().getBoolean(HITMAN_FLAG)) return false;
 
@@ -290,13 +253,7 @@ public class HarpoonHitman implements EveryFrameScript {
         return true;
     }
 
-    /**
-     * Whether damage to this fleet can support a private revenge contract.
-     * <p>
-     * Reputation-impact flags are the common contract: vanilla and mod missions use them to mark
-     * targets the player is already meant to fight. The explicit fleet-type and MagicLib checks
-     * cover bounty implementations even when they have not also set one of those generic flags.
-     */
+
     public static boolean isEligibleVictim(CampaignFleetAPI victim) {
         if (victim == null) return false;
 
@@ -311,13 +268,7 @@ public class HarpoonHitman implements EveryFrameScript {
                 && !memory.getBoolean(MAGIC_BOUNTY_TARGET_FLAG);
     }
 
-    /**
-     * Whether the proposed client still has a public, established market in the economy.
-     * <p>
-     * Size three is the first normal colony size. Hidden and condition-only markets are not a
-     * political base capable of placing a contract, which naturally excludes Remnants and similar
-     * non-colonial factions without maintaining a brittle faction-id blacklist.
-     */
+
     public static boolean hasEstablishedColony(String factionId) {
         if (factionId == null || Global.getSector() == null) return false;
 
@@ -329,7 +280,7 @@ public class HarpoonHitman implements EveryFrameScript {
         return false;
     }
 
-    /** Whether one is already out, so a second contract is not signed on top of the first. */
+
     public static boolean isOut() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null || player.getContainingLocation() == null) return false;
@@ -341,7 +292,7 @@ public class HarpoonHitman implements EveryFrameScript {
         return false;
     }
 
-    /** Whether another booked response is already serving its one-month delay. */
+
     public static boolean isPending() {
         Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);
         return pending instanceof HarpoonHitman && !((HarpoonHitman) pending).isDone();

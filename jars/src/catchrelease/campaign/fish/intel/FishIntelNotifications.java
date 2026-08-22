@@ -5,20 +5,13 @@ import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.util.DelayedActionScript;
 
-/**
- * The one delivery policy for Catch.Release intel.
- * <p>
- * Vanilla's intel manager only drains its comm queue while the campaign is unpaused. Forcing a
- * queued entry on the next campaign frame therefore gives it immediately after a modal dialog
- * closes, instead of spending its campaign message behind that dialog. Updates use the same
- * zero-day vanilla script boundary.
- */
+
 public final class FishIntelNotifications {
 
     private FishIntelNotifications() {
     }
 
-    /** Adds a new entry on the first unpaused campaign frame, with its normal campaign message. */
+
     public static void queue(BaseIntelPlugin intel) {
         if (intel == null || Global.getSector() == null) return;
 
@@ -29,7 +22,7 @@ public final class FishIntelNotifications {
         manager.queueIntel(intel);
     }
 
-    /** Sends an existing entry's update on the first unpaused campaign frame. */
+
     public static void update(BaseIntelPlugin intel, Object listInfoParam) {
         if (intel == null || Global.getSector() == null) return;
 

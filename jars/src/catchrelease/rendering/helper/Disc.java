@@ -4,21 +4,13 @@ import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 
-/**
- * A circle, filled or outlined, drawn where the caller says in whatever coordinates are current.
- * <p>
- * The filled form runs from one alpha at the middle to another at the rim, which is what a backlight
- * is: light with no edge to it. The outlined form is the same circle as a line, for when the edge is
- * the point.
- * <p>
- * All GL state this touches is pushed and popped, so anything drawn after the call is unaffected.
- */
+
 public class Disc {
 
-    /** Straight cuts around the circle. Thirty-two is smooth at any radius a panel uses, and cheap. */
+
     public static final int SEGMENTS = 32;
 
-    /** Filled circle as a triangle fan; additive blend for glow effects, normal blend for surfaces. */
+
     public static void draw(float x, float y, float radius, Color color,
                             float centerAlpha, float edgeAlpha, boolean additive) {
 

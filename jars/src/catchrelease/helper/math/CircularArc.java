@@ -115,7 +115,7 @@ public class CircularArc extends Circle{
         float arcLength = getArcCircumference();
         int numPoints = Math.max(1, (int)(arcLength / distanceBetweenLocations));
 
-        float angleSpan = getArcLength(); // in degrees
+        float angleSpan = getArcLength();
         float angleStep = angleSpan / numPoints;
         int direction = getAngleTravelDir();
 
@@ -154,7 +154,6 @@ public class CircularArc extends Circle{
 
         if (onArc) return Math.abs(dist - radius);
 
-        //off-arc: distance to the nearer endpoint
         Vector2f p1 = getPointForAngle(startAngle);
         Vector2f p2 = getPointForAngle(endAngle);
         return Math.min(Misc.getDistance(point, p1), Misc.getDistance(point, p2));

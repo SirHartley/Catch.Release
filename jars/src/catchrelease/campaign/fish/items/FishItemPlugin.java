@@ -21,13 +21,7 @@ import org.lwjgl.input.Keyboard;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * One landed specimen in the hold. Each carries its own length/weight/aberration so specimens
- * never stack; right-click stows it into that species' bundle, hold ctrl to stow all of them.
- * <p>
- * Ctrl, not shift - shift+right-click is intercepted by the cargo screen's own mass-transfer path
- * before the item ever sees it.
- */
+
 public class FishItemPlugin extends BaseSpecialItemPlugin {
 
     public FishCatch getCatch() {
@@ -56,7 +50,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return getCatch() != null;
     }
 
-    /** Handled here rather than by the frame, since what is removed depends on the control key. */
+
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
@@ -73,8 +67,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         SpecialItemData clickedData = stack.getSpecialDataIfSpecial();
 
         if (isBulkDown()) {
-            //Snapshot before changing anything: the replacement has to be written into the
-            //clicked cell before the other source cells are emptied.
+            // Snapshot before changing anything: the replacement has to be written into the clicked cell before the other source cells are emptied.
             for (CargoStackAPI other : FishItems.getFishStacks(stack.getCargo(), clicked.speciesId)) {
                 SpecialItemData data = other.getSpecialDataIfSpecial();
                 FishCatch entry = FishCatch.decode(data.getData());
@@ -90,9 +83,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         if (stowed.isEmpty()) return;
 
-        //bundle contents ARE its data, so growing it means replacing the stack, not appending.
-        //Exactly one crate is taken: identical crates stack, and taking the whole stack to put a
-        //single merged crate back would throw away the contents of every crate but one
         CargoStackAPI existing = FishItems.getBundleStack(stack.getCargo(), clicked.speciesId);
         SpecialItemData existingData = null;
         if (existing != null) {
@@ -100,8 +90,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
             stowed.addAll(FishItems.decodeBundle(existingData.getData()));
         }
 
-        //Vanilla fills the first empty cargo cell. Put the replacement in the clicked cell before
-        //removing any other source, otherwise the whole packed block jumps to the earliest hole.
         int clickedCount = isBulkDown() ? (int) stack.getSize() : 1;
         helper.removeFromClickedStackFirst(clickedCount);
         helper.addItems(CargoItemType.SPECIAL, FishItems.toBundle(stowed), 1);
@@ -125,7 +113,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishCatch entry = getCatch();
         FishSpec spec = entry == null ? null : entry.getSpec();
 
-        //the spec's own icon is blank, so this is the icon rather than something drawn over one
+        // the spec's own icon is blank, so this is the icon rather than something drawn over one
         FishItemRenderer.renderIcon(x, y, w, h, alphaMult, glowMult, getIconPath(spec));
 
         if (entry == null) return;
@@ -133,14 +121,13 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishItemRenderer.render(x, y, w, h, alphaMult,
                 spec == null ? null : spec.rarity, entry.getGrade());
 
-        //the wanted dot: a marked ware or an open job would take this specimen
         if (ShopMarks.isWanted(entry)) {
             ShopMarks.drawDot(x + w - ShopMarks.DOT_INSET, y + ShopMarks.DOT_INSET,
                     ShopMarks.DOT_RADIUS, alphaMult);
         }
     }
 
-    /** Species icon, or the fallback - used by the codex, which builds this plugin with no stack/specimen to read from. */
+
     protected String getIconPath(FishSpec spec) {
         if (spec == null || spec.icon == null || spec.icon.isEmpty()) {
             return FishConstants.ITEM_ICON_FALLBACK;
@@ -149,12 +136,12 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return spec.icon;
     }
 
-    /** Read from the keyboard directly - the cargo screen's click helper says what may be moved, not what modifier was held. */
+
     protected boolean isBulkDown() {
         return Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
     }
 
-    /** Vanilla special-item layout (title, type line, stat rows, description, cost label) so price reads "Sells for"/"Base value" consistently with other items. */
+
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -168,7 +155,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         FishGrade grade = entry.getGrade();
         float opad = 10f;
 
-        //vanilla resolves F2 to the generic "Fish" item spec; point it at this specimen's species instead
+        // vanilla resolves F2 to the generic "Fish" item spec; point it at this specimen's species instead
         FishCodex.link(tooltip, entry.speciesId);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
@@ -177,7 +164,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addSpacer(-opad);
         }
 
-        //where a manufactured thing says its design type, a grown one says its species' standing
         if (spec != null) {
             tooltip.addPara("Species type: %s", opad, Misc.getGrayColor(), spec.rarity.color,
                     Misc.ucFirst(spec.rarity.name().toLowerCase()));
@@ -197,7 +183,6 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
         }
 
-        //The explicit legend for the yellow dot drawn on this cargo icon.
         java.util.List<String> requiredBy = ShopMarks.getRequiredBy(entry);
         if (!requiredBy.isEmpty()) {
             tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
@@ -212,11 +197,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-    /**
-     * The canonical five-rung coherence ladder, low to high aberration. Kept as a numeric band so
-     * anything visualising the same reading - including the Fisherman - cannot quietly invent a
-     * second set of thresholds beside the labels shown to the player.
-     */
+
     public static int getAberrationBand(float aberration) {
         if (aberration >= 0.8f) return 4;
         if (aberration >= 0.55f) return 3;
@@ -226,7 +207,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         return 0;
     }
 
-    /** Said as how well it is holding rather than as a number, which is not a thing a crew would read off. */
+
     public static String getAberrationLabel(float aberration) {
         return switch (getAberrationBand(aberration)) {
             case 4 -> "barely holding";

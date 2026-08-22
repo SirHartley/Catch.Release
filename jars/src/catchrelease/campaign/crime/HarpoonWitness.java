@@ -8,30 +8,16 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
 
-/**
- * A holed crew going to find somebody to tell.
- * <p>
- * They do not radio it in. They break off whatever they were doing and fly to the nearest patrol
- * that is not at war with them, and the report lands when they get there - which makes reporting
- * something the player can watch happen, and outrun. Shoot the messenger, jump out, or simply be
- * gone by the time they arrive, and nobody was ever told.
- * <p>
- * Whose patrol it is does not matter, only that they are in earshot and not hostile to the crew
- * doing the telling. A hauler with a hole in it is not going to hold out for a patrol flying its own
- * flag - it is about the space this happened in, not about anybody's allegiance.
- * <p>
- * If there is nobody to tell, and the player left their transponder on long enough to be named, the
- * crew sometimes spends the money instead - see {@link HarpoonHitman}.
- */
+
 public class HarpoonWitness implements EveryFrameScript {
 
-    /** Set on a crew already on its way to report, so a second hit does not start a second errand. */
+
     public static final String REPORTING_FLAG = "$catchrelease_harpoonReporting";
 
-    /** How close counts as having got there and said it. */
+
     public static final float REPORT_DISTANCE = 400f;
 
-    /** Days they will spend trying to reach somebody before giving it up as a bad job. */
+
     public static final float TRAVEL_DAYS = 12f;
 
     protected CampaignFleetAPI victim;
@@ -46,12 +32,7 @@ public class HarpoonWitness implements EveryFrameScript {
     protected float daysSpent = 0f;
     protected boolean done = false;
 
-    /**
-     * Sets a crew off to report a harpooning, or settles what happens when they cannot.
-     *
-     * @param identified whether the player was running a transponder, and so has a name on them
-     * @param explosive  whether the hull was hit with a charge rather than a barb
-     */
+
     public static void begin(CampaignFleetAPI victim, String factionId,
                              boolean identified, boolean explosive) {
 
@@ -64,9 +45,6 @@ public class HarpoonWitness implements EveryFrameScript {
                 ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
         boolean hitmanEligible = HarpoonHitman.isEligibleVictim(victim);
 
-        //A charge in the hull with the player's own flag flying is not something anybody reports.
-        //There is no patrol errand here: the recovered charge goes straight to the same 30% contract
-        //roll, though any crew it produces still takes the ordinary response month to arrive.
         if (explosive && identified && hitmanEligible) {
             HarpoonHitman.send(factionId, victimName, originName, true, true);
             return;
@@ -77,7 +55,6 @@ public class HarpoonWitness implements EveryFrameScript {
 
         CampaignFleetAPI patrol = HarpoonPatrolResponse.findNearbyPatrol(victim);
 
-        //nobody within reach to tell. Some of them let it go and some of them pay somebody
         if (patrol == null) {
             if (identified && hitmanEligible) {
                 HarpoonHitman.send(factionId, victimName, originName, explosive, false);
@@ -124,8 +101,6 @@ public class HarpoonWitness implements EveryFrameScript {
     public void advance(float amount) {
         if (done) return;
 
-        //the messenger did not make it, or the patrol they were flying at is gone. Either way the
-        //report dies with them - which is the whole reason this is a journey rather than a message
         if (!isAlive(victim) || !isAlive(patrol)) {
             giveUp();
             return;
@@ -136,9 +111,6 @@ public class HarpoonWitness implements EveryFrameScript {
             return;
         }
 
-        //Hit again on the way, or crossed into hostility with the reputation loss, and the crew has
-        //stopped being a messenger. Their new repair, fight, or flight orders stand; this one lets
-        //go without touching them.
         if (HarpoonOffence.isDemanding(victim) || HarpoonOffence.isFleeing(victim)
                 || HarpoonOffence.hasTurnedHostile(victim)) {
             abandon();
@@ -158,7 +130,7 @@ public class HarpoonWitness implements EveryFrameScript {
         return fleet != null && !fleet.isExpired() && fleet.isAlive();
     }
 
-    /** Told. The patrol takes it from here, and the crew goes back to whatever it was doing. */
+
     protected void report() {
         HarpoonPatrolResponse.clearRetryWait(factionId);
         HarpoonPatrolResponse.dispatch(patrol, factionId);
@@ -166,10 +138,7 @@ public class HarpoonWitness implements EveryFrameScript {
         release();
     }
 
-    /**
-     * Nobody was told. The errand is dropped, and a crew that got a look at who did it may still
-     * decide the matter is worth paying to settle.
-     */
+
     protected void giveUp() {
         if (identified && hitmanEligible) {
             HarpoonHitman.send(factionId, victimName, originName, explosive, false);
@@ -178,7 +147,7 @@ public class HarpoonWitness implements EveryFrameScript {
         release();
     }
 
-    /** Ends the errand and puts the crew back on a course of its own. */
+
     protected void release() {
         abandon();
 
@@ -188,7 +157,7 @@ public class HarpoonWitness implements EveryFrameScript {
         Misc.giveStandardReturnToSourceAssignments(victim);
     }
 
-    /** Ends the errand and leaves the crew's orders alone, for when something else now owns them. */
+
     protected void abandon() {
         done = true;
 

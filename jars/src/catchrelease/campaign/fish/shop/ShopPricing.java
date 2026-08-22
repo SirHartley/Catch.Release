@@ -15,30 +15,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * What things cost: credits, plus a catch requirement rolled once per campaign (a seed drawn on first
- * ask, kept in the save) rather than written into a table - so different campaigns want different
- * catches for the same gear. Difficulty climbs the same way for every ladder: more asks, better,
- * rarer, more specific, ending in a named species at the last rung.
- * <p>
- * One rule rather than a price list, so it needs no maintenance as upgrades are added.
- */
+
 public class ShopPricing {
 
     public static final String SEED_KEY = "$catchrelease_shop_seed";
 
-    /** Credits for a ladder's first rung, and how steeply the rungs climb. */
+
     public static final int CREDITS_BASE = 2500;
     public static final float CREDITS_PER_LEVEL = 1.7f;
 
-    /** Credits per tier of tackle - a module is one purchase, so it is priced as one. */
+
     public static final int TACKLE_CREDITS_PER_TIER = 4000;
 
-    /** Stats that change what a rig does, not just how well - priced as if already this many rungs up their ladder. */
+
     public static final int PREMIUM_TIER_BUMP = 2;
     protected static final Set<String> PREMIUM_STATS = Set.of(StatIds.SEARCHLIGHT_SLOW);
 
-    /** Credits and the catch beside them. A null requirement is credits alone. */
+
     public static class Price {
         public final int credits;
         public final FishRequirement fish;
@@ -49,7 +42,7 @@ public class ShopPricing {
         }
     }
 
-    /** This campaign's seed, drawn once and kept in the save. */
+
     public static long getSeed() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(SEED_KEY);
         if (stored instanceof Long) return (Long) stored;
@@ -60,18 +53,14 @@ public class ShopPricing {
         return seed;
     }
 
-    /** The next rung of a stat's ladder. Null once it is at its ceiling. */
+
     public static Price getPrice(UpgradeStat stat) {
         if (stat == null || isMaxed(stat)) return null;
 
         return getPrice(stat, stat.level + 1);
     }
 
-    /**
-     * Price of one exact rung, used by a schematic promised before that rung can be bought. Unlike
-     * {@link #getPrice(UpgradeStat)}, this does not depend on the player's current level changing
-     * between accepting and completing the job.
-     */
+
     public static Price getPrice(UpgradeStat stat, int targetLevel) {
         if (stat == null || targetLevel < 1 || targetLevel > stat.maxLevel) return null;
 
@@ -84,7 +73,7 @@ public class ShopPricing {
         return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
     }
 
-    /** A module's one price. Emptying the slot is free. */
+
     public static Price getPrice(Tackle tackle) {
         if (tackle == null || tackle == Tackle.NONE) return null;
 
@@ -94,9 +83,8 @@ public class ShopPricing {
                 generate(rngFor("tackle_" + tackle.name(), tier), tier + 1, false));
     }
 
-    /** Tackle is tiered by what it does, and the ones that change what can come up cost the most. */
+
     protected static int getTackleTier(Tackle tackle) {
-        //the coupler replaces a whole natural rupture with lamp-made openings; it is the top tier
         if (tackle.breachCoupling) return 4;
         if (tackle.retrievesCharge) return 3;
         if (tackle.shipTackle) return 3;
@@ -122,7 +110,7 @@ public class ShopPricing {
         return Math.max(100, (credits / 100) * 100);
     }
 
-    /** The ask for one rung - difficulty stacks axes (type, grade/rarity floors, then hard asks) rather than just raising count. */
+
     protected static FishRequirement generate(Random rng, int tier, boolean last) {
         FishRequirement req = new FishRequirement();
 
@@ -152,7 +140,6 @@ public class ShopPricing {
             } else {
                 req.lowCoherence = true;
 
-                // Low coherence already acts as the rarity difficulty; stacking a floor on it overshoots.
                 if (tier < 3) req.minRarity = null;
             }
         }
@@ -166,7 +153,7 @@ public class ShopPricing {
         return tags[rng.nextInt(tags.length)];
     }
 
-    /** A species worth naming: rare or better, not special. Sorted first so the same roll picks the same species regardless of table load order. */
+
     protected static String pickSpecies(Random rng) {
         List<FishSpec> pool = new ArrayList<>();
 

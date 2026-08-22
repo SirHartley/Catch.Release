@@ -19,7 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** A cargo picker that exposes and validates the individual specimens a fishing job can take. */
+
 public final class FishHandoffPicker {
 
     public interface Listener {
@@ -28,19 +28,18 @@ public final class FishHandoffPicker {
         void cancelled();
     }
 
-    /** Optional stricter provenance gate for requests that want one particular specimen. */
+
     public interface Eligibility {
         boolean accepts(FishCatch fish);
     }
 
-    /** An exact, non-overlapping assignment of selected specimens to every outstanding ask. */
+
     public static final class Selection {
         protected final List<SpecialItemData> items;
         protected final List<FishCatch> contents;
         protected final FishCatch bestForFirstAsk;
 
-        /** Whether the fish may still be boxed - an auto-pick reaches into crates and the pile,
-         *  where the picker's fish were all loose by construction. */
+
         protected final boolean boxed;
 
         protected Selection(List<SpecialItemData> items, List<FishCatch> contents,
@@ -55,12 +54,12 @@ public final class FishHandoffPicker {
             return bestForFirstAsk;
         }
 
-        /** The exact specimens this hand-in takes, for a confirmation to read out. */
+
         public List<FishCatch> getContents() {
             return contents;
         }
 
-        /** Removes exactly the selected specimens, after confirming they are still aboard. */
+
         public boolean spend() {
             if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) {
                 return false;
@@ -88,7 +87,7 @@ public final class FishHandoffPicker {
             return true;
         }
 
-        /** By encoded identity, loose stacks before containers, all verified before any removal. */
+
         protected boolean spendBoxed(CargoAPI cargo) {
             Map<String, Integer> need = new LinkedHashMap<>();
             for (FishCatch fish : contents) need.merge(fish.encode(), 1, Integer::sum);
@@ -148,7 +147,7 @@ public final class FishHandoffPicker {
         return show(dialog, title, asks, null, listener);
     }
 
-    /** Same exact-specimen picker with a caller-specific confirmation verb. */
+
     public static boolean show(InteractionDialogAPI dialog, String title, String confirmText,
                                final List<FishRequirement> asks, final Listener listener) {
 
@@ -201,9 +200,6 @@ public final class FishHandoffPicker {
                             return;
                         }
 
-                        //the engine re-enables its confirm every frame whenever anything at all
-                        //is picked, so a wrong selection cannot be stopped at the button - it is
-                        //refused here instead, and the picker comes back with the reason said
                         if (picked == null || picked.getStacksCopy().isEmpty()) {
                             listener.cancelled();
                             return;
@@ -233,8 +229,7 @@ public final class FishHandoffPicker {
                         int selected = countLoose(combined);
                         boolean ready = match(combined, asks) != null;
 
-                        //one line per ask, ticking off as the selection covers it - refreshed
-                        //every frame by the picker itself
+                        // one line per ask, ticking off as the selection covers it - refreshed every frame by the picker itself
                         panel.addPara("The order:", 0f);
 
                         List<Candidate> picked = readLoose(combined);
@@ -270,12 +265,7 @@ public final class FishHandoffPicker {
         return true;
     }
 
-    /**
-     * Picks the minimum hand-in without a picker: every matching specimen aboard - loose or
-     * boxed - offered worst-first to the same slot assignment the manual picker validates
-     * with, so the auto path never takes a better fish than the order needs and never takes
-     * one it does not. Null when the hold cannot cover the asks.
-     */
+
     public static Selection autoSelect(List<FishRequirement> asks, Eligibility eligibility) {
         if (asks == null || asks.isEmpty()) return null;
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return null;
@@ -305,7 +295,7 @@ public final class FishHandoffPicker {
             }
         }
 
-        //worst-first, so the assignment reaches for the cheapest fish that still qualifies
+        // worst-first, so the assignment reaches for the cheapest fish that still qualifies
         candidates.sort(java.util.Comparator.comparingDouble(c -> c.fish.getValue()));
 
         int required = requiredCount(asks);
@@ -419,11 +409,7 @@ public final class FishHandoffPicker {
         return false;
     }
 
-    /**
-     * How many of an ask this selection covers, greedily, consuming what it attributes so a
-     * specimen never counts for two asks. A one-species ask with no species named takes its
-     * best single species. Display arithmetic - the authoritative yes/no stays {@code match}.
-     */
+
     protected static int attribute(FishRequirement ask, List<Candidate> picked,
                                    boolean[] consumed) {
 

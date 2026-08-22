@@ -113,7 +113,7 @@ public class WarpGrid {
         }
     }
 
-    /** Warp offset (dx, dy) for a grid vertex; border vertices never warp. */
+
     public WarpOffset getOffset(int i, int j) {
         if (i <= 0 || j <= 0 || i >= wide - 1 || j >= tall - 1) return new WarpOffset(0f, 0f);
 

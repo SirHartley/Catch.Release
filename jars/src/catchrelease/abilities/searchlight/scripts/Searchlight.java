@@ -34,98 +34,90 @@ import java.util.List;
 
 public class Searchlight implements EveryFrameScript {
 
-    /** Beam and ring colour. Every lamp is a breach lamp now, burning a window through the pond fabric. */
+
     public static final Color COLOR = new Color(185, 80, 255, 255);
     public static final Color RING_COLOR = new Color(255, 120, 255);
 
-    /** The beam's lens: how much wider than the light it bends, and how hard. */
+
     public static final float LENS_SIZE_MULT = 0.8f;
     public static final float LENS_INTENSITY = 9f;
     public static final float LENS_FADE_IN = 0.6f;
 
-    public static final float SINE_CADENCE = 90f; //how far the sine wave carries off the arc
-    public static final float OSCILLATION_TIME_MULT = 0.7f; //sine speed
+    public static final float SINE_CADENCE = 90f;
+    public static final float OSCILLATION_TIME_MULT = 0.7f;
 
-    /** The beam's radius without a row in the upgrade sheet. */
+
     public static final float AREA_FALLBACK = 240f;
 
-    /**
-     * Furthest from the fleet a light can reach, upgrades included: arc radius (2x beam size) +
-     * sine wander + beam size. Anything seeding entities just outside light range must use this.
-     */
+
     public static float getMaxReach() {
         float size = getArea();
 
         return size * 2f + SINE_CADENCE + size;
     }
 
-    /** Beam radius; single source of truth so the arc, lens, and reach can't disagree. */
+
     public static float getArea() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_AREA, AREA_FALLBACK);
     }
 
-    /**
-     * The faces a light can wear. All transient: LunaCampaignRenderer's registration does not
-     * survive a load, so a non-transient field would come back non-null but undrawn. Left null,
-     * {@link #advanceLook()} rebuilds whichever is needed on the first frame after load.
-     */
+
     private transient SearchlightGlowRenderer glow;
     private transient SearchlightBreachRenderer breach;
     private transient SearchlightFanRenderer fan;
     private transient SearchlightFanBreachRenderer fanBreach;
 
-    /** Seconds one face takes to hand over to the other when the fleet crosses. */
+
     public static final float LOOK_SWAP_FADE = 1f;
 
-    /** Luna registrations are transient, so retaining their objects through a save only creates
-     * unreachable, never-advancing baggage. */
+
     private transient List<RippleRingRenderer> rings = new ArrayList<>();
     private final Vector2f currentRenderLoc = new Vector2f();
 
     private CircularArc arc;
     private float baseArcAngle;
-    private int travelDirection = 1; //1 or -1, flips on each limit
+    private int travelDirection = 1;
     private float oscillationTime = 0f;
 
     private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
     private boolean expired = false;
 
-    /** What the beam is locked on. Transient - a lock is brief, so it just resumes sweeping on load. */
+
     private transient SectorEntityToken lockTarget;
     private float lockLeft = 0f;
     private float lockBlend = 0f;
     private float lockCooldown = 0f;
 
-    /** Where the held thing is, kept separately so the lean-off has somewhere to lean from. */
+
     private final Vector2f lockLoc = new Vector2f();
 
-    /** Which side of the held thing the light stopped on, fixed at the moment it stopped. */
+
     private float lockBearing = 0f;
 
-    /** Fan half-angle at base radius, and minimum strength kept at its tip (never fades to nothing). */
+
     public static final float FAN_HALF_ANGLE = 14.3f;
     public static final float FAN_TIP_STRENGTH = 0.35f;
 
-    /** Fan sweep rate relative to a spot's, reduced since the fan's far end covers more sky per degree. */
+
     public static final float FAN_SWEEP_MULT = 0.7f;
 
-    /** Hold offset from target, as a share of beam radius - off-centre because the beam's centre is brightest, hiding the target. */
+
     public static final float LOCK_HOLD_RADIUS_SHARE = 0.5f;
 
-    /** Seconds spent leaning onto what it found, and the wait before it may stop for anything else. */
+
     public static final float LOCK_EASE_TIME = 1.6f;
     public static final float LOCK_COOLDOWN = 4f;
 
-    /** GraphicsLib distortion for the beam's bend; moved not respawned. Transient - holds GL state. */
+
     private transient WaveDistortion lens;
 
-    /** The fan's bend: a chain of stations down the wedge, since one disc only bent the tip. */
+
     public static final int FAN_LENS_STATIONS = 5;
     public static final float FAN_LENS_INTENSITY = 6f;
 
     private transient List<WaveDistortion> fanLenses;
 
-    /** Runtime ownership. Rebound by the ability after load before this script may draw again. */
+
     private transient SearchlightAbilityPlugin owner;
     private transient CampaignFleetAPI ownerFleet;
     private transient LocationAPI home;
@@ -140,17 +132,14 @@ public class Searchlight implements EveryFrameScript {
         return false;
     }
 
-    /**
-     * The arc sweeps in world-fixed degrees, not hull heading - tying it to a manually-piloted
-     * fleet's constantly-correcting facing never lets the sweep settle.
-     */
+
     public void init(CircularArc circularArc, SearchlightAbilityPlugin owner,
                      CampaignFleetAPI ownerFleet, LocationAPI home) {
         this.arc = circularArc;
         bindOwner(owner, ownerFleet, home);
         baseArcAngle = arc.startAngle;
 
-        //set before the faces are built, or they'd read the vector's (0,0) default for one frame
+        // set before the faces are built, or they'd read the vector's (0,0) default for one frame
         updateRenderLoc(arc.getPointForAngle(baseArcAngle));
 
         advanceLook();
@@ -167,7 +156,7 @@ public class Searchlight implements EveryFrameScript {
             return;
         }
 
-        //Do not trust a saved/reference alias to remain the fleet's live Vector2f forever.
+        // Do not trust a saved/reference alias to remain the fleet's live Vector2f forever.
         arc.center = ownerFleet.getLocation();
 
         ensureRings();
@@ -175,7 +164,7 @@ public class Searchlight implements EveryFrameScript {
         advanceLook();
         advanceLens();
 
-        //spot only - a fan has no single landing point for a ripple to make sense at
+        // spot only - a fan has no single landing point for a ripple to make sense at
         ringInterval.advance(amt);
         if (ringInterval.intervalElapsed() && fan == null) {
             float size = getArea();
@@ -196,8 +185,7 @@ public class Searchlight implements EveryFrameScript {
         if (arc != null && ownerFleet != null) arc.center = ownerFleet.getLocation();
     }
 
-    /** A fleet script is save-persistent while every face it registers is not. Refuse to rebuild
-     * those faces unless this exact live activation still owns the script in the same location. */
+
     public boolean isRuntimeCurrent() {
         if (expired) return false;
         if ((owner == null || ownerFleet == null || home == null) && !recoverOwnerAfterLoad()) {
@@ -212,8 +200,7 @@ public class Searchlight implements EveryFrameScript {
                 && ownerFleet.getContainingLocation() == home;
     }
 
-    /** Runtime fields are transient. Recover only through list membership on the installed, active
-     * player ability; a genuinely orphaned old script is therefore rejected rather than revived. */
+
     protected boolean recoverOwnerAfterLoad() {
         if (Global.getSector() == null) return false;
 
@@ -239,7 +226,7 @@ public class Searchlight implements EveryFrameScript {
     public void advanceMovement(float amt) {
         advanceLock(amt);
 
-        //sweep pauses while locked, resuming from where it left off rather than the elapsed clock
+        // sweep pauses while locked, resuming from where it left off rather than the elapsed clock
         if (lockTarget == null) {
             oscillationTime += amt;
 
@@ -248,7 +235,7 @@ public class Searchlight implements EveryFrameScript {
             float progress = arc.getTraversalProgress(baseArcAngle);
             float normalizedProgress = (travelDirection < 0) ? 1f - progress : progress;
 
-            if (normalizedProgress > 0.99f) travelDirection *= -1; //flip dir on last percent so it doesn't go 0
+            if (normalizedProgress > 0.99f) travelDirection *= -1; // flip dir on last percent so it doesn't go 0
 
             float degPerSec = arc.convertToDegreesPerSecond(speed);
             baseArcAngle = Misc.normalizeAngle(baseArcAngle + degPerSec * amt * travelDirection);
@@ -262,7 +249,7 @@ public class Searchlight implements EveryFrameScript {
         float tangentAngle = baseArcAngle + 90f;
         Vector2f renderPos = MathUtils.getPointOnCircumference(basePos, offset, tangentAngle);
 
-        //eased both ways - a hard snap on lock/release reads as two lights, not one
+        // eased both ways - a hard snap on lock/release reads as two lights, not one
         if (lockBlend > 0f) {
             float t = TrigHelper.smootherStep(lockBlend);
 
@@ -274,11 +261,7 @@ public class Searchlight implements EveryFrameScript {
         updateRenderLoc(renderPos);
     }
 
-    /**
-     * Picks spot vs. fan face for the current fit. Checked every frame since the fan module can
-     * be refitted under a running light. Draw order is registration order, so window is registered
-     * before light. Also heals load: transient faces come back null and get rebuilt here.
-     */
+
     protected void advanceLook() {
         if (!isRuntimeCurrent()) return;
 
@@ -310,7 +293,6 @@ public class Searchlight implements EveryFrameScript {
                 LunaCampaignRenderer.addTransientRenderer(fanBreach);
             }
             if (fan == null) {
-                //needs both the pivot (fleet) and aim (sweep) vectors
                 fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
                 LunaCampaignRenderer.addTransientRenderer(fan);
             }
@@ -326,7 +308,7 @@ public class Searchlight implements EveryFrameScript {
         }
     }
 
-    /** Acquires, holds, and releases a lock target - one at a time, with a cooldown between locks. */
+
     protected void advanceLock(float amt) {
         if (lockCooldown > 0f) lockCooldown -= amt;
 
@@ -337,19 +319,19 @@ public class Searchlight implements EveryFrameScript {
                 lockTarget = null;
                 lockCooldown = LOCK_COOLDOWN;
             } else {
-                //re-tracked each frame - the target is swimming, not stationary
+                // re-tracked each frame - the target is swimming, not stationary
                 lockLoc.set(holdPointFor(lockTarget.getLocation()));
             }
         }
 
-        //not while still leaning off the last lock, or the two blends fight over the same beam
+        // not while still leaning off the last lock, or the two blends fight over the same beam
         if (lockTarget == null && lockBlend <= 0f && lockCooldown <= 0f) acquire();
 
         float step = LOCK_EASE_TIME <= 0f ? 1f : amt / LOCK_EASE_TIME;
         lockBlend = MathUtils.clamp(lockBlend + (lockTarget != null ? step : -step), 0f, 1f);
     }
 
-    /** The nearest thing under the beam worth stopping for, if the rig has been taught to stop. */
+
     protected void acquire() {
         float lockTime = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
         if (lockTime <= 0f) return;
@@ -361,7 +343,7 @@ public class Searchlight implements EveryFrameScript {
         SectorEntityToken best = null;
         float bestLit = 0f;
 
-        //best lit, not nearest - under a fan those differ (centre line beats off-axis)
+        // best lit, not nearest - under a fan those differ (centre line beats off-axis)
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
 
@@ -377,24 +359,23 @@ public class Searchlight implements EveryFrameScript {
         lockTarget = best;
         lockLeft = lockTime;
 
-        //bearing fixed here, not recomputed per frame, or it would chase the beam chasing it
+        // bearing fixed here, not recomputed per frame, or it would chase the beam chasing it
         lockBearing = Misc.getAngleInDegrees(best.getLocation(), currentRenderLoc);
         lockLoc.set(holdPointFor(best.getLocation()));
     }
 
-    /** Hold point beside the target, offset by {@link #LOCK_HOLD_RADIUS_SHARE} of beam radius. */
+
     protected Vector2f holdPointFor(Vector2f target) {
         return MathUtils.getPointOnCircumference(target,
                 getArea() * LOCK_HOLD_RADIUS_SHARE, lockBearing);
     }
 
-    /** Keeps the GraphicsLib distortion tracking the beam - one lens on a spot's landing,
-     *  a chain of them down a fan's whole wedge. */
+
     protected void advanceLens() {
         if (!CampaignDistortionRenderer.isSupported()) return;
 
         if (isFanned()) {
-            //the tip lens retires; the wedge bends along its whole length instead
+            // the tip lens retires; the wedge bends along its whole length instead
             if (lens != null) {
                 CampaignDistortionRenderer.removeDistortion(lens);
                 lens = null;
@@ -427,16 +408,11 @@ public class Searchlight implements EveryFrameScript {
 
         lens.setLocation(new Vector2f(currentRenderLoc));
 
-        //skipped during fade-in, which owns size itself; otherwise picks up area upgrades
+        // skipped during fade-in, which owns size itself; otherwise picks up area upgrades
         if (!lens.isFading()) lens.setSize(size * LENS_SIZE_MULT);
     }
 
-    /**
-     * The chain: stations spaced evenly from the hull to the wedge's far arc, each sized to
-     * the local wedge width - never smaller than half the spacing, so the bend reads as one
-     * continuous ribbon rather than beads. Intensity sits under the spot's, since neighbouring
-     * stations overlap and their bending stacks.
-     */
+
     protected void advanceFanLenses() {
         Vector2f origin = getOrigin();
 
@@ -479,22 +455,22 @@ public class Searchlight implements EveryFrameScript {
         return currentRenderLoc;
     }
 
-    /** Where the light is thrown from - the fleet, via the arc's own location vector. */
+
     public Vector2f getOrigin() {
         return arc == null ? currentRenderLoc : arc.center;
     }
 
-    /** Whether the fan is fitted, which changes the shape of everything the light is doing. */
+
     public static boolean isFanned() {
         return TackleManager.get(Tackle.Fit.SEARCHLIGHT).fanBeam;
     }
 
-    /** Fan half-angle scaled with the current beam radius, so upgrading area widens the fan too. */
+
     public static float getFanHalfAngle() {
         return FAN_HALF_ANGLE * (getArea() / AREA_FALLBACK);
     }
 
-    /** How lit a point is by this light (0-1), handling both spot and fan shapes. Single source of truth. */
+
     public float getLitStrength(Vector2f at) {
         float size = getArea();
 
@@ -509,7 +485,6 @@ public class Searchlight implements EveryFrameScript {
 
         Vector2f origin = getOrigin();
 
-        //extends past the aim point by beam size, so fan and spot reach match {@link #getMaxReach()}
         float length = Misc.getDistance(origin, currentRenderLoc) + size;
         if (length <= 1f) return 0f;
 

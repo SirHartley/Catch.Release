@@ -9,11 +9,7 @@ import catchrelease.skillshot.SkillshotSettings;
 
 import java.awt.*;
 
-/**
- * Reticule for abilities that land on a spot: a circle at the cursor sized to the effect radius.
- * {@link BaseReticuleRenderer}'s guide lines ({@code withTrajectory()}, {@code withBounds()}) stop
- * at the circle's edge rather than crossing it.
- */
+
 public class AreaReticuleRenderer extends BaseReticuleRenderer {
 
     transient private SpriteAPI area;
@@ -24,10 +20,7 @@ public class AreaReticuleRenderer extends BaseReticuleRenderer {
         this(SkillshotSettings.DEFAULT_AREA_SIZE);
     }
 
-    /**
-     * @param size diameter of the circle in world units - pass the ability's actual effect diameter
-     *             so the player is aiming at what they will get
-     */
+
     public AreaReticuleRenderer(float size) {
         this.size = size;
     }
@@ -44,7 +37,7 @@ public class AreaReticuleRenderer extends BaseReticuleRenderer {
         area.renderAtCenter(cursorPos.x, cursorPos.y);
     }
 
-    /** Stop the guide lines at the edge of the circle rather than drawing them across it. */
+
     @Override
     protected float getGuideLineEndPadding() {
         return size * 0.5f;

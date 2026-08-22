@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/** Console Commands integration for adding one registered fish species by id or display name. */
+
 public class AddFish implements BaseCommandWithSuggestion {
 
     private static final int MAX_AMBIGUOUS_SUGGESTIONS = 12;
@@ -71,11 +71,7 @@ public class AddFish implements BaseCommandWithSuggestion {
         return CommandResult.SUCCESS;
     }
 
-    /**
-     * Console Commands asks for suggestions one whitespace-delimited argument at a time. The first
-     * argument offers both ids and full display names, so remembering any one word is enough for
-     * its substring filter. Later arguments complete the next word of a manually typed name.
-     */
+
     @Override
     public List<String> getSuggestions(int parameter, List<String> previous, CommandContext context) {
         if (!context.isInCampaign()) return Collections.emptyList();

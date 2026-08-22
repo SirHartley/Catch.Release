@@ -9,10 +9,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
-/**
- * Job asking for one specific species by name (other jobs describe a shape instead). Pays in
- * non-credit rewards only.
- */
+
 public class CultJob extends FishJob {
 
     public static final int VALUE = 2800;
@@ -43,7 +40,7 @@ public class CultJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, false)); //no credit reward
+        addRewards(FishRewardRoller.roll(genRandom, VALUE, false));
 
         setUpSpine();
 

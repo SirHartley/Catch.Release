@@ -9,7 +9,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 import java.util.List;
 
-/** Job needing three different fish types, one each - variety rather than quantity. */
+
 public class ChefJob extends FishJob {
 
     public static final int VALUE_PER_TYPE = 1400;

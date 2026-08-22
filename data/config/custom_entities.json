@@ -1,45 +1,43 @@
 {
 	"catchrelease_Mote":{
-		"defaultRadius":20, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true, # show in campaign layer
-		"showIconOnMap":false,
-		"showNameOnMap":false,
-		"renderCircleIndicator":false, # make clickable,
-		"interactable":false,
-		"layers":[ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
-		"tags":["catchrelease_mote"],
-		"pluginClass":"catchrelease.campaign.fish.entities.FishEntityPlugin"
-	},
-
-	# the pond is terrain now - see data/campaign/terrain.json
-
-	"catchrelease_RodMote":{
-		"defaultRadius":20, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true, # show in campaign layer
-		"showIconOnMap":false,
-		"showNameOnMap":false,
-		"renderCircleIndicator":false, # make clickable,
-		"interactable":false,
-		"layers":[ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
-		"tags":["catchrelease_RodMote"],
-		"pluginClass":"catchrelease.abilities.rod.entities.RodMoteEntityPlugin"
-	},
-
-	"catchrelease_Harpoon":{
-		"defaultRadius":10, # used if radius<0 in addCustomEntity()
+		"defaultRadius":20,
 		"showInCampaign":true,
 		"showIconOnMap":false,
 		"showNameOnMap":false,
 		"renderCircleIndicator":false,
 		"interactable":false,
-		"layers":[ABOVE], # the line and the head both draw here
+		"layers":[ABOVE],
+		"tags":["catchrelease_mote"],
+		"pluginClass":"catchrelease.campaign.fish.entities.FishEntityPlugin"
+	},
+
+	"catchrelease_RodMote":{
+		"defaultRadius":20,
+		"showInCampaign":true,
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"layers":[ABOVE],
+		"tags":["catchrelease_RodMote"],
+		"pluginClass":"catchrelease.abilities.rod.entities.RodMoteEntityPlugin"
+	},
+
+	"catchrelease_Harpoon":{
+		"defaultRadius":10,
+		"showInCampaign":true,
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"layers":[ABOVE],
 		"tags":["catchrelease_Harpoon"],
 		"pluginClass":"catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin"
 	},
 
 	"catchrelease_BuriedMote":{
-		"defaultRadius":20, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true, # it draws nothing of its own - the searchlight draws the dent it makes
+		"defaultRadius":20,
+		"showInCampaign":true,
 		"showIconOnMap":false,
 		"showNameOnMap":false,
 		"renderCircleIndicator":false,
@@ -49,8 +47,7 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin"
 	},
 
-	# the fishing boats' mark on the system map - drawn there and nowhere else, so the boat can be
-	# found among the blips without anything being painted over its hull out in space
+	# Map-only marker for fishing boats.
 	"catchrelease_FisherMapIcon":{
 		"defaultRadius":10,
 		"showInCampaign":false,
@@ -69,16 +66,15 @@
 	},
 
 	"catchrelease_FishingDrone":{
-		"defaultRadius":15, # used if radius<0 in addCustomEntity()
-		"showInCampaign":true, # show in campaign layer
+		"defaultRadius":15,
+		"showInCampaign":true,
 		"showIconOnMap":false,
 		"showNameOnMap":false,
-		"renderCircleIndicator":false, # make clickable,
+		"renderCircleIndicator":false,
 		"interactable":false,
-		"layers":[ABOVE], # what layer(s) to render in. See CampaignEngineLayers.java for possible values,
+		"layers":[ABOVE],
 		"tags":["catchrelease_FishingDrone"],
 		"pluginClass":"catchrelease.abilities.rod.entities.FishingDroneEntityPlugin"
 	}
 }
-
 

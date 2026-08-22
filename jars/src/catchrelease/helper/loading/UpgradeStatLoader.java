@@ -58,12 +58,10 @@ public class UpgradeStatLoader {
 
         s.baseValue = optDouble(row, "baseValue", 0d);
 
-        //CSV columns are "type"/"increaseType"; both current and legacy ("baseType"/"upgradeType")
-        //names are accepted
         s.baseType = parseEnum(optString(row, "type", optString(row, "baseType", "DOUBLE")),
                 UpgradeStat.BaseType.class, UpgradeStat.BaseType.DOUBLE);
 
-        //campaign unless the row says otherwise, since that is what most of them are
+        // campaign unless the row says otherwise, since that is what most of them are
         s.category = parseEnum(optString(row, "category", "CAMPAIGN"),
                 UpgradeStat.Category.class, UpgradeStat.Category.CAMPAIGN);
 

@@ -16,19 +16,10 @@ import catchrelease.skillshot.render.SkillshotRenderer;
 
 import java.util.List;
 
-/**
- * The hotkey path: hold the ability's number key to aim, release to fire.
- * <p>
- * A single long-lived listener rather than one per session, since it must already be watching before
- * the key goes down. Intercepts 1-9 itself rather than letting the UI turn them into button presses,
- * which would fire the ability immediately with nothing left to aim.
- * <p>
- * Only picks up abilities whose spec carries {@link SkillshotSettings#TAG_SKILLSHOT} and whose plugin
- * implements {@link SkillshotAbility}.
- */
+
 public class OnKeyPressSkillshotListener implements SkillshotInputListener, CampaignInputListener {
 
-    /** Keyboard event value of the '1' key; slots run from here to '9'. */
+
     public static final int FIRST_SLOT_KEY = Keyboard.KEY_1;
     public static final int LAST_SLOT_KEY = Keyboard.KEY_9;
 
@@ -55,7 +46,7 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
 
     @Override
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
-        //ctrl is the vanilla "reassign ability slot" modifier - stay out of its way
+        // ctrl is the vanilla "reassign ability slot" modifier - stay out of its way
         boolean ctrlPressed = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
 
         if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null || ctrlPressed) {
@@ -67,8 +58,7 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
             if (input.isConsumed()) continue;
 
             if (input.getEventType().equals(InputEventType.KEY_DOWN)) {
-                // Already aiming: a repeat/macro re-sent KEY_DOWN. Consume it so it can't become a
-                // button press, but keep scanning - the matching KEY_UP may be later this frame.
+                // Already aiming: a repeat/macro re-sent KEY_DOWN. Consume it so it can't become a button press, but keep scanning - the matching KEY_UP may be later this frame.
                 if (isActive()) {
                     if (input.getEventValue() == heldSlotKey) input.consume();
                     continue;
@@ -130,10 +120,7 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
         input.consume();
     }
 
-    /**
-     * The skillshot ability sitting in the given ability bar slot, or null if that slot is empty,
-     * holds something else, or holds an ability that is not set up for skillshot targeting.
-     */
+
     protected SkillshotAbility getSlottedSkillshotAbility(int slotIndex) {
         List<PersistentUIDataAPI.AbilitySlotAPI> slots = Global.getSector().getUIData().getAbilitySlotsAPI().getCurrSlotsCopy();
         if (slotIndex < 0 || slotIndex >= slots.size()) return null;

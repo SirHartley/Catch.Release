@@ -13,60 +13,38 @@ import com.fs.starfarer.api.ui.UIPanelAPI;
 
 import java.util.List;
 
-/**
- * Hangs the conservatory's aquarium on the colony's main menu: the tank panel sits in the right
- * sidebar directly below the planet's interaction image. Just the glass - stocking and the
- * display switch live in the aquarium office, off the industry's own click-menu.
- * <p>
- * The crawl is by capability, like every screen we stand on: the encounter dialog comes off
- * {@code CampaignState}, and the planet visual inside it is the child with {@code getPlanet}.
- * The tank mounts when the dialog's market has a working, switched-on conservatory, the docked
- * core UI is anything short of fully covering the menu, and the planet image is the visual actually
- * on screen; it unmounts the moment any of that stops being true. That last one is what keeps the
- * glass on the colony's main menu and off the bar, the briefing portraits and anything else shown
- * over the top.
- * Every step fails soft - a surprise means no tank, and the menu is exactly as vanilla drew it.
- */
+
 public class AquariumTankScript implements EveryFrameScript {
 
     public static final String APP_DRIVER = "com.fs.state.AppDriver";
     public static final String CAMPAIGN_STATE = "com.fs.starfarer.campaign.CampaignState";
 
-    /** Core-UI brightness at which the menu counts as covered - see {@link #coreCoverage}. */
+
     public static final float COVERED = 0.999f;
 
     public static final float GAP = 8f;
     public static final float TANK_HEIGHT = 170f;
     public static final float PANEL_HEIGHT = TANK_HEIGHT + AquariumTankPanel.WALL_PAD * 2f;
 
-    /**
-     * How wide the tank comes out on the colony menu, measured off a running game.
-     * <p>
-     * The real tank never uses this - it takes the planet image's own width, which is the only
-     * honest answer and adapts to whatever the interface is doing. A <i>preview</i> has no planet
-     * image to measure, and a preview of the wrong width is worse than no preview: it crops the
-     * art differently from the pane it is previewing, which is the one thing it exists to get
-     * right. So it quotes this, and {@link #getPanelWidth} hands back the real figure instead the
-     * moment a real tank has reported one.
-     */
+
     public static final float PANEL_WIDTH = 400f;
 
-    /** The width a real tank was last mounted at, or 0 before one has been. */
+
     protected static float mountedWidth = 0f;
 
-    /** What a preview should be built at: measured if the menu has ever said, quoted otherwise. */
+
     public static float getPanelWidth() {
         return mountedWidth > 0f ? mountedWidth : PANEL_WIDTH;
     }
 
-    /** The dialog the tank currently stands in. A new dialog means a fresh mount. */
+
     protected Object dialog;
     protected CustomPanelAPI panel;
 
-    /** Latched when a mount went wrong; cleared when the dialog closes. */
+
     protected boolean failed = false;
 
-    /** Registered every load; transient, so a save never carries the watcher. */
+
     public static void register() {
         Global.getSector().addTransientScript(new AquariumTankScript());
     }
@@ -107,7 +85,7 @@ public class AquariumTankScript implements EveryFrameScript {
         }
     }
 
-    /** The open encounter dialog, if there is one. */
+
     protected Object findDialog() {
         try {
             Object driver = ReflectionUtils.invokeStatic(Class.forName(APP_DRIVER), "getInstance");
@@ -120,7 +98,7 @@ public class AquariumTankScript implements EveryFrameScript {
         }
     }
 
-    /** The working, switched-on conservatory behind the dialog's market, or null. */
+
     protected BreachConservatory getConservatory(Object dialog) {
         if (!(dialog instanceof InteractionDialogAPI)) return null;
 
@@ -136,24 +114,7 @@ public class AquariumTankScript implements EveryFrameScript {
         return conservatory;
     }
 
-    /**
-     * How much of the menu the docked core UI (trade, refit, the colony screen) is covering,
-     * 0 to 1.
-     * <p>
-     * Not a null check: the dialog keeps the core UI object for its whole life once one has
-     * been opened - dismissal only fades it out, nothing nulls the field - so {@code getCoreUI}
-     * answering is no proof anything is showing. The fader is what actually knows, and it is
-     * why the tank used to vanish for good after any colony-screen visit: the check read the
-     * husk as coverage and never mounted again until re-docking rebuilt the dialog.
-     * <p>
-     * A reading rather than the yes/no it used to be, because yes/no is where the pop-in came
-     * from. Coming back from the colony screen the menu is drawn again at once and the core UI
-     * fades off it over a good fraction of a second; a tank that waits for {@code isFadedOut}
-     * spends all of that missing and then arrives in one frame, on top of a menu the player has
-     * already been looking at. Anything short of fully covered is enough to mount on, and
-     * mounting early costs nothing - the tank is a child of the dialog and the core UI is drawn
-     * over it, so there is nothing to see until there is.
-     */
+
     protected float coreCoverage(Object dialog) {
         Object core = ReflectionUtils.invokeIfExists(dialog, "getCoreUI");
         if (core == null) return 0f;
@@ -164,28 +125,12 @@ public class AquariumTankScript implements EveryFrameScript {
         Object brightness = ReflectionUtils.invokeIfExists(fader, "getBrightness");
         if (brightness instanceof Float) return (Float) brightness;
 
-        //no reading to be had; back to the question that at least always answers
         Object fadedOut = ReflectionUtils.invokeIfExists(fader, "isFadedOut");
 
         return fadedOut instanceof Boolean && (Boolean) fadedOut ? 0f : 1f;
     }
 
-    /**
-     * The planet's interaction image, if it is the visual the dialog is currently showing: the
-     * dialog child that knows what planet it is showing, and is on screen rather than on its way
-     * off it.
-     * <p>
-     * The showing half is not fussiness. The dialog swaps visuals by fading the outgoing one out
-     * and adding the incoming one beside it - nothing removes the old child until a later sweep
-     * catches its fader already out - so a plain "is there a planet child" answers yes for the
-     * whole crossfade and yes again for as long as the sweep takes. That is why the tank used to
-     * follow the player down to the dockside bar: the bar's own illustration went up, the planet
-     * image went away, and the glass stayed hanging where the image had been.
-     * <p>
-     * Asking the fader instead costs nothing and covers the rest of it for free - a portrait, a
-     * mission illustration, anything at all shown over the menu - where a test for the bar
-     * specifically would have to be written again for each of them.
-     */
+
     protected UIComponentAPI findPlanetVisual(Object dialog) {
         Object children = ReflectionUtils.invokeIfExists(dialog, "getChildrenCopy");
         if (!(children instanceof List)) return null;
@@ -201,12 +146,7 @@ public class AquariumTankScript implements EveryFrameScript {
         return null;
     }
 
-    /**
-     * Whether a component is on screen: it has a fader, and that fader is neither out nor on its
-     * way out. Anything that cannot be asked counts as gone, which is the same way round as
-     * {@link #coreCoverage} and the same bargain the whole class is written on - a surprise
-     * costs the tank, never the menu underneath it.
-     */
+
     protected boolean isShowing(Object component) {
         Object fader = ReflectionUtils.invokeIfExists(component, "getFader");
         if (fader == null) return false;
@@ -219,7 +159,7 @@ public class AquariumTankScript implements EveryFrameScript {
         return !((Boolean) out) && !((Boolean) going);
     }
 
-    /** Builds the tank under the planet image. Just the glass - stocking is the office's job. */
+
     protected void mount() {
         UIComponentAPI visual = findPlanetVisual(dialog);
         if (visual == null) return;
@@ -233,7 +173,6 @@ public class AquariumTankScript implements EveryFrameScript {
         float width = visualPos.getWidth();
         if (width < 120f) return;
 
-        //no air below the image on this resolution - better no tank than a tank over the text
         if (visualPos.getY() - GAP - PANEL_HEIGHT < dialogPos.getY()) return;
 
         float x = visualPos.getX() - dialogPos.getX();
@@ -243,7 +182,7 @@ public class AquariumTankScript implements EveryFrameScript {
         AquariumTankPanel plugin =
                 new AquariumTankPanel(conservatory, (InteractionDialogAPI) dialog);
 
-        //what the menu actually gave us, for the previews that cannot ask
+        // what the menu actually gave us, for the previews that cannot ask
         mountedWidth = width;
 
         panel = Global.getSettings().createCustom(width, PANEL_HEIGHT, plugin);
@@ -258,7 +197,6 @@ public class AquariumTankScript implements EveryFrameScript {
             try {
                 ((UIPanelAPI) dialog).removeComponent(panel);
             } catch (Throwable ignored) {
-                //the dialog is already gone, and the panel with it
             }
         }
 

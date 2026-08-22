@@ -3,17 +3,14 @@ package catchrelease.campaign.fish.treasure;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Describes what a treasure award contained, for display; items are already granted by the time
- * this exists (a receipt, not the goods).
- */
+
 public class TreasureAward {
 
-    /** One thing that was handed over: its name, how many, and the icon the hold shows it with. */
+
     public static class Item {
         public final String name;
 
-        /** A sprite path, or null when nothing sensible exists - the card falls back to its own art. */
+
         public final String sprite;
         public final int count;
 
@@ -31,7 +28,7 @@ public class TreasureAward {
         this.rarity = rarity;
     }
 
-    /** The contents as one line, for anywhere that wants words rather than a card. */
+
     public String describe() {
         StringBuilder out = new StringBuilder();
 

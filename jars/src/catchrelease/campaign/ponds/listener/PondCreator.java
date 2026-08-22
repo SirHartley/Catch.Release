@@ -43,24 +43,21 @@ public class PondCreator {
     }
 
     public void spawnPond(Vector2f loc){
-        //terrain, not a custom entity: no id/name/radius args - the plugin names and sizes the
-        //entity from the params in its init()
+        // terrain, not a custom entity: no id/name/radius args - the plugin names and sizes the entity from the params in its init()
         SectorEntityToken pond = system.addTerrain(
                 MaskedFishingPondTerrainPlugin.TERRAIN_ID,
                 new MaskedFishingPondTerrainPlugin.PondParams(random.nextLong(), PondConstants.POND_RADIUS));
         pond.setLocation(loc.x, loc.y);
 
-        //ponds intentionally do not orbit - following them around is tedious
+        // ponds intentionally do not orbit - following them around is tedious
     }
 
-    /** A spot with nothing in it, working outwards ring by ring, each walked from a random start
-     * so ponds do not all end up due east of their star. */
+
     private Vector2f getPondSpawnLoc() {
         float radius = PondConstants.MIN_DISTANCE;
         if (!system.isNebula()) radius += system.getStar().getRadius();
 
-        //bounded rather than while(true): a packed system with nowhere left would otherwise hang
-        //sector generation
+        // bounded rather than while(true): a packed system with nowhere left would otherwise hang sector generation
         for (int ring = 0; ring < PondConstants.MAX_FITTING_ATTEMPTS; ring++) {
             float offset = MathUtils.getRandomNumberInRange(0f, 360f);
 
@@ -74,12 +71,11 @@ public class PondCreator {
                     + PondConstants.DIST_PER_FITTING_ATTEMPT * random.nextFloat();
         }
 
-        //nowhere clean left - out past everything beats landing on top of something
         return MathUtils.getPointOnCircumference(new Vector2f(0, 0), radius,
                 MathUtils.getRandomNumberInRange(0f, 360f));
     }
 
-    /** Whether a pond would sit clear of planets and other ponds here. */
+
     private boolean isClear(Vector2f point) {
         for (PlanetAPI planet : system.getPlanets()) {
             if (Misc.getDistance(planet.getLocation(), point) < PondConstants.MIN_EMPTY_RADIUS_AROUND_POND) {
@@ -96,13 +92,12 @@ public class PondCreator {
         return !isInNebula(point) && !isOnRingBand(point);
     }
 
-    /** Whether a ring band runs through this spot. Terrain rings answer through their plugin;
-     * art-only rings have none, so their band is measured by hand off focus/radius/width. */
+
     private boolean isOnRingBand(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
             if (!(terrain.getPlugin() instanceof BaseRingTerrain)) continue;
 
-            //pond radius rides along: checks whether the pond's edge reaches the band, not its centre
+            // pond radius rides along: checks whether the pond's edge reaches the band, not its centre
             if (terrain.getPlugin().containsPoint(point,
                     PondConstants.POND_RADIUS + PondConstants.MIN_RING_CLEARANCE)) {
                 return true;
@@ -126,8 +121,7 @@ public class PondCreator {
         return false;
     }
 
-    /** Asks the terrain's own containsPoint rather than measuring off its centre, since a nebula
-     * is a grid of tiles with holes. */
+
     private boolean isInNebula(Vector2f point) {
         for (CampaignTerrainAPI terrain : system.getTerrainCopy()) {
             if (!(terrain.getPlugin() instanceof NebulaTerrainPlugin)) continue;

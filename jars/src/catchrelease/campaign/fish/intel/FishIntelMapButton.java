@@ -14,7 +14,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-/** One button and one handoff shared by every live Catch.Release intel entry. */
+
 public final class FishIntelMapButton {
 
     public static final String BUTTON_ID = "catchrelease_open_fishing_map";
@@ -54,7 +54,7 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
-    /** A known destination supersedes habitat search: send the campaign autopilot there. */
+
     public static void addPlotRoute(TooltipMakerAPI info, float width,
                                     SectorEntityToken destination) {
         if (info == null || destination == null
@@ -78,7 +78,7 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
-    /** A non-fish objective still needs navigation, without implying habitat data exists. */
+
     public static void addSetAutopilot(TooltipMakerAPI info, float width,
                                        SectorEntityToken destination) {
         if (info == null || destination == null
@@ -102,7 +102,7 @@ public final class FishIntelMapButton {
         }, TooltipMakerAPI.TooltipLocation.BELOW);
     }
 
-    /** Convenience for one named target without exposing mutable singleton lists. */
+
     public static List<FishRequirement> forSpecies(String speciesId) {
         if (speciesId == null) return null;
 
@@ -113,10 +113,7 @@ public final class FishIntelMapButton {
         return asks;
     }
 
-    /**
-     * Handles the shared button, parks its filter before changing tabs, and lets IntelUI center a
-     * place-based entry using the public API when one is available.
-     */
+
     public static boolean handle(Object buttonId, IntelUIAPI ui, List<FishRequirement> asks,
                                  SectorEntityToken center, String systemId) {
         if (!BUTTON_ID.equals(buttonId)) return false;
@@ -136,7 +133,7 @@ public final class FishIntelMapButton {
         return true;
     }
 
-    /** A non-fish objective uses the same vanilla course planner under its own honest label. */
+
     public static boolean handleSetAutopilot(Object buttonId, SectorEntityToken destination) {
         if (!SET_AUTOPILOT_BUTTON_ID.equals(buttonId)) return false;
 
@@ -144,7 +141,7 @@ public final class FishIntelMapButton {
         return true;
     }
 
-    /** Uses vanilla's public route planner; the destination may be a system anchor or entity. */
+
     public static boolean handlePlotRoute(Object buttonId, SectorEntityToken destination) {
         if (!PLOT_ROUTE_BUTTON_ID.equals(buttonId)) return false;
 

@@ -60,7 +60,7 @@ public class MaskGlowRenderer {
 
         if (uGlowAlpha >= 0) GL20.glUniform1f(uGlowAlpha, glowAlpha);
 
-        //uniforms not declared in the shader resolve to -1 and are skipped
+        // uniforms not declared in the shader resolve to -1 and are skipped
         if (uThreshold >= 0) GL20.glUniform1f(uThreshold, threshold);
 
         if (uRadiusOutPx >= 0) GL20.glUniform1f(uRadiusOutPx, radiusOutPx);

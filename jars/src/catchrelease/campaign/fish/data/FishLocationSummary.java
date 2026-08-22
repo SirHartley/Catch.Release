@@ -7,20 +7,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Turns a species' habitat criteria - the same ones {@link FishSpec#matches} reads - into a readable
- * sentence. A blank criterion means "anything", matching the spawner's own interpretation, and is
- * left out of the sentence entirely rather than said as "under any sun".
- * <p>
- * Written in the order somebody would say it: where, then under what, then how old, then how well
- * the place is holding together, then what it takes to reach one.
- */
+
 public class FishLocationSummary {
 
-    /** The direction words, in the order a sentence wants them rather than the enum's. */
+
     protected static final String[] QUADRANTS = {"NE", "NW", "SE", "SW"};
 
-    /** The one-line answer to where this swims. */
+
     public static String describe(FishSpec spec) {
         if (spec == null) return "Nowhere anyone has written down.";
 
@@ -29,7 +22,7 @@ public class FishLocationSummary {
         String where = describeRegions(spec.regions);
         clauses.add(where);
 
-        //each omitted entirely when unconstrained, rather than saying "under any star"
+        // each omitted entirely when unconstrained, rather than saying "under any star"
         addIfAny(clauses, describeStars(spec.starColours));
         addIfAny(clauses, describeAges(spec.constellationAges));
         addIfAny(clauses, describeCoherence(spec.minAberration, spec.maxAberration));
@@ -43,10 +36,7 @@ public class FishLocationSummary {
         if (clause != null) clauses.add(clause);
     }
 
-    /**
-     * Regions collapsed into core/rim bands with quadrants, plus abyssal named separately (it's a
-     * system property, not a quadrant).
-     */
+
     protected static String describeRegions(Set<SectorRegion> regions) {
         if (regions == null || regions.isEmpty()) return "Anywhere in the sector";
 
@@ -81,7 +71,7 @@ public class FishLocationSummary {
         return Character.toUpperCase(joined.charAt(0)) + joined.substring(1);
     }
 
-    /** One band, with its directions only if it is not the whole of it. */
+
     protected static String describeBand(String band, Set<String> quadrants) {
         if (quadrants.size() == QUADRANTS.length) return "in " + band;
 
@@ -102,7 +92,7 @@ public class FishLocationSummary {
         }
     }
 
-    /** The sky half. Nothing listed means it does not care what it is swimming under. */
+
     protected static String describeStars(Set<StarColour> starColours) {
         if (starColours == null || starColours.isEmpty()) return null;
 
@@ -116,7 +106,7 @@ public class FishLocationSummary {
         return "under " + joinNatural(names, "or");
     }
 
-    /** How old the constellation has to be. All three ages listed is no constraint worth saying. */
+
     protected static String describeAges(Set<StarAge> ages) {
         if (ages == null || ages.isEmpty() || ages.size() >= 3) return null;
 
@@ -132,10 +122,7 @@ public class FishLocationSummary {
         return "in " + joinNatural(names, "or") + " constellations";
     }
 
-    /**
-     * The coherence band, said the way the rest of the mod says it - as how well reality is holding,
-     * rather than as the number underneath, which counts the wrong way round and is nobody's word.
-     */
+
     protected static String describeCoherence(float minAberration, float maxAberration) {
         boolean floor = minAberration > 0f;
         boolean ceiling = maxAberration < 1f;
@@ -148,7 +135,7 @@ public class FishLocationSummary {
         return "only where coherence holds";
     }
 
-    /** What it takes to reach one, for the species only one kind of gear ever brings up. */
+
     protected static String describeReach(Set<CatchImplement> reachedBy) {
         if (reachedBy == null || reachedBy.isEmpty() || reachedBy.size() > 1) return null;
 
@@ -159,7 +146,7 @@ public class FishLocationSummary {
         return "and only ever loose in the dark, under a breach lamp";
     }
 
-    /** Unknown tags are tidied into words rather than dropped - dropping would understate constraints. */
+
     protected static String describeTags(Set<String> systemTags) {
         if (systemTags == null || systemTags.isEmpty()) return null;
 
@@ -185,11 +172,11 @@ public class FishLocationSummary {
         }
     }
 
-    /** Natural-language list join: "a and b", or "a, b, and c" for more than two. */
+
     protected static String joinNatural(List<String> parts, String word) {
         if (parts.isEmpty()) return "";
         if (parts.size() == 1) return parts.get(0);
-        //comma before the word if either half already contains "word", to avoid ambiguous runs
+        // comma before the word if either half already contains "word", to avoid ambiguous runs
         if (parts.size() == 2) {
             boolean nested = parts.get(0).contains(" " + word + " ") || parts.get(1).contains(" " + word + " ");
 

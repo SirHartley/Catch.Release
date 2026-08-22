@@ -2,11 +2,7 @@ package catchrelease.skillshot.render;
 
 import catchrelease.skillshot.SkillshotSettings;
 
-/**
- * An {@link AreaReticuleRenderer} whose aim point is gated by a {@link PositionValidator}. While the
- * validator rejects the cursor position the whole reticule turns
- * {@link SkillshotSettings#INVALID_COLOR} and the input listeners refuse to fire.
- */
+
 public class ValidatedAreaReticuleRenderer extends AreaReticuleRenderer {
 
     protected PositionValidator validator;

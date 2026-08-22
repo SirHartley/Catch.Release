@@ -40,48 +40,42 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The harpoon: head, line, and everything that happens on the end of it. One entity runs the
- * whole cast; the line is drawn from the fleet's position <i>this frame</i> throughout, so a
- * fleet under way drags the line with it rather than leaving it hanging where it was fired from.
- */
+
 public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     public enum State {
-        /** On its way out, looking for something to hit. */
+
         OUTBOUND,
-        /** Buried in a mote and carrying it, briefly - the visible shove. */
+
         PUSHING,
-        /** Fast in a fleet, hauling one end to the other. No catch is played - a fleet is not
-         *  a specimen, it arrives and that's the event. */
+
+
         HAULING,
-        /** Line snapping straight, before the catch begins. */
+
         TAUT,
-        /** The catch is up; nothing moves until it resolves. */
+
         HELD,
-        /** Coming home hard, with the specimen on the end. */
+
         REELING,
-        /** Coming home empty. */
+
         RETURNING,
-        /** Blown off its own line by an explosive head, tumbling away with the rope going with
-         *  it. Terminal, and not an arrival - nothing is reeled in and nothing comes home. */
+
+
         BLASTED,
-        /** Home, winding in the last of the line before it goes - arrival isn't the same as
-         *  being stowed, the head stops short with rope still to take up. */
+
+
         RETRACTING,
-        /** Home, nothing further. Needed because expiring is a fade, not a removal - advance
-         *  keeps firing for the rest of the fade, so it needs a state that does nothing. */
+
+
         DONE
     }
 
-    /** Origin/target captured at fire time rather than read off the entity - init runs before
-     *  the caller places the entity, so its location is still the world origin. */
+
     public static class Params {
         public final Vector2f from;
         public final Vector2f target;
 
-        /** Whose line this is; null is the player's. An owned line changes hands on nothing -
-         *  it homes on its owner, never hooks a fleet, and lands its catch without a minigame. */
+
         public final CampaignFleetAPI owner;
 
         public Params(Vector2f from, Vector2f target) {
@@ -101,41 +95,39 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected float distanceOut = 0f;
     protected float stateTime = 0f;
 
-    /** Total seconds since firing. What the whip in the line runs off, since it outlives one state. */
+
     protected float age = 0f;
 
-    /** Where the middle of the rope actually is, and its velocity - the only state the rope's
-     *  shape has, as opposed to the straight line between fleet and head. */
+
     protected Vector2f slack;
     protected Vector2f slackVelocity = new Vector2f();
 
-    /** How much line is in the air. More than the gap it spans is what puts waves in it. */
+
     protected float paidOut = 0f;
 
-    /** What the head has hold of, if anything. */
+
     protected SectorEntityToken hooked;
 
-    /** Which end of the line moves, fixed at the hit rather than re-decided each frame - two
-     *  fleets close in weight would otherwise swap the pull direction back and forth forever. */
+
     protected boolean haulingTarget = false;
 
-    /** Set once the catch has been put up, so a busy UI is retried rather than skipped. */
+
     protected boolean minigameOpened = false;
 
-    /** Where the blast threw the head, and how fast. Null until a charge has gone off. */
+
     protected Vector2f blastThrow;
 
-    /** What was won, rolled by the catch itself so the hold gets the specimen the player was shown. */
+
     protected FishCatch caught;
 
-    /** Whose line this is; null means the player's. See {@link Params#owner}. */
+
     protected CampaignFleetAPI owner;
 
     protected float trailId;
 
     transient protected SpriteAPI headSprite;
 
-    /** Native dimensions of this entity's private sprite copy, restored after every render. */
+
     transient protected float headSpriteWidth;
     transient protected float headSpriteHeight;
 
@@ -152,7 +144,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     }
 
-    /** The fleet the line is anchored to: its owner, or the player for an unowned one. */
+
     protected CampaignFleetAPI getHomeFleet() {
         if (owner != null) return owner.isExpired() ? null : owner;
 
@@ -168,7 +160,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         CampaignFleetAPI fleet = getHomeFleet();
         if (fleet == null) {
-            //through cutLine, not straight to expire, so an active haul releases its fleet flag
+            // through cutLine, not straight to expire, so an active haul releases its fleet flag
             if (state == State.HAULING) cutLine();
 
             expire();
@@ -187,42 +179,34 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             case BLASTED: advanceBlasted(amount); break;
         }
 
-        //after the head has moved, so the rope is chasing this frame's ends rather than last frame's
+        // after the head has moved, so the rope is chasing this frame's ends rather than last frame's
         advanceSlack(amount, fleet);
 
         renderTrail();
     }
 
-    /** How fast it flies, upgraded. Read per frame so a purchase applies to a line already out. */
+
     protected float getSpeed() {
         return UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
     }
 
-    /** Straight out, until it finds something or runs out of line. */
+
     protected void advanceOutbound(float amount) {
         move(heading, getSpeed() * amount);
         distanceOut += getSpeed() * amount;
 
-        //Pond and breach-lamp targets both come back from here as the same ordinary mote. From
-        //this point onward there is one hit, hold and shove path; where the fish was rendered
-        //before impact cannot change how the harpoon moves it.
         SectorEntityToken hit = findMote();
 
         if (hit != null) {
-            //Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
+            // Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
             if (entity.isInCurrentLocation()) {
                 Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
             }
 
-            //The player's fitted retrieval head refunds the confirmed shot. NPC-owned lines do
-            //not borrow the player's tackle, and fleet hits and misses never pass through here.
             if (owner == null && TackleManager.get(Tackle.Fit.HARPOON).retrievesCharge) {
                 HarpoonAbilityPlugin.retrieveCharge();
             }
 
-            //an explosive head never gets as far as the push: there is nothing to shove, nothing to
-            //play, and nothing to bring home. isExplosive reads the player's tackle, so an owned
-            //line never asks - what is screwed onto the player's line is not on anyone else's
             if (owner == null && isExplosive()) {
                 blastMote(hit);
                 return;
@@ -234,7 +218,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //checked after motes, so a line through a shoal takes the fish rather than the hull behind it
+        // checked after motes, so a line through a shoal takes the fish rather than the hull behind it
         CampaignFleetAPI struck = findFleet();
         if (struck != null) {
             if (isExplosive()) {
@@ -250,43 +234,28 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (distanceOut >= HarpoonConstants.RANGE) enter(State.RETURNING);
     }
 
-    /**
-     * Fleet on the line, a different problem to a fish on it. Which way it pulls is decided once
-     * here, by which end has more to say about it: a lighter fleet comes to you, a heavier one
-     * takes you to it - always hauling the target in would let a fishing boat drag a battle group
-     * across a system. No catch is played out; a fleet arrives, and that's the whole event.
-     */
+
     protected void beginHaul(CampaignFleetAPI struck) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
         haulingTarget = player != null
                 && struck.getEffectiveStrength() < player.getEffectiveStrength();
 
-        //flag carries its own expiry rather than being left to the harpoon to unset - the harpoon
-        //might not survive to do it (save mid-haul, location unloaded), which would otherwise
-        //leave the fleet permanently un-hookable
         struck.getMemoryWithoutUpdate().set(HarpoonConstants.HAULED_FLAG, true,
                 HarpoonConstants.HAULED_FLAG_EXPIRY_DAYS);
 
-        //booked at the hit, not when the rope lets go - being harpooned is what they object to
+        // booked at the hit, not when the rope lets go - being harpooned is what they object to
         HarpoonOffence.record(struck);
 
         enter(State.HAULING);
     }
 
-    /**
-     * Whether the head fitted is a charge rather than a barb. Read at the hit rather than kept from
-     * launch, same as the fathom head - a shot is over in a fraction of a second.
-     */
+
     public static boolean isExplosive() {
         return TackleManager.get(Tackle.Fit.HARPOON).explosive;
     }
 
-    /**
-     * A specimen, and then no specimen. No catch to play and nothing to bring home - this head does
-     * not take fish, it removes them. Set to harm nobody: a fish going up is not an incident, and
-     * damage to a fleet that happened to be nearby would be a rep hit with no conversation on it.
-     */
+
     protected void blastMote(SectorEntityToken mote) {
         String targetName = "Pattern";
         if (mote.getCustomPlugin() instanceof FishEntityPlugin fish
@@ -300,11 +269,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         detonate(ExplosionFleetDamage.NONE);
     }
 
-    /**
-     * A charge against somebody's hull, which is not a rope on it. Booked as a harpooning first -
-     * it is still the fishing gear pointed at people - and then the crew's patience is skipped
-     * entirely, since there is no version of this where they wait to hear an explanation.
-     */
+
     protected void blastFleet(CampaignFleetAPI struck) {
         CrabWares.recordExplosiveUse(struck.getName());
 
@@ -313,11 +278,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         detonate(ExplosionFleetDamage.MEDIUM);
     }
 
-    /**
-     * Sets the charge off where the head is standing, using vanilla's own fireball entity - it
-     * already throws particles, drives a shockwave, plays the sound, and shoves and damages whatever
-     * is near enough, all of which this would otherwise grow its own copy of.
-     */
+
     protected void detonate(ExplosionFleetDamage damage) {
         LocationAPI where = entity.getContainingLocation();
         Vector2f at = new Vector2f(entity.getLocation());
@@ -330,22 +291,17 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 Entities.EXPLOSION, Factions.NEUTRAL, params);
         explosion.setLocation(at.x, at.y);
 
-        //The charge is the module. A miss brings it home unfired; a detonation consumes it, clears
-        //the slot, and makes Crablobab's ownership-gated offer available again.
         TackleManager.consume(Tackle.EXPLOSIVE_HEAD);
 
         throwHead();
     }
 
-    /**
-     * The head, off its line and going. Thrown on along the shot rather than away from the blast -
-     * it was standing in the middle of the blast, and there is no "away" from a point you are on.
-     */
+
     protected void throwHead() {
         float away = heading.lengthSquared() > 0f
                 ? Misc.getAngleInDegrees(heading) : (float) Math.random() * 360f;
 
-        //a little off line, so two shots at the same thing don't throw the head down the same path
+        // a little off line, so two shots at the same thing don't throw the head down the same path
         Vector2f thrown = Misc.getUnitVectorAtDegreeAngle(
                 away + MathUtils.getRandomNumberInRange(-25f, 25f));
 
@@ -355,17 +311,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.BLASTED);
     }
 
-    /**
-     * The head coasting away from its own charge, rope trailing after it. Not routed through
-     * {@link #land} - there is no arrival here, only the last second of something already over.
-     */
+
     protected void advanceBlasted(float amount) {
         if (blastThrow == null) blastThrow = new Vector2f();
 
         Vector2f loc = entity.getLocation();
         entity.setLocation(loc.x + blastThrow.x * amount, loc.y + blastThrow.y * amount);
 
-        //drag, so it slows without ever reversing or quite stopping
+        // drag, so it slows without ever reversing or quite stopping
         blastThrow.scale(Math.max(0f, 1f - HarpoonConstants.BLAST_THROW_DRAG * amount));
 
         entity.setFacing(entity.getFacing() + HarpoonConstants.BLAST_SPIN * amount);
@@ -376,24 +329,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         expire();
     }
 
-    /**
-     * What is left of the line while the blast takes it, 1 down to 0. Faded here rather than left
-     * to {@link Misc#fadeAndExpire}, which drives the entity's own brightness - the rope is drawn by
-     * hand from this render pass, so the head would have dimmed out from under a full-strength line.
-     */
+
     protected float getBlastFade() {
-        //keyed off the charge having gone off rather than off BLASTED, which the last frame of it
-        //leaves for DONE - a line already faded to nothing would otherwise come back at full
-        //strength for the length of the entity's own fade
         if (blastThrow == null) return 1f;
 
         return MathUtils.clamp(1f - stateTime / HarpoonConstants.BLAST_FADE_TIME, 0f, 1f);
     }
 
-    /**
-     * Lets go of a fleet and comes home, by whatever route ended the haul. Undoes the haul's
-     * effects here rather than at each call site, so the flag can never be left behind.
-     */
+
     public void cutLine() {
         CampaignFleetAPI struck = getHookedFleet();
         if (struck != null) struck.getMemoryWithoutUpdate().unset(HarpoonConstants.HAULED_FLAG);
@@ -401,16 +344,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         enter(State.RETURNING);
     }
 
-    /** Whether this line is currently hauling on something, for anything wanting to cut it. */
+
     public boolean isHauling() {
         return state == State.HAULING;
     }
 
-    /**
-     * Cuts every line currently hauling, and says whether there was one. Routed through by the
-     * ability's own press - being towed with no way to answer is otherwise the only thing here
-     * done <i>to</i> the player rather than by them.
-     */
+
     public static boolean cutAllLines() {
         boolean cut = false;
 
@@ -422,14 +361,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return cut;
     }
 
-    /** Whether anything is on a line right now, for the button that would cut it. */
+
     public static boolean isAnyHauling() {
         return !getHauling().isEmpty();
     }
 
-    /** Whether any of the player's lines is out at all - flight, haul and return included. The
-     *  looser cousin of {@link #isAnyHauling()}, for anything reacting to the rig being in use
-     *  rather than to something being on the line. */
+
     public static boolean isAnyLineOut() {
         LocationAPI location = Global.getSector().getCurrentLocation();
         if (location == null) return false;
@@ -443,9 +380,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return false;
     }
 
-    /** Every line currently hauling, found by tag rather than by walking the location - this is
-     *  asked from {@code isUsable}, which polls twice a frame, and the full entity list can run
-     *  to thousands of asteroids. The tagged list is normally empty and always tiny. */
+
     protected static List<HarpoonEntityPlugin> getHauling() {
         List<HarpoonEntityPlugin> hauling = new ArrayList<>();
 
@@ -457,8 +392,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
             HarpoonEntityPlugin harpoon = (HarpoonEntityPlugin) token.getCustomPlugin();
 
-            //only the player's lines: this feeds the player's own cut, and an owned line is not
-            //theirs to let go of (not that one ever hauls - see findFleet)
+            // only the player's lines: this feeds the player's own cut, and an owned line is not theirs to let go of (not that one ever hauls - see findFleet)
             if (harpoon.owner != null) continue;
 
             if (harpoon.isHauling()) hauling.add(harpoon);
@@ -467,8 +401,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return hauling;
     }
 
-    /** Head and mote carry on together briefly, slowing, so the hit reads as an impact rather
-     *  than the mote simply stopping. */
+
     protected void advancePushing(float amount) {
         if (!isHookedValid()) {
             enter(State.RETURNING);
@@ -483,12 +416,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (stateTime >= HarpoonConstants.PUSH_TIME) enter(State.TAUT);
     }
 
-    /**
-     * One end of the line coming to the other, until they meet or the rope has had enough. The
-     * head rides the fleet rather than the fleet riding the head: a mote is dragged by writing
-     * its position every frame, but a fleet has a course, an AI and a burn level, so it is given
-     * velocity toward the other end and left to move under its own logic instead.
-     */
+
     protected void advanceHauling(float amount, CampaignFleetAPI player) {
         CampaignFleetAPI struck = getHookedFleet();
 
@@ -497,16 +425,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //both ends must be in the same location, or a jump mid-haul subtracts coordinates
-        //across two unrelated spaces
+        // both ends must be in the same location, or a jump mid-haul subtracts coordinates across two unrelated spaces
         if (struck.getContainingLocation() != entity.getContainingLocation()
                 || player.getContainingLocation() != entity.getContainingLocation()) {
             cutLine();
             return;
         }
 
-        //still has to be haulable - isHaulable rather than canHook, since canHook also rejects a
-        //fleet already carrying a line, which by now is this one
+        // still has to be haulable - isHaulable rather than canHook, since canHook also rejects a fleet already carrying a line, which by now is this one
         if (!isHaulable(struck)) {
             cutLine();
             return;
@@ -515,8 +441,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         CampaignFleetAPI pulled = haulingTarget ? struck : player;
         CampaignFleetAPI anchor = haulingTarget ? player : struck;
 
-        //head sits on the fleet, so the line reads as attached rather than resting where it
-        //happened to reach
+        // head sits on the fleet, so the line reads as attached rather than resting where it happened to reach
         entity.setLocation(struck.getLocation().x, struck.getLocation().y);
 
         Vector2f toAnchor = Vector2f.sub(anchor.getLocation(), pulled.getLocation(), null);
@@ -530,8 +455,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //pause before the yank, mirroring the beat a mote gets between landing and the catch
-        //starting; nothing is written to the fleet until it passes
+        // pause before the yank, mirroring the beat a mote gets between landing and the catch starting; nothing is written to the fleet until it passes
         if (stateTime < HarpoonConstants.HAUL_DELAY) return;
 
         toAnchor.normalise(toAnchor);
@@ -539,7 +463,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 toAnchor.y * HarpoonConstants.HAUL_SPEED);
     }
 
-    /** What is on the line, if what is on the line is a fleet. */
+
     protected CampaignFleetAPI getHookedFleet() {
         if (!isHookedValid()) return null;
         if (!(hooked instanceof CampaignFleetAPI)) return null;
@@ -547,15 +471,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return (CampaignFleetAPI) hooked;
     }
 
-    /** Nearest fleet within catch radius of its own radius, not the flat radius a mote uses -
-     *  a capital group is reticule-sized, not a speck. */
+
     protected CampaignFleetAPI findFleet() {
-        //an owned line never ties to a hull - the Fisherman throws at fish, and a rope between
-        //two NPC fleets is a physics problem nobody is playing
+        // an owned line never ties to a hull - the Fisherman throws at fish, and a rope between two NPC fleets is a physics problem nobody is playing
         if (owner != null) return null;
 
-        //line must clear the launcher before it can hit anything this big, or the head tests
-        //hulls from inside the player's own fleet on its first frame
+        // line must clear the launcher before it can hit anything this big, or the head tests hulls from inside the player's own fleet on its first frame
         if (distanceOut < HarpoonConstants.FLEET_ARM_DISTANCE) return null;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -569,7 +490,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             float distance = Misc.getDistance(entity.getLocation(), other.getLocation());
             if (distance > HarpoonConstants.CATCH_RADIUS + other.getRadius()) continue;
 
-            //nearest rather than first-listed, so overlapping hulls yield the one actually reached
+            // nearest rather than first-listed, so overlapping hulls yield the one actually reached
             if (distance >= closestDistance) continue;
 
             closest = other;
@@ -579,23 +500,15 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return closest;
     }
 
-    /** Whether a fleet is a thing a rope can meaningfully be tied to - mostly vanilla's own
-     *  patrol-targeting checks. A station's position comes from its orbit, so hauling on one
-     *  does nothing or drags the player into it; one mid-transition, in battle, hidden or
-     *  despawning isn't a sane target either. */
+
     public static boolean canHook(CampaignFleetAPI other) {
-        //The Fisherman is the one fleet that is not a target at all. Reject it at collision
-        //eligibility (rather than suppressing the offence afterward), so ordinary and explosive
-        //heads both continue through the boat and may still strike something behind it.
         if (FishermanSpawner.isFisherman(other)) return false;
 
-        //second half only narrows down a target - a line already on a hull says nothing about
-        //whether it's sane to haul, which is why the haul itself checks the first half alone
         return isHaulable(other)
                 && !other.getMemoryWithoutUpdate().getBoolean(HarpoonConstants.HAULED_FLAG);
     }
 
-    /** Whether a rope makes any sense on this fleet at all, line or no line. */
+
     public static boolean isHaulable(CampaignFleetAPI other) {
         if (other.isExpired() || !other.isAlive()) return false;
         if (other.isStationMode() || other.isHidden() || other.isDespawning()) return false;
@@ -604,7 +517,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return other.getBattle() == null;
     }
 
-    /** Line pulls straight, then the catch begins. */
+
     protected void advanceTaut() {
         if (!isHookedValid()) {
             enter(State.RETURNING);
@@ -613,9 +526,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         if (stateTime < HarpoonConstants.TAUT_TIME || minigameOpened) return;
 
-        //an owned line plays no catch: the animation is the whole show, and it always lands.
-        //caught stays null on purpose, so landing adds nothing to anyone's cargo - the mote
-        //fading at the boat's side is the catch being taken aboard
         if (owner != null) {
             enter(State.REELING);
             return;
@@ -624,7 +534,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         openMinigame();
     }
 
-    /** Home, at whatever speed this outcome deserves, to wherever the fleet is now. */
+
     protected void advanceHomeward(float amount, CampaignFleetAPI fleet) {
         float speed = state == State.REELING ? HarpoonConstants.REEL_SPEED : HarpoonConstants.RETURN_SPEED;
 
@@ -642,8 +552,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (state == State.REELING) dragHooked();
     }
 
-    /** Marks the mote as carried, so it stops swimming instead of fighting the line for its own
-     *  position when both write it in the same frame. */
+
     protected void setHookedHeld(boolean held) {
         if (!isHookedValid()) return;
         if (!(hooked.getCustomPlugin() instanceof FishEntityPlugin)) return;
@@ -651,30 +560,26 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         ((FishEntityPlugin) hooked.getCustomPlugin()).setHeld(held);
     }
 
-    /** Lets go of whatever is on the end, leaving it free to swim off as it was. */
+
     protected void releaseHooked() {
         setHookedHeld(false);
         hooked = null;
     }
 
-    /** Specimen goes to cargo on arrival, not on stow - arrival is what earns it. */
+
     protected void land() {
         boolean carrying = state == State.REELING && caught != null;
 
-        //before anything else, so a frame of the retract cannot land the same specimen twice
+        // before anything else, so a frame of the retract cannot land the same specimen twice
         enter(State.RETRACTING);
 
         if (carrying) FishItems.addToPlayerCargo(caught);
 
-        //a fleet was never the catch; fade it out only if what's hooked isn't a fleet
+        // a fleet was never the catch; fade it out only if what's hooked isn't a fleet
         if (isHookedValid() && getHookedFleet() == null) Misc.fadeAndExpire(hooked, 0.3f);
     }
 
-    /**
-     * Winds the last of the line in before the harpoon expires. Arrival alone left the head
-     * short of the fleet with rope still visibly paid out, so this brings it the rest of the way
-     * and takes up the rope to nothing first. Also time-capped, since both ends can move.
-     */
+
     protected void advanceRetract(float amount, CampaignFleetAPI fleet) {
         Vector2f toFleet = Vector2f.sub(fleet.getLocation(), entity.getLocation(), null);
         float distance = toFleet.length();
@@ -684,7 +589,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             move(toFleet, Math.min(HarpoonConstants.RETURN_SPEED * amount, distance));
         }
 
-        //slack lags both ends like a spring, so it must also catch up before there's nothing left to draw
+        // slack lags both ends like a spring, so it must also catch up before there's nothing left to draw
         float slackOff = slack == null ? 0f : Misc.getDistance(slack, fleet.getLocation());
 
         boolean stowed = distance <= HarpoonConstants.RETRACT_DONE
@@ -702,7 +607,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         FishSpec spec = getHookedSpec();
         if (spec == null) {
-            //nothing worth playing, so whatever it was goes back to swimming
             releaseHooked();
             enter(State.RETURNING);
             return;
@@ -717,7 +621,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 FishLogEntry.Method.HARPOON, new FishingMinigameDialogPlugin.Callback() {
             @Override
             public void onCatchResolved(FishCatch landed) {
-                //the state is the outcome: only a reeling line has anything on it
+                // the state is the outcome: only a reeling line has anything on it
                 caught = landed;
                 enter(landed != null ? State.REELING : State.RETURNING);
 
@@ -728,16 +632,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             }
         });
 
-        //the UI was busy - hold on to it and try again next frame
+        // the UI was busy - hold on to it and try again next frame
         if (!opened) minigameOpened = false;
         else enter(State.HELD);
     }
 
-    /**
-     * The middle of the rope, chasing the middle of the straight line between fleet and head - a
-     * damped spring, so it lags while either end moves, swings when the head reverses, and rings
-     * down to straight when everything stops, without any of that being scripted per state.
-     */
+
     protected void advanceSlack(float amount, CampaignFleetAPI fleet) {
         Vector2f rest = getRestPoint(amount, fleet);
 
@@ -746,8 +646,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //pulled straight to rest while retracting rather than left to the spring - underdamped,
-        //it would hold a stowed harpoon on the hull for most of a second on a wobble nobody sees
         if (state == State.RETRACTING) {
             float pull = Math.min(1f, HarpoonConstants.RETRACT_SLACK_PULL * amount);
 
@@ -760,7 +658,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        //walked through in pieces: campaign time arrives in chunks a spring this stiff would fly apart on
         int steps = Math.max(1, (int) Math.ceil(amount / HarpoonConstants.LINE_MAX_STEP));
         float step = amount / steps;
 
@@ -775,12 +672,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /**
-     * Where the middle of the rope is heading, and how much rope there is to get there with. The
-     * excess is why a line moves at all: thrown further than it measures going out, hauled in
-     * once taut, outrun by the head coming home. It shows up as symmetric waves rather than a
-     * one-sided sag, since the rest point is always the plain midpoint.
-     */
+
     protected Vector2f getRestPoint(float amount, CampaignFleetAPI fleet) {
         Vector2f from = fleet.getLocation();
         Vector2f to = entity.getLocation();
@@ -790,13 +682,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         switch (state) {
             case OUTBOUND:
             case PUSHING:
-            //a blown line is not being reeled in by anyone, so it keeps paying out behind the head
-            //the charge threw - which is what makes it go slack and whip rather than tidy itself up
             case BLASTED:
                 paidOut = Math.max(paidOut, distance * HarpoonConstants.LINE_PAYOUT);
                 break;
-            //a hull gets the same fast take-up as a fish - without naming it here, a haul falls
-            //to the slow returning rate and the rope into a dragged fleet never looks taut
+            // a hull gets the same fast take-up as a fish - without naming it here, a haul falls to the slow returning rate and the rope into a dragged fleet never looks taut
             case TAUT:
             case HAULING:
                 paidOut = approach(paidOut, distance, HarpoonConstants.LINE_TAKEUP * amount);
@@ -808,7 +697,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return midpoint(from, to);
     }
 
-    /** How loose the rope is: spare length as a share of the distance it has to cover. */
+
     protected float getExcessShare(float distance) {
         if (distance <= 0f) return 0f;
 
@@ -835,19 +724,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     }
 
-    /** Whatever is on the end comes with the head. */
+
     protected void dragHooked() {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
     }
 
-    /**
-     * Whether a shot could take this target at all, leaving aside range. A buried mote needs
-     * beam exposure, or - with deep-strike gear - just showing as a detected dent. An ordinary
-     * mote just needs to be unheld. Single source of truth for both the strike and aim-assist,
-     * so the two can't disagree about what's takeable.
-     */
+
     public static boolean canTake(SectorEntityToken target) {
         if (target == null || target.isExpired()) return false;
 
@@ -859,22 +743,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return FishEntityPlugin.isAvailable(target, reachesUnder());
     }
 
-    /** Whether the fitted head reads the fabric rather than only the water above it. Checked
-     *  live rather than cached at launch - a shot in flight lasts a fraction of a second. */
+
     public static boolean reachesUnder() {
         return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
     }
 
-    /**
-     * One acquisition path for every fish-shaped target. Existing pond motes keep priority, as
-     * before; a player's line then checks exposed breach-lamp motes. A buried target is surfaced
-     * here, before the caller can hold or shove it, so every successful return value is the same
-     * ordinary mote implementation.
-     */
+
     protected SectorEntityToken findMote() {
         SectorEntityToken mote = findMoteWithTag(FishEntityPlugin.MOTE_TAG);
 
-        //What the player's lamps exposed is the player's to take. NPC lines only fish ponds.
+        // What the player's lamps exposed is the player's to take. NPC lines only fish ponds.
         if (mote == null && owner == null) {
             mote = findMoteWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
         }
@@ -885,7 +763,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return buried.unearth();
     }
 
-    /** First takeable target of one representation within the head's collision radius. */
+
     protected SectorEntityToken findMoteWithTag(String tag) {
         for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
             if (!canTake(mote)) continue;
@@ -935,9 +813,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 new Vector2f(0f, 0f));
     }
 
-    /** Covers the full line length, not just the head's own radius plus a little - the default
-     *  culls the whole thing the moment the head leaves screen, so a line toward the edge of the
-     *  view would vanish on the way out and reappear on the way back. */
+
     @Override
     public float getRenderRange() {
         return HarpoonConstants.RANGE + entity.getRadius() + 100f;
@@ -957,9 +833,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         renderHead(alpha);
     }
 
-    /** Line drawn from the fleet's current position rather than where it was fired, so it stays
-     *  anchored while the fleet moves. Two passes: a wide dim glow, and a hairline core over it,
-     *  both unbroken. */
+
     protected void renderLine(CampaignFleetAPI fleet, float alpha) {
         List<Vector2f> path = getLinePath(fleet.getLocation(), entity.getLocation());
 
@@ -976,12 +850,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 HarpoonConstants.LINE_ALPHA * alpha, HarpoonConstants.LINE_WIDTH);
     }
 
-    /**
-     * A curve bent through {@link #slack} (the rope's spring-driven middle) with a shiver laid
-     * over it. The shiver is small bends running down the rope, fed by the throw and by how hard
-     * the middle is being swung, pinned at both ends and weighted toward the fleet since the
-     * head end is the one under tension.
-     */
+
     protected List<Vector2f> getLinePath(Vector2f from, Vector2f to) {
         List<Vector2f> path = new ArrayList<>();
 
@@ -993,14 +862,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
         along.scale(1f / length);
 
-        //a quadratic through the rope's middle: the control point is placed so t=0.5 lands on it
         Vector2f middle = slack == null ? midpoint(from, to) : slack;
         float controlX = middle.x * 2f - (from.x + to.x) * 0.5f;
         float controlY = middle.y * 2f - (from.y + to.y) * 0.5f;
 
         float shiver = length * HarpoonConstants.WAVE_AMPLITUDE * getShiver(length);
 
-        //perpendicular, so the shiver is across the line rather than along it
+        // perpendicular, so the shiver is across the line rather than along it
         Vector2f across = new Vector2f(-along.y, along.x);
 
         for (int i = 0; i <= HarpoonConstants.LINE_SEGMENTS; i++) {
@@ -1010,7 +878,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             float x = inverse * inverse * from.x + 2f * inverse * t * controlX + t * t * to.x;
             float y = inverse * inverse * from.y + 2f * inverse * t * controlY + t * t * to.y;
 
-            //nothing at the ends, most of it in the middle, and the same either side of centre
+            // nothing at the ends, most of it in the middle, and the same either side of centre
             float envelope = (float) Math.sin(t * Math.PI);
 
             float offset = envelope * shiver * (float) Math.sin(
@@ -1022,19 +890,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return path;
     }
 
-    /**
-     * How much the rope is shivering: whichever is greatest of the throw dying off, being swung
-     * hard enough to shake, or simply carrying more rope than it needs. The last of those also
-     * carries the loose-line waves going out and coming home.
-     */
+
     protected float getShiver(float distance) {
         float thrown = (float) Math.exp(-age / Math.max(0.01f, HarpoonConstants.WAVE_DAMPING));
         float swung = slackVelocity.length() / HarpoonConstants.WAVE_REFERENCE_SPEED;
 
         float shiver = MathUtils.clamp(Math.max(getExcessShare(distance), Math.max(thrown, swung)), 0f, 1f);
 
-        //held down rather than off during a haul - a fleet on the end makes this a cable, not a
-        //thrown line, so it should mostly track the swing term
+        // held down rather than off during a haul - a fleet on the end makes this a cable, not a thrown line, so it should mostly track the swing term
         if (state == State.HAULING) shiver *= HarpoonConstants.HAUL_SHIVER;
 
         return shiver;
@@ -1049,8 +912,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         try {
             headSprite.setAdditiveBlend();
 
-            //Only the player's line carries the player's fitted tackle. An NPC-owned harpoon
-            //must not turn red merely because the player happens to have a charge equipped.
+            // Only the player's line carries the player's fitted tackle. An NPC-owned harpoon must not turn red merely because the player happens to have a charge equipped.
             if (owner == null && isExplosive()) {
                 renderExplosiveHead(loc, alpha);
             } else {
@@ -1060,8 +922,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 headSprite.renderAtCenter(loc.x, loc.y);
             }
         } finally {
-            //Sprite state is sticky. This copy is private, but leaving it neutral also keeps a
-            //future refactor from turning a harmless optimization into a cross-render tint leak.
             headSprite.setColor(Color.WHITE);
             headSprite.setAlphaMult(1f);
             headSprite.setNormalBlend();
@@ -1069,7 +929,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    /** Hot centre plus an irregular red pulse, visibly a charge rather than a recoloured barb. */
+
     protected void renderExplosiveHead(Vector2f loc, float alpha) {
         float pulse = 1f
                 + HarpoonConstants.EXPLOSIVE_PULSE
@@ -1096,11 +956,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         headSprite.renderAtCenter(loc.x, loc.y);
     }
 
-    /**
-     * Filename lookup deliberately creates a new underlying Sprite in 0.98a-RC8. Fetching the
-     * category sprite directly would only create a new API wrapper around the shared cached
-     * Sprite, letting this head's tint and size leak into every fusion-lamp glow in the campaign.
-     */
+
     protected void loadHeadSprite() {
         if (headSprite != null) return;
 

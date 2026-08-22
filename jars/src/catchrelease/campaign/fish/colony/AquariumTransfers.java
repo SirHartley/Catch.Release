@@ -14,17 +14,10 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.util.List;
 
-/**
- * Moving fish between the hold and the tank, both directions through the vanilla cargo picker.
- * Shared by the aquarium office dialog and the tank's own buttons on the colony menu, so the
- * two doors into the same water cannot drift apart.
- * <p>
- * The add picker works in loose specimens. Crates and the pile are opened before it appears so
- * the player chooses individual fish rather than moving a whole container at once.
- */
+
 public final class AquariumTransfers {
 
-    /** Callback with how many specimens moved, after a picker resolves. */
+
     public interface OnMoved {
         void moved(int count);
     }
@@ -32,12 +25,7 @@ public final class AquariumTransfers {
     private AquariumTransfers() {
     }
 
-    /**
-     * Specimens aboard, crates and the pile included.
-     * <p>
-     * It used to be loose ones only, which stopped being a useful answer the moment a landed fish
-     * went straight into a crate - the tank would have read as empty for a hold full of fish.
-     */
+
     public static int countFishAboard() {
         int count = 0;
 
@@ -109,7 +97,7 @@ public final class AquariumTransfers {
                 });
     }
 
-    /** Hold to tank. @return how many specimens moved */
+
     public static int addToTank(CargoAPI picked, BreachConservatory conservatory) {
         if (picked == null) return 0;
 
@@ -120,8 +108,7 @@ public final class AquariumTransfers {
             SpecialItemData data = stack.getSpecialDataIfSpecial();
             if (!FishItems.isCatch(data)) continue;
 
-            //the picker supplies loose fish; container support keeps direct callers safe by moving
-            //the encoded contents rather than the box itself
+            // the picker supplies loose fish; container support keeps direct callers safe by moving the encoded contents rather than the box itself
             java.util.List<FishCatch> going = FishItems.read(data);
             if (going.isEmpty()) continue;
 
@@ -137,7 +124,7 @@ public final class AquariumTransfers {
         return moved;
     }
 
-    /** Tank to hold. @return how many specimens moved */
+
     public static int takeFromTank(CargoAPI picked, BreachConservatory conservatory) {
         if (picked == null) return 0;
 
@@ -160,7 +147,7 @@ public final class AquariumTransfers {
         return moved;
     }
 
-    /** Base with the cancel callback nothing here needs. */
+
     protected abstract static class PickerListener implements CargoPickerListener {
 
         protected final OnMoved after;

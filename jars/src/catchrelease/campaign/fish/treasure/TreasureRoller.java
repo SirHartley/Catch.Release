@@ -20,13 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Rolls treasure contents. The two rarer tiers roll the game's own "blueprints"/"rare_tech" drop
- * groups (so they track vanilla/mod changes); the two commoner tiers pick directly from loaded
- * specs. Ship hulls only come up when {@code hasShipTackle}, capped at cruiser (uncommon) or
- * capital (rare). Awards go straight into the player's cargo; the returned {@link TreasureAward} is
- * just the receipt.
- */
+
 public class TreasureRoller {
 
     public static boolean rollForTreasure(float chanceMult) {
@@ -34,7 +28,7 @@ public class TreasureRoller {
                 < FishConstants.TREASURE_CHANCE * Math.max(0f, chanceMult);
     }
 
-    /** 0 to {@link FishConstants#TREASURE_MAX_PER_CATCH}; later pieces may go unspawned if the catch ends first. */
+
     public static int rollCount(float chanceMult) {
         if (!rollForTreasure(chanceMult)) return 0;
 
@@ -54,12 +48,7 @@ public class TreasureRoller {
         return picker.pick();
     }
 
-    /**
-     * Rolls the contents and puts them somewhere the player can get at them.
-     *
-     * @param hasShipTackle whether a hull can be awarded; without it, those tiers fall back to their usual contents
-     * @return never null, never empty
-     */
+
     public static TreasureAward award(TreasureRarity rarity, boolean hasShipTackle) {
         TreasureAward award = new TreasureAward(rarity);
 
@@ -85,7 +74,7 @@ public class TreasureRoller {
         return award;
     }
 
-    /** A commodity pile, a weapon, or a fighter chip. */
+
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
@@ -102,7 +91,6 @@ public class TreasureRoller {
             if (spec.isNonEcon() || spec.isMeta() || spec.isPersonnel()) continue;
             if (spec.getBasePrice() <= 0f) continue;
 
-            //weighted inversely by price: cheap commodities come up in bulk, expensive ones rarely
             picker.add(spec.getId(), 1f / Math.max(1f, spec.getBasePrice()));
         }
 
@@ -159,7 +147,7 @@ public class TreasureRoller {
         award.items.add(new TreasureAward.Item(wingName(spec), getWingSprite(spec), 1));
     }
 
-    /** Appends "wing" only if the spec's own name doesn't already end with it (case-insensitive). */
+
     protected static String wingName(FighterWingSpecAPI spec) {
         String name = spec.getWingName();
         if (name == null || name.isEmpty()) return "fighter wing";
@@ -167,7 +155,7 @@ public class TreasureRoller {
         return name.toLowerCase().endsWith("wing") ? name : name + " wing";
     }
 
-    /** Null on failure. */
+
     protected static String getWingSprite(FighterWingSpecAPI spec) {
         try {
             return Global.getSettings().getVariant(spec.getVariantId()).getHullSpec().getSpriteName();
@@ -176,7 +164,7 @@ public class TreasureRoller {
         }
     }
 
-    /** Adds a mothballed hull (uncrewed) no bigger than {@code maxSize}. */
+
     protected static void awardHull(TreasureAward award, HullSize maxSize) {
         WeightedRandomPicker<ShipHullSpecAPI> picker =
                 new WeightedRandomPicker<>();
@@ -190,7 +178,6 @@ public class TreasureRoller {
             if (spec.getHullSize().ordinal() > maxSize.ordinal()) continue;
             if (spec.getHullSize().ordinal() < HullSize.FRIGATE.ordinal()) continue;
 
-            //weight halves per hull size step, so bigger hulls are rarer
             picker.add(spec, 1f / (float) Math.pow(2, spec.getHullSize().ordinal()));
         }
 
@@ -209,7 +196,7 @@ public class TreasureRoller {
                 spec.getSpriteName(), 1));
     }
 
-    /** Rolls vanilla's own drop group rather than listing its contents, so it tracks changes to the table. */
+
     protected static void awardFromDropGroup(TreasureAward award, CargoAPI cargo, String group) {
         DropData drop = new DropData();
         drop.chances = 1;
@@ -236,7 +223,7 @@ public class TreasureRoller {
         }
     }
 
-    /** No single icon accessor on {@link CargoStackAPI}, so each stack type is asked separately. Null for anything else. */
+
     protected static String getStackSprite(CargoStackAPI stack) {
         try {
             if (stack.isCommodityStack() && stack.getResourceIfResource() != null) {
@@ -259,7 +246,6 @@ public class TreasureRoller {
                 return stack.getHullModSpecIfHullMod().getSpriteName();
             }
         } catch (Exception e) {
-            //icon is decorative; fall through to null
         }
 
         return null;

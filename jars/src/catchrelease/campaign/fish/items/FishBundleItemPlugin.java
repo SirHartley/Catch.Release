@@ -21,20 +21,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A crate of one species, holding every specimen that was stowed in it.
- * <p>
- * The contents are the item's data, so a bundle that has grown is a different item to the one it
- * was - which is why stowing replaces the bundle rather than adding to it. Right-clicking one spills
- * it back out into individual specimens, each with the stats it went in with; holding control
- * instead sweeps the whole hold into a single {@link FishPileItemPlugin}.
- * <p>
- * Control rather than shift, the same as on a specimen - shift+right-click is intercepted by the
- * cargo screen's own mass-transfer path before the item ever sees it.
- */
+
 public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
-    /** Native box art is 80x80; coordinates are measured from its upper-left corner. */
+
     public static final float BOX_ICON_GRID = 80f;
     public static final float BOX_ICON_UL_X = 49f;
     public static final float BOX_ICON_UL_Y = 35f;
@@ -73,7 +63,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         return !getContents().isEmpty();
     }
 
-    /** Removal handled in {@link #performRightClickAction}, not here. */
+
     @Override
     public boolean shouldRemoveOnRightClickAction() {
         return false;
@@ -84,7 +74,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         List<FishCatch> contents = getContents();
         if (contents.isEmpty() || helper == null) return;
 
-        //the tidy-up rather than the unpack: everything aboard onto one line
+        // the tidy-up rather than the unpack: everything aboard onto one line
         if (isBulkDown()) {
             FishPileItemPlugin.sweep(helper, stack.getCargo(), stack.getSpecialDataIfSpecial(),
                     (int) stack.getSize());
@@ -93,20 +83,19 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         helper.removeFromClickedStackFirst(1);
 
-        //The first unpacked specimen takes the crate's cell; later specimens are appended. This
-        //keeps every pre-existing cargo cell in place while the crate expands.
+        // The first unpacked specimen takes the crate's cell; later specimens are appended. This keeps every pre-existing cargo cell in place while the crate expands.
         for (int i = 0; i < contents.size(); i++) {
             helper.addItems(CargoItemType.SPECIAL, FishItems.toItem(contents.get(i)), 1);
         }
     }
 
-    /** Read from the keyboard directly - the click helper says what may be moved, not what was held. */
+
     protected boolean isBulkDown() {
         return org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_LCONTROL)
                 || org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_RCONTROL);
     }
 
-    /** Marked with the species' rarity and the best grade in the crate. */
+
     @Override
     public void render(float x, float y, float w, float h, float alphaMult, float glowMult,
                        SpecialItemRendererAPI renderer) {
@@ -126,7 +115,6 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         FishItemRenderer.render(x, y, w, h, alphaMult, spec == null ? null : spec.rarity, best);
 
-        //the wanted dot: a marked ware or an open job would take something in the crate
         for (FishCatch entry : contents) {
             if (ShopMarks.isWanted(entry)) {
                 ShopMarks.drawDot(x + w - ShopMarks.DOT_INSET, y + ShopMarks.DOT_INSET,
@@ -136,7 +124,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
     }
 
-    /** Fits the species art to the four measured corners of the box label. */
+
     protected void renderBoxIcon(float x, float y, float w, float h, float alphaMult,
                                  float glowMult, FishSpec spec) {
 
@@ -155,12 +143,12 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         return x + w * imageX / BOX_ICON_GRID;
     }
 
-    /** Converts the supplied top-left image grid to Starsector's bottom-left render space. */
+
     protected float gridY(float y, float h, float imageY) {
         return y + h * (BOX_ICON_GRID - imageY) / BOX_ICON_GRID;
     }
 
-    /** Same tooltip anatomy as a single specimen; contents summarized by grade rather than one line each. */
+
     @Override
     public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                               CargoTransferHandlerAPI transferHandler, Object stackSource) {
@@ -173,7 +161,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         FishSpec spec = contents.get(0).getSpec();
         float opad = 10f;
 
-        //without this, F2 resolves to the generic bundle item spec rather than the species it holds
+        // without this, F2 resolves to the generic bundle item spec rather than the species it holds
         FishCodex.link(tooltip, contents.get(0).speciesId);
 
         if (!Global.CODEX_TOOLTIP_MODE) {
@@ -194,7 +182,6 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         tooltip.addPara("Contains: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
                 contents.size() + " specimens of " + contents.get(0).getDisplayName());
 
-        //who is asking for anything in the crate: marked gear and open jobs both
         java.util.List<String> requiredBy = new java.util.ArrayList<>();
         for (FishCatch entry : contents) {
             for (String name : ShopMarks.getRequiredBy(entry)) {

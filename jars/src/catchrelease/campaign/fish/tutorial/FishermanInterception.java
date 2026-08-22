@@ -17,31 +17,16 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * The boat heading somebody off before they do something stupid.
- * <p>
- * In an inhabited system there is a fishing boat already posted, so a player walking up to a rupture
- * with no gear is a problem it can actually be present for. It becomes present. It does not travel;
- * it is simply somewhere else the next time anybody looks, a short way off and closing, and nobody
- * aboard remarks on this.
- * <p>
- * The teleport is the point rather than a shortcut. Whatever is running that boat is not bound by
- * the ordinary business of being in one place, and the cheapest way to say so is to break the rule
- * in front of the player and never mention it. It is dropped in outside the viewport so the arrival
- * is never actually witnessed - what is witnessed is that it is there now and was not before.
- * <p>
- * Only before the introduction, and only in a populated system: out on the frontier the hulk does
- * this job, and doing both would be two answers to one question.
- */
+
 public class FishermanInterception implements EveryFrameScript {
 
-    /** Set on a boat that has moved itself to cut somebody off, so it is only ever done once. */
+
     public static final String INTERCEPTED_KEY = "$catchrelease_intercepted";
 
-    /** Set only while the boat is actually closing, so the burn override lapses with the chase. */
+
     public static final String CHASING_KEY = "$catchrelease_fisherClosing";
 
-    /** Days the catch-up lasts - the same clock the INTERCEPT assignment runs on. */
+
     public static final float CHASE_DAYS = 3f;
 
     protected final IntervalUtil interval = new IntervalUtil(
@@ -85,7 +70,7 @@ public class FishermanInterception implements EveryFrameScript {
         cutOff(boat, player);
     }
 
-    /** Whether the player is close enough to a rupture to be about to try something. */
+
     protected boolean isNosingAroundARupture(CampaignFleetAPI player, StarSystemAPI system) {
         for (SectorEntityToken pond : QuestPond.getPonds(system)) {
             if (Misc.getDistance(player.getLocation(), pond.getLocation())
@@ -98,20 +83,7 @@ public class FishermanInterception implements EveryFrameScript {
         return false;
     }
 
-    /**
-     * The boat is now here.
-     * <p>
-     * Placed off the far side of the player from wherever it was, so the move is never on screen,
-     * and pointed straight at them with the flags that make a fleet close and hold rather than go
-     * back to what it was doing.
-     * <p>
-     * Through {@link OuterReaches#place} like every other placement of a boat, and this one needs
-     * it most: the drop point is measured off the player, the player is standing at a rupture, and
-     * ruptures are seeded from the star outwards - so somebody who found one in the inner system
-     * got a trawler materialising against the sun. The boat comes in at the near edge of its own
-     * band instead and closes from there, which is further to fly and the right place to fly it
-     * from. This only ever runs in an inhabited system, so the band always applies.
-     */
+
     protected void cutOff(CampaignFleetAPI boat, CampaignFleetAPI player) {
         boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
 
@@ -134,10 +106,9 @@ public class FishermanInterception implements EveryFrameScript {
 
         boat.addAssignment(FleetAssignment.INTERCEPT, player, 10f, "closing on your fleet");
 
-        //the one thing that lets it off the trawler's pace, and it expires with the assignment
         boat.getMemoryWithoutUpdate().set(CHASING_KEY, true, CHASE_DAYS);
 
-        //it wants to be talked to, and it does not lose interest halfway there
+        // it wants to be talked to, and it does not lose interest halfway there
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_PURSUE_PLAYER, true, 10f);
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true, 10f);
         boat.getMemoryWithoutUpdate().set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, 10f);
@@ -147,12 +118,12 @@ public class FishermanInterception implements EveryFrameScript {
                 + " is closing on your position.", Misc.getHighlightColor());
     }
 
-    /** Whether this boat is closing on the player right now - what unlocks its burn. */
+
     public static boolean isClosing(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CHASING_KEY);
     }
 
-    /** Whether this boat is the one that came to head somebody off - for what it says first. */
+
     public static boolean hasIntercepted(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(INTERCEPTED_KEY);
     }

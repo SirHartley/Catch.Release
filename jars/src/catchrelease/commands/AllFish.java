@@ -12,7 +12,7 @@ import org.lazywizard.console.Console;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Console Commands integration for filling a testing hold with every registered catch. */
+
 public class AllFish implements BaseCommand {
 
     @Override

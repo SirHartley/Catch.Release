@@ -28,11 +28,11 @@ public class MaskedWarpedSpriteRenderer {
 
     private float maskThreshold = 0f;
 
-    /** The eddy, off unless a caller turns it. Twist in the band and where the band starts. */
+
     private float swirl = 0f;
     private float swirlEdge = 0.55f;
 
-    /** The funnel, off unless a caller opens it. Depth, the remap's exponent, the throat's dark. */
+
     private float well = 0f;
     private float wellGamma = 1f;
     private float wellDim = 0f;
@@ -45,20 +45,13 @@ public class MaskedWarpedSpriteRenderer {
         this.maskThreshold = threshold;
     }
 
-    /**
-     * Twist: radians at the band's strongest point, with per-frame time modulation already
-     * folded in (the shader doesn't accumulate). Edge: band start radius, as a fraction of mask radius.
-     */
+
     public void setSwirl(float twist, float edge) {
         this.swirl = twist;
         this.swirlEdge = edge;
     }
 
-    /**
-     * Radial remap of the fill that reads as depth. Depth blends it in (0 flat, 1 full); gamma
-     * is the remap's exponent (under 1 compresses toward centre); dim darkens the throat at full
-     * depth (0 = no colour change).
-     */
+
     public void setWell(float depth, float gamma, float dim) {
         this.well = depth;
         this.wellGamma = gamma;
@@ -96,11 +89,9 @@ public class MaskedWarpedSpriteRenderer {
         if (uWellGamma >= 0) GL20.glUniform1f(uWellGamma, wellGamma);
         if (uWellDim >= 0) GL20.glUniform1f(uWellDim, wellDim);
 
-        // unit0 = fill
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         fillSprite.bindTexture();
 
-        // unit1 = mask
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         maskSprite.bindTexture();
 
@@ -109,7 +100,6 @@ public class MaskedWarpedSpriteRenderer {
         float w = fillSize;
         float h = fillSize;
 
-        // Pixel-space UV extents for fill
         float fillTW = fillSprite.getTextureWidth() - 0.001f;
         float fillTH = fillSprite.getTextureHeight() - 0.001f;
 
@@ -117,7 +107,6 @@ public class MaskedWarpedSpriteRenderer {
         float fillUvPerWorldX = fillTW / fillSize;
         float fillUvPerWorldY = fillTH / fillSize;
 
-        // mask-width offset in fill texcoords; swirl is computed in mask space and mapped to fill via this
         if (uMaskToFill >= 0) {
             GL20.glUniform2f(uMaskToFill, maskSize * fillUvPerWorldX, maskSize * fillUvPerWorldY);
         }
@@ -135,7 +124,6 @@ public class MaskedWarpedSpriteRenderer {
             float fillTX1 = fillTW + uOff;
             float fillTY1 = fillTH + vOff;
 
-            // mask UV: fill-space pos mapped into a centered maskSize square via (pos - inset) / maskSize
             float inset = (fillSize - maskSize) * 0.5f;
 
             float mU0 = (0f - inset) / maskSize;
@@ -145,22 +133,18 @@ public class MaskedWarpedSpriteRenderer {
 
             GL11.glBegin(GL11.GL_QUADS);
             {
-                //bottom left
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE0, fillTX0, fillTY0);
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE1, mU0, mV0);
                 GL11.glVertex2f(0f, 0f);
 
-                //bottom right
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE0, fillTX1, fillTY0);
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE1, mU1, mV0);
                 GL11.glVertex2f(w, 0f);
 
-                //top right
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE0, fillTX1, fillTY1);
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE1, mU1, mV1);
                 GL11.glVertex2f(w, h);
 
-                //top left
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE0, fillTX0, fillTY1);
                 GL13.glMultiTexCoord2f(GL13.GL_TEXTURE1, mU0, mV1);
                 GL11.glVertex2f(0f, h);
@@ -168,7 +152,7 @@ public class MaskedWarpedSpriteRenderer {
             GL11.glEnd();
 
         } else {
-            int wide = warp.getWide(); //warp applied to fill
+            int wide = warp.getWide();
             int tall = warp.getTall();
 
             float cw = w / (float) (wide - 1);
@@ -183,19 +167,16 @@ public class MaskedWarpedSpriteRenderer {
                 GL11.glBegin(GL11.GL_QUAD_STRIP);
                 for (int j = 0; j < tall; j++) {
 
-                    //mask / unwarped
                     float x1 = cw * i;
                     float y1 = ch * j;
                     float x2 = cw * (i + 1f);
                     float y2 = ch * j;
 
-                    //fill base UVs (pixel-space) + parallax offset
                     float fU1 = fillCTW * i + uOff;
                     float fV1 = fillCTH * j + vOff;
                     float fU2 = fillCTW * (i + 1f) + uOff;
                     float fV2 = fillCTH * j + vOff;
 
-                    //warp offsets converted to fill UV offsets (pixel-space)
                     WarpGrid.WarpOffset o1 = warp.getOffset(i, j);
                     WarpGrid.WarpOffset o2 = warp.getOffset(i + 1, j);
 
@@ -204,7 +185,6 @@ public class MaskedWarpedSpriteRenderer {
                     fU2 += o2.dx * fillUvPerWorldX;
                     fV2 += o2.dy * fillUvPerWorldY;
 
-                    //unwarped mask UVs (normalized 0..1 in mask space)
                     float mU1 = (x1 - inset) / maskSize;
                     float mV1 = (y1 - inset) / maskSize;
                     float mU2 = (x2 - inset) / maskSize;

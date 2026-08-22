@@ -4,25 +4,16 @@ import com.fs.starfarer.api.Global;
 import catchrelease.skillshot.input.OnKeyPressSkillshotListener;
 import catchrelease.skillshot.input.SkillshotActivationManager;
 
-/**
- * Entry point. Two calls from your ModPlugin are all the framework needs:
- *
- * <pre>
- * public void onGameLoad(boolean newGame) { SkillshotFramework.register(); }
- * public void beforeGameSave()            { SkillshotFramework.reset(); }
- * </pre>
- *
- * Everything else hangs off abilities tagged {@link SkillshotSettings#TAG_SKILLSHOT}.
- */
+
 public class SkillshotFramework {
 
-    /** Idempotent - safe to call on every game load. */
+
     public static void register() {
         OnKeyPressSkillshotListener.getInstanceOrRegister();
         SkillshotActivationManager.getInstanceOrRegister();
     }
 
-    /** Tears down any in-progress targeting session, so a half-aimed skillshot isn't saved. */
+
     public static void reset() {
         OnKeyPressSkillshotListener.getInstanceOrRegister().reset();
 

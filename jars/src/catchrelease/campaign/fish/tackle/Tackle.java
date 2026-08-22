@@ -1,18 +1,11 @@
 package catchrelease.campaign.fish.tackle;
 
-/**
- * A module fitted to a rig, changing how the catch plays. One slot each, so fitting one means not
- * fitting another. Fields default to neutral, so a tackle only sets the one or two it changes.
- * <p>
- * Drones take the full set, the harpoon takes three; treasure hooks are drone-only since only a
- * drone can carry treasure back.
- */
+
 public enum Tackle {
 
     NONE("None", Fit.BOTH,
             "Nothing fitted."),
 
-    //--- drones
     SPOOL_GOVERNOR("Spool Governor", Fit.DRONE,
             "Widens the window the drones fly, at the cost of how quickly it answers.") {
         {
@@ -75,7 +68,6 @@ public enum Tackle {
         }
     },
 
-    //--- both
     CALIBRATED_GRADER("Calibrated Grader", Fit.BOTH,
             "Picks the better of what is there. Specimens come up nearer the top of their range.") {
         {
@@ -97,7 +89,6 @@ public enum Tackle {
         }
     },
 
-    //--- harpoon
     FATHOM_HEAD("Fathom Head", Fit.HARPOON,
             "Reads under the fabric rather than across it. The head takes what has gone below:"
                     + " a specimen that has dived to shake the line, and anything the lamps"
@@ -133,7 +124,6 @@ public enum Tackle {
         }
     },
 
-    //--- searchlights
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
             "A light that finds something breaks off its sweep and follows it for a few seconds"
                     + " before carrying on.") {
@@ -151,14 +141,14 @@ public enum Tackle {
         }
     };
 
-    /** Which rig a piece of tackle will fit. */
+
     public enum Fit {
         DRONE,
         HARPOON,
         SEARCHLIGHT,
         BOTH;
 
-        /** False only for BOTH, which is a fit tackle can declare but never a slot the player owns. */
+
         public boolean isRig() {
             return this != BOTH;
         }
@@ -167,10 +157,10 @@ public enum Tackle {
     public final String name;
     public final Fit fit;
     public final String description;
-    /** Optional texture path for the outfitter; the rig shelf icon is used when this is blank. */
+
     public final String icon;
 
-    //everything below is neutral unless a tackle says otherwise
+    // everything below is neutral unless a tackle says otherwise
     public float barSizeMult = 1f;
     public float barLiftMult = 1f;
     public float barGravityMult = 1f;
@@ -180,50 +170,31 @@ public enum Tackle {
     public float rarityBias = 1f;
     public float qualityBias = 0f;
 
-    /**
-     * How much steadier a specimen taken on this rig reads, as aberration taken off the water's own
-     * figure - so 0.25 on water at 0.6 lands a specimen that reads 0.35.
-     * <p>
-     * Coherence is the player-facing side of aberration, and this is the only axis that moves it
-     * after the catch is decided rather than by fishing somewhere else. Floored at perfectly
-     * coherent; it cannot make a specimen read better than the fabric allows.
-     */
+
     public float coherenceBonus = 0f;
 
     public boolean shipTackle = false;
     public boolean sonar = false;
 
-    /** Whether the drone rig can pass through temporary openings cut by the breach lamps. */
+
     public boolean breachCoupling = false;
 
-    /**
-     * Whether the head reaches below the fabric, not just across the water. Covers two cases: a
-     * mote diving deep, and a mote buried within a lamp's passive reach, which shows as a dent but
-     * is never exposed by a beam.
-     */
+
     public boolean deepStrike = false;
 
-    /** Whether a confirmed mote strike restores one charge to the harpoon's capped pool. */
+
     public boolean retrievesCharge = false;
 
-    /**
-     * Whether the barb carries a charge that goes off on whatever the head reaches. The one module
-     * here that takes a capability away rather than adding one - a line with this on the end can't
-     * land anything, because there's nothing left to land.
-     */
+
     public boolean explosive = false;
 
-    /**
-     * Whether the outfitter stocks this, as opposed to it being sold somewhere else entirely.
-     * Stocking and owning are different questions, the same way owning and wearing are: one bought
-     * out of somebody's coat in a bar still comes off and goes back on for nothing afterwards.
-     */
+
     public boolean stocked = true;
 
-    /** Seconds a light holds on what it found before going back to its sweep. Zero never stops. */
+
     public float lockTime = 0f;
 
-    /** Whether the lights are thrown as fans off the hull rather than as spots out in the dark. */
+
     public boolean fanBeam = false;
 
     Tackle(String name, Fit fit, String description) {
@@ -237,11 +208,7 @@ public enum Tackle {
         this.icon = icon;
     }
 
-    /**
-     * BOTH covers the drones and harpoon rigs a catch is actually played on, not the searchlight -
-     * phrased as what BOTH includes rather than what's exempt, since an exemption-based check would
-     * silently apply to every new rig added later.
-     */
+
     public boolean fits(Fit rig) {
         if (this == NONE) return true;
         if (this.fit == Fit.BOTH) return rig == Fit.DRONE || rig == Fit.HARPOON;

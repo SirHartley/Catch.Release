@@ -10,20 +10,12 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-/**
- * The pond as a hole: mask stencilled out of the fabric, warping hyperspace showing through,
- * shaded dark at center and at the rim to read as an aperture. No shader - built from
- * {@link Stencil} and {@link WarpedRectRenderer}, both already used elsewhere. Alternative to the
- * shader-based look behind {@link PondConstants#POND_HOLE_LOOK}.
- */
+
 public class PondHoleRenderer {
 
     public static final int FAN_SEGMENTS = 48;
 
-    /**
-     * @param maskSize the mask quad's edge length - the rupture as currently open
-     * @param elapsed  the pond's own clock, for the background's slow wander
-     */
+
     public void render(SpriteAPI starfield, SpriteAPI mask, WarpGrid warp, Vector2f loc,
                        float maskSize, float alpha, float elapsed) {
 
@@ -33,10 +25,9 @@ public class PondHoleRenderer {
 
         float radius = maskSize * 0.5f;
 
-        //opaque floor so the hole never shows terrain through a thin background
+        // opaque floor so the hole never shows terrain through a thin background
         drawDisc(loc, radius * 1.05f, 0f, Color.BLACK, 0.95f * alpha, Color.BLACK, 0.95f * alpha);
 
-        //own drift motion since a camera snapped to the pond kills parallax (see PondDepthField)
         float driftPhase = elapsed * (float) (Math.PI * 2.0) / PondConstants.HOLE_DRIFT_PERIOD;
         float driftX = (float) Math.cos(driftPhase) * PondConstants.HOLE_DRIFT;
         float driftY = (float) Math.sin(driftPhase * 0.7f) * PondConstants.HOLE_DRIFT;
@@ -48,18 +39,16 @@ public class PondHoleRenderer {
                 PondConstants.HOLE_BG_TINT, PondConstants.HOLE_BG_ALPHA * alpha,
                 PondConstants.HOLE_BG_ZOOM);
 
-        //funnel: dark pooling at center, thinning outward, reads as depth
         drawDisc(loc, radius * PondConstants.HOLE_WELL_REACH, 0f,
                 Color.BLACK, PondConstants.HOLE_WELL_ALPHA * alpha, Color.BLACK, 0f);
 
-        //wall shadow just inside the rim, reads as an aperture edge
         drawRing(loc, radius * PondConstants.HOLE_RIM_START, radius * 1.02f,
                 Color.BLACK, 0f, PondConstants.HOLE_RIM_SHADOW * alpha);
 
         Stencil.endStencil();
     }
 
-    /** A radial gradient disc: one colour and alpha at the middle, another at the edge. */
+
     protected void drawDisc(Vector2f center, float radius, float innerRadius,
                             Color centerColor, float centerAlpha, Color edgeColor, float edgeAlpha) {
         if (radius <= 0f) return;
@@ -88,7 +77,7 @@ public class PondHoleRenderer {
         GL11.glPopAttrib();
     }
 
-    /** A gradient ring: transparent at the inner radius, shaded at the outer one. */
+
     protected void drawRing(Vector2f center, float innerRadius, float outerRadius,
                             Color color, float innerAlpha, float outerAlpha) {
         if (outerRadius <= innerRadius) return;

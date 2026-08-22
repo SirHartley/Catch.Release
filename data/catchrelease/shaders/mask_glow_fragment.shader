@@ -1,11 +1,11 @@
-uniform sampler2D maskTex;      // unit 1
+uniform sampler2D maskTex;
 
 uniform vec3  glowColor;
 uniform float glowAlpha;
 
-uniform float radiusOutPx;      // outer glow length in texels
-uniform float radiusInPx;       // inner glow length in texels
-uniform vec2  maskTexelSize;    // (1/width, 1/height)
+uniform float radiusOutPx;
+uniform float radiusInPx;
+uniform vec2  maskTexelSize;
 
 void main() {
     vec2 uv = gl_TexCoord[1].xy;
@@ -22,14 +22,11 @@ void main() {
 
     float a = texture2D(maskTex, uv).a;
 
-    // Force very low alpha to full transparency
     if (a < 0.05) {
         gl_FragColor = vec4(0.0);
         return;
     }
 
-    // Sample pattern (8-tap) for min/max
-    // Outer
     vec2 dO = maskTexelSize * radiusOutPx;
     float o1 = texture2D(maskTex, uv + vec2( dO.x, 0.0)).a;
     float o2 = texture2D(maskTex, uv + vec2(-dO.x, 0.0)).a;
@@ -43,7 +40,6 @@ void main() {
     float maxA = max(max(max(o1, o2), max(o3, o4)),
                      max(max(o5, o6), max(o7, o8)));
 
-    // Inner
     vec2 dI = maskTexelSize * radiusInPx;
     float i1 = texture2D(maskTex, uv + vec2( dI.x, 0.0)).a;
     float i2 = texture2D(maskTex, uv + vec2(-dI.x, 0.0)).a;

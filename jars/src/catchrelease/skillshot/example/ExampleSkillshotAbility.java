@@ -9,24 +9,11 @@ import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
 
-/**
- * A complete, working skillshot ability - the shortest thing that proves the loop end to end. Aim,
- * fire, and a marker briefly appears where you aimed.
- * <p>
- * Copy this as the starting point for a real one: swap the reticule, put your payload in
- * {@link #onSkillshotFired}.
- *
- * <pre>
- * abilities.csv: tags "skillshot", plugin catchrelease.skillshot.example.ExampleSkillshotAbility
- * </pre>
- */
+
 public class ExampleSkillshotAbility extends BaseSkillshotAbility {
 
     @Override
     public SkillshotRenderer createReticule() {
-        // for an area-landing ability: return new AreaReticuleRenderer(400f), or
-        // new ValidatedAreaReticuleRenderer(400f, new MarketProximityValidator(500f)) to block firing near inhabited worlds
-        // .withTrajectory() adds an aim-direction line, .withBounds(30f) flanking lines, .withLength(2000f) caps them at range
         return new DirectionReticuleRenderer();
     }
 

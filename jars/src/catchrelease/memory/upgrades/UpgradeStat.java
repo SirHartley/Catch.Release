@@ -11,7 +11,7 @@ public class UpgradeStat {
         MULT
     }
 
-    /** CAMPAIGN upgrades are simply bought and on; MINIGAME upgrades fill a slot, so picking one excludes another. */
+
     public enum Category {
         CAMPAIGN,
         MINIGAME
@@ -24,7 +24,7 @@ public class UpgradeStat {
     public UpgradeType upgradeType;
     public int maxLevel;
     public String description;
-    /** Optional texture path for the outfitter; its shelf icon is used when this is blank. */
+
     public String icon;
     public Category category = Category.CAMPAIGN;
 

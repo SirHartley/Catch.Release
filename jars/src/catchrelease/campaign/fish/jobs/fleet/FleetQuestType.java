@@ -10,15 +10,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.Random;
 
-/**
- * Fleet quest flavors: each is the same fish-for-payment transaction, differing only in flavor text
- * and requested catch.
- * <p>
- * Every one of them is hung on a hull that was already flying, so none of them can be about a fleet
- * that cannot move - the two that used to be say "failing" rather than "gone" for exactly that
- * reason. {@link #fleetType} is now a preference rather than a recipe: the kind of hull the errand
- * suits, used to pick between candidates rather than to build one.
- */
+
 public enum FleetQuestType {
 
     STRANDED("Stranded Fleet",
@@ -78,16 +70,16 @@ public enum FleetQuestType {
 
     public final String title;
 
-    /** The kind of hull the errand suits, used to pick between candidates already out there. */
+
     public final String fleetType;
 
-    /** What they say when the link opens, before any of it is agreed to. */
+
     public final String pitch;
 
-    /** One line for the intel, in the third person - the pitch is theirs, this is the player's note. */
+
     public final String note;
 
-    /** What the fleet reads as doing while it waits, on the campaign map. */
+
     public final String actionText;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText) {
@@ -98,14 +90,7 @@ public enum FleetQuestType {
         this.actionText = actionText;
     }
 
-    /** Rolls the requested catch; smaller asks than bar job orders, since this interrupts rather than being planned for. */
-    /**
-     * Something that actually lives somewhere, for the asks that name a species.
-     * <p>
-     * Common or uncommon only: these are the errands where the fish is a part rather than a prize -
-     * a printer feedstock, a packing gel - and sending somebody after a legendary for a drive repair
-     * would read as the crew not knowing what they need.
-     */
+
     protected static String pickSpecies(Random random) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
 
@@ -127,9 +112,6 @@ public enum FleetQuestType {
         switch (this) {
             case STRANDED:
             case SCAVENGER_ENGINE:
-                //a bare count describes itself as "1 specimen", which is not an errand - it is a
-                //blank where the errand should be. Both of these want one particular thing out of
-                //the water, so they get a species and the intel reads as a request
                 ask.count = 1;
                 ask.speciesId = pickSpecies(random);
                 break;
@@ -145,7 +127,7 @@ public enum FleetQuestType {
 
             case SEEKER:
             case COLLECTOR:
-                //must be a specific rare/uncommon species
+                // must be a specific rare/uncommon species
                 ask.count = 1;
                 ask.minRarity = random.nextFloat() > 0.5f ? FishRarity.RARE : FishRarity.UNCOMMON;
                 break;
@@ -162,7 +144,7 @@ public enum FleetQuestType {
         return ask;
     }
 
-    /** What the ask is worth before the difficulty of it is read off. */
+
     public int getBaseCredits() {
         switch (this) {
             case COLLECTOR: return 14000;

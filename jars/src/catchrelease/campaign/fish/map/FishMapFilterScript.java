@@ -25,69 +25,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Puts a Fish toggle on the sector map's filter row (beside Starscape, Fuel range) and runs
- * everything that follows from pressing it: the map narrows, a filter pane takes the freed edge,
- * and the shown species' waters are drawn as merged shapes over the map.
- * <p>
- * The button is built via reflection to match vanilla's own checkbox renderer/class exactly, and
- * clicks are read by polling {@code isChecked} rather than through a listener. Narrowing resizes
- * the scroller - the map's real viewport, which content size and zoom clamps re-derive from -
- * and re-centres on the world point that was in the middle; the waters render in the scroller's
- * overlay layer.
- * <p>
- * The map screen rebuilds on every open, so the button is re-inserted each time; whether the
- * filter was on persists in sector memory. Every step fails soft - a broken assumption just
- * means no button, and the sector map is exactly as vanilla made it.
- */
+
 public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishRoutePopup.Host {
 
     public static final String MEMORY_KEY = "$catchrelease_map_fish_filter";
 
-    /** The vanilla row's own button geometry: 120x25, 3px apart. */
+
     public static final float BUTTON_WIDTH = 120f;
     public static final float BUTTON_HEIGHT = 25f;
     public static final float BUTTON_PAD = 3f;
 
     public static final float PANE_GAP = 8f;
 
-    /** How far a lone system's water reaches, in hyperspace units. */
+
     public static final float BLOB_RADIUS = 3200f;
 
-    /** How long a parked species request stays valid - generous next to a tab switch, short
-     *  next to a session, so a stale request can't reshape a map opened much later. */
+
     public static final long PENDING_SPECIES_MILLIS = 10_000L;
 
-    /** Species someone outside asked the map to focus (the codex's "show on the sector map").
-     *  Static, since the asker's dialog is gone before the map exists. */
+
     protected static String pendingSpeciesId;
     protected static List<FishRequirement> pendingRequirements;
     protected static boolean pendingOverview;
     protected static String pendingSystemId;
     protected static long pendingFocusSetAt;
 
-    /** Whether the codex asked to open the map for the parked species. The codex overlay fades
-     *  out asynchronously, so the tab switch must wait until its dismissal callback has run. */
+
     protected static boolean pendingMapOpen;
 
-    /** The map screen instance the button currently lives on. A new open means a new one. */
+
     protected Object mapScreen;
 
-    /** Latched when this screen-open went wrong; cleared when the screen is rebuilt. */
+
     protected boolean failed = false;
 
     protected ButtonAPI fishButton;
     protected boolean applied = false;
 
-    /**
-     * Whether the sidebar is actually attached to the map screen right now, as opposed to
-     * {@link #applied}, which only records that {@link #activate()} ran. The two come apart when
-     * the planner hands the slot back and the re-add fails, and nothing else reconciles them -
-     * see {@link #ensurePaneStanding()}. Maintained by every add and remove of {@link #panePanel}
-     * rather than asked of the component, because the API has no attachment query and the
-     * internals' answer cannot be identity-checked against the screen without running the game.
-     */
+
     protected boolean paneStanding = false;
     protected float originalScrollerWidth = 0f;
 
@@ -96,7 +72,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected CustomPanelAPI overlayPanel;
     protected FishPresenceOverlay overlay;
 
-    /** The system view's own sidebar - same mechanism as the big pane, smaller tenant. */
+
     protected FishSystemPane systemPane;
     protected CustomPanelAPI systemPanePanel;
     protected boolean systemApplied = false;
@@ -105,16 +81,16 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
 
-    /** The pane's slot on the screen, kept so the planner can borrow it and hand it back. */
+
     protected float paneX, paneY, paneHeight;
 
-    /** The map's own arrow list and what this script put in it, for taking it back out. */
+
     protected Object arrowList;
     protected final List<Object> injectedArrows = new ArrayList<>();
     protected Object lastRouteSeen;
     protected boolean arrowsIn = false;
 
-    /** World-space meshes by species - the hosts never move during a session, so cut once. */
+
     protected final Map<String, FishPresenceField.Mesh> meshCache = new HashMap<>();
 
     @Override
@@ -146,12 +122,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             try {
                 insertButton();
 
-                //the overlay rides every map open, filter or no filter - the route badges and
-                //the system view's fish row are map furniture, not filter furniture. The waters
-                //only ever appear in it once the filter fills the blob list
                 mountOverlay();
 
-                //the map reopens the way it was left
                 if (fishButton != null && isRemembered()) fishButton.setChecked(true);
             } catch (Throwable t) {
                 fail(t);
@@ -161,10 +133,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         if (failed || fishButton == null) return;
 
         try {
-            //a parked request self-activates the filter - the memory flag only fires on a fresh
-            //attach, and the codex may have opened over a map already up with the filter off.
-            //It also flips to the hyper view up front: the pane only stands there now, and a
-            //request that waited for the pane while the pane waited for the view would wait forever
             if (hasFreshPendingFocus()) {
                 if (!fishButton.isChecked()) fishButton.setChecked(true);
 
@@ -177,10 +145,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             boolean checked = fishButton.isChecked();
             if (checked != isRemembered()) remember(checked);
 
-            //the pane and the narrowed map are hyperspace furniture: the filter stays checked
-            //across a flip to the system view, where the system's own smaller pane stands in.
-            //Deactivations run before activations, so a view flip hands the map's edge over
-            //instead of narrowing an already-narrowed map
             boolean wantPane = checked && isHyperViewShown();
 
             StarSystemAPI viewed = getViewedSystem();
@@ -192,9 +156,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             if (!applied && wantPane) activate();
             if (!systemApplied && wantSystem) activateSystemPane(viewed);
 
-            //the flag says the pane is up and the planner is down - make sure the glass
-            //agrees. applied only means activate() ran; a hand-back that broke half-way
-            //leaves the pane gone with neither branch above ever firing again
             if (applied && wantPane && popupPanel == null) ensurePaneStanding();
 
             if (applied && hasPendingFocus()) applyPendingFocus();
@@ -205,15 +166,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /**
-     * Keeps the map's own arrow list carrying the plotted route, so legs wear vanilla's own
-     * arrow style. The list is found on the map's params object as the one non-null {@code List}
-     * field (arrows vs markers, told apart by which is populated) - if that stops holding, the
-     * arrows are silently skipped. Re-run when the route's identity changes or the map flips
-     * between views - the legs are hyperspace geometry, and vanilla draws its params arrows on
-     * the system view too, where they point at nothing. Anything this script previously added is
-     * pulled back out first.
-     */
+
     protected void syncRouteArrows() {
         FishRoute.Saved route = FishRoute.get();
         boolean hyper = isHyperViewShown();
@@ -240,7 +193,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 Object value = field.get(params);
                 if (value == null) continue;
 
-                if (target != null) return; //two live lists - the shape no longer answers
+                if (target != null) return;
                 target = value;
             }
             if (target == null) return;
@@ -274,7 +227,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The single system the map is showing, or null on the hyperspace view. */
+
     protected StarSystemAPI getViewedSystem() {
         if (mapScreen == null) return null;
 
@@ -288,17 +241,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** Whether the system has anything to put on a pane - an empty pane is just a narrower map. */
+
     protected boolean hasAnyFish(StarSystemAPI system) {
         return !FishPresence.getKnownFishIn(system).isEmpty()
                 || FishPresence.getUnknownCountIn(system) > 0;
     }
 
-    /**
-     * The system view's pane: the same hand-over as {@link #activate()} - the map gives up its
-     * right edge, the pane takes it - sized for a column of holders rather than the full
-     * filter. Rebuilt whenever the viewed system changes, since the stock is the system's.
-     */
+
     protected void activateSystemPane(StarSystemAPI system) {
         try {
             Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
@@ -340,7 +289,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The system pane steps off and the map takes its edge back. */
+
     protected void deactivateSystemPane() {
         try {
             Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
@@ -373,7 +322,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** Whether the map is showing hyperspace right now, rather than a single system. */
+
     protected boolean isHyperViewShown() {
         if (mapScreen == null) return false;
 
@@ -388,17 +337,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The heat map rides the overlay; the pane holds the choice, the overlay does the painting. */
+
     @Override
     public void onCoherenceToggled(boolean shown) {
         if (overlay != null) overlay.setCoherenceShown(shown);
     }
 
-    /**
-     * The planner takes the sidebar's own slot: the pane steps aside, the planner stands exactly
-     * where it stood, and closing hands the slot back. A separate floating card was tried and
-     * looked like a guest; the sidebar is already the pane the player is working in.
-     */
+
     @Override
     public void onPlannerRequested() {
         if (popupPanel != null || mapScreen == null || panePanel == null) return;
@@ -423,7 +368,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     public void onRoutePlotted(FishRoute.Saved route) {
         closePlanner();
 
-        //arrows/badges land this frame via syncRouteArrows; point the map at the first stop
+        // arrows/badges land this frame via syncRouteArrows; point the map at the first stop
         try {
             if (route != null && !route.stops.isEmpty()) {
                 com.fs.starfarer.api.campaign.StarSystemAPI first =
@@ -434,7 +379,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 }
             }
         } catch (Throwable t) {
-            //pointing the map is a nicety
         }
     }
 
@@ -443,7 +387,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         closePlanner();
     }
 
-    /** Takes the planner down and puts the sidebar back in the slot it lent out. */
+
     protected void closePlanner() {
         if (popupPanel != null && mapScreen != null) {
             try {
@@ -457,8 +401,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                     paneStanding = true;
                 }
             } catch (Throwable t) {
-                //usually the screen going away mid-close; if it is in fact still up, the
-                //advance gate re-seats the pane next frame
+                // usually the screen going away mid-close; if it is in fact still up, the advance gate re-seats the pane next frame
                 Global.getLogger(FishMapFilterScript.class)
                         .warn("Planner could not hand the sidebar's slot back", t);
             }
@@ -468,22 +411,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         popupPanel = null;
     }
 
-    /**
-     * Re-seats the sidebar if it is wanted but not actually standing on the screen.
-     * {@code applied} only records that {@link #activate()} ran - a broken hand-back from the
-     * planner leaves the flag and the glass disagreeing, and no other path reconciles them.
-     * Reads {@link #paneStanding} rather than asking the component, since the API has no
-     * attachment query and the internals' {@code getParent} cannot be identity-checked against
-     * the screen from source alone - and a wrong answer there would re-seat the sidebar every
-     * frame, which is worse than the fault being healed.
-     */
+
     protected void ensurePaneStanding() {
         if (panePanel == null || mapScreen == null) return;
 
         if (paneStanding) return;
 
-        //remove first: harmless when it is genuinely detached, and the one thing that stops a
-        //wrong answer here from stacking a second sidebar on top of the first
+        // remove first: harmless when it is genuinely detached, and the one thing that stops a wrong answer here from stacking a second sidebar on top of the first
         ((UIPanelAPI) mapScreen).removeComponent(panePanel);
         ((UIPanelAPI) mapScreen).addComponent(panePanel)
                 .setSize(FishMapPane.WIDTH, paneHeight)
@@ -492,10 +426,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         paneStanding = true;
     }
 
-    /**
-     * Parks a species and flags the filter to come on next frame (same frame, if the map's
-     * already open). Applied in {@link #applyPendingFocus()} once a pane exists.
-     */
+
     public static void requestSpeciesFocus(String speciesId) {
         pendingSpeciesId = speciesId;
         pendingRequirements = null;
@@ -508,8 +439,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** Parks a complete accepted ask; category requests remain unions rather than being truncated
-     * to the three individually selectable species the ordinary map UI permits. */
+
     public static void requestRequirementsFocus(List<FishRequirement> asks) {
         pendingMapOpen = false;
         pendingSpeciesId = null;
@@ -523,7 +453,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** Parks an all-category survey centered on a reported system. */
+
     public static void requestOverviewFocus(String systemId) {
         pendingMapOpen = false;
         pendingSpeciesId = null;
@@ -537,20 +467,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /**
-     * Parks a species and asks the campaign UI to open its map after the codex has actually
-     * finished dismissing. Calling {@code showCoreUITab()} directly from the codex button races
-     * the overlay's fade-out and can leave the core UI on its previous tab.
-     */
+
     public static void requestSpeciesFocusFromCodex(String speciesId) {
         requestSpeciesFocus(speciesId);
         pendingMapOpen = true;
     }
 
-    /** Opens the requested map exactly once, after CodexDialog's dismissal delegate clears the
-     *  campaign state's codex flag. If the codex was opened from the map, that map is already the
-     *  current core tab; asking vanilla to select MAP again toggles the map closed. This runs while
-     *  paused, as codex transitions do. */
+
     protected void openPendingMapWhenCodexCloses() {
         if (!pendingMapOpen) return;
 
@@ -569,9 +492,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         pendingMapOpen = false;
 
-        //Vanilla's MAP tab action is a toggle: selecting it while its panel is current calls
-        //dismiss(0). A codex opened by F2 over one of our map rows leaves that map underneath the
-        //codex overlay, so simply let the existing screen receive the parked focus request.
         if (ui.getCurrentCoreTab() != CoreUITabId.MAP) {
             ui.showCoreUITab(CoreUITabId.MAP);
         }
@@ -586,11 +506,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 && System.currentTimeMillis() - pendingFocusSetAt <= PENDING_SPECIES_MILLIS;
     }
 
-    /**
-     * Honours the parked request now the pane exists: flips to SPECIES with the species picked,
-     * re-cuts the waters, and points the map like a row click would. Consumed up front, so a
-     * failed request doesn't retry on the next open.
-     */
+
     protected void applyPendingFocus() {
         boolean fresh = hasFreshPendingFocus();
         String id = pendingSpeciesId;
@@ -605,13 +521,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         if (!fresh) return;
         if (pane == null) return;
 
-        //waters are in hyperspace coordinates; flip to the hyper view first (same method the
-        //game calls on a location change), so the focus point means something once there
         try {
             ReflectionUtils.invoke(mapScreen, "notifyMapLocationChanged",
                     Global.getSector().getHyperspace());
         } catch (Throwable t) {
-            //the flip is a nicety - on the system view the pane still opens on the species
         }
 
         FishSpec spec = FishPresence.getSpec(id);
@@ -647,11 +560,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 return;
             }
         } catch (Throwable ignored) {
-            //the system's ordinary intel marker still points at it if centering is unavailable
         }
     }
 
-    /** The sector map screen if it is on the glass right now, else null. */
+
     protected Object findMapScreen() {
         if (Global.getSector() == null) return null;
 
@@ -664,15 +576,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         Object tab = ReflectionUtils.invokeIfExists(core, "getCurrentTab");
         if (tab == null) return null;
 
-        //identified by capability - the one panel that resizes a map and scroller together
         return ReflectionUtils.hasMethodOfName(tab, "updateMapAndScrollerSize") ? tab : null;
     }
 
-    /**
-     * Builds the Fish button from the row's own parts and hangs it after the last vanilla button.
-     * The checkbox renderer is found by shape - a constructor taking (label, font, three colours)
-     * - so no obfuscated name is ever written down.
-     */
+
     protected void insertButton() {
         Object filterRow = ReflectionUtils.invoke(mapScreen, "getFilter");
         if (filterRow == null) throw new IllegalStateException("no filter row on the map screen");
@@ -680,7 +587,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         ButtonAPI template = (ButtonAPI) ReflectionUtils.get(filterRow, "constellations");
         Object renderer = ReflectionUtils.invoke(template, "getRenderer");
 
-        //checkbox class is either the renderer itself or the one thing it wraps - both tried by shape
         ReflectionUtils.ReflectedConstructor checkboxCtor = null;
         Class<?> checkboxClass = null;
 
@@ -708,22 +614,19 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         if (checkboxCtor == null) throw new IllegalStateException("no checkbox renderer to clone");
 
-        //bracketed key written into the label by hand - vanilla's auto-append only covers its
-        //own rebindable keys
+        // bracketed key written into the label by hand - vanilla's auto-append only covers its own rebindable keys
         FactionAPI player = Global.getSector().getPlayerFaction();
         Object checkbox = checkboxCtor.newInstance("Fish [7]",
                 Global.getSettings().getString("defaultFont"),
                 player.getColor(), player.getDarkUIColor(), player.getBrightUIColor());
 
-        //the key digit in the highlight colour, the way vanilla's own row wears its numbers
+        // the key digit in the highlight colour, the way vanilla's own row wears its numbers
         Object title = ReflectionUtils.invokeIfExists(checkbox, "getTitle");
         if (title instanceof LabelAPI) {
             ((LabelAPI) title).setHighlightColor(Misc.getHighlightColor());
             ((LabelAPI) title).setHighlight("7");
         }
 
-        //vanilla's factory wraps the checkbox in an adapter (new n(new m(checkbox), listener))
-        //before the button ctor accepts it - try the adapter route first, direct ctor as fallback
         fishButton = null;
 
         if (!renderer.getClass().equals(checkboxClass)) {
@@ -755,7 +658,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         fishButton.setChecked(false);
 
-        //the same finishing touches vanilla's factory applies, both plain API
+        // the same finishing touches vanilla's factory applies, both plain API
         fishButton.setHighlightBrightness(0.8f);
         fishButton.setQuickMode(true);
 
@@ -766,16 +669,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 .rightOfMid((UIComponentAPI) template, BUTTON_PAD);
     }
 
-    /**
-     * Filter on: the map hands its right edge to the pane and the waters appear. Resizing the
-     * scroller (the map's real viewport, which content size and zoom clamps re-derive from) is
-     * the whole resize, plus a re-centre on the world point that was in the middle.
-     */
-    /**
-     * The always-on overlay: route badges and the system view's fish row belong to the map
-     * itself, so this goes up the moment the screen is found, before the filter has said a word.
-     * The waters arrive in it later, if and when the filter fills the blob list.
-     */
+
     protected void mountOverlay() {
         Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
         Object mapWidget = ReflectionUtils.invoke(mapScreen, "getMap");
@@ -784,8 +678,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
 
-        //the heat map belongs to the filter, not the bare map - activate() applies the sticky
-        //choice when the pane comes up, and a map without the filter shows no heat
+        // the heat map belongs to the filter, not the bare map - activate() applies the sticky choice when the pane comes up, and a map without the filter shows no heat
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
@@ -807,8 +700,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             scrollerPos.setSize(narrowWidth, scrollerPos.getHeight());
             ReflectionUtils.invoke(mapScreen, "centerOn", keep);
 
-            //the pane, on the edge the map gave up - its slot remembered so the planner can
-            //borrow it
             PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
             paneX = scrollerPos.getX() + narrowWidth + PANE_GAP - screenPos.getX();
             paneY = screenPos.getY() + screenPos.getHeight()
@@ -825,12 +716,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
             paneStanding = true;
 
-            //the standing overlay follows the narrowed viewport
             if (overlayPanel != null) {
                 overlayPanel.getPosition().setSize(narrowWidth, paneHeight);
             }
 
-            //the sticky choice comes back with the filter it belongs to
             if (overlay != null) overlay.setCoherenceShown(FishMapPane.isCoherenceShown());
 
             rebuildBlobs();
@@ -840,11 +729,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /** The filter goes off: the pane, the waters and the heat map leave; the overlay stays for
-     *  the route and the system view, with its blob list emptied. */
+
     protected void deactivate() {
         try {
-            //a planner holding the pane's slot goes down with it, without handing the slot back
+            // a planner holding the pane's slot goes down with it, without handing the slot back
             if (popupPanel != null) {
                 ((UIPanelAPI) mapScreen).removeComponent(popupPanel);
                 popup = null;
@@ -871,8 +759,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 overlay.setNoDataShown(false);
             }
 
-            //the heat map is the filter's reading of the water, not the map's - it goes down
-            //with the pane; the sticky choice itself stays for the next activation
+            // the heat map is the filter's reading of the water, not the map's - it goes down with the pane; the sticky choice itself stays for the next activation
             if (overlay != null) overlay.setCoherenceShown(false);
 
             if (overlayPanel != null) {
@@ -889,12 +776,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
     }
 
-    /**
-     * Cuts and caches the current mode's waters. Category view shades each enabled type's whole
-     * territory; species view shades up to three picks, each in its own weave (solid /
-     * stripe-right / stripe-left) so overlaps cross instead of stacking, with picks sharing a
-     * colour sharing one merged border instead of doubled lines.
-     */
+
     protected void rebuildBlobs() {
         if (pane == null || overlay == null) return;
 
@@ -925,7 +807,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                         getStyle(index++), true, true));
             }
         } else {
-            //colour groups first, because a border is per colour rather than per pick
+            // colour groups first, because a border is per colour rather than per pick
             Map<Integer, List<FishSpec>> byColor = new java.util.LinkedHashMap<>();
             List<FishSpec> picked = new ArrayList<>();
 
@@ -939,7 +821,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 byColor.computeIfAbsent(spec.rarity.color.getRGB(), k -> new ArrayList<>()).add(spec);
             }
 
-            //each pick's fill, in its own weave, with its own border only when its colour is its own
+            // each pick's fill, in its own weave, with its own border only when its colour is its own
             for (int i = 0; i < picked.size(); i++) {
                 FishSpec spec = picked.get(i);
                 FishPresenceField.Mesh mesh = getSpeciesMesh(spec);
@@ -951,7 +833,6 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                         getStyle(i), true, !colorShared));
             }
 
-            //and one merged border per shared colour, around everything that colour covers
             for (List<FishSpec> group : byColor.values()) {
                 if (group.size() < 2) continue;
 
@@ -967,7 +848,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay.setNoDataShown(pane.hasSelectionWithoutRangeData());
     }
 
-    /** The three weaves, dealt in pick order; a fourth of anything starts the deal over. */
+
     protected int getStyle(int index) {
         switch (index % 3) {
             case 1: return FishPresenceOverlay.STYLE_STRIPE_RIGHT;
@@ -990,7 +871,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         return mesh.isEmpty() ? null : mesh;
     }
 
-    /** The merged shape around everything a colour group covers, cached by its membership. */
+
     protected FishPresenceField.Mesh getUnionMesh(List<FishSpec> group) {
         List<String> ids = new ArrayList<>();
         for (FishSpec spec : group) ids.add(spec.id);
@@ -1025,7 +906,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 ReflectionUtils.invoke(mapScreen, "centerOn", focus);
             }
         } catch (Throwable t) {
-            //pointing the map is a nicety; a species with nowhere to point is not an error
+            // pointing the map is a nicety; a species with nowhere to point is not an error
         }
     }
 
@@ -1037,13 +918,12 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         Global.getSector().getMemoryWithoutUpdate().set(MEMORY_KEY, on);
     }
 
-    /** The screen went away, or was never there. Forget everything about it. */
+
     protected void drop() {
         clearComponents();
         mapScreen = null;
         failed = false;
 
-        //cut fresh next open: a catch or a bought chart between opens changes what is drawn
         meshCache.clear();
     }
 
@@ -1063,16 +943,13 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         applied = false;
         originalScrollerWidth = 0f;
 
-        //arrow list belonged to the old screen - drop it and force re-injection on the next one
+        // arrow list belonged to the old screen - drop it and force re-injection on the next one
         arrowList = null;
         injectedArrows.clear();
         lastRouteSeen = new Object();
     }
 
-    /**
-     * Something on this screen-open broke the recipe: un-narrow the map if narrowed, log once,
-     * and sit the rest of this open out.
-     */
+
     protected void fail(Throwable t) {
         Global.getLogger(FishMapFilterScript.class)
                 .warn("Fish map filter bowing out of this map screen", t);
@@ -1098,7 +975,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 }
             }
         } catch (Throwable ignored) {
-            //the withdrawal itself failing means the screen is already gone
+            // the withdrawal itself failing means the screen is already gone
         }
 
         clearComponents();

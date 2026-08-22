@@ -17,12 +17,11 @@ import java.util.EnumSet;
 
 import static catchrelease.helper.math.TrigHelper.smootherStep;
 
-//one renderer instance per ripple; not pooled
+// one renderer instance per ripple; not pooled
 public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
 
     public static final float MAX_ALPHA = 0.7f;
 
-    //defaults for the searchlight
     public static final float START_RADIUS_OFFSET = 0.7f;
     public static final float FEATHER_PX = 2f;
     public static final float RING_WIDTH_PX = 2f;
@@ -39,7 +38,6 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     public float growTime = GROW_TIME;
     public float startRadiusOffsetMult = START_RADIUS_OFFSET;
 
-    //fade
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
@@ -48,11 +46,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
     public float size;
     public Color color;
 
-    /**
-     * Location this ring is confined to. LunaLib draws all campaign renderers wherever the player
-     * currently is, so without this a ring would paint at its raw coordinates in whatever system is
-     * on screen. Null draws unconditionally. Not transient - must survive save/load.
-     */
+
     public LocationAPI home;
 
     public RippleRingRenderer(Vector2f loc, float size, Color color) {
@@ -61,9 +55,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         this.color = color;
     }
 
-    /**
-     * @param startRadiusOffsetMult multiplies the max radius by 0.x to get the start radius
-     */
+
     public RippleRingRenderer(Color color, float maxSize, Vector2f location, float startWidth, float growTime, float startRadiusOffsetMult) {
         this.color = color;
         this.size = maxSize;
@@ -146,9 +138,9 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         float rT = smootherStep(t);
         float radiusPx = lerp(minRadius, maxRadius, rT);
 
-        float up = smootherStep(2 * t); //fades in twice as fast as it fades out
+        float up = smootherStep(2 * t);
         float down = smootherStep(1f - t);
-        float alphaMult = up * down * 4f; //normalizes peak to ~1 at t=0.5
+        float alphaMult = up * down * 4f;
 
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);

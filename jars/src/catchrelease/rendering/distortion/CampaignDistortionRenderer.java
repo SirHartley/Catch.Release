@@ -26,17 +26,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * GraphicsLib's distortion, running in the campaign.
- * <p>
- * {@code DistortionShader} keeps its distortion list in {@code Global.getCombatEngine().getCustomData()},
- * unavailable outside a battle - so the plumbing is rebuilt here (a Luna campaign renderer for the
- * draw, a static list for the distortions) driving GraphicsLib's shader files directly. Two passes:
- * distortion sprites render into ShaderLib's auxiliary buffer via 2dtangent as an offset field, then
- * the screen is copied and redrawn displaced by that field. {@link #unitsToUV} and {@link #isOnScreen}
- * reimplement the two ShaderLib helpers that read zoom off the combat viewport, unusable here for the
- * same reason.
- */
+
 public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
     protected static final String VERT = "data/shaders/distortion/distortion.vert";
@@ -46,7 +36,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
 
     protected static final String SETTINGS = "GRAPHICS_OPTIONS.ini";
 
-    /** GraphicsLib's default and the fallback here; the ceiling that counts is the user's setting. */
+
     public static final int MAX_DISTORTIONS = 100;
 
     protected static boolean settingsRead = false;
@@ -66,10 +56,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected final int[] index = new int[4];
     protected final int[] indexAux = new int[7];
 
-    /**
-     * Adds a distortion, hooking the renderer up on first use (see {@link #get()}). Registered
-     * transient - never saved, since in-flight distortions and GL program ids are worthless after load.
-     */
+
     public static void addDistortion(DistortionAPI distortion) {
         if (distortion == null) return;
 
@@ -80,22 +67,21 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         if (instance != null) instance.distortions.remove(distortion);
     }
 
-    /** Requires shaders and framebuffers enabled, and distortion left on in GraphicsLib's settings. */
+
     public static boolean isSupported() {
         readSettings();
 
         return ShaderLib.areShadersAllowed() && ShaderLib.areBuffersAllowed() && enableDistortion;
     }
 
-    /** User-configurable cap on distortions drawn per pass. */
+
     public static int getMaxDistortions() {
         readSettings();
 
         return maxDistortions;
     }
 
-    /** Reads the same GRAPHICS_OPTIONS.ini GraphicsLib reads (merged across mods via loadJSON).
-     *  Once per run - nothing changes these without a restart. */
+
     protected static void readSettings() {
         if (settingsRead) return;
         settingsRead = true;
@@ -106,23 +92,17 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
             enableDistortion = settings.getBoolean("enableDistortion");
             maxDistortions = settings.getInt("maximumDistortions");
         } catch (IOException | JSONException e) {
-            //fail off, matching GraphicsLib's own behavior when this file is unreadable
             Global.getLogger(CampaignDistortionRenderer.class).log(Level.ERROR,
                     "GraphicsLib's graphics options will not read - campaign distortion stays off", e);
             enableDistortion = false;
         }
     }
 
-    /**
-     * The instance is a static that outlives loads and saves; Luna's renderer registration does not,
-     * so every ask checks and re-registers if needed - the GL programs are unaffected and don't need
-     * rebuilding.
-     */
+
     public static CampaignDistortionRenderer get() {
         if (instance == null) instance = new CampaignDistortionRenderer();
 
         if (!LunaCampaignRenderer.hasRenderer(instance)) {
-            //whatever was still in flight belonged to a game that is gone
             instance.distortions.clear();
             LunaCampaignRenderer.addTransientRenderer(instance);
         }
@@ -130,7 +110,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return instance;
     }
 
-    /** Never expires: it is the campaign's distortion pass, not one effect within it. */
+
     @Override
     public boolean isExpired() {
         return false;
@@ -146,7 +126,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    /** The last layer there is, so everything in the world has been drawn before it is bent. */
+
     @Override
     public EnumSet<CampaignEngineLayers> getActiveLayers() {
         return EnumSet.of(CampaignEngineLayers.ABOVE);
@@ -156,10 +136,6 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (distortions.isEmpty()) return;
 
-        //the pass is two full-screen operations before a single distortion is drawn - a screen
-        //copy and a warp draw - and the list is sector-wide: the standing boats run lamps in
-        //systems the player is nowhere near. Nothing in sight means no pass at all, not a pass
-        //over nothing
         if (!anyOnScreen(viewport)) return;
 
         if (!load()) return;
@@ -167,8 +143,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         draw(viewport);
     }
 
-    /** Lazily loaded on the first frame with something to draw, so a game that never opens a
-     *  rupture never compiles any of it. */
+
     protected boolean load() {
         if (loaded) return usable;
         loaded = true;
@@ -233,11 +208,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         ShaderLib.exitDraw();
     }
 
-    /**
-     * Draws every distortion into the auxiliary buffer via 2dtangent as a field of offsets; returns
-     * the normalization the second pass needs to read them back at the right strength. Copies the
-     * screen first - in combat GraphicsLib's pipeline already does this, but nothing does out here.
-     */
+
     protected Vector2f renderOffsetField(ViewportAPI viewport) {
         ShaderLib.copyScreen(ShaderLib.getScreenTexture(), GL13.GL_TEXTURE0);
 
@@ -306,7 +277,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return norm;
     }
 
-    /** Whether any distortion would actually land in this viewport, by the draw loop's own test. */
+
     protected boolean anyOnScreen(ViewportAPI viewport) {
         for (DistortionAPI distortion : distortions) {
             Vector2f location = distortion.getLocation();
@@ -320,7 +291,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return false;
     }
 
-    /** The strongest distortion on screen, which is what everything else is scaled against. */
+
     protected float getMaxScale(ViewportAPI viewport) {
         float max = 0f;
 
@@ -336,7 +307,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return max;
     }
 
-    /** Whichever framebuffer extension this machine ended up with - ShaderLib decided that already. */
+
     protected static void bindAuxiliaryBuffer(boolean bind) {
         int id = bind ? ShaderLib.getAuxiliaryBufferId() : 0;
 
@@ -349,8 +320,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         }
     }
 
-    /** World units as a share of the screen texture. Reimplements ShaderLib's version (unusable here
-     *  - it reads zoom off the combat viewport) against the campaign viewport instead. */
+
     protected static float unitsToUV(ViewportAPI viewport, float units) {
         float zoom = viewport.getViewMult();
         if (zoom <= 0f) return 0f;
@@ -358,7 +328,7 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         return units / (ShaderLib.getInternalHeight() * zoom);
     }
 
-    /** Same reason as {@link #unitsToUV} - reimplemented against the campaign viewport. */
+
     protected static boolean isOnScreen(ViewportAPI viewport, Vector2f location, float radius) {
         return viewport.isNearViewport(location, radius);
     }

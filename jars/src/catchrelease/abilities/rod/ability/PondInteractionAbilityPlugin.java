@@ -30,23 +30,13 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     protected static final String SOUND_POND_OPEN_UI = "catchrelease_ui_rod_pond_open_sfx";
     protected static final String SOUND_DRONE_DISPATCH_UI = "catchrelease_ui_rod_drone_dispatch";
 
-    //Press once to unlock nearby pond
-    //once unlocked, this ability changes to a targetted skillshot instead for the angler behaviour
-    //away from any pond, with the breach lamps lit and their coupler fitted, the press sends a
-    //roaming screen instead
-    //while a swarm is out the press is the recall instead, and the ability reads as active until
-    //the last drone is home
 
     @Override
     protected String getActivationText() {
         return isRoamingAvailable() ? "Dispatching drones" : "Forcing the rupture";
     }
 
-    /**
-     * No-aim presses: dispatch a roaming screen, or force open a shut pond. Lamps checked first -
-     * the rod can't open a rupture while breach lamps are lit (the two rigs take turns), and a
-     * fitted coupler lets roaming use the openings the lamps already cut.
-     */
+
     @Override
     protected void onActivatedWithoutReticule() {
         if (!entity.isPlayerFleet()) return;
@@ -59,10 +49,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         unlockClosestPond();
     }
 
-    /**
-     * True when breach lamps are lit and the drone rig has the coupler that lets its LINE use those
-     * temporary openings. The two rigs take turns; without the coupler, a lit lamp blocks the ROD.
-     */
+
     public boolean isRoamingAvailable() {
         return SearchlightAbilityPlugin.isBreaching() && hasBreachCoupler();
     }
@@ -101,8 +88,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public String getOnSoundUI() {
-        // Keep recalls in drone mode even if the pond or breach-lamp state has changed
-        // since the swarm was dispatched.
+        // Keep recalls in drone mode even if the pond or breach-lamp state has changed since the swarm was dispatched.
         if (FishingDroneSwarmScript.getExisting() != null
                 || closestPondActive()
                 || isRoamingAvailable()) {
@@ -114,7 +100,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     @Override
     public SkillshotRenderer createReticule() {
-        //doubled to diameter for the reticule API; read from the upgrade so a wider ring shows while aiming
         float radius = FishingDroneSwarmScript.getRingRadius() * 2f;
         return new ValidatedAreaReticuleRenderer(radius, new PondProximityValidator(radius));
     }
@@ -126,11 +111,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         FishingDroneSwarmScript.dispatch(getPond(), worldTarget);
     }
 
-    /**
-     * While a swarm is out, the press means recall, not cast - checked ahead of the vanilla path
-     * since a cast leaves the ability on cooldown, which would otherwise swallow the press for
-     * exactly the stretch a recall needs to be reachable.
-     */
+
     @Override
     public void pressButton() {
         if (entity != null && entity.isPlayerFleet()) {
@@ -150,30 +131,27 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     public boolean isUsable() {
         FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
 
-        //swarm out: button is recall, usable regardless of cast cooldown; already recalling: nothing
-        //to do until landed. Checked before pond lookup - a roaming screen has no pond nearby
         if (swarm != null) {
             return !swarm.isRecalling() && swarm.hasRecallableDrones() && disableFrames <= 0;
         }
 
-        //lamps replace the natural rupture with temporary openings the stock drone rig cannot use
+        // lamps replace the natural rupture with temporary openings the stock drone rig cannot use
         if (SearchlightAbilityPlugin.isBreaching() && !hasBreachCoupler()) return false;
 
         SectorEntityToken pond = getPond();
 
-        //an occupied rupture is the camp's leverage: leaving is allowed, fishing is not
+        // an occupied rupture is the camp's leverage: leaving is allowed, fishing is not
         if (CampedSpot.isPondBlocked(pond)) return false;
 
-        //the ability cooldown may end while its opener is still crossing the distance to the pond
         if (!isPondActive(pond) && RodMoteEntityPlugin.isOpening(pond)) return false;
 
-        //roaming needs no pond; otherwise falls back to requiring a pond in range
+        // roaming needs no pond; otherwise falls back to requiring a pond in range
         if (!isRoamingAvailable() && pond == null) return false;
 
         return super.isUsable();
     }
 
-    /** Reads as active for as long as the drones are away, recall included - they are still out. */
+
     @Override
     public boolean isActive() {
         return FishingDroneSwarmScript.getExisting() != null;
@@ -184,7 +162,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         return isActive();
     }
 
-    /** Fills as drones return home, not on a fixed timer - stays at 1f while still out fishing since the button is the recall, not a cooldown wait. */
+
     @Override
     public float getCooldownFraction() {
         FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
@@ -217,7 +195,6 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         if (!Global.CODEX_TOOLTIP_MODE) {
             SectorEntityToken pond = getPond();
 
-            //mirrors the press's own decision order
             if (CampedSpot.isPondBlocked(pond)) {
                 tooltip.addPara("A fleet is sitting on this rupture. The ROD cannot be deployed here.",
                         Misc.getNegativeHighlightColor(), pad);
@@ -244,7 +221,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         addIncompatibleToTooltip(tooltip, false);
     }
 
-    /** The working icon whenever the press will send drones, whichever of the two ways it would. */
+
     @Override
     public String getSpriteName() {
         if (closestPondActive() || isRoamingAvailable()) {

@@ -11,22 +11,13 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The two doors the conservatory opens on the colony management screen: the fish outfitter -
- * the same shop the ability opens, rebuilt inside the dialog the UI hands us - and the aquarium
- * office, where the tank is stocked, emptied, or shut off.
- * <p>
- * A vanilla {@link com.fs.starfarer.api.campaign.listeners.IndustryOptionProvider}, registered
- * transient on every load. The options ride on the industry's own click-menu, so there is
- * nothing to crawl and nothing to break - this is the one piece of colony UI the API hands out
- * for free.
- */
+
 public class ConservatoryOptionProvider extends BaseIndustryOptionProvider {
 
     public static final Object SHOP = new Object();
     public static final Object AQUARIUM = new Object();
 
-    /** Registered every load; transient, so a save never carries the listener. */
+
     public static void register() {
         Global.getSector().getListenerManager().addListener(
                 new ConservatoryOptionProvider(), true);

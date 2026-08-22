@@ -7,14 +7,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A rounded rectangle outline, drawn in whatever coordinate space is current (screen or world).
- * Matches vanilla's panel styling; a second call a few units out gives it depth. All touched GL
- * state is pushed and popped.
- */
+
 public class RoundedBorder {
 
-    /** Straight cuts per corner. Six is already smooth at the radii a UI uses, and cheap. */
+
     public static final int CORNER_SEGMENTS = 6;
 
     public static void draw(float x, float y, float width, float height, float radius,
@@ -43,7 +39,7 @@ public class RoundedBorder {
         GL11.glPopAttrib();
     }
 
-    /** Radius is clamped to what fits, so a narrow bar gets the tightest corners its width allows. */
+
     protected static List<Vector2f> getOutline(float x, float y, float width, float height, float radius) {
         float r = Math.max(0f, Math.min(radius, Math.min(width, height) * 0.5f));
 
@@ -57,15 +53,15 @@ public class RoundedBorder {
             return outline;
         }
 
-        addCorner(outline, x + r, y + r, r, 180f);                    //bottom left
-        addCorner(outline, x + width - r, y + r, r, 270f);            //bottom right
-        addCorner(outline, x + width - r, y + height - r, r, 0f);     //top right
-        addCorner(outline, x + r, y + height - r, r, 90f);            //top left
+        addCorner(outline, x + r, y + r, r, 180f);
+        addCorner(outline, x + width - r, y + r, r, 270f);
+        addCorner(outline, x + width - r, y + height - r, r, 0f);
+        addCorner(outline, x + r, y + height - r, r, 90f);
 
         return outline;
     }
 
-    /** A quarter turn about a corner's centre, starting where the last edge left off. */
+
     protected static void addCorner(List<Vector2f> outline, float centerX, float centerY, float radius,
                                     float startAngle) {
         for (int i = 0; i <= CORNER_SEGMENTS; i++) {

@@ -26,12 +26,10 @@ void main() {
     vec2 p = uv - vec2(0.5, 0.5);
     float r = length(p);
 
-    // Ring mask: band between (radius - ringWidth) and radius
     float outer = 1.0 - sstep(radius - feather, radius + feather, r);
     float inner = sstep(radius - ringWidth - feather, radius - ringWidth + feather, r);
     float ring = outer * inner;
 
-    // Polar coords for noise so breakup follows the circumference
     float ang = atan(p.y, p.x);
     float ang01 = ang / 6.2831853 + 0.5;
 
@@ -40,9 +38,6 @@ void main() {
 
     float n = texture2D(noiseTex, nUV).r;
 
-    // The soft cut divides by noiseSoft, so a zero one has to take the hard branch rather than a
-    // NaN. This used to blend between the two on a factor that saturates at noiseSoft = 0.04, which
-    // meant the hard cut was unreachable for every value it was there to cover.
     float cut = (noiseSoft <= 0.0)
         ? step(noiseCutoff, n)
         : sstep(noiseCutoff - noiseSoft, noiseCutoff + noiseSoft, n);
