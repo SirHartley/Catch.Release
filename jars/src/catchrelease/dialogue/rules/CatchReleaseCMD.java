@@ -56,10 +56,9 @@ import java.util.Map;
  * comes through here. One class with a switch rather than a class per verb, so the package the game
  * scans stays one entry long.
  * <p>
- * <b>Registered by {@code data/config/settings.json}.</b> {@code ruleCommandPackages} is read once
- * from merged settings and <b>replaces</b> rather than merges, so ours re-lists vanilla's five
- * packages alongside {@code catchrelease.dialogue.rules}. Dropping any of those five would break
- * every rule in the game.
+ * <b>Registered by {@code data/config/settings.json}.</b> {@code ruleCommandPackages} arrays merge
+ * across mods like every other settings array, so ours lists only
+ * {@code catchrelease.dialogue.rules} - vanilla's own packages stay registered by vanilla.
  * <p>
  * Two shapes, both {@code CatchReleaseCMD <verb> [arg]}:
  * <ul>
