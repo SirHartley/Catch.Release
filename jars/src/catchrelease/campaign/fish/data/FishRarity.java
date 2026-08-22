@@ -3,8 +3,10 @@ package catchrelease.campaign.fish.data;
 import java.awt.Color;
 
 /**
- * Rarity ladder: mote colour, plus how fast (SPEED) and erratically (WANDER) the mote moves before
- * it's caught - a rare fish is harder to get to as well as harder to land.
+ * Rarity ladder: the canonical colour for every rarity-bearing player-facing surface, plus how
+ * fast (SPEED) and erratically (WANDER) the mote moves before it's caught. Callers use
+ * {@link #color} for every rung, including Common; substituting generic text white or grey makes
+ * one rarity mean several different things.
  * <p>
  * The top of the ladder is red rather than the orange it used to be. Orange is spoken for twice
  * over: it is what the mod marks quest-relevant things in, and vanilla's own {@code textEnemyColor}
@@ -13,7 +15,7 @@ import java.awt.Color;
  */
 public enum FishRarity {
 
-    COMMON(0, Color.GRAY, 1f, 1f),
+    COMMON(0, new Color(232, 211, 168), 1f, 1f),
     UNCOMMON(1, Color.GREEN, 1.15f, 1.3f),
     RARE(2, Color.BLUE, 1.35f, 1.7f),
     EPIC(3, new Color(163, 53, 238), 1.6f, 2.2f),
