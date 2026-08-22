@@ -18,11 +18,12 @@ public class Flash implements LunaCampaignRenderingPlugin {
     public static float DEFAULT_EXPLOSION_SIZE = 200f;
 
     protected float animProgress = 0f;
-    transient private SpriteAPI glow;
 
+    transient private SpriteAPI glow;
     public Color color;
     public Vector2f loc;
     public float size;
+
     private boolean expired = false;
 
     public Flash(Color color, Vector2f loc, float size) {

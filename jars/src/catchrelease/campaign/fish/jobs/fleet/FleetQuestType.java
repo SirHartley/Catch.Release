@@ -62,13 +62,9 @@ public enum FleetQuestType {
             "Arguing");
 
     public final String title;
-
     public final String fleetType;
-
     public final String pitch;
-
     public final String note;
-
     public final String actionText;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText) {

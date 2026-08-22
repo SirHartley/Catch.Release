@@ -20,6 +20,7 @@ import java.awt.Color;
 public class CoherenceTerrain extends StarCoronaTerrainPlugin {
 
     public static final String TERRAIN_ID = "catchrelease_coherence_field";
+
     public static final float FIELD_RADIUS = 50000f;
     public static final float IDLE_EXPIRE = 5f;
     public static final float READING_REFRESH = 1f;

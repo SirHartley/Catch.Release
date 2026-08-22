@@ -24,11 +24,13 @@ import java.util.Map;
 public class MafiaJob extends FishJob {
 
     public static final String BET_FLAG = "$catchrelease_ringBet";
+
     public static final int VALUE = 3000;
     public static final float DAYS = 35f;
     public static final float BASE_ODDS = 0.38f;
     public static final float QUALITY_SWING = 0.30f;
     public static final float WIN_MULT = 2f;
+
     protected static final String LEFT_FIRST_NAME = "Salvatore";
     protected static final String RIGHT_FIRST_NAME = "Enzo";
 

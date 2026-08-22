@@ -142,6 +142,7 @@ public enum Tackle {
     public final String icon;
 
     // everything below is neutral unless a tackle says otherwise
+
     public float barSizeMult = 1f;
     public float barLiftMult = 1f;
     public float barGravityMult = 1f;
@@ -152,22 +153,14 @@ public enum Tackle {
     public float qualityBias = 0f;
 
     public float coherenceBonus = 0f;
-
     public boolean shipTackle = false;
     public boolean sonar = false;
-
     public boolean breachCoupling = false;
-
     public boolean deepStrike = false;
-
     public boolean retrievesCharge = false;
-
     public boolean explosive = false;
-
     public boolean stocked = true;
-
     public float lockTime = 0f;
-
     public boolean fanBeam = false;
 
     Tackle(String name, Fit fit, String description) {

@@ -15,6 +15,7 @@ public class ArchedTrajectoryFollowingMote extends BaseCircleTrajectoryFollowing
     public static final float GLOW_SIZE = 15f;
 
     protected FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
+
     protected Color color;
     transient SpriteAPI moteSprite;
 

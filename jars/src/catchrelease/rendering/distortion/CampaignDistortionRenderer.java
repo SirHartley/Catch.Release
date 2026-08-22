@@ -32,11 +32,13 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
     protected static final String FRAG = "data/shaders/distortion/distortion.frag";
     protected static final String VERT_AUX = "data/shaders/distortion/2dtangent.vert";
     protected static final String FRAG_AUX = "data/shaders/distortion/2dtangent.frag";
+
     protected static final String SETTINGS = "GRAPHICS_OPTIONS.ini";
     public static final int MAX_DISTORTIONS = 100;
     protected static boolean settingsRead = false;
     protected static boolean enableDistortion = false;
     protected static int maxDistortions = MAX_DISTORTIONS;
+
     protected static CampaignDistortionRenderer instance;
 
     protected final List<DistortionAPI> distortions = new ArrayList<>();

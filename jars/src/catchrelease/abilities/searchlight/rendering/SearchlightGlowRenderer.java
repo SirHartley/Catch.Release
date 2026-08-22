@@ -18,6 +18,7 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
     public static final float SUPERLUMINAL_TIME = 0.4f;
 
     public transient SpriteAPI sprite;
+
     private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;

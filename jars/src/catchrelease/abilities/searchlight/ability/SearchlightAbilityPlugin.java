@@ -31,6 +31,7 @@ import java.util.List;
 public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     public static final String ABILITY_ID = "catchrelease_searchlights";
+
     public static float DETECTABILITY_PERCENT = 100f;
     public static float SPOOL_UP_TIME = 1.5f;
     public static float SEARCHLIGHT_ACTIVATION_PAUSE = 1f;
@@ -41,6 +42,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private boolean spoolDone = false;
     private List<Searchlight> activeSearchlights = new ArrayList<>();
     private List<CircularArc> searchlightArcs = new ArrayList<>();
+
     private transient SearchlightImpressionRenderer impressionRenderer;
     private transient LocationAPI activationLocation;
 

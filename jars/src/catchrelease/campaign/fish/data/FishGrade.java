@@ -13,7 +13,6 @@ public enum FishGrade {
     EXCEPTIONAL("Exceptional", 4, 1f, 2.2f);
 
     public final int rank;
-
     public final String name;
     public final float ceiling;
     public final float valueMult;

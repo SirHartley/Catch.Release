@@ -25,6 +25,7 @@ public class StenciledFishingPondEntityPlugin extends BaseCustomEntityPlugin {
     public static final String ENTITY_ID = "catchrelease_StaticPond";
 
     public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
+
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI stencil;
     transient protected SpriteAPI background;

@@ -19,6 +19,7 @@ public class CrabBackdrops {
     public static final String TURN_KEY = "$catchrelease_crabBackdropTurn";
     public static final String SOLD_AT_KEY = "$catchrelease_crabBackdropSoldAt";
     public static final float RESTOCK_DAYS = 60f;
+
     public static final int[] CREDITS_BY_RARITY = {12000, 25000, 45000, 75000, 120000};
     public static final int[] CRABS_BY_RARITY = {2, 3, 5, 7, 10};
 

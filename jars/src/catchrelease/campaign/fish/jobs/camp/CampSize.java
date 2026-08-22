@@ -11,10 +11,8 @@ public enum CampSize {
     LARGE("a raiding pack", 100f, 150f, 90000, 34000);
 
     public final String describe;
-
     public final float minFP;
     public final float maxFP;
-
     public final int bribe;
     public final int value;
 

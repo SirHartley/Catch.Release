@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 public final class PaneWidgets {
 
     public static final String CHIP_ICON_FONT = "graphics/fonts/victor10.fnt";
+
     public static final String CLICK_SOUND = "ui_button_pressed";
 
     protected static transient LazyFont tinyFont;

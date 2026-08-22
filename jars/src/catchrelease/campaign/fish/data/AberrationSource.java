@@ -41,15 +41,10 @@ public enum AberrationSource {
     }
 
     public final String label;
-
     public final Find find;
-
     public final float reachLY;
-
     public final float weight;
-
     public final boolean survey;
-
     public final String[] tags;
 
     AberrationSource(String label, Find find, float reachLY, float weight, boolean survey,

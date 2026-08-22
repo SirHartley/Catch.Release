@@ -23,8 +23,8 @@ public class AquariumTankScript implements EveryFrameScript {
 
     public static final float PANEL_HEIGHT = TANK_HEIGHT + AquariumTankPanel.WALL_PAD * 2f;
     public static final float PANEL_WIDTH = 400f;
-    protected static float mountedWidth = 0f;
 
+    protected static float mountedWidth = 0f;
     protected Object dialog;
     protected CustomPanelAPI panel;
     protected boolean failed = false;

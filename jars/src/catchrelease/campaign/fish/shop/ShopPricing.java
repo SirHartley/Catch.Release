@@ -18,6 +18,7 @@ import java.util.Set;
 public class ShopPricing {
 
     public static final String SEED_KEY = "$catchrelease_shop_seed";
+
     public static final int CREDITS_BASE = 2500;
     public static final float CREDITS_PER_LEVEL = 1.7f;
     public static final int TACKLE_CREDITS_PER_TIER = 4000;

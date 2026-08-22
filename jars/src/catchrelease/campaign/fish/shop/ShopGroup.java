@@ -16,11 +16,8 @@ public enum ShopGroup {
     SEARCHLIGHT_RIG("Lens arrays", "Lens arrays", "shop_lights_modifiers", "catchrelease_searchlights");
 
     public final String title;
-
     public final String tabTitle;
-
     public final String iconId;
-
     public final String needsAbility;
 
     ShopGroup(String title, String tabTitle, String iconId) {

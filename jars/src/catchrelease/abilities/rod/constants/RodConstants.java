@@ -5,15 +5,16 @@ import java.awt.Color;
 public class RodConstants {
 
     public static final Color DRONE_COLOR = Color.ORANGE;
+
     public static final String SOUND_DRONE_LAUNCH = "catchrelease_drone_launch";
     public static final String SOUND_TARGET_LOCK = "catchrelease_rod_target_lock";
     public static final String SOUND_MOTE_CAUGHT = "catchrelease_rod_catch";
     public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
 
     public static float DRONE_LAUNCH_OFFSET = 0.5f;
+
     public static final float DRONE_ORBIT_RADIUS = 60f;
     public static final float DRONE_ROAM_RADIUS = 140f;
-
     public static final float RING_RADIUS_FALLBACK = 150f;
     public static final float CHASE_MARGIN_FALLBACK = 40f;
 
@@ -44,8 +45,10 @@ public class RodConstants {
     public static final float RING_PULSE_SPEED = 4f;
 
     public static final float DRONE_ARRIVAL_DISTANCE = 10f;
+
     public static final float DRONE_SPRITE_SIZE = 8f;
     public static final float DRONE_TRAIL_SIZE = 5f;
+
     public static final int DRONE_COUNT_FALLBACK = 1;
     public static final float DRONE_SEARCH_INTERVAL = 0.25f;
 }

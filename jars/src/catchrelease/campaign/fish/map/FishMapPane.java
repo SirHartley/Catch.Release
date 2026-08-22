@@ -53,8 +53,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public static final float FOOTER_HEIGHT = COHERENCE_HEIGHT + 8f;
     public static final String SEARCH_GHOST = "Search...";
     public static final int MAX_SELECTED = 3;
-    protected static boolean coherenceShown = false;
 
+    protected static boolean coherenceShown = false;
     protected final Host host;
     protected final FishPresence.Filter filter = new FishPresence.Filter();
     protected CustomPanelAPI panel;

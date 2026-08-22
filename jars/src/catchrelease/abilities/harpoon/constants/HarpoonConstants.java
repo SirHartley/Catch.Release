@@ -5,6 +5,7 @@ import java.awt.Color;
 public class HarpoonConstants {
 
     public static final String ENTITY_ID = "catchrelease_Harpoon";
+
     public static final String SOUND_FIRE = "catchrelease_harpoon_fire";
     public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";
     public static final String SOUND_CHARGE_RELOAD = "catchrelease_harpoon_charge_reload";
@@ -15,6 +16,7 @@ public class HarpoonConstants {
     public static final String RELOAD_SOUND_ALWAYS = "Always play";
 
     public static final String TAG = "catchrelease_harpoon_line";
+
     public static final float CHARGES_FALLBACK = 2f;
     public static final float RECHARGE_FALLBACK = 12f;
     public static final Color LINE_COLOR = new Color(120, 220, 255);
@@ -23,6 +25,7 @@ public class HarpoonConstants {
     public static final Color EXPLOSIVE_HALO_COLOR = new Color(255, 20, 10);
     public static final Color EXPLOSIVE_HEAD_COLOR = new Color(255, 55, 20);
     public static final Color EXPLOSIVE_CORE_COLOR = new Color(255, 220, 155);
+
     public static final float EXPLOSIVE_HALO_SIZE = 34f;
     public static final float EXPLOSIVE_HEAD_SIZE = 19f;
     public static final float EXPLOSIVE_CORE_SIZE = 8f;

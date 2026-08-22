@@ -43,6 +43,7 @@ public class FleetQuest extends FishJob {
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
+
     public static final float DELIVERY_DAYS = 60f;
     public static final float HOLD_DAYS = 100000f;
 

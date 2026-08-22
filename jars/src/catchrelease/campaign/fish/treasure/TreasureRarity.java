@@ -10,7 +10,6 @@ public enum TreasureRarity {
     EPIC("Relic", 3, 1.5f, new Color(163, 90, 220));
 
     public final int rank;
-
     public final String name;
     public final float weight;
     public final Color color;

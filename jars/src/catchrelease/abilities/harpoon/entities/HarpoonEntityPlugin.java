@@ -64,15 +64,17 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected Vector2f slack;
     protected Vector2f slackVelocity = new Vector2f();
-
     protected float paidOut = 0f;
+
     protected SectorEntityToken hooked;
     protected boolean haulingTarget = false;
     protected boolean minigameOpened = false;
 
     protected Vector2f blastThrow;
+
     protected FishCatch caught;
     protected CampaignFleetAPI owner;
+
     protected float trailId;
 
     transient protected SpriteAPI headSprite;

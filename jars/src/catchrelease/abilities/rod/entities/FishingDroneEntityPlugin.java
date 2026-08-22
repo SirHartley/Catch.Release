@@ -34,24 +34,28 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     public static final String ENTITY_ID = "catchrelease_FishingDrone";
 
     protected Mode mode = Mode.LAUNCHING;
+
     protected Vector2f orbitCenter;
     protected Color color;
     protected boolean roaming;
     protected float ringPhase;
     protected float slotOffset;
-
     protected float currentAngle;
     protected float currentRadius;
 
     protected float facingOffset;
     protected Vector2f velocity = new Vector2f();
     protected float wanderPhase;
+
     protected float returnTime = 0f;
+
     protected float trailId;
+
     protected SectorEntityToken chaseTarget;
     protected boolean returningToPassiveOrbit = false;
     protected SectorEntityToken carried;
     protected boolean arrivedHome = false;
+
     transient protected SpriteAPI sprite;
 
     public static class Params {

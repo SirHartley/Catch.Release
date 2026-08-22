@@ -22,7 +22,9 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
     protected static final String VERT = "data/catchrelease/shaders/coherence_overlay_vertex.shader";
     protected static final String FRAG = "data/catchrelease/shaders/coherence_overlay_fragment.shader";
     protected static final Color COLOR = new Color(170, 20, 200);
+
     protected static final float WARP_MAX_PX = 10f;
+
     protected static CoherenceOverlayRenderer instance;
 
     protected float level = 0f;

@@ -11,7 +11,6 @@ public enum FishRarity {
     LEGENDARY(4, new Color(235, 55, 50), 1.9f, 2.8f);
 
     public final int rank;
-
     public final Color color;
 
     public final float speedMult;

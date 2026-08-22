@@ -42,6 +42,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     public static final float NO_DATA_BORDER = 2f;
 
     protected List<Blob> blobs = new ArrayList<>();
+
     protected boolean noDataShown;
     protected Object mapWidget;
     protected transient float[] scratch = new float[512];

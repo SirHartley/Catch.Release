@@ -11,12 +11,9 @@ public enum CampType {
     PATHERS("pathers", Factions.LUDDIC_PATH, FleetTypes.PATROL_SMALL, "Wayfarers", 2.5f);
 
     public final String token;
-
     public final String factionId;
     public final String fleetType;
-
     public final String fleetName;
-
     public final float bribeMult;
 
     CampType(String token, String factionId, String fleetType, String fleetName, float bribeMult) {

@@ -13,6 +13,7 @@ import java.util.List;
 public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
 
     public static final Color BASE_RIPPLE_COLOR = new Color(100, 120, 160);
+
     public static final float INNER_SIZE_MULT = 0.05f;
 
     public static final float EXTRA_RIPPLE_BASE_MIN_INTERVAL = 1f;
@@ -22,9 +23,11 @@ public class UnstableFabricRippleTerrainRenderer implements EveryFrameScript {
     public static final float BASE_RING_WIDTH = 2f;
 
     private IntervalUtil extraRippleInterval = new IntervalUtil(6f, 10f);
+
     private SectorEntityToken attachedEntity;
     private List<RippleData> ripples = new ArrayList<>();
     private float size;
+
     private boolean expired = false;
 
     public UnstableFabricRippleTerrainRenderer(RippleData mainRipple, SectorEntityToken attachedEntity){

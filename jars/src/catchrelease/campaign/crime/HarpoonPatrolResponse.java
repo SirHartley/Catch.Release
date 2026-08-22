@@ -34,6 +34,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     public static final String REPEAT_KEY = "$catchrelease_harpoonRepeat";
     public static final String COUNT_KEY = "$catchrelease_harpoonCount";
     public static final String RETRY_KEY = "$catchrelease_harpoonPatrolWait";
+
     public static final int FINE = 10000;
     public static final float SEARCH_RANGE = 2500f;
     public static final float CHASE_DAYS = 12f;
@@ -41,6 +42,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     public static final float DEALT_WITH_DAYS = HarpoonOffence.MEMORY_DAYS;
 
     protected final IntervalUtil interval = new IntervalUtil(0.1f, 0.3f);
+
     protected CampaignFleetAPI chasing = null;
 
     public static void register() {

@@ -64,11 +64,13 @@ public class Searchlight implements EveryFrameScript {
     private transient List<RippleRingRenderer> rings = new ArrayList<>();
 
     private final Vector2f currentRenderLoc = new Vector2f();
+
     private CircularArc arc;
     private float baseArcAngle;
     private int travelDirection = 1;
     private float oscillationTime = 0f;
     private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
+
     private boolean expired = false;
 
     private transient SectorEntityToken lockTarget;

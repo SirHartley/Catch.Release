@@ -32,8 +32,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     public transient SpriteAPI sprite;
     public transient SpriteAPI moteSprite;
-    private final List<Searchlight> lights;
 
+    private final List<Searchlight> lights;
     private final SearchlightAbilityPlugin owner;
     private final LocationAPI home;
     private final Map<SectorEntityToken, Float> marks = new HashMap<>();
