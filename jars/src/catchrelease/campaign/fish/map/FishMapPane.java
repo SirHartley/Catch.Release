@@ -122,7 +122,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     public boolean hasSelectionWithoutRangeData() {
         for (String id : selectedIds) {
             FishSpec spec = FishPresence.getSpec(id);
-            if (spec != null && !FishPresence.hasRangeData(spec)) return true;
+            if (spec == null || !FishPresence.hasRangeData(spec)) return true;
         }
 
         return false;
@@ -137,11 +137,10 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         resetRequested = false;
 
-        boolean wasRestricted = filter.speciesRestricted;
         filter.speciesRestricted = false;
         filter.allowedSpeciesIds.clear();
         if (selectedIds.contains(speciesId)) {
-            if (wasRestricted && panel != null) rebuildList();
+            if (panel != null) rebuildList();
             return;
         }
 
@@ -151,7 +150,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         }
 
         selectedIds.add(speciesId);
-        if (wasRestricted && panel != null) rebuildList();
+        if (panel != null) rebuildList();
     }
 
     public void showRequirements(List<FishRequirement> asks) {
@@ -349,12 +348,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         if (listRemovable != null) panel.removeComponent(listRemovable);
 
         List<FishSpec> shown = FishPresence.getShown(filter);
-        shownCount = shown.size();
 
         float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f;
         float listWidth = width - PAD * 2f;
-        boolean noDataForEntry = filter.speciesRestricted
-                && filter.allowedSpeciesIds.isEmpty();
+        boolean noDataForEntry = hasSelectionWithoutRangeData()
+                || filter.speciesRestricted && filter.allowedSpeciesIds.isEmpty();
+        shownCount = noDataForEntry ? 0 : shown.size();
 
         // same air on both sides - the list's slot is inset PAD left and right alike
         listElement = panel.createUIElement(listWidth, listHeight, !noDataForEntry);
@@ -382,12 +381,15 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             listElement.addCustom(emptyState, 0f);
         }
 
-        for (FishSpec spec : shown) {
-            CustomPanelAPI row = panel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
-                    new RowPlugin(spec));
+        if (!noDataForEntry) {
+            for (FishSpec spec : shown) {
+                CustomPanelAPI row = panel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
+                        new RowPlugin(spec));
 
-            listElement.addCustom(row, 3f);
-            listElement.addTooltipTo(createRowTooltip(spec), row, TooltipMakerAPI.TooltipLocation.LEFT);
+                listElement.addCustom(row, 3f);
+                listElement.addTooltipTo(createRowTooltip(spec), row,
+                        TooltipMakerAPI.TooltipLocation.LEFT);
+            }
         }
 
         listViewport = panel.addUIElement(listElement);

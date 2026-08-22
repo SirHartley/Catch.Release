@@ -51,13 +51,15 @@ public class FishPresence {
     }
 
     public static boolean hasRangeData(FishSpec spec) {
-        return spec != null && spec.id != null
-                && (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id));
+        if (spec == null || spec.id == null) return false;
+
+        // Dev mode opens the complete chart without writing unlocks into the save.
+        return Global.getSettings().isDevMode()
+                || FishLog.isCaught(spec.id)
+                || FishLog.isLocationDataUnlocked(spec.id);
     }
 
     public static boolean isKnown(FishSpec spec) {
-        if (Global.getSettings().isDevMode()) return true;
-
         return hasRangeData(spec);
     }
 
