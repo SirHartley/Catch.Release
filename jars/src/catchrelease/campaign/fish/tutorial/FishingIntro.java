@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
+import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
@@ -24,6 +25,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotsAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -1279,35 +1281,26 @@ public class FishingIntro {
             return 0f;
         }
 
-        /** What completing the current rung unlocks, stated with the bar jobs' payment density. */
-        protected void addReturnBenefits(TooltipMakerAPI info, Target target, Color text) {
-            float pad = 0f;
-
-            switch (target.stage) {
-                case RODDED -> info.addPara("Further instruction and the next lesson", text, pad);
-                case FISH_ONE -> {
-                    info.addPara("Fishing Outfitter access", text, pad);
-                    info.addPara("Breach Lights and Harpoon rigs", text, 0f);
-                }
-                case FISH_TWO -> {
-                    info.addPara("Remaining Outfitter shelves for the Breach Lights and Harpoon",
-                            text, pad);
-                    info.addPara("2 common range data entries", text, 0f);
-                }
-                case FISH_THREE -> {
-                    info.addPara("Range data purchasing", text, pad);
-                    info.addPara("2 common, 1 uncommon, and 1 rare range data entries", text, 0f);
-                }
-                default -> info.addPara("Further fishing instruction", text, pad);
-            }
-        }
-
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             Target target = getTarget();
             float opad = 10f;
             Color highlight = Misc.getHighlightColor();
             Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
+
+            //the teacher's face and colours, exactly where the bar jobs put their giver's - and
+            //always the held portrait, never the water-read one: the note keeps the face even
+            //when the boat does not
+            FactionAPI faction = getFactionForUIColors();
+            info.addImages(width, 128, opad, opad,
+                    FishermanIdentity.getPortrait(0f), faction.getCrest());
+
+            if (target != null) {
+                info.addPara("Fishing lessons given by the Fisherman, affiliated with "
+                                + faction.getDisplayNameWithArticle() + ".", opad,
+                        faction.getBaseUIColor(),
+                        faction.getDisplayNameWithArticleWithoutArticle());
+            }
 
             if (target == null) {
                 if (isCarryingFisherProperty()) {
@@ -1352,11 +1345,6 @@ public class FishingIntro {
                     }
                 }
                 unindent(info);
-
-                info.addPara("On return:", opad);
-                bullet(info);
-                addReturnBenefits(info, target, text);
-                unindent(info);
             }
 
             if (target != null && target.systemId != null && !target.landed) {
@@ -1366,6 +1354,8 @@ public class FishingIntro {
             } else {
                 FishIntelMapButton.add(info, width, getAsks());
             }
+
+            addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override
@@ -1385,10 +1375,16 @@ public class FishingIntro {
             super.buttonPressConfirmed(buttonId, ui);
         }
 
-        /** Vanilla's own tutorial-mission icon, which is exactly what this is. */
+        /** The teacher's face, the way every bar job wears its giver's - and always the held one. */
         @Override
         public String getIcon() {
-            return Global.getSettings().getSpriteName("campaignMissions", "tutorial");
+            return FishermanIdentity.getPortrait(0f);
+        }
+
+        /** The Fisherman's colours - the lessons are theirs, whichever boat happens to teach. */
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getFaction(FishermanConstants.FACTION);
         }
 
         @Override
