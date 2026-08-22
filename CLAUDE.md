@@ -38,6 +38,11 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   package gains or loses a file - any change that moves what a file does, what registers it,
   or how the pieces fit lands in the map in the same commit. A change is not done while the
   map still describes the old shape.
+- **The mod compiles before merge.** Every runtime-affecting branch must pass the full clean
+  Java 17 compile gate under [Building](#building) against its final remote state. Static checks,
+  token comparisons, IDE state, partial compilation, and a green result from an earlier commit do
+  not count. A missing compiler or dependency is a merge blocker, not permission to skip the gate.
+  Documentation-only changes are exempt.
 - **Never sync or modify a live/local mod copy or another checkout unless the user explicitly
   requests it.** Work is written only in the current task repository. External installs and
   checkouts - including `C:\Modding\mods\Catch.Release` - may be inspected read-only for
@@ -131,6 +136,11 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
 - **Work from, and finish against, remote state.** Refresh remote `master` before branching and
   check it again before merging, account for intervening remote changes, verify the merged remote
   commit, and leave every local checkout and live mod install untouched.
+- **Compile from a disposable copy of the exact remote branch.** Temporary compiler inputs and
+  output are allowed only in an isolated build directory; never compile from, write into, or sync
+  a PC checkout or live mod install. Remove the build directory afterward. This narrow build
+  scratch exception does not authorize any other local repository writes. If it cannot be used,
+  stop before merge.
 - **Draft and audit dialogue with the Starsector Editor GPT in the ChatGPT app.** Give the editor
   the complete current remote `docs/LORE.md`, not a summary, before asking it to revise a line.
   For corrective passes, also supply both the pre-regression and current dialogue so stronger
@@ -160,6 +170,17 @@ The UI rule still wins where it applies: if a change touches something the playe
 goes to Fable 5.
 
 ## Building
+
+### Required compile gate
+
+After the final runtime-affecting commit and before merge:
+
+1. Build from the exact remote task-branch snapshot into a clean, empty output directory.
+2. Compile every `.java` file under `jars/src` with Java 17 and the complete dependency set
+   below. The command must exit successfully with no compile errors.
+3. Record the command, branch commit, Java version, and result in the pull request and final reply.
+4. If the build cannot run or a dependency is missing, do not merge. Report the blocker.
+5. Documentation-only changes do not require a compile.
 
 Java 17 (`.idea/misc.xml` sets the language level; the source uses switch expressions).
 

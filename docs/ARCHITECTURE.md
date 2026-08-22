@@ -36,6 +36,9 @@ packages that module output as `jars/catchrelease.jar`. Compiler output must sta
 making the whole directory a source root recursively packages the artifact's own JAR and stale
 `production/` classes, allowing new data such as rules rows to run against old mission bytecode.
 
+Runtime-affecting branches are not merge-ready until the full clean Java 17 compile gate in
+`CLAUDE.md` passes against the exact remote branch. Documentation-only changes are exempt.
+
 ---
 
 ## Where a feature lives
