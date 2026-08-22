@@ -68,6 +68,30 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
   permission boundary, not something to route around - report it and leave the branch, so it is a
   known leftover rather than a silent one.
 
+## Comments and documentation
+
+- **Comment hidden constraints, not visible operations.** Keep the reason that code cannot express:
+  engine or API quirks, required ordering and lifecycle, save or serialization compatibility,
+  reflection and obfuscation, units and invariants, non-obvious math, or cross-file coupling.
+  Delete comments that merely translate the next statement into English.
+- **Let names carry ordinary intent.** Do not add Javadoc to self-explanatory classes, methods,
+  fields, parameters, or return values. Keep necessary comments short, usually one line, in a
+  direct working-programmer voice. Source comments are not essays, tutorials, release notes, or
+  a record of how the implementation was developed.
+- **Do not preserve dead code in comments.** Delete commented-out code. Leave a TODO only when it
+  names a concrete remaining action; include the constraint or blocker when that is not obvious.
+- **Documentation describes the current truth.** Record architecture, contracts, entry points,
+  and live gotchas. Do not turn documentation into a development diary, PR history, bug
+  postmortem, or implementation narrative. Replace stale prose in the same commit instead of
+  appending a correction that contradicts it.
+- **Give each fact one home.** Keep `docs/ARCHITECTURE.md` as the compact file and feature map,
+  and put wider stable context in the relevant focused document. Do not repeat the same
+  explanation across documentation and source comments unless a local warning is needed to keep
+  code safe.
+- **Remove or update stale words with the code.** A changed behavior does not leave behind an old
+  comment or document claim. Player-facing prose and rules still follow the lore and rules
+  workflows above.
+
 ## ChatGPT app workflow (ChatGPT only)
 
 This section applies only when ChatGPT is working on Catch.Release in the ChatGPT app. It is
@@ -104,9 +128,9 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
 
 ## Model assignments
 
-Opus 5, in the main session, writes the code. Planning and code are the same job here - the
-reasons live in the javadoc, and a class handed to somebody else comes back explaining what it
-does instead of why it is built that way.
+Opus 5, in the main session, writes the code. Planning and code are the same job here. Clear
+names and structure carry ordinary intent; comments are reserved for the hidden constraints
+listed above.
 
 Subagents are for legwork that does not produce shipped code:
 

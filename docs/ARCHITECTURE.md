@@ -7,8 +7,9 @@ Kept by hand, and updated by every change — not only when a package gains or l
 whenever what a file does, what registers it, or how the pieces fit moves. The update belongs in
 the same commit as the change. A map that is wrong is worse than no map, because it is believed.
 
-Source comments stay sparse: keep engine quirks, save compatibility, and non-obvious math or
-lifecycle constraints; names carry the rest.
+`CLAUDE.md` owns the comment and documentation policy. Source comments stay sparse: keep
+engine quirks, save compatibility, and non-obvious math or lifecycle constraints; names carry
+the rest. This map records the current shape, not change history.
 
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.
