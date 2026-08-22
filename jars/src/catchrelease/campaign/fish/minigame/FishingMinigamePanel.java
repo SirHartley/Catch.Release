@@ -204,6 +204,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             CatchCelebration.playHook(FishConstants.SOUND_CAUGHT);
             result = new CatchResultPanel(specimen, where, method);
 
+            //filed beside the species log, after resolveTreasure, so the entry knows its bycatch
+            catchrelease.campaign.fish.intel.CatchLogIntel.record(specimen, where, lootAwards);
+
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 
             //celebration reads its centre off the layout at render time, after the readout has settled

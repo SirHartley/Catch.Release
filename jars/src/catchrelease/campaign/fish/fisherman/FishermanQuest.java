@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.fisherman;
 
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -11,7 +10,6 @@ import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
-import catchrelease.ui.FishIcons;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -34,10 +32,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
-import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
@@ -736,7 +732,8 @@ public class FishermanQuest {
 
         /**
          * The facts under the title, the same on the list row and the open panel: the quarry,
-         * the water, what the mark is, and the pay. No day count - the quest does not expire.
+         * the water, and what the mark is. No day count - the quest does not expire - and no pay
+         * line: the note reads like an accepted bar job, and those keep the price out of it.
          */
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
@@ -755,8 +752,6 @@ public class FishermanQuest {
             info.addPara("In %s", 0f, tc, h, quest.systemName);
             info.addPara(quest.atPond ? "The mark is a rupture"
                     : "The mark is open space - lamp work", tc, 0f);
-            info.addPara("%s and one more chart on the shelf", 0f, tc, h,
-                    Misc.getDGSCredits(quest.credits));
 
             unindent(info);
         }
@@ -765,31 +760,19 @@ public class FishermanQuest {
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             FishSpec spec = getSpec();
             String name = spec == null ? "the named species" : spec.getDisplayName();
+            float opad = 10f;
 
-            //The specimen itself at the top, where vanilla's missions put the poster's crest.
-            //It has to use the shared knowledge-aware renderer: an accepted chart request tells
-            //the player a pattern's name and water, but not the finished art until it is landed.
-            if (spec == null) {
-                info.addImage(FishConstants.ITEM_ICON_FALLBACK, width, 80f, 10f);
-            } else {
-                info.addCustom(Global.getSettings().createCustom(width, 80f,
-                        new BaseCustomUIPanelPlugin() {
-                            private PositionAPI position;
+            //the poster's face and colours, exactly where the bar jobs put their giver's - and
+            //always the held portrait, never the water-read one: the note keeps the face even
+            //when the boat does not
+            FactionAPI faction = getFactionForUIColors();
+            info.addImages(width, 128, opad, opad,
+                    FishermanIdentity.getPortrait(0f), faction.getCrest());
 
-                            @Override
-                            public void positionChanged(PositionAPI newPosition) {
-                                position = newPosition;
-                            }
-
-                            @Override
-                            public void render(float alphaMult) {
-                                if (position == null) return;
-                                FishIcons.drawBacklit(spec,
-                                        position.getCenterX(), position.getCenterY(),
-                                        40f, 56f, alphaMult);
-                            }
-                        }), 10f);
-            }
+            info.addPara("Chart request given by the Fisherman, affiliated with "
+                            + faction.getDisplayNameWithArticle() + ".", opad,
+                    faction.getBaseUIColor(),
+                    faction.getDisplayNameWithArticleWithoutArticle());
 
             if (quest.landed) {
                 LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
@@ -810,15 +793,13 @@ public class FishermanQuest {
                         + " asking about.", Misc.getGrayColor(), 10f);
             }
 
-            info.addPara("Pays %s and one more chart on the shelf, permanently.", 10f,
-                    Misc.getHighlightColor(), Misc.getDGSCredits(quest.credits));
-
-            addBulletPoints(info, ListInfoMode.IN_DESC);
             if (quest.landed) {
                 FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
             } else {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             }
+
+            addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override
@@ -831,9 +812,10 @@ public class FishermanQuest {
             super.buttonPressConfirmed(buttonId, ui);
         }
 
+        /** The poster's face, the way every bar job wears its giver's - and always the held one. */
         @Override
         public String getIcon() {
-            return FishConstants.CODEX_CATEGORY_ICON;
+            return FishermanIdentity.getPortrait(0f);
         }
 
         @Override
