@@ -11,6 +11,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import java.util.Random;
 
 public enum FleetQuestType {
+
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -61,13 +62,9 @@ public enum FleetQuestType {
             "Arguing");
 
     public final String title;
-
     public final String fleetType;
-
     public final String pitch;
-
     public final String note;
-
     public final String actionText;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText) {

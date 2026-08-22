@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BreachConservatory extends BaseIndustry {
+
     public static final String ID = "catchrelease_conservatory";
 
     protected List<String> aquariumFish = new ArrayList<>();

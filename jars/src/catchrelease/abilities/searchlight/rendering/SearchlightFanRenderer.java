@@ -15,10 +15,13 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
+
     public static final int STEPS_ACROSS = 16;
     public static final int STEPS_ALONG = 24;
+
     public static final float SUPERLUMINAL_TIME = 0.4f;
     private static final Color EDGE_TINT = new Color(230, 35, 255);
+
     private static final float BAND_CENTER = 0.62f;
     private static final float BAND_WIDTH = 0.38f;
 
@@ -26,10 +29,12 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     private final Vector2f aim;
     private final float size;
     private final Color color;
+
     private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;
     private float fadeElapsed = 0f;
+
     private float timePassed = 0f;
     private float extraAlphaMult = 1f;
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuriedMoteSpawner implements EveryFrameScript {
+
     protected IntervalUtil interval = new IntervalUtil(
             FishConstants.BURIED_CHECK_INTERVAL * 0.75f, FishConstants.BURIED_CHECK_INTERVAL * 1.25f);
 

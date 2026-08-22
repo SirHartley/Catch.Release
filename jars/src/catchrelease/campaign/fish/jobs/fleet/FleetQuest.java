@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.util.Map;
 
 public class FleetQuest extends FishJob {
+
     public static final String QUEST_FLAG = "$catchrelease_fleetQuest";
     public static final String PITCH_KEY = "$catchrelease_fleetQuestPitch";
     public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
@@ -42,8 +43,10 @@ public class FleetQuest extends FishJob {
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
+
     public static final float DELIVERY_DAYS = 60f;
     public static final float HOLD_DAYS = 100000f;
+
     public static final String OFFER_SPRITE_CATEGORY = "systemMap";
     public static final String OFFER_SPRITE = "mission_indicator";
     public static final Color OFFER_COLOR = new Color(95, 200, 215);

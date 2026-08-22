@@ -4,6 +4,7 @@ import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 public class ParallaxUtil {
+
     public static Vector2f computeDriftUvOffsetPx(float time,
                                                   float amplitudeWorld,
                                                   float periodSeconds,

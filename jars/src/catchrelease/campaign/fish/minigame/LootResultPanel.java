@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LootResultPanel {
+
     protected static final int COIN_SEGMENTS = 16;
 
     protected final List<TreasureAward> awards;
@@ -28,13 +29,16 @@ public class LootResultPanel {
     protected boolean chestSoundPlayed = false;
     protected final List<Coin> coins = new ArrayList<>();
     transient protected LazyFont font;
+
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
     transient protected boolean fontsChecked = false;
 
     protected static class Row {
+
         final String name;
         final String spriteName;
+
         final int count;
         final Color color;
         transient LazyFont.DrawableString nameText;
@@ -49,14 +53,17 @@ public class LootResultPanel {
     }
 
     protected static class Coin {
+
         float fx;
         float startY; // how far into the fall it began, in pixels, so they never start in a row
         float speed;
         float size;
         float flipRate; // radians per second of the main flip
         float phase;
+
         float wobbleRate; // radians per second of the second, slower flip across the other axis
         float wobblePhase;
+
         float spinRate; // radians per second the whole ellipse turns in the plane, signed
         float spinPhase;
     }

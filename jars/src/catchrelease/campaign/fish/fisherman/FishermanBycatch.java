@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import java.util.Map;
 
 public final class FishermanBycatch {
+
     public static final String FOUND_KEY = "$catchrelease_bycatch_found";
     public static final String EXPLAINED_KEY = "$catchrelease_bycatch_explained";
 

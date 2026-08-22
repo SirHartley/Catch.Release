@@ -1,6 +1,7 @@
 package catchrelease.memory.upgrades;
 
 public class StatIds {
+
     public static final String
             SEARCHLIGHT_AREA = "searchlight_area",
             SEARCHLIGHT_SPEED = "searchlight_speed",
@@ -26,6 +27,7 @@ public class StatIds {
             FISHING_BAR_SIZE = "fishing_bar_size",
             MINIGAME_PROGRESS_RATE = "minigame_progress_rate",
             MINIGAME_ESCAPE_RESIST = "minigame_escape_resist";
+
     public static final String
             LAMPS_ABILITY = "catchrelease_searchlights",
             ROD_ABILITY = "catchrelease_rod",
@@ -35,6 +37,7 @@ public class StatIds {
             SEARCHLIGHT_TRACK_TIME, SEARCHLIGHT_DETECT_RADIUS,
             SEARCHLIGHT_SLOW,
     };
+
     protected static final String[] ROD = {
             FISHING_DRONE_COUNT, DRONE_SPEED, DRONE_ACCELERATION, DRONE_CATCH_AREA,
             DRONE_CHASE_TIME, DRONE_CHASE_MARGIN, DRONE_RARE_PRIORITY,

@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class FishRewardRoller {
+
     public static final int VALUE_PER_FISH = 1200;
     public static final float CREDIT_PAYOUT_MULT = 5f;
     public static final float SPREAD = 0.35f;

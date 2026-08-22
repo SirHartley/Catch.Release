@@ -1,6 +1,7 @@
 package catchrelease.skillshot;
 
 public enum GuideLineStyle {
+
     SOLID,
     DASHED,
     DOTTED;

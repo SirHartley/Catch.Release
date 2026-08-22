@@ -6,6 +6,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import org.lwjgl.util.vector.Vector2f;
 
 public enum SectorRegion {
+
     CORE_NE,
     CORE_NW,
     CORE_SE,

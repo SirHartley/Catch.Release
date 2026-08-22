@@ -11,11 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RippleData {
+
     public boolean infinite = false;
     public Vector2f loc;
     public IntervalUtil interval;
     public int amount;
     public LocationAPI home;
+
     public Color color;
     public float maxSize, ringWidth, growTime, startRadiusOffsetMult;
     public List<RippleRingRenderer> renderers = new ArrayList<>();

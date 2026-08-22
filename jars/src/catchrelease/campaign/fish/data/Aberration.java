@@ -23,17 +23,20 @@ import java.util.List;
 import java.util.Map;
 
 public class Aberration {
+
     public static final Reading NOTHING = new Reading(0f, null);
     protected static final Map<String, Reading> readings = new HashMap<>();
     protected static final Map<String, Reading> known = new HashMap<>();
     protected static Boolean entered = null;
     protected static List<Mark> index = null;
     protected static List<ColonyMark> colonyIndex = null;
+
     protected static long stampDate = Long.MIN_VALUE;
     protected static boolean stampGates = false;
     protected static int stampMarkets = Integer.MIN_VALUE;
 
     public static class Reading {
+
         public final float level;
         public final AberrationSource source;
 
@@ -44,6 +47,7 @@ public class Aberration {
     }
 
     protected static class ColonyMark {
+
         protected final Vector2f inHyper;
         protected final String systemId;
         protected final float reachSq;
@@ -70,6 +74,7 @@ public class Aberration {
     }
 
     protected static class Mark {
+
         protected final AberrationSource source;
         protected final Vector2f inHyper;
         protected final String systemId;
@@ -115,6 +120,7 @@ public class Aberration {
     }
 
     public static class Watcher implements EveryFrameScript {
+
         protected transient LocationAPI lastLocation;
         protected transient boolean placed = false;
         protected transient boolean mapWasOpen = false;

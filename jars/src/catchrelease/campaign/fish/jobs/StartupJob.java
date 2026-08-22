@@ -7,6 +7,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class StartupJob extends FishJob {
+
     public static final int VALUE_PER_FISH = 800;
     public static final int ROUNDS = 3;
     public static final float GROWTH = 2f;

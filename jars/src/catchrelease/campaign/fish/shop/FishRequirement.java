@@ -21,17 +21,21 @@ import java.util.Locale;
 import java.util.Map;
 
 public class FishRequirement {
+
     public static final float LOW_COHERENCE = 0.55f;
 
     public int count = 1;
     public boolean sameSpecies = false;
     public String tag = null;
     public String speciesId = null;
+
     public FishRarity minRarity = null;
     public FishGrade minGrade = null;
     public boolean lowCoherence = false;
+
     public float minLength = 0f;
     public float minWeight = 0f;
+
     public SectorRegion origin = null;
     public FishLogEntry.Method method = null;
     public CatchImplement implement = null;
@@ -40,6 +44,7 @@ public class FishRequirement {
     public List<FishRequirement> anyOf = new ArrayList<>();
 
     public static class RarityHighlight {
+
         public final String text;
         public final FishRarity rarity;
 

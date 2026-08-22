@@ -20,17 +20,21 @@ import java.util.List;
 import java.util.Map;
 
 public final class FishHandoffPicker {
+
     public interface Listener {
+
         void picked(Selection selection);
 
         void cancelled();
     }
 
     public interface Eligibility {
+
         boolean accepts(FishCatch fish);
     }
 
     public static final class Selection {
+
         protected final List<SpecialItemData> items;
         protected final List<FishCatch> contents;
         protected final FishCatch bestForFirstAsk;
@@ -120,6 +124,7 @@ public final class FishHandoffPicker {
     }
 
     protected static final class Candidate {
+
         protected final SpecialItemData item;
         protected final FishCatch fish;
 

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishPileItemPlugin extends BaseSpecialItemPlugin {
+
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
 

@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 public class FishPresence {
+
     public static class Filter {
+
         public String search = "";
         public final Set<FishType> types = new LinkedHashSet<>();
         public boolean speciesRestricted = false;

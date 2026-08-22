@@ -1,17 +1,21 @@
 package catchrelease.memory.upgrades;
 
 public class UpgradeStat {
+
     public enum BaseType {
+
         INT,
         DOUBLE
     }
 
     public enum UpgradeType {
+
         FLAT,
         MULT
     }
 
     public enum Category {
+
         CAMPAIGN,
         MINIGAME
     }
@@ -19,6 +23,7 @@ public class UpgradeStat {
     public String id;
     public double baseValue;
     public BaseType baseType;
+
     public double increasePerLevel;
     public UpgradeType upgradeType;
     public int maxLevel;

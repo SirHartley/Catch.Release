@@ -12,9 +12,11 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 
 public class ShopUi {
+
     public static final String FONT_TITLE = FishConstants.MINIGAME_RESULT_TITLE_FONT;
     public static final String FONT_BODY = FishConstants.MINIGAME_RESULT_FONT;
     public static final String FONT_SMALL = "graphics/fonts/orbitron12condensed.fnt";
+
     protected static LazyFont title;
     protected static LazyFont body;
     protected static LazyFont small;

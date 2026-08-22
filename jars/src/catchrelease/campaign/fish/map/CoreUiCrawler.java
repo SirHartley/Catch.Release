@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.map;
 import catchrelease.reflection.ReflectionUtils;
 
 public final class CoreUiCrawler {
+
     public static final String APP_DRIVER = "com.fs.state.AppDriver";
     public static final String CAMPAIGN_STATE = "com.fs.starfarer.campaign.CampaignState";
 

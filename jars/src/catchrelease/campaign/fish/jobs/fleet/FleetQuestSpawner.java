@@ -16,10 +16,13 @@ import java.util.List;
 import java.util.Random;
 
 public class FleetQuestSpawner implements EveryFrameScript {
+
     public static final float CHECK_MIN_DAYS = 3f;
     public static final float CHECK_MAX_DAYS = 7f;
+
     public static final float CHANCE = 0.07f;
     public static final int MAX_ACTIVE = 1;
+
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
     public static final float COOLDOWN_DAYS = 45f;
 

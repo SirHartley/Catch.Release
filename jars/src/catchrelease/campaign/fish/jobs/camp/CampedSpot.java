@@ -18,16 +18,22 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.Random;
 
 public class CampedSpot {
+
     public static final String CAMP_FLAG = "$catchrelease_campFleet";
     public static final String WHO_KEY = "$catchreleaseCampWho";
+
     public static final String BRIBE_KEY = "$catchrelease_campBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_campBribeDGS";
+
     public static final String CLEARED_FLAG = "$catchrelease_campCleared";
     public static final String WARNED_FLAG = "$catchrelease_campWarned";
     public static final String CLOSING_FLAG = "$catchrelease_campClosing";
+
     public static final float WARNING_CHASE_DAYS = 3f;
+
     public static final String POND_BLOCKED_FLAG = "$catchrelease_campedPond";
     public static final String CAMP_SPECIES_KEY = "$catchrelease_campedSpecies";
+
     public static final float OFFSET = 350f;
     public static final float HOLD_DAYS = 100000f;
 

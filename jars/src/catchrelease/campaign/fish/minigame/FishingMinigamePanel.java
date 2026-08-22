@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishingMinigamePanel implements CustomUIPanelPlugin {
+
     protected FishingMinigame minigame;
     protected Listener listener;
     protected FishCatch specimen;
@@ -37,26 +38,31 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected FishLogEntry.Method method;
     protected PositionAPI position;
     protected FishingMinigameLayout layout;
+
     protected boolean reeling = false;
     protected boolean reported = false;
     protected boolean failedSoundPlayed = false;
     protected float lineLoopHeldLevel = 0f;
     protected boolean fishCoveredLastFrame;
     transient protected CatchCelebration celebration;
+
     transient protected CatchResultPanel result;
     transient protected LootResultPanel lootResult;
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
+
     protected boolean treasureResolved = false;
     protected MinigameTreasure soundTreasure;
     protected boolean treasureGotSoundPlayed = false;
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
     protected float jitterTime = 0f;
     transient protected SpriteAPI backgroundSprite;
+
     transient protected boolean backgroundChecked = false;
     transient protected WarpGrid warp;
     transient protected SpriteAPI moteSprite;
 
     public interface Listener {
+
         void onMinigameEnded(boolean caught);
     }
 

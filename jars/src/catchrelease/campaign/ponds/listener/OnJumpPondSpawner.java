@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
 
 public class OnJumpPondSpawner extends BaseCampaignEventListener {
+
     public OnJumpPondSpawner() {
         super(false);
     }

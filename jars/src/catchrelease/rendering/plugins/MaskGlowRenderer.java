@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.io.IOException;
 
 public class MaskGlowRenderer {
+
     private transient int program = 0;
     private transient int uMaskTex = -1;
     private transient int uGlowColor = -1;

@@ -5,6 +5,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 
 public enum FishGrade {
+
     TERRIBLE("Terrible", 0, 0.15f, 0.55f),
     POOR("Poor", 1, 0.33f, 0.8f),
     AVERAGE("Average", 2, 0.67f, 1f),
@@ -12,7 +13,6 @@ public enum FishGrade {
     EXCEPTIONAL("Exceptional", 4, 1f, 2.2f);
 
     public final int rank;
-
     public final String name;
     public final float ceiling;
     public final float valueMult;

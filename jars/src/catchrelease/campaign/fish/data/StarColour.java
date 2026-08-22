@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.data;
 
 public enum StarColour {
+
     BLUE("a blue star"),
     WHITE("a white star"),
     YELLOW("a yellow star"),

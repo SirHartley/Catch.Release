@@ -10,6 +10,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class CoreFisherSpawner implements EveryFrameScript {
+
     protected final IntervalUtil interval =
             new IntervalUtil(FishermanConstants.CORE_CHECK_DAYS * 0.8f,
                     FishermanConstants.CORE_CHECK_DAYS * 1.2f);

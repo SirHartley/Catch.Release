@@ -16,14 +16,17 @@ import java.util.List;
 import java.util.Set;
 
 public class ShopMarks {
+
     public static final String KEY = "$catchrelease_shop_marks";
     public static final float DOT_RADIUS = 3.5f;
     public static final float DOT_INSET = 8f;
+
     protected static final long WANTED_CACHE_MS = 250L;
     protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
             new catchrelease.helper.cache.TimedValue<>(WANTED_CACHE_MS);
 
     public static class Ask {
+
         public final String name;
         public final FishRequirement requirement;
 
@@ -34,6 +37,7 @@ public class ShopMarks {
     }
 
     protected static class UpgradeMark {
+
         final UpgradeStat stat;
         final int targetLevel;
 

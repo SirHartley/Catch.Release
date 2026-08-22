@@ -24,8 +24,11 @@ import org.magiclib.plugins.MagicTrailPlugin;
 import java.awt.*;
 
 public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
+
     public static final String ENTITY_ID = "catchrelease_RodMote";
+
     public static final float GLOW_SIZE = 15f;
+
     public static final float VELOCITY = 200f;
     public static final float SINE_WAVE_MAX_VARIANCE = 100f;
 
@@ -36,11 +39,14 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
     protected SectorEntityToken target;
     protected Color color;
     protected boolean flashed = false;
+
     transient SpriteAPI moteSprite;
+
     public Flash flash;
     public SimpleRippleDataRunner ripples;
 
     public static class RodMoteEntityPluginData {
+
         Vector2f origin;
         SectorEntityToken target;
         Color color;

@@ -7,14 +7,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class FishRoute {
+
     public static final String KEY = "$catchrelease_fish_route";
 
     public static class Stop implements Serializable {
+
         public String systemId;
         public ArrayList<String> fishIds = new ArrayList<>();
     }
 
     public static class Saved implements Serializable {
+
         public ArrayList<Stop> stops = new ArrayList<>();
     }
 

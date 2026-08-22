@@ -10,6 +10,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.EnumSet;
 
 public abstract class BaseCircleTrajectoryFollowingParticle implements LunaCampaignRenderingPlugin {
+
     public Vector2f originLocation;
     public Vector2f targetLocation;
     public Vector2f relativeCenter;

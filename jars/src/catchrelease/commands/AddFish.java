@@ -20,9 +20,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class AddFish implements BaseCommandWithSuggestion {
+
     private static final int MAX_AMBIGUOUS_SUGGESTIONS = 12;
 
     private static final class ParsedArguments {
+
         private final String query;
         private final int amount;
 
@@ -33,6 +35,7 @@ public class AddFish implements BaseCommandWithSuggestion {
     }
 
     private static final class Match {
+
         private final FishSpec spec;
         private final boolean fuzzy;
         private final List<FishSpec> suggestions;

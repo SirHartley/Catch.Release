@@ -12,6 +12,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.ArrayList;
 
 public class FishermanMapIcon extends BaseCustomEntityPlugin {
+
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
     private static final String SERVICE_LINE =

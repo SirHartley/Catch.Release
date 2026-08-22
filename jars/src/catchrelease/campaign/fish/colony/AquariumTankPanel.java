@@ -23,24 +23,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
+
     public static final float WALL_PAD = 6f;
     public static final float FISH_LENGTH_MIN = 12f;
     public static final float FISH_LENGTH_MAX = 76f;
     public static final int WARP_SEGMENTS = 10;
+
     public static final float TURNOVER_BAND = 0.15f;
     public static final float TURNOVER_RATE = 4f;
+
     public static final float TURN_RATE = 240f;
     public static final float MAX_PITCH = 30f;
+
     public static final float DRIFT_TILT = 8f;
     public static final float DRIFT_TILT_RATE = 0.5f;
+
     public static final float CRAB_BED_PX = 4f;
     public static final float CRAB_BOB = 0.03f;
     public static final float CRAB_DASH_MIN = 0.05f;
     public static final float CRAB_DASH_MAX = 0.24f;
     public static final float CRAB_SPEED = 2.2f;
     public static final float CRAB_ROCK = 5f;
+
     public static final Color WATER_DEEP = new Color(8, 24, 38);
     public static final Color WATER_SHALLOW = new Color(18, 60, 84);
+
     public static final Color GLASS = new Color(120, 200, 230);
     public static final Color KELP = new Color(24, 74, 52);
     public static final float FADE_IN = 0.4f;
@@ -48,6 +55,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     protected final BreachConservatory conservatory;
     protected final InteractionDialogAPI dialog;
     protected PositionAPI pos;
+
     protected float time = 0f;
     protected Backdrop preview;
     protected float shown = 0f;
@@ -59,7 +67,9 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     protected boolean furnished = false;
 
     protected static class TankFish {
+
         protected enum Build {
+
             SWIMMER,
             DRIFTER,
             CRAWLER
@@ -78,10 +88,13 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         protected boolean darting = false;
         protected float pitch = 0f;
         protected float age = 0f;
+
         protected float floorMin = 0f;
         protected float floorMax = 0f;
+
         protected float turnover;
         protected float turnoverTarget;
+
         protected FishMotion mode;
         protected float modeLeft = 0f;
         protected final float wavePhase;
@@ -349,6 +362,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     protected static class Bubble {
+
         protected float x, y, speed, radius, wobblePhase;
 
         public void render(float tankX, float tankY, float alphaMult, float time) {

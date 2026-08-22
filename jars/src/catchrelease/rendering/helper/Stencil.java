@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 public class Stencil {
+
     public static void startDepthMask(SpriteAPI mask,
                                       float width,
                                       float height,

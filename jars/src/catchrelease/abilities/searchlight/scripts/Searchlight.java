@@ -33,21 +33,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Searchlight implements EveryFrameScript {
+
     public static final Color COLOR = new Color(185, 80, 255, 255);
     public static final Color RING_COLOR = new Color(255, 120, 255);
+
     public static final float LENS_SIZE_MULT = 0.8f;
     public static final float LENS_INTENSITY = 9f;
     public static final float LENS_FADE_IN = 0.6f;
+
     public static final float SINE_CADENCE = 90f;
     public static final float OSCILLATION_TIME_MULT = 0.7f;
     public static final float AREA_FALLBACK = 240f;
     public static final float LOOK_SWAP_FADE = 1f;
+
     public static final float FAN_HALF_ANGLE = 14.3f;
     public static final float FAN_TIP_STRENGTH = 0.35f;
     public static final float FAN_SWEEP_MULT = 0.7f;
+
     public static final float LOCK_HOLD_RADIUS_SHARE = 0.5f;
     public static final float LOCK_EASE_TIME = 1.6f;
     public static final float LOCK_COOLDOWN = 4f;
+
     public static final int FAN_LENS_STATIONS = 5;
     public static final float FAN_LENS_INTENSITY = 6f;
 
@@ -56,21 +62,27 @@ public class Searchlight implements EveryFrameScript {
     private transient SearchlightFanRenderer fan;
     private transient SearchlightFanBreachRenderer fanBreach;
     private transient List<RippleRingRenderer> rings = new ArrayList<>();
+
     private final Vector2f currentRenderLoc = new Vector2f();
+
     private CircularArc arc;
     private float baseArcAngle;
     private int travelDirection = 1;
     private float oscillationTime = 0f;
     private final IntervalUtil ringInterval = new IntervalUtil(1, 3);
+
     private boolean expired = false;
+
     private transient SectorEntityToken lockTarget;
     private float lockLeft = 0f;
     private float lockBlend = 0f;
     private float lockCooldown = 0f;
     private final Vector2f lockLoc = new Vector2f();
     private float lockBearing = 0f;
+
     private transient WaveDistortion lens;
     private transient List<WaveDistortion> fanLenses;
+
     private transient SearchlightAbilityPlugin owner;
     private transient CampaignFleetAPI ownerFleet;
     private transient LocationAPI home;

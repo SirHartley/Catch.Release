@@ -16,8 +16,10 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.EnumSet;
 
 public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float OPEN_TIME = SearchlightBreachRenderer.OPEN_TIME;
     public static final float CENTER_ALPHA = SearchlightBreachRenderer.CENTER_ALPHA;
+
     public static final int STEPS_ACROSS = SearchlightFanRenderer.STEPS_ACROSS;
     public static final int STEPS_ALONG = SearchlightFanRenderer.STEPS_ALONG;
 
@@ -26,6 +28,7 @@ public class SearchlightFanBreachRenderer implements LunaCampaignRenderingPlugin
     private final Vector2f aim;
     private float timePassed = 0f;
     private float open = 0f;
+
     private boolean expired = false;
     private boolean fading = false;
     private float fadeDuration = 0f;

@@ -23,9 +23,11 @@ import java.io.IOException;
 import java.util.EnumSet;
 
 public class TestStencilRenderer implements LunaCampaignRenderingPlugin {
+
     public static final float SIZE = 500f;
 
     public IntervalUtil moteSpawnInterval = new IntervalUtil(0.5f, 3f);
+
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI stencil;
     transient protected WarpingSpriteRendererUtil warp;

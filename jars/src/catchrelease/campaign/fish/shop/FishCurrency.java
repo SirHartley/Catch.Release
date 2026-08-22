@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishCurrency {
+
     public static Map<FishRarity, Integer> count() {
         Map<FishRarity, Integer> counts = new EnumMap<>(FishRarity.class);
         for (FishRarity rarity : FishRarity.values()) counts.put(rarity, 0);

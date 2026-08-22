@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BlackHoleSpiralWarp {
+
     public static final String RANGE_SETTING = "catchreleaseBlackHoleSpiralWarpRange";
     public static final float DEFAULT_RANGE = CircularSpiralWarpRenderer.DEFAULT_RANGE;
     public static final String BLACK_HOLE_TYPE = "black_hole";
@@ -18,6 +19,7 @@ public final class BlackHoleSpiralWarp {
 
     protected static final class BlackHoleProvider
             implements CircularSpiralWarpRenderer.SourceProvider {
+
         protected LocationAPI location;
         protected final List<CircularSpiralWarpRenderer.Source> cached = new ArrayList<>();
 

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BackdropLoader {
+
     public static final String PATH = "data/campaign/backdrops.csv";
 
     @SuppressWarnings("unchecked")

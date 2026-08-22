@@ -14,6 +14,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class FishingRingRenderer implements LunaCampaignRenderingPlugin {
+
     protected FishingDroneSwarmScript swarm;
     protected float fade = 0f;
     protected float pulseTime = 0f;

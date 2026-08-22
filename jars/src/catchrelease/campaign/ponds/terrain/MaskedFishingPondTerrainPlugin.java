@@ -38,6 +38,7 @@ import java.awt.Color;
 import java.util.EnumSet;
 
 public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
+
     public static final float ACTIVATION_SPOOL_UP_TIME = 5f;
     public static final String TERRAIN_ID = "catchrelease_StaticPond";
     public static final String NAME = "Unstable Substrate";
@@ -52,17 +53,21 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     protected boolean wasOpened = false;
     protected boolean expiring = false;
     protected boolean visualOnly = false;
+
     transient protected SpriteAPI starfield;
     transient protected SpriteAPI mask;
+
     protected float elapsed = 0f;
     transient protected PondDepthField depthField;
     transient protected WarpGrid warpGrid;
     transient protected MaskedWarpedSpriteRenderer maskedRenderer;
+
     transient protected MaskGlowRenderer maskGlowRenderer;
     transient protected PondHoleRenderer holeRenderer;
     transient protected EnumSet<CampaignEngineLayers> layers = createLayers();
 
     public static class PondParams {
+
         public long seed;
         public float radius;
         public boolean temporary = false;

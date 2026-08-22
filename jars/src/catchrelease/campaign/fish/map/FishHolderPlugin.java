@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.util.List;
 
 public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
+
     public static final float ICON_SHARE = 0.66f;
 
     protected final FishSpec spec;

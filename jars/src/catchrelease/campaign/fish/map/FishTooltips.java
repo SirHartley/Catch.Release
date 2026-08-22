@@ -16,6 +16,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.function.Supplier;
 
 public final class FishTooltips {
+
     private FishTooltips() {
     }
 

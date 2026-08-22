@@ -17,11 +17,14 @@ import java.util.EnumSet;
 import java.util.List;
 
 public abstract class BaseReticuleRenderer implements SkillshotRenderer {
+
     transient private SpriteAPI fleetReticule;
     private boolean done = false;
     protected Vector2f cursorPos = new Vector2f();
+
     protected boolean showTrajectory = false;
     protected boolean showBounds = false;
+
     protected float boundsSpread = 0f;
     protected float length = 0f;
     protected GuideLineStyle lineStyle = null;

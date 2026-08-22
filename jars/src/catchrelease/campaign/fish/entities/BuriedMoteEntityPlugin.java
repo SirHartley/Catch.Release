@@ -13,15 +13,18 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
+
     public static final String BURIED_TAG = "catchrelease_buried_mote";
 
     protected String fishId;
     protected float heading = 0f;
     protected float headingLeft = 0f;
+
     protected float time = 0f;
     protected float sineVariance = 1f;
 
     public static class Params {
+
         public final String fishId;
 
         public Params(String fishId) {

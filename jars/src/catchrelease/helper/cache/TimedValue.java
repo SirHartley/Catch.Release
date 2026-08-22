@@ -4,8 +4,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class TimedValue<T> {
+
     protected final double ttl;
     protected boolean held = false;
+
     protected double stampTime;
     protected Object stampKey;
     protected T value;

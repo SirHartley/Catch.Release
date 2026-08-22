@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Backdrops {
+
     public static final String OWNED_KEY = "$catchrelease_backdrops";
 
     public static Backdrop getDefault() {

@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import catchrelease.skillshot.SkillshotFramework;
 
 public class SkillshotActivationManager implements EveryFrameScript {
+
     protected SkillshotInputListener currentListener = null;
     protected SkillshotInputListener forceDeregisterNextTick = null;
 

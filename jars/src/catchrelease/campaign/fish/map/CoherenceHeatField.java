@@ -9,6 +9,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class CoherenceHeatField {
+
     public static final float CELL = 2000f;
     public static final int SAMPLES_PER_FRAME = 500;
     public static final float SHOW_FLOOR = 0.08f;

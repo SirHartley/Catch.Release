@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OuterReaches {
+
     public static final float AVOID_RADIUS = 2500f;
     public static final float INNER_PAD = 1500f;
     public static final float OUTER_PAD = 2500f;

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import java.util.Random;
 
 public class RandomMemoryHelper {
+
     public static final String MEM_KEY_RANDOM = "$catchrelease_random";
 
     public static Random getRandom(StarSystemAPI system){

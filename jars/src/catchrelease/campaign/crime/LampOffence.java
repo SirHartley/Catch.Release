@@ -17,6 +17,7 @@ import com.fs.starfarer.api.impl.campaign.CoreReputationPlugin.RepActions;
 import com.fs.starfarer.api.util.Misc;
 
 public class LampOffence {
+
     public static final String COUNT_KEY = "$catchrelease_lampOffences";
     public static final String LAST_KEY = "$catchrelease_lampLast";
     public static final String SAW_KEY = "$catchrelease_sawLamps";
@@ -24,10 +25,13 @@ public class LampOffence {
     public static final String RUN_KEY = "$catchrelease_lampRun";
     public static final String STOPPED_RUN_KEY = "$catchrelease_lampStoppedRun";
     public static final String RESOLVED_RUN_KEY = "$catchrelease_lampResolvedRun";
+
     public static final float PLANET_RANGE = 3000f;
     public static final float FORGET_DAYS = 90f;
     public static final float REPEAT_DAYS = 30f;
+
     public static final int FINE = 25000;
+
     public static final float REP_LOSS = 0.03f;
     public static final float REP_REFUSE = 0.06f;
 

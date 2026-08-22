@@ -32,28 +32,34 @@ import java.util.List;
 import java.util.Map;
 
 public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
+
     protected static final String CAMPAIGN_MUSIC_VOLUME_KEY = "campaignMusicVolumeMult";
 
     protected FishSpec fish;
     protected Callback callback;
     protected SectorEntityToken anchor;
+
     protected SectorEntityToken catchTarget;
     protected FishLogEntry.Method method = FishLogEntry.Method.UNKNOWN;
     protected FishCatch specimen;
     protected InteractionDialogAPI dialog;
     protected FishingMinigame minigame;
     protected Delegate delegate;
+
     protected boolean resolved = false;
     transient protected boolean dismissed = false;
+
     transient protected float previousCampaignMusicVolume;
     transient protected boolean campaignMusicVolumeScoped = false;
 
     public interface Callback {
+
         void onCatchResolved(FishCatch landed);
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
             FishingMinigamePanel.Listener {
+
         protected static final float DEV_BUTTON_WIDTH = 150f;
         protected static final float DEV_BUTTON_HEIGHT = 24f;
         protected static final float DEV_LIST_WIDTH = 220f;
@@ -61,8 +67,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         protected FishingMinigamePanel panel = new FishingMinigamePanel(minigame, specimen, anchor, method, this);
         protected DialogCallbacks callbacks;
+
         protected CustomPanelAPI framePanel;
         protected CustomPanelAPI fishList;
+
         protected final Object devWinId = new Object();
         protected final Object devWinTreasureId = new Object();
         protected final Object devTreasureId = new Object();

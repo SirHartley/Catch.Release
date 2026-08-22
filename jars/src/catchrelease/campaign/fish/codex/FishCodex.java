@@ -9,6 +9,7 @@ import com.fs.starfarer.api.impl.codex.CodexEntryV2;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 public class FishCodex {
+
     public static final String CATEGORY_ID = "catchrelease_fish";
 
     public static String getEntryId(String speciesId) {

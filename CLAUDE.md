@@ -106,9 +106,13 @@ Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
 - **Functional flow may beat the default.** A cohesive subsystem can stay together when splitting
   it across declaration categories would make the class harder to follow. The result should read
   naturally from setup through operation to details.
-- **Keep spacing deliberate.** Use one blank line between sections and methods, none between
-  simple related fields or enum constants, and never stack empty lines. Do not leave an empty line
-  just inside an opening or closing brace.
+- **Group fields by responsibility.** Within the static and instance sections, keep each
+  subsystem's fields together and put one blank line between groups: sprites, rendering state,
+  locations, lifecycle state, and so on. Use a one-to-three-word header only when names and types
+  do not make the boundary clear.
+- **Keep spacing deliberate.** Leave one blank line immediately after every class, enum,
+  interface, and record opening brace. Use one blank line between field groups, sections, and
+  methods; none between fields in one group or between enum constants; never stack empty lines.
 - **Use section headers sparingly.** A short header such as `// Rendering` is useful when a long
   class contains distinct subsystems. Do not add one where member names and order already make the
   grouping obvious.

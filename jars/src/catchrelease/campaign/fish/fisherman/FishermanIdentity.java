@@ -10,6 +10,7 @@ import com.fs.starfarer.api.characters.PersonAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 public class FishermanIdentity {
+
     public static final String PERSON_KEY = "$catchrelease_fisherman_person";
     public static final String FIRST_NAME = "The";
     public static final String LAST_NAME = "Fisherman";
@@ -21,6 +22,7 @@ public class FishermanIdentity {
             "catchrelease_fisherman_unstable",
             "catchrelease_fisherman_barely_holding"
     };
+
     public static final float DRIFT_SLIPPING = 0.3f;
     public static final float DRIFT_UNSTABLE = 0.55f;
     public static final float DRIFT_FAILING = 0.8f;

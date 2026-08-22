@@ -12,20 +12,24 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.awt.Color;
 
 public class ShopRowPlugin extends ListRow {
+
     public static final float PIP_SIZE = 8f;
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
+
     public static final float MARK_SLOT = 18f;
     public static final float MARK_RADIUS = 5f;
 
     protected final ShopEntry entry;
     protected final Host host;
     protected transient LazyFont.DrawableString name;
+
     protected transient LazyFont.DrawableString mark;
     protected transient String markText;
     protected transient LazyFont.DrawableString fresh;
 
     public interface Host {
+
         boolean isSelected(ShopEntry entry);
 
         void onRowClicked(ShopEntry entry);

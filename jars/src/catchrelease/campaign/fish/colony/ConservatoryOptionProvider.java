@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConservatoryOptionProvider extends BaseIndustryOptionProvider {
+
     public static final Object SHOP = new Object();
     public static final Object AQUARIUM = new Object();
 

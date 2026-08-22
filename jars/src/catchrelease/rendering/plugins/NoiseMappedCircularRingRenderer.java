@@ -12,6 +12,7 @@ import java.awt.*;
 import java.io.IOException;
 
 public class NoiseMappedCircularRingRenderer {
+
     private transient int program = 0;
     private transient int uNoiseTex = -1;
     private transient int uTime = -1;

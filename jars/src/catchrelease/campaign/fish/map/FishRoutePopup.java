@@ -29,12 +29,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class FishRoutePopup extends BaseCustomUIPanelPlugin {
+
     public static final float PAD = 14f;
     public static final float TITLE_HEIGHT = 20f;
     public static final float CLOSE_WIDTH = 20f;
     public static final float SEARCH_HEIGHT = 22f;
+
     public static final float CHIP_HEIGHT = 34f;
     public static final float CHIP_GAP = 4f;
+
     public static final float HEADER_HEIGHT = 20f;
     public static final float CONTROLS_HEIGHT = 124f;
     public static final float ROW_HEIGHT = 24f;
@@ -50,26 +53,31 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     protected final FishPresence.Filter filter = new FishPresence.Filter();
     protected CustomPanelAPI panel;
     protected float width, height;
+
     protected PositionAPI pos;
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
     protected UIComponentAPI listRemovable;
     protected PositionAPI listViewport;
+
     protected String notice;
     protected Color noticeColor;
 
     public interface Host {
+
         void onRoutePlotted(FishRoute.Saved route);
 
         void onPlannerClosed();
     }
 
     protected static class Row {
+
         FishSpec spec;
         String reason;
     }
 
     protected class NoticePlugin extends BaseCustomUIPanelPlugin {
+
         protected PositionAPI noticePos;
 
         @Override
@@ -95,6 +103,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected class RowPlugin extends FishListRow {
+
         public RowPlugin(Row row) {
             super(row.spec);
         }

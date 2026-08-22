@@ -30,16 +30,20 @@ import java.util.List;
 import java.util.Set;
 
 public class FishingDroneSwarmScript implements EveryFrameScript {
+
     protected SectorEntityToken pond;
     protected Vector2f target;
     protected List<SectorEntityToken> drones = new ArrayList<>();
     protected int plannedDroneCount = 0;
+
     protected int nextDroneIndex = 0;
     protected float nextDroneLaunchIn = 0f;
+
     protected IntervalUtil searchInterval = new IntervalUtil(RodConstants.DRONE_SEARCH_INTERVAL, RodConstants.DRONE_SEARCH_INTERVAL);
     protected Set<String> handled = new HashSet<>();
     protected boolean recalling = false;
     protected boolean done = false;
+
     protected int recallCount = 0;
     protected boolean moteInRing = false;
 

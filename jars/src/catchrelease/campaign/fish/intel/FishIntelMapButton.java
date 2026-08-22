@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class FishIntelMapButton {
+
     public static final String BUTTON_ID = "catchrelease_open_fishing_map";
     public static final String PLOT_ROUTE_BUTTON_ID = "catchrelease_plot_fish_route";
     public static final String SET_AUTOPILOT_BUTTON_ID = "catchrelease_set_intel_autopilot";
+
     public static final float HEIGHT = 22f;
 
     private FishIntelMapButton() {

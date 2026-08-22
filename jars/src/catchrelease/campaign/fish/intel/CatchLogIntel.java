@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class CatchLogIntel extends BaseIntelPlugin {
+
     public static final String TAG = "Catch log";
 
     protected final FishCatch specimen;
@@ -35,6 +36,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
     protected final List<Bycatch> bycatch = new ArrayList<>();
 
     public static class Bycatch implements Serializable {
+
         public final String rarityName;
         public final Color rarityColor;
         public final String contents;

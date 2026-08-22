@@ -8,13 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChargeManager implements EveryFrameScript {
+
     public static final String KEY = "$catchrelease_charges";
 
     protected final Map<String, Refill> refills = new HashMap<>();
 
     public static class Refill {
+
         public final String maxStat;
         public final float maxFallback;
+
         public final String rateStat;
         public final float rateFallback;
 

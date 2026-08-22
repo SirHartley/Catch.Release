@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FishermanShelf {
+
     public static class SurveyOffer {
+
         public FishSpec spec;
         public FishRarity costRarity;
         public int costCount;

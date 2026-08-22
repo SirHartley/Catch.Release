@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SkillshotUtils {
+
     protected static final float JOIN_TOLERANCE = 0.01f;
 
     public static Vector2f getCursorWorldPosition() {

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishItems {
+
     public static final String FISH = "catchrelease_fish";
     public static final String BUNDLE = "catchrelease_fish_bundle";
     public static final String PILE = "catchrelease_fish_pile";

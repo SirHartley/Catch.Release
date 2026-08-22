@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 
 public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript implements EveryFrameScript {
+
     public static final float OFFER_DAYS = 30f;
 
     protected CampaignFleetAPI fleet;

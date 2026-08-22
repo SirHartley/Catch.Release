@@ -12,14 +12,17 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import java.awt.Color;
 
 public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
+
     public static final float BOX_SIZE = 72f;
     public static final float ART_SIZE = 52f;
     public static final float TEXT_GAP = 16f;
+
     public static final float PIP_SIZE = 10f;
     public static final float PIP_GAP = 4f;
 
     protected final ShopEntry entry;
     protected PositionAPI pos;
+
     protected transient LazyFont.DrawableString name;
     protected transient LazyFont.DrawableString sub;
 

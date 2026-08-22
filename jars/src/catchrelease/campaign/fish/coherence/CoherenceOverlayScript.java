@@ -14,6 +14,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
 public class CoherenceOverlayScript implements EveryFrameScript {
+
     protected float level = 0f;
     protected float aberration = 0f;
     protected float pull = 0f;

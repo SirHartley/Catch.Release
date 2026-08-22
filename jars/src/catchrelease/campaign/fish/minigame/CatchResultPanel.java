@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CatchResultPanel {
+
     protected final FishCatch entry;
     protected final SectorEntityToken where;
     protected final FishLogEntry.Method method;
@@ -33,13 +34,16 @@ public class CatchResultPanel {
     protected boolean newSpecies = false;
     protected final List<Bubble> bubbles = new ArrayList<>();
     transient protected LazyFont font;
+
     transient protected LazyFont titleFont;
     transient protected LazyFont.DrawableString title;
+
     transient protected LazyFont.DrawableString prompt;
     transient protected LazyFont.DrawableString recordText;
     transient protected boolean fontsChecked = false;
 
     protected static class Line {
+
         final String label;
         final String value;
         final Color color;
@@ -56,6 +60,7 @@ public class CatchResultPanel {
     }
 
     protected static class Bubble {
+
         float fx;
         float startY;
         float speed;

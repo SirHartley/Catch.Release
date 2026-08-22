@@ -13,15 +13,18 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
+
     public static final String TITLE = "THE OUTFITTER";
     public static final float CHIP_WIDTH = 64f;
     public static final float CREDITS_CHIP_WIDTH = 110f;
+
     public static final float CHIP_HEIGHT = 30f;
     public static final float CHIP_GAP = 8f;
     public static final float ICON_SIZE = 20f;
 
     protected final Purse purse;
     protected PositionAPI pos;
+
     protected transient LazyFont.DrawableString title;
     protected final Map<FishRarity, LazyFont.DrawableString> counts = new EnumMap<>(FishRarity.class);
     protected final Map<FishRarity, Integer> drawnCounts = new EnumMap<>(FishRarity.class);
@@ -29,6 +32,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     protected int drawnCredits = -1;
 
     public interface Purse {
+
         Map<FishRarity, Integer> getWallet();
 
         int getCredits();

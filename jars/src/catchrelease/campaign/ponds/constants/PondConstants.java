@@ -1,22 +1,27 @@
 package catchrelease.campaign.ponds.constants;
 
 public class PondConstants {
+
     public static final float POND_RADIUS = 500f;
     public static final float MIN_EMPTY_RADIUS_AROUND_POND = 1000;
     public static final float MIN_DISTANCE = 10000f;
     public static final float DIST_PER_FITTING_ATTEMPT = 500f;
+
     public static final float MIN_POND_SEPARATION = 6000f;
     public static final float MIN_NEBULA_CLEARANCE = 1200f;
+
     public static final float FITTING_ANGLE_STEP = 5f;
     public static final int MAX_FITTING_ATTEMPTS = 120;
     public static final int MIN_POND_AMT_PER_SYSTEM = 1;
     public static final int PLANETS_PER_ADDITIONAL_POND = 4;
     public static final float POND_INTERACT_RANGE_MULT = 1.5f;
     public static final float MOTE_SPAWN_INSET = 0.85f;
+
     public static final float POND_FOCUS_TIME_CONSTANT = 1f;
     public static final float POND_FOCUS_RETURN_TIME_CONSTANT = 0.4f;
     public static final float POND_FOCUS_HANDBACK_DISTANCE = 5f;
     public static final float POND_FOCUS_FLEET_MARGIN = 0.8f;
+
     public static final int DEPTH_PARTICLES = 90;
     public static final float DEPTH_SPIN_MIN = 1.5f;
     public static final float DEPTH_SPIN_MAX = 6f;
@@ -25,6 +30,7 @@ public class PondConstants {
     public static final float DEPTH_SINK_DEPTH = 0.03f;
     public static final float DEPTH_SWIRL_BOOST = 2.2f;
     public static final float DEPTH_DRAIN = 0.08f;
+
     public static final float POND_WELL_DEPTH = 0.7f;
     public static final float POND_WELL_GAMMA = 0.6f;
     public static final float POND_WELL_DIM = 0.4f;
@@ -32,6 +38,7 @@ public class PondConstants {
     public static final float POND_SWIRL_BREATHE = 0.35f;
     public static final float POND_SWIRL_RATE = 0.25f;
     public static final float POND_SWIRL_EDGE = 0.55f;
+
     public static final float DEPTH_SPEED_FLOOR = 0.25f;
     public static final float DEPTH_REACH_FLOOR = 0.7f;
     public static final float DEPTH_FILL = 1.15f;
@@ -43,6 +50,7 @@ public class PondConstants {
     public static final java.awt.Color DEPTH_COLOR_DEEP = new java.awt.Color(25, 35, 80);
     public static final java.awt.Color DEPTH_COLOR_NEAR = new java.awt.Color(215, 175, 255);
     public static final boolean POND_HOLE_LOOK = false;
+
     public static final float HOLE_FILL_MULT = 1.5f;
     public static final float HOLE_BG_ALPHA = 0.85f;
     public static final float HOLE_BG_ZOOM = 1.6f;
@@ -54,8 +62,10 @@ public class PondConstants {
     public static final float HOLE_RIM_START = 0.72f;
     public static final float HOLE_RIM_SHADOW = 0.55f;
     public static final float MIN_RING_CLEARANCE = 200f;
+
     public static final float POND_FILL_DRIFT = 90f;
     public static final float POND_FILL_DRIFT_PERIOD = 23f;
+
     public static final float OPEN_DISTORTION_SIZE = 620f;
     public static final float OPEN_DISTORTION_INTENSITY = 26f;
     public static final float OPEN_DISTORTION_GROW = 0.9f;

@@ -7,6 +7,7 @@ import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 
 public final class CrablobabIdentity {
+
     public static final String PERSON_KEY = "$catchrelease_crablobab_person";
     public static final String PORTRAIT_ID = "catchrelease_crabolabob";
     public static final String RANK_ID = "catchrelease_crabMerchant";

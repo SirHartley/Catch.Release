@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class FishHabitat {
+
     public static final String CACHE_KEY = "$catchrelease_habitats";
 
     public final StarColour star;
     public final String starType;
+
     public final Set<String> tags;
     public final SectorRegion region;
     public final StarAge age;

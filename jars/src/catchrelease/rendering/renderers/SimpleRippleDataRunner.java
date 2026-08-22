@@ -4,6 +4,7 @@ import catchrelease.campaign.ponds.renderer.RippleData;
 import com.fs.starfarer.api.EveryFrameScript;
 
 public class SimpleRippleDataRunner implements EveryFrameScript {
+
     public RippleData data;
 
     public SimpleRippleDataRunner(RippleData data) {

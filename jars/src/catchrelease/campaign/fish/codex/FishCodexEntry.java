@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.util.List;
 
 public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin {
+
     public static final float RIGHT_WIDTH = 290f;
     public static final float BOX_GAP = 10f;
     public static final float ART_MAX = 240f;
@@ -41,10 +42,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
     protected final String speciesId;
     protected transient CustomPanelAPI panel;
+
     protected transient CodexDialogAPI codex;
     protected transient Object mapButtonId;
 
     protected static class IconCard extends BaseCustomUIPanelPlugin {
+
         protected final FishSpec spec;
         protected final float artWidth;
         protected final float artHeight;

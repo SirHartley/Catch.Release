@@ -13,6 +13,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.util.Random;
 
 public final class CrablobabBarPresence {
+
     public static final String VANILLA_ROLL_KEY = "$BarCMD_shownEvents";
     public static final String ROLL_KEY = "$catchrelease_crablobab_bar_roll";
     public static final float MAX_ROLL_DAYS = 60f;

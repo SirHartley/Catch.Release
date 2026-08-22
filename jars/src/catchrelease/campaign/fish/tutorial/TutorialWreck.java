@@ -18,7 +18,9 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 
 public class TutorialWreck {
+
     public static class Watcher implements EveryFrameScript {
+
         public static void register() {
             Global.getSector().addTransientScript(new Watcher());
         }

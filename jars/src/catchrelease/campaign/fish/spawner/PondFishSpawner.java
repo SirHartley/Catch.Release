@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 public class PondFishSpawner {
+
     public static String pickFishId(LocationAPI location, CatchImplement how) {
         return pickFishId(location, how, 0f);
     }
