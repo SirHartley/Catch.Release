@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 243 Java files across ten top-level packages, plus
+What is where, and which file to open first. 251 Java files across twelve top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -62,6 +62,7 @@ Runtime-affecting branches are not merge-ready until the full clean Java 17 comp
 | An ability's behaviour | `abilities/<name>/ability/` |
 | An ability's tuning | `abilities/<name>/constants/` |
 | Aiming and reticules | `skillshot/` (has its own README) |
+| Distress-call scheduling and third-party event hooks | `distress/` (has its own README) |
 | A pane, widget or list row on any screen but the minigame | `ui/` — the shared component framework |
 | Shaders and GL helpers | `rendering/` + `data/catchrelease/shaders/` |
 | The sector-map fish filter | `campaign/fish/map/` |
@@ -105,16 +106,18 @@ Everything game-facing is wired from `ModPlugin.java`.
 14. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
    stats missing from the save are seeded and every sheet-owned field of a held stat is refreshed,
    so a save carries levels and nothing else that matters
-15. `SkillshotFramework.register()` — the aiming framework
-16. `FishMapFilterScript` as a transient script — the sector-map filter
-17. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-18. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-19. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
+15. `DistressCallFramework.register()` — the merged distress-call registry and its persistent,
+   idempotent coordinator, bound to vanilla's live nearby-event cadence
+16. `SkillshotFramework.register()` — the aiming framework
+17. `FishMapFilterScript` as a transient script — the sector-map filter
+18. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+19. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+20. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
    and fed every black-hole star in the current system by its small Catch.Release adapter
-20. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+21. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-21. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
+22. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -181,6 +184,11 @@ instead of a generic vanilla voice greeting.
 | `catchrelease_duel` | **`KidsJob`** | | `catchrelease_campPath` | `PatherCampJob` |
 | `catchrelease_ring` | **`MafiaJob`** | | | |
 | `catchrelease_client` | **`CompanionJob`** | | | |
+
+**`data/campaign/distress_calls.csv`** — the merged event registry for the reusable distress-call
+framework. One un-commented, namespaced row is one enabled event; provider adapters own eligibility
+and all quest content. The framework owns only the vanilla-scheduled entity, breadcrumb intel and
+the rules trigger named by the row.
 
 **`data/world/factions/default_ranks.json`** — contributes the `catchrelease_crabMerchant`
 rank label used by Crablobab's person card and the Fisherman's stable `catchrelease_none` label.
@@ -810,6 +818,20 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `searchlight/rendering/SearchlightFanBreachRenderer.java` | The same window cut as the fan's wedge, falloff for falloff. A zero-duration shutdown marks it expired synchronously rather than waiting for a LunaLib advance. |
 | `searchlight/rendering/SearchlightBurnRenderer.java` | The old pond-style burn look — sidelined, nothing uses it |
 | `searchlight/rendering/SearchlightImpressionRenderer.java` | Dents for all beams together: passive bruises near a light, and a beam over a mote reveals its pond self. Bound to the exact owning ability activation and location, and self-expires if either stops matching. |
+
+### `distress`
+Reusable distress-call framework. **Has its own README — read that first.**
+
+| File | What it does |
+|---|---|
+| `DistressCallFramework.java` | Idempotent registration, the provider registry, resolution entry point and logging |
+| `DistressCallSettings.java` | Mutable paths, memory keys, route id and concurrency/reservation tuning |
+| `DistressCallSpec.java` | One validated merged-sheet row: provider, weighting, fleet shape, limits, trigger and opaque tags |
+| `DistressCallRegistry.java` | Loads `distress_calls.csv` through the game's merged-spreadsheet API and rejects malformed rows without creating entities |
+| `DistressCallProvider.java` | The narrow external-content seam: eligibility, fleet preparation, expiry and resolution |
+| `DistressCallInstance.java` | Save-safe ids and live entity/intel handles; the rules `Call` target that fires the row's dialogue trigger |
+| `DistressCallManager.java` | Persistent idempotent coordinator and route spawner. Watches vanilla's actual distress interval, yields when vanilla creates the call, shares its system reservations, supplies the fleet and exact vanilla breadcrumb intel, and owns no quest logic |
+| `vanilla/NearbyEventsBridge.java` | The only protected-state seam: binds to the live `NearbyEventsEvent` interval and timeout tracker through `ReflectionUtils`; fails closed rather than starting an independent scheduler |
 
 ### `skillshot`
 Reusable aim-and-fire framework. **Has its own README — read that first.**

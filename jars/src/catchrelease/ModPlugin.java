@@ -26,6 +26,7 @@ import catchrelease.memory.charges.ChargeManager;
 import catchrelease.campaign.fish.spawner.BuriedMoteSpawner;
 import catchrelease.campaign.ponds.listener.OnJumpPondSpawner;
 import catchrelease.rendering.spiral.BlackHoleSpiralWarp;
+import catchrelease.distress.DistressCallFramework;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.testing.DevShortcut;
 import com.fs.starfarer.api.BaseModPlugin;
@@ -74,6 +75,7 @@ public class ModPlugin extends BaseModPlugin {
 
         Aberration.Watcher.register();
         UpgradeManager.getInstance().updateBaseValues();
+        DistressCallFramework.register();
         SkillshotFramework.register();
 
         // transient - a save should never carry a screen-watcher

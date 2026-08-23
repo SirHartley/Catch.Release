@@ -3754,3 +3754,9 @@ Eventually:
 The formation comes about.",,
 catchrelease_campCloseDialogue,DialogOptionSelected,$option == catchrelease_campCloseDialogue,"MakeOtherFleetGoAway true
 CatchReleaseCMD leaveEncounter",,,
+distress_framework_hail,BeginFleetEncounter,"!$isHostile
+$distressFramework score:1300
+!$distressNoHail","AddText ""You're being hailed."" $faction.baseColor
+$hailing = true 0",,,Generic vanilla-style hail for framework-owned distress entities
+distress_framework_open,OpenCommLink,"!$isHostile
+$entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,The instance fires the event row's external dialogue trigger
