@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
-import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -125,7 +124,7 @@ public class FishRumors {
 
         @Override
         public String getIcon() {
-            return FishConstants.CODEX_CATEGORY_ICON;
+            return FishermanIdentity.getPortrait(0f);
         }
 
         @Override
