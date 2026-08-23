@@ -262,8 +262,7 @@ public class FishermanQuest {
             info.addImages(width, 128, opad, opad,
                     FishermanIdentity.getPortrait(0f), faction.getCrest());
 
-            info.addPara("Chart request given by the Fisherman, affiliated with "
-                            + faction.getDisplayNameWithArticle() + ".", opad,
+            info.addPara("Chart request given by the Fisherman.", opad,
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
