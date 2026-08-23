@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
@@ -12,15 +13,17 @@ import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.map.FishPresence;
-import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CargoAPI;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
@@ -148,18 +151,18 @@ public class FishermanQuest {
             this.quest = quest;
         }
 
-        protected Saved getQuest() {
-            Saved active = FishermanQuest.getActive();
-            return active == null ? quest : active;
-        }
-
-        protected boolean isLanded(Saved current) {
-            return FishermanQuest.isSatisfied(current);
-        }
-
         @Override
         public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
-            return FishermanQuest.getAsks(getQuest());
+            List<catchrelease.campaign.fish.shop.FishRequirement> out = new java.util.ArrayList<>();
+            if (quest == null || quest.speciesId == null) return out;
+
+            catchrelease.campaign.fish.shop.FishRequirement ask =
+                    new catchrelease.campaign.fish.shop.FishRequirement();
+
+            ask.speciesId = quest.speciesId;
+            out.add(ask);
+
+            return out;
         }
 
         @Override
@@ -168,23 +171,21 @@ public class FishermanQuest {
         }
 
         protected FishSpec getSpec() {
-            Saved current = getQuest();
-            return current == null ? null : FishSpecLoader.getFishSpec(current.speciesId);
+            return FishSpecLoader.getFishSpec(quest.speciesId);
         }
 
         @Override
         public String getName() {
-            Saved current = getQuest();
             FishSpec spec = getSpec();
 
-            if (isLanded(current)) return "Chart request: take it back";
+            if (quest.landed) return "Chart request: take it back";
 
             return "Chart request: " + (spec == null ? "a specimen" : spec.getDisplayName());
         }
 
         @Override
         public String getSmallDescriptionTitle() {
-            return isLanded(getQuest()) ? "Chart request: take it back" : "Chart request";
+            return quest.landed ? "Chart request: take it back" : "Chart request";
         }
 
         @Override
@@ -195,68 +196,32 @@ public class FishermanQuest {
             addBulletPoints(info, mode);
         }
 
-        protected float addProgressLine(TooltipMakerAPI info, Color text, float pad) {
-            List<FishRequirement> asks = getAsks();
-            if (asks.isEmpty()) {
-                info.addPara("0/1 aboard - The named species", text, pad);
-                return 0f;
-            }
-
-            FishRequirement ask = asks.get(0);
-            int aboard = Math.min(ask.count, FishCurrency.count(ask));
-            String progress = ask.describeProgress(aboard);
-            LabelAPI line = info.addPara(progress, text, pad);
-            FishRequirement.highlight(line, java.util.Collections.singletonList(ask), progress,
-                    aboard + "/" + ask.count);
-
-            return 0f;
-        }
-
-        protected float addDestinationLine(TooltipMakerAPI info, Saved current, Color text,
-                                           float pad) {
-            if (current.atPond) {
-                info.addPara("Marked rupture in %s", pad, text, Misc.getHighlightColor(),
-                        current.systemName);
-            } else {
-                info.addPara("Open space in %s", pad, text, Misc.getHighlightColor(),
-                        current.systemName);
-            }
-
-            return 0f;
-        }
-
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
-            Saved current = getQuest();
-            if (current == null) return;
+            Color h = Misc.getHighlightColor();
+            Color tc = getBulletColorForMode(mode);
 
-            Color text = getBulletColorForMode(mode);
-            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
 
             bullet(info);
-            pad = addProgressLine(info, text, pad);
 
-            if (isLanded(current)) {
-                info.addPara("Return to the nearest fishing boat", text, pad);
-            } else {
-                pad = addDestinationLine(info, current, text, pad);
-                if (current.atPond) {
-                    info.addPara("ROD/LYNE at the marked rupture", text, pad);
-                } else {
-                    info.addPara("Breach Lights and Harpoon only", text, pad);
-                }
-            }
+            FishSpec spec = getSpec();
+
+            String wanted = spec == null ? "the named species" : spec.getDisplayName();
+            LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
+            FishRequirement.highlight(wantedLine, getAsks(), wanted);
+            info.addPara("In %s", 0f, tc, h, quest.systemName);
+            info.addPara(quest.atPond ? "Habitat: Rupture only"
+                    : "Habitat: Breach lamps only", tc, 0f);
 
             unindent(info);
         }
 
         @Override
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
-            Saved current = getQuest();
-            if (current == null) return;
-
+            FishSpec spec = getSpec();
+            String name = spec == null ? "the named species" : spec.getDisplayName();
             float opad = 10f;
-            Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
             FactionAPI faction = getFactionForUIColors();
             info.addImages(width, 128, opad, opad,
@@ -267,29 +232,25 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
-            info.addPara("The Fisherman is waiting for the requested specimen.", opad);
-
-            info.addPara("What is wanted:", opad);
-            bullet(info);
-            addProgressLine(info, text, 0f);
-            unindent(info);
-
-            info.addPara(isLanded(current) ? "Return to:" : "Where and how:", opad);
-            bullet(info);
-            if (isLanded(current)) {
-                info.addPara("The nearest fishing boat", text, 0f);
+            if (quest.landed) {
+                LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
+                        Misc.getHighlightColor(), Misc.ucFirst(name));
+                FishRequirement.highlight(landed, getAsks(), Misc.ucFirst(name));
             } else {
-                addDestinationLine(info, current, text, 0f);
-                if (current.atPond) {
-                    info.addPara("Use the ROD/LYNE at the marked rupture", text, 0f);
-                } else {
-                    info.addPara("Use the Breach Lights, then land it with the Harpoon",
-                            text, 0f);
-                }
-            }
-            unindent(info);
+                LabelAPI request = info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
+                                + " in there until somebody lands it.", 10f,
+                        Misc.getHighlightColor(), name, quest.systemName);
+                FishRequirement.highlight(request, getAsks(), name, quest.systemName);
 
-            if (isLanded(current)) {
+                info.addPara(quest.atPond
+                                ? "The mark is under a rupture. Drop a rod down it."
+                                : "The mark is under open space. Nothing will show it but the lamps.",
+                        Misc.getGrayColor(), 10f);
+
+                info.addPara("Whatever comes up will be barely holding.", Misc.getGrayColor(), 10f);
+            }
+
+            if (quest.landed) {
                 FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
             } else {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
@@ -300,19 +261,17 @@ public class FishermanQuest {
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-            Saved current = getQuest();
-            if (isLanded(current)
+            if (quest.landed
                     && FishIntelMapButton.handleSetAutopilot(buttonId,
                     FishingIntro.getNearestBoat())) return;
-            if (!isLanded(current)
+            if (!quest.landed
                     && FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
             super.buttonPressConfirmed(buttonId, ui);
         }
 
         @Override
         public String getIcon() {
-            Saved current = getQuest();
-            return FishIntelIcon.get(current != null && current.atPond
+            return FishIntelIcon.get(quest.atPond
                     ? CatchImplement.POND : CatchImplement.BREACH_LAMP);
         }
 
@@ -339,17 +298,14 @@ public class FishermanQuest {
 
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
-            Saved current = getQuest();
-            if (current == null) return null;
-
             // once it is aboard the water is not where the player is being sent
-            if (isLanded(current)) return null;
+            if (quest.landed) return null;
 
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-                if (!system.getId().equals(current.systemId)) continue;
+                if (!system.getId().equals(quest.systemId)) continue;
 
-                if (current.atPond) {
-                    SectorEntityToken pond = QuestPond.findPondAt(system, current.x, current.y,
+                if (quest.atPond) {
+                    SectorEntityToken pond = QuestPond.findPondAt(system, quest.x, quest.y,
                             SPOT_SPREAD);
 
                     if (pond != null) return pond;
@@ -505,11 +461,17 @@ public class FishermanQuest {
         Saved quest = getActive();
         if (quest == null) return false;
 
-        FishRequirement ask = getAsk(quest);
-        if (ask == null) return false;
+        FishRequirement ask = new FishRequirement();
+        ask.count = 1;
+        ask.speciesId = quest.speciesId;
 
         boolean opened = FishHandoffPicker.show(dialog, "Select the requested specimen",
-                java.util.Collections.singletonList(ask), new FishHandoffPicker.Listener() {
+                java.util.Collections.singletonList(ask), new FishHandoffPicker.Eligibility() {
+                    @Override
+                    public boolean accepts(FishCatch fish) {
+                        return isEligible(quest, fish);
+                    }
+                }, new FishHandoffPicker.Listener() {
                     @Override
                     public void picked(FishHandoffPicker.Selection selection) {
                         if (turnIn(dialog == null ? null : dialog.getTextPanel(), selection)) {
@@ -538,34 +500,28 @@ public class FishermanQuest {
     }
 
     public static boolean isSatisfied() {
-        return isSatisfied(getActive());
-    }
+        Saved quest = getActive();
+        if (quest == null) return false;
 
-    protected static boolean isSatisfied(Saved quest) {
-        FishRequirement ask = getAsk(quest);
-
-        return ask != null && FishCurrency.count(ask) >= ask.count;
-    }
-
-    protected static List<FishRequirement> getAsks(Saved quest) {
-        FishRequirement ask = getAsk(quest);
-
-        if (ask == null) return java.util.Collections.emptyList();
-        return java.util.Collections.singletonList(ask);
-    }
-
-    protected static FishRequirement getAsk(Saved quest) {
-        if (quest == null || quest.speciesId == null) return null;
         ensureIdentity(quest);
 
-        FishRequirement ask = new FishRequirement();
-        ask.speciesId = quest.speciesId;
-        ask.lowCoherence = true;
-        ask.minCaughtAt = quest.acceptedAt;
-        ask.caughtSystemId = quest.systemId;
-        ask.questTargetId = quest.targetFishId;
+        return findAboard(quest) != null;
+    }
 
-        return ask;
+    protected static FishCatch findAboard(Saved quest) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return null;
+
+        for (CargoStackAPI stack : player.getCargo().getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isCatch(data)) continue;
+
+            for (FishCatch entry : FishItems.read(data)) {
+                if (isEligible(quest, entry)) return entry;
+            }
+        }
+
+        return null;
     }
 
     public static boolean turnIn(TextPanelAPI text) {
@@ -577,11 +533,8 @@ public class FishermanQuest {
 
     protected static boolean turnIn(TextPanelAPI text, FishHandoffPicker.Selection selection) {
         Saved quest = getActive();
-        FishRequirement ask = getAsk(quest);
         FishCatch selected = selection == null ? null : selection.getBestForFirstAsk();
-        if (quest == null || ask == null || !ask.matches(selected) || !selection.spend()) {
-            return false;
-        }
+        if (quest == null || !isEligible(quest, selected) || !selection.spend()) return false;
 
         return finishTurnIn(quest, text);
     }
@@ -617,8 +570,43 @@ public class FishermanQuest {
     }
 
     protected static boolean spend(Saved quest) {
-        FishRequirement ask = getAsk(quest);
-        return ask != null && FishCurrency.spend(ask);
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return false;
+
+        CargoAPI cargo = player.getCargo();
+
+        for (CargoStackAPI stack : cargo.getStacksCopy()) {
+            SpecialItemData data = stack.getSpecialDataIfSpecial();
+            if (!FishItems.isCatch(data)) continue;
+
+            List<FishCatch> contents = FishItems.read(data);
+
+            int found = -1;
+            for (int i = 0; i < contents.size(); i++) {
+                if (isEligible(quest, contents.get(i))) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found < 0) continue;
+
+            if (!FishItems.isContainer(data)) {
+                cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+                return true;
+            }
+
+            contents.remove(found);
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
+
+            // a container's contents are its identity, so a part-spent one is a different item
+            if (!contents.isEmpty()) {
+                cargo.addSpecial(FishItems.repack(data.getId(), contents), 1);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     protected static void letGo(Saved quest) {
@@ -663,8 +651,17 @@ public class FishermanQuest {
 
     public static void onCatchStored(FishCatch fish) {
         Saved quest = getActive();
-        FishRequirement ask = getAsk(quest);
-        if (ask != null && ask.matches(fish)) setLanded(quest, true);
+        if (quest != null && isEligible(quest, fish)) setLanded(quest, true);
+    }
+
+    protected static boolean isEligible(Saved quest, FishCatch fish) {
+        if (quest == null || fish == null) return false;
+        ensureIdentity(quest);
+
+        return quest.speciesId != null && quest.speciesId.equals(fish.speciesId)
+                && quest.targetFishId.equals(fish.questTargetId)
+                && fish.caughtAt >= quest.acceptedAt
+                && quest.systemId != null && quest.systemId.equals(fish.caughtSystemId);
     }
 
     protected static void ensureIdentity(Saved quest) {
