@@ -491,13 +491,17 @@ public class FishermanQuest {
     }
 
     public static void accept(Saved quest) {
+        accept(quest, null);
+    }
+
+    public static void accept(Saved quest, TextPanelAPI textPanel) {
         if (quest == null) return;
 
         ensureIdentity(quest);
 
         Global.getSector().getPersistentData().put(STATE_KEY, quest);
         Global.getSector().getPersistentData().remove(OFFER_KEY);
-        FishIntelNotifications.queue(new QuestIntel(quest));
+        FishIntelNotifications.queue(new QuestIntel(quest), textPanel);
     }
 
     public static boolean showTurnInPicker(final InteractionDialogAPI dialog,
