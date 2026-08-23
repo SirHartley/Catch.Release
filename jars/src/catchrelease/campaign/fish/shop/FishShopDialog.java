@@ -394,6 +394,20 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     list.addTooltipTo(createMarkTooltip(entry), ring,
                             TooltipMakerAPI.TooltipLocation.BELOW);
                 }
+
+                // the grey tier squares get the same treatment - hotspot sized to the pip row ShopRowPlugin.renderState draws at the row's right edge
+                if (entry.isUpgrade() && !entry.isMaxed()
+                        && ShopSchematics.hasMissingSchematic(entry.stat)) {
+                    float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(),
+                            ShopRowPlugin.PIP_SIZE, ShopRowPlugin.PIP_GAP);
+                    CustomPanelAPI pips = panel.createCustomPanel(pipsWidth, ROW_HEIGHT,
+                            new BaseCustomUIPanelPlugin() {
+                            });
+                    row.addComponent(pips).inTL(ROW_WIDTH - ShopRowPlugin.PAD_SIDE - pipsWidth, 0f);
+
+                    list.addTooltipTo(createPipTooltip(), pips,
+                            TooltipMakerAPI.TooltipLocation.BELOW);
+                }
             }
 
             listViewport = place(list, PAD, top);
@@ -443,6 +457,22 @@ public class FishShopDialog implements InteractionDialogPlugin {
             };
         }
 
+        protected TooltipMakerAPI.TooltipCreator createPipTooltip() {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    tooltip.addPara("%s - find a schematic to unlock", 0f,
+                            Misc.getTextColor(), Misc.getHighlightColor(), "Locked");
+                }
+            };
+        }
+
         protected void buildDetail() {
             float top = PAD + HEADER_HEIGHT + 10f;
             float height = HEIGHT - top - PAD;
@@ -460,6 +490,25 @@ public class FishShopDialog implements InteractionDialogPlugin {
             CustomPanelAPI head = panel.createCustomPanel(width - 10f, 84f,
                     new ShopDetailHeaderPlugin(entry));
             info.addCustom(head, 0f);
+
+            // hotspot mirroring ShopDetailHeaderPlugin.renderLadder's pip position: text column, one title line and its two pads down from the panel top
+            if (entry.isUpgrade() && !entry.isMaxed()
+                    && ShopSchematics.hasMissingSchematic(entry.stat)) {
+                LazyFont titleFont = ShopUi.getTitleFont();
+                float nameHeight = titleFont == null ? 20f : titleFont.getBaseHeight();
+                float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(),
+                        ShopDetailHeaderPlugin.PIP_SIZE, ShopDetailHeaderPlugin.PIP_GAP);
+
+                CustomPanelAPI pips = panel.createCustomPanel(pipsWidth,
+                        ShopDetailHeaderPlugin.PIP_SIZE + 4f, new BaseCustomUIPanelPlugin() {
+                        });
+                head.addComponent(pips).inTL(
+                        ShopDetailHeaderPlugin.BOX_SIZE + ShopDetailHeaderPlugin.TEXT_GAP,
+                        6f + nameHeight + 10f - 2f);
+
+                info.addTooltipTo(createPipTooltip(), pips,
+                        TooltipMakerAPI.TooltipLocation.BELOW);
+            }
 
             info.addPara(entry.getDescription(), 12f);
 
