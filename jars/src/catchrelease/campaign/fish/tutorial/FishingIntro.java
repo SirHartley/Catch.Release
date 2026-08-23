@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.tutorial;
 
+import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -309,8 +310,13 @@ public class FishingIntro {
             Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
             FactionAPI faction = getFactionForUIColors();
-            info.addImages(width, 128, opad, opad,
-                    FishermanIdentity.getPortrait(0f), faction.getCrest());
+            if (isCarryingFisherProperty()) {
+                info.addImage(Global.getSettings().getSpriteName(
+                        ModPlugin.MOD_ID, "tutorial_wreck"), width, 128, opad);
+            } else {
+                info.addImages(width, 128, opad, opad,
+                        FishermanIdentity.getPortrait(0f), faction.getCrest());
+            }
 
             if (target != null) {
                 info.addPara("Fishing lessons given by the Fisherman, affiliated with "
@@ -394,7 +400,7 @@ public class FishingIntro {
 
         @Override
         public String getIcon() {
-            return FishermanIdentity.getPortrait(0f);
+            return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder");
         }
 
         @Override
