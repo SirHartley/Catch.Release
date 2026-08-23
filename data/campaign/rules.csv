@@ -1337,12 +1337,14 @@ One checks the seal. $catchreleaseRewardCap is handed over in return.
 The third is already leaving.",,
 catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:1200
 !$catchrelease_fleetQuestTaken
-!$catchrelease_fleetQuestHailed","$catchrelease_fleetQuestHailed = true
+!$catchrelease_fleetQuestHailed
+!$distressFramework","$catchrelease_fleetQuestHailed = true
 FleetDesc
 HailPlayer",,,They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger.
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
-!$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+!$entity.isHostile
+!$entity.distressFramework","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
 Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestPitch""
 
 Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
@@ -3755,3 +3757,17 @@ Eventually:
 The formation comes about.",,
 catchrelease_campCloseDialogue,DialogOptionSelected,$option == catchrelease_campCloseDialogue,"MakeOtherFleetGoAway true
 CatchReleaseCMD leaveEncounter",,,
+distress_framework_hail,BeginFleetEncounter,"!$isHostile
+$distressFramework score:1300
+!$distressNoHail","AddText ""You're being hailed."" $faction.baseColor
+$hailing = true 0",,,Generic vanilla-style hail for framework-owned distress entities
+distress_framework_open,OpenCommLink,"!$isHostile
+$entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,The instance fires the event row's external dialogue trigger
+catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
+!$entity.catchrelease_fleetQuestTaken
+!$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestPitch""
+
+Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
+5:catchrelease_fqAcceptNoPromise:No promises.
+10:catchrelease_fqDecline:Decline",Distress framework entry; dialogue and sequencing are copied from the ordinary fleet offer
