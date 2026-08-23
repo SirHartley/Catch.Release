@@ -1259,9 +1259,10 @@ whole screen and never did — the locked-row tooltip in the same list proved it
 **A fleet quest never spawns a fleet, and until it is accepted it only stops one from avoiding the
 player.** The offer is memory keys and a `FleetQuestMarker` hung on a scavenger already in the
 player's system — no rename, no orders, no `$missionImportant`. The quest refreshes vanilla's
-never-avoid flag and removes the player from the navigation module's avoid list, as the Fisherman
-does, so the hull does not run from the fleet it is trying to hail. Turning one down otherwise costs
-nothing because there is nothing to tidy away.
+never-avoid flag under its own reason and removes the player from the navigation module's avoid
+list, as the Fisherman does, so the hull does not run from the fleet it is trying to hail. Release
+removes that reason on completion, refusal or expiry without disturbing another system's reason for
+the same flag.
 
 **Accepting supplants the hull.** `FleetQuest.supplant()` builds a copy (fresh members off the same
 variants, so nothing is owned by two fleets at once; only the source market carried over from the
