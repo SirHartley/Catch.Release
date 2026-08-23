@@ -159,6 +159,8 @@ public class FishingIntro {
             setLanded(target, isTargetMet());
             if (target.landed) return;
 
+            ensureTargetPondClaim(target);
+
             CampaignFleetAPI player = Global.getSector().getPlayerFleet();
             if (player == null) return;
 
@@ -664,6 +666,7 @@ public class FishingIntro {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
+        ensureTargetPondClaim(target);
         updateIntel();
     }
 
@@ -694,6 +697,23 @@ public class FishingIntro {
 
         QuestPond.releaseAll(TutorialConstants.TARGET_KEY);
         QuestPond.clearMotes(TutorialConstants.TARGET_KEY);
+    }
+
+    protected static void ensureTargetPondClaim(Target target) {
+        if (target == null || !target.atPond || target.systemId == null) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!target.systemId.equals(system.getId())) continue;
+
+            SectorEntityToken pond = QuestPond.findPondAt(system, target.x, target.y,
+                    TutorialConstants.SPOT_SPREAD);
+
+            if (pond != null && !QuestPond.isClaimedBy(
+                    pond, TutorialConstants.TARGET_KEY)) {
+                QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+            }
+            return;
+        }
     }
 
     protected static void setLanded(Target target, boolean landed) {
@@ -1199,9 +1219,7 @@ public class FishingIntro {
                     continue;
                 }
 
-                if (!target.anySpecies) {
-                    QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
-                }
+                QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
 
                 mote = QuestPond.placeMote(pond, speciesId, true,
                         TutorialConstants.TARGET_KEY);
