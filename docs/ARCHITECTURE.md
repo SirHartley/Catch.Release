@@ -905,7 +905,7 @@ Shader and GL machinery.
 | `memory/upgrades/UpgradeManager.java` | Save-persisted levels. `getValue` is the single read entry point; `updateBaseValues` re-walks the sheet each load, seeding stats the save predates and refreshing every sheet-owned field, so the save owns the levels and the sheet owns everything else |
 | `memory/upgrades/StatIds.java` | The ids joining code to `UpgradeData.csv` |
 | `memory/upgrades/UpgradeStat.java` | One row: base, FLAT/MULT per level, category, optional outfitter icon path, current value |
-| `memory/charges/ChargeManager.java` | Float charge pools that regenerate continuously; timed refill and explicit capped gains preserve fractional progress and receive one callback when a step crosses a whole-charge boundary, without treating initial full-pool creation as a gain |
+| `memory/charges/ChargeManager.java` | Float charge pools that regenerate only while the campaign is unpaused; timed refill and explicit capped gains preserve fractional progress and receive one callback when a step crosses a whole-charge boundary, without treating initial full-pool creation as a gain |
 | `memory/TransientMemory.java` | Session-only cache. Keys must start with `$`, never persisted |
 | `memory/RandomMemoryHelper.java` | A per-star-system `Random`, stored in that system's memory |
 | `helper/loading/FishSpecLoader.java` | `fish.csv` → `FishSpec`, cached |
