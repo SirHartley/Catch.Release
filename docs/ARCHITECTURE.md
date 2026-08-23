@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 251 Java files across twelve top-level packages, plus
+What is where, and which file to open first. 252 Java files across twelve top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -91,7 +91,8 @@ Everything game-facing is wired from `ModPlugin.java`.
    the fishing boats' conversations are rules rows and need no plugin
 5. `HarpoonPatrolResponse.register()` and `LampPatrolResponse.register()` — the crime responses: a
    patrol after an outstanding harpooning, and the stop over lit lamps
-6. `FleetQuestSpawner.register()` — fleets out in the world that want fish
+6. `FleetQuestSpawner.register()` — the five local scavenger offers; the stranded and dead-engine
+   jobs enter through the distress framework instead
 7. `FishermanSpawner.register()` — the daily roll for the visiting fishing boat
 8. `CoreFisherSpawner.register()` — one standing boat to every inhabited system
 9. `FishermanQuest.Keeper.register()` — keeps a chart request's specimen in the water
@@ -106,8 +107,9 @@ Everything game-facing is wired from `ModPlugin.java`.
 14. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
    stats missing from the save are seeded and every sheet-owned field of a held stat is refreshed,
    so a save carries levels and nothing else that matters
-15. `DistressCallFramework.register()` — the merged distress-call registry and its persistent,
-   idempotent coordinator, bound to vanilla's live nearby-event cadence
+15. `CatchReleaseDistressProvider.register()` then `DistressCallFramework.register()` — the two
+   fleet-job adapters, merged distress-call registry and its persistent, idempotent coordinator,
+   bound to vanilla's live nearby-event cadence
 16. `SkillshotFramework.register()` — the aiming framework
 17. `FishMapFilterScript` as a transient script — the sector-map filter
 18. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
@@ -188,7 +190,8 @@ instead of a generic vanilla voice greeting.
 **`data/campaign/distress_calls.csv`** — the merged event registry for the reusable distress-call
 framework. One un-commented, namespaced row is one enabled event; provider adapters own eligibility
 and all quest content. The framework owns only the vanilla-scheduled entity, breadcrumb intel and
-the rules trigger named by the row.
+the rules trigger named by the row. Catch.Release contributes the stranded trade fleet and the
+scavenger with a dead engine; both enter the existing `FleetQuest` spine through one provider.
 
 **`data/world/factions/default_ranks.json`** — contributes the `catchrelease_crabMerchant`
 rank label used by Crablobab's person card and the Fisherman's stable `catchrelease_none` label.
@@ -511,10 +514,11 @@ Jobs hung on a hull that was already out there, which then has to still be there
 
 | File | What it does |
 |---|---|
-| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; accepting renders vanilla's intel-added card in the live conversation, while `take()` still waits for that conversation to close before it supplants the hull with a copy, then `mark()` and `hold()`. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
-| `FleetQuestSpawner.java` | Hangs an offer on a hull already in the player's system; spawns nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep, and the trade's own boat would be copied away by accepting it. Rare on purpose: one active at a time, 7% a check, 45-day cooldown |
-| `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, re-hangs the mark after a load, times the offer out |
-| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. `fleetType` is a preference between candidates, not a recipe |
+| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; a distress-sourced offer suppresses the local cyan marker because vanilla's distress intel is the locator. Accepting renders vanilla's intel-added card in the live conversation, while `take()` still waits for that conversation to close before it supplants the hull with a copy, then `mark()` and `hold()`. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
+| `FleetQuestSpawner.java` | Hangs one of five local offers on a hull already in the player's system; spawns nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep. Rare on purpose: one active at a time, 7% a check, 45-day cooldown |
+| `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, resolves a framework distress entity before accepting or declining, re-hangs only local offer marks after a load, and times the offer out |
+| `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. Five remain in the local scavenger picker; `STRANDED` and `SCAVENGER_ENGINE` are retained in place for save compatibility and selected by the distress adapter |
+| `CatchReleaseDistressProvider.java` | The only Catch.Release dependency of the generic distress package: gates both CSV rows behind fishing work and the shared one-job limit, prepares their existing `FleetQuest`, and abandons it if the vanilla-style distress fleet expires |
 
 ### `campaign/fish/colony`
 The Breach Conservatory: the structure that brings the fishing trade to the player's own colony.

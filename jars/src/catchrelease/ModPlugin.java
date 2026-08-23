@@ -20,6 +20,7 @@ import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
+import catchrelease.campaign.fish.jobs.fleet.CatchReleaseDistressProvider;
 import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
 import catchrelease.memory.charges.ChargeManager;
@@ -75,6 +76,7 @@ public class ModPlugin extends BaseModPlugin {
 
         Aberration.Watcher.register();
         UpgradeManager.getInstance().updateBaseValues();
+        CatchReleaseDistressProvider.register();
         DistressCallFramework.register();
         SkillshotFramework.register();
 

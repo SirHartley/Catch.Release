@@ -57,14 +57,25 @@ public class FleetQuest extends FishJob {
     protected CampaignFleetAPI giver;
     protected transient FleetMarkerRenderer marker;
     protected boolean takenUp = false;
+    protected boolean distressOffer = false;
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
+        return startOn(giver, type, false);
+    }
+
+    public static FleetQuest startDistressOn(CampaignFleetAPI giver, FleetQuestType type) {
+        return startOn(giver, type, true);
+    }
+
+    private static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type,
+                                      boolean distressOffer) {
         if (giver == null || giver.isExpired() || type == null) return null;
         if (isQuestFleet(giver)) return null;
 
         FleetQuest quest = new FleetQuest();
         quest.type = type;
         quest.giver = giver;
+        quest.distressOffer = distressOffer;
 
         if (!quest.create(null, false)) return null;
 
@@ -151,7 +162,7 @@ public class FleetQuest extends FishJob {
     }
 
     public void ensureMarked() {
-        if (takenUp || giver == null || giver.isExpired()) return;
+        if (distressOffer || takenUp || giver == null || giver.isExpired()) return;
         if (marker != null && !marker.isExpired()) return;
 
         marker = FleetMarkerRenderer.addTo(giver, OFFER_SPRITE_CATEGORY, OFFER_SPRITE,
@@ -298,6 +309,9 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(REWARD_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
         giver.getMemoryWithoutUpdate().unset(REF_KEY);
+
+        Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
+                MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
 
         if (!takenUp) return;
 

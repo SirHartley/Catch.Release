@@ -61,6 +61,14 @@ public enum FleetQuestType {
             "An argument aboard that has outlasted everyone's patience for it.",
             "Arguing");
 
+    private static final FleetQuestType[] LOCAL_OFFERS = {
+            SEEKER,
+            QUOTA,
+            STARVING,
+            COLLECTOR,
+            WAGER
+    };
+
     public final String title;
     public final String fleetType;
     public final String pitch;
@@ -141,6 +149,6 @@ public enum FleetQuestType {
     }
 
     public static FleetQuestType rollAny(Random random) {
-        return values()[random.nextInt(values().length)];
+        return LOCAL_OFFERS[random.nextInt(LOCAL_OFFERS.length)];
     }
 }

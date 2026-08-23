@@ -1,1 +1,3 @@
 id,providerId,weight,probability,factionId,fleetType,minFP,maxFP,cooldownDays,maxActive,dialogTrigger,tags
+catchrelease_stranded_fleet,catchrelease_fleet_quests,10,0.35,independent,smallTrader,20,45,45,1,CatchReleaseDistressFleetQuest,fish_job
+catchrelease_dead_engine,catchrelease_fleet_quests,10,0.35,independent,scavengerSmall,15,30,45,1,CatchReleaseDistressFleetQuest,fish_job

@@ -39,6 +39,11 @@ public final class DistressCallFramework {
         manager.resolve(fleet);
     }
 
+    public static boolean isManaged(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate()
+                .getBoolean(DistressCallSettings.ENTITY_FLAG);
+    }
+
     public static void log(String message) {
         if (DistressCallSettings.LOG_DEBUG) {
             Global.getLogger(DistressCallFramework.class).info(message);
