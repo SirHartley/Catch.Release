@@ -168,7 +168,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return highlightIntroText(ruleId, dialog, params, memoryMap);
             case "highlightFishText":
                 return highlightQuestText(ruleId, dialog, params, memoryMap,
-                        Collections.emptyList(), null);
+                        Collections.emptyList());
             case "showIntroMap":
                 return showIntroMap(dialog, params.size() > 1
                         ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
@@ -503,7 +503,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
 
         return job != null && highlightQuestText(ruleId, dialog, params, memoryMap,
-                job.getAsks(), job.describeAsks());
+                job.getAsks());
     }
 
     protected boolean highlightWorkText(String ruleId, InteractionDialogAPI dialog,
@@ -517,8 +517,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         List<FishRequirement> asks = new ArrayList<>();
         asks.add(ask);
 
-        return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
-                FishermanQuest.describe(work));
+        return highlightQuestText(ruleId, dialog, params, memoryMap, asks);
     }
 
     protected boolean highlightIntroText(String ruleId, InteractionDialogAPI dialog,
@@ -535,13 +534,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             }
         }
 
-        return highlightQuestText(ruleId, dialog, params, memoryMap, asks,
-                FishingIntro.describeTarget());
+        return highlightQuestText(ruleId, dialog, params, memoryMap, asks);
     }
 
     protected boolean highlightQuestText(String ruleId, InteractionDialogAPI dialog,
                                          List<Token> params, Map<String, MemoryAPI> memoryMap,
-                                         List<FishRequirement> asks, String fullAsk) {
+                                         List<FishRequirement> asks) {
         com.fs.starfarer.api.campaign.TextPanelAPI panel = text(dialog);
         if (panel == null) return false;
 
@@ -551,32 +549,36 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             if (value != null && !value.isEmpty()) values.add(value);
         }
 
-        List<FishRequirement.RarityHighlight> askRarity =
-                FishRequirement.getRarityHighlights(asks);
-        List<FishRequirement.RarityHighlight> fishNames =
-                FishRequirement.getFishNameHighlights(values.toArray(new String[0]));
-
-        Map<String, Color> highlights = new LinkedHashMap<>();
-        for (String value : values) {
-            boolean containsRarity = false;
-            for (FishRequirement.RarityHighlight entry : fishNames) {
-                if (value.contains(entry.text)) {
-                    containsRarity = true;
+        List<FishRequirement.RarityHighlight> rarity =
+                new ArrayList<>(FishRequirement.getRarityHighlights(asks));
+        for (FishRequirement.RarityHighlight entry :
+                FishRequirement.getFishNameHighlights(values.toArray(new String[0]))) {
+            boolean duplicate = false;
+            for (FishRequirement.RarityHighlight existing : rarity) {
+                if (existing.text.equals(entry.text)) {
+                    duplicate = true;
                     break;
                 }
             }
-            if (!containsRarity && !askRarity.isEmpty() && fullAsk != null
-                    && (value.equals(fullAsk) || value.equals(Misc.ucFirst(fullAsk)))) {
-                containsRarity = true;
-            }
-            if (!containsRarity) highlights.putIfAbsent(value, Misc.getHighlightColor());
+            if (!duplicate) rarity.add(entry);
         }
 
-        for (FishRequirement.RarityHighlight entry : askRarity) {
-            highlights.put(entry.text, entry.rarity.color);
-        }
-        for (FishRequirement.RarityHighlight entry : fishNames) {
-            highlights.put(entry.text, entry.rarity.color);
+        Map<String, Color> highlights = new LinkedHashMap<>();
+        for (String value : values) {
+            List<FishRequirement.RarityHighlight> inValue = new ArrayList<>();
+            for (FishRequirement.RarityHighlight entry : rarity) {
+                if (value.contains(entry.text)) inValue.add(entry);
+            }
+            inValue.sort((left, right) -> Integer.compare(
+                    value.indexOf(left.text), value.indexOf(right.text)));
+
+            if (inValue.isEmpty()) {
+                highlights.putIfAbsent(value, Misc.getHighlightColor());
+                continue;
+            }
+            for (FishRequirement.RarityHighlight entry : inValue) {
+                highlights.putIfAbsent(entry.text, entry.rarity.color);
+            }
         }
         if (highlights.isEmpty()) return true;
 

@@ -543,14 +543,14 @@ public class FishingIntro {
 
         grant(TutorialConstants.ROD, text);
 
-        setTarget(rollTarget(RODDED));
+        setTarget(rollTarget(RODDED), text);
     }
 
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
         Target target = rollTarget(FISH_ONE);
-        setTarget(target);
+        setTarget(target, text);
         ensureTargetBoat(target);
     }
 
@@ -599,7 +599,7 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
-        setTarget(rollTarget(FISH_TWO));
+        setTarget(rollTarget(FISH_TWO), text);
     }
 
     public static void giveCharts(TextPanelAPI text) {
@@ -612,7 +612,7 @@ public class FishingIntro {
         target.stage = FISH_THREE;
         target.speciesIds = given;
 
-        setTarget(target);
+        setTarget(target, text);
     }
 
     public static void finish(TextPanelAPI text) {
@@ -636,7 +636,7 @@ public class FishingIntro {
         return stored instanceof Target ? (Target) stored : null;
     }
 
-    protected static void setTarget(Target target) {
+    protected static void setTarget(Target target, TextPanelAPI text) {
         if (target == null) {
             clearTarget();
             return;
@@ -646,7 +646,7 @@ public class FishingIntro {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
-        updateIntel();
+        updateIntel(text);
     }
 
     protected static void clearTarget() {
@@ -656,17 +656,35 @@ public class FishingIntro {
     }
 
     protected static void updateIntel() {
-        IntelManagerAPI manager = Global.getSector().getIntelManager();
-
-        if (!manager.getCommQueue(IntroIntel.class).isEmpty()
-                || manager.getIntel(IntroIntel.class).isEmpty()) return;
-
-        sendIntelUpdate();
+        updateIntel(null);
     }
 
-    protected static void sendIntelUpdate() {
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
-                .getIntel(IntroIntel.class)) {
+    protected static void updateIntel(TextPanelAPI text) {
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        List<IntelInfoPlugin> queued = manager.getCommQueue(IntroIntel.class);
+
+        if (!queued.isEmpty()) {
+            showIntelInDialogue(queued, text);
+            return;
+        }
+
+        List<IntelInfoPlugin> active = manager.getIntel(IntroIntel.class);
+        if (active.isEmpty()) return;
+
+        showIntelInDialogue(active, text);
+        sendIntelUpdate(active);
+    }
+
+    protected static void showIntelInDialogue(List<IntelInfoPlugin> entries, TextPanelAPI text) {
+        if (text == null) return;
+
+        for (IntelInfoPlugin intel : entries) {
+            FishIntelNotifications.showAdded((IntroIntel) intel, text);
+        }
+    }
+
+    protected static void sendIntelUpdate(List<IntelInfoPlugin> entries) {
+        for (IntelInfoPlugin intel : entries) {
             FishIntelNotifications.update((IntroIntel) intel, null);
         }
     }
