@@ -460,7 +460,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 
 | File | What it does |
 |---|---|
-| `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
+| `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives, and the shared catch-implement predicate used by normal and rumor spawning |
 | `FishCatch.java` | One rolled specimen — length, weight, aberration, region, exact source rupture, catch timestamp, and how it was taken; Fisherman chart catches additionally append their target ID and system to the backward-compatible encoded tail so exact provenance survives loose cargo and containers |
 | `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour. `rank` is the explicit ladder position - comparisons never read `ordinal()` |
 | `FishRarity.java` | The sole palette source for every player-facing rarity surface, plus the speed and wander ladder. Common is a warm beige-creme distinct from both vanilla standard text and disabled grey; every caller uses `rarity.color` instead of substituting either. `rank` is the explicit ladder position every comparison and rarity-graded price reads - never `ordinal()`, so reordering the enum cannot silently reshuffle the ladder |
@@ -624,7 +624,7 @@ Which fish, where.
 
 | File | What it does |
 |---|---|
-| `PondFishSpawner.java` | Weighted selection filtered by star type, tags and region; biased by drone tackle and rumors |
+| `PondFishSpawner.java` | Weighted selection filtered by habitat and catch implement; biased by drone tackle and rumors. A stranger rumor bypasses only its species' normal range, never the implement that can reach it |
 | `BuriedMoteSpawner.java` | Keeps a target buried-mote population around the player |
 
 ### `campaign/fish/shop`
