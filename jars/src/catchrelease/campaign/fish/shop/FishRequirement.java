@@ -41,6 +41,8 @@ public class FishRequirement {
     public CatchImplement implement = null;
     public String sourceId = null;
     public long minCaughtAt = 0L;
+    public String caughtSystemId = null;
+    public String questTargetId = null;
     public List<FishRequirement> anyOf = new ArrayList<>();
 
     public static class RarityHighlight {
@@ -89,6 +91,8 @@ public class FishRequirement {
         if (implement != null && entry.implement != implement) return false;
         if (sourceId != null && !sourceId.equals(entry.sourceId)) return false;
         if (minCaughtAt > 0L && entry.caughtAt < minCaughtAt) return false;
+        if (caughtSystemId != null && !caughtSystemId.equals(entry.caughtSystemId)) return false;
+        if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) return false;
 
         if (lowCoherence) {
             if (entry.aberration < LOW_COHERENCE) return false;
