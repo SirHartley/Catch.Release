@@ -111,6 +111,16 @@ public class ShopSchematics {
         return requires(stat, target) ? target : -1;
     }
 
+    public static boolean hasMissingSchematic(UpgradeStat stat) {
+        if (stat == null) return false;
+
+        for (int rung = Math.max(0, stat.level) + 1; rung <= stat.maxLevel; rung++) {
+            if (requires(stat, rung) && !has(stat, rung)) return true;
+        }
+
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     protected static Set<String> getFresh() {
         if (Global.getSector() == null) return new LinkedHashSet<>();
