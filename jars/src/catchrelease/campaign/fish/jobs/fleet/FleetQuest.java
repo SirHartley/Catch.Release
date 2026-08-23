@@ -354,9 +354,9 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_NO_JUMP);
         giver.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
 
-        giver.clearAssignments();
-
-        if (!giver.isExpired()) Misc.giveStandardReturnToSourceAssignments(giver);
+        if (!giver.isExpired() && !Misc.isFleetReturningToDespawn(giver)) {
+            Misc.giveStandardReturnToSourceAssignments(giver);
+        }
     }
 
     @Override
@@ -365,10 +365,8 @@ public class FleetQuest extends FishJob {
 
         if (!Stage.DONE.equals(currentStage) || giver == null) return;
 
-        dropMarker();
-        Misc.makeUnimportant(giver, IMPORTANT_REASON);
-        giver.getMemoryWithoutUpdate().unset(DELIVER_FLAG);
         giver.getMemoryWithoutUpdate().set(THANKS_KEY, type.thanks);
+        release();
     }
 
     @Override
