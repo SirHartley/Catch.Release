@@ -258,7 +258,8 @@ public class FleetQuest extends FishJob {
         if (giver == null || giver.isExpired()) return;
 
         MemoryAPI memory = giver.getMemoryWithoutUpdate();
-        memory.set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        Misc.setFlagWithReason(memory, MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY,
+                IMPORTANT_REASON, true, HOLD_DAYS);
         memory.unset(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY);
 
         CampaignFleetAPI player = Global.getSector() == null
@@ -346,6 +347,9 @@ public class FleetQuest extends FishJob {
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
                 MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
+        Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
+                MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY,
+                IMPORTANT_REASON, false, HOLD_DAYS);
 
         if (!takenUp) return;
 
