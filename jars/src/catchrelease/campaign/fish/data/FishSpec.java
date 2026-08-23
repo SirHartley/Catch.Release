@@ -81,7 +81,7 @@ public class FishSpec {
 
         if (where.aberration < minAberration || where.aberration > maxAberration) return false;
 
-        if (how != null && !reachedBy.isEmpty() && !reachedBy.contains(how)) return false;
+        if (!canBeReachedBy(how)) return false;
 
         if (!systemTags.isEmpty()) {
             if (where.tags == null) return false;
@@ -98,5 +98,9 @@ public class FishSpec {
         }
 
         return true;
+    }
+
+    public boolean canBeReachedBy(CatchImplement how) {
+        return how == null || reachedBy.isEmpty() || reachedBy.contains(how);
     }
 }

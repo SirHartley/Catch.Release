@@ -460,7 +460,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 
 | File | What it does |
 |---|---|
-| `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives |
+| `FishSpec.java` | One row of the fish table: identity, minigame stats, value/size range, where it lives, and the shared catch-implement predicate used by normal and rumor spawning |
 | `FishCatch.java` | One rolled specimen — length, weight, aberration, region, exact source rupture, catch timestamp, and how it was taken; Fisherman chart catches additionally append their target ID and system to the backward-compatible encoded tail so exact provenance survives loose cargo and containers |
 | `FishGrade.java` | Five-step quality ladder, size fraction → value multiplier and colour. `rank` is the explicit ladder position - comparisons never read `ordinal()` |
 | `FishRarity.java` | The sole palette source for every player-facing rarity surface, plus the speed and wander ladder. Common is a warm beige-creme distinct from both vanilla standard text and disabled grey; every caller uses `rarity.color` instead of substituting either. `rank` is the explicit ladder position every comparison and rarity-graded price reads - never `ordinal()`, so reordering the enum cannot silently reshuffle the ladder |
@@ -554,7 +554,7 @@ follows the local five-rung coherence reading, and none of them explains how.
 | `FishermanMapIcon.java` | The boat's dedicated fisher-hook mark on the system map — one per undetected boat while the player shares its location. It yields to the fleet's own visible sensor contact at detection range, returns if contact is lost, and reconciles old-save duplicates and marks in departed locations away. Its tooltip keeps the authored `The Fisherman` casing with vanilla's `ucFirst` title styling instead of `getNameWithFaction()` lower-casing the named fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin. The five portraits follow `FishItemPlugin`'s canonical coherence bands; `preparePortrait` mutates the shared person only for the boat being hailed, immediately before vanilla draws the comm portrait, so off-screen boats cannot overwrite it. Every identity lookup clears rank and post - vanilla's own rankless presentation: the person card shows one muted None and dedups the post line against the rank by string, so a registered "none" rank label breaks the dedup and prints the label twice. Repairs old saves that persisted either field |
 | `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
-| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` is queued through the shared next-unpaused-frame notification delivery, uses the Fisherman's stable portrait as its intel icon, gives the same lead in precise intel prose with the stranger's name in its rarity colour, counts down against the rumor's own timestamp, plots a route to the reported system for a stranger-species lead, and labels loot/rarity leads honestly as **Set autopilot** instead of opening a fish planner with no fish target. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
+| `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` is queued through the shared next-unpaused-frame notification delivery, uses the Fisherman's stable portrait as its intel icon, gives the same lead in precise intel prose with the stranger's name in its rarity colour, counts down against the rumor's own timestamp, and reports expiry only while the player is in hyperspace or the reported system. Stranger-species leads plot a route to that system; loot/rarity leads honestly use **Set autopilot** instead of opening a fish planner with no fish target. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves |
 | `FishermanConstants.java` | Every number the above read |
 
 The Fisherman map mark is also an autopilot proxy. Once per second while the player is local,
@@ -624,7 +624,7 @@ Which fish, where.
 
 | File | What it does |
 |---|---|
-| `PondFishSpawner.java` | Weighted selection filtered by star type, tags and region; biased by drone tackle and rumors |
+| `PondFishSpawner.java` | Weighted selection filtered by habitat and catch implement; biased by drone tackle and rumors. A stranger rumor bypasses only its species' normal range, never the implement that can reach it |
 | `BuriedMoteSpawner.java` | Keeps a target buried-mote population around the player |
 
 ### `campaign/fish/shop`

@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -48,6 +49,8 @@ public class FishRumors {
 
     public static class RumorIntel extends BaseIntelPlugin {
 
+        protected static final Object EXPIRED_UPDATE = new Object();
+
         protected final Saved rumor;
 
         public RumorIntel(Saved rumor) {
@@ -56,6 +59,10 @@ public class FishRumors {
 
         @Override
         public String getName() {
+            if (getListInfoParam() == EXPIRED_UPDATE) {
+                return "Fisherman's rumor expired: " + rumor.systemName;
+            }
+
             return "Fisherman's rumor: " + rumor.systemName;
         }
 
@@ -73,6 +80,8 @@ public class FishRumors {
 
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            if (getListInfoParam() == EXPIRED_UPDATE) return;
+
             Color tc = getBulletColorForMode(mode);
 
             float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
@@ -85,6 +94,27 @@ public class FishRumors {
             addDays(info, "before it is stale", Math.max(daysLeft, 0f), tc, initPad);
 
             unindent(info);
+        }
+
+        @Override
+        protected void notifyEnded() {
+            super.notifyEnded();
+
+            if (shouldNotifyExpiry()) sendUpdateIfPlayerHasIntel(EXPIRED_UPDATE, false);
+        }
+
+        protected boolean shouldNotifyExpiry() {
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            if (player == null) return false;
+            if (player.isInHyperspace()) return true;
+
+            LocationAPI location = player.getContainingLocation();
+            if (!(location instanceof StarSystemAPI)) return false;
+
+            StarSystemAPI system = (StarSystemAPI) location;
+            if (rumor.systemId != null) return rumor.systemId.equals(system.getId());
+
+            return rumor.systemName != null && rumor.systemName.equals(system.getNameWithNoType());
         }
 
         @Override

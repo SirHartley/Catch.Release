@@ -46,7 +46,9 @@ public class PondFishSpawner {
         String strangerId = FishRumors.getStrangerId(location);
         if (strangerId != null) {
             FishSpec stranger = FishSpecLoader.getFishSpec(strangerId);
-            if (stranger != null) picker.add(stranger, FishermanConstants.RUMOR_STRANGER_WEIGHT);
+            if (stranger != null && stranger.canBeReachedBy(how)) {
+                picker.add(stranger, FishermanConstants.RUMOR_STRANGER_WEIGHT);
+            }
         }
 
         if (picker.isEmpty()) {
