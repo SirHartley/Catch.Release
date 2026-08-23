@@ -614,7 +614,7 @@ public class FishingIntro {
         setStage(FISH_THREE);
 
         List<String> given = new ArrayList<>();
-        giveCharts(TutorialConstants.FREE_COMMONS, given, text);
+        giveNearbyCommonCharts(TutorialConstants.FREE_COMMONS, given, text);
 
         Target target = new Target();
         target.stage = FISH_THREE;
@@ -1040,6 +1040,73 @@ public class FishingIntro {
 
     protected static void giveCharts(int count, List<String> givenOut, TextPanelAPI text) {
         giveChartsOfRarity(FishRarity.COMMON, count, givenOut, text);
+    }
+
+    protected static void giveNearbyCommonCharts(int count, List<String> givenOut,
+                                                 TextPanelAPI text) {
+        List<StarSystemAPI> nearby = getNearbyChartSystems();
+        List<FishSpec> candidates = new ArrayList<>();
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || spec.rarity != FishRarity.COMMON) continue;
+            if (!spec.hasHabitat() || spec.spawnWeight <= 0f) continue;
+            if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
+            if (getNearbySpawnScore(spec, nearby) <= 0f) continue;
+
+            candidates.add(spec);
+        }
+
+        candidates.sort((left, right) -> {
+            int byNearbyScore = Float.compare(
+                    getNearbySpawnScore(right, nearby), getNearbySpawnScore(left, nearby));
+            if (byNearbyScore != 0) return byNearbyScore;
+
+            int byWeight = Float.compare(right.spawnWeight, left.spawnWeight);
+            if (byWeight != 0) return byWeight;
+
+            return left.id.compareTo(right.id);
+        });
+
+        for (int i = 0; i < count && i < candidates.size(); i++) {
+            FishSpec spec = candidates.get(i);
+
+            FishLog.unlockLocationData(spec.id);
+            if (givenOut != null) givenOut.add(spec.id);
+            if (text != null) addRangeDataGainText(spec, text);
+        }
+    }
+
+    protected static List<StarSystemAPI> getNearbyChartSystems() {
+        List<StarSystemAPI> nearby = new ArrayList<>();
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null) return nearby;
+
+        Vector2f from = player.getLocationInHyperspace();
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
+            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
+            if (system.getCenter() == null) continue;
+            if (Misc.getDistanceLY(from, system.getLocation())
+                    > TutorialConstants.CHART_TARGET_RANGE_LY) continue;
+
+            nearby.add(system);
+        }
+
+        return nearby;
+    }
+
+    protected static float getNearbySpawnScore(FishSpec spec, List<StarSystemAPI> systems) {
+        float score = 0f;
+
+        for (StarSystemAPI system : systems) {
+            FishHabitat habitat = FishHabitat.of(system);
+
+            if (spec.matches(habitat, CatchImplement.POND)) score += spec.spawnWeight;
+            if (spec.matches(habitat, CatchImplement.BREACH_LAMP)) score += spec.spawnWeight;
+        }
+
+        return score;
     }
 
     public static void giveChartsOfRarity(FishRarity rarity, int count) {

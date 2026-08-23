@@ -44,6 +44,7 @@ public class TutorialConstants {
     public static final float SECOND_MIN_LY = 2f;
     public static final float SECOND_MAX_LY = 10f;
     public static final float SECOND_MIN_DRIFT = 0.3f;
+    public static final float CHART_TARGET_RANGE_LY = 10f;
 
     public static final float KEEP_CHECK_SECONDS = 2f;
     public static final float SPOT_SPREAD = 400f;
