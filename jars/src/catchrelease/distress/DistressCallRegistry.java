@@ -48,4 +48,8 @@ final class DistressCallRegistry {
     static List<DistressCallSpec> all() {
         return new ArrayList<>(specs.values());
     }
+
+    static List<String> ids() {
+        return new ArrayList<>(specs.keySet());
+    }
 }

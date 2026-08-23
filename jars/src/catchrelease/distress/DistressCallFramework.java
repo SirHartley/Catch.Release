@@ -2,8 +2,10 @@ package catchrelease.distress;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class DistressCallFramework {
@@ -32,6 +34,18 @@ public final class DistressCallFramework {
 
     public static DistressCallProvider getProvider(String id) {
         return providers.get(id);
+    }
+
+    public static List<String> getEventIds() {
+        return DistressCallRegistry.ids();
+    }
+
+    public static StarSystemAPI spawnForTesting(String eventId) {
+        return DistressCallManager.getInstanceOrRegister().spawnForTesting(eventId);
+    }
+
+    public static StarSystemAPI claimVanillaSystemForTesting() {
+        return DistressCallManager.getInstanceOrRegister().claimVanillaSystemForTesting();
     }
 
     public static void resolve(CampaignFleetAPI fleet) {

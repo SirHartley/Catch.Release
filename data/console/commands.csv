@@ -3,3 +3,4 @@ AllFish,catchrelease.commands.AllFish,"catchrelease,cheat,campaign,market",allfi
 AddFish,catchrelease.commands.AddFish,"catchrelease,cheat,campaign,market",addfish <fish id or name> <amount>,"Adds a fish species by id or name. Partial names, typo correction, and autocomplete suggestions are supported."
 SpawnFisherman,catchrelease.commands.SpawnFisherman,"catchrelease,cheat,campaign,market",spawnfisherman,"Spawns the visiting Fisherman in the player's current star system."
 SpawnFleetQuest,catchrelease.commands.SpawnFleetQuest,"catchrelease,cheat,campaign,market",spawnfleetquest <quest>,"Spawns a route-backed scavenger with the selected local fleet quest. Available only inside a star system; quest ids autocomplete."
+SpawnDistressCall,catchrelease.commands.SpawnDistressCall,"catchrelease,cheat,campaign,market",spawndistresscall <event>,"Spawns the selected framework or vanilla distress call. Available only in hyperspace; event ids autocomplete."

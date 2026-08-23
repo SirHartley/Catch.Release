@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 254 Java files across twelve top-level packages, plus
+What is where, and which file to open first. 256 Java files across twelve top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -259,6 +259,11 @@ an existing local boat and retires an off-system visitor before making the stand
 procgen quest ids. It creates a route-backed vanilla scavenger near the player and hangs the chosen
 offer through the ordinary `FleetQuest`/`FleetQuestEncounter` path, while retaining the normal
 one-active-quest limit.
+`SpawnDistressCall <event>` is available only while fully in hyperspace and autocompletes every
+merged framework event plus `vanilla_normal`, `vanilla_pirate_ambush`,
+`vanilla_pirate_ambush_trap` and `vanilla_derelict_ship`. It bypasses only cadence, probability and
+cooldown: target systems still pass vanilla's nearby-system filters and reservations, framework
+providers still approve their event, and both paths use their normal routes, entities and intel.
 Console Commands remains runtime-optional: its own loader is the only code that ever loads these
 classes, so the mod runs
 without the console installed, and it is deliberately not a `mod_info.json` dependency.
@@ -833,14 +838,15 @@ Reusable distress-call framework. **Has its own README — read that first.**
 
 | File | What it does |
 |---|---|
-| `DistressCallFramework.java` | Idempotent registration, the provider registry, resolution entry point and logging |
+| `DistressCallFramework.java` | Idempotent registration, the provider registry, resolution entry point and logging; also exposes the merged ids and narrow testing entry points used by the optional console command |
 | `DistressCallSettings.java` | Mutable paths, memory keys, route id and concurrency/reservation tuning |
 | `DistressCallSpec.java` | One validated merged-sheet row: provider, weighting, fleet shape, limits, trigger and opaque tags |
 | `DistressCallRegistry.java` | Loads `distress_calls.csv` through the game's merged-spreadsheet API and rejects malformed rows without creating entities |
 | `DistressCallProvider.java` | The narrow external-content seam: eligibility, fleet preparation, expiry and resolution |
 | `DistressCallInstance.java` | Save-safe ids and live entity/intel handles; the rules `Call` target that fires the row's dialogue trigger |
-| `DistressCallManager.java` | Persistent idempotent coordinator and route spawner. Watches vanilla's actual distress interval, yields when vanilla creates the call, shares its system reservations, supplies the fleet and exact vanilla breadcrumb intel, and owns no quest logic |
+| `DistressCallManager.java` | Persistent idempotent coordinator and route spawner. Watches vanilla's actual distress interval, yields when vanilla creates the call, shares its system reservations, supplies the fleet and exact vanilla breadcrumb intel, and owns no quest logic. Its test entry selects through the same system/provider gates and starts the chosen framework route; the route manager still waits until the player is close enough to instantiate its fleet |
 | `vanilla/NearbyEventsBridge.java` | The only protected-state seam: binds to the live `NearbyEventsEvent` interval and timeout tracker through `ReflectionUtils`; fails closed rather than starting an independent scheduler |
+| `vanilla/VanillaDistressCallSpawner.java` | Console-test bridge over vanilla's protected generators. It selects one of the four stock distress event types, then lets `NearbyEventsEvent` create its ordinary route, entity or salvage special and adds the same breadcrumb intel |
 
 ### `skillshot`
 Reusable aim-and-fire framework. **Has its own README — read that first.**
