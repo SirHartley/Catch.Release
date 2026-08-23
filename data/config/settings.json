@@ -23,6 +23,7 @@
           "shop_rod_modifiers":"graphics/catchrelease/ui/rod.png",
           "shop_harpoon":"graphics/catchrelease/ui/harpoon.png",
           "lyne":"graphics/catchrelease/ability/lyne.png",
+          "tutorial_wreck":"graphics/catchrelease/illustrations/us_wreck.jpg",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
     },
