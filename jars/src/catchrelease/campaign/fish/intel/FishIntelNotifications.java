@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.intel;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.util.DelayedActionScript;
@@ -31,6 +32,10 @@ public final class FishIntelNotifications {
     }
 
     public static void queue(BaseIntelPlugin intel) {
+        queue(intel, null);
+    }
+
+    public static void queue(BaseIntelPlugin intel, TextPanelAPI textPanel) {
         if (intel == null || Global.getSector() == null) return;
 
         IntelManagerAPI manager = Global.getSector().getIntelManager();
@@ -38,6 +43,13 @@ public final class FishIntelNotifications {
 
         intel.setForceAddNextFrame(true);
         manager.queueIntel(intel);
+        showAdded(intel, textPanel);
+    }
+
+    public static void showAdded(BaseIntelPlugin intel, TextPanelAPI textPanel) {
+        if (intel == null || textPanel == null || Global.getSector() == null) return;
+
+        Global.getSector().getIntelManager().addIntelToTextPanel(intel, textPanel);
     }
 
     public static void update(BaseIntelPlugin intel, Object listInfoParam) {

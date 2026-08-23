@@ -520,16 +520,20 @@ public class FishingIntro {
     }
 
     public static void point() {
+        point(null);
+    }
+
+    public static void point(TextPanelAPI text) {
         if (isAtLeast(POINTED)) return;
 
         setStage(POINTED);
 
         IntroIntel intel = new IntroIntel();
-        FishIntelNotifications.queue(intel);
+        FishIntelNotifications.queue(intel, text);
     }
 
     public static void giveRod(TextPanelAPI text) {
-        point();
+        point(text);
         setStage(RODDED);
 
         grant(TutorialConstants.ROD, text);
@@ -1085,10 +1089,14 @@ public class FishingIntro {
     }
 
     public static void takeFisherProperty() {
+        takeFisherProperty(null);
+    }
+
+    public static void takeFisherProperty(TextPanelAPI text) {
         Global.getSector().getMemoryWithoutUpdate()
                 .set(TutorialConstants.FISHER_PROPERTY_KEY, true);
 
-        point();
+        point(text);
     }
 
     public static void dropFisherProperty() {

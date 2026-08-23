@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
@@ -32,6 +33,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Map;
 
 public class FleetQuest extends FishJob {
@@ -249,6 +251,19 @@ public class FleetQuest extends FishJob {
         if (!takenUp || giver == null) return;
 
         makeImportant(giver, getDeliverFlag(), Stage.WANTED);
+    }
+
+    @Override
+    protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
+                                 List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
+        if ("showIntelAdded".equals(action)) {
+            FishIntelNotifications.showAdded(this,
+                    dialog == null ? null : dialog.getTextPanel());
+
+            return true;
+        }
+
+        return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
     @Override
