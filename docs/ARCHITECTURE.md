@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 252 Java files across twelve top-level packages, plus
+What is where, and which file to open first. 254 Java files across twelve top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -255,6 +255,10 @@ ambiguous partials instead of silently choosing. Its native autocomplete exposes
 display names, with word-by-word continuation for manually typed names. `SpawnFisherman` has no
 arguments and places the ordinary visiting Fisherman in the player's current star system; it reuses
 an existing local boat and retires an off-system visitor before making the standard full fleet.
+`SpawnFleetQuest <quest>` is available only inside a star system and autocompletes the five local
+procgen quest ids. It creates a route-backed vanilla scavenger near the player and hangs the chosen
+offer through the ordinary `FleetQuest`/`FleetQuestEncounter` path, while retaining the normal
+one-active-quest limit.
 Console Commands remains runtime-optional: its own loader is the only code that ever loads these
 classes, so the mod runs
 without the console installed, and it is deliberately not a `mod_info.json` dependency.
@@ -515,7 +519,7 @@ Jobs hung on a hull that was already out there, which then has to still be there
 | File | What it does |
 |---|---|
 | `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; a distress-sourced offer suppresses the local cyan marker because vanilla's distress intel is the locator. Accepting renders vanilla's intel-added card in the live conversation, while `take()` still waits for that conversation to close before it supplants the hull with a copy, then `mark()` and `hold()`. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
-| `FleetQuestSpawner.java` | Hangs one of five local offers on a hull already in the player's system; spawns nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep. Rare on purpose: one active at a time, 7% a check, 45-day cooldown |
+| `FleetQuestSpawner.java` | Hangs one of five local offers on a hull already in the player's system; natural rolls spawn nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep. Rare on purpose: one active at a time, 7% a check, 45-day cooldown. Its explicit console/testing entry creates a route-backed vanilla scavenger near the player, bypassing only the natural roll and cooldown before using the same offer and encounter path |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, resolves a framework distress entity before accepting or declining, re-hangs only local offer marks after a load, and times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. Five remain in the local scavenger picker; `STRANDED` and `SCAVENGER_ENGINE` are retained in place for save compatibility and selected by the distress adapter |
 | `CatchReleaseDistressProvider.java` | The only Catch.Release dependency of the generic distress package: gates both CSV rows behind fishing work and the shared one-job limit, prepares their existing `FleetQuest`, and abandons it if the vanilla-style distress fleet expires |
