@@ -195,26 +195,57 @@ public class FishermanQuest {
             addBulletPoints(info, mode);
         }
 
+        protected float addProgressLine(TooltipMakerAPI info, Color text, float pad) {
+            List<FishRequirement> asks = getAsks();
+            if (asks.isEmpty()) {
+                info.addPara("0/1 aboard - The named species", text, pad);
+                return 0f;
+            }
+
+            FishRequirement ask = asks.get(0);
+            int aboard = Math.min(ask.count, FishCurrency.count(ask));
+            String progress = ask.describeProgress(aboard);
+            LabelAPI line = info.addPara(progress, text, pad);
+            FishRequirement.highlight(line, java.util.Collections.singletonList(ask), progress,
+                    aboard + "/" + ask.count);
+
+            return 0f;
+        }
+
+        protected float addDestinationLine(TooltipMakerAPI info, Saved current, Color text,
+                                           float pad) {
+            if (current.atPond) {
+                info.addPara("Marked rupture in %s", pad, text, Misc.getHighlightColor(),
+                        current.systemName);
+            } else {
+                info.addPara("Open space in %s", pad, text, Misc.getHighlightColor(),
+                        current.systemName);
+            }
+
+            return 0f;
+        }
+
         @Override
         protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
             Saved current = getQuest();
             if (current == null) return;
 
-            Color h = Misc.getHighlightColor();
-            Color tc = getBulletColorForMode(mode);
-
-            float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+            Color text = getBulletColorForMode(mode);
+            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
 
             bullet(info);
+            pad = addProgressLine(info, text, pad);
 
-            FishSpec spec = getSpec();
-
-            String wanted = spec == null ? "the named species" : spec.getDisplayName();
-            LabelAPI wantedLine = info.addPara("Wanted: %s", initPad, tc, h, wanted);
-            FishRequirement.highlight(wantedLine, getAsks(), wanted);
-            info.addPara("In %s", 0f, tc, h, current.systemName);
-            info.addPara(current.atPond ? "The mark is a rupture"
-                    : "The mark is open space - lamp work", tc, 0f);
+            if (isLanded(current)) {
+                info.addPara("Return to the nearest fishing boat", text, pad);
+            } else {
+                pad = addDestinationLine(info, current, text, pad);
+                if (current.atPond) {
+                    info.addPara("ROD/LYNE at the marked rupture", text, pad);
+                } else {
+                    info.addPara("Breach Lights and Harpoon only", text, pad);
+                }
+            }
 
             unindent(info);
         }
@@ -224,9 +255,8 @@ public class FishermanQuest {
             Saved current = getQuest();
             if (current == null) return;
 
-            FishSpec spec = getSpec();
-            String name = spec == null ? "the named species" : spec.getDisplayName();
             float opad = 10f;
+            Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
             FactionAPI faction = getFactionForUIColors();
             info.addImages(width, 128, opad, opad,
@@ -237,24 +267,27 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
+            info.addPara("The Fisherman is waiting for the requested specimen.", opad);
+
+            info.addPara("What is wanted:", opad);
+            bullet(info);
+            addProgressLine(info, text, 0f);
+            unindent(info);
+
+            info.addPara(isLanded(current) ? "Return to:" : "Where and how:", opad);
+            bullet(info);
             if (isLanded(current)) {
-                LabelAPI landed = info.addPara("%s is in the hold. Take it to a fishing boat.", 10f,
-                        Misc.getHighlightColor(), Misc.ucFirst(name));
-                FishRequirement.highlight(landed, getAsks(), Misc.ucFirst(name));
+                info.addPara("The nearest fishing boat", text, 0f);
             } else {
-                LabelAPI request = info.addPara("One specimen of %s, out of %s. It is in there, and it will keep being"
-                                + " in there until somebody lands it.", 10f,
-                        Misc.getHighlightColor(), name, current.systemName);
-                FishRequirement.highlight(request, getAsks(), name, current.systemName);
-
-                info.addPara(current.atPond
-                                ? "The mark is a rupture. Drop a rod down it."
-                                : "The mark is open space. Nothing will show it but the lamps.",
-                        Misc.getGrayColor(), 10f);
-
-                info.addPara("Whatever comes up will be barely holding. That is what they are"
-                        + " asking about.", Misc.getGrayColor(), 10f);
+                addDestinationLine(info, current, text, 0f);
+                if (current.atPond) {
+                    info.addPara("Use the ROD/LYNE at the marked rupture", text, 0f);
+                } else {
+                    info.addPara("Use the Breach Lights, then land it with the Harpoon",
+                            text, 0f);
+                }
             }
+            unindent(info);
 
             if (isLanded(current)) {
                 FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
