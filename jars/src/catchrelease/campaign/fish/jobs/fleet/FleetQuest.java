@@ -14,6 +14,7 @@ import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
@@ -227,6 +228,7 @@ public class FleetQuest extends FishJob {
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(), MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE,
                 IMPORTANT_REASON, true, HOLD_DAYS);
 
+        keepStanding();
         ensureMarked();
     }
 
@@ -246,6 +248,22 @@ public class FleetQuest extends FishJob {
 
         giver.setNoFactionInName(true);
         giver.setName(type.title);
+
+        keepStanding();
+    }
+
+    protected void keepStanding() {
+        if (giver == null || giver.isExpired()) return;
+
+        MemoryAPI memory = giver.getMemoryWithoutUpdate();
+        memory.set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        memory.unset(MemFlags.MEMORY_KEY_AVOID_PLAYER_SLOWLY);
+
+        CampaignFleetAPI player = Global.getSector() == null
+                ? null : Global.getSector().getPlayerFleet();
+        if (player != null && giver.getAI() instanceof ModularFleetAIAPI) {
+            ((ModularFleetAIAPI) giver.getAI()).getNavModule().unavoidEntity(player);
+        }
     }
 
     protected void hold() {
@@ -255,6 +273,13 @@ public class FleetQuest extends FishJob {
 
         giver.clearAssignments();
         giver.addAssignment(FleetAssignment.HOLD, null, HOLD_DAYS, type.actionText);
+    }
+
+    @Override
+    protected void advanceImpl(float amount) {
+        super.advanceImpl(amount);
+
+        if (Stage.WANTED.equals(currentStage)) keepStanding();
     }
 
     @Override

@@ -523,7 +523,7 @@ Jobs hung on a hull that was already out there, which then has to still be there
 
 | File | What it does |
 |---|---|
-| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it and touches nothing else; a distress-sourced offer suppresses the local cyan marker because vanilla's distress intel is the locator. Accepting renders vanilla's intel-added card in the live conversation, while `take()` still waits for that conversation to close before it supplants the hull with a copy, then `mark()` and `hold()`. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
+| `FleetQuest.java` | A `FishJob` whose giver is a fleet. `offer()` hangs it, keeps vanilla scavenger AI from avoiding the player, and otherwise leaves its work alone; a distress-sourced offer suppresses the local cyan marker because vanilla's distress intel is the locator. Accepting renders vanilla's intel-added card in the live conversation, while `take()` still waits for that conversation to close before it supplants the hull with a copy, then `mark()` and `hold()`. The player-avoid override is also refreshed while the offer is live, using the same memory and navigation reset as the Fisherman. Its hand-over uses the shared specimen picker, then resumes the fleet sheet and leaves the encounter from the callback |
 | `FleetQuestSpawner.java` | Hangs one of five local offers on a hull already in the player's system; natural rolls spawn nothing. **Scavengers only**, and never the Fisherman — the errand assumes somebody already picking over the system with no schedule to keep. Rare on purpose: one active at a time, 7% a check, 45-day cooldown. Its explicit console/testing entry creates a route-backed vanilla scavenger near the player, bypassing only the natural roll and cooldown before using the same offer and encounter path |
 | `FleetQuestEncounter.java` | Runs one offer — reads the answer once the dialogue closes, resolves a framework distress entity before accepting or declining, re-hangs only local offer marks after a load, and times the offer out |
 | `FleetQuestType.java` | Seven flavours of trouble, with pitch text, ask rolling and base worth. Five remain in the local scavenger picker; `STRANDED` and `SCAVENGER_ENGINE` are retained in place for save compatibility and selected by the distress adapter |
@@ -1256,10 +1256,12 @@ vanilla own placement, clipping and timing. (The old fear that a card in the scr
 be sliced off by the scissor box only applied to hand-drawn cards; stock tooltips render above the
 whole screen and never did — the locked-row tooltip in the same list proved it.)
 
-**A fleet quest never spawns a fleet, and until it is accepted it never touches one either.** The
-offer is two memory keys and a `FleetQuestMarker` hung on a civilian hull already in the player's
-system — no rename, no orders, no `$missionImportant`. Turning one down costs nothing because there
-is nothing to tidy away.
+**A fleet quest never spawns a fleet, and until it is accepted it only stops one from avoiding the
+player.** The offer is memory keys and a `FleetQuestMarker` hung on a scavenger already in the
+player's system — no rename, no orders, no `$missionImportant`. The quest refreshes vanilla's
+never-avoid flag and removes the player from the navigation module's avoid list, as the Fisherman
+does, so the hull does not run from the fleet it is trying to hail. Turning one down otherwise costs
+nothing because there is nothing to tidy away.
 
 **Accepting supplants the hull.** `FleetQuest.supplant()` builds a copy (fresh members off the same
 variants, so nothing is owned by two fleets at once; only the source market carried over from the

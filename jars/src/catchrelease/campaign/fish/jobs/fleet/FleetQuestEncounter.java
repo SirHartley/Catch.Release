@@ -80,7 +80,10 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
         }
 
         // renderers do not survive a save, and the offer does
-        if (quest != null) quest.ensureMarked();
+        if (quest != null) {
+            quest.keepStanding();
+            quest.ensureMarked();
+        }
     }
 
     protected boolean isDialogOpen() {
