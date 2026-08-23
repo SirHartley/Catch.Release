@@ -459,7 +459,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         // re-read after the round update so rows describe the new ask, not the one just handed over
         updateTokens(mem);
 
-        if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
+        if (!more && !deferCompletionUntilAfterPaymentDialogue()) {
+            setCurrentStage(Stage.DONE, dialog, memoryMap);
+        }
     }
 
     protected boolean handOver(FishHandoffPicker.Selection selection, InteractionDialogAPI dialog,
@@ -491,9 +493,15 @@ public abstract class FishJob extends HubMissionWithBarEvent
         token(mem, MORE_KEY, more);
         updateTokens(mem);
 
-        if (!more) setCurrentStage(Stage.DONE, dialog, memoryMap);
+        if (!more && !deferCompletionUntilAfterPaymentDialogue()) {
+            setCurrentStage(Stage.DONE, dialog, memoryMap);
+        }
 
         return true;
+    }
+
+    protected boolean deferCompletionUntilAfterPaymentDialogue() {
+        return false;
     }
 
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
