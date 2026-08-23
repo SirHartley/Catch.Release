@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="illustration">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="icons &amp; rules">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanQuest.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanQuest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishingIntro.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishingIntro.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -128,7 +126,8 @@
     <MESSAGE value="rules work" />
     <MESSAGE value="Fisherman intro castaway" />
     <MESSAGE value="illustration" />
-    <option name="LAST_COMMIT_MESSAGE" value="illustration" />
+    <MESSAGE value="icons &amp; rules" />
+    <option name="LAST_COMMIT_MESSAGE" value="icons &amp; rules" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

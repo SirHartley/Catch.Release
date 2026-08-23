@@ -16,7 +16,6 @@ import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
-import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
@@ -397,17 +396,10 @@ public class FishingIntro {
 
         @Override
         public String getIcon() {
-            Target target = getTarget();
-            if (target == null) {
+            if (getTarget() == null) {
                 return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "intel_tutorial");
             }
-            if (target.needsDeepGear) {
-                return FishIntelIcon.get(CatchImplement.BREACH_LAMP);
-            }
-            if (target.atPond) {
-                return FishIntelIcon.get(CatchImplement.POND);
-            }
-            return FishIntelIcon.get(getAsks());
+            return FishermanIdentity.getPortrait(0f);
         }
 
         @Override

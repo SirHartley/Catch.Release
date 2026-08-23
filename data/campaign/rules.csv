@@ -1200,7 +1200,7 @@ catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","He taps the lens awake before answering.
 
-""Feed, do not go anywhere. This is huge.""
+""Chat, do not go anywhere. This is huge.""
 
 He turns one lamp toward you.
 
@@ -1218,7 +1218,7 @@ Then, to you:
 
 ""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""","catchrelease_jobAccept:Agree to supply the specimen.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Feed, we have a captain.""
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain.""
 
 He starts recording before you can move.
 
@@ -1231,9 +1231,9 @@ catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_t
 
 He turns to the lens without moving it off you.
 
-""Feed, you just watched a captain walk away from easy sponsor money.""
+""Chat, you just watched a captain walk away from easy sponsor money.""
 
-A beat.
+He pauses for dramatic effect.
 
 ""Would you have taken it? Tell me I'm wrong.""
 
@@ -1242,7 +1242,7 @@ catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber
 
 He raises the camera as soon as he sees you.
 
-""Feed, update. The captain is back. Do we have it? We do not have it.""
+""Chat, update. The captain is back. Do we have it? We do not have it.""
 
 He lowers the camera again.
 
@@ -1250,7 +1250,7 @@ He lowers the camera again.
 catchrelease_tuber_paid,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The specimen spends less than a minute under the lamps before he has four angles and a close shot of your hand beside it.
 
-""Do not move. Feed, look at this. Look at this.""
+""Do not move. Chat, look at this. Look at this.""
 
 He shifts the specimen half a handspan.
 
@@ -1262,7 +1262,7 @@ $catchreleasePaid
 $catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","He watches the numbers climb, flatten, then stop.
 
-""No. No, no. Feed liked it. Feed did not need it.""
+""No. No, no. Chat liked it. Chat did not need it.""
 
 He scrubs backward through the clip.
 
@@ -1270,7 +1270,7 @@ He scrubs backward through the clip.
 
 He turns the display toward you as though the graph has personally insulted him.
 
-""Bad coherence. Visible. $catchreleaseAskCap. I want one where the first frame says one thing and the next frame makes everyone check the first frame again.""
+""I need a bad one, $catchreleaseAskCap. I want one where the first frame says one thing and the next frame makes everyone check the first frame again.""
 
 He points toward your hold.
 
@@ -1283,7 +1283,7 @@ catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tube
 $catchreleasePaid
 !$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"He watches the playback.
 
-""Oh, feed is going to hate this.""
+""Oh, chat is going to hate this.""
 
 He crops in until the specimen fills the display.
 
@@ -1444,6 +1444,7 @@ $entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
 CatchReleaseCMD leaveEncounter",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
+,,,,,,
 catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
 SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
 
@@ -1472,7 +1473,8 @@ The transponder package still contains the last service handshake it accepted.
 
 The source is listed simply as FISHERMAN.","catchrelease_wreckTake:Recover the assembly
 catchrelease_wreckLeave:Leave it",
-catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,CatchReleaseCMD carryFisherProperty,"The frame comes over on the heavy cargo crane.
+catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,"CatchReleaseCMD carryFisherProperty
+CatchReleaseCMD showIntroIntel","The frame comes over on the heavy cargo crane.
 
 It is larger aboard your ship than it looked outside: several tonnes of scarred mechanism, docking hardware, and sealed electronics wrapped around an empty space - clearly intended to hold a craft of some kind, now absent.
 
@@ -1515,7 +1517,7 @@ He points to the beacon.
 ""By the time anyone worked it out, I wasn't on their route anymore. Probably thought I bailed on them.""",0:catchrelease_ratingWho:What boat?,
 catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,"CatchReleaseCMD point
 FireAll CRCastawayPlanetOptions
-AddTextSmall ""Gained: Fisherman Location Data"" highlight","""Fishing crew.""
+CatchReleaseCMD showIntroIntel","""Fishing crew.""
 
 He drinks from a dirty water pouch.
 
@@ -1820,6 +1822,7 @@ CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
 CatchReleaseCMD point
+CatchReleaseCMD showIntroIntel
 FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
@@ -2673,7 +2676,8 @@ He gives your fleet readout another look.
 A small nod.
 
 ""Try not to make a liar of me.""",catchrelease_introRodOperate:Continue,
-catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,FireBest CatchReleaseIntroBrief,,,
+catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,"FireBest CatchReleaseIntroBrief
+CatchReleaseCMD showIntroIntel",,,
 catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
 CatchReleaseCMD tokens
 $catchreleaseStage == 2
@@ -2731,7 +2735,8 @@ catchrelease_introFirstDone,DialogOptionSelected,"$option == catchrelease_introF
 CatchReleaseCMD tokens
 $catchreleaseStage == 2","CatchReleaseCMD sendOut
 CatchReleaseCMD tokens
-FireBest CatchReleaseIntroBrief",,,
+FireBest CatchReleaseIntroBrief
+CatchReleaseCMD showIntroIntel",,,
 catchrelease_introFirstDoneAlready,DialogOptionSelected,"$option == catchrelease_introFirstDone
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated Continue may replay the current brief but cannot call sendOut again and replace the assigned target.
@@ -2858,7 +2863,8 @@ catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleas
 $catchreleaseIntroHarpoonAsked
 $catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:What do you want caught?,The assignment continuation appears after all three equipment and safety questions have been covered.
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
-FireBest CatchReleaseIntroBrief",,,
+FireBest CatchReleaseIntroBrief
+CatchReleaseCMD showIntroIntel",,,
 catchrelease_introTurnIn4,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 4
@@ -2905,7 +2911,8 @@ He brings up your map and marks the fishing-planner control.
 He closes the display.
 
 ""Captain who plans a fishing trip gets to complain about the fishing. Captain who doesn't gets to complain about fuel.""",catchrelease_introSurveyDone:Continue,
-catchrelease_introSurveyDone,DialogOptionSelected,$option == catchrelease_introSurveyDone,FireBest CatchReleaseIntroBrief,,,
+catchrelease_introSurveyDone,DialogOptionSelected,$option == catchrelease_introSurveyDone,"FireBest CatchReleaseIntroBrief
+CatchReleaseCMD showIntroIntel",,,
 catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
