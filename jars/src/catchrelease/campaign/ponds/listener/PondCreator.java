@@ -54,7 +54,10 @@ public class PondCreator {
 
     private Vector2f getPondSpawnLoc() {
         float radius = PondConstants.MIN_DISTANCE;
-        if (!system.isNebula()) radius += system.getStar().getRadius();
+        PlanetAPI star = system.getStar();
+
+        // Abyss procgen locations are star systems without a star.
+        if (!system.isNebula() && star != null) radius += star.getRadius();
 
         // bounded rather than while(true): a packed system with nowhere left would otherwise hang sector generation
         for (int ring = 0; ring < PondConstants.MAX_FITTING_ATTEMPTS; ring++) {
