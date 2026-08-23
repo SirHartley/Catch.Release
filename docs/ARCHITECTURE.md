@@ -305,8 +305,8 @@ Each repeatable topic records a campaign-long asked flag only when its answer op
 and answered topics share the same submenu without a separate repeat-question state. Two dedicated
 rules triggers stream every relevant unasked topic first and every answered topic afterward; the
 command pages that ordered stream six at a time, so new questions occupy the first positions and
-answered questions fall to the final positions and page. Answered options use the canonical
-Common-rarity colour so they recede without disappearing. Labels and information-release gates stay
+answered questions fall to the final positions and page. Answered options use vanilla grey so they
+recede without disappearing. Labels and information-release gates stay
 in `rules.csv`; Java owns only the page arithmetic. Every rebuild appends Previous/Next as relevant,
 then the always-present back option and Escape shortcut, so no page can become a dead end.
 Its name question asks `Do you have a name?`; Baha is introduced by the Fisherman's registry answer
@@ -1274,7 +1274,7 @@ machinery and there is nothing for a sheet to say about it.
 The Starsector Editor is a draft source, not the lore authority: every returned line is independently
 compared with `docs/LORE.md` before sheet insertion, and an Editor QA result does not replace that
 check. The Fisherman's question menu then keeps the same division: sheet rows add unasked topics
-first and asked topics second, and `addFisherQuestion` gives the latter the common-grey colour. The
+first and asked topics second, and `addFisherQuestion` gives the latter vanilla grey. The
 searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
 `$global.catchrelease_fisherAsked_searchlightDrones`, and returns both its acknowledgement and its
 schematic follow-up to the same menu. It explains the `BREACH_COUPLER` gate without granting it: a

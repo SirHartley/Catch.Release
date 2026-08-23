@@ -453,7 +453,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
             if (asked) {
-                dialog.getOptionPanel().addOption(label, optionId, FishRarity.COMMON.color, null);
+                dialog.getOptionPanel().addOption(label, optionId, Misc.getGrayColor(), null);
             } else {
                 dialog.getOptionPanel().addOption(label, optionId);
             }
