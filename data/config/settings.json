@@ -25,6 +25,9 @@
           "lyne":"graphics/catchrelease/ability/lyne.png",
           "tutorial_wreck":"graphics/catchrelease/illustrations/us_wreck.jpg",
           "intel_tutorial":"graphics/catchrelease/intel/tutorial.png",
+          "intel_any":"graphics/catchrelease/intel/intel_any.png",
+          "intel_lamp":"graphics/catchrelease/intel/intel_lamp.png",
+          "intel_rod":"graphics/catchrelease/intel/intel_rod.png",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
     },
