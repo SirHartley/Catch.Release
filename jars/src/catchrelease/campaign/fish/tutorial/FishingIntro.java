@@ -310,10 +310,7 @@ public class FishingIntro {
             Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
             FactionAPI faction = getFactionForUIColors();
-            if (isCarryingFisherProperty()) {
-                info.addImage(Global.getSettings().getSpriteName(
-                        ModPlugin.MOD_ID, "tutorial_wreck"), width, 128, opad);
-            } else {
+            if (target != null) {
                 info.addImages(width, 128, opad, opad,
                         FishermanIdentity.getPortrait(0f), faction.getCrest());
             }
@@ -400,7 +397,10 @@ public class FishingIntro {
 
         @Override
         public String getIcon() {
-            return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder");
+            if (getTarget() == null) {
+                return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder");
+            }
+            return FishermanIdentity.getPortrait(0f);
         }
 
         @Override

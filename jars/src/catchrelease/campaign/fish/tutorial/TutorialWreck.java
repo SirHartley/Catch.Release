@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.tutorial;
 
+import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -77,6 +78,7 @@ public class TutorialWreck {
         SectorEntityToken wreck = BaseThemeGenerator.addSalvageEntity(system,
                 Entities.WRECK, Factions.NEUTRAL, params);
 
+        wreck.setInteractionImage(ModPlugin.MOD_ID, "tutorial_wreck");
         wreck.setDiscoverable(true);
         wreck.setCircularOrbit(pond, MathUtils.getRandomNumberInRange(0f, 360f),
                 pond.getRadius() + TutorialConstants.WRECK_ORBIT_RADIUS,
