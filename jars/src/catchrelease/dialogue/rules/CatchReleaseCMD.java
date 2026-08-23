@@ -237,7 +237,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "rollWork":
                 return rollWork(memoryMap);
             case "takeWork":
-                return takeWork();
+                return takeWork(dialog);
             case "turnInWork":
                 return FishermanQuest.showTurnInPicker(dialog, memoryMap);
 
@@ -880,11 +880,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return true;
     }
 
-    protected boolean takeWork() {
+    protected boolean takeWork(InteractionDialogAPI dialog) {
         FishermanQuest.Saved offer = FishermanQuest.getOffer();
         if (offer == null) return false;
 
-        FishermanQuest.accept(offer);
+        FishermanQuest.accept(offer, text(dialog));
 
         return true;
     }
