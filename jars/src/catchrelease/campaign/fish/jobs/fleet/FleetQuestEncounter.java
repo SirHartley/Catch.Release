@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.distress.DistressCallFramework;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListenerAndScript;
@@ -89,6 +90,7 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
 
     protected void answer() {
         if (fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.TAKEN_FLAG)) {
+            resolveDistress();
             if (quest != null) quest.take();
 
             finish();
@@ -100,8 +102,13 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
 
     protected void turnedDown() {
         if (quest != null) quest.abandon();
+        resolveDistress();
 
         finish();
+    }
+
+    protected void resolveDistress() {
+        if (DistressCallFramework.isManaged(fleet)) DistressCallFramework.resolve(fleet);
     }
 
     protected void finish() {

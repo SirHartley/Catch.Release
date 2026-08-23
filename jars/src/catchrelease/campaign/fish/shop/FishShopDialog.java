@@ -378,12 +378,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         new ShopRowPlugin(entry, this));
                 list.addCustom(row, 3f);
 
-                if (entry.isLocked()) {
-                    list.addTooltipTo(createLockedTooltip(entry), row,
-                            TooltipMakerAPI.TooltipLocation.BELOW);
-                    continue;
-                }
-
                 // the ring's explanation rides a transparent hotspot over its slot, so the stock tooltip machinery scopes it to the ring rather than the whole row
                 if (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry)) {
                     CustomPanelAPI ring = panel.createCustomPanel(ShopRowPlugin.MARK_SLOT,
@@ -395,44 +389,32 @@ public class FishShopDialog implements InteractionDialogPlugin {
                             TooltipMakerAPI.TooltipLocation.BELOW);
                 }
 
-                // the grey tier squares get the same treatment - hotspot sized to the pip row ShopRowPlugin.renderState draws at the row's right edge
-                if (entry.isUpgrade() && !entry.isMaxed()
-                        && ShopSchematics.hasMissingSchematic(entry.stat)) {
+                if (entry.isUpgrade() && !entry.isMaxed()) {
                     float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(),
                             ShopRowPlugin.PIP_SIZE, ShopRowPlugin.PIP_GAP);
-                    CustomPanelAPI pips = panel.createCustomPanel(pipsWidth, ROW_HEIGHT,
-                            new BaseCustomUIPanelPlugin() {
-                            });
-                    row.addComponent(pips).inTL(ROW_WIDTH - ShopRowPlugin.PAD_SIDE - pipsWidth, 0f);
+                    float pipsLeft = ROW_WIDTH - ShopRowPlugin.PAD_SIDE - pipsWidth;
+                    float pipsTop = (ROW_HEIGHT - ShopRowPlugin.PIP_SIZE) * 0.5f;
 
-                    list.addTooltipTo(createPipTooltip(), pips,
-                            TooltipMakerAPI.TooltipLocation.BELOW);
+                    addPipTooltips(list, row, entry, pipsLeft, pipsTop,
+                            ShopRowPlugin.PIP_SIZE, ShopRowPlugin.PIP_GAP);
                 }
             }
 
             listViewport = place(list, PAD, top);
         }
 
-        protected TooltipMakerAPI.TooltipCreator createLockedTooltip(ShopEntry entry) {
-            return new BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return TOOLTIP_WIDTH;
-                }
+        protected void addPipTooltips(TooltipMakerAPI tooltipHost, CustomPanelAPI parent,
+                                      ShopEntry entry, float left, float top,
+                                      float size, float gap) {
+            for (int rung = 1; rung <= entry.getMaxLevel(); rung++) {
+                CustomPanelAPI pip = panel.createCustomPanel(size, size,
+                        new BaseCustomUIPanelPlugin() {
+                        });
+                parent.addComponent(pip).inTL(left + (rung - 1) * (size + gap), top);
 
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
-                                          Object tooltipParam) {
-                    tooltip.addPara("Schematic required", Misc.getHighlightColor(), 0f);
-                    tooltip.addPara("Upgrade tier %s is one of this upgrade's final two tiers."
-                                    + " Fishing jobs can offer its schematic.", 6f,
-                            Misc.getHighlightColor(), String.valueOf(entry.getLevel() + 1));
-                    tooltip.addPara("Each schematic unlocks one upgrade tier for purchase; it does not"
-                            + " grant the upgrade.", Misc.getGrayColor(), 6f);
-                    tooltip.addPara("Marking this tier dots its schematic on job offers until"
-                            + " the plan is learned.", Misc.getGrayColor(), 6f);
-                }
-            };
+                tooltipHost.addTooltipTo(createPipTooltip(entry, rung), pip,
+                        TooltipMakerAPI.TooltipLocation.BELOW);
+            }
         }
 
         protected TooltipMakerAPI.TooltipCreator createMarkTooltip(ShopEntry entry) {
@@ -457,7 +439,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             };
         }
 
-        protected TooltipMakerAPI.TooltipCreator createPipTooltip() {
+        protected TooltipMakerAPI.TooltipCreator createPipTooltip(ShopEntry entry, int rung) {
             return new BaseTooltipCreator() {
                 @Override
                 public float getTooltipWidth(Object tooltipParam) {
@@ -467,8 +449,38 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                           Object tooltipParam) {
-                    tooltip.addPara("%s - find a schematic to unlock", 0f,
-                            Misc.getTextColor(), Misc.getHighlightColor(), "Locked");
+                    String tier = String.valueOf(rung);
+
+                    if (rung <= entry.getLevel()) {
+                        tooltip.addPara("Purchased", Misc.getPositiveHighlightColor(), 0f);
+                        tooltip.addPara("Upgrade tier %s is installed.", 6f,
+                                Misc.getHighlightColor(), tier);
+                        return;
+                    }
+
+                    if (ShopSchematics.requires(entry.stat, rung)
+                            && !ShopSchematics.has(entry.stat, rung)) {
+                        tooltip.addPara("Locked", Misc.getNegativeHighlightColor(), 0f);
+                        tooltip.addPara("Upgrade tier %s requires a schematic."
+                                        + " Fishing jobs can offer it.", 6f,
+                                Misc.getHighlightColor(), tier);
+                        tooltip.addPara("Each schematic unlocks one upgrade tier for purchase;"
+                                + " it does not grant the upgrade.", Misc.getGrayColor(), 6f);
+                        tooltip.addPara("Marking this tier dots its schematic on job offers until"
+                                + " the plan is learned.", Misc.getGrayColor(), 6f);
+                        return;
+                    }
+
+                    tooltip.addPara("Available", Misc.getHighlightColor(), 0f);
+
+                    if (rung == entry.getLevel() + 1) {
+                        tooltip.addPara("Upgrade tier %s is available for purchase.", 6f,
+                                Misc.getHighlightColor(), tier);
+                    } else {
+                        tooltip.addPara("Upgrade tier %s is unlocked."
+                                        + " Purchase the preceding tiers first.", 6f,
+                                Misc.getHighlightColor(), tier);
+                    }
                 }
             };
         }
@@ -491,23 +503,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     new ShopDetailHeaderPlugin(entry));
             info.addCustom(head, 0f);
 
-            // hotspot mirroring ShopDetailHeaderPlugin.renderLadder's pip position: text column, one title line and its two pads down from the panel top
-            if (entry.isUpgrade() && !entry.isMaxed()
-                    && ShopSchematics.hasMissingSchematic(entry.stat)) {
+            if (entry.isUpgrade()) {
                 LazyFont titleFont = ShopUi.getTitleFont();
                 float nameHeight = titleFont == null ? 20f : titleFont.getBaseHeight();
-                float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(),
+                float pipsLeft = ShopDetailHeaderPlugin.BOX_SIZE
+                        + ShopDetailHeaderPlugin.TEXT_GAP;
+                float pipsTop = 6f + nameHeight + 10f;
+
+                addPipTooltips(info, head, entry, pipsLeft, pipsTop,
                         ShopDetailHeaderPlugin.PIP_SIZE, ShopDetailHeaderPlugin.PIP_GAP);
-
-                CustomPanelAPI pips = panel.createCustomPanel(pipsWidth,
-                        ShopDetailHeaderPlugin.PIP_SIZE + 4f, new BaseCustomUIPanelPlugin() {
-                        });
-                head.addComponent(pips).inTL(
-                        ShopDetailHeaderPlugin.BOX_SIZE + ShopDetailHeaderPlugin.TEXT_GAP,
-                        6f + nameHeight + 10f - 2f);
-
-                info.addTooltipTo(createPipTooltip(), pips,
-                        TooltipMakerAPI.TooltipLocation.BELOW);
             }
 
             info.addPara(entry.getDescription(), 12f);

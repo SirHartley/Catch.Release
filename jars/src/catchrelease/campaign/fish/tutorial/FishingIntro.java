@@ -16,6 +16,7 @@ import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
@@ -396,10 +397,19 @@ public class FishingIntro {
 
         @Override
         public String getIcon() {
-            if (getTarget() == null) {
+            int stage = getStage();
+
+            if (stage <= POINTED) {
                 return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "intel_tutorial");
             }
-            return FishermanIdentity.getPortrait(0f);
+            if (stage == RODDED || stage == FISH_ONE) {
+                return FishIntelIcon.get(CatchImplement.POND);
+            }
+            if (stage == FISH_TWO) {
+                return FishIntelIcon.get(CatchImplement.BREACH_LAMP);
+            }
+
+            return FishIntelIcon.get(getAsks());
         }
 
         @Override
