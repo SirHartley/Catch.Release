@@ -359,6 +359,17 @@ public class FleetQuest extends FishJob {
     }
 
     @Override
+    protected void notifyEnding() {
+        super.notifyEnding();
+
+        if (!Stage.DONE.equals(currentStage) || giver == null) return;
+
+        dropMarker();
+        Misc.makeUnimportant(giver, IMPORTANT_REASON);
+        giver.getMemoryWithoutUpdate().unset(DELIVER_FLAG);
+    }
+
+    @Override
     protected void notifyEnded() {
         super.notifyEnded();
 
