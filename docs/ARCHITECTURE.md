@@ -327,7 +327,7 @@ offers a highlighted one-time question about what came up with the catch. Select
 existing explanation, consumes the pending state, and returns to the usual menu without entering
 the general question list.
 The safety interception remains higher-scored and therefore still takes precedence.
-Every fish name emitted through a rules token is coloured from its species rarity, including tutorial reminders, cult repetition, stranger rumors, Crablobab's fish references, selected duel/ring contenders, and range-data rewards; the sheet delegates that lookup to the shared command instead of hard-coding species or colours. Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
+Every fish name emitted through a rules token is coloured from its species rarity, including tutorial reminders, cult repetition, stranger rumors, Crablobab's fish references, selected duel/ring contenders, and range-data rewards; the sheet delegates that lookup to the shared command instead of hard-coding species or colours. The command submits mixed rarity and ordinary highlights in the sheet's parameter order, as required by `TextPanelAPI`, so a fish before its system is not dropped. Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
 bar jobs, their duel/ring choice variants, fleet jobs and Fisherman work highlight their hand-off
 options without changing the dialogue or callback routing behind them.
