@@ -2871,11 +2871,11 @@ $catchreleaseTargetMet","AddTextSmall ""Advanced outfitter unlocked"" highlight"
 He makes two small entries in the service ledger.
 
 ""Harpoon and lens upgrades are open to you now.""",0:catchrelease_introTurnIn4_continue:Continue,"The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
-catchrelease_introTurnIn4_continue,DialogOptionSelected,$option == catchrelease_introTurnIn4_continue,"CatchReleaseCMD takeTarget
+catchrelease_introTurnIn4_continue,DialogOptionSelected,$option == catchrelease_introTurnIn4_continue,"Highlight ""range data""
+CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
 CatchReleaseCMD tokens
 SetOptionColor catchrelease_introPlannerAsk highlight
-Highlight ""range data""
 FireAll CatchReleaseRangeDataBrief","""Now, for the next step.""
 
 He sends two range records to your fleet map.
