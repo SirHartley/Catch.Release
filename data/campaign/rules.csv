@@ -1459,7 +1459,7 @@ The reactor is cold. The lockers have been emptied. Someone took the expensive a
 
 Your ops chief sends back imagery of the external frame.
 
-""Different story out here. LYNE markings. Fisheries service codes, maybe. Half of them don't resolve against anything in the registry.""
+""Different story out here. LYNE markings. Rig service codes, maybe. Half of them don't resolve against anything in the registry.""
 
 A closer image follows.
 
@@ -1473,16 +1473,14 @@ catchrelease_wreckLeave:Leave it",
 catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,"CatchReleaseCMD carryFisherProperty
 AddTextSmall ""Recovered LYNE service assembly"" highlight","The frame comes over on the heavy cargo crane.
 
-It is larger aboard your ship than it looked outside: several tonnes of scarred mechanism, docking hardware, and sealed electronics wrapped around an empty space roughly the dimensions of a light fighter.
+It is larger aboard your ship than it looked outside: several tonnes of scarred mechanism, docking hardware, and sealed electronics wrapped around an empty space - clearly intended to hold a craft of some kind, now absent.
 
-Your crew lash it down.
-
-The service handshake still points to the Fisherman.","catchrelease_wreckExplore:Explore the derelict
+Your crew lash it down.","catchrelease_wreckExplore:Explore the derelict
 catchrelease_wreckLeave:Leave",
 catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExplore,"SalvageGenFromSeed
 FireBest ShowSalvageEntityDetails
 FireBest SalvageCheckHostile",,,Chains into vanilla's own salvage flow - the same three commands the stock sal_ rows run on any salvageable.
-catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,EndConversation,,,
+catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
 !$catchrelease_castawaySeen
 CatchReleaseCMD castawayEligible score:1000","CatchReleaseCMD startCastaway
@@ -1602,7 +1600,7 @@ CatchReleaseCMD tokens
 $entity.catchrelease_intercepted
 $catchreleaseStage < 2","CatchReleaseCMD point
 $menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The trawler cuts across your approach before you get much closer to the unstable fabric.
+$global.catchrelease_intercepted = true 0","The trawler cuts across your approach before you get much closer to the unstable fabric.
 
 The Fisherman comes on the channel.
 
@@ -1610,11 +1608,12 @@ The Fisherman comes on the channel.
 
 He looks at your ship, then toward the rupture.
 
-""You've no ROD aboard. Another hundred klicks and I'll have to come fetch you instead of your catch.""
+""You've no ROD aboard. Another hundred klicks and I'll have to come fish you from the rupture instead of my catch.""
 
 He gestures away from it.
 
-""Come alongside.""",,
+""Come alongside.""","0:catchrelease_fisherIntro:Move alongside.
+100:catchrelease_fisherLeave:Leave",
 catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
@@ -2553,6 +2552,15 @@ He looks past the camera.
 
 ""Missing the useful half.""","0:catchrelease_introHarpoonReturn:Return it
 100:catchrelease_fisherBack:Leave it there",
+catchrelease_introHelloIntercept,DialogOptionSelected,"$option == catchrelease_fisherIntro score:51
+CatchReleaseCMD tokens
+$catchreleaseStage < 2
+!$catchreleaseCarrying
+$global.catchrelease_intercepted",,"The Fisherman glances over your transponder return, then sets the manifest aside.
+
+""All right, captain. You've wandered into unstable fabric. What are you after?""","0:catchrelease_introWantWork:I'm looking for something to do.
+10:catchrelease_introCurious:I want to know what use this place has.
+100:catchrelease_fisherBack:Nothing, really.",
 catchrelease_introHelloRating,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
