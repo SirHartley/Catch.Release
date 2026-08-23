@@ -1349,10 +1349,12 @@ Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $
 5:catchrelease_fqAcceptNoPromise:No promises.
 10:catchrelease_fqDecline:Decline",Two acceptance phrasings intentionally converge
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
+Call $catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
 
 No formal contract follows.",,
 catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_fqAcceptNoPromise,"$entity.catchrelease_fleetQuestTaken = true
+Call $catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
 
 No formal contract follows.",,Technical routing twin for the supplied second acceptance phrasing.
