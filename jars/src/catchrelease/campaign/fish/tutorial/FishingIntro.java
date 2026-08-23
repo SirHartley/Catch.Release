@@ -397,16 +397,18 @@ public class FishingIntro {
 
         @Override
         public String getIcon() {
-            Target target = getTarget();
-            if (target == null) {
+            int stage = getStage();
+
+            if (stage <= POINTED) {
                 return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "intel_tutorial");
             }
-            if (target.needsDeepGear) {
-                return FishIntelIcon.get(CatchImplement.BREACH_LAMP);
-            }
-            if (target.atPond) {
+            if (stage == RODDED || stage == FISH_ONE) {
                 return FishIntelIcon.get(CatchImplement.POND);
             }
+            if (stage == FISH_TWO) {
+                return FishIntelIcon.get(CatchImplement.BREACH_LAMP);
+            }
+
             return FishIntelIcon.get(getAsks());
         }
 
