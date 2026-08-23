@@ -8,6 +8,8 @@ import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public enum FleetQuestType {
@@ -146,6 +148,25 @@ public enum FleetQuestType {
             case QUOTA: return 5000;
             default: return 4000;
         }
+    }
+
+    public String getId() {
+        return name().toLowerCase(Locale.ROOT);
+    }
+
+    public static List<FleetQuestType> getLocalOffers() {
+        return List.of(LOCAL_OFFERS);
+    }
+
+    public static FleetQuestType getLocalOffer(String id) {
+        if (id == null) return null;
+
+        String wanted = id.trim().toLowerCase(Locale.ROOT);
+        for (FleetQuestType type : LOCAL_OFFERS) {
+            if (type.getId().equals(wanted)) return type;
+        }
+
+        return null;
     }
 
     public static FleetQuestType rollAny(Random random) {

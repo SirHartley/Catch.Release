@@ -6,10 +6,19 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.OptionalFleetData;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteFleetSpawner;
+import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteSegment;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.procgen.themes.RuinsFleetRouteManager;
+import com.fs.starfarer.api.impl.campaign.procgen.themes.ScavengerFleetAssignmentAI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +35,63 @@ public class FleetQuestSpawner implements EveryFrameScript {
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
     public static final float COOLDOWN_DAYS = 45f;
 
+    public static final String TEST_ROUTE_SOURCE = "catchrelease_test_fleet_quest";
+    public static final float TEST_ROUTE_DAYS = 60f;
+    public static final float TEST_SPAWN_DISTANCE = 1200f;
+
     protected IntervalUtil interval = new IntervalUtil(CHECK_MIN_DAYS, CHECK_MAX_DAYS);
     protected Random random = new Random();
+
+    private static class TestRouteSpawner implements RouteFleetSpawner {
+
+        private final StarSystemAPI system;
+        private final FleetQuestType type;
+
+        private TestRouteSpawner(StarSystemAPI system, FleetQuestType type) {
+            this.system = system;
+            this.type = type;
+        }
+
+        @Override
+        public CampaignFleetAPI spawnFleet(RouteData route) {
+            Random random = route.getRandom();
+            CampaignFleetAPI fleet = RuinsFleetRouteManager.createScavenger(
+                    null, system.getLocation(), route, route.getMarket(), false, random);
+            if (fleet == null) return null;
+
+            fleet.addScript(new ScavengerFleetAssignmentAI(fleet, route, false));
+
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            if (player != null && player.getContainingLocation() == system) {
+                Vector2f location = Misc.getPointAtRadius(
+                        player.getLocation(), TEST_SPAWN_DISTANCE, random);
+                fleet.setLocation(location.x, location.y);
+            }
+
+            FleetQuest quest = FleetQuest.startOn(fleet, type);
+            if (quest == null) {
+                Misc.fadeAndExpire(fleet);
+                return null;
+            }
+
+            FleetQuestEncounter.attach(fleet, quest);
+            return fleet;
+        }
+
+        @Override
+        public boolean shouldCancelRouteAfterDelayCheck(RouteData route) {
+            return false;
+        }
+
+        @Override
+        public boolean shouldRepeat(RouteData route) {
+            return false;
+        }
+
+        @Override
+        public void reportAboutToBeDespawnedByRouteManager(RouteData route) {
+        }
+    }
 
     public static void register() {
         Global.getSector().addTransientScript(new FleetQuestSpawner());
@@ -75,9 +139,36 @@ public class FleetQuestSpawner implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
     }
 
-    protected int countActive() {
+    public static int countActive() {
         return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size()
                 + FleetQuestEncounter.countLive();
+    }
+
+    public static CampaignFleetAPI spawnForTesting(FleetQuestType type) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || !(player.getContainingLocation() instanceof StarSystemAPI system)) {
+            return null;
+        }
+        if (type == null || !FleetQuestType.getLocalOffers().contains(type) || countActive() > 0) {
+            return null;
+        }
+
+        RuinsFleetRouteManager scavengers = new RuinsFleetRouteManager(system);
+        MarketAPI source = scavengers.pickSourceMarket();
+        if (source == null) return null;
+
+        RouteManager routes = RouteManager.getInstance();
+        OptionalFleetData optional = new OptionalFleetData(source);
+        RouteData route = routes.addRoute(TEST_ROUTE_SOURCE, source, Misc.genRandomSeed(),
+                optional, new TestRouteSpawner(system, type));
+        route.addSegment(new RouteSegment(TEST_ROUTE_DAYS, system.getCenter()));
+
+        // RouteManager owns activeFleet; a zero-day advance keeps the test hull on its normal lifecycle.
+        routes.advance(0f);
+
+        CampaignFleetAPI fleet = route.getActiveFleet();
+        if (fleet == null) routes.removeRoute(route);
+        return fleet;
     }
 
     protected boolean adopt(FleetQuestType type) {
