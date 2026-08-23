@@ -236,9 +236,42 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         return count;
     }
 
-    private void startRoute(DistressCallSpec spec, StarSystemAPI system) {
+    public StarSystemAPI spawnForTesting(String specId) {
+        if (!bindVanilla() || hasActiveCall()) return null;
+
+        DistressCallSpec spec = DistressCallRegistry.get(specId);
+        DistressCallProvider provider = spec == null ? null
+                : DistressCallFramework.getProvider(spec.providerId);
+        if (spec == null || provider == null) return null;
+
+        List<StarSystemAPI> eligible = new ArrayList<>();
+        for (StarSystemAPI system : getEligibleSystems(true)) {
+            if (provider.isEligible(spec, system)) eligible.add(system);
+        }
+        if (eligible.isEmpty()) return null;
+
+        StarSystemAPI system = eligible.get(random.nextInt(eligible.size()));
+        return startRoute(spec, system) == null ? null : system;
+    }
+
+    public StarSystemAPI claimVanillaSystemForTesting() {
+        if (!bindVanilla() || hasActiveCall()) return null;
+
+        List<StarSystemAPI> eligible = getEligibleSystems(true);
+        if (eligible.isEmpty()) return null;
+
+        StarSystemAPI system = eligible.get(random.nextInt(eligible.size()));
+        vanilla.reserve(system.getId(), DistressCallSettings.REPEAT_RESERVATION_DAYS);
+        return system;
+    }
+
+    private boolean hasActiveCall() {
+        return !active.isEmpty() || !getActiveDistressIntel().isEmpty();
+    }
+
+    private DistressCallInstance startRoute(DistressCallSpec spec, StarSystemAPI system) {
         SectorEntityToken jumpPoint = Misc.getDistressJumpPoint(system);
-        if (jumpPoint == null) return;
+        if (jumpPoint == null) return null;
 
         DistressCallInstance instance = new DistressCallInstance(spec.id, system);
         active.add(instance);
@@ -257,6 +290,8 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         RouteData route = RouteManager.getInstance().addRoute(
                 DistressCallSettings.ROUTE_SOURCE_ID, null, Misc.genRandomSeed(), optional, this, data);
         route.addSegment(new RouteSegment(30f + random.nextFloat() * 10f, jumpPoint));
+
+        return instance;
     }
 
     @Override
