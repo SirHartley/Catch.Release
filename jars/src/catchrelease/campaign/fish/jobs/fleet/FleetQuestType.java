@@ -85,12 +85,13 @@ public enum FleetQuestType {
         this.actionText = actionText;
     }
 
-    protected static String pickSpecies(Random random) {
+    protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (spec.rarity.rank > FishRarity.UNCOMMON.rank) continue;
+            if (minimum != null && spec.rarity.rank < minimum.rank) continue;
+            if (maximum != null && spec.rarity.rank > maximum.rank) continue;
 
             picker.add(spec, 1f);
         }
@@ -107,7 +108,7 @@ public enum FleetQuestType {
             case STRANDED:
             case SCAVENGER_ENGINE:
                 ask.count = 1;
-                ask.speciesId = pickSpecies(random);
+                ask.speciesId = pickSpecies(random, null, FishRarity.UNCOMMON);
                 break;
 
             case STARVING:
@@ -119,9 +120,12 @@ public enum FleetQuestType {
                 ask.minGrade = FishGrade.FINE;
                 break;
 
-            case SEEKER:
             case COLLECTOR:
-                // must be a specific rare/uncommon species
+                ask.count = 1;
+                ask.speciesId = pickSpecies(random, FishRarity.UNCOMMON, null);
+                break;
+
+            case SEEKER:
                 ask.count = 1;
                 ask.minRarity = random.nextFloat() > 0.5f ? FishRarity.RARE : FishRarity.UNCOMMON;
                 break;
