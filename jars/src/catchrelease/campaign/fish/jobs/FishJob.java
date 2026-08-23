@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.shop.FishCurrency;
@@ -83,6 +84,11 @@ public abstract class FishJob extends HubMissionWithBarEvent
     @Override
     public String getAskerName() {
         return getBaseName();
+    }
+
+    @Override
+    public String getIcon() {
+        return FishIntelIcon.get(asks);
     }
 
     public List<FishReward> getRewards() {

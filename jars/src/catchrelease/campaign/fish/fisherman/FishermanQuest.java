@@ -1,9 +1,11 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
@@ -270,7 +272,8 @@ public class FishermanQuest {
 
         @Override
         public String getIcon() {
-            return FishermanIdentity.getPortrait(0f);
+            return FishIntelIcon.get(quest.atPond
+                    ? CatchImplement.POND : CatchImplement.BREACH_LAMP);
         }
 
         @Override
