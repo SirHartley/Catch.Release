@@ -1472,8 +1472,7 @@ The transponder package still contains the last service handshake it accepted.
 
 The source is listed simply as FISHERMAN.","catchrelease_wreckTake:Recover the assembly
 catchrelease_wreckLeave:Leave it",
-catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,"CatchReleaseCMD carryFisherProperty
-AddTextSmall ""Recovered LYNE service assembly"" highlight","The frame comes over on the heavy cargo crane.
+catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,CatchReleaseCMD carryFisherProperty,"The frame comes over on the heavy cargo crane.
 
 It is larger aboard your ship than it looked outside: several tonnes of scarred mechanism, docking hardware, and sealed electronics wrapped around an empty space - clearly intended to hold a craft of some kind, now absent.
 
@@ -1666,14 +1665,16 @@ $catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight
 catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3
-!$global.catchrelease_fisherAsked_okay",,,58:catchrelease_fisherOkay:Are you okay?,
+!$global.catchrelease_fisherAsked_okay","SetOptionColor catchrelease_fisherOkay highlight
+",,58:catchrelease_fisherOkay:Are you okay?,
 catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:I just left you in another system.,
+!$global.catchrelease_fisherAsked_fourJumps","SetOptionColor catchrelease_intro_fourJumps highlight
+",,60:catchrelease_intro_fourJumps:I just left you in another system.,
 #catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3

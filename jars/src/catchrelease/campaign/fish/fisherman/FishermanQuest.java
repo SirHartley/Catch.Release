@@ -255,7 +255,7 @@ public class FishermanQuest {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             }
 
-            addBulletPoints(info, ListInfoMode.IN_DESC);
+            //addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override

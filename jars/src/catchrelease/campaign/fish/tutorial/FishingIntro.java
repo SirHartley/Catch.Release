@@ -316,8 +316,7 @@ public class FishingIntro {
             }
 
             if (target != null) {
-                info.addPara("Fishing lessons given by the Fisherman, affiliated with "
-                                + faction.getDisplayNameWithArticle() + ".", opad,
+                info.addPara("Fishing lessons given by the Fisherman.", opad,
                         faction.getBaseUIColor(),
                         faction.getDisplayNameWithArticleWithoutArticle());
             }
@@ -361,7 +360,7 @@ public class FishingIntro {
                         info.addPara("Use the Breach Lights, then land it with the Harpoon",
                                 text, 0f);
                     } else if (target.atPond) {
-                        info.addPara("Use the ROD/LINE at the marked rupture", text, 0f);
+                        info.addPara("Use the ROD/LYNE at the marked rupture", text, 0f);
                     }
                 }
                 unindent(info);
@@ -375,7 +374,7 @@ public class FishingIntro {
                 FishIntelMapButton.add(info, width, getAsks());
             }
 
-            addBulletPoints(info, ListInfoMode.IN_DESC);
+            //addBulletPoints(info, ListInfoMode.IN_DESC);
         }
 
         @Override
@@ -398,7 +397,7 @@ public class FishingIntro {
         @Override
         public String getIcon() {
             if (getTarget() == null) {
-                return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "placeholder");
+                return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "intel_tutorial");
             }
             return FishermanIdentity.getPortrait(0f);
         }
