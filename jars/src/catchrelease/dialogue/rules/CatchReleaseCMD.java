@@ -179,8 +179,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                         : null);
 
             case "point":
-                FishingIntro.point(text(dialog));
+                FishingIntro.point();
                 return true;
+            case "showIntroIntel":
+                return FishingIntro.showCurrentIntel(text(dialog));
             case "giveRod":
                 FishingIntro.giveRod(text(dialog));
                 return true;
@@ -217,7 +219,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                         && Castaway.start(planet);
 
             case "carryFisherProperty":
-                FishingIntro.takeFisherProperty(text(dialog));
+                FishingIntro.takeFisherProperty();
                 if (dialog != null) TutorialWreck.retire(dialog.getInteractionTarget());
                 return true;
             case "dropFisherProperty":
@@ -226,7 +228,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             // Aliases keep an old rules sheet usable during a hot reload of this update.
             case "carryHarpoon":
-                FishingIntro.takeFisherProperty(text(dialog));
+                FishingIntro.takeFisherProperty();
                 return true;
             case "dropHarpoon":
                 FishingIntro.dropFisherProperty();

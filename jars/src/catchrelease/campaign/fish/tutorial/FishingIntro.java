@@ -533,32 +533,28 @@ public class FishingIntro {
     }
 
     public static void point() {
-        point(null);
-    }
-
-    public static void point(TextPanelAPI text) {
         if (isAtLeast(POINTED)) return;
 
         setStage(POINTED);
 
         IntroIntel intel = new IntroIntel();
-        FishIntelNotifications.queue(intel, text);
+        FishIntelNotifications.queue(intel);
     }
 
     public static void giveRod(TextPanelAPI text) {
-        point(text);
+        point();
         setStage(RODDED);
 
         grant(TutorialConstants.ROD, text);
 
-        setTarget(rollTarget(RODDED), text);
+        setTarget(rollTarget(RODDED));
     }
 
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
         Target target = rollTarget(FISH_ONE);
-        setTarget(target, text);
+        setTarget(target);
         ensureTargetBoat(target);
     }
 
@@ -607,7 +603,7 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
-        setTarget(rollTarget(FISH_TWO), text);
+        setTarget(rollTarget(FISH_TWO));
     }
 
     public static void giveCharts(TextPanelAPI text) {
@@ -620,7 +616,7 @@ public class FishingIntro {
         target.stage = FISH_THREE;
         target.speciesIds = given;
 
-        setTarget(target, text);
+        setTarget(target);
     }
 
     public static void finish(TextPanelAPI text) {
@@ -638,13 +634,25 @@ public class FishingIntro {
         FishRumors.ensureTutorialLead();
     }
 
+    public static boolean showCurrentIntel(TextPanelAPI text) {
+        if (text == null) return false;
+
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        List<IntelInfoPlugin> entries = manager.getCommQueue(IntroIntel.class);
+        if (entries.isEmpty()) entries = manager.getIntel(IntroIntel.class);
+        if (entries.isEmpty()) return false;
+
+        FishIntelNotifications.showAdded((IntroIntel) entries.get(0), text);
+        return true;
+    }
+
     public static Target getTarget() {
         Object stored = Global.getSector().getPersistentData().get(TutorialConstants.TARGET_KEY);
 
         return stored instanceof Target ? (Target) stored : null;
     }
 
-    protected static void setTarget(Target target, TextPanelAPI text) {
+    protected static void setTarget(Target target) {
         if (target == null) {
             clearTarget();
             return;
@@ -654,7 +662,7 @@ public class FishingIntro {
         letGo(getTarget());
 
         Global.getSector().getPersistentData().put(TutorialConstants.TARGET_KEY, target);
-        updateIntel(text);
+        updateIntel();
     }
 
     protected static void clearTarget() {
@@ -664,31 +672,13 @@ public class FishingIntro {
     }
 
     protected static void updateIntel() {
-        updateIntel(null);
-    }
-
-    protected static void updateIntel(TextPanelAPI text) {
         IntelManagerAPI manager = Global.getSector().getIntelManager();
-        List<IntelInfoPlugin> queued = manager.getCommQueue(IntroIntel.class);
-
-        if (!queued.isEmpty()) {
-            showIntelInDialogue(queued, text);
-            return;
-        }
+        if (!manager.getCommQueue(IntroIntel.class).isEmpty()) return;
 
         List<IntelInfoPlugin> active = manager.getIntel(IntroIntel.class);
         if (active.isEmpty()) return;
 
-        showIntelInDialogue(active, text);
         sendIntelUpdate(active);
-    }
-
-    protected static void showIntelInDialogue(List<IntelInfoPlugin> entries, TextPanelAPI text) {
-        if (text == null) return;
-
-        for (IntelInfoPlugin intel : entries) {
-            FishIntelNotifications.showAdded((IntroIntel) intel, text);
-        }
     }
 
     protected static void sendIntelUpdate(List<IntelInfoPlugin> entries) {
@@ -1120,14 +1110,10 @@ public class FishingIntro {
     }
 
     public static void takeFisherProperty() {
-        takeFisherProperty(null);
-    }
-
-    public static void takeFisherProperty(TextPanelAPI text) {
         Global.getSector().getMemoryWithoutUpdate()
                 .set(TutorialConstants.FISHER_PROPERTY_KEY, true);
 
-        point(text);
+        point();
     }
 
     public static void dropFisherProperty() {
