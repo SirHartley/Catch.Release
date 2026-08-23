@@ -17,9 +17,6 @@ qa_
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 
-Outfitter
-- Add on-hover tooltip to the "rank indicators" - both on the list entry and in the main panel explaining "Locked - Find a schematic to unlock"
-
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
 

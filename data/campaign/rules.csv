@@ -1481,22 +1481,29 @@ catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExpl
 FireBest ShowSalvageEntityDetails
 FireBest SalvageCheckHostile",,,Chains into vanilla's own salvage flow - the same three commands the stock sal_ rows run on any salvageable.
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
+,,,,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
 !$catchrelease_castawaySeen
 CatchReleaseCMD castawayEligible score:1000","CatchReleaseCMD startCastaway
 $catchrelease_castawaySeen = true 0
 $option = catchrelease_castawayPlanetOpen 0
 FireBest DialogOptionSelected",,,"The rating's scene takes an eligible planet's own interaction over, vanilla's mission-target way (a score-boosted OpenInteractionDialog row, like aem_target); the seen flag expires with the pause, so the hold lasts one dialog and he hails again next visit until given a berth."
-catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,ShowDefaultVisual,"Your comms officer catches a personal beacon running on emergency power.
+catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,"ShowDefaultVisual
+FireAll CRCastawayPlanetOptions","Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
 
-The occupant is thin, dirty, and extremely pleased to see a ship.","0:catchrelease_ratingAsk:Ask how he got here
-10:catchrelease_ratingWho:Ask who he worked for
-20:catchrelease_ratingRescue:Offer passage
-90:catchrelease_castawayToPlanet:See to the planet
-100:catchrelease_castawayLeave:Leave",The scene itself; entered only through the interaction hijack above.
-catchrelease_ratingAsk,DialogOptionSelected,$option == catchrelease_ratingAsk,,"""Missed the boat.""
+The occupant is thin, dirty, and extremely pleased to see a ship.",,The scene itself; entered only through the interaction hijack above.
+catchrelease_ratingBegs,CRCastawayPlanetOptions,"$global.catchrelease_ratingAsked
+$option == catchrelease_castawayPlanetOpen",,"A garbled transmission calls out almost immediately.
+
+""You came back! Please take me aboard, $PlayerSirOrMadam, I beg of you!""",,
+catchrelease_ratingAskOption,CRCastawayPlanetOptions,!$global.catchrelease_ratingAsked,,,0:catchrelease_ratingAsk:Ask how he got here,
+catchrelease_ratingRescueOption,CRCastawayPlanetOptions,$global.catchrelease_ratingAsked,,,20:catchrelease_ratingRescue:Offer passage,
+catchrelease_ratingMurderOption,CRCastawayPlanetOptions,,,,30:catchrelease_ratingMuder:Order a cannon fired at the beacon,
+catchrelease_castawayToPlanetOption,CRCastawayPlanetOptions,,,,90:catchrelease_castawayToPlanet:See to the planet,
+catchrelease_castawayLeaveOption,CRCastawayPlanetOptions,,,,100:catchrelease_castawayLeave:Leave,
+catchrelease_ratingAsk,DialogOptionSelected,$option == catchrelease_ratingAsk,$global.catchrelease_ratingAsked = true,"""Missed the boat.""
 
 He sees your expression.
 
@@ -1504,28 +1511,30 @@ He sees your expression.
 
 He points to the beacon.
 
-""By the time anyone worked it out, I wasn't on their route anymore.""","0:catchrelease_ratingWho:What boat?
-100:catchrelease_castawayBack:Something else",
-catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,,"""Fishing crew.""
+""By the time anyone worked it out, I wasn't on their route anymore. Probably thought I bailed on them.""",0:catchrelease_ratingWho:What boat?,
+catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,"CatchReleaseCMD point
+FireAll CRCastawayPlanetOptions
+AddTextSmall ""Gained: Fisherman Location Data"" highlight","""Fishing crew.""
 
-He drinks from the water pouch your people gave him.
+He drinks from a dirty water pouch.
 
 ""Worked around the Fisherman's boats. If you're looking for them, go past the settled traffic and hail the trawlers.""
 
 He gives your comms officer the old fleet handshake.
 
-""It still works.""",100:catchrelease_castawayBack:Continue,
-catchrelease_castawayBack,DialogOptionSelected,$option == catchrelease_castawayBack,ShowDefaultVisual,,"0:catchrelease_ratingAsk:Ask how he got here
-10:catchrelease_ratingWho:Ask who he worked for
-20:catchrelease_ratingRescue:Offer passage
-90:catchrelease_castawayToPlanet:See to the planet
-100:catchrelease_castawayLeave:Leave",Technical menu return for the supplied castaway branches.
+""It still works.""",,
+catchrelease_ratingMuder,DialogOptionSelected,$option == catchrelease_ratingMuder,$catchrelease_castawaySeen = true,"You order bombardment of the coordinates the beacon is broadcasting from. 
+
+It falls silent with a single shot.",0:catchrelease_castawayToPlanet:See to the planet,
+catchrelease_castawayBack,DialogOptionSelected,$option == catchrelease_castawayBack,"ShowDefaultVisual
+FireAll CRCastawayPlanetOptions",,,Technical menu return for the supplied castaway branches.
 catchrelease_ratingRescue,DialogOptionSelected,$option == catchrelease_ratingRescue,CatchReleaseCMD rescueCastaway,"He accepts before you finish the sentence.
 
 Your personnel officer finds a spare berth.","0:catchrelease_castawayToPlanet:See to the planet
 100:catchrelease_castawayLeave:Leave",
 catchrelease_castawayToPlanet,DialogOptionSelected,$option == catchrelease_castawayToPlanet,FireBest OpenInteractionDialog,,,Hands the dialog back to the planet's ordinary interaction; the seen flag or the rescue keeps the scene from re-firing inside it.
 catchrelease_castawayLeave,DialogOptionSelected,$option == catchrelease_castawayLeave,DismissDialog,,,
+,,,,,,
 catchrelease_fisherEncounter,BeginFleetEncounter,"$catchrelease_fisherman score:1000
 !$isHostile","unset $ignorePlayerCommRequests
 OpenComms",,,"Walking up to a trawler goes straight into the conversation, which is what OpenComms is for - it sets the flag the encounter reads at the end of its own init and takes the OPEN_COMM branch instead of building the fleet screen. Without this row the boat gets the ordinary engage/disengage/leave screen with an unlabelled comm link at the bottom of it, and everything the boat is for sits behind a line that reads like every hauler in the sector."
