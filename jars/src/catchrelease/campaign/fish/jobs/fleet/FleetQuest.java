@@ -46,6 +46,7 @@ public class FleetQuest extends FishJob {
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
+    public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
 
     public static final float DELIVERY_DAYS = 60f;
     public static final float HOLD_DAYS = 100000f;
@@ -367,6 +368,7 @@ public class FleetQuest extends FishJob {
         dropMarker();
         Misc.makeUnimportant(giver, IMPORTANT_REASON);
         giver.getMemoryWithoutUpdate().unset(DELIVER_FLAG);
+        giver.getMemoryWithoutUpdate().set(THANKS_KEY, type.thanks);
     }
 
     @Override

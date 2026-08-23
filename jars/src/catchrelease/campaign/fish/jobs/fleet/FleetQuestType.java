@@ -20,48 +20,57 @@ public enum FleetQuestType {
                     + " it has not got. There is a rupture nearby - bring us something out of it and we"
                     + " will make it worth the detour.",
             "They need something living out of a nearby rupture before the printer will run again.",
-            "Holding position"),
+            "Holding position",
+            "Printer's running. That bought us the trip home. Thank you."),
     SEEKER("Fleet on a Hunt",
             FleetTypes.SCAVENGER_SMALL,
             "We have been out here eleven weeks looking for one specific thing and we are not"
                     + " equipped for it. You clearly are. Land it for us and we will hand over what"
                     + " we came out with instead.",
             "They have been hunting one specimen for weeks with the wrong gear entirely.",
-            "Searching"),
+            "Searching",
+            "That's it. Eleven weeks with the wrong gear, and you brought it back in one trip."
+                    + " Thank you."),
     QUOTA("Short of Quota",
             FleetTypes.TRADE_SMALL,
             "Our quota is due, our nets came up light, and the difference between filed and short"
                     + " is a hearing neither of us wants to attend. Make up the numbers and we will"
                     + " pay out of the margin.",
             "Their filed quota is short and the deadline is not moving.",
-            "Filling quota"),
+            "Filling quota",
+            "Filed and balanced. Nobody has to explain the shortfall now. Thank you."),
     STARVING("Hungry Fleet",
             FleetTypes.TRADE_SMALL,
             "We have been on printed protein for nineteen days. Nobody is dying. Everybody is"
                     + " furious. Bring us something that was recently alive and name a price.",
             "Nineteen days of printed protein and a crew about to mutiny over it.",
-            "Rationing"),
+            "Rationing",
+            "The galley has stopped threatening mutiny. You have our thanks."),
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
             "Coil's going and the gel that packs it is not something you can synthesise out here."
                     + " You can fish it out of the local water, apparently. We looked it up. Bring"
                     + " us one and we will pay in what we have been pulling out of the hulks.",
             "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
-            "Holding position"),
+            "Holding position",
+            "The gel packed cleanly. Coil is holding. We can move. Thank you."),
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
             "I am not in distress and I would like that on the record. I am in want. There is a"
                     + " specimen I have been trying to buy for two years and nobody will sell me"
                     + " one. Catch it and the price stops being a problem.",
             "A private collector who has run out of people willing to sell to them.",
-            "Waiting"),
+            "Waiting",
+            "Two years of refusals, and there it is. You have my thanks."),
     WAGER("Settling a Bet",
             FleetTypes.SCAVENGER_SMALL,
             "There is a disagreement aboard about what is actually down there and it has stopped"
                     + " being funny. Go and settle it. Whoever is wrong is paying, and it will not"
                     + " be coming out of our pocket either way.",
             "An argument aboard that has outlasted everyone's patience for it.",
-            "Arguing");
+            "Arguing",
+            "That settled it. Half the crew owes the other half money, and both halves owe you"
+                    + " thanks.");
 
     private static final FleetQuestType[] LOCAL_OFFERS = {
             SEEKER,
@@ -76,13 +85,16 @@ public enum FleetQuestType {
     public final String pitch;
     public final String note;
     public final String actionText;
+    public final String thanks;
 
-    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText) {
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
         this.note = note;
         this.actionText = actionText;
+        this.thanks = thanks;
     }
 
     protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {

@@ -1363,6 +1363,9 @@ No formal contract follows.",,Technical routing twin for the supplied second acc
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,FireAll CatchReleaseFleetResolutionOptions,"""Fair enough.""
 
 The channel closes.",,
+catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1300
+!$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
+FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,One-shot acknowledgement after a completed fleet order.
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk
