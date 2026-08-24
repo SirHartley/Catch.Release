@@ -1125,6 +1125,17 @@ progress negative — so what keeps rare-and-up meaningful against an upgraded k
 falls to 0.6. Retuning a band means moving all five and simulating; moving `difficulty` alone
 changes the early game and nothing else.
 
+**Movement modes are the in-band variety, and two of them are tier-bounded.** Seven motions —
+smooth, darter, sinker, floater, weaver, twitcher, lunger — each with its own signature on the
+track, in the campaign mote's swimming and in the aquarium tank, plus MIXED, which rerolls the
+whole pool. They are not equally hard and are not meant to be: floater and weaver sit easiest,
+sinker and lunger hardest. Two placement rules are load-bearing, both simulated rather than
+guessed: **weaver is never a species motion above UNCOMMON** — its end-to-end sweep out-runs the
+bar's top speed past that and the catch turns binary-by-skill, then impossible — and **lunger
+never sits on a COMMON**, because its freeze-and-lunge plays a full band harder than the row's
+numbers say. MIXED may still roll either anywhere, which is survivable because a roll lasts one
+think.
+
 **Ranges are one or two quadrants for ordinary species, and the gate is the range for gated ones —
 capped at fifteen species per system.** An ordinary row lives in its home quadrant plus at most one
 adjacent one. A hard-gated row — deep-coherence, neutron/black-hole stars, theme tags, a colour gate
