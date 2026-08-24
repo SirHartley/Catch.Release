@@ -1118,6 +1118,13 @@ because a species that says nothing about where it lives is one somebody could d
 describable lives down there — without the exception the deepest water in the game offered the same
 roach as a core world. It is the one asymmetry in the table and it is deliberate.
 
+**The species list is a 9 : 3 : 1 : 0.5 pyramid.** The non-abyssal sheet holds commons, uncommons,
+rares and epics in that ratio — currently 54 / 18 / 6 / 3 — so generation and habitat grouping
+follow a real pyramid instead of a jumble where rares outnumber uncommons. Rarity is assigned from
+the description: a fish whose text reads ordinary sits low regardless of its art, and only the
+genuinely inexplicable half-dozen hold the rare tier. A row that changes tier takes its new band's
+catch columns, spawn weight and value with it.
+
 **The catch columns are one ladder, and the rate columns are its upper half.** `fish.csv` tunes the
 minigame per rarity band through five columns moved together: `difficulty`, `restlessness`,
 `motionSpeed`, `progressRateMult`, `escapeRateMult`. The difficulty column stops mattering once the
