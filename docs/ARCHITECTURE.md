@@ -1105,8 +1105,8 @@ minigame per rarity band through five columns moved together: `difficulty`, `res
 `motionSpeed`, `progressRateMult`, `escapeRateMult`. The difficulty column stops mattering once the
 bar-size upgrade lands — at 160px the window covers enough track that no fish speed makes net
 progress negative — so what keeps rare-and-up meaningful against an upgraded kit is the rate pair:
-`escapeRateMult` climbs from 0.95 (gentle commons) to 1.8 (the legendary) while `progressRateMult`
-falls to 0.75. Retuning a band means moving all five and simulating; moving `difficulty` alone
+`escapeRateMult` climbs from 0.95 (gentle commons) to 2.7 (the legendary) while `progressRateMult`
+falls to 0.6. Retuning a band means moving all five and simulating; moving `difficulty` alone
 changes the early game and nothing else.
 
 **Every non-abyssal species lives in exactly one quadrant, and a region holds at most ten.** The
