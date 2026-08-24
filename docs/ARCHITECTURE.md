@@ -1125,6 +1125,13 @@ the description: a fish whose text reads ordinary sits low regardless of its art
 genuinely inexplicable half-dozen hold the rare tier. A row that changes tier takes its new band's
 catch columns, spawn weight and value with it.
 
+**The abyss is its own scale.** Abyssal rarity follows the same pyramid within its pool — seven
+commons, two uncommons, a rare, an epic, the manta on top — but the label only sets encounter
+frequency and value down there. The catch columns never drop below rare-band numbers: the abyssal
+ladder runs d150 for its commons up to d190 for its epic, all above the main sheet's epic band, with
+the manta's 195 / 0.6 / 2.7 still the ceiling. Re-tiering an abyssal row means moving it along that
+ladder, never onto the main one.
+
 **The catch columns are one ladder, and the rate columns are its upper half.** `fish.csv` tunes the
 minigame per rarity band through five columns moved together: `difficulty`, `restlessness`,
 `motionSpeed`, `progressRateMult`, `escapeRateMult`. The difficulty column stops mattering once the
