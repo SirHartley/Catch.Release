@@ -1109,13 +1109,15 @@ progress negative — so what keeps rare-and-up meaningful against an upgraded k
 falls to 0.6. Retuning a band means moving all five and simulating; moving `difficulty` alone
 changes the early game and nothing else.
 
-**Every non-abyssal species lives in exactly one quadrant, and a region holds at most ten.** The
-rosters are balanced by hand — five to six commons (two or three of them the gentle tier), one or
-two uncommons, two or three rares, an epic in three of the eight — with families split across
-quadrants and every region keeping at least two commons free of star, age and coherence gates so no
-pond can come up empty. The cap is what keeps any one system's offer under ten species; a new row
-joins a quadrant with room rather than listing several, and widening a row's regions is how the cap
-gets broken.
+**Ranges are one or two quadrants for ordinary species, and the gate is the range for gated ones —
+capped at fifteen species per system.** An ordinary row lives in its home quadrant plus at most one
+adjacent one. A hard-gated row — deep-coherence, neutron/black-hole stars, theme tags, a colour gate
+stacked on a coherence gate — names a half-sector or nothing at all, because the gate already does
+the narrowing and a single quadrant on top of it is how a species ends up existing in one system.
+The cap is verified by sweeping the sheet over every region × star colour × age × coherence × theme
+combination; it currently sits exactly at fifteen, so any widened row must be re-swept, and the
+deep-coherence rows are the ones that stack in thin-fabric systems. Every region keeps at least two
+commons free of star, age and coherence gates so no pond can come up empty.
 
 **A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
 neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
