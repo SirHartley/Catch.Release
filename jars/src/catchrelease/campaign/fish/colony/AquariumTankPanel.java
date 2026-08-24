@@ -138,13 +138,15 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         protected FishMotion nextMode() {
             FishMotion rolled = spec.motion == FishMotion.MIXED ? rollMixedMode() : spec.motion;
 
-            return build == Build.DRIFTER && rolled == FishMotion.DARTER
+            // nothing built like a jellyfish bolts or lunges
+            return build == Build.DRIFTER
+                    && (rolled == FishMotion.DARTER || rolled == FishMotion.LUNGER)
                     ? FishMotion.SMOOTH : rolled;
         }
 
         protected FishMotion rollMixedMode() {
-            FishMotion[] pool = {FishMotion.SMOOTH, FishMotion.DARTER,
-                    FishMotion.SINKER, FishMotion.FLOATER};
+            FishMotion[] pool = {FishMotion.SMOOTH, FishMotion.DARTER, FishMotion.SINKER,
+                    FishMotion.FLOATER, FishMotion.WEAVER, FishMotion.TWITCHER, FishMotion.LUNGER};
 
             return pool[(int) MathUtils.getRandomNumberInRange(0f, pool.length - 0.01f)];
         }
@@ -240,6 +242,22 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 case FLOATER:
                     pause = MathUtils.getRandomNumberInRange(0.5f, 2f) / restless;
                     pickTarget(0.6f, 0.95f);
+                    break;
+                case WEAVER:
+                    // no pause and always the far wall: laps, not errands
+                    target.set(loc.x < 0.5f ? 0.9f : 0.1f,
+                            MathUtils.getRandomNumberInRange(0.3f, 0.7f));
+                    break;
+                case TWITCHER:
+                    pause = MathUtils.getRandomNumberInRange(0.15f, 0.5f) / restless;
+                    target.set(MathUtils.clamp(loc.x
+                                    + MathUtils.getRandomNumberInRange(-0.12f, 0.12f), 0.08f, 0.92f),
+                            MathUtils.clamp(loc.y
+                                    + MathUtils.getRandomNumberInRange(-0.1f, 0.1f), 0.15f, 0.9f));
+                    break;
+                case LUNGER:
+                    pause = MathUtils.getRandomNumberInRange(3f, 6f) / restless;
+                    pickTarget(0.1f, 0.9f);
                     break;
                 default:
                     pause = MathUtils.getRandomNumberInRange(0.2f, 1.5f) / restless;

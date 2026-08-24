@@ -37,6 +37,23 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     private static final float FLOATER_SPEED_MULT = 1.15f;
     private static final float FLOATER_JINK = 10f;
+
+    private static final float WEAVER_SPEED_MULT = 0.9f;
+    private static final float WEAVER_SWAY = 38f;
+    private static final float WEAVER_RATE = 2.3f;
+
+    private static final float TWITCHER_SPEED_MULT = 1.05f;
+    private static final float TWITCHER_STUTTER_MULT = 0.25f;
+    private static final float TWITCHER_RUN_TIME = 0.7f;
+    private static final float TWITCHER_STUTTER_TIME = 0.18f;
+    private static final float TWITCHER_JINK = 9f;
+    private static final float TWITCHER_JINK_RATE = 11f;
+
+    private static final float LUNGER_FREEZE_TIME = 2.4f;
+    private static final float LUNGER_DASH_TIME = 0.5f;
+    private static final float LUNGER_DASH_MULT = 2.6f;
+    private static final float LUNGER_FREEZE_MULT = 0.06f;
+
     private static final float MIXED_REROLL = 6f;
 
     private static final FishRarity DIVE_FROM = FishRarity.EPIC;
@@ -257,6 +274,30 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             case FLOATER:
                 return FLOATER_SPEED_MULT;
 
+            case WEAVER:
+                return WEAVER_SPEED_MULT;
+
+            case TWITCHER:
+                phaseLeft -= amount;
+                if (phaseLeft <= 0f) {
+                    dashing = !dashing;
+                    phaseLeft = (dashing ? TWITCHER_RUN_TIME : TWITCHER_STUTTER_TIME)
+                            * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
+                }
+
+                return dashing ? TWITCHER_SPEED_MULT : TWITCHER_STUTTER_MULT;
+
+            case LUNGER:
+                phaseLeft -= amount;
+                if (phaseLeft <= 0f) {
+                    dashing = !dashing;
+                    phaseLeft = dashing ? LUNGER_DASH_TIME
+                            : LUNGER_FREEZE_TIME / difficulty
+                                    * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
+                }
+
+                return dashing ? LUNGER_DASH_MULT + 0.4f * (difficulty - 1f) : LUNGER_FREEZE_MULT;
+
             default:
                 return 1f;
         }
@@ -334,6 +375,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             case FLOATER:
                 return (float) Math.sin(time * 4.7f + sineVariance) * FLOATER_JINK * difficulty;
 
+            case WEAVER:
+                // one wide regular serpentine, deliberately slower and broader than any of the
+                // random wander terms it rides on
+                return (float) Math.sin(time * WEAVER_RATE + sineVariance) * WEAVER_SWAY;
+
+            case TWITCHER:
+                return (float) Math.sin(time * TWITCHER_JINK_RATE + sineVariance)
+                        * TWITCHER_JINK * difficulty;
+
+            case LUNGER:
+                return 0f;
+
             default:
                 return 0f;
         }
@@ -350,7 +403,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         rerollLeft -= amount;
         if (activeMode == null || activeMode == FishMotion.MIXED || rerollLeft <= 0f) {
             FishMotion[] pool = {FishMotion.SMOOTH, FishMotion.DARTER, FishMotion.SINKER,
-                    FishMotion.FLOATER};
+                    FishMotion.FLOATER, FishMotion.WEAVER, FishMotion.TWITCHER, FishMotion.LUNGER};
             activeMode = pool[(int) MathUtils.getRandomNumberInRange(0f, pool.length - 0.01f)];
 
             rerollLeft = MIXED_REROLL / getRarity().wanderMult
