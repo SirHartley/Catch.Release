@@ -1155,12 +1155,23 @@ think.
 **Ranges are one or two quadrants for ordinary species, and the gate is the range for gated ones —
 capped at fifteen species per system.** An ordinary row lives in its home quadrant plus at most one
 adjacent one. A hard-gated row — deep-coherence, neutron/black-hole stars, theme tags, a colour gate
-stacked on a coherence gate — names a half-sector or nothing at all, because the gate already does
-the narrowing and a single quadrant on top of it is how a species ends up existing in one system.
-The cap is verified by sweeping the sheet over every region × star colour × age × coherence × theme
-combination; it currently sits exactly at fifteen, so any widened row must be re-swept, and the
-deep-coherence rows are the ones that stack in thin-fabric systems. Every region keeps at least two
-commons free of star, age and coherence gates so no pond can come up empty.
+stacked on a coherence gate — names a half-sector, sometimes less a region, or nothing at all,
+because the gate already does the narrowing and a single quadrant on top of it is how a species ends
+up existing in one system. The cap is verified by sweeping the sheet over every region × star colour
+× age × coherence × theme combination; it currently sits exactly at fifteen, so any widened or added
+row must be re-swept, and the deep-coherence rows are the ones that stack in thin-fabric systems.
+When the legendaries landed, each wide gated row gave back the one region the sweep flagged — that
+is where the half-sector-less-one shapes come from. Every region keeps at least two commons free of
+star, age and coherence gates so no pond can come up empty.
+
+**The legendaries are quadrant destinations, and their art is pending.** One legendary per quadrant
+(`lantern_jack`, `slipstream_moray`, `quorum`, `false_dawn`), one across the four core regions
+(`longliner`), the manta in the abyss — six in all. The five new ones carry `minAberration 0.5`, so
+they exist only where the fabric has nearly gone; `FishRanges`'s three-system floor keeps each one
+somewhere real. The two calm-fabric commons (`nav_bobber`, `plume_remora`) carry `maxAberration
+0.4` for the opposite reason — the crowded end of the sweep is the deep end, and they fit the cap
+only by staying out of it. All seven placeholder rows reuse existing sprites until their own art
+lands.
 
 **A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
 neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
