@@ -6,6 +6,9 @@ public enum FishMotion {
     DARTER,
     SINKER,
     FLOATER,
+    WEAVER,
+    TWITCHER,
+    LUNGER,
     MIXED;
 
     public static FishMotion parse(String name, FishMotion fallback) {

@@ -28,6 +28,7 @@ public class FishingMinigame {
     protected float progressRateMult;
     protected float escapeRateMult;
     protected FishMotion motion;
+    protected FishMotion activeMotion;
 
     protected float barPosition = 0.4f;
     protected float barHeight;
@@ -155,6 +156,14 @@ public class FishingMinigame {
 
         float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
 
+        // a lunger is two speeds pretending to be one fish: near its spot it is almost parked,
+        // and the trip to the next spot is violent
+        if (activeMotion == FishMotion.LUNGER) {
+            maxSpeed *= Math.abs(fishTarget - fishPosition) > FishConstants.MINIGAME_LUNGER_NEAR
+                    ? FishConstants.MINIGAME_LUNGER_DASH_MULT
+                    : FishConstants.MINIGAME_LUNGER_CREEP_MULT;
+        }
+
         float desired = MathUtils.clamp((fishTarget - fishPosition) * FishConstants.MINIGAME_FISH_STIFFNESS,
                 -maxSpeed, maxSpeed);
 
@@ -238,9 +247,10 @@ public class FishingMinigame {
     }
 
     protected float pickFishTarget() {
-        FishMotion motion = this.motion == FishMotion.MIXED ? pickMixedMotion() : this.motion;
+        activeMotion = motion == FishMotion.MIXED ? pickMixedMotion() : motion;
+        if (activeMotion == null) activeMotion = FishMotion.SMOOTH;
 
-        switch (motion) {
+        switch (activeMotion) {
             case DARTER:
                 // bolts somewhere else entirely rather than drifting a little
                 return MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f
@@ -253,13 +263,36 @@ public class FishingMinigame {
             case FLOATER:
                 return MathUtils.getRandomNumberInRange(0.55f, 1f);
 
+            case WEAVER:
+                // flips only once it has arrived, so the full sweep survives any difficulty -
+                // a timer flip mid-crossing would collapse the metronome into centre jitter
+                return Math.abs(fishPosition - fishTarget) >= FishConstants.MINIGAME_WEAVER_ARRIVE
+                        ? fishTarget
+                        : fishPosition > 0.5f
+                                ? FishConstants.MINIGAME_WEAVER_LOW
+                                : FishConstants.MINIGAME_WEAVER_HIGH;
+
+            case TWITCHER: {
+                float hop = MathUtils.getRandomNumberInRange(0f, 1f)
+                        < FishConstants.MINIGAME_TWITCHER_LEAP_CHANCE
+                        ? FishConstants.MINIGAME_TWITCHER_LEAP
+                        : FishConstants.MINIGAME_TWITCHER_HOP;
+
+                return MathUtils.clamp(fishPosition
+                        + MathUtils.getRandomNumberInRange(-hop, hop), 0.05f, 0.95f);
+            }
+
+            case LUNGER:
+                return MathUtils.getRandomNumberInRange(0f, 1f);
+
             default:
                 return MathUtils.getRandomNumberInRange(0f, 1f);
         }
     }
 
     protected FishMotion pickMixedMotion() {
-        FishMotion[] options = {FishMotion.SMOOTH, FishMotion.DARTER, FishMotion.SINKER, FishMotion.FLOATER};
+        FishMotion[] options = {FishMotion.SMOOTH, FishMotion.DARTER, FishMotion.SINKER,
+                FishMotion.FLOATER, FishMotion.WEAVER, FishMotion.TWITCHER, FishMotion.LUNGER};
 
         return options[(int) MathUtils.getRandomNumberInRange(0, options.length - 0.001f)];
     }
@@ -270,10 +303,39 @@ public class FishingMinigame {
 
         float divisor = Math.max(0.1f, restlessness * getDifficultyMult());
 
-        // a darter is defined by the wait before the bolt, so it gets to keep more of it
-        if (motion == FishMotion.DARTER) base *= FishConstants.MINIGAME_DARTER_PATIENCE;
+        // cadence is keyed to the rolled motion, not the sheet's - a MIXED fish that just rolled
+        // a lunger has to actually sit still, or the roll changes nothing but the target
+        switch (activeMotion == null ? FishMotion.SMOOTH : activeMotion) {
+            case DARTER:
+                // a darter is defined by the wait before the bolt, so it gets to keep more of it
+                base *= FishConstants.MINIGAME_DARTER_PATIENCE;
+                break;
 
-        return base / divisor;
+            case TWITCHER:
+                base *= FishConstants.MINIGAME_TWITCHER_CADENCE;
+                break;
+
+            case LUNGER:
+                base *= FishConstants.MINIGAME_LUNGER_PATIENCE;
+                break;
+
+            case WEAVER:
+                base = FishConstants.MINIGAME_THINK_TIME_MAX;
+                break;
+
+            default:
+                break;
+        }
+
+        float think = base / divisor;
+
+        // the end-rest is the only window a slower bar ever gets against a fast weaver, so
+        // difficulty may shorten it but never remove it
+        if (activeMotion == FishMotion.WEAVER) {
+            think = Math.max(FishConstants.MINIGAME_WEAVER_DWELL_FLOOR, think);
+        }
+
+        return think;
     }
 
     protected float getDifficultyMult() {
