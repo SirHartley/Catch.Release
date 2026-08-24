@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 //This is a java port of starficz ReflectionUtils, ported via Claude. 
-//I lack the technical skills to double-check what the AI did, so treat it with a lot of suspicion.
 
 public final class ReflectionUtils {
 
