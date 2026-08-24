@@ -51,6 +51,10 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     protected float mouseY = -1f;
     protected PositionAPI panelPos;
 
+    protected Runnable saveRouteRequested;
+    protected Object savedStateFor;
+    protected boolean savedState;
+
     protected transient CoherenceHeatField heat;
     protected boolean coherenceShown = false;
 
@@ -85,6 +89,25 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         noDataShown = shown;
     }
 
+    public void setSaveRouteListener(Runnable listener) {
+        saveRouteRequested = listener;
+    }
+
+    public void noteRouteSaved() {
+        savedStateFor = FishRoute.get();
+        savedState = true;
+    }
+
+    protected boolean isRouteSaved(FishRoute.Saved route) {
+        // cached per route object - the plotted route only changes by being replaced
+        if (route != savedStateFor) {
+            savedStateFor = route;
+            savedState = catchrelease.campaign.fish.intel.FishRouteIntel.isSaved(route);
+        }
+
+        return savedState;
+    }
+
     @Override
     public void positionChanged(PositionAPI position) {
         panelPos = position;
@@ -105,11 +128,26 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
                 FishRoute.clear();
                 event.consume();
             }
+
+            if (event.isLMBDownEvent() && FishRoute.get() != null
+                    && isInSaveLabel(event.getX(), event.getY())) {
+                if (saveRouteRequested != null && !isRouteSaved(FishRoute.get())) {
+                    saveRouteRequested.run();
+                }
+                event.consume();
+            }
         }
     }
 
     protected boolean isInCloseLabel(float x, float y) {
-        float[] bounds = getCloseLabelBounds();
+        return isInBounds(getCloseLabelBounds(), x, y);
+    }
+
+    protected boolean isInSaveLabel(float x, float y) {
+        return isInBounds(getSaveLabelBounds(), x, y);
+    }
+
+    protected boolean isInBounds(float[] bounds, float x, float y) {
         if (bounds == null) return false;
 
         return x >= bounds[0] && x <= bounds[0] + bounds[2]
@@ -123,14 +161,25 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     protected float[] getCloseLabelBounds() {
+        return getLabelBounds(saveRouteRequested == null ? 0 : 1,
+                saveRouteRequested == null ? 1 : 2);
+    }
+
+    protected float[] getSaveLabelBounds() {
+        return saveRouteRequested == null ? null : getLabelBounds(0, 2);
+    }
+
+    protected float[] getLabelBounds(int slot, int slots) {
         if (panelPos == null) return null;
 
         LazyFont small = ShopUi.getSmallFont();
         float width = 160f;
+        float gap = 8f;
         float height = (small == null ? 14f : small.getBaseHeight()) + 10f;
+        float total = width * slots + gap * (slots - 1);
 
         return new float[]{
-                panelPos.getX() + (panelPos.getWidth() - width) * 0.5f,
+                panelPos.getX() + (panelPos.getWidth() - total) * 0.5f + slot * (width + gap),
                 panelPos.getY() + panelPos.getHeight() - height - 8f,
                 width, height};
     }
@@ -260,7 +309,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             }
         }
 
-        renderCloseLabel(alphaMult);
+        renderLabels(alphaMult);
     }
 
     protected static float[][] clusterOffsets(int count, float spacing) {
@@ -292,15 +341,27 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         return out;
     }
 
-    protected void renderCloseLabel(float alphaMult) {
-        float[] bounds = getCloseLabelBounds();
+    protected void renderLabels(float alphaMult) {
+        boolean hovered = isInCloseLabel(mouseX, mouseY);
+        drawLabel(getCloseLabelBounds(), "X - CLOSE ROUTE",
+                hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(), alphaMult);
+
+        if (saveRouteRequested == null) return;
+
+        if (isRouteSaved(FishRoute.get())) {
+            drawLabel(getSaveLabelBounds(), "ROUTE SAVED", Misc.getGrayColor(), alphaMult);
+        } else {
+            hovered = isInSaveLabel(mouseX, mouseY);
+            drawLabel(getSaveLabelBounds(), "SAVE AS INTEL",
+                    hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(), alphaMult);
+        }
+    }
+
+    protected void drawLabel(float[] bounds, String label, Color color, float alphaMult) {
         if (bounds == null) return;
 
         LazyFont small = ShopUi.getSmallFont();
         if (small == null) return;
-
-        boolean hovered = isInCloseLabel(mouseX, mouseY);
-        Color color = hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
         ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], bounds[3], Color.BLACK, 0.85f * alphaMult);
         ShopUi.drawQuad(bounds[0], bounds[1], bounds[2], 1f, color, alphaMult);
@@ -308,8 +369,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         ShopUi.drawQuad(bounds[0], bounds[1], 1f, bounds[3], color, alphaMult);
         ShopUi.drawQuad(bounds[0] + bounds[2] - 1f, bounds[1], 1f, bounds[3], color, alphaMult);
 
-        LazyFont.DrawableString text = small.createText("X - CLOSE ROUTE", color,
-                small.getBaseHeight());
+        LazyFont.DrawableString text = small.createText(label, color, small.getBaseHeight());
         text.draw(Math.round(bounds[0] + (bounds[2] - text.getWidth()) * 0.5f),
                 Math.round(bounds[1] + (bounds[3] + text.getHeight()) * 0.5f));
     }

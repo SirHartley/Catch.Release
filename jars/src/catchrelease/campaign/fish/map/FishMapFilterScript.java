@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
-        FishRoutePopup.Host {
+        FishRoutePopup.Host, FishRouteSaveDialog.Host {
 
     public static final String MEMORY_KEY = "$catchrelease_map_fish_filter";
     public static final float BUTTON_WIDTH = 120f;
@@ -64,6 +64,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     protected Object shownSystem;
     protected FishRoutePopup popup;
     protected CustomPanelAPI popupPanel;
+    protected FishRouteSaveDialog saveDialog;
+    protected CustomPanelAPI saveDialogPanel;
 
     protected float paneX, paneY, paneHeight;
     protected Object arrowList;
@@ -136,6 +138,9 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             if (!systemApplied && wantSystem) activateSystemPane(viewed);
 
             if (applied && wantPane && popupPanel == null) ensurePaneStanding();
+
+            // the route can be closed from under the dialog by the label next to it
+            if (saveDialogPanel != null && FishRoute.get() == null) closeSaveDialog();
 
             if (applied && hasPendingFocus()) applyPendingFocus();
 
@@ -355,6 +360,65 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     @Override
     public void onPlannerClosed() {
         closePlanner();
+    }
+
+    protected void openSaveDialog() {
+        if (saveDialogPanel != null || mapScreen == null || FishRoute.get() == null) return;
+
+        try {
+            Object scroller = ReflectionUtils.invoke(mapScreen, "getScroller");
+            PositionAPI scrollerPos = ((UIComponentAPI) scroller).getPosition();
+            PositionAPI screenPos = ((UIComponentAPI) mapScreen).getPosition();
+
+            float x = scrollerPos.getX() - screenPos.getX()
+                    + (scrollerPos.getWidth() - FishRouteSaveDialog.WIDTH) * 0.5f;
+            float y = screenPos.getY() + screenPos.getHeight()
+                    - (scrollerPos.getY() + scrollerPos.getHeight())
+                    + (scrollerPos.getHeight() - FishRouteSaveDialog.HEIGHT) * 0.5f;
+
+            saveDialog = new FishRouteSaveDialog(this);
+            saveDialogPanel = Global.getSettings().createCustom(
+                    FishRouteSaveDialog.WIDTH, FishRouteSaveDialog.HEIGHT, saveDialog);
+            saveDialog.mount(saveDialogPanel);
+
+            ((UIPanelAPI) mapScreen).addComponent(saveDialogPanel)
+                    .setSize(FishRouteSaveDialog.WIDTH, FishRouteSaveDialog.HEIGHT)
+                    .inTL(x, y);
+        } catch (Throwable t) {
+            fail(t);
+        }
+    }
+
+    @Override
+    public void onRouteSaveConfirmed(String name, String purpose) {
+        closeSaveDialog();
+
+        FishRoute.Saved route = FishRoute.get();
+        if (route == null) return;
+
+        catchrelease.campaign.fish.intel.FishRouteIntel intel =
+                new catchrelease.campaign.fish.intel.FishRouteIntel(name, purpose, route);
+        catchrelease.campaign.fish.intel.FishIntelNotifications.queue(intel);
+
+        if (overlay != null) overlay.noteRouteSaved();
+    }
+
+    @Override
+    public void onRouteSaveClosed() {
+        closeSaveDialog();
+    }
+
+    protected void closeSaveDialog() {
+        if (saveDialogPanel != null && mapScreen != null) {
+            try {
+                ((UIPanelAPI) mapScreen).removeComponent(saveDialogPanel);
+            } catch (Throwable t) {
+                // the screen going away mid-close already took the panel with it
+            }
+        }
+
+        saveDialog = null;
+        saveDialogPanel = null;
     }
 
     protected void closePlanner() {
@@ -635,6 +699,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         overlay = new FishPresenceOverlay();
         overlay.setMapWidget(mapWidget);
+        overlay.setSaveRouteListener(this::openSaveDialog);
 
         // the heat map belongs to the filter, not the bare map - activate() applies the sticky choice when the pane comes up, and a map without the filter shows no heat
 
@@ -889,6 +954,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         overlay = null;
         popup = null;
         popupPanel = null;
+        saveDialog = null;
+        saveDialogPanel = null;
         systemPane = null;
         systemPanePanel = null;
         systemApplied = false;
@@ -910,6 +977,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             if (mapScreen != null) {
                 if (panePanel != null) ((UIPanelAPI) mapScreen).removeComponent(panePanel);
                 paneStanding = false;
+
+                if (saveDialogPanel != null) {
+                    ((UIPanelAPI) mapScreen).removeComponent(saveDialogPanel);
+                }
 
                 if (systemPanePanel != null) {
                     ((UIPanelAPI) mapScreen).removeComponent(systemPanePanel);
