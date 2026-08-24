@@ -1100,6 +1100,15 @@ because a species that says nothing about where it lives is one somebody could d
 describable lives down there — without the exception the deepest water in the game offered the same
 roach as a core world. It is the one asymmetry in the table and it is deliberate.
 
+**The catch columns are one ladder, and the rate columns are its upper half.** `fish.csv` tunes the
+minigame per rarity band through five columns moved together: `difficulty`, `restlessness`,
+`motionSpeed`, `progressRateMult`, `escapeRateMult`. The difficulty column stops mattering once the
+bar-size upgrade lands — at 160px the window covers enough track that no fish speed makes net
+progress negative — so what keeps rare-and-up meaningful against an upgraded kit is the rate pair:
+`escapeRateMult` climbs from 0.95 (gentle commons) to 1.8 (the legendary) while `progressRateMult`
+falls to 0.75. Retuning a band means moving all five and simulating; moving `difficulty` alone
+changes the early game and nothing else.
+
 **Every non-abyssal species lives in exactly one quadrant, and a region holds at most ten.** The
 rosters are balanced by hand — five to six commons (two or three of them the gentle tier), one or
 two uncommons, two or three rares, an epic in three of the eight — with families split across
