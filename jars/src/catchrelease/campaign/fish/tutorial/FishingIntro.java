@@ -4,10 +4,10 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
-import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
@@ -868,12 +868,11 @@ public class FishingIntro {
         List<FishSpec> candidates = new ArrayList<>();
         if (system == null) return candidates;
 
-        FishHabitat habitat = FishHabitat.of(system);
         FishRarity maximum = getMaxTargetRarity(stage);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || spec.rarity == null || !spec.hasHabitat()) continue;
-            if (spec.spawnWeight <= 0f || !spec.matches(habitat, implement)) continue;
+            if (spec.spawnWeight <= 0f || !FishRanges.matches(spec, system, implement)) continue;
             if (!isHarpoonLessonCandidate(stage, spec)) continue;
             if (spec.rarity.rank > maximum.rank) continue;
 
@@ -1100,10 +1099,8 @@ public class FishingIntro {
         float score = 0f;
 
         for (StarSystemAPI system : systems) {
-            FishHabitat habitat = FishHabitat.of(system);
-
-            if (spec.matches(habitat, CatchImplement.POND)) score += spec.spawnWeight;
-            if (spec.matches(habitat, CatchImplement.BREACH_LAMP)) score += spec.spawnWeight;
+            if (FishRanges.matches(spec, system, CatchImplement.POND)) score += spec.spawnWeight;
+            if (FishRanges.matches(spec, system, CatchImplement.BREACH_LAMP)) score += spec.spawnWeight;
         }
 
         return score;

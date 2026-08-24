@@ -2,7 +2,7 @@ package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
-import catchrelease.campaign.fish.data.FishHabitat;
+import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -64,7 +64,7 @@ public class FishPresence {
     }
 
     public static boolean livesIn(FishSpec spec, StarSystemAPI system) {
-        return spec != null && system != null && spec.matches(FishHabitat.of(system));
+        return FishRanges.matches(spec, system, null);
     }
 
     public static boolean showsRegions(FishSpec spec) {

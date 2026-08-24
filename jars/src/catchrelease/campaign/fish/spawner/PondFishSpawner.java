@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.spawner;
 
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishHabitat;
+import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
@@ -37,7 +38,7 @@ public class PondFishSpawner {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec.spawnWeight <= 0f) continue;
-            if (!spec.matches(where, how)) continue;
+            if (!FishRanges.matches(spec, location, how)) continue;
 
             picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));
         }
