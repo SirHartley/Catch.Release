@@ -1100,6 +1100,14 @@ because a species that says nothing about where it lives is one somebody could d
 describable lives down there — without the exception the deepest water in the game offered the same
 roach as a core world. It is the one asymmetry in the table and it is deliberate.
 
+**Every non-abyssal species lives in exactly one quadrant, and a region holds at most ten.** The
+rosters are balanced by hand — five to six commons (two or three of them the gentle tier), one or
+two uncommons, two or three rares, an epic in three of the eight — with families split across
+quadrants and every region keeping at least two commons free of star, age and coherence gates so no
+pond can come up empty. The cap is what keeps any one system's offer under ten species; a new row
+joins a quadrant with room rather than listing several, and widening a row's regions is how the cap
+gets broken.
+
 **A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
 neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
 "wanted pond-caught" are one vocabulary rather than two that happen to agree. It is also a second
