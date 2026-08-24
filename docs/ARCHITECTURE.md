@@ -104,22 +104,25 @@ Everything game-facing is wired from `ModPlugin.java`.
 12. `AquariumTankScript.register()` — the aquarium on the colony's main menu
 13. `Aberration.Watcher.register()` — the aberration index fills on arriving somewhere and on the
    sector map opening; this is its only registration site
-14. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
+14. `FishRanges.register()` — the month-end range reassessor, plus one immediate assessment on a
+   save that has never had one, so a fresh sector's homeless species are re-homed before the first
+   cast rather than a month in
+15. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
    stats missing from the save are seeded and every sheet-owned field of a held stat is refreshed,
    so a save carries levels and nothing else that matters
-15. `CatchReleaseDistressProvider.register()` then `DistressCallFramework.register()` — the two
+16. `CatchReleaseDistressProvider.register()` then `DistressCallFramework.register()` — the two
    fleet-job adapters, merged distress-call registry and its persistent, idempotent coordinator,
    bound to vanilla's live nearby-event cadence
-16. `SkillshotFramework.register()` — the aiming framework
-17. `FishMapFilterScript` as a transient script — the sector-map filter
-18. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-19. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-20. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
+17. `SkillshotFramework.register()` — the aiming framework
+18. `FishMapFilterScript` as a transient script — the sector-map filter
+19. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+20. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+21. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
    and fed every black-hole star in the current system by its small Catch.Release adapter
-21. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+22. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-22. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
+23. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -480,7 +483,8 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `Aberration.java` | 0–1 aberration for a location — the inverse of coherence — strongest destabilizer minus strongest colony stabilizer. Any inhabited economy market makes its own system exactly Stable and cuts a five-light-year quadratic stability field around it. One crawl of the sector builds both flat mark indexes; system readings are computed off them and cached; `localPull` is the only per-frame figure and never leaves the system it is asked about. `Watcher` fills on arrival and on the sector map opening |
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
 | `StarColour.java` | What a system's sun looks like, from its star's planet type |
-| `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached |
+| `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached until the monthly reassessment drops the cache |
+| `FishRanges.java` | Where a species can spawn in this sector, right now: the runtime question between the sheet and everything that asks. Pinned quest targets answer from a frozen system list; everything else from `FishSpec.matches` at the species' current relaxation level. Reassessed at month end |
 | `CatchImplement.java` | What made a fish reachable — a pond or a breach lamp — read off the mote's own provenance |
 | `FishLocationSummary.java` | Builds the "where this swims" sentence from every habitat criterion a spec sets |
 
@@ -1089,11 +1093,23 @@ already in saves still parse. Changing the format breaks fish already in saves.
 
 **Where a fish lives is one question, and everything asks it the same way.** `FishHabitat.of()`
 reads a place once — sun colour, system tags, region, constellation age, how well reality is holding
-— and `FishSpec.matches()` is the only thing that tests a species against it. They used to be
-several: the spawner tested star type, tags and region; the map, the route planner and the intel
-panel tested the region alone, so the map shaded systems under the wrong sun and said so beside a
-spawner that would never have offered the fish there. `FishPresence.livesIn()` is what every screen
-calls. Habitats are cached for the session because none of their inputs change during a game.
+— and `FishRanges.matches()` is the only thing that tests a species against it, applying the pin
+and relaxation state on top of `FishSpec.matches()`. They used to be several: the spawner tested
+star type, tags and region; the map, the route planner and the intel panel tested the region alone,
+so the map shaded systems under the wrong sun and said so beside a spawner that would never have
+offered the fish there. `FishPresence.livesIn()` is what every screen calls, and it routes through
+the ranges. Habitats are cached because their one moving input — coherence — only moves as far as
+anyone can see when the month-end reassessment drops the cache and re-reads every system.
+
+**Ranges are dynamic, floored, capped, and pinned.** At the end of every month (and once, on a save
+that has never had it) `FishRanges.reassess()` re-reads every habitat — gates light, slipstorms
+move — and re-homes any non-abyssal species with fewer than three real systems by relaxing its
+sheet gates one rung at a time: constellation age first, then a ±0.25 coherence widening, then star
+colour, then regions, never across the abyss boundary in either direction. A rung is refused if it
+would push any real system past fifteen species, and the most starved species are processed first
+so they claim the headroom. Species named by an active quest ask (`FishAsker` intel) are pinned —
+their range is frozen as the system list they had before the reassessment, and it thaws only when
+the quest ends — so a reassessment can never pull a quest target out of its quest system.
 
 **Blank means "anywhere" on every habitat criterion except the abyss.** `ABYSSAL` has to be named,
 because a species that says nothing about where it lives is one somebody could describe, and nothing
