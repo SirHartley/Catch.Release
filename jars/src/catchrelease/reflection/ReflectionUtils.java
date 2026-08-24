@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 //This is a java port of starficz ReflectionUtils, ported via Claude. 
+//Use the original ReflectionUtils.kt over this, it has better documenation and isn't vibe-coded.
 
 public final class ReflectionUtils {
 
