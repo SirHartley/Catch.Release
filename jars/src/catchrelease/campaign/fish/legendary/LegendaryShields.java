@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -34,7 +35,10 @@ public class LegendaryShields {
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int CHARGE_SHIELD_COUNT = 2;
     public static final float MOTE_REGEN_DAYS = 30f;
+    public static final float LAZY_SPEED_MULT = 0.4f;
     public static final float RUN_SPEED_MULT = 1.35f;
+    public static final float FLEE_RANGE = 900f;
+    public static final float FLEE_LEG = 3000f;
 
     public static final float EAT_SEEK_RANGE = 2500f;
     public static final float EAT_RANGE = 80f;
@@ -49,6 +53,15 @@ public class LegendaryShields {
 
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
+
+        // the first throw of a residency never lands, whatever the head: it wakes the
+        // fish - the chase, the speed and the haunt all start here
+        if (!state.provoked) {
+            state.provoked = true;
+            fish.flashShield();
+            say(fish.getMote(), "Deflected - it is awake now");
+            return HitResult.DEFLECTED;
+        }
 
         switch (id) {
             case POP_SHIELD_SPECIES -> {
@@ -151,12 +164,31 @@ public class LegendaryShields {
         };
     }
 
-    /** The Longliner only ever swims after its disguise burns, and then it runs. */
+    /** Placid and easy to hit until the first throw touches it; after that it runs. */
     public static float getSpeedMult(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return 1f;
-        if (!POP_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return 1f;
 
-        return RUN_SPEED_MULT;
+        return LegendaryChases.isProvoked(fish.getFishSpec().id)
+                ? RUN_SPEED_MULT : LAZY_SPEED_MULT;
+    }
+
+    /** A provoked legendary keeps water between itself and the fleet - the chase. */
+    public static void advanceFlee(FishEntityPlugin fish) {
+        if (asLegendaryMote(fish) == null) return;
+        if (!LegendaryChases.isProvoked(fish.getFishSpec().id)) return;
+
+        SectorEntityToken self = fish.getMote();
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (self == null || player == null
+                || player.getContainingLocation() != self.getContainingLocation()) {
+            return;
+        }
+
+        if (Misc.getDistance(player.getLocation(), self.getLocation()) > FLEE_RANGE) return;
+
+        float away = Misc.getAngleInDegrees(player.getLocation(), self.getLocation());
+        fish.setSwimTarget(MathUtils.getPointOnCircumference(
+                self.getLocation(), FLEE_LEG, away));
     }
 
     /** Keeps the Quorum's splinter escort matched to the ledger while its mote is up. */
