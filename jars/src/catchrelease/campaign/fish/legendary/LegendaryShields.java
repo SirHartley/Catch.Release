@@ -42,7 +42,7 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float SHIELD_RADIUS = 52f;
 
-    private static final Color SHIELD_DEFAULT = new Color(154, 255, 150);
+    private static final Color SHIELD_ORANGE = new Color(241, 186, 65);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
@@ -175,7 +175,7 @@ public class LegendaryShields {
     }
 
     public static Color getShieldColor(FishEntityPlugin fish) {
-        if (fish == null) return SHIELD_DEFAULT;
+        if (fish == null) return SHIELD_ORANGE;
 
         String id = fish.getFishSpec().id;
 
@@ -183,7 +183,7 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
             case CHARGE_SHIELD_SPECIES -> SHIELD_PURPLE;
-            default -> SHIELD_DEFAULT;
+            default -> SHIELD_ORANGE;
         };
 
     }
