@@ -316,10 +316,11 @@ scene, but breach-lamp escalation and the hostile fishing camp are intentionally
 Moloch, defilement, base appetite and violence against creation, screamed without accurate fabric
 physics. Institutional vocabulary must not flatten any of these into placeholder procedure.
 
-Dialogue drafting and corrective voice audits use the Codex app's Starsector Editor with the full
-current `LORE.md` attached. A regression repair also supplies the prior and current sheet excerpts,
-and keeps faction, Fisherman and Crablobab passes separate before a final whole-sheet voice check;
-this prevents generic tightening from erasing the distinctions the lore requires.
+Every player-facing line is drafted and audited through the Codex app's Starsector Editor with the
+full current `LORE.md` attached. The prompt identifies the exact display surface and its mechanical,
+space and layout constraints; a regression repair also supplies the prior and current copy. Distinct
+speakers and surfaces receive focused passes before final integrated context QA, preventing generic
+tightening from erasing required voice, information density or UI function.
 
 The Fisherman and Crablobab never share a cadence. The former is a warm, patient old captain in
 presentation with a colder strategic calculus underneath; he teaches in full human beats, then
@@ -1439,10 +1440,11 @@ branch on and always returns true, and in a row's *script* a verb does the thing
 it worked. The panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is
 machinery and there is nothing for a sheet to say about it.
 
-The Starsector Editor is a draft source, not the lore authority: every returned line is independently
-compared with `docs/LORE.md` before sheet insertion, and an Editor QA result does not replace that
-check. The Fisherman's question menu then keeps the same division: sheet rows add unasked topics
-first and asked topics second, and `addFisherQuestion` gives the latter vanilla grey. The
+The Starsector Editor is a draft source, not the lore authority: every returned player-facing line
+is independently compared with `docs/LORE.md` and its stated display context before integration,
+and an Editor QA result does not replace that check. The Fisherman's question menu then keeps the
+same division: sheet rows add unasked topics first and asked topics second, and `addFisherQuestion`
+gives the latter vanilla grey. The
 searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
 `$global.catchrelease_fisherAsked_searchlightDrones`, and returns both its acknowledgement and its
 schematic follow-up to the same menu. It explains the `BREACH_COUPLER` gate without granting it: a
