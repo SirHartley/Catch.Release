@@ -45,10 +45,9 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float SHIELD_RADIUS = 52f;
 
-    private static final Color SHIELD_DEFAULT = new Color(154, 255, 150);
+    private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
-
 
     public enum HitResult {
         NONE, DEFLECTED, POPPED
@@ -69,7 +68,7 @@ public class LegendaryShields {
             state.provoked = true;
             if (!POP_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
-                say(fish.getMote(), "Harpoon deflected. The fish is now alert.");
+                say(fish.getMote(), "Deflected - Now awake");
                 return HitResult.DEFLECTED;
             }
         }
@@ -98,11 +97,11 @@ public class LegendaryShields {
                 if (stacked > 0) {
                     state.shieldUnits = stacked - 1;
                     fish.flashShield();
-                    say(fish.getMote(), "A stored shell burns away");
+                    say(fish.getMote(), "Shell burned");
                     return HitResult.DEFLECTED;
                 }
                 if (fish.tryBaseShieldDeflect()) {
-                    say(fish.getMote(), "Deflected - the shell reknits in seconds");
+                    say(fish.getMote(), "Deflected");
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -110,7 +109,7 @@ public class LegendaryShields {
             default -> {
                 // the base shell every unarmoured legendary wears
                 if (fish.tryBaseShieldDeflect()) {
-                    say(fish.getMote(), "Deflected - the shell reknits in seconds");
+                    say(fish.getMote(), "Deflected");
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -158,11 +157,11 @@ public class LegendaryShields {
         if (state.shieldUnits > 0) {
             say(Global.getSector().getPlayerFleet(), state.shieldUnits
                     + (state.shieldUnits == 1
-                    ? " Quorum Splinter remains in orbit."
-                    : " Quorum Splinters remain in orbit."));
+                    ? " Splinter remains."
+                    : " Splinters remain."));
         } else {
             say(Global.getSector().getPlayerFleet(),
-                    "Last Quorum Splinter removed. The shield is down.");
+                    "The shield cracks.");
         }
     }
 
@@ -195,7 +194,7 @@ public class LegendaryShields {
     }
 
     public static Color getShieldColor(FishEntityPlugin fish) {
-        if (fish == null) return SHIELD_DEFAULT;
+        if (fish == null) return SHIELD_PURPLE;
 
         String id = fish.getFishSpec().id;
 
@@ -204,7 +203,7 @@ public class LegendaryShields {
         return switch (id) {
             case POP_SHIELD_SPECIES -> SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            default -> SHIELD_DEFAULT;
+            default -> SHIELD_PURPLE;
         };
     }
 
