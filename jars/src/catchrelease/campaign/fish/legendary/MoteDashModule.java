@@ -17,12 +17,15 @@ import java.util.List;
 /**
  * The moray's countermeasure: exposed motes near it are flung at the fleet like a
  * skillshot, aim fuzzed so some miss. A mote that connects delivers an interdiction
- * pulse and burns out; a chase abandoned mid-dash releases the motes unhurt.
+ * pulse and burns out; a chase abandoned mid-dash releases the motes unhurt. The
+ * moray's water is usually empty - it hosts in dead systems and runs from the one
+ * thing that exposes motes - so when nothing real is in reach it conjures a mote in
+ * its own wake and throws that: ammunition is never the limiting factor.
  */
 public class MoteDashModule extends BaseHauntModule {
 
-    public static final float TRIGGER_RANGE = 1400f;
-    public static final float CONVERT_COOLDOWN_SECONDS = 10f;
+    public static final float TRIGGER_RANGE = 2200f;
+    public static final float CONVERT_COOLDOWN_SECONDS = 8f;
     public static final float DASH_SPEED = 550f;
     public static final float DASH_SECONDS = 7f;
     public static final float HIT_RADIUS = 140f;
@@ -30,7 +33,10 @@ public class MoteDashModule extends BaseHauntModule {
     public static final float AIM_LEAD_SECONDS = 1.2f;
     public static final float SLOW_SECONDS = 2.5f;
 
-    protected float convertCooldown = 4f;
+    public static final float CONJURE_RANGE_MIN = 150f;
+    public static final float CONJURE_RANGE_MAX = 400f;
+
+    protected float convertCooldown = 3f;
     protected float slowLeft;
     protected final List<SectorEntityToken> dashers = new ArrayList<>();
 
@@ -69,10 +75,46 @@ public class MoteDashModule extends BaseHauntModule {
         if (host == null) return;
 
         FishEntityPlugin mote = findVictim(host);
+        if (mote == null) mote = conjureVictim(host, player);
         if (mote == null) return;
 
         convertCooldown = CONVERT_COOLDOWN_SECONDS;
         fling(mote, player);
+    }
+
+    /** The cheat: nothing real in reach, so a mote of some ordinary species surfaces
+     *  in the moray's wake, already marked for the throw. Tracked as a haunt prop, so
+     *  an abandoned chase removes it instead of leaving a stray catch behind. */
+    protected FishEntityPlugin conjureVictim(SectorEntityToken host,
+                                             CampaignFleetAPI player) {
+        FishSpec ammo = pickAmmoSpec();
+        if (ammo == null) return null;
+
+        Vector2f at = MathUtils.getPointOnCircumference(host.getLocation(),
+                MathUtils.getRandomNumberInRange(CONJURE_RANGE_MIN, CONJURE_RANGE_MAX),
+                Misc.getAngleInDegrees(host.getLocation(), player.getLocation())
+                        + MathUtils.getRandomNumberInRange(-60f, 60f));
+        Vector2f drift = MathUtils.getPointOnCircumference(at, 1000f,
+                random.nextFloat() * 360f);
+
+        SectorEntityToken mote = track(system.addCustomEntity(
+                Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                new FishEntityPlugin.Params(drift, ammo.id)));
+        mote.setLocation(at.x, at.y);
+
+        return mote.getCustomPlugin() instanceof FishEntityPlugin fish ? fish : null;
+    }
+
+    protected FishSpec pickAmmoSpec() {
+        List<FishSpec> common = new ArrayList<>();
+        for (FishSpec candidate
+                : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
+            if (candidate.rarity == FishRarity.COMMON && candidate.spawnWeight > 0f) {
+                common.add(candidate);
+            }
+        }
+
+        return common.isEmpty() ? null : common.get(random.nextInt(common.size()));
     }
 
     protected FishEntityPlugin findVictim(SectorEntityToken host) {
