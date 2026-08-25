@@ -35,6 +35,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float SHIELD_RADIUS = 52f;
     private static final float SHIELD_FLASH_SECONDS = 0.6f;
     private static final Color SHIELD_COLOR = new Color(150, 220, 255);
+    private static final float SHIELD_LENS_INTENSITY = 10f;
     private static final float REVEAL_SIZE = 110f;
 
     private static final float DARTER_PAUSE = 1.1f;
@@ -115,6 +116,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // shell game: a decoy is steered by its real mote's controller, never by itself
     private SectorEntityToken decoyAnchor;
     private transient float revealLeft;
+
+    // lamp-bound extras fade with the player's beam; the shield gets a lens on top
+    private transient float lampFade;
+    private transient org.dark.shaders.distortion.WaveDistortion shieldLens;
 
     public static class Params {
 
@@ -209,6 +214,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
         if (revealLeft > 0f) revealLeft -= amount;
+
+        advanceLampFade(amount);
+        advanceShieldLens();
 
         advanceDive(amount);
 
@@ -479,6 +487,45 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         revealLeft = Math.max(revealLeft, seconds);
     }
 
+    /** Phantoms, shell-game bodies and shield escorts exist only in the lamp light. */
+    protected boolean isLampBound() {
+        return phantom || decoyAnchor != null || orbitAnchor != null;
+    }
+
+    protected void advanceLampFade(float amount) {
+        // the raw beam falloff is squared; widened so most of the beam reads as lit
+        float target = Math.min(1f, catchrelease.abilities.searchlight.ability
+                .SearchlightAbilityPlugin.getBeamStrengthAt(entity.getLocation()) * 3f);
+        lampFade += (target - lampFade) * Math.min(1f, amount * 4f);
+    }
+
+    protected void advanceShieldLens() {
+        boolean wanted = lampFade > 0.05f && LegendaryShields.isShielded(this)
+                && catchrelease.rendering.distortion.CampaignDistortionRenderer.isSupported();
+
+        if (!wanted) {
+            if (shieldLens != null) {
+                catchrelease.rendering.distortion.CampaignDistortionRenderer
+                        .removeDistortion(shieldLens);
+                shieldLens = null;
+            }
+            return;
+        }
+
+        if (shieldLens == null) {
+            shieldLens = new org.dark.shaders.distortion.WaveDistortion(
+                    entity.getLocation(), new Vector2f());
+            shieldLens.setSize(SHIELD_RADIUS * 2.2f);
+            catchrelease.rendering.distortion.CampaignDistortionRenderer
+                    .addDistortion(shieldLens);
+        }
+
+        shieldLens.setLocation(entity.getLocation());
+        shieldLens.setIntensity(SHIELD_LENS_INTENSITY * lampFade);
+        // refreshed every frame: a mote that stops advancing takes its lens with it
+        shieldLens.setLifetime(2f);
+    }
+
     protected void advanceDecoy() {
         if (decoyAnchor == null || decoyAnchor.isExpired()
                 || decoyAnchor.getContainingLocation() != entity.getContainingLocation()) {
@@ -594,6 +641,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 entity.getSensorContactFaderBrightness();
 
         alpha *= getVisibility();
+        // the school's lies live only in the lamp light; the real fish keeps its glow
+        if (isLampBound()) alpha *= lampFade;
         if (alpha <= 0f) return;
 
         float spriteAlpha = alpha * (1f - 0.5f * flicker.getBrightness());
@@ -619,13 +668,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void renderShield(ViewportAPI viewport) {
-        float alpha = viewport.getAlphaMult();
-        if (alpha <= 0f) return;
+        float base = viewport.getAlphaMult();
+        if (base <= 0f) return;
+
+        // the defence display is lamp-bound: no beam on the fish, no shield to see.
+        // The reveal halo is the one exception - its whole job is finding a fish
+        // that just left the light
+        float alpha = base * lampFade;
 
         Vector2f loc = entity.getLocation();
 
         // the tether that says the shield is the escort's doing, not the fish's own
-        if (orbitAnchor != null && !orbitAnchor.isExpired()) {
+        if (alpha > 0f && orbitAnchor != null && !orbitAnchor.isExpired()) {
             float pulse = 0.25f + 0.15f * (float) Math.sin(time * 6f);
             Disc.draw(loc.x, loc.y, 10f, SHIELD_COLOR, pulse * alpha, 0f, true);
 
@@ -636,15 +690,20 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     0.08f * alpha, 0f, true);
         }
 
-        if (LegendaryShields.isShielded(this)) {
-            float pulse = 0.8f + 0.2f * (float) Math.sin(time * 3f);
-            Disc.draw(loc.x, loc.y, SHIELD_RADIUS, SHIELD_COLOR,
-                    0.08f * alpha, 0.22f * alpha * pulse, true);
+        if (alpha > 0f && LegendaryShields.isShielded(this)) {
+            // a soap bubble, not a plate: an all-but-empty middle, a film that thickens
+            // toward the rim, a twin rim breathing slightly - the lens does the rest
+            float pulse = 0.96f + 0.04f * (float) Math.sin(time * 2.1f);
+            float breathe = 0.85f + 0.15f * (float) Math.sin(time * 3f);
+            Disc.draw(loc.x, loc.y, SHIELD_RADIUS * pulse, SHIELD_COLOR,
+                    0.012f * alpha, 0.09f * alpha * breathe, true);
             Disc.drawOutline(loc.x, loc.y, SHIELD_RADIUS * pulse, SHIELD_COLOR,
-                    0.55f * alpha, 1.5f);
+                    0.4f * alpha * breathe, 1.5f);
+            Disc.drawOutline(loc.x, loc.y, SHIELD_RADIUS * pulse * 0.9f, SHIELD_COLOR,
+                    0.12f * alpha, 1f);
         }
 
-        if (shieldFlash > 0f) {
+        if (alpha > 0f && shieldFlash > 0f) {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
             float ring = SHIELD_RADIUS * (1f + 1.2f * (1f - f));
             Disc.drawOutline(loc.x, loc.y, ring, SHIELD_COLOR, f * alpha, 3f);
@@ -658,7 +717,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             sprite.setColor(Color.WHITE);
             sprite.setBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
             sprite.setSize(REVEAL_SIZE, REVEAL_SIZE);
-            sprite.setAlphaMult(f * pulse * alpha);
+            sprite.setAlphaMult(f * pulse * base);
             sprite.renderAtCenter(loc.x, loc.y);
             sprite.setAdditiveBlend();
         }

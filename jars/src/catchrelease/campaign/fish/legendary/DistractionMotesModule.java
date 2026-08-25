@@ -9,16 +9,19 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
- * Sightings that are not the fish: phantom motes in the legendary's own colours, spread
- * around the player. Nothing can hook, slow or hold one, and closing in dissolves it.
+ * Sightings that are not the fish: phantom motes in the legendary's own colours,
+ * clustered around the fish itself while it is in the water (around the player only
+ * when it is not). Nothing can hook, slow or hold one, and closing in dissolves it.
  */
 public class DistractionMotesModule extends BaseHauntModule {
 
     public static final int MAX_ALIVE = 4;
     public static final float SPAWN_MIN_SECONDS = 8f;
     public static final float SPAWN_MAX_SECONDS = 16f;
-    public static final float SPAWN_RANGE_MIN = 900f;
-    public static final float SPAWN_RANGE_MAX = 2200f;
+    public static final float SPAWN_RANGE_MIN = 250f;
+    public static final float SPAWN_RANGE_MAX = 800f;
+    public static final float FALLBACK_RANGE_MIN = 900f;
+    public static final float FALLBACK_RANGE_MAX = 2200f;
     public static final float DISSOLVE_RANGE = 220f;
     public static final float DISSOLVE_SECONDS = 0.6f;
     public static final float LIFE_MIN_SECONDS = 50f;
@@ -56,7 +59,15 @@ public class DistractionMotesModule extends BaseHauntModule {
     }
 
     protected void spawnPhantom() {
-        Vector2f at = nearPlayer(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
+        Vector2f at;
+        FishEntityPlugin own = findOwnMote();
+        if (own != null && own.getMote() != null) {
+            at = MathUtils.getPointOnCircumference(own.getMote().getLocation(),
+                    MathUtils.getRandomNumberInRange(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX),
+                    random.nextFloat() * 360f);
+        } else {
+            at = nearPlayer(FALLBACK_RANGE_MIN, FALLBACK_RANGE_MAX);
+        }
         Vector2f drift = MathUtils.getPointOnCircumference(at,
                 MathUtils.getRandomNumberInRange(400f, 900f), random.nextFloat() * 360f);
 

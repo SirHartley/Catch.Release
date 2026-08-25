@@ -56,6 +56,22 @@ public abstract class BaseHauntModule implements HauntModule {
         return MathUtils.getDistance(player.getLocation(), entity.getLocation());
     }
 
+    /** The haunted species' own live mote in this system, if it is in the water. */
+    protected catchrelease.campaign.fish.entities.FishEntityPlugin findOwnMote() {
+        for (SectorEntityToken candidate : system.getEntitiesWithTag(
+                catchrelease.campaign.fish.entities.FishEntityPlugin.MOTE_TAG)) {
+            if (candidate.isExpired()) continue;
+            if (!(candidate.getCustomPlugin()
+                    instanceof catchrelease.campaign.fish.entities.FishEntityPlugin fish)) {
+                continue;
+            }
+            if (fish.isPhantom() || fish.isDecoy() || fish.getFishSpec() == null) continue;
+            if (spec.id.equals(fish.getFishSpec().id)) return fish;
+        }
+
+        return null;
+    }
+
     protected <T extends SectorEntityToken> T track(T entity) {
         entity.addTag(LegendaryHaunt.HAUNT_TAG);
         spawned.add(entity);
