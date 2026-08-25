@@ -42,8 +42,11 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float SHIELD_RADIUS = 52f;
 
+    private static final Color SHIELD_DEFAULT = new Color(154, 255, 150);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
+    private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
+
 
     public enum HitResult {
         NONE, DEFLECTED, POPPED
@@ -171,12 +174,17 @@ public class LegendaryShields {
     }
 
     public static Color getShieldColor(FishEntityPlugin fish) {
-        if (fish != null && fish.getFishSpec() != null
-                && CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) {
-            return SHIELD_RED;
-        }
+        if (fish == null) return SHIELD_DEFAULT;
 
-        return SHIELD_BLUE;
+        String id = fish.getFishSpec().id;
+
+        return switch (id) {
+            case POP_SHIELD_SPECIES -> SHIELD_RED;
+            case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
+            case CHARGE_SHIELD_SPECIES -> SHIELD_PURPLE;
+            default -> SHIELD_DEFAULT;
+        };
+
     }
 
     /** Placid and easy to hit until provoked, then the flight envelope takes over.
