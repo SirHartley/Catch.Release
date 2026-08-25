@@ -67,7 +67,7 @@ public class LegendaryShields {
             state.provoked = true;
             if (!POP_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
-                say(fish.getMote(), "Deflected - it awakens");
+                say(fish.getMote(), "Harpoon deflected. The fish is now alert.");
                 return HitResult.DEFLECTED;
             }
         }
@@ -126,7 +126,7 @@ public class LegendaryShields {
 
         // the fish is gone in a blink; the word floats where the strike happened
         say(Global.getSector().getPlayerFleet(),
-                "It dives ahead of the blast - somewhere else now");
+                "The fish dives before the blast and resurfaces farther away.");
 
         return true;
     }
@@ -144,12 +144,13 @@ public class LegendaryShields {
         state.shieldStampAt = Global.getSector().getClock().getTimestamp();
 
         if (state.shieldUnits > 0) {
-            say(Global.getSector().getPlayerFleet(), "The escort thins - "
-                    + state.shieldUnits
-                    + (state.shieldUnits == 1 ? " splinter still orbits" : " splinters still orbit"));
+            say(Global.getSector().getPlayerFleet(), state.shieldUnits
+                    + (state.shieldUnits == 1
+                    ? " Quorum Splinter remains in orbit."
+                    : " Quorum Splinters remain in orbit."));
         } else {
             say(Global.getSector().getPlayerFleet(),
-                    "The last splinter - The Quorum swims bare");
+                    "Last Quorum Splinter removed. The shield is down.");
         }
     }
 
@@ -284,7 +285,7 @@ public class LegendaryShields {
             Misc.fadeAndExpire(prey, 0.3f);
             state.shieldUnits = getShieldUnits(state, CHARGE_SHIELD_COUNT) + 1;
             fish.flashShield();
-            say(self, "Mote swallowed - its shell brightens");
+            say(self, "Mote consumed. The Lantern Jack's shell brightens.");
         }
     }
 

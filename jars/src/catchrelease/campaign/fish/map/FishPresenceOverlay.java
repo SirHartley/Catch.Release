@@ -366,16 +366,16 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     protected void renderLabels(float alphaMult) {
         boolean hovered = isInCloseLabel(mouseX, mouseY);
-        drawLabel(getCloseLabelBounds(), "X - CLOSE ROUTE",
+        drawLabel(getCloseLabelBounds(), "X - CLEAR ROUTE",
                 hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(), alphaMult);
 
         if (saveRouteRequested == null) return;
 
         if (isRouteSaved(FishRoute.get())) {
-            drawLabel(getSaveLabelBounds(), "ROUTE SAVED", Misc.getGrayColor(), alphaMult);
+            drawLabel(getSaveLabelBounds(), "ROUTE TRACKED", Misc.getGrayColor(), alphaMult);
         } else {
             hovered = isInSaveLabel(mouseX, mouseY);
-            drawLabel(getSaveLabelBounds(), "SAVE AS INTEL",
+            drawLabel(getSaveLabelBounds(), "TRACK ROUTE",
                     hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(), alphaMult);
         }
     }

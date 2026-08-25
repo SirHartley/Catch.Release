@@ -20,8 +20,8 @@ public class FishRouteSaveDialog extends BaseCustomUIPanelPlugin {
     public static final float FIELD_HEIGHT = 22f;
     public static final float BUTTON_HEIGHT = 26f;
 
-    public static final String NAME_GHOST = "Milk run, spine loop...";
-    public static final String PURPOSE_GHOST = "What the run is for...";
+    public static final String NAME_GHOST = "Route name...";
+    public static final String PURPOSE_GHOST = "Optional note...";
     public static final int NAME_MAX_CHARS = 40;
     public static final int PURPOSE_MAX_CHARS = 120;
 
@@ -49,7 +49,7 @@ public class FishRouteSaveDialog extends BaseCustomUIPanelPlugin {
         TooltipMakerAPI content = panel.createUIElement(innerWidth, HEIGHT - PAD * 2f, false);
 
         CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                new PaneWidgets.TitleRow("SAVE ROUTE"));
+                new PaneWidgets.TitleRow("TRACK ROUTE"));
         CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
                 new PaneWidgets.TextButton(() -> "X", () -> true, host::onRouteSaveClosed));
         titleRow.addComponent(close).inTR(0f, 0f);
@@ -60,13 +60,13 @@ public class FishRouteSaveDialog extends BaseCustomUIPanelPlugin {
         nameField.setText(NAME_GHOST);
         nameField.setMaxChars(NAME_MAX_CHARS);
 
-        content.addPara("Purpose", Misc.getGrayColor(), 8f);
+        content.addPara("Note", Misc.getGrayColor(), 8f);
         purposeField = content.addTextField(innerWidth, FIELD_HEIGHT, ShopUi.FONT_SMALL, 4f);
         purposeField.setText(PURPOSE_GHOST);
         purposeField.setMaxChars(PURPOSE_MAX_CHARS);
 
         CustomPanelAPI save = panel.createCustomPanel(innerWidth, BUTTON_HEIGHT,
-                new PaneWidgets.TextButton(() -> "SAVE AS INTEL", () -> true, this::confirm));
+                new PaneWidgets.TextButton(() -> "START TRACKING", () -> true, this::confirm));
         content.addCustom(save, 12f);
 
         panel.addUIElement(content).inTL(PAD, PAD);
