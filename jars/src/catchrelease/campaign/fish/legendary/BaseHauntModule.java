@@ -19,10 +19,21 @@ public abstract class BaseHauntModule implements HauntModule {
     protected final FishSpec spec;
     protected final Random random = new Random();
     protected final List<SectorEntityToken> spawned = new ArrayList<>();
+    protected float intensity = 1f;
 
     protected BaseHauntModule(StarSystemAPI system, FishSpec spec) {
         this.system = system;
         this.spec = spec;
+    }
+
+    @Override
+    public void setIntensity(float intensity) {
+        this.intensity = intensity;
+    }
+
+    /** Spawning modules escalate only while the haunt is at full presence. */
+    protected boolean atFullIntensity() {
+        return intensity >= 1f;
     }
 
     protected CampaignFleetAPI player() {

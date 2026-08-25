@@ -47,7 +47,7 @@ public class GhostFleetsModule extends BaseHauntModule {
 
         if (ghost == null) {
             spawnTimer -= amount;
-            if (spawnTimer <= 0f) {
+            if (spawnTimer <= 0f && atFullIntensity()) {
                 spawnTimer = MathUtils.getRandomNumberInRange(
                         SPAWN_MIN_SECONDS, SPAWN_MAX_SECONDS);
                 spawnGhostFleet();

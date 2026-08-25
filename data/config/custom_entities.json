@@ -11,6 +11,18 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.FishEntityPlugin"
 	},
 
+	"catchrelease_HauntMine":{
+		"defaultRadius":16,
+		"showInCampaign":true,
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"layers":[ABOVE],
+		"tags":["catchrelease_haunt"],
+		"pluginClass":"catchrelease.campaign.fish.entities.HauntMineEntityPlugin"
+	},
+
 	"catchrelease_GhostAsteroid":{
 		"defaultRadius":24,
 		"showInCampaign":true,

@@ -54,14 +54,14 @@ public class MoteDashModule extends BaseHauntModule {
                 continue;
             }
 
-            InterdictionModule.pulse(player);
+            InterdictionPulse.fire(player);
             slowLeft = SLOW_SECONDS;
             Misc.fadeAndExpire(dasher, 0.5f);
             dashers.remove(dasher);
         }
 
         convertCooldown -= amount;
-        if (convertCooldown > 0f) return;
+        if (convertCooldown > 0f || !atFullIntensity()) return;
 
         SectorEntityToken host = findLegendaryMote();
         if (host == null) return;
@@ -130,6 +130,7 @@ public class MoteDashModule extends BaseHauntModule {
         dashers.clear();
 
         slowLeft = 0f;
+        InterdictionPulse.release(player());
 
         super.cleanup();
     }

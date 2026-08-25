@@ -22,7 +22,7 @@ public class ChromaticAberrationModule extends BaseHauntModule {
     public void advance(float amount) {
         level = Math.min(1f, level + amount / RAMP_SECONDS);
 
-        ChromaticAberrationOverlay.setLevel(level);
+        ChromaticAberrationOverlay.setLevel(Math.min(level, intensity));
     }
 
     @Override
