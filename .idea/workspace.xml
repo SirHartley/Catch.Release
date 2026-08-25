@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="fucked it up">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="concept">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanQuest.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanQuest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +127,8 @@
     <MESSAGE value="illustration" />
     <MESSAGE value="icons &amp; rules" />
     <MESSAGE value="fucked it up" />
-    <option name="LAST_COMMIT_MESSAGE" value="fucked it up" />
+    <MESSAGE value="concept" />
+    <option name="LAST_COMMIT_MESSAGE" value="concept" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

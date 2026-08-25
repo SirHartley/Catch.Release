@@ -58,7 +58,7 @@ public class LegendaryShields {
             state.provoked = true;
             if (!POP_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
-                say(fish.getMote(), "Deflected - it is awake now");
+                say(fish.getMote(), "Deflected - it awakens");
                 return HitResult.DEFLECTED;
             }
         }
@@ -68,18 +68,18 @@ public class LegendaryShields {
                 if (state.shieldPopped) return HitResult.NONE;
                 fish.flashShield();
                 if (!explosive) {
-                    say(fish.getMote(), "Deflected - it wants a blasting charge");
+                    say(fish.getMote(), "Deflected");
                     return HitResult.DEFLECTED;
                 }
 
                 state.shieldPopped = true;
-                say(fish.getMote(), "The shell cracks - for good");
+                say(fish.getMote(), "The shell cracks");
                 return HitResult.POPPED;
             }
             case MOTE_SHIELD_SPECIES -> {
                 if (getShieldUnits(state, MOTE_SHIELD_COUNT) <= 0) return HitResult.NONE;
                 fish.flashShield();
-                say(fish.getMote(), "Deflected - the splinters hold the shield");
+                say(fish.getMote(), "Deflected");
                 return HitResult.DEFLECTED;
             }
             case CHARGE_SHIELD_SPECIES -> {
@@ -88,7 +88,7 @@ public class LegendaryShields {
 
                 state.shieldUnits = charges - 1;
                 fish.flashShield();
-                say(fish.getMote(), "Deflected - its shell dims");
+                say(fish.getMote(), "The shell dims");
                 return HitResult.DEFLECTED;
             }
             default -> {
