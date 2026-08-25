@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.map.FishPresence;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -129,6 +130,16 @@ public class LegendaryChases {
     }
 
     protected static String pickHost(FishSpec spec, String avoid) {
+        String host = pickHost(spec, avoid, false);
+        if (host != null) return host;
+
+        // only a sector with no unsettled candidate at any rung falls back to settled space
+        host = pickHost(spec, avoid, true);
+
+        return host != null ? host : avoid;
+    }
+
+    protected static String pickHost(FishSpec spec, String avoid, boolean allowPopulated) {
         boolean abyssal = spec.regions.contains(SectorRegion.ABYSSAL);
 
         // sheet gates first; a sector that never rolled a matching system relaxes rung by rung
@@ -138,6 +149,7 @@ public class LegendaryChases {
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                 if (!abyssal && !FishPresence.isChartable(system)) continue;
                 if (system.getId().equals(avoid)) continue;
+                if (!allowPopulated && OuterReaches.isPopulated(system)) continue;
                 if (spec.matches(FishHabitat.of(system), null, relax)) {
                     candidates.add(system.getId());
                 }
@@ -148,7 +160,7 @@ public class LegendaryChases {
             }
         }
 
-        return avoid;
+        return null;
     }
 
     @SuppressWarnings("unchecked")
