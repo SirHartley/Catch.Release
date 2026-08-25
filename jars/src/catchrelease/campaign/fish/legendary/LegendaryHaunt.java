@@ -40,6 +40,14 @@ public class LegendaryHaunt implements EveryFrameScript {
         sweepLeftovers();
     }
 
+    public static void resetForTesting() {
+        if (Global.getSector() == null) return;
+
+        for (EveryFrameScript script : new ArrayList<>(Global.getSector().getTransientScripts())) {
+            if (script instanceof LegendaryHaunt haunt) haunt.stop();
+        }
+    }
+
     protected static void sweepLeftovers() {
         List<LocationAPI> locations = new ArrayList<>(Global.getSector().getStarSystems());
         locations.add(Global.getSector().getHyperspace());

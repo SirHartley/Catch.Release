@@ -1,6 +1,6 @@
 # Catch.Release — file and feature map
 
-What is where, and which file to open first. 256 Java files across twelve top-level packages, plus
+What is where, and which file to open first. 281 Java files across twelve top-level packages, plus
 the data tables that register them.
 
 Kept by hand, and updated by every change — not only when a package gains or loses a file, but
@@ -260,8 +260,13 @@ positive amount while on the campaign map or at a market. It reads the merged fi
 that many real specimens of every species, and adds one species crate per row to player cargo.
 `AddFish` accepts a positive amount after a fish id or multi-word display name, resolves exact and
 unique partial matches before using Console Commands' typo-correction matcher, and reports
-ambiguous partials instead of silently choosing. Its native autocomplete exposes both ids and
-display names, with word-by-word continuation for manually typed names. `SpawnFisherman` has no
+ambiguous partials instead of silently choosing. Its shared resolver and native autocomplete expose
+both ids and display names, with word-by-word continuation for manually typed names. `SpawnFish`
+uses that same lookup to place one named pattern in a nearby active rupture or under a live breach-
+lamp beam, respecting its reachable method. A legendary spawn clears the prior test chase, resets
+its singleton ledger and shields into the current system, and suppresses the Longliner's separate
+boat so every legendary can be tested repeatedly through its real mote and haunt path.
+`SpawnFisherman` has no
 arguments and places the ordinary visiting Fisherman in the player's current star system; it reuses
 an existing local boat and retires an off-system visitor before making the standard full fleet.
 `SpawnFleetQuest <quest>` is available only inside a star system and autocompletes the five local
@@ -773,7 +778,7 @@ The whaling chase: unique fish, one host system each, and the haunting that mark
 | File | What it does |
 |---|---|
 | `LegendaryChases.java` | The persistent ledger: per legendary, its one host system, the last sighting, whether the Longliner's disguise is blown, and whether it has been landed. A sighting starts the ninety-day relocation clock; the fish re-occurs in its host until caught, moves on when the clock runs out unseen-side (never out from under a player in-system), and once caught never spawns again. A revealed Longliner skips the clock entirely and relocates the moment the player leaves its system. Host picking prefers systems without civilization (`OuterReaches.isPopulated`), falling back to settled space only when no unsettled candidate matches at any relaxation rung. `FishRanges` answers every legendary range question from here |
-| `LegendaryHaunt.java` | Stage manager, transient, sighting-driven: a haunt begins only once the legendary's own mote has been visibly seen near the fleet, ramps in over a few seconds, holds for a minute after the fish is lost, then fades out and needs a fresh sighting to restart. Intensity is pushed into every module each frame - spawning modules stop escalating below full, screen effects scale with it. Leaving the system, landing the fish, or the fish moving on still tears everything down at once, and registration sweeps the haunt tag from every location so a hard exit strands nothing in a save. Each species levies only a couple of modules from the pool, never all of them |
+| `LegendaryHaunt.java` | Stage manager, transient, sighting-driven: a haunt begins only once the legendary's own mote has been visibly seen near the fleet, ramps in over a few seconds, holds for a minute after the fish is lost, then fades out and needs a fresh sighting to restart. Intensity is pushed into every module each frame - spawning modules stop escalating below full, screen effects scale with it. Leaving the system, landing the fish, or the fish moving on still tears everything down at once, and registration sweeps the haunt tag from every location so a hard exit strands nothing in a save. Its narrow testing reset tears down the live modules before `SpawnFish` starts another legendary chase. Each species levies only a couple of modules from the pool, never all of them |
 | `HauntModule.java` / `BaseHauntModule.java` | The module contract - advance plus a no-trace cleanup - and the shared base: spawn tracking under the haunt tag, near-player placement, and hard removal that despawns fleets and unhooks entities in the same frame |
 | `DistractionMotesModule.java` | Phantom motes in the legendary's own colours: unhookable, unslowable decoys that dissolve when approached |
 | `InterdictionPulse.java` | The shared sourceless interdiction: burn abilities knocked onto cooldown vanilla-style, plus the abort-side release that clears the lockout. Fired only by things that touched the fleet - the moray's flung motes and the False Dawn's blue mines - never on a timer |

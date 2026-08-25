@@ -34,11 +34,11 @@ public class AddFish implements BaseCommandWithSuggestion {
         }
     }
 
-    private static final class Match {
+    static final class Match {
 
-        private final FishSpec spec;
-        private final boolean fuzzy;
-        private final List<FishSpec> suggestions;
+        final FishSpec spec;
+        final boolean fuzzy;
+        final List<FishSpec> suggestions;
 
         private Match(FishSpec spec, boolean fuzzy, List<FishSpec> suggestions) {
             this.spec = spec;
@@ -117,6 +117,11 @@ public class AddFish implements BaseCommandWithSuggestion {
 
     @Override
     public List<String> getSuggestions(int parameter, List<String> previous, CommandContext context) {
+        return getFishSuggestions(parameter, previous, context);
+    }
+
+    static List<String> getFishSuggestions(int parameter, List<String> previous,
+                                           CommandContext context) {
         if (!context.isInCampaign()) return Collections.emptyList();
 
         List<FishSpec> specs = validSpecs();
@@ -168,7 +173,7 @@ public class AddFish implements BaseCommandWithSuggestion {
         }
     }
 
-    private static Match findMatch(String query) {
+    static Match findMatch(String query) {
         List<FishSpec> specs = validSpecs();
         String normalizedQuery = normalize(query);
         if (normalizedQuery.isEmpty()) return Match.none();
