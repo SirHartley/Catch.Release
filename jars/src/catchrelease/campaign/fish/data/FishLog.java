@@ -65,6 +65,10 @@ public class FishLog {
     public static boolean unlockLocationData(String speciesId) {
         if (speciesId == null) return false;
 
+        // legendary range is never sold, given or rolled - nobody has charted the chase
+        FishSpec spec = catchrelease.helper.loading.FishSpecLoader.getFishSpec(speciesId);
+        if (spec != null && spec.rarity == FishRarity.LEGENDARY) return false;
+
         FishLogEntry entry = get(speciesId);
 
         // creates a hint-only entry if the species was never caught, rather than refusing
@@ -95,6 +99,14 @@ public class FishLog {
         }
 
         entry.locationDataUnlocked = false;
+    }
+
+    /** Repairs saves from before legendary range data stopped existing. */
+    public static void relockLegendaryRangeData() {
+        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || spec.rarity != FishRarity.LEGENDARY) continue;
+            if (isLocationDataUnlocked(spec.id)) relockLocationData(spec.id);
+        }
     }
 
     protected static long getTimestamp() {

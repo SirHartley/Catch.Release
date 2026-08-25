@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -181,6 +182,7 @@ public class FishRewardRoller {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
             if (!spec.hasHabitat()) continue;
+            if (spec.rarity == FishRarity.LEGENDARY) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
 
             unknown.add(spec);

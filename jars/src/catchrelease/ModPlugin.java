@@ -6,6 +6,7 @@ import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishRanges;
+import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
 import catchrelease.campaign.fish.data.Aberration;
@@ -93,6 +94,7 @@ public class ModPlugin extends BaseModPlugin {
 
         // housekeeping, once, before anything is looked at
         sweepPondClaims();
+        FishLog.relockLegendaryRangeData();
 
         // an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();
