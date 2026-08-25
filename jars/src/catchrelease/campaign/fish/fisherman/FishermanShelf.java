@@ -115,6 +115,7 @@ public class FishermanShelf {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.rarity == FishRarity.LEGENDARY) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
             if (listed.contains(spec.id)) continue;
 

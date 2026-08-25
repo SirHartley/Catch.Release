@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishLogEntry;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItemRenderer;
 import catchrelease.ui.FishIcons;
@@ -226,9 +227,15 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
     protected void addDescription(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.isCaught()) {
-            text.addPara("Known only from range data. Nothing of this species has been seen"
-                    + " aboard - only where to look, and what the instruments made of the way"
-                    + " it moves.", Misc.getGrayColor(), BOX_GAP);
+            if (isLegendary(state)) {
+                text.addPara("Nothing of this species has been seen aboard, and no chart"
+                        + " claims to know its water.", Misc.getGrayColor(), BOX_GAP);
+                addUniqueLine(text, state);
+            } else {
+                text.addPara("Known only from range data. Nothing of this species has been"
+                        + " seen aboard - only where to look, and what the instruments made"
+                        + " of the way it moves.", Misc.getGrayColor(), BOX_GAP);
+            }
             return;
         }
 
@@ -243,10 +250,22 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 spec.getTypeName());
         text.addPara("Rarity: %s", 3f, Misc.getGrayColor(), spec.rarity.color,
                 Misc.ucFirst(spec.rarity.name().toLowerCase()));
+        if (isLegendary(state)) addUniqueLine(text, state);
 
         if (spec.desc != null && !spec.desc.isEmpty()) {
             text.addPara(spec.desc, Misc.getTextColor(), BOX_GAP);
         }
+    }
+
+    protected boolean isLegendary(FishCodexEntryState state) {
+        return state.spec != null && state.spec.rarity == FishRarity.LEGENDARY;
+    }
+
+    protected void addUniqueLine(TooltipMakerAPI text, FishCodexEntryState state) {
+        text.addPara(state.isCaught()
+                        ? "There is one. It has been landed, and it does not occur again."
+                        : "There is one. Once landed, it does not occur again.",
+                state.spec.rarity.color, 3f);
     }
 
     protected void addCatchData(TooltipMakerAPI text, FishCodexEntryState state) {
@@ -295,8 +314,13 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishLogEntry logged = state.log;
 
         if (!state.hasRangeData()) {
-            text.addPara("Sealed. Range data for this species can be bought from someone who has"
-                    + " been where it lives.", Misc.getGrayColor(), BOX_GAP);
+            if (isLegendary(state)) {
+                text.addPara("Sealed. Nobody sells range data for this one - it is found,"
+                        + " not charted.", Misc.getGrayColor(), BOX_GAP);
+            } else {
+                text.addPara("Sealed. Range data for this species can be bought from someone"
+                        + " who has been where it lives.", Misc.getGrayColor(), BOX_GAP);
+            }
             return;
         }
 

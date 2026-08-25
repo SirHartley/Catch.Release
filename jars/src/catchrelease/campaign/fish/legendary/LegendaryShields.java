@@ -55,21 +55,18 @@ public class LegendaryShields {
                 if (state.shieldPopped) return HitResult.NONE;
                 fish.flashShield();
                 if (!explosive) {
-                    say("The harpoon glances off the Longliner's shell - nothing short"
-                            + " of a blasting charge will open it.");
+                    say(fish.getMote(), "Deflected - it wants a blasting charge");
                     return HitResult.DEFLECTED;
                 }
 
                 state.shieldPopped = true;
-                say("The blasting charge cracks the Longliner's shell wide -"
-                        + " and it stays cracked.");
+                say(fish.getMote(), "The shell cracks - for good");
                 return HitResult.POPPED;
             }
             case MOTE_SHIELD_SPECIES -> {
                 if (getShieldUnits(state, MOTE_SHIELD_COUNT) <= 0) return HitResult.NONE;
                 fish.flashShield();
-                say("Turned aside - the splinters wheeling around The Quorum"
-                        + " are holding that shield up.");
+                say(fish.getMote(), "Deflected - the splinters hold the shield");
                 return HitResult.DEFLECTED;
             }
             case CHARGE_SHIELD_SPECIES -> {
@@ -78,7 +75,7 @@ public class LegendaryShields {
 
                 state.shieldUnits = charges - 1;
                 fish.flashShield();
-                say("Deflected - the Lantern Jack's shell dims a shade with the effort.");
+                say(fish.getMote(), "Deflected - its shell dims");
                 return HitResult.DEFLECTED;
             }
             default -> {
@@ -105,9 +102,9 @@ public class LegendaryShields {
                 new FishEntityPlugin.Params(swimTo, fish.getFishSpec().id));
         reborn.setLocation(at.x, at.y);
 
-        String name = fish.getFishSpec().name;
-        if (!name.startsWith("The ")) name = "The " + name;
-        say(name + " dives ahead of the blast - it is somewhere else now.");
+        // the fish is gone in a blink; the word floats where the strike happened
+        say(Global.getSector().getPlayerFleet(),
+                "It dives ahead of the blast - somewhere else now");
 
         return true;
     }
@@ -121,11 +118,12 @@ public class LegendaryShields {
         state.shieldStampAt = Global.getSector().getClock().getTimestamp();
 
         if (state.shieldUnits > 0) {
-            say("The Quorum's shield thins - " + state.shieldUnits
-                    + (state.shieldUnits == 1 ? " splinter still orbits."
-                            : " splinters still orbit."));
+            say(Global.getSector().getPlayerFleet(), "The escort thins - "
+                    + state.shieldUnits
+                    + (state.shieldUnits == 1 ? " splinter still orbits" : " splinters still orbit"));
         } else {
-            say("The last splinter is aboard - The Quorum swims bare.");
+            say(Global.getSector().getPlayerFleet(),
+                    "The last splinter - The Quorum swims bare");
         }
     }
 
@@ -230,12 +228,16 @@ public class LegendaryShields {
             Misc.fadeAndExpire(prey, 0.3f);
             state.shieldUnits = getShieldUnits(state, CHARGE_SHIELD_COUNT) + 1;
             fish.flashShield();
-            say("The Lantern Jack swallows an exposed mote - its shell brightens.");
+            say(self, "Mote swallowed - its shell brightens");
         }
     }
 
-    protected static void say(String text) {
-        Global.getSector().getCampaignUI().addMessage(text, Misc.getHighlightColor());
+    /** Chase feedback floats at the thing it happened to, never the message feed. */
+    public static void say(SectorEntityToken at, String text) {
+        if (at == null || at.isExpired()) at = Global.getSector().getPlayerFleet();
+        if (at == null) return;
+
+        at.addFloatingText(text, Misc.getHighlightColor(), 1f);
     }
 
     protected static int getShieldUnits(LegendaryChases.Chase state, int cap) {

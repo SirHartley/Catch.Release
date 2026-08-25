@@ -184,9 +184,7 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
 
-        Global.getSector().getCampaignUI().addMessage(
-                "The boat's sensor return comes apart under the lamp.",
-                Misc.getHighlightColor());
+        LegendaryShields.say(mote, "The sensor return comes apart under the lamp");
     }
 
     protected void retire(CampaignFleetAPI boat) {
