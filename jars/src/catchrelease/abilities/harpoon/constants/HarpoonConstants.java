@@ -5,8 +5,6 @@ import java.awt.Color;
 public class HarpoonConstants {
 
     public static final String ENTITY_ID = "catchrelease_Harpoon";
-    public static final String EXPLOSIVE_ICON =
-            "graphics/catchrelease/ability/harpoon_explosive.png";
 
     public static final String SOUND_FIRE = "catchrelease_harpoon_fire";
     public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";

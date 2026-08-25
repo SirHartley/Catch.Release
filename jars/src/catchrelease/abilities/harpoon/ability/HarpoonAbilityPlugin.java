@@ -1,11 +1,13 @@
 package catchrelease.abilities.harpoon.ability;
 
+import catchrelease.ModPlugin;
 import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -81,7 +83,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     @Override
     public String getSpriteName() {
         if (Global.getSector() != null && HarpoonEntityPlugin.isExplosive()) {
-            return HarpoonConstants.EXPLOSIVE_ICON;
+            return Global.getSettings().getSpriteName(ModPlugin.MOD_ID, "harpoon_explosive");
         }
 
         return super.getSpriteName();

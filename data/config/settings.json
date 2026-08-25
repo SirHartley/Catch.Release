@@ -28,6 +28,7 @@
           "intel_any":"graphics/catchrelease/intel/intel_any.png",
           "intel_lamp":"graphics/catchrelease/intel/intel_lamp.png",
           "intel_rod":"graphics/catchrelease/intel/intel_rod.png",
+          "harpoon_explosive":"graphics/catchrelease/ability/harpoon_explosive.png",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
     },
