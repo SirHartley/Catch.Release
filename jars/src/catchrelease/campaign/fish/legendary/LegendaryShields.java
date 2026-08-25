@@ -30,6 +30,7 @@ public class LegendaryShields {
     public static final String MOTE_SHIELD_SPECIES = "quorum";
     public static final String CHARGE_SHIELD_SPECIES = "lantern_jack";
     public static final String SHARD_SPECIES = "quorum_shard";
+    public static final String DECOY_SPECIES = "quorum_decoy";
 
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int CHARGE_SHIELD_COUNT = 2;
@@ -208,7 +209,7 @@ public class LegendaryShields {
             if (meal.isFromPond() || meal.isPhantom() || meal.isHeld() || meal.isDiving()) {
                 continue;
             }
-            if (meal.getOrbitAnchor() != null) continue;
+            if (meal.getOrbitAnchor() != null || meal.isDecoy()) continue;
             if (QuestPond.isQuestMote(other)) continue;
             FishSpec spec = meal.getFishSpec();
             if (spec == null || spec.rarity == FishRarity.LEGENDARY) continue;
@@ -230,6 +231,13 @@ public class LegendaryShields {
             fish.flashShield();
             say(self, "Mote swallowed - its shell brightens");
         }
+    }
+
+    /** A shell-game body wears the real one's colour everywhere until the deck tells. */
+    public static java.awt.Color getPresentedColor(FishSpec spec) {
+        if (spec != null && DECOY_SPECIES.equals(spec.id)) return FishRarity.LEGENDARY.color;
+
+        return spec == null ? java.awt.Color.WHITE : spec.rarity.color;
     }
 
     /** Chase feedback floats at the thing it happened to, never the message feed. */

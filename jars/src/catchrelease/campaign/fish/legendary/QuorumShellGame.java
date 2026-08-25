@@ -22,6 +22,10 @@ import java.util.Random;
  */
 public class QuorumShellGame {
 
+    // sidelined alternative: pop empty bodies on the harpoon instead of letting them
+    // play their own easier minigame in the real one's colours - flip if the fights annoy
+    public static final boolean POP_DECOYS = false;
+
     public static final int DECOYS = 2;
     public static final float RING_RADIUS = 120f;
     public static final float SPIN_DEG_PER_SECOND = 16f;
@@ -125,9 +129,10 @@ public class QuorumShellGame {
         while (state.bodies.size() < DECOYS + 1) {
             float slot = freeSlotAngle(state);
 
+            // the decoy species: shard-band minigame, but presented in the real colours
             FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                     new Vector2f(state.real.getLocation()),
-                    LegendaryShields.MOTE_SHIELD_SPECIES);
+                    LegendaryShields.DECOY_SPECIES);
             params.decoyAnchor = state.real;
 
             SectorEntityToken token = state.real.getContainingLocation().addCustomEntity(
@@ -173,12 +178,19 @@ public class QuorumShellGame {
         state.swapTimer = MathUtils.getRandomNumberInRange(
                 SWAP_MIN_SECONDS, SWAP_MAX_SECONDS);
 
-        int first = random.nextInt(state.bodies.size());
-        int second = random.nextInt(state.bodies.size() - 1);
+        // a body on somebody's line sits the shuffle out
+        List<Body> free = new ArrayList<>();
+        for (Body body : state.bodies) {
+            if (!isHeld(body)) free.add(body);
+        }
+        if (free.size() < 2) return;
+
+        int first = random.nextInt(free.size());
+        int second = random.nextInt(free.size() - 1);
         if (second >= first) second++;
 
-        Body one = state.bodies.get(first);
-        Body two = state.bodies.get(second);
+        Body one = free.get(first);
+        Body two = free.get(second);
 
         one.fromAngle = one.angle;
         one.toAngle = two.angle;
@@ -190,8 +202,15 @@ public class QuorumShellGame {
         two.radiusBias = 1.55f;
     }
 
+    protected static boolean isHeld(Body body) {
+        return body.token != null
+                && body.token.getCustomPlugin() instanceof FishEntityPlugin fish
+                && fish.isHeld();
+    }
+
     protected static void place(State state, float amount) {
         for (Body body : state.bodies) {
+            if (isHeld(body)) continue;
             body.angle += SPIN_DEG_PER_SECOND * amount;
 
             float radius = RING_RADIUS;
@@ -233,8 +252,11 @@ public class QuorumShellGame {
         return angle < 0f ? angle + 360f : angle;
     }
 
-    /** A harpoon that finds an empty body pops it; the school deals a fresh one. */
+    /** The sidelined pop: a harpoon that finds an empty body bursts it and the school
+     *  deals a fresh one. Inert while {@link #POP_DECOYS} is off - the body is hooked
+     *  and fights its own minigame instead. */
     public static boolean intercept(SectorEntityToken mote) {
+        if (!POP_DECOYS) return false;
         if (mote == null || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) {
             return false;
         }

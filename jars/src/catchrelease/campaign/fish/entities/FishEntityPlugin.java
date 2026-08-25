@@ -171,6 +171,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     protected Color resolveColor() {
         if (entity != null && QuestPond.isQuestMote(entity)) return QUEST_COLOR;
 
+        // a shell-game decoy glows in the real one's colours, never its own row's
+        if (decoyAnchor != null) return FishRarity.LEGENDARY.color;
+
         FishSpec spec = getFishSpec();
 
         return spec == null ? FishRarity.COMMON.color : spec.rarity.color;

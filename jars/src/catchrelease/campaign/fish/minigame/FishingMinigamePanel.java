@@ -440,7 +440,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected void renderCatchMote(float centerX, float centerY, float alphaMult) {
         SpriteAPI sprite = getMoteSprite();
-        Color color = minigame.getFish().rarity.color;
+        Color color = catchrelease.campaign.fish.legendary.LegendaryShields
+                .getPresentedColor(minigame.getFish());
 
         if (sprite == null) {
             Disc.draw(centerX, centerY, FishConstants.MINIGAME_MOTE_GLOW_SIZE * 0.5f,
