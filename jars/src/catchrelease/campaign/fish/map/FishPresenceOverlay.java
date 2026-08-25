@@ -265,18 +265,40 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
     protected void renderRoute(float factor, float centerX, float centerY, float alphaMult) {
         FishRoute.Saved route = FishRoute.get();
-        if (route == null || route.stops.isEmpty()) return;
+        boolean liveShown = route != null && !route.stops.isEmpty();
+
+        // saved routes stay on the map like the plotted one; stops merge by system so an
+        // overlap between routes draws one ring carrying the union of their fish
+        java.util.Map<String, java.util.LinkedHashSet<String>> bySystem =
+                new java.util.LinkedHashMap<>();
+
+        if (liveShown) {
+            for (FishRoute.Stop stop : route.stops) {
+                bySystem.computeIfAbsent(stop.systemId,
+                        k -> new java.util.LinkedHashSet<>()).addAll(stop.fishIds);
+            }
+        }
+        for (catchrelease.campaign.fish.intel.FishRouteIntel intel
+                : catchrelease.campaign.fish.intel.FishRouteIntel.getAll()) {
+            for (FishRoute.Stop stop : intel.getStops()) {
+                bySystem.computeIfAbsent(stop.systemId,
+                        k -> new java.util.LinkedHashSet<>()).addAll(stop.fishIds);
+            }
+        }
+
+        if (bySystem.isEmpty()) return;
 
         Color player = Misc.getBasePlayerColor();
 
-        for (FishRoute.Stop stop : route.stops) {
-            StarSystemAPI system = FishRoute.getSystem(stop);
+        for (java.util.Map.Entry<String, java.util.LinkedHashSet<String>> entry
+                : bySystem.entrySet()) {
+            StarSystemAPI system = FishRoute.getSystemById(entry.getKey());
             if (system == null || system.getLocation() == null) continue;
 
             float sx = system.getLocation().x * factor + centerX;
             float sy = system.getLocation().y * factor + centerY;
 
-            int count = Math.max(1, stop.fishIds.size());
+            int count = Math.max(1, entry.getValue().size());
 
             // full-size icons packed as a cluster - pair, triangle, square, pentagon - so the ring hugs the cluster's reach plus breathing room, never tighter than the base
             float[][] offsets = clusterOffsets(count, ROUTE_ICON + ROUTE_ICON_GAP);
@@ -298,7 +320,7 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             Disc.drawOutline(bx, by, radius, player, 0.9f * alphaMult, 1.5f);
 
             int slot = 0;
-            for (String id : stop.fishIds) {
+            for (String id : entry.getValue()) {
                 float[] at = offsets[Math.min(slot++, offsets.length - 1)];
 
                 FishSpec spec = FishPresence.getSpec(id);
@@ -309,7 +331,8 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
             }
         }
 
-        renderLabels(alphaMult);
+        // the labels close and save the live route; a map showing only saved ones has neither
+        if (liveShown) renderLabels(alphaMult);
     }
 
     protected static float[][] clusterOffsets(int count, float spacing) {

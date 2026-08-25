@@ -152,14 +152,20 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
     protected void syncRouteArrows() {
         FishRoute.Saved route = FishRoute.get();
+        List<catchrelease.campaign.fish.intel.FishRouteIntel> saved =
+                catchrelease.campaign.fish.intel.FishRouteIntel.getAll();
         boolean hyper = isHyperViewShown();
-        boolean want = route != null && !route.stops.isEmpty() && hyper;
+        boolean liveShown = route != null && !route.stops.isEmpty();
+        boolean want = hyper && (liveShown || !saved.isEmpty());
 
-        if (route == lastRouteSeen && want == arrowsIn) return;
+        List<Object> sig = new ArrayList<>();
+        sig.add(route);
+        sig.addAll(saved);
+        if (sig.equals(lastRouteSeen) && want == arrowsIn) return;
 
         if (arrowList instanceof List) ((List<?>) arrowList).removeAll(injectedArrows);
         injectedArrows.clear();
-        lastRouteSeen = route;
+        lastRouteSeen = sig;
         arrowsIn = want;
 
         if (!want || mapScreen == null) return;
@@ -183,29 +189,40 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
             @SuppressWarnings("unchecked")
             List<Object> arrows = (List<Object>) target;
 
-            com.fs.starfarer.api.campaign.SectorEntityToken from =
-                    Global.getSector().getPlayerFleet();
+            if (liveShown) addArrowChain(arrows, route.stops, 0.5f);
 
-            for (FishRoute.Stop stop : route.stops) {
-                com.fs.starfarer.api.campaign.StarSystemAPI system = FishRoute.getSystem(stop);
-                if (system == null || system.getHyperspaceAnchor() == null) continue;
+            for (catchrelease.campaign.fish.intel.FishRouteIntel intel : saved) {
+                // the live plot of an already-saved route would double its chain
+                if (liveShown && intel.matches(route)) continue;
 
-                com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData arrow =
-                        new com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData(
-                                from, system.getHyperspaceAnchor());
-                arrow.color = Global.getSector().getPlayerFaction().getBaseUIColor();
-                arrow.alphaMult = 0.5f;
-
-                arrows.add(arrow);
-                injectedArrows.add(arrow);
-
-                from = system.getHyperspaceAnchor();
+                addArrowChain(arrows, intel.getStops(), 0.35f);
             }
 
             arrowList = arrows;
         } catch (Throwable t) {
             Global.getLogger(FishMapFilterScript.class)
                     .warn("Could not put the fishing route's arrows on the map", t);
+        }
+    }
+
+    protected void addArrowChain(List<Object> arrows, List<FishRoute.Stop> stops, float alpha) {
+        com.fs.starfarer.api.campaign.SectorEntityToken from =
+                Global.getSector().getPlayerFleet();
+
+        for (FishRoute.Stop stop : stops) {
+            com.fs.starfarer.api.campaign.StarSystemAPI system = FishRoute.getSystem(stop);
+            if (system == null || system.getHyperspaceAnchor() == null) continue;
+
+            com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData arrow =
+                    new com.fs.starfarer.api.campaign.comm.IntelInfoPlugin.ArrowData(
+                            from, system.getHyperspaceAnchor());
+            arrow.color = Global.getSector().getPlayerFaction().getBaseUIColor();
+            arrow.alphaMult = alpha;
+
+            arrows.add(arrow);
+            injectedArrows.add(arrow);
+
+            from = system.getHyperspaceAnchor();
         }
     }
 

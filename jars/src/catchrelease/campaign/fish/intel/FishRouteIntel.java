@@ -76,15 +76,30 @@ public class FishRouteIntel extends BaseIntelPlugin {
     public static boolean isSaved(FishRoute.Saved route) {
         if (route == null || Global.getSector() == null) return false;
 
-        for (IntelInfoPlugin intel
-                : Global.getSector().getIntelManager().getIntel(FishRouteIntel.class)) {
-            if (((FishRouteIntel) intel).matches(route)) return true;
+        for (FishRouteIntel intel : getAll()) {
+            if (intel.matches(route)) return true;
         }
 
         return false;
     }
 
-    protected boolean matches(FishRoute.Saved route) {
+    public static List<FishRouteIntel> getAll() {
+        List<FishRouteIntel> out = new ArrayList<>();
+        if (Global.getSector() == null) return out;
+
+        for (IntelInfoPlugin intel
+                : Global.getSector().getIntelManager().getIntel(FishRouteIntel.class)) {
+            out.add((FishRouteIntel) intel);
+        }
+
+        return out;
+    }
+
+    public List<FishRoute.Stop> getStops() {
+        return stops;
+    }
+
+    public boolean matches(FishRoute.Saved route) {
         if (route.stops.size() != stops.size()) return false;
 
         for (int i = 0; i < stops.size(); i++) {
@@ -337,6 +352,28 @@ public class FishRouteIntel extends BaseIntelPlugin {
         StarSystemAPI system = FishRoute.getSystem(stops.get(0));
 
         return system == null ? null : system.getHyperspaceAnchor();
+    }
+
+    @Override
+    public List<ArrowData> getArrowData(SectorMapAPI map) {
+        // the same chain the plotted route draws: player, then stop to stop in order
+        List<ArrowData> arrows = new ArrayList<>();
+        SectorEntityToken from = Global.getSector().getPlayerFleet();
+        if (from == null) return null;
+
+        for (FishRoute.Stop stop : stops) {
+            StarSystemAPI system = FishRoute.getSystem(stop);
+            if (system == null || system.getHyperspaceAnchor() == null) continue;
+
+            ArrowData arrow = new ArrowData(from, system.getHyperspaceAnchor());
+            arrow.color = Global.getSector().getPlayerFaction().getBaseUIColor();
+            arrow.alphaMult = 0.5f;
+            arrows.add(arrow);
+
+            from = system.getHyperspaceAnchor();
+        }
+
+        return arrows;
     }
 
     @Override

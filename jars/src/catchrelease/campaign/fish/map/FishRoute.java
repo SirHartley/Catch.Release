@@ -47,10 +47,14 @@ public class FishRoute {
     }
 
     public static StarSystemAPI getSystem(Stop stop) {
-        if (stop == null || stop.systemId == null || Global.getSector() == null) return null;
+        return stop == null ? null : getSystemById(stop.systemId);
+    }
+
+    public static StarSystemAPI getSystemById(String systemId) {
+        if (systemId == null || Global.getSector() == null) return null;
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (stop.systemId.equals(system.getId())) return system;
+            if (systemId.equals(system.getId())) return system;
         }
 
         return null;
