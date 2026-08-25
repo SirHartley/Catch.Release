@@ -30,7 +30,6 @@ public class LegendaryShields {
     public static final String MOTE_SHIELD_SPECIES = "quorum";
     public static final String CHARGE_SHIELD_SPECIES = "lantern_jack";
     public static final String SHARD_SPECIES = "quorum_shard";
-    public static final String DECOY_SPECIES = "quorum_decoy";
 
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int CHARGE_SHIELD_COUNT = 2;
@@ -115,6 +114,10 @@ public class LegendaryShields {
 
         LegendaryChases.Chase state = LegendaryChases.getState(MOTE_SHIELD_SPECIES);
         int motes = getShieldUnits(state, MOTE_SHIELD_COUNT);
+        // a splinter landed while the shield is already bare was a shell-game body:
+        // nothing thins, the regen clock stays put, and the escort message stays quiet
+        if (motes <= 0) return;
+
         state.shieldUnits = Math.max(0, motes - 1);
         state.shieldStampAt = Global.getSector().getClock().getTimestamp();
 
@@ -233,9 +236,14 @@ public class LegendaryShields {
         }
     }
 
-    /** A shell-game body wears the real one's colour everywhere until the deck tells. */
-    public static java.awt.Color getPresentedColor(FishSpec spec) {
-        if (spec != null && DECOY_SPECIES.equals(spec.id)) return FishRarity.LEGENDARY.color;
+    /** A shell-game body wears the real one's colour everywhere until the deck tells -
+     *  keyed off the hooked mote itself, since it shares the splinter's species row. */
+    public static java.awt.Color getPresentedColor(FishSpec spec, SectorEntityToken catchTarget) {
+        if (catchTarget != null
+                && catchTarget.getCustomPlugin() instanceof FishEntityPlugin fish
+                && fish.isDecoy()) {
+            return FishRarity.LEGENDARY.color;
+        }
 
         return spec == null ? java.awt.Color.WHITE : spec.rarity.color;
     }

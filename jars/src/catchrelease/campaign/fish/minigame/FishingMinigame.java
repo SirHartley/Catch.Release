@@ -49,6 +49,7 @@ public class FishingMinigame {
     protected Tackle tackle = Tackle.NONE;
     protected State state = State.RUNNING;
     protected boolean cannotLose = false;
+    protected java.awt.Color presentedColor;
 
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
@@ -358,6 +359,15 @@ public class FishingMinigame {
 
     public FishSpec getFish() {
         return fish;
+    }
+
+    /** What the fish claims to be on screen - a shell-game body lies about its colour. */
+    public java.awt.Color getPresentedColor() {
+        return presentedColor != null ? presentedColor : fish.rarity.color;
+    }
+
+    public void setPresentedColor(java.awt.Color presentedColor) {
+        this.presentedColor = presentedColor;
     }
 
     public float getDifficulty() {

@@ -259,6 +259,8 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         // tackle sizes the window and rolls treasure; read once before anything is rolled
         Tackle tackle = TackleManager.get(method);
         this.minigame = new FishingMinigame(fish, tackle);
+        this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
+                .LegendaryShields.getPresentedColor(fish, catchTarget));
 
         boolean stranger = fish != null && anchor != null && fish.id.equals(
                 catchrelease.campaign.fish.fisherman.FishRumors.getStrangerId(
