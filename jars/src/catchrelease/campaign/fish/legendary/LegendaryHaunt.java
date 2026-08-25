@@ -120,6 +120,8 @@ public class LegendaryHaunt implements EveryFrameScript {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.rarity != FishRarity.LEGENDARY) continue;
             if (LegendaryChases.isCaught(spec.id)) continue;
+            // no haunt until a harpoon has touched it - the first throw wakes the fish
+            if (!LegendaryChases.isProvoked(spec.id)) continue;
             // an unpopped shield keeps the fish complacent: no haunt until the pop
             if (LegendaryShields.isHauntSuppressed(spec)) continue;
             if (!here.getId().equals(LegendaryChases.getHostSystemId(spec))) continue;

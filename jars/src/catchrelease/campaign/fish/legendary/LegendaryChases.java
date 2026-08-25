@@ -38,6 +38,9 @@ public class LegendaryChases {
         // the Longliner's disguise is spent for this residency once the lamp finds it
         public boolean revealed;
 
+        // a harpoon has touched it this residency: the chase is on, the haunt may start
+        public boolean provoked;
+
         // shield bookkeeping, semantics per species in LegendaryShields:
         // units = orbit motes or deflection charges, -1 until first initialised
         public boolean shieldPopped;
@@ -93,6 +96,12 @@ public class LegendaryChases {
         return chase != null && chase.revealed;
     }
 
+    public static boolean isProvoked(String speciesId) {
+        Chase chase = speciesId == null ? null : getLedger().get(speciesId);
+
+        return chase != null && chase.provoked;
+    }
+
     public static void onCatch(catchrelease.campaign.fish.data.FishCatch specimen) {
         if (specimen == null) return;
 
@@ -133,6 +142,7 @@ public class LegendaryChases {
             chase.systemId = pickHost(spec, chase.systemId);
             chase.seenAt = 0L;
             chase.revealed = false;
+            chase.provoked = false;
         }
 
         return chase;

@@ -249,6 +249,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
+        LegendaryShields.advanceFlee(this);
         if (QuorumShellGame.advance(this, amount)) return;
 
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
