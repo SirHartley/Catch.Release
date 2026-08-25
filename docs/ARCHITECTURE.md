@@ -1118,12 +1118,14 @@ because a species that says nothing about where it lives is one somebody could d
 describable lives down there — without the exception the deepest water in the game offered the same
 roach as a core world. It is the one asymmetry in the table and it is deliberate.
 
-**The species list is a 9 : 3 : 1 : 0.5 pyramid.** The non-abyssal sheet holds commons, uncommons,
-rares and epics in that ratio — currently 54 / 18 / 6 / 3 — so generation and habitat grouping
-follow a real pyramid instead of a jumble where rares outnumber uncommons. Rarity is assigned from
-the description: a fish whose text reads ordinary sits low regardless of its art, and only the
-genuinely inexplicable half-dozen hold the rare tier. A row that changes tier takes its new band's
-catch columns, spawn weight and value with it.
+**The species list is a 10 : 4 : 2 : 1 pyramid over exactly one hundred fish.** Legendaries do not
+count toward the total. The hundred split 59 / 23 / 12 / 6 across commons, uncommons, rares and
+epics — the abyss pool holding 7 / 2 / 1 / 1 of those, the main sheet 52 / 21 / 11 / 5 — so
+generation and habitat grouping follow a real pyramid instead of a jumble where rares outnumber
+uncommons. Rarity is assigned from the description: a fish whose text reads ordinary sits low
+regardless of its art, and only the genuinely inexplicable hold the rare tier. A row that changes
+tier takes its new band's catch columns, spawn weight and value with it, and adding or re-tiering
+a row means rebalancing the pyramid back to the hundred.
 
 **The abyss is its own scale.** Abyssal rarity follows the same pyramid within its pool — seven
 commons, two uncommons, a rare, an epic, the manta on top — but the label only sets encounter
@@ -1170,8 +1172,9 @@ star, age and coherence gates so no pond can come up empty.
 they exist only where the fabric has nearly gone; `FishRanges`'s three-system floor keeps each one
 somewhere real. The two calm-fabric commons (`nav_bobber`, `plume_remora`) carry `maxAberration
 0.4` for the opposite reason — the crowded end of the sweep is the deep end, and they fit the cap
-only by staying out of it. All seven placeholder rows reuse existing sprites until their own art
-lands.
+only by staying out of it. The eight rows that filled the list to its hundred follow the same
+pattern: bounded to calm-or-mid fabric or gated to dead stars, because the deep bands sit at the
+cap everywhere. All fifteen placeholder rows reuse existing sprites until their own art lands.
 
 **A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
 neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
