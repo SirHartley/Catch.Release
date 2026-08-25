@@ -34,7 +34,7 @@ public final class InterdictionPulse {
         }
 
         Global.getSector().getCampaignUI().addMessage(
-                "Interdiction pulse - no source on the plot.",
+                "Interdiction pulse detected. No source appears on the sensor plot.",
                 Misc.getNegativeHighlightColor());
     }
 

@@ -174,22 +174,22 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
         if (getListInfoParam() instanceof FishCatch specimen) {
             FishSpec spec = specimen.getSpec();
-            LabelAPI line = info.addPara("%s caught - %s so far on this route", pad, tc, h,
+            LabelAPI line = info.addPara("%s: %s caught on this route", pad, tc, h,
                     specimen.getDisplayName(),
                     String.valueOf(landed.getOrDefault(specimen.speciesId, 0)));
             if (spec != null) line.setHighlightColors(spec.rarity.color, h);
         } else {
-            info.addPara("%s stops - %s species", pad, tc, h,
+            info.addPara("%s stops, %s species", pad, tc, h,
                     String.valueOf(stops.size()), String.valueOf(getSpeciesIds().size()));
 
             int total = getLandedTotal();
             if (total > 0) {
-                info.addPara("%s caught since saving", 0f, tc, h, String.valueOf(total));
+                info.addPara("Caught since saving: %s", 0f, tc, h, String.valueOf(total));
             }
 
             int open = getOpenAsks().size();
             if (open > 0) {
-                info.addPara("%s still asked for", 0f, tc, h, String.valueOf(open));
+                info.addPara("Current requests: %s", 0f, tc, h, String.valueOf(open));
             }
         }
 
@@ -246,7 +246,7 @@ public class FishRouteIntel extends BaseIntelPlugin {
             bullet(info);
             for (String id : stop.fishIds) {
                 FishSpec spec = FishPresence.getSpec(id);
-                LabelAPI line = info.addPara("%s - %s caught - %s", 2f, text, h,
+                LabelAPI line = info.addPara("%s: %s caught, %s", 2f, text, h,
                         getSpeciesName(id), String.valueOf(landed.getOrDefault(id, 0)),
                         describeReach(spec));
                 line.setHighlightColors(
@@ -257,12 +257,12 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
         Map<String, String> open = getOpenAsks();
         if (!open.isEmpty()) {
-            info.addPara("Still on somebody's list: %s.", opad, h, describeOpenAsks(open));
+            info.addPara("Current requests: %s.", opad, h, describeOpenAsks(open));
         }
 
         int total = getLandedTotal();
         if (total > 0) {
-            info.addPara("%s of the route's fish caught since it was saved.", opad, h,
+            info.addPara("Caught since this route was saved: %s.", opad, h,
                     String.valueOf(total));
         }
 

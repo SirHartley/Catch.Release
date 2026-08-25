@@ -15,7 +15,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.console.BaseCommand;
 import org.lazywizard.console.Console;
 
-/** Prints every gate on the legendary chase pipeline, so a dead haunt names its reason. */
+/** Displays the state needed to diagnose legendary chase and haunt behavior. */
 public class HauntStatus implements BaseCommand {
 
     @Override
@@ -31,18 +31,18 @@ public class HauntStatus implements BaseCommand {
 
         LegendaryHaunt haunt = LegendaryHaunt.getInstance();
         if (haunt == null) {
-            Console.showMessage("Haunt script: MISSING - LegendaryHaunt is not registered.");
+            Console.showMessage("Haunt script: not registered.");
         } else if (haunt.getActiveSpeciesId() == null) {
-            Console.showMessage("Haunt script: registered, no active haunt.");
+            Console.showMessage("Haunt: none active.");
         } else {
             Console.showMessage(String.format(
-                    "Haunt script: ACTIVE on %s - intensity %.2f, unseen for %.1fs, %d modules.",
+                    "Haunt: %s, intensity %.2f, unseen %.1fs, modules %d.",
                     haunt.getActiveSpeciesId(), haunt.getIntensity(),
                     haunt.getSinceSeen(), haunt.getModuleCount()));
         }
 
         Console.showMessage("Player system: " + (here == null
-                ? "none (hyperspace?)" : here.getName() + " [" + here.getId() + "]"));
+                ? "none (player is in hyperspace)" : here.getName() + " [" + here.getId() + "]"));
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.rarity != FishRarity.LEGENDARY) continue;
@@ -50,7 +50,7 @@ public class HauntStatus implements BaseCommand {
             StringBuilder line = new StringBuilder(spec.id).append(": ");
 
             if (LegendaryChases.isCaught(spec.id)) {
-                Console.showMessage(line.append("caught - retired forever.").toString());
+                Console.showMessage(line.append("caught; spawning disabled.").toString());
                 continue;
             }
 
@@ -59,7 +59,9 @@ public class HauntStatus implements BaseCommand {
             if (here != null && here.getId().equals(hostId)) line.append(" [HERE]");
 
             line.append(", provoked=").append(LegendaryChases.isProvoked(spec.id));
-            if (LegendaryShields.isHauntSuppressed(spec)) line.append(", SUPPRESSED (shield unpopped)");
+            if (LegendaryShields.isHauntSuppressed(spec)) {
+                line.append(", haunt suppressed (Longliner shield intact)");
+            }
             if (LegendaryChases.isRevealed(spec.id)) line.append(", revealed");
 
             if (here != null) {
@@ -104,9 +106,9 @@ public class HauntStatus implements BaseCommand {
             }
         }
 
-        if (nearest == Float.MAX_VALUE) return "no mote in system";
+        if (nearest == Float.MAX_VALUE) return "no active mote in system";
 
-        return String.format("mote at %du%s (sight range %du)",
+        return String.format("mote distance=%du%s, sight range=%du",
                 (int) nearest, diving ? " (diving)" : "", (int) LegendaryHaunt.SIGHT_RANGE);
     }
 }
