@@ -96,18 +96,6 @@ public class SlipDashModule extends BaseHauntModule {
         begin(fish, player);
     }
 
-    protected FishEntityPlugin findOwnMote() {
-        for (SectorEntityToken candidate
-                : system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (candidate.isExpired()) continue;
-            if (!(candidate.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
-            if (fish.isPhantom() || fish.getFishSpec() == null) continue;
-            if (spec.id.equals(fish.getFishSpec().id)) return fish;
-        }
-
-        return null;
-    }
-
     protected void begin(FishEntityPlugin fish, CampaignFleetAPI player) {
         Vector2f at = fish.getMote().getLocation();
 

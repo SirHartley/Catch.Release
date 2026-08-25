@@ -64,7 +64,8 @@ public class MoteDashModule extends BaseHauntModule {
         convertCooldown -= amount;
         if (convertCooldown > 0f || !atFullIntensity()) return;
 
-        SectorEntityToken host = findLegendaryMote();
+        FishEntityPlugin own = findOwnMote();
+        SectorEntityToken host = own == null ? null : own.getMote();
         if (host == null) return;
 
         FishEntityPlugin mote = findVictim(host);
@@ -72,18 +73,6 @@ public class MoteDashModule extends BaseHauntModule {
 
         convertCooldown = CONVERT_COOLDOWN_SECONDS;
         fling(mote, player);
-    }
-
-    protected SectorEntityToken findLegendaryMote() {
-        for (SectorEntityToken candidate
-                : system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (candidate.isExpired()) continue;
-            if (!(candidate.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
-            if (fish.isPhantom() || fish.getFishSpec() == null) continue;
-            if (spec.id.equals(fish.getFishSpec().id)) return candidate;
-        }
-
-        return null;
     }
 
     protected FishEntityPlugin findVictim(SectorEntityToken host) {
