@@ -19,7 +19,6 @@ import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -35,7 +34,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float ORBIT_DEG_PER_SECOND = 140f;
     private static final float SHIELD_FLASH_SECONDS = 0.6f;
     private static final float SHIELD_LENS_INTENSITY = 10f;
-    private static final float REVEAL_SIZE = 110f;
 
     private static final float STACK_RING_GAP = 7f;
 
@@ -123,7 +121,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // shell game: a decoy is steered by its real mote's controller, never by itself
     private SectorEntityToken decoyAnchor;
-    private transient float revealLeft;
 
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
@@ -224,7 +221,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         time += amount;
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
-        if (revealLeft > 0f) revealLeft -= amount;
         if (baseShieldRegen > 0f) baseShieldRegen -= amount;
 
         advanceLampFade(amount);
@@ -495,11 +491,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return decoyAnchor;
     }
 
-    /** Inverted halo for a few seconds, so a fish that just moved can be found again. */
-    public void revealFor(float seconds) {
-        revealLeft = Math.max(revealLeft, seconds);
-    }
-
     /** The base shell: up when the countdown has run out, spent for ten seconds by a
      *  deflection - so a throw lands only as a quick follow-up to another. */
     public boolean isBaseShieldUp() {
@@ -723,9 +714,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float base = viewport.getAlphaMult();
         if (base <= 0f) return;
 
-        // the defence display is lamp-bound: no beam on the fish, no shield to see.
-        // The reveal halo is the one exception - its whole job is finding a fish
-        // that just left the light
+        // the defence display is lamp-bound: no beam on the fish, no shield to see
         float alpha = base * lampFade;
 
         Vector2f loc = entity.getLocation();
@@ -769,19 +758,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
             float ring = LegendaryShields.SHIELD_RADIUS * (1f + 1.2f * (1f - f));
             Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
-        }
-
-        if (revealLeft > 0f && sprite != null) {
-            // invert blend: src*(1-dst) + dst*(1-src) - the glow reads as a negative of
-            // whatever is behind it and vanishes cleanly where the texture is empty
-            float f = Math.min(1f, revealLeft);
-            float pulse = 0.7f + 0.3f * (float) Math.sin(time * 5f);
-            sprite.setColor(Color.WHITE);
-            sprite.setBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
-            sprite.setSize(REVEAL_SIZE, REVEAL_SIZE);
-            sprite.setAlphaMult(f * pulse * base);
-            sprite.renderAtCenter(loc.x, loc.y);
-            sprite.setAdditiveBlend();
         }
     }
 }

@@ -38,7 +38,6 @@ public class SlipDashModule extends BaseHauntModule {
     public static final float FLEE_FUZZ_DEG = 45f;
     public static final float CURVE_MAX_DEG_PER_SECOND = 30f;
     public static final float CURVE_WAVE_RATE = 0.9f;
-    public static final float REVEAL_SECONDS = 9f;
 
     public static final float STREAM_WIDTH = 420f;
     public static final int STREAM_BURN = 50;
@@ -106,8 +105,6 @@ public class SlipDashModule extends BaseHauntModule {
         curveRate = CURVE_MAX_DEG_PER_SECOND
                 * MathUtils.getRandomNumberInRange(0.4f, 1f)
                 * (random.nextBoolean() ? 1f : -1f);
-
-        fish.revealFor(dashLeft + REVEAL_SECONDS);
 
         Trail trail = new Trail();
 
