@@ -50,6 +50,22 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float RUN_SURGE_SECONDS = 4f;
     private static final float RUN_SURGE_MULT = 3f;
 
+    private static final float PROWL_MULT = 1.6f;
+    private static final float PROWL_LEG_MIN = 1200f;
+    private static final float PROWL_LEG_MAX = 2200f;
+    private static final float PROWL_TURN_MIN_DEG = 25f;
+    private static final float PROWL_TURN_MAX_DEG = 60f;
+    private static final float PROWL_RETARGET_MIN = 2.5f;
+    private static final float PROWL_RETARGET_MAX = 4.5f;
+    private static final float PROWL_ARRIVE_RANGE = 250f;
+    private static final float HUNT_MULT = 1.9f;
+    private static final float EVADE_SECONDS = 5f;
+    private static final float EVADE_MULT = 2.6f;
+    private static final float EVADE_JINK_MIN = 0.35f;
+    private static final float EVADE_JINK_MAX = 0.7f;
+    private static final float EVADE_LEG = 700f;
+
+
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
@@ -130,6 +146,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
+
+    // the Lantern Jack's prowl: sweeping legs between hunts, sharp jinks when struck
+    private transient float prowlLeft;
+    private transient float evasiveLeft;
+    private transient float jinkLeft;
+    private transient float jinkSign = 1f;
+    private transient boolean hunting;
+
 
     // lamp-bound extras fade with the player's beam; the shield gets a lens on top
     private transient float lampFade;
@@ -263,6 +287,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
+        if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
 
@@ -525,6 +550,66 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (cycle > RUN_PERIOD - RUN_SURGE_SECONDS) return RUN_SURGE_MULT;
 
         return RUN_MULT;
+    }
+
+    /** The Lantern Jack's pace: a burst when struck, a closing rush on prey, and a
+     *  fast loping patrol the rest of the time - it is never standing water. */
+    public float getJackSpeedMult() {
+        if (evasiveLeft > 0f) return EVADE_MULT;
+        if (hunting) return HUNT_MULT;
+
+        return PROWL_MULT;
+    }
+
+    public void setHunting(boolean hunting) {
+        this.hunting = hunting;
+    }
+
+    public void startEvasive() {
+        evasiveLeft = Math.max(evasiveLeft, EVADE_SECONDS);
+        jinkLeft = 0f;
+    }
+
+
+    /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
+     *  to follow. The hunt (the eater's swim target) takes the wheel by itself. */
+    protected void advanceProwl(float amount) {
+        if (evasiveLeft > 0f) {
+            evasiveLeft -= amount;
+            jinkLeft -= amount;
+            if (jinkLeft > 0f) return;
+
+            jinkLeft = MathUtils.getRandomNumberInRange(EVADE_JINK_MIN, EVADE_JINK_MAX);
+            // flip written out so the transient's post-load zero heals itself
+            jinkSign = jinkSign >= 0f ? -1f : 1f;
+
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            float away = player != null
+                    && player.getContainingLocation() == entity.getContainingLocation()
+                    ? Misc.getAngleInDegrees(player.getLocation(), entity.getLocation())
+                    : MathUtils.getRandomNumberInRange(0f, 360f);
+            setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
+                    EVADE_LEG,
+                    away + jinkSign * MathUtils.getRandomNumberInRange(50f, 110f)));
+            return;
+        }
+
+        if (hunting) return;
+
+        prowlLeft -= amount;
+        // retarget before arrival: a pondless mote that reaches its target expires
+        if (prowlLeft > 0f && Misc.getDistance(entity.getLocation(), target)
+                > PROWL_ARRIVE_RANGE) {
+            return;
+        }
+
+        prowlLeft = MathUtils.getRandomNumberInRange(
+                PROWL_RETARGET_MIN, PROWL_RETARGET_MAX);
+        float heading = Misc.getAngleInDegrees(entity.getLocation(), target)
+                + (MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f)
+                * MathUtils.getRandomNumberInRange(PROWL_TURN_MIN_DEG, PROWL_TURN_MAX_DEG);
+        setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
+                MathUtils.getRandomNumberInRange(PROWL_LEG_MIN, PROWL_LEG_MAX), heading));
     }
 
     protected void advanceFleeMode() {
