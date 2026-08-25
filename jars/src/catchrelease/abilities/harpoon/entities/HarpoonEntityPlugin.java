@@ -13,6 +13,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
@@ -182,6 +183,18 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             playMoteHitSound();
 
             if (handleShieldContact(contact.mote)) return;
+        }
+
+        // a mine answers to a thrown head - clearing the field from range is the
+        // counterplay - and it goes off before any fish behind it is considered
+        SectorEntityToken mine = findMine();
+        if (mine != null) {
+            playMoteHitSound();
+            if (mine.getCustomPlugin() instanceof HauntMineEntityPlugin plugin) {
+                plugin.detonate();
+            }
+            enter(State.RETURNING);
+            return;
         }
 
         SectorEntityToken hit = findMote();
@@ -788,6 +801,20 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         float fraction = (-projection - (float) Math.sqrt(discriminant)) / (2f * stepLength);
         return fraction >= 0f && fraction <= 1f ? fraction : -1f;
+    }
+
+    protected SectorEntityToken findMine() {
+        for (SectorEntityToken mine : entity.getContainingLocation()
+                .getEntitiesWithTag(HauntMineEntityPlugin.MINE_TAG)) {
+            if (mine.isExpired()) continue;
+
+            if (Misc.getDistance(entity.getLocation(), mine.getLocation())
+                    <= HarpoonConstants.CATCH_RADIUS) {
+                return mine;
+            }
+        }
+
+        return null;
     }
 
     protected SectorEntityToken findMoteWithTag(String tag) {

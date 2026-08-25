@@ -35,6 +35,7 @@ public class LegendaryShields {
     public static final String CHARGE_SHIELD_SPECIES = "lantern_jack";
     public static final String SHARD_SPECIES = "quorum_shard";
     public static final String MORAY_SPECIES = "slipstream_moray";
+    public static final String DAWN_SPECIES = "false_dawn";
 
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int JACK_STACK_MAX = 3;
@@ -232,21 +233,24 @@ public class LegendaryShields {
         if (CHARGE_SHIELD_SPECIES.equals(id)) return fish.getJackSpeedMult();
 
         if (isFleeing(fish)) {
-            // the moray does not pulse - it runs, and its slip-dashes ride on top
-            return MORAY_SPECIES.equals(id)
-                    ? fish.getWildRunSpeedMult() : fish.getFleeSpeedMult();
+            // the moray does not pulse - it runs, and its slip-dashes ride on top;
+            // the False Dawn runs flat out so its minefield is crossed at speed
+            if (MORAY_SPECIES.equals(id)) return fish.getWildRunSpeedMult();
+            if (DAWN_SPECIES.equals(id)) return fish.getDawnRunSpeedMult();
+
+            return fish.getFleeSpeedMult();
         }
 
         return LAZY_SPEED_MULT;
     }
 
     /** How close the fleet must press before flight overrides everything else. The
-     *  moray bolts the moment the fleet is anywhere on its horizon. */
+     *  moray and the False Dawn bolt the moment the fleet is anywhere on their
+     *  horizon - both are built around being chased, not cornered. */
     public static float getFleePressureRange(FishEntityPlugin fish) {
-        if (fish != null && fish.getFishSpec() != null
-                && MORAY_SPECIES.equals(fish.getFishSpec().id)) {
-            return 4500f;
-        }
+        String id = fish == null || fish.getFishSpec() == null
+                ? null : fish.getFishSpec().id;
+        if (MORAY_SPECIES.equals(id) || DAWN_SPECIES.equals(id)) return 4500f;
 
         return 3500f;
     }

@@ -50,6 +50,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float RUN_SURGE_SECONDS = 4f;
     private static final float RUN_SURGE_MULT = 3f;
 
+    private static final float DAWN_RUN_PERIOD = 6f;
+    private static final float DAWN_SPRINT_SECONDS = 2.5f;
+    private static final float DAWN_SPRINT_MULT = 3.2f;
+    private static final float DAWN_CRUISE_MULT = 2.2f;
+
     private static final float PROWL_MULT = 1.6f;
     private static final float PROWL_LEG_MIN = 1200f;
     private static final float PROWL_LEG_MAX = 2200f;
@@ -561,6 +566,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (cycle > RUN_PERIOD - RUN_SURGE_SECONDS) return RUN_SURGE_MULT;
 
         return RUN_MULT;
+    }
+
+    /** The False Dawn never stops at all: a hard runner whose minefield only matters
+     *  while the fleet is actually chasing it through the field. */
+    public float getDawnRunSpeedMult() {
+        return time % DAWN_RUN_PERIOD < DAWN_SPRINT_SECONDS
+                ? DAWN_SPRINT_MULT : DAWN_CRUISE_MULT;
     }
 
     /** The Lantern Jack's pace: a burst when struck, a closing rush on prey, and a
