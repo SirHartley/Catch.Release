@@ -183,7 +183,7 @@ public class LegendaryHaunt implements EveryFrameScript {
             // no shield of its own: the False Dawn is the minelayer
             case "false_dawn" -> {
                 out.add(new MinefieldModule(system, spec));
-                out.add(new ChromaticAberrationModule(system, spec));
+                out.add(new CoherenceSurgeModule(system, spec));
             }
             case "longliner" -> {
                 out.add(new GhostFleetsModule(system, spec));

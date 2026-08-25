@@ -779,7 +779,7 @@ The whaling chase: unique fish, one host system each, and the haunting that mark
 | `SensorGhostsModule.java` | Vanilla sensor-ghost entities drifting through the sensor bubble, unclickable, fading before anything is made of them |
 | `GhostFleetsModule.java` | A dark-transponder fleet on an intercept course - ignored by all other fleets, unclickable, comm-dead - that despawns the instant it should have arrived |
 | `FakeWrecksModule.java` | Wreck entities seeded around the player's course that fade out at working distance, before any salvage dialog could open |
-| `ChromaticAberrationModule.java` | The screen effect: full-frame chromatic aberration through `rendering/plugins/ChromaticAberrationOverlay`, easing in with intensity and cutting to nothing on cleanup |
+| `ChromaticAberrationModule.java` / `CoherenceSurgeModule.java` | The screen effects: full-frame chromatic aberration through `rendering/plugins/ChromaticAberrationOverlay` (the manta's - its abyss already runs coherence at the floor), and the low-coherence overlay held at full force through the script's haunt floor (the False Dawn's). Both ease in and cut to nothing on cleanup |
 | `GhostAsteroidsModule.java` | A temporary asteroid field with nothing solid in it: a cluster of `GhostAsteroidEntityPlugin` rocks drifting as one body, topped up while the chase runs |
 | `LegendaryShields.java` | The defences, answered at the harpoon's hit moment. The Longliner: a hull shield only an Explosive Head pops, permanently - until then it deflects everything, swims lazily and raises no haunt. The Quorum: a shield held up by three fast-orbiting Quorum Splinter motes (`quorum_shard`, a harpoonable rare-band catch of its own, spawn weight zero so it exists only as escort); the shield stands while any orbit, splinters regrow one a month, and the haunt stays gentle to compensate. The Lantern Jack: two deflection charges, refilled by hunting down and swallowing lamp-exposed motes. All state lives in the `LegendaryChases` ledger, so a popped shield stays popped across relocations and abandoned chases. Every shield event - deflection with a per-species hint, the pop, the dive after a blast, a swallowed mote, a thinned escort - is told to the player as a campaign message. Neither the eater nor the moray's flung dashes ever consume a quest-planted mote |
 | `MoteDashModule.java` | The moray's extra countermeasure: exposed motes near its own mote are flung at the fleet like a skillshot, aim fuzzed so some miss; a connecting mote delivers an interdiction pulse and burns out, and an abandoned chase releases mid-dash motes unhurt |
@@ -791,7 +791,7 @@ distance for the last two.
 
 | File | What it does |
 |---|---|
-| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop, plus a session-only haunt floor a legendary chase can hold at full force. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
 | `CoherenceTerrain.java` | The terrain-bar line. Invisible terrain covering a whole location whose `containsEntity` is "is the overlay up" rather than a distance — IndEvo's trick, so nothing has to be moved under the fleet |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
