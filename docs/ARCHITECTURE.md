@@ -1225,7 +1225,8 @@ Dawn's minefield - through `LegendaryShields`, the harpoon's deflection hook and
 0.4` for the opposite reason — the crowded end of the sweep is the deep end, and they fit the cap
 only by staying out of it. The eight rows that filled the list to its hundred follow the same
 pattern: bounded to calm-or-mid fabric or gated to dead stars, because the deep bands sit at the
-cap everywhere. All fifteen placeholder rows reuse existing sprites until their own art lands.
+cap everywhere. All fifteen reuse existing sprites until their own art lands and are marked
+`placeholder art` in the table's final `comment` column.
 
 **A species can be reachable by only one kind of gear.** `reachedBy` names `POND`, `BREACH_LAMP`, or
 neither for both — the same `CatchImplement` a buyer asks about, so "only ever out of a rupture" and
