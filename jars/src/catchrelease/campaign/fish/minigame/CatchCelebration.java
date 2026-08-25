@@ -18,6 +18,7 @@ import java.util.List;
 public class CatchCelebration {
 
     protected final FishSpec fish;
+    protected final Color accent;
     protected final List<Confetto> confetti = new ArrayList<>();
     protected float elapsed = 0f;
     transient protected LazyFont font;
@@ -31,8 +32,9 @@ public class CatchCelebration {
         Color color;
     }
 
-    public CatchCelebration(FishSpec fish) {
+    public CatchCelebration(FishSpec fish, Color accent) {
         this.fish = fish;
+        this.accent = accent;
     }
 
     protected Confetto spawn(float x, float y, FishSpec fish) {
@@ -61,8 +63,7 @@ public class CatchCelebration {
     protected Color pickColor(FishSpec fish) {
         if (fish != null
                 && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
-            return catchrelease.campaign.fish.legendary.LegendaryShields
-                    .getPresentedColor(fish);
+            return getAccentColor();
         }
 
         return Color.getHSBColor(MathUtils.getRandomNumberInRange(0f, 1f),
@@ -206,7 +207,9 @@ public class CatchCelebration {
     }
 
     protected Color getAccentColor() {
-        return catchrelease.campaign.fish.legendary.LegendaryShields.getPresentedColor(fish);
+        if (accent != null) return accent;
+
+        return fish == null ? Color.WHITE : fish.rarity.color;
     }
 
     protected static Color withAlpha(Color color, float alpha) {

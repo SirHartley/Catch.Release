@@ -129,10 +129,11 @@ public class QuorumShellGame {
         while (state.bodies.size() < DECOYS + 1) {
             float slot = freeSlotAngle(state);
 
-            // the decoy species: shard-band minigame, but presented in the real colours
+            // an empty body is a splinter under the hood: same row, same minigame -
+            // the decoy anchor alone makes it glow and present in the real colours
             FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                     new Vector2f(state.real.getLocation()),
-                    LegendaryShields.DECOY_SPECIES);
+                    LegendaryShields.SHARD_SPECIES);
             params.decoyAnchor = state.real;
 
             SectorEntityToken token = state.real.getContainingLocation().addCustomEntity(

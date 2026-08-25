@@ -182,7 +182,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
             // celebration reads its centre off the layout at render time, after the readout has settled
             if (CrabWares.CELEBRATION.isOn()) {
-                celebration = new CatchCelebration(minigame.getFish());
+                celebration = new CatchCelebration(minigame.getFish(),
+                        minigame.getPresentedColor());
             }
         }
 
@@ -440,8 +441,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected void renderCatchMote(float centerX, float centerY, float alphaMult) {
         SpriteAPI sprite = getMoteSprite();
-        Color color = catchrelease.campaign.fish.legendary.LegendaryShields
-                .getPresentedColor(minigame.getFish());
+        Color color = minigame.getPresentedColor();
 
         if (sprite == null) {
             Disc.draw(centerX, centerY, FishConstants.MINIGAME_MOTE_GLOW_SIZE * 0.5f,
