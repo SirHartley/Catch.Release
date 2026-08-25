@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
@@ -188,6 +189,7 @@ public class LegendaryShields {
                 continue;
             }
             if (meal.getOrbitAnchor() != null) continue;
+            if (QuestPond.isQuestMote(other)) continue;
             FishSpec spec = meal.getFishSpec();
             if (spec == null || spec.rarity == FishRarity.LEGENDARY) continue;
 
