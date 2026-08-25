@@ -244,8 +244,8 @@ public class QuorumShellGame {
         if (state != null) state.bodies.removeIf(b -> b.token == mote);
 
         Misc.fadeAndExpire(mote, 0.4f);
-        Global.getSector().getCampaignUI().addMessage(
-                "Empty - and the school is three again.", Misc.getHighlightColor());
+        LegendaryShields.say(Global.getSector().getPlayerFleet(),
+                "Empty - and the school is three again");
 
         return true;
     }
