@@ -44,6 +44,8 @@ public class LegendaryShields {
 
     public static final float EAT_SEEK_RANGE = 3500f;
     public static final float EAT_RANGE = 80f;
+    public static final float FLARE_PULL_RANGE = 3000f;
+    public static final float LURE_SECONDS = 20f;
     public static final float SHIELD_RADIUS = 52f;
 
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
@@ -103,10 +105,13 @@ public class LegendaryShields {
                     state.shieldUnits = stacked - 1;
                     fish.flashShield();
                     say(fish.getMote(), "Shell burned");
+                    // the larder just emptied: ring the water for refills
+                    if (state.shieldUnits == 0) fish.tryLureFlare();
                     return HitResult.DEFLECTED;
                 }
                 if (fish.tryBaseShieldDeflect()) {
                     say(fish.getMote(), "Deflected");
+                    fish.tryLureFlare();
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -348,6 +353,27 @@ public class LegendaryShields {
         }
     }
 
+    /** The flare call: low on shells, the Jack rings the water and every edible mote
+     *  in the pull radius turns and runs at it - prey delivering itself. */
+    public static void lureFlare(FishEntityPlugin jack) {
+        SectorEntityToken self = jack.getMote();
+        if (self == null || self.getContainingLocation() == null) return;
+
+        for (SectorEntityToken other : self.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (other == self || other.isExpired()) continue;
+            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
+            if (!isEdible(other, meal)) continue;
+            if (Misc.getDistance(self.getLocation(), other.getLocation())
+                    > FLARE_PULL_RANGE) {
+                continue;
+            }
+
+            meal.startLure(self, LURE_SECONDS);
+        }
+
+        say(self, "The lantern flares. Nearby motes turn toward it.");
+    }
 
     /** Only what the lamps exposed: pond stock, phantoms and anything hidden are not
      *  on the menu, and neither is a legendary or somebody's orbiting shield. */

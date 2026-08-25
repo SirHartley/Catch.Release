@@ -65,6 +65,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float EVADE_JINK_MAX = 0.7f;
     private static final float EVADE_LEG = 700f;
 
+    private static final float FLARE_COOLDOWN_SECONDS = 30f;
+    private static final float FLARE_RING_SECONDS = 2f;
+    private static final float LURE_SPEED_MULT = 1.8f;
 
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
@@ -154,6 +157,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float jinkSign = 1f;
     private transient boolean hunting;
 
+    // the flare call: the Jack's ring vfx and, on any mote, being called in by one
+    private transient float flareCooldown;
+    private transient float flareRing;
+    private transient SectorEntityToken lureTarget;
+    private transient float lureLeft;
 
     // lamp-bound extras fade with the player's beam; the shield gets a lens on top
     private transient float lampFade;
@@ -252,6 +260,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
         if (baseShieldRegen > 0f) baseShieldRegen -= amount;
+        if (flareCooldown > 0f) flareCooldown -= amount;
+        if (flareRing > 0f) flareRing -= amount;
 
         advanceLampFade(amount);
         advanceShieldLens();
@@ -290,9 +300,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
+        if (advanceLure(amount)) return;
 
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
-                * LegendaryShields.getSpeedMult(this)
+                * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
                 * advanceMode(amount) * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
@@ -570,6 +581,45 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         jinkLeft = 0f;
     }
 
+    /** Low on shells, the Jack rings the water: one call, then a long reload. */
+    public void tryLureFlare() {
+        if (flareCooldown > 0f) return;
+
+        flareCooldown = FLARE_COOLDOWN_SECONDS;
+        flareRing = FLARE_RING_SECONDS;
+        LegendaryShields.lureFlare(this);
+    }
+
+    public void startLure(SectorEntityToken at, float seconds) {
+        lureTarget = at;
+        lureLeft = seconds;
+    }
+
+    public float getLureSpeedMult() {
+        return lureLeft > 0f ? LURE_SPEED_MULT : 1f;
+    }
+
+    /** A called mote runs at the caller and holds just off its jaws - close enough
+     *  for the eater, short of the arrival that would expire a pondless mote. */
+    protected boolean advanceLure(float amount) {
+        if (lureLeft <= 0f) return false;
+
+        lureLeft -= amount;
+        if (lureTarget == null || lureTarget.isExpired()
+                || lureTarget.getContainingLocation() != entity.getContainingLocation()) {
+            lureLeft = 0f;
+            lureTarget = null;
+            return false;
+        }
+
+        if (Misc.getDistance(entity.getLocation(), lureTarget.getLocation())
+                <= LegendaryShields.EAT_RANGE * 0.7f) {
+            return true;
+        }
+
+        setSwimTarget(new Vector2f(lureTarget.getLocation()));
+        return false;
+    }
 
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
      *  to follow. The hunt (the eater's swim target) takes the wheel by itself. */
@@ -858,6 +908,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
             float ring = LegendaryShields.SHIELD_RADIUS * (1f + 1.2f * (1f - f));
             Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
+        }
+
+        // the flare call: a shockwave ring run out to the full pull radius, so the
+        // reach of the summons is drawn rather than told
+        if (alpha > 0f && flareRing > 0f) {
+            float p = 1f - flareRing / FLARE_RING_SECONDS;
+            float radius = LegendaryShields.FLARE_PULL_RANGE * p;
+            float fade = (1f - p) * alpha;
+            Disc.drawOutline(loc.x, loc.y, radius, shieldColor, fade * 0.7f, 3f);
+            Disc.drawOutline(loc.x, loc.y, radius * 0.9f, shieldColor, fade * 0.3f, 1.5f);
+            Disc.draw(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * (1f + 2f * p),
+                    shieldColor, fade * 0.45f, 0f, true);
         }
     }
 }
