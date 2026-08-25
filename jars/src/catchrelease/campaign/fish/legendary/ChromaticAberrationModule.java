@@ -11,6 +11,8 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 public class ChromaticAberrationModule extends BaseHauntModule {
 
     public static final float RAMP_SECONDS = 5f;
+    // a live haunt never whispers: the effect enters at a visible floor, not from zero
+    public static final float FLOOR = 0.35f;
 
     protected float level = 0f;
 
@@ -22,7 +24,9 @@ public class ChromaticAberrationModule extends BaseHauntModule {
     public void advance(float amount) {
         level = Math.min(1f, level + amount / RAMP_SECONDS);
 
-        ChromaticAberrationOverlay.setLevel(Math.min(level, intensity));
+        float value = Math.min(level, intensity);
+        ChromaticAberrationOverlay.setLevel(value <= 0f
+                ? 0f : FLOOR + (1f - FLOOR) * value);
     }
 
     @Override
