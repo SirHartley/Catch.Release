@@ -34,6 +34,7 @@ public class LegendaryShields {
     public static final String MOTE_SHIELD_SPECIES = "quorum";
     public static final String CHARGE_SHIELD_SPECIES = "lantern_jack";
     public static final String SHARD_SPECIES = "quorum_shard";
+    public static final String MORAY_SPECIES = "slipstream_moray";
 
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int JACK_STACK_MAX = 3;
@@ -218,21 +219,36 @@ public class LegendaryShields {
             return LegendaryChases.isProvoked(id) ? 1f : LAZY_SPEED_MULT;
         }
 
-        if (isFleeing(fish)) return fish.getFleeSpeedMult();
+        if (isFleeing(fish)) {
+            // the moray does not pulse - it runs, and its slip-dashes ride on top
+            return MORAY_SPECIES.equals(id)
+                    ? fish.getWildRunSpeedMult() : fish.getFleeSpeedMult();
+        }
 
         // the Lantern Jack is a hunter, never placid: full pace on its prey's tail
         return CHARGE_SHIELD_SPECIES.equals(id) ? 1f : LAZY_SPEED_MULT;
     }
 
     /** How close the fleet must press before flight overrides everything else. The
-     *  Lantern Jack tolerates a much closer fleet - the hunt matters more to it. */
+     *  Lantern Jack tolerates a much closer fleet - the hunt matters more to it - and
+     *  the moray bolts the moment the fleet is anywhere on its horizon. */
     public static float getFleePressureRange(FishEntityPlugin fish) {
-        if (fish != null && fish.getFishSpec() != null
-                && CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) {
-            return 1000f;
-        }
+        String id = fish == null || fish.getFishSpec() == null
+                ? null : fish.getFishSpec().id;
+        if (CHARGE_SHIELD_SPECIES.equals(id)) return 1000f;
+        if (MORAY_SPECIES.equals(id)) return 4500f;
 
         return 3500f;
+    }
+
+    /** How hard the escape line weaves. The moray corners far harder than the rest. */
+    public static float getFleeWeaveDeg(FishEntityPlugin fish) {
+        if (fish != null && fish.getFishSpec() != null
+                && MORAY_SPECIES.equals(fish.getFishSpec().id)) {
+            return 75f;
+        }
+
+        return 40f;
     }
 
     /** Whether this fish is in its active flight stage - sprinting away from the fleet. */

@@ -38,11 +38,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float STACK_RING_GAP = 7f;
 
     private static final float FLEE_LEG = 3000f;
-    private static final float FLEE_WEAVE_DEG = 40f;
     private static final float FLEE_SPRINT_PERIOD = 7f;
     private static final float FLEE_SPRINT_SECONDS = 1.8f;
     private static final float FLEE_SPRINT_MULT = 2.6f;
     private static final float FLEE_CRUISE_MULT = 1.5f;
+
+    private static final float RUN_PERIOD = 12f;
+    private static final float RUN_BREATHER_SECONDS = 2f;
+    private static final float RUN_BREATHER_MULT = 0.5f;
+    private static final float RUN_MULT = 2.2f;
+    private static final float RUN_SURGE_SECONDS = 4f;
+    private static final float RUN_SURGE_MULT = 3f;
 
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
@@ -512,6 +518,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 ? FLEE_SPRINT_MULT : FLEE_CRUISE_MULT;
     }
 
+    /** The moray's chase instead: it runs, then runs harder, and only stops to breathe. */
+    public float getWildRunSpeedMult() {
+        float cycle = time % RUN_PERIOD;
+        if (cycle < RUN_BREATHER_SECONDS) return RUN_BREATHER_MULT;
+        if (cycle > RUN_PERIOD - RUN_SURGE_SECONDS) return RUN_SURGE_MULT;
+
+        return RUN_MULT;
+    }
+
     protected void advanceFleeMode() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null
@@ -525,7 +540,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         // a weaving line away from the fleet, retargeted continuously while pressed
         float away = Misc.getAngleInDegrees(player.getLocation(), entity.getLocation())
-                + (float) Math.sin(time * 1.1f) * FLEE_WEAVE_DEG;
+                + (float) Math.sin(time * 1.1f) * LegendaryShields.getFleeWeaveDeg(this);
         setSwimTarget(MathUtils.getPointOnCircumference(
                 entity.getLocation(), FLEE_LEG, away));
     }
