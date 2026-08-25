@@ -4,8 +4,10 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.campaign.fish.data.FishMotion;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -77,6 +79,11 @@ public class FishingMinigame {
         treasuresLeft = TreasureRoller.rollCount(
                 tackle.treasureChanceMult * FishRumors.getLootMultForPlayer());
 
+        // a legendary always carries a full hold of the best there is
+        if (fish.rarity == FishRarity.LEGENDARY) {
+            treasuresLeft = Math.max(3, treasuresLeft);
+        }
+
         treasure = spawnTreasure();
     }
 
@@ -84,6 +91,10 @@ public class FishingMinigame {
         if (treasuresLeft <= 0) return null;
 
         treasuresLeft--;
+        if (fish.rarity == FishRarity.LEGENDARY) {
+            return new MinigameTreasure(TreasureRarity.EPIC);
+        }
+
         return new MinigameTreasure(TreasureRoller.rollRarity());
     }
 
