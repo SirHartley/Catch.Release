@@ -31,12 +31,12 @@ public class HauntStatus implements BaseCommand {
 
         LegendaryHaunt haunt = LegendaryHaunt.getInstance();
         if (haunt == null) {
-            Console.showMessage("Haunt script: not registered.");
+            Console.showMessage("Haunt script: MISSING - LegendaryHaunt is not registered.");
         } else if (haunt.getActiveSpeciesId() == null) {
-            Console.showMessage("Haunt: none active.");
+            Console.showMessage("Haunt script: registered, no active haunt.");
         } else {
             Console.showMessage(String.format(
-                    "Haunt: %s, intensity %.2f, unseen %.1fs, modules %d.",
+                    "Haunt: ACTIVE on %s - intensity %.2f, unseen %.1fs, modules %d.",
                     haunt.getActiveSpeciesId(), haunt.getIntensity(),
                     haunt.getSinceSeen(), haunt.getModuleCount()));
         }
