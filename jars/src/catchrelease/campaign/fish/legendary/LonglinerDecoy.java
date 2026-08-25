@@ -191,6 +191,9 @@ public class LonglinerDecoy implements EveryFrameScript {
         FishermanShelf.releaseFor(boat);
         FishermanMapIcon.removeFor(boat);
         boat.despawn();
+        boat.setAI(null);
+        boat.setLocation(0f, 0f);
+        Misc.fadeAndExpire(boat);
 
         Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
     }

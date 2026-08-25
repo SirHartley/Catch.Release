@@ -33,9 +33,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     private static final float ORBIT_RADIUS = 70f;
     private static final float ORBIT_DEG_PER_SECOND = 140f;
-    private static final float SHIELD_RADIUS = 52f;
     private static final float SHIELD_FLASH_SECONDS = 0.6f;
-    private static final Color SHIELD_COLOR = new Color(150, 220, 255);
     private static final float SHIELD_LENS_INTENSITY = 10f;
     private static final float REVEAL_SIZE = 110f;
 
@@ -549,7 +547,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (shieldLens == null) {
             shieldLens = new org.dark.shaders.distortion.WaveDistortion(
                     entity.getLocation(), new Vector2f());
-            shieldLens.setSize(SHIELD_RADIUS * 2.2f);
+            shieldLens.setSize(LegendaryShields.SHIELD_RADIUS * 2.2f);
             catchrelease.rendering.distortion.CampaignDistortionRenderer
                     .addDistortion(shieldLens);
         }
@@ -711,16 +709,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float alpha = base * lampFade;
 
         Vector2f loc = entity.getLocation();
+        Color shieldColor = LegendaryShields.getShieldColor(this);
 
         // the tether that says the shield is the escort's doing, not the fish's own
         if (alpha > 0f && orbitAnchor != null && !orbitAnchor.isExpired()) {
             float pulse = 0.25f + 0.15f * (float) Math.sin(time * 6f);
-            Disc.draw(loc.x, loc.y, 10f, SHIELD_COLOR, pulse * alpha, 0f, true);
+            Disc.draw(loc.x, loc.y, 10f, shieldColor, pulse * alpha, 0f, true);
 
             Vector2f anchorLoc = orbitAnchor.getLocation();
             Vector2f mid = new Vector2f((loc.x + anchorLoc.x) * 0.5f,
                     (loc.y + anchorLoc.y) * 0.5f);
-            Disc.draw(mid.x, mid.y, ORBIT_RADIUS * 0.45f, SHIELD_COLOR,
+            Disc.draw(mid.x, mid.y, ORBIT_RADIUS * 0.45f, shieldColor,
                     0.08f * alpha, 0f, true);
         }
 
@@ -729,18 +728,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             // toward the rim, a twin rim breathing slightly - the lens does the rest
             float pulse = 0.96f + 0.04f * (float) Math.sin(time * 2.1f);
             float breathe = 0.85f + 0.15f * (float) Math.sin(time * 3f);
-            Disc.draw(loc.x, loc.y, SHIELD_RADIUS * pulse, SHIELD_COLOR,
+            Disc.draw(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * pulse, shieldColor,
                     0.012f * alpha, 0.09f * alpha * breathe, true);
-            Disc.drawOutline(loc.x, loc.y, SHIELD_RADIUS * pulse, SHIELD_COLOR,
+            Disc.drawOutline(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * pulse, shieldColor,
                     0.4f * alpha * breathe, 1.5f);
-            Disc.drawOutline(loc.x, loc.y, SHIELD_RADIUS * pulse * 0.9f, SHIELD_COLOR,
+            Disc.drawOutline(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * pulse * 0.9f,
+                    shieldColor,
                     0.12f * alpha, 1f);
         }
 
         if (alpha > 0f && shieldFlash > 0f) {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
-            float ring = SHIELD_RADIUS * (1f + 1.2f * (1f - f));
-            Disc.drawOutline(loc.x, loc.y, ring, SHIELD_COLOR, f * alpha, 3f);
+            float ring = LegendaryShields.SHIELD_RADIUS * (1f + 1.2f * (1f - f));
+            Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
         }
 
         if (revealLeft > 0f && sprite != null) {

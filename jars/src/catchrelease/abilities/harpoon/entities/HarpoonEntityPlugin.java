@@ -100,6 +100,17 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    protected static class ShieldContact {
+
+        protected final SectorEntityToken mote;
+        protected final float fraction;
+
+        protected ShieldContact(SectorEntityToken mote, float fraction) {
+            this.mote = mote;
+            this.fraction = fraction;
+        }
+    }
+
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
         super.init(entity, pluginParams);
@@ -157,16 +168,26 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceOutbound(float amount) {
-        move(heading, getSpeed() * amount);
-        distanceOut += getSpeed() * amount;
+        Vector2f from = new Vector2f(entity.getLocation());
+        float distance = getSpeed() * amount;
+        move(heading, distance);
+        distanceOut += distance;
+
+        ShieldContact contact = findShieldContact(from, entity.getLocation());
+        if (contact != null) {
+            Vector2f to = entity.getLocation();
+            entity.setLocation(from.x + (to.x - from.x) * contact.fraction,
+                    from.y + (to.y - from.y) * contact.fraction);
+            distanceOut -= distance * (1f - contact.fraction);
+            playMoteHitSound();
+
+            if (handleShieldContact(contact.mote)) return;
+        }
 
         SectorEntityToken hit = findMote();
 
         if (hit != null) {
-            // Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
-            if (entity.isInCurrentLocation()) {
-                Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
-            }
+            playMoteHitSound();
 
             // an empty shell-game body answers before anything: it pops, hooks nothing,
             // and must never reach the shield or blast paths wearing the real one's spec
@@ -175,22 +196,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 return;
             }
 
-            // shields answer before the barb bites: a deflected throw hooks nothing and
-            // refunds nothing, and popping one spends the explosive head on the shield
-            LegendaryShields.HitResult shield = LegendaryShields.onHarpoonHit(hit,
-                    owner == null && isExplosive());
-            if (shield == LegendaryShields.HitResult.POPPED) {
-                if (hit.getCustomPlugin() instanceof FishEntityPlugin fish
-                        && fish.getFishSpec() != null) {
-                    CrabWares.recordExplosiveUse(fish.getFishSpec().getDisplayName());
-                }
-                detonate(ExplosionFleetDamage.NONE);
-                return;
-            }
-            if (shield == LegendaryShields.HitResult.DEFLECTED) {
-                enter(State.RETURNING);
-                return;
-            }
+            if (handleShieldContact(hit)) return;
 
             if (owner == null && TackleManager.get(Tackle.Fit.HARPOON).retrievesCharge) {
                 HarpoonAbilityPlugin.retrieveCharge();
@@ -221,6 +227,32 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         if (distanceOut >= HarpoonConstants.RANGE) enter(State.RETURNING);
+    }
+
+    protected void playMoteHitSound() {
+        if (entity.isInCurrentLocation()) {
+            Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
+        }
+    }
+
+    protected boolean handleShieldContact(SectorEntityToken mote) {
+        LegendaryShields.HitResult result = LegendaryShields.onHarpoonContact(mote,
+                owner == null && isExplosive());
+
+        if (result == LegendaryShields.HitResult.POPPED) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                    && fish.getFishSpec() != null) {
+                CrabWares.recordExplosiveUse(fish.getFishSpec().getDisplayName());
+            }
+            detonate(ExplosionFleetDamage.NONE);
+            return true;
+        }
+        if (result == LegendaryShields.HitResult.DEFLECTED) {
+            enter(State.RETURNING);
+            return true;
+        }
+
+        return false;
     }
 
     protected void beginHaul(CampaignFleetAPI struck) {
@@ -717,6 +749,45 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)) return mote;
 
         return buried.unearth();
+    }
+
+    protected ShieldContact findShieldContact(Vector2f from, Vector2f to) {
+        ShieldContact first = null;
+
+        for (SectorEntityToken mote : entity.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (!canTake(mote)) continue;
+            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+            if (!LegendaryShields.isShielded(fish)) continue;
+
+            float fraction = getCircleEntry(from, to, mote.getLocation(),
+                    LegendaryShields.SHIELD_RADIUS);
+            if (fraction < 0f || (first != null && fraction >= first.fraction)) continue;
+
+            first = new ShieldContact(mote, fraction);
+        }
+
+        return first;
+    }
+
+    protected static float getCircleEntry(Vector2f from, Vector2f to,
+            Vector2f center, float radius) {
+        float offsetX = from.x - center.x;
+        float offsetY = from.y - center.y;
+        float radiusCheck = offsetX * offsetX + offsetY * offsetY - radius * radius;
+        if (radiusCheck <= 0f) return 0f;
+
+        float stepX = to.x - from.x;
+        float stepY = to.y - from.y;
+        float stepLength = stepX * stepX + stepY * stepY;
+        if (stepLength <= 0f) return -1f;
+
+        float projection = 2f * (offsetX * stepX + offsetY * stepY);
+        float discriminant = projection * projection - 4f * stepLength * radiusCheck;
+        if (discriminant < 0f) return -1f;
+
+        float fraction = (-projection - (float) Math.sqrt(discriminant)) / (2f * stepLength);
+        return fraction >= 0f && fraction <= 1f ? fraction : -1f;
     }
 
     protected SectorEntityToken findMoteWithTag(String tag) {
