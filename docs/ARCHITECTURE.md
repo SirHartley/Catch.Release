@@ -764,7 +764,7 @@ Codex pages for species.
 |---|---|
 | `FishCodex.java` | Installs the category and per-species entries; owns every guarded custom/F2 link into a fish entry |
 | `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
-| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the species silhouette in list and detail both - the detail draws the shared rimmed `FishIcons` portrait live, while the list uses vanilla's private icon tint for the same alpha-shaped black body - and full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
+| `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the species silhouette in list and detail both - the detail draws the shared rimmed `FishIcons` portrait live, while the list uses vanilla's private icon tint for the same alpha-shaped black body - and full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map. A legendary's page says plainly that there is one and that it never occurs again once landed, and its sealed range line says nobody sells a chart to it |
 
 ### `campaign/fish/legendary`
 
