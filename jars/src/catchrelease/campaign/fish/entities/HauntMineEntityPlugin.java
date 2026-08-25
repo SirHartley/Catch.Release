@@ -48,7 +48,10 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    public static final String MINE_TAG = "catchrelease_haunt_mine";
+
     public static final float TRIGGER_RANGE = 190f;
+    public static final float EFFECT_RANGE = 600f;
     public static final float ARM_SECONDS = 2f;
     public static final float GLOW_SIZE = 34f;
 
@@ -73,6 +76,23 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
         if (pluginParams instanceof Params params) kind = params.kind;
         time = (float) (Math.random() * 10f);
+        entity.addTag(MINE_TAG);
+    }
+
+    /** A harpoon strike sets it off from range: the full show, but the shove, the
+     *  interdict and the pull only land on a fleet close enough to deserve them. */
+    public void detonate() {
+        if (triggered) return;
+
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null
+                || player.getContainingLocation() != entity.getContainingLocation()) {
+            return;
+        }
+
+        triggered = true;
+        fire(player, Misc.getDistance(player.getLocation(), entity.getLocation())
+                <= EFFECT_RANGE);
     }
 
     @Override
@@ -116,10 +136,10 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         triggered = true;
-        fire(player);
+        fire(player, true);
     }
 
-    protected void fire(CampaignFleetAPI player) {
+    protected void fire(CampaignFleetAPI player, boolean close) {
         switch (kind) {
             case BLAST -> {
                 explode(kind.color, BLAST_RADIUS);
@@ -127,7 +147,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
                 Vector2f away = new Vector2f(player.getLocation().x - entity.getLocation().x,
                         player.getLocation().y - entity.getLocation().y);
                 float length = away.length();
-                if (length > 1f) {
+                if (close && length > 1f) {
                     player.getVelocity().set(
                             player.getVelocity().x + away.x / length * BLAST_PUSH_SPEED,
                             player.getVelocity().y + away.y / length * BLAST_PUSH_SPEED);
@@ -135,11 +155,13 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             }
             case INTERCEPT -> {
                 explode(kind.color, BLAST_RADIUS * 0.55f);
-                catchrelease.campaign.fish.legendary.InterdictionPulse.fire(player);
-                slowLeft = INTERCEPT_SLOW_SECONDS;
+                if (close) {
+                    catchrelease.campaign.fish.legendary.InterdictionPulse.fire(player);
+                    slowLeft = INTERCEPT_SLOW_SECONDS;
+                }
             }
             case IMPLOSION -> {
-                pullLeft = PULL_SECONDS;
+                if (close) pullLeft = PULL_SECONDS;
 
                 RippleDistortion ripple = new RippleDistortion(
                         new Vector2f(entity.getLocation()), new Vector2f());
