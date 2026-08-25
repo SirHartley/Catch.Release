@@ -11,6 +11,8 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.Color;
+
 /**
  * The legendary defences, one kind per species, all answered at the harpoon's hit moment:
  *
@@ -38,6 +40,9 @@ public class LegendaryShields {
 
     public static final float EAT_SEEK_RANGE = 2500f;
     public static final float EAT_RANGE = 80f;
+
+    private static final Color SHIELD_BLUE = new Color(150, 220, 255);
+    private static final Color SHIELD_RED = new Color(255, 70, 70);
 
     public enum HitResult {
         NONE, DEFLECTED, POPPED
@@ -164,6 +169,15 @@ public class LegendaryShields {
         };
     }
 
+    public static Color getShieldColor(FishEntityPlugin fish) {
+        if (fish != null && fish.getFishSpec() != null
+                && CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) {
+            return SHIELD_RED;
+        }
+
+        return SHIELD_BLUE;
+    }
+
     /** Placid and easy to hit until provoked, then the flight envelope takes over.
      *  The Quorum never flees - its fight is the escort and the shell game - and the
      *  Longliner is fleeing from the moment its disguise burns, first throw or not. */
@@ -267,14 +281,14 @@ public class LegendaryShields {
 
     /** A shell-game body wears the real one's colour everywhere until the deck tells -
      *  keyed off the hooked mote itself, since it shares the splinter's species row. */
-    public static java.awt.Color getPresentedColor(FishSpec spec, SectorEntityToken catchTarget) {
+    public static Color getPresentedColor(FishSpec spec, SectorEntityToken catchTarget) {
         if (catchTarget != null
                 && catchTarget.getCustomPlugin() instanceof FishEntityPlugin fish
                 && fish.isDecoy()) {
             return FishRarity.LEGENDARY.color;
         }
 
-        return spec == null ? java.awt.Color.WHITE : spec.rarity.color;
+        return spec == null ? Color.WHITE : spec.rarity.color;
     }
 
     /** Chase feedback floats at the thing it happened to, never the message feed. */
