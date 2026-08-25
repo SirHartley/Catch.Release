@@ -20,8 +20,8 @@ public class MinefieldModule extends BaseHauntModule {
     public static final float SPAWN_MAX_SECONDS = 11f;
     public static final int WAVE_MIN = 3;
     public static final int WAVE_MAX = 6;
-    public static final float SPAWN_RANGE_MIN = 500f;
-    public static final float SPAWN_RANGE_MAX = 2000f;
+    public static final float SPAWN_RANGE_MIN = 400f;
+    public static final float SPAWN_RANGE_MAX = 1200f;
 
     protected float spawnTimer = 1.5f;
 

@@ -15,13 +15,13 @@ import org.lwjgl.util.vector.Vector2f;
  */
 public class DistractionMotesModule extends BaseHauntModule {
 
-    public static final int MAX_ALIVE = 4;
-    public static final float SPAWN_MIN_SECONDS = 8f;
-    public static final float SPAWN_MAX_SECONDS = 16f;
+    public static final int MAX_ALIVE = 8;
+    public static final float SPAWN_MIN_SECONDS = 5f;
+    public static final float SPAWN_MAX_SECONDS = 10f;
     public static final float SPAWN_RANGE_MIN = 120f;
     public static final float SPAWN_RANGE_MAX = 450f;
-    public static final float FALLBACK_RANGE_MIN = 900f;
-    public static final float FALLBACK_RANGE_MAX = 2200f;
+    public static final float FALLBACK_RANGE_MIN = 500f;
+    public static final float FALLBACK_RANGE_MAX = 1100f;
     public static final float DISSOLVE_RANGE = 220f;
     public static final float DISSOLVE_SECONDS = 0.6f;
     public static final float LIFE_MIN_SECONDS = 50f;
