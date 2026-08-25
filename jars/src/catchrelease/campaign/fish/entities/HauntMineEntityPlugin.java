@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.entities;
 
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
+import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -26,9 +27,9 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     public enum Kind {
 
-        BLAST(new Color(255, 90, 60), 5f),
-        INTERCEPT(new Color(90, 150, 255), 3.4f),
-        IMPLOSION(new Color(255, 210, 90), 2.6f);
+        BLAST(new Color(255, 90, 60), 10f),
+        INTERCEPT(new Color(90, 150, 255), 8f),
+        IMPLOSION(new Color(255, 210, 90), 6.5f);
 
         public final Color color;
         public final float blinkRate;
@@ -54,6 +55,8 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
     public static final float EFFECT_RANGE = 700f;
     public static final float ARM_SECONDS = 2f;
     public static final float GLOW_SIZE = 34f;
+    public static final float PULSE_PERIOD = 2.2f;
+    public static final float PULSE_SECONDS = 1.1f;
 
     public static final float BLAST_PUSH_SPEED = 700f;
     public static final float BLAST_RADIUS = 320f;
@@ -77,6 +80,13 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         if (pluginParams instanceof Params params) kind = params.kind;
         time = (float) (Math.random() * 10f);
         entity.addTag(MINE_TAG);
+    }
+
+    // the pulse ring reaches the trigger radius; without this the base render range
+    // clips it whenever the mine itself sits just off-screen
+    @Override
+    public float getRenderRange() {
+        return TRIGGER_RANGE + 500f;
     }
 
     /** A harpoon strike sets it off from range: the full show, but the shove, the
@@ -197,25 +207,36 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             if (sprite == null) return;
         }
 
-        // blinking, and blinking faster once the fleet is close enough to matter
+        // hard strobing, harder still once the fleet is close enough to matter
         float rate = kind.blinkRate;
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player != null && Misc.getDistance(player.getLocation(),
                 entity.getLocation()) < TRIGGER_RANGE * 2.5f) {
-            rate *= 2f;
+            rate *= 3f;
         }
-        float blink = 0.35f + 0.65f * (0.5f + 0.5f * (float) Math.sin(time * rate));
+        float blink = 0.15f + 0.85f * (0.5f + 0.5f * (float) Math.sin(time * rate));
 
         Vector2f loc = entity.getLocation();
         sprite.setColor(kind.color);
         sprite.setAdditiveBlend();
 
-        float size = GLOW_SIZE;
+        float size = GLOW_SIZE * (0.85f + 0.3f * blink);
         for (int i = 0; i < 3; i++) {
             sprite.setSize(size, size);
             sprite.setAlphaMult(alpha * blink * (i == 0 ? 0.9f : 0.6f));
             sprite.renderAtCenter(loc.x, loc.y);
             size *= 0.45f;
+        }
+
+        // the position pulse: a ring breathing out to the trigger radius on a cycle,
+        // so an armed mine's location and reach read from across the field
+        float cycle = time % PULSE_PERIOD;
+        if (time >= ARM_SECONDS && cycle < PULSE_SECONDS) {
+            float p = cycle / PULSE_SECONDS;
+            float fade = (1f - p) * alpha;
+            Disc.drawOutline(loc.x, loc.y, TRIGGER_RANGE * p, kind.color, fade * 0.5f, 2f);
+            Disc.drawOutline(loc.x, loc.y, TRIGGER_RANGE * p * 0.85f, kind.color,
+                    fade * 0.25f, 1.2f);
         }
     }
 }
