@@ -95,7 +95,7 @@ public class MoteDashModule extends BaseHauntModule {
             if (fish.isPhantom() || fish.isHeld() || fish.isDashing() || fish.isDiving()) {
                 continue;
             }
-            if (fish.getOrbitAnchor() != null) continue;
+            if (fish.getOrbitAnchor() != null || fish.isDecoy()) continue;
             if (QuestPond.isQuestMote(candidate)) continue;
             FishSpec other = fish.getFishSpec();
             if (other == null || other.rarity == FishRarity.LEGENDARY) continue;

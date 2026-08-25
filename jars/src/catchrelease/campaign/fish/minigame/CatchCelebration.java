@@ -61,7 +61,8 @@ public class CatchCelebration {
     protected Color pickColor(FishSpec fish) {
         if (fish != null
                 && MathUtils.getRandomNumberInRange(0f, 1f) < FishConstants.CELEBRATION_CONFETTI_RARITY_SHARE) {
-            return fish.rarity.color;
+            return catchrelease.campaign.fish.legendary.LegendaryShields
+                    .getPresentedColor(fish);
         }
 
         return Color.getHSBColor(MathUtils.getRandomNumberInRange(0f, 1f),
@@ -205,7 +206,7 @@ public class CatchCelebration {
     }
 
     protected Color getAccentColor() {
-        return fish == null ? Color.WHITE : fish.rarity.color;
+        return catchrelease.campaign.fish.legendary.LegendaryShields.getPresentedColor(fish);
     }
 
     protected static Color withAlpha(Color color, float alpha) {
