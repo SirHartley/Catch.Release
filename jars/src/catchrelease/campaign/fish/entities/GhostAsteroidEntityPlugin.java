@@ -35,7 +35,6 @@ public class GhostAsteroidEntityPlugin
         }
     }
 
-    protected SectorEntityToken entity;
     protected Params params;
     protected transient SpriteAPI sprite;
 
@@ -45,7 +44,10 @@ public class GhostAsteroidEntityPlugin
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
-        this.entity = entity;
+        // the base keeps the entity reference getRenderRange() reads; shadowing it
+        // with a local field leaves the base's copy null and crashes the first render
+        super.init(entity, pluginParams);
+
         this.params = (Params) pluginParams;
         this.angle = (float) (Math.random() * 360f);
         this.time = (float) (Math.random() * 100f);
