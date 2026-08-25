@@ -22,7 +22,7 @@ import java.util.List;
 public class MoteDashModule extends BaseHauntModule {
 
     public static final float TRIGGER_RANGE = 1400f;
-    public static final float CONVERT_COOLDOWN_SECONDS = 18f;
+    public static final float CONVERT_COOLDOWN_SECONDS = 10f;
     public static final float DASH_SPEED = 550f;
     public static final float DASH_SECONDS = 7f;
     public static final float HIT_RADIUS = 140f;
@@ -30,7 +30,7 @@ public class MoteDashModule extends BaseHauntModule {
     public static final float AIM_LEAD_SECONDS = 1.2f;
     public static final float SLOW_SECONDS = 2.5f;
 
-    protected float convertCooldown = 6f;
+    protected float convertCooldown = 4f;
     protected float slowLeft;
     protected final List<SectorEntityToken> dashers = new ArrayList<>();
 

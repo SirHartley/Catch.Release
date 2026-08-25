@@ -23,14 +23,14 @@ import java.util.Map;
  */
 public class SensorGhostsModule extends BaseHauntModule {
 
-    public static final int MAX_ALIVE = 8;
-    public static final float SPAWN_MIN_SECONDS = 3.5f;
-    public static final float SPAWN_MAX_SECONDS = 8f;
-    public static final float SPAWN_RANGE_MIN = 700f;
-    public static final float SPAWN_RANGE_MAX = 1900f;
+    public static final int MAX_ALIVE = 14;
+    public static final float SPAWN_MIN_SECONDS = 2f;
+    public static final float SPAWN_MAX_SECONDS = 4.5f;
+    public static final float SPAWN_RANGE_MIN = 400f;
+    public static final float SPAWN_RANGE_MAX = 1000f;
     public static final float DRIFT_MIN_SPEED = 60f;
     public static final float DRIFT_MAX_SPEED = 140f;
-    public static final float STALK_CHANCE = 0.4f;
+    public static final float STALK_CHANCE = 0.55f;
     public static final float STALK_MIN_SPEED = 45f;
     public static final float STALK_MAX_SPEED = 95f;
     public static final float STALK_TURN_DEG_PER_SECOND = 40f;
