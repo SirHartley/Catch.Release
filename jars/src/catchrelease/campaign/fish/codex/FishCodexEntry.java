@@ -228,12 +228,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     protected void addDescription(TooltipMakerAPI text, FishCodexEntryState state) {
         if (!state.isCaught()) {
             if (isLegendary(state)) {
-                text.addPara("No specimen has been landed, and no range data is available.",
+                text.addPara("No specimen has been landed. No range data is available.",
                         Misc.getGrayColor(), BOX_GAP);
                 addUniqueLine(text, state);
             } else {
-                text.addPara("No specimen has been landed. Range data records only its habitat"
-                        + " and observed movement.", Misc.getGrayColor(), BOX_GAP);
+                text.addPara("Known only from range data. No specimen has been landed.",
+                        Misc.getGrayColor(), BOX_GAP);
             }
             return;
         }
@@ -262,8 +262,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
     protected void addUniqueLine(TooltipMakerAPI text, FishCodexEntryState state) {
         text.addPara(state.isCaught()
-                        ? "Unique specimen. Already landed."
-                        : "Unique specimen. It will not return after being landed.",
+                        ? "There is one. It has been landed, and it does not occur again."
+                        : "There is one. Once landed, it does not occur again.",
                 state.spec.rarity.color, 3f);
     }
 
@@ -314,11 +314,11 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         if (!state.hasRangeData()) {
             if (isLegendary(state)) {
-                text.addPara("No range data is available for this species. It must be found"
-                        + " without a chart.", Misc.getGrayColor(), BOX_GAP);
+                text.addPara("No range data exists for this species. It has to be found,"
+                        + " not charted.", Misc.getGrayColor(), BOX_GAP);
             } else {
-                text.addPara("Range data has not been acquired. Catch the species or obtain"
-                        + " its range data to reveal the habitat.", Misc.getGrayColor(), BOX_GAP);
+                text.addPara("Its range has not been charted here. Catch the species or acquire"
+                        + " its range data to reveal it.", Misc.getGrayColor(), BOX_GAP);
             }
             return;
         }
