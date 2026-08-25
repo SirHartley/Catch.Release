@@ -37,7 +37,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float SHIELD_LENS_INTENSITY = 10f;
     private static final float REVEAL_SIZE = 110f;
 
-    private static final float FLEE_PRESSURE_RANGE = 3500f;
+    private static final float STACK_RING_GAP = 7f;
+
     private static final float FLEE_LEG = 3000f;
     private static final float FLEE_WEAVE_DEG = 40f;
     private static final float FLEE_SPRINT_PERIOD = 7f;
@@ -123,6 +124,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // shell game: a decoy is steered by its real mote's controller, never by itself
     private SectorEntityToken decoyAnchor;
     private transient float revealLeft;
+
+    // the base shell: spent by a deflection, back when this reaches zero
+    private float baseShieldRegen;
 
     // lamp-bound extras fade with the player's beam; the shield gets a lens on top
     private transient float lampFade;
@@ -221,6 +225,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
         if (revealLeft > 0f) revealLeft -= amount;
+        if (baseShieldRegen > 0f) baseShieldRegen -= amount;
 
         advanceLampFade(amount);
         advanceShieldLens();
@@ -495,6 +500,21 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         revealLeft = Math.max(revealLeft, seconds);
     }
 
+    /** The base shell: up when the countdown has run out, spent for ten seconds by a
+     *  deflection - so a throw lands only as a quick follow-up to another. */
+    public boolean isBaseShieldUp() {
+        return baseShieldRegen <= 0f;
+    }
+
+    public boolean tryBaseShieldDeflect() {
+        if (!isBaseShieldUp()) return false;
+
+        baseShieldRegen = LegendaryShields.BASE_SHIELD_REGEN_SECONDS;
+        flashShield();
+
+        return true;
+    }
+
     /** Flight comes in pulses: a sprint that opens water, a cruise the fleet can close. */
     public float getFleeSpeedMult() {
         return time % FLEE_SPRINT_PERIOD < FLEE_SPRINT_SECONDS
@@ -508,7 +528,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
         if (Misc.getDistance(player.getLocation(), entity.getLocation())
-                > FLEE_PRESSURE_RANGE) {
+                > LegendaryShields.getFleePressureRange(this)) {
             return;
         }
 
@@ -735,6 +755,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             Disc.drawOutline(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * pulse * 0.9f,
                     shieldColor,
                     0.12f * alpha, 1f);
+
+            // the Lantern Jack's larder, worn openly: one extra circle per stored shell
+            int rings = LegendaryShields.getStackedRings(this);
+            for (int i = 1; i <= rings; i++) {
+                Disc.drawOutline(loc.x, loc.y,
+                        LegendaryShields.SHIELD_RADIUS * pulse + STACK_RING_GAP * i,
+                        shieldColor, 0.3f * alpha, 1.2f);
+            }
         }
 
         if (alpha > 0f && shieldFlash > 0f) {
