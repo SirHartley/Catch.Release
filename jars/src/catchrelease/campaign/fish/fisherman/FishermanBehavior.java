@@ -83,13 +83,14 @@ public class FishermanBehavior implements EveryFrameScript {
 
             if (fan == null) {
                 fan = new SearchlightFanRenderer(arc.center, renderLoc,
-                        Searchlight.getArea(), FishermanConstants.LIGHT_COLOR);
+                        FishermanConstants.LIGHT_AREA, FishermanConstants.LIGHT_HALF_ANGLE,
+                        FishermanConstants.LIGHT_COLOR);
                 LunaCampaignRenderer.addTransientRenderer(fan);
             }
         }
 
         public float litStrength(Vector2f at) {
-            float size = Searchlight.getArea();
+            float size = FishermanConstants.LIGHT_AREA;
             Vector2f origin = arc.center;
 
             float length = Misc.getDistance(origin, renderLoc) + size;
@@ -102,9 +103,9 @@ public class FishermanBehavior implements EveryFrameScript {
                     Misc.getAngleInDegrees(origin, renderLoc),
                     Misc.getAngleInDegrees(origin, at)));
 
-            if (off > Searchlight.getFanHalfAngle()) return 0f;
+            if (off > FishermanConstants.LIGHT_HALF_ANGLE) return 0f;
 
-            float acrossShare = 1f - off / Searchlight.getFanHalfAngle();
+            float acrossShare = 1f - off / FishermanConstants.LIGHT_HALF_ANGLE;
             float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
 
             return acrossShare * acrossShare
@@ -368,7 +369,7 @@ public class FishermanBehavior implements EveryFrameScript {
         lamps = new ArrayList<>();
 
         float areaPerLamp = 360f / FishermanConstants.LIGHTS;
-        float radius = Searchlight.getArea() * 2f;
+        float radius = FishermanConstants.LIGHT_AREA * 2f;
 
         for (int i = 0; i < FishermanConstants.LIGHTS; i++) {
             float minAngle = areaPerLamp * i + MathUtils.getRandomNumberInRange(0f, 45f);
@@ -417,7 +418,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
         Vector2f aim = lamp.renderLoc;
         float across = MathUtils.getRandomNumberInRange(0f, 360f);
-        float reach = Searchlight.getArea() * 0.8f;
+        float reach = FishermanConstants.LIGHT_AREA * 0.8f;
 
         Vector2f spawn = MathUtils.getPointOnCircumference(aim, reach, across);
         Vector2f target = MathUtils.getPointOnCircumference(aim, reach, across + 180f);

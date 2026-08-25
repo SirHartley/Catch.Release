@@ -28,7 +28,9 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     private final Vector2f origin;
     private final Vector2f aim;
     private final float size;
+    private final float halfAngle;
     private final Color color;
+    private final boolean tracksPlayerScale;
 
     private boolean expired = false;
     private boolean fading = false;
@@ -40,10 +42,22 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
     public SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size, Color color) {
+        this(origin, aim, size, Searchlight.getFanHalfAngle(), color, true);
+    }
+
+    public SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size,
+            float halfAngle, Color color) {
+        this(origin, aim, size, halfAngle, color, false);
+    }
+
+    protected SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size,
+            float halfAngle, Color color, boolean tracksPlayerScale) {
         this.origin = origin;
         this.aim = aim;
         this.size = size;
+        this.halfAngle = halfAngle;
         this.color = color;
+        this.tracksPlayerScale = tracksPlayerScale;
     }
 
     @Override
@@ -107,8 +121,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
-        // radius read live, not cached - both the draw and the hit test run off the current upgrade each frame
-        drawWedge(Misc.getAngleInDegrees(origin, aim), distance + Searchlight.getArea(), distance, alpha);
+        drawWedge(Misc.getAngleInDegrees(origin, aim), distance + getSize(), distance, alpha);
     }
 
     protected void drawWedge(float direction, float length, float aimDistance, float alpha) {
@@ -139,7 +152,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
             for (int i = 0; i <= STEPS_ACROSS; i++) {
                 float t = i / (float) STEPS_ACROSS * 2f - 1f;
 
-                double angle = Math.toRadians(direction + Searchlight.getFanHalfAngle() * t);
+                double angle = Math.toRadians(direction + getHalfAngle() * t);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
 
@@ -169,5 +182,13 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         if (u <= aimFract) return base;
 
         return base * TrigHelper.smootherStep((1f - u) / (1f - aimFract));
+    }
+
+    protected float getSize() {
+        return tracksPlayerScale ? Searchlight.getArea() : size;
+    }
+
+    protected float getHalfAngle() {
+        return tracksPlayerScale ? Searchlight.getFanHalfAngle() : halfAngle;
     }
 }

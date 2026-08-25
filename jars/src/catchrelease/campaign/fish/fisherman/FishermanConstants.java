@@ -29,6 +29,8 @@ public class FishermanConstants {
     };
     public static final Color LIGHT_COLOR = new Color(255, 180, 50, 255);
     public static final int LIGHTS = 3;
+    public static final float LIGHT_AREA = 240f;
+    public static final float LIGHT_HALF_ANGLE = 14.3f;
     public static final float SWEEP_DEGREES_PER_SECOND = 30f;
     public static final String SOUND_TOGGLE = "catchrelease_ui_searchlight_toggle";
 
