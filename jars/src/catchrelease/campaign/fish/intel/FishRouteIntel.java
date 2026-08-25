@@ -159,7 +159,7 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
         if (getListInfoParam() instanceof FishCatch specimen) {
             FishSpec spec = specimen.getSpec();
-            LabelAPI line = info.addPara("%s landed - %s aboard since saving", pad, tc, h,
+            LabelAPI line = info.addPara("%s caught - %s so far on this route", pad, tc, h,
                     specimen.getDisplayName(),
                     String.valueOf(landed.getOrDefault(specimen.speciesId, 0)));
             if (spec != null) line.setHighlightColors(spec.rarity.color, h);
@@ -169,7 +169,7 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
             int total = getLandedTotal();
             if (total > 0) {
-                info.addPara("%s landed since saving", 0f, tc, h, String.valueOf(total));
+                info.addPara("%s caught since saving", 0f, tc, h, String.valueOf(total));
             }
 
             int open = getOpenAsks().size();
@@ -225,14 +225,20 @@ public class FishRouteIntel extends BaseIntelPlugin {
         info.addPara("Route saved on %s.", opad, h, getSavedDate());
 
         info.addPara("The plotted run:", opad);
-        bullet(info);
         for (FishRoute.Stop stop : stops) {
-            LabelAPI line = info.addPara("%s: " + describeStopFish(stop), 3f, text, h,
-                    getSystemName(stop));
-            line.setHighlight(getHighlights(stop).toArray(new String[0]));
-            line.setHighlightColors(getHighlightColors(stop).toArray(new Color[0]));
+            info.addPara("%s", 6f, text, h, getSystemName(stop));
+
+            bullet(info);
+            for (String id : stop.fishIds) {
+                FishSpec spec = FishPresence.getSpec(id);
+                LabelAPI line = info.addPara("%s - %s caught - %s", 2f, text, h,
+                        getSpeciesName(id), String.valueOf(landed.getOrDefault(id, 0)),
+                        describeReach(spec));
+                line.setHighlightColors(
+                        spec == null ? text : spec.rarity.color, h, gray);
+            }
+            unindent(info);
         }
-        unindent(info);
 
         Map<String, String> open = getOpenAsks();
         if (!open.isEmpty()) {
@@ -241,7 +247,7 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
         int total = getLandedTotal();
         if (total > 0) {
-            info.addPara("%s of the route's fish landed since it was saved.", opad, h,
+            info.addPara("%s of the route's fish caught since it was saved.", opad, h,
                     String.valueOf(total));
         }
 
@@ -262,38 +268,14 @@ public class FishRouteIntel extends BaseIntelPlugin {
         return system == null ? "Uncharted" : system.getBaseName();
     }
 
-    protected String describeStopFish(FishRoute.Stop stop) {
-        StringBuilder out = new StringBuilder();
+    protected String describeReach(FishSpec spec) {
+        if (spec == null || spec.reachedBy.isEmpty()) return "rupture or lamp";
+        if (spec.reachedBy.contains(CatchImplement.POND)
+                && !spec.reachedBy.contains(CatchImplement.BREACH_LAMP)) return "rupture only";
+        if (spec.reachedBy.contains(CatchImplement.BREACH_LAMP)
+                && !spec.reachedBy.contains(CatchImplement.POND)) return "lamp only";
 
-        for (String id : stop.fishIds) {
-            if (out.length() > 0) out.append(", ");
-            out.append(getSpeciesName(id));
-
-            int count = landed.getOrDefault(id, 0);
-            if (count > 0) out.append(" (").append(count).append(" landed)");
-        }
-
-        return out.toString();
-    }
-
-    protected List<String> getHighlights(FishRoute.Stop stop) {
-        List<String> out = new ArrayList<>();
-        out.add(getSystemName(stop));
-        for (String id : stop.fishIds) out.add(getSpeciesName(id));
-
-        return out;
-    }
-
-    protected List<Color> getHighlightColors(FishRoute.Stop stop) {
-        List<Color> out = new ArrayList<>();
-        out.add(Misc.getHighlightColor());
-
-        for (String id : stop.fishIds) {
-            FishSpec spec = FishPresence.getSpec(id);
-            out.add(spec == null ? Misc.getTextColor() : spec.rarity.color);
-        }
-
-        return out;
+        return "rupture or lamp";
     }
 
     protected String getSpeciesName(String id) {

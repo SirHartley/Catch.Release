@@ -396,9 +396,10 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         FishRoute.Saved route = FishRoute.get();
         if (route == null) return;
 
+        // straight into the manager - the entry has to exist the moment the player checks
         catchrelease.campaign.fish.intel.FishRouteIntel intel =
                 new catchrelease.campaign.fish.intel.FishRouteIntel(name, purpose, route);
-        catchrelease.campaign.fish.intel.FishIntelNotifications.queue(intel);
+        Global.getSector().getIntelManager().addIntel(intel);
 
         if (overlay != null) overlay.noteRouteSaved();
     }
