@@ -5,4 +5,4 @@ SpawnFish,catchrelease.commands.SpawnFish,"catchrelease,cheat,campaign,market",s
 SpawnFisherman,catchrelease.commands.SpawnFisherman,"catchrelease,cheat,campaign,market",spawnfisherman,"Spawns the visiting Fisherman in the player's current star system."
 SpawnFleetQuest,catchrelease.commands.SpawnFleetQuest,"catchrelease,cheat,campaign,market",spawnfleetquest <quest>,"Spawns a route-backed scavenger with the selected local fleet quest. Available only inside a star system; quest ids autocomplete."
 SpawnDistressCall,catchrelease.commands.SpawnDistressCall,"catchrelease,cheat,campaign,market",spawndistresscall <event>,"Spawns the selected framework or vanilla distress call. Available only in hyperspace; event ids autocomplete."
-HauntStatus,catchrelease.commands.HauntStatus,"catchrelease,campaign",hauntstatus,"Displays legendary chase and haunt diagnostics: script registration, host, chase flags, active motes, sightings, and haunt state."
+HauntStatus,catchrelease.commands.HauntStatus,"catchrelease,campaign",hauntstatus,"Displays legendary chase state: host, provocation, sightings, active motes, and haunt status."

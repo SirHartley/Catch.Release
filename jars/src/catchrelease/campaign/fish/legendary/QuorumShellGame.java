@@ -268,7 +268,7 @@ public class QuorumShellGame {
 
         Misc.fadeAndExpire(mote, 0.4f);
         LegendaryShields.say(Global.getSector().getPlayerFleet(),
-                "Empty. The school reforms as three.");
+                "Decoy. The school reforms.");
 
         return true;
     }

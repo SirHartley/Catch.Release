@@ -69,7 +69,7 @@ public class LegendaryShields {
             state.provoked = true;
             if (!POP_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
-                say(fish.getMote(), "Harpoon deflected — the fish wakes.");
+                say(fish.getMote(), "Harpoon deflected. The fish is now alert.");
                 return HitResult.DEFLECTED;
             }
         }
@@ -138,7 +138,7 @@ public class LegendaryShields {
 
         // the fish is gone in a blink; the word floats where the strike happened
         say(Global.getSector().getPlayerFleet(),
-                "It dives ahead of the blast. The return reappears farther off.");
+                "The fish dives before the blast and resurfaces farther away.");
 
         return true;
     }
@@ -156,14 +156,13 @@ public class LegendaryShields {
         state.shieldStampAt = Global.getSector().getClock().getTimestamp();
 
         if (state.shieldUnits > 0) {
-            say(Global.getSector().getPlayerFleet(), "The escort thins — "
-                    + state.shieldUnits
+            say(Global.getSector().getPlayerFleet(), state.shieldUnits
                     + (state.shieldUnits == 1
-                    ? " splinter still orbits."
-                    : " splinters still orbit."));
+                    ? " Quorum Splinter remains in orbit."
+                    : " Quorum Splinters remain in orbit."));
         } else {
             say(Global.getSector().getPlayerFleet(),
-                    "The last splinter is gone. The Quorum has no shield left.");
+                    "Last Quorum Splinter removed. The shield is down.");
         }
     }
 
@@ -321,7 +320,7 @@ public class LegendaryShields {
             Misc.fadeAndExpire(prey, 0.3f);
             state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
             fish.flashShield();
-            say(self, "The Lantern Jack swallows the mote. Another shell closes over it.");
+            say(self, "Mote consumed. Another shell layers on.");
         }
     }
 
