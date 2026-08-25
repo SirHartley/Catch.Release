@@ -139,11 +139,11 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
                 : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired()) continue;
 
-            float inBeam = strongestBeam(buried.getLocation());
-            if (inBeam <= 0f) continue;
+            float reveal = revealStrength(buried.getLocation());
+            if (reveal <= 0f) continue;
 
             Float held = marks.get(buried);
-            if (held == null || held < inBeam) marks.put(buried, inBeam);
+            if (held == null || held < reveal) marks.put(buried, reveal);
         }
     }
 
@@ -196,8 +196,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
             float shadow = nearestBeamShadow(buried.getLocation());
             float dent = Math.max(mark, shadow);
 
-            // live, not off the lingering mark - a beam is a window, and the dent turns inside out to a reveal only while directly under it
-            float reveal = revealStrength(buried.getLocation());
+            float reveal = Math.max(mark, revealStrength(buried.getLocation()));
 
             if (dent <= 0f && reveal <= 0f) continue;
 
