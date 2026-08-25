@@ -239,6 +239,9 @@ The short version:
   catch comes from the wrong side of it, so neither flag has fishers, buyers or bar jobs - only
   patrols that stop you and cells that sit on the water. `campaign/fish/FishingTaboo.java` is the
   one list; do not hardcode the faction ids anywhere else.
+- **A custom entity plugin's `init` must call `super.init`.** `BaseCustomEntityPlugin` keeps the
+  `entity` reference its own `getRenderRange()` reads; shadowing it with a local field leaves the
+  base's copy null and the first render crashes with an NPE. Use the inherited field.
 - **Terrain differs from custom entities.** `getPlugin()` rather than `getCustomPlugin()`,
   radius only settable through `CampaignTerrainAPI`, `getActiveLayers()` and
   `getRenderRange()` throw unless overridden, and `BaseTerrain.advance` sweeps local fleets
