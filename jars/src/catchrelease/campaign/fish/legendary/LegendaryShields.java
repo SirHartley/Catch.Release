@@ -6,7 +6,6 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -36,9 +35,6 @@ public class LegendaryShields {
     public static final int CHARGE_SHIELD_COUNT = 2;
     public static final float MOTE_REGEN_DAYS = 30f;
     public static final float LAZY_SPEED_MULT = 0.4f;
-    public static final float RUN_SPEED_MULT = 1.35f;
-    public static final float FLEE_RANGE = 900f;
-    public static final float FLEE_LEG = 3000f;
 
     public static final float EAT_SEEK_RANGE = 2500f;
     public static final float EAT_RANGE = 80f;
@@ -55,12 +51,16 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
         // the first throw of a residency never lands, whatever the head: it wakes the
-        // fish - the chase, the speed and the haunt all start here
+        // fish - the chase, the speed and the haunt all start here. The Longliner is
+        // the exception: it is already running, and its shell answers every throw
+        // itself, so a first explosive hit pops it on the spot
         if (!state.provoked) {
             state.provoked = true;
-            fish.flashShield();
-            say(fish.getMote(), "Deflected - it is awake now");
-            return HitResult.DEFLECTED;
+            if (!POP_SHIELD_SPECIES.equals(id)) {
+                fish.flashShield();
+                say(fish.getMote(), "Deflected - it is awake now");
+                return HitResult.DEFLECTED;
+            }
         }
 
         switch (id) {
@@ -164,31 +164,28 @@ public class LegendaryShields {
         };
     }
 
-    /** Placid and easy to hit until the first throw touches it; after that it runs. */
+    /** Placid and easy to hit until provoked, then the flight envelope takes over.
+     *  The Quorum never flees - its fight is the escort and the shell game - and the
+     *  Longliner is fleeing from the moment its disguise burns, first throw or not. */
     public static float getSpeedMult(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return 1f;
 
-        return LegendaryChases.isProvoked(fish.getFishSpec().id)
-                ? RUN_SPEED_MULT : LAZY_SPEED_MULT;
-    }
-
-    /** A provoked legendary keeps water between itself and the fleet - the chase. */
-    public static void advanceFlee(FishEntityPlugin fish) {
-        if (asLegendaryMote(fish) == null) return;
-        if (!LegendaryChases.isProvoked(fish.getFishSpec().id)) return;
-
-        SectorEntityToken self = fish.getMote();
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (self == null || player == null
-                || player.getContainingLocation() != self.getContainingLocation()) {
-            return;
+        String id = fish.getFishSpec().id;
+        if (MOTE_SHIELD_SPECIES.equals(id)) {
+            return LegendaryChases.isProvoked(id) ? 1f : LAZY_SPEED_MULT;
         }
 
-        if (Misc.getDistance(player.getLocation(), self.getLocation()) > FLEE_RANGE) return;
+        return isFleeing(fish) ? fish.getFleeSpeedMult() : LAZY_SPEED_MULT;
+    }
 
-        float away = Misc.getAngleInDegrees(player.getLocation(), self.getLocation());
-        fish.setSwimTarget(MathUtils.getPointOnCircumference(
-                self.getLocation(), FLEE_LEG, away));
+    /** Whether this fish is in its active flight stage - sprinting away from the fleet. */
+    public static boolean isFleeing(FishEntityPlugin fish) {
+        if (asLegendaryMote(fish) == null) return false;
+
+        String id = fish.getFishSpec().id;
+        if (MOTE_SHIELD_SPECIES.equals(id)) return false;
+
+        return POP_SHIELD_SPECIES.equals(id) || LegendaryChases.isProvoked(id);
     }
 
     /** Keeps the Quorum's splinter escort matched to the ledger while its mote is up. */
