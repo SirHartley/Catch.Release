@@ -15,6 +15,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.upgrades.StatIds;
@@ -165,6 +166,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             // Both ordinary and explosive heads struck a mote; fleet collisions never enter here.
             if (entity.isInCurrentLocation()) {
                 Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
+            }
+
+            // an empty shell-game body answers before anything: it pops, hooks nothing,
+            // and must never reach the shield or blast paths wearing the real one's spec
+            if (QuorumShellGame.intercept(hit)) {
+                enter(State.RETURNING);
+                return;
             }
 
             // shields answer before the barb bites: a deflected throw hooks nothing and

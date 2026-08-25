@@ -176,19 +176,17 @@ public class LegendaryHaunt implements EveryFrameScript {
             }
             case "slipstream_moray" -> {
                 out.add(new MoteDashModule(system, spec));
-                out.add(new GhostAsteroidsModule(system, spec));
+                out.add(new SlipDashModule(system, spec));
             }
             // the escort shield is the Quorum's real defence; the haunt stays gentle
             case "quorum" -> out.add(new DistractionMotesModule(system, spec));
             // no shield of its own: the False Dawn is the minelayer
             case "false_dawn" -> {
                 out.add(new MinefieldModule(system, spec));
-                out.add(new ChromaticAberrationModule(system, spec));
+                out.add(new CoherenceSurgeModule(system, spec));
             }
-            case "longliner" -> {
-                out.add(new GhostFleetsModule(system, spec));
-                out.add(new FakeWrecksModule(system, spec));
-            }
+            // the disguise and the shell are the Longliner's game; the haunt stays minor
+            case "longliner" -> out.add(new SensorGhostsModule(system, spec));
             // its abyss already runs coherence low; the surge would be lost in the noise
             case "abyssal_ghost_manta" -> {
                 out.add(new ChromaticAberrationModule(system, spec));

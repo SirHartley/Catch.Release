@@ -38,6 +38,8 @@ public class PondFishSpawner {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec.spawnWeight <= 0f) continue;
+            // the Longliner enters the water as a boat, never through the spawner
+            if (catchrelease.campaign.fish.legendary.LonglinerDecoy.spawnsAsBoat(spec)) continue;
             if (!FishRanges.matches(spec, location, how)) continue;
 
             picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));

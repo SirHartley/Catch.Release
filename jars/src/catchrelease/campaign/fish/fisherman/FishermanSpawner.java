@@ -151,6 +151,9 @@ public class FishermanSpawner implements EveryFrameScript {
     public static boolean isLiveFisherman(CampaignFleetAPI fleet) {
         return isFisherman(fleet)
                 && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.RETIRE_KEY)
+                // the Longliner's boat talks like a fisherman but is never booked as one,
+                // or reconciliation would retire it - or worse, retire the real boat
+                && !catchrelease.campaign.fish.legendary.LonglinerDecoy.isDecoyBoat(fleet)
                 && !fleet.isExpired() && fleet.isAlive();
     }
 

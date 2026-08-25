@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -17,6 +18,7 @@ import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -33,6 +35,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float SHIELD_RADIUS = 52f;
     private static final float SHIELD_FLASH_SECONDS = 0.6f;
     private static final Color SHIELD_COLOR = new Color(150, 220, 255);
+    private static final float REVEAL_SIZE = 110f;
 
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
@@ -105,7 +108,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float orbitAngle = (float) (Math.random() * 360f);
     private float dashLeft;
     private Vector2f dashVelocity;
+    // flung motes burn out at the end of a dash; a travelling fish does not
+    private boolean dashExpires = true;
     private transient float shieldFlash;
+
+    // shell game: a decoy is steered by its real mote's controller, never by itself
+    private SectorEntityToken decoyAnchor;
+    private transient float revealLeft;
 
     public static class Params {
 
@@ -114,6 +123,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         public final SectorEntityToken pond;
         public boolean phantom;
         public SectorEntityToken orbitAnchor;
+        public SectorEntityToken decoyAnchor;
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -176,6 +186,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.pond = p.pond;
         this.phantom = p.phantom;
         this.orbitAnchor = p.orbitAnchor;
+        this.decoyAnchor = p.decoyAnchor;
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
@@ -194,10 +205,16 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         time += amount;
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
+        if (revealLeft > 0f) revealLeft -= amount;
 
         advanceDive(amount);
 
         if (held) return;
+
+        if (decoyAnchor != null) {
+            advanceDecoy();
+            return;
+        }
 
         if (orbitAnchor != null) {
             advanceOrbit(amount);
@@ -208,7 +225,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             dashLeft -= amount;
             entity.setLocation(entity.getLocation().x + dashVelocity.x * amount,
                     entity.getLocation().y + dashVelocity.y * amount);
-            if (dashLeft <= 0f) Misc.fadeAndExpire(entity, 1f);
+            if (dashLeft <= 0f && dashExpires) Misc.fadeAndExpire(entity, 1f);
             return;
         }
 
@@ -221,6 +238,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
+        if (QuorumShellGame.advance(this, amount)) return;
 
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
                 * LegendaryShields.getSpeedMult(this)
@@ -429,11 +447,41 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void startDash(Vector2f velocity, float seconds) {
         dashVelocity = velocity;
         dashLeft = seconds;
+        dashExpires = true;
+    }
+
+    /** A dash the fish survives: it arrives instead of burning out. */
+    public void startTravelDash(Vector2f velocity, float seconds) {
+        dashVelocity = velocity;
+        dashLeft = seconds;
+        dashExpires = false;
     }
 
     public void stopDash() {
         dashLeft = 0f;
         dashVelocity = null;
+        dashExpires = true;
+    }
+
+    public boolean isDecoy() {
+        return decoyAnchor != null;
+    }
+
+    public SectorEntityToken getDecoyAnchor() {
+        return decoyAnchor;
+    }
+
+    /** Inverted halo for a few seconds, so a fish that just moved can be found again. */
+    public void revealFor(float seconds) {
+        revealLeft = Math.max(revealLeft, seconds);
+    }
+
+    protected void advanceDecoy() {
+        if (decoyAnchor == null || decoyAnchor.isExpired()
+                || decoyAnchor.getContainingLocation() != entity.getContainingLocation()) {
+            decoyAnchor = null;
+            Misc.fadeAndExpire(entity, 0.6f);
+        }
     }
 
     protected void advanceOrbit(float amount) {
@@ -597,6 +645,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
             float ring = SHIELD_RADIUS * (1f + 1.2f * (1f - f));
             Disc.drawOutline(loc.x, loc.y, ring, SHIELD_COLOR, f * alpha, 3f);
+        }
+
+        if (revealLeft > 0f && sprite != null) {
+            // invert blend: src*(1-dst) + dst*(1-src) - the glow reads as a negative of
+            // whatever is behind it and vanishes cleanly where the texture is empty
+            float f = Math.min(1f, revealLeft);
+            float pulse = 0.7f + 0.3f * (float) Math.sin(time * 5f);
+            sprite.setColor(Color.WHITE);
+            sprite.setBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
+            sprite.setSize(REVEAL_SIZE, REVEAL_SIZE);
+            sprite.setAlphaMult(f * pulse * alpha);
+            sprite.renderAtCenter(loc.x, loc.y);
+            sprite.setAdditiveBlend();
         }
     }
 }
