@@ -11,6 +11,7 @@ import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -37,6 +38,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final Color SHIELD_COLOR = new Color(150, 220, 255);
     private static final float SHIELD_LENS_INTENSITY = 10f;
     private static final float REVEAL_SIZE = 110f;
+
+    private static final float FLEE_PRESSURE_RANGE = 3500f;
+    private static final float FLEE_LEG = 3000f;
+    private static final float FLEE_WEAVE_DEG = 40f;
+    private static final float FLEE_SPRINT_PERIOD = 7f;
+    private static final float FLEE_SPRINT_SECONDS = 1.8f;
+    private static final float FLEE_SPRINT_MULT = 2.6f;
+    private static final float FLEE_CRUISE_MULT = 1.5f;
 
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
@@ -249,7 +258,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
-        LegendaryShields.advanceFlee(this);
+        if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
 
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
@@ -486,6 +495,30 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     /** Inverted halo for a few seconds, so a fish that just moved can be found again. */
     public void revealFor(float seconds) {
         revealLeft = Math.max(revealLeft, seconds);
+    }
+
+    /** Flight comes in pulses: a sprint that opens water, a cruise the fleet can close. */
+    public float getFleeSpeedMult() {
+        return time % FLEE_SPRINT_PERIOD < FLEE_SPRINT_SECONDS
+                ? FLEE_SPRINT_MULT : FLEE_CRUISE_MULT;
+    }
+
+    protected void advanceFleeMode() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null
+                || player.getContainingLocation() != entity.getContainingLocation()) {
+            return;
+        }
+        if (Misc.getDistance(player.getLocation(), entity.getLocation())
+                > FLEE_PRESSURE_RANGE) {
+            return;
+        }
+
+        // a weaving line away from the fleet, retargeted continuously while pressed
+        float away = Misc.getAngleInDegrees(player.getLocation(), entity.getLocation())
+                + (float) Math.sin(time * 1.1f) * FLEE_WEAVE_DEG;
+        setSwimTarget(MathUtils.getPointOnCircumference(
+                entity.getLocation(), FLEE_LEG, away));
     }
 
     /** Phantoms, shell-game bodies and shield escorts exist only in the lamp light. */
