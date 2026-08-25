@@ -123,6 +123,10 @@ public class LegendaryChases {
             chase = new Chase();
             chase.systemId = pickHost(spec, null);
             ledger.put(spec.id, chase);
+        } else if (!chase.caught && chase.systemId == null) {
+            // a row created through getState carries no host; without this repair such
+            // a species can never spawn and never haunt - silently, forever
+            chase.systemId = pickHost(spec, null);
         } else if (!chase.caught && !isPlayerIn(chase.systemId)
                 && (isDueToMove(chase) || isDoneHiding(spec, chase))) {
             // the cooldown ran out unseen-side only: it never moves out from under a chase
