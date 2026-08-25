@@ -48,6 +48,36 @@ public class LegendaryHaunt implements EveryFrameScript {
         }
     }
 
+    public static LegendaryHaunt getInstance() {
+        if (Global.getSector() == null) return null;
+
+        for (EveryFrameScript script : Global.getSector().getTransientScripts()) {
+            if (script instanceof LegendaryHaunt haunt) return haunt;
+        }
+
+        return null;
+    }
+
+    public String getActiveSpeciesId() {
+        return activeSpeciesId;
+    }
+
+    public float getIntensity() {
+        return intensity;
+    }
+
+    public float getSinceSeen() {
+        return sinceSeen;
+    }
+
+    public int getModuleCount() {
+        return modules.size();
+    }
+
+    public boolean isSightedNow(FishSpec spec, StarSystemAPI here) {
+        return spec != null && here != null && isSighted(spec, here);
+    }
+
     protected static void sweepLeftovers() {
         List<LocationAPI> locations = new ArrayList<>(Global.getSector().getStarSystems());
         locations.add(Global.getSector().getHyperspace());

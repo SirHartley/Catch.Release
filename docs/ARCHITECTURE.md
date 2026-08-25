@@ -266,6 +266,9 @@ uses that same lookup to place one named pattern in a nearby active rupture or u
 lamp beam, respecting its reachable method. A legendary spawn clears the prior test chase, resets
 its singleton ledger and shields into the current system, and suppresses the Longliner's separate
 boat so every legendary can be tested repeatedly through its real mote and haunt path.
+`HauntStatus` has no arguments and prints every gate on the legendary chase pipeline - script
+registration, the live haunt's species/intensity/module count, and per legendary its host system,
+provocation, suppression, nearest own mote and sighting - so a dead haunt names its reason.
 `SpawnFisherman` has no
 arguments and places the ordinary visiting Fisherman in the player's current star system; it reuses
 an existing local boat and retires an off-system visitor before making the standard full fleet.
