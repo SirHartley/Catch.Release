@@ -185,10 +185,8 @@ public class LegendaryHaunt implements EveryFrameScript {
                 out.add(new MinefieldModule(system, spec));
                 out.add(new CoherenceSurgeModule(system, spec));
             }
-            case "longliner" -> {
-                out.add(new GhostFleetsModule(system, spec));
-                out.add(new FakeWrecksModule(system, spec));
-            }
+            // the disguise and the shell are the Longliner's game; the haunt stays minor
+            case "longliner" -> out.add(new SensorGhostsModule(system, spec));
             // its abyss already runs coherence low; the surge would be lost in the noise
             case "abyssal_ghost_manta" -> {
                 out.add(new ChromaticAberrationModule(system, spec));

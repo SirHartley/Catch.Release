@@ -35,6 +35,9 @@ public class LegendaryChases {
         public long seenAt;
         public boolean caught;
 
+        // the Longliner's disguise is spent for this residency once the lamp finds it
+        public boolean revealed;
+
         // shield bookkeeping, semantics per species in LegendaryShields:
         // units = orbit motes or deflection charges, -1 until first initialised
         public boolean shieldPopped;
@@ -77,6 +80,19 @@ public class LegendaryChases {
         chase.seenAt = Global.getSector().getClock().getTimestamp();
     }
 
+    public static void noteRevealed(String speciesId) {
+        Chase chase = speciesId == null ? null : getLedger().get(speciesId);
+        if (chase == null || chase.caught) return;
+
+        chase.revealed = true;
+    }
+
+    public static boolean isRevealed(String speciesId) {
+        Chase chase = speciesId == null ? null : getLedger().get(speciesId);
+
+        return chase != null && chase.revealed;
+    }
+
     public static void onCatch(catchrelease.campaign.fish.data.FishCatch specimen) {
         if (specimen == null) return;
 
@@ -107,13 +123,22 @@ public class LegendaryChases {
             chase = new Chase();
             chase.systemId = pickHost(spec, null);
             ledger.put(spec.id, chase);
-        } else if (!chase.caught && isDueToMove(chase) && !isPlayerIn(chase.systemId)) {
+        } else if (!chase.caught && !isPlayerIn(chase.systemId)
+                && (isDueToMove(chase) || isDoneHiding(spec, chase))) {
             // the cooldown ran out unseen-side only: it never moves out from under a chase
             chase.systemId = pickHost(spec, chase.systemId);
             chase.seenAt = 0L;
+            chase.revealed = false;
         }
 
         return chase;
+    }
+
+    /** A blown Longliner disguise does not wait ninety days: it moves the moment the
+     *  player leaves the system, and the new water gets a fresh boat. */
+    protected static boolean isDoneHiding(FishSpec spec, Chase chase) {
+        return chase.revealed
+                && LegendaryShields.POP_SHIELD_SPECIES.equals(spec.id);
     }
 
     protected static boolean isDueToMove(Chase chase) {

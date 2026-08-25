@@ -15,8 +15,9 @@ import org.lwjgl.util.vector.Vector2f;
  * The legendary defences, one kind per species, all answered at the harpoon's hit moment:
  *
  * - The Longliner wears a hull shield that only an Explosive Head can pop. Until then it
- *   deflects every throw, swims lazily, and raises no haunt; once popped it stays popped
- *   forever - abandoning the chase does not re-armour it.
+ *   deflects every throw and raises no haunt; once popped it stays popped forever -
+ *   abandoning the chase does not re-armour it. Out of the water it is a boat
+ *   ({@link LonglinerDecoy}); in it, it runs.
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
  *   splinters regrow at one a month.
@@ -33,7 +34,7 @@ public class LegendaryShields {
     public static final int MOTE_SHIELD_COUNT = 3;
     public static final int CHARGE_SHIELD_COUNT = 2;
     public static final float MOTE_REGEN_DAYS = 30f;
-    public static final float LAZY_SPEED_MULT = 0.35f;
+    public static final float RUN_SPEED_MULT = 1.35f;
 
     public static final float EAT_SEEK_RANGE = 2500f;
     public static final float EAT_RANGE = 80f;
@@ -148,12 +149,12 @@ public class LegendaryShields {
         };
     }
 
+    /** The Longliner only ever swims after its disguise burns, and then it runs. */
     public static float getSpeedMult(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return 1f;
         if (!POP_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return 1f;
 
-        return LegendaryChases.getState(fish.getFishSpec().id).shieldPopped
-                ? 1f : LAZY_SPEED_MULT;
+        return RUN_SPEED_MULT;
     }
 
     /** Keeps the Quorum's splinter escort matched to the ledger while its mote is up. */
