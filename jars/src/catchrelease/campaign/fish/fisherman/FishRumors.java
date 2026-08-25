@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -314,6 +315,10 @@ public class FishRumors {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || spec.spawnWeight <= 0f) continue;
+
+            // a stranger rumor bypasses the range gate at spawn time, and a legendary's
+            // one-host residency (and its caught-forever flag) must never be bypassed
+            if (spec.rarity == FishRarity.LEGENDARY) continue;
 
             if (!spec.hasHabitat() || FishPresence.livesIn(spec, system)) continue;
 
