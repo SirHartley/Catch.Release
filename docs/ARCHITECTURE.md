@@ -1168,7 +1168,8 @@ star, age and coherence gates so no pond can come up empty.
 
 **The legendaries are quadrant destinations, and their art is pending.** One legendary per quadrant
 (`lantern_jack`, `slipstream_moray`, `quorum`, `false_dawn`), one across the four core regions
-(`longliner`), the manta in the abyss — six in all. The five new ones carry `minAberration 0.5`, so
+(`longliner`), the manta in the abyss — six in all, and every one of them lamp-only: a legendary is
+a whaling chase, worked with the breach lamps, never handed over by a pond. The five new ones carry `minAberration 0.5`, so
 they exist only where the fabric has nearly gone; `FishRanges`'s three-system floor keeps each one
 somewhere real. The two calm-fabric commons (`nav_bobber`, `plume_remora`) carry `maxAberration
 0.4` for the opposite reason — the crowded end of the sweep is the deep end, and they fit the cap
