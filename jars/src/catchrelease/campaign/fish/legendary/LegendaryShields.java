@@ -23,8 +23,10 @@ import java.awt.Color;
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
  *   splinters regrow at one a month.
- * - The Lantern Jack carries two deflection charges and refills them by hunting down and
- *   swallowing motes the breach lamps have exposed.
+ * - The Lantern Jack wears the base shell too, and layers stored shells on top of it -
+ *   up to three - by hunting down and swallowing motes the breach lamps have exposed.
+ * - Everything else wears the base shell: one deflection, regrown ten seconds later,
+ *   so landing a throw means following the first with a second inside the window.
  */
 public class LegendaryShields {
 
@@ -34,18 +36,18 @@ public class LegendaryShields {
     public static final String SHARD_SPECIES = "quorum_shard";
 
     public static final int MOTE_SHIELD_COUNT = 3;
-    public static final int CHARGE_SHIELD_COUNT = 2;
+    public static final int JACK_STACK_MAX = 3;
     public static final float MOTE_REGEN_DAYS = 30f;
+    public static final float BASE_SHIELD_REGEN_SECONDS = 10f;
     public static final float LAZY_SPEED_MULT = 0.4f;
 
     public static final float EAT_SEEK_RANGE = 2500f;
     public static final float EAT_RANGE = 80f;
     public static final float SHIELD_RADIUS = 52f;
 
-    private static final Color SHIELD_ORANGE = new Color(241, 186, 65);
+    private static final Color SHIELD_DEFAULT = new Color(154, 255, 150);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
-    private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
 
 
     public enum HitResult {
@@ -92,15 +94,25 @@ public class LegendaryShields {
                 return HitResult.DEFLECTED;
             }
             case CHARGE_SHIELD_SPECIES -> {
-                int charges = getShieldUnits(state, CHARGE_SHIELD_COUNT);
-                if (charges <= 0) return HitResult.NONE;
-
-                state.shieldUnits = charges - 1;
-                fish.flashShield();
-                say(fish.getMote(), "The shell dims");
-                return HitResult.DEFLECTED;
+                int stacked = getJackStack(state);
+                if (stacked > 0) {
+                    state.shieldUnits = stacked - 1;
+                    fish.flashShield();
+                    say(fish.getMote(), "A stored shell burns away");
+                    return HitResult.DEFLECTED;
+                }
+                if (fish.tryBaseShieldDeflect()) {
+                    say(fish.getMote(), "Deflected - the shell reknits in seconds");
+                    return HitResult.DEFLECTED;
+                }
+                return HitResult.NONE;
             }
             default -> {
+                // the base shell every unarmoured legendary wears
+                if (fish.tryBaseShieldDeflect()) {
+                    say(fish.getMote(), "Deflected - the shell reknits in seconds");
+                    return HitResult.DEFLECTED;
+                }
                 return HitResult.NONE;
             }
         }
@@ -169,23 +181,31 @@ public class LegendaryShields {
         return switch (id) {
             case POP_SHIELD_SPECIES -> !state.shieldPopped;
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
-            case CHARGE_SHIELD_SPECIES -> getShieldUnits(state, CHARGE_SHIELD_COUNT) > 0;
-            default -> false;
+            case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0 || fish.isBaseShieldUp();
+            default -> fish.isBaseShieldUp();
         };
     }
 
+    /** Stored shells drawn as extra circles - the Lantern Jack's larder, worn openly. */
+    public static int getStackedRings(FishEntityPlugin fish) {
+        if (asLegendaryMote(fish) == null) return 0;
+        if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return 0;
+
+        return getJackStack(LegendaryChases.getState(CHARGE_SHIELD_SPECIES));
+    }
+
     public static Color getShieldColor(FishEntityPlugin fish) {
-        if (fish == null) return SHIELD_ORANGE;
+        if (fish == null) return SHIELD_DEFAULT;
 
         String id = fish.getFishSpec().id;
 
+        // the Lantern Jack's base shell is the common green one; only its stacked
+        // rings tell it apart
         return switch (id) {
             case POP_SHIELD_SPECIES -> SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            case CHARGE_SHIELD_SPECIES -> SHIELD_PURPLE;
-            default -> SHIELD_ORANGE;
+            default -> SHIELD_DEFAULT;
         };
-
     }
 
     /** Placid and easy to hit until provoked, then the flight envelope takes over.
@@ -199,7 +219,21 @@ public class LegendaryShields {
             return LegendaryChases.isProvoked(id) ? 1f : LAZY_SPEED_MULT;
         }
 
-        return isFleeing(fish) ? fish.getFleeSpeedMult() : LAZY_SPEED_MULT;
+        if (isFleeing(fish)) return fish.getFleeSpeedMult();
+
+        // the Lantern Jack is a hunter, never placid: full pace on its prey's tail
+        return CHARGE_SHIELD_SPECIES.equals(id) ? 1f : LAZY_SPEED_MULT;
+    }
+
+    /** How close the fleet must press before flight overrides everything else. The
+     *  Lantern Jack tolerates a much closer fleet - the hunt matters more to it. */
+    public static float getFleePressureRange(FishEntityPlugin fish) {
+        if (fish != null && fish.getFishSpec() != null
+                && CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) {
+            return 1000f;
+        }
+
+        return 3500f;
     }
 
     /** Whether this fish is in its active flight stage - sprinting away from the fleet. */
@@ -242,13 +276,14 @@ public class LegendaryShields {
         }
     }
 
-    /** The Lantern Jack refills spent charges by swallowing lamp-exposed motes. */
+    /** The Lantern Jack hunts: it stalks lamp-exposed motes and swallows them to layer
+     *  stored shells over its base shell, up to the stack cap. */
     public static void advanceEater(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return;
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
 
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
-        if (getShieldUnits(state, CHARGE_SHIELD_COUNT) >= CHARGE_SHIELD_COUNT) return;
+        if (getJackStack(state) >= JACK_STACK_MAX) return;
 
         SectorEntityToken self = fish.getMote();
         if (self == null || self.getContainingLocation() == null) return;
@@ -283,10 +318,17 @@ public class LegendaryShields {
 
         if (best <= EAT_RANGE) {
             Misc.fadeAndExpire(prey, 0.3f);
-            state.shieldUnits = getShieldUnits(state, CHARGE_SHIELD_COUNT) + 1;
+            state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
             fish.flashShield();
-            say(self, "Mote consumed. The Lantern Jack's shell brightens.");
+            say(self, "Mote consumed. Another shell layers on.");
         }
+    }
+
+    // the stack starts empty: stored shells are earned by eating, never granted
+    protected static int getJackStack(LegendaryChases.Chase state) {
+        if (state.shieldUnits < 0) state.shieldUnits = 0;
+
+        return state.shieldUnits;
     }
 
     /** A shell-game body wears the real one's colour everywhere until the deck tells -
