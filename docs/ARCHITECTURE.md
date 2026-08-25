@@ -107,22 +107,24 @@ Everything game-facing is wired from `ModPlugin.java`.
 14. `FishRanges.register()` — the month-end range reassessor, plus one immediate assessment on a
    save that has never had one, so a fresh sector's homeless species are re-homed before the first
    cast rather than a month in
-15. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
+15. `LegendaryHaunt.register()` — the whaling chase's stage manager as a transient script, plus a
+   tag sweep that removes any haunt leftovers a hard exit stranded in a save
+16. `UpgradeManager.getInstance().updateBaseValues()` — re-reads the upgrade sheet into the save:
    stats missing from the save are seeded and every sheet-owned field of a held stat is refreshed,
    so a save carries levels and nothing else that matters
-16. `CatchReleaseDistressProvider.register()` then `DistressCallFramework.register()` — the two
+17. `CatchReleaseDistressProvider.register()` then `DistressCallFramework.register()` — the two
    fleet-job adapters, merged distress-call registry and its persistent, idempotent coordinator,
    bound to vanilla's live nearby-event cadence
-17. `SkillshotFramework.register()` — the aiming framework
-18. `FishMapFilterScript` as a transient script — the sector-map filter
-19. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
-20. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
-21. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
+18. `SkillshotFramework.register()` — the aiming framework
+19. `FishMapFilterScript` as a transient script — the sector-map filter
+20. `FishIntelPlanetPanel` as a transient script — the intel Planets view's fish panel
+21. `CoherenceOverlayScript` as a transient script — the low-coherence screen overlay
+22. `BlackHoleSpiralWarp.install()` — the portable circular post-process, registered transiently
    and fed every black-hole star in the current system by its small Catch.Release adapter
-22. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
+23. `sweepPondClaims()` — one walk, taking the mission marker off every rupture no errand is holding
    any more and fading every planted specimen no errand is still waiting on; repairs saves
    carrying either, since transitions cannot
-23. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
+24. `DevShortcut.register()` — the J key, as a transient `CampaignInputListener`; successive presses grant the testing loadout, every backdrop, then every outfitter schematic; inert unless dev mode is on
 
 `beforeGameSave()` — `SkillshotFramework.reset()`.
 
@@ -220,7 +222,8 @@ day it is built. `crabStock` gates **his rotation only** — a row he may not ca
 hands out, and the reward roller leans on exactly those, so every row has a source. The art is cropped to cover a `388 x 170` pane with the glass line over its edge —
 `386 x 168` visible, near enough `2.3:1` — so about `772 x 336` at 2x.
 
-**`data/config/custom_entities.json`** — the motes, harpoon, drone, and the fishing boats' dedicated
+**`data/config/custom_entities.json`** — the motes, harpoon, drone, the haunt's ghost asteroid
+(`catchrelease_GhostAsteroid` → `GhostAsteroidEntityPlugin`), and the fishing boats' dedicated
 fisher-hook map mark (`catchrelease_FisherMapIcon` → `FishermanMapIcon`). The introduction owns no
 custom entity any more: the castaway's scene lives on the host planet's market memory, and the
 tutorial wreck is vanilla's own salvage-entity wreck. The pond is **not** here any more.
@@ -484,7 +487,7 @@ The data model: species, individual catches, the player's log, and the enums eve
 | `SectorRegion.java` | Nine-way sector location enum (8 quadrant bands + ABYSSAL) |
 | `StarColour.java` | What a system's sun looks like, from its star's planet type |
 | `FishHabitat.java` | Everything a place says about itself — sun, tags, region, constellation age, coherence — read once and cached until the monthly reassessment drops the cache |
-| `FishRanges.java` | Where a species can spawn in this sector, right now: the runtime question between the sheet and everything that asks. Pinned quest targets answer from a frozen system list; everything else from `FishSpec.matches` at the species' current relaxation level. Reassessed at month end |
+| `FishRanges.java` | Where a species can spawn in this sector, right now: the runtime question between the sheet and everything that asks. Legendaries answer first, from `LegendaryChases`' one-host ledger, and never pin or relax - their single host only occupies a cap slot in the relax bookkeeping. Pinned quest targets answer from a frozen system list; everything else from `FishSpec.matches` at the species' current relaxation level. Reassessed at month end |
 | `CatchImplement.java` | What made a fish reachable — a pond or a breach lamp — read off the mote's own provenance |
 | `FishLocationSummary.java` | Builds the "where this swims" sentence from every habitat criterion a spec sets |
 
@@ -495,7 +498,7 @@ Bar-given jobs on a shared spine, plus the ask/reward rollers they share.
 |---|---|
 | `FishJob.java` | The spine: asks, rewards, hand-over, intel, and the `rules.csv` token contract. Comm-directory greetings and exits ask the live mission whether it is at the active `WANTED` delivery stage and person-given; `BaseHubMission` leaves the stage null until acceptance, so this works for accepted jobs loaded from older saves without leaking generic hand-in options into specialized jobs or bar routing into entity-given fleet quests. Its contact-visual hook owns the primary portrait and lets multi-person jobs add vanilla secondary portraits. Offer rows can call back into it to inject item-style explanation cards for schematic rewards. Hand-over opens an asynchronous exact-specimen picker, then fires the existing payout rows only after the chosen fish have been spent. Jobs normally complete as part of that hand-over, but entity-given jobs can defer the stage change until their paid dialogue has resumed. Fish names and explicit rarity floors in its intel and picker wear their canonical rarity colours. Its stage wrapper puts the shared navigation button after every active standard or specialized description and omits it from completed intel, handing the complete ask to the fishing map including broad category asks. Active orders render each requirement as its own live aboard/needed count, while ending and completed intel suppress that live cargo line after hand-in has spent the specimens; the central landed-catch hook schedules an intel update on the next unpaused campaign frame whenever a multi-specimen order advances. Vanilla hub acceptance still supplies the initial job notification directly in the accepting dialogue's text panel. Its list and map icon comes from `FishIntelIcon`: lamp-only asks use the lamp mark, rupture-only asks use the ROD mark, and open or mixed asks use the shared mark. A `FishAsker`, so its asks reach the wanted-fish marks Its rules callback also supplies a remote-only variant of vanilla's offer/reminder map action, using each job's own map location and intel presentation. |
 | `FishHandoffPicker.java` | The hand-in's two routes. The picker: eligible loose fish, an optional specimen-provenance gate, an optional caller-authored confirmation verb, a side readout ticking each ask off live as the selection covers it, and an exact non-overlapping assignment validated on confirm - a wrong confirm reopens the picker with the reason said, since the engine re-enables the stock confirm button every frame anything is picked and cannot be gated. And `autoSelect`: the minimum set that covers the asks, chosen worst-first from the whole hold, crates and pile included, spent by encoded identity with part-taken containers repacked |
-| `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table |
+| `FishJobAsks.java` | Rolls ask parameters — weight floors, species, type variety — off the fish table; legendaries are excluded, because a fish that exists once can never be a standing order |
 | `FishReward.java` | Reward base plus Credits, old-save direct Upgrade/Tackle grants, UpgradeSchematic, TackleSchematic, LocationData, Backdrop and Blueprint. Schematic rewards provide their own 48px offer card using the exact item-or-category icon resolved by their outfitter entry: it names the exact upgrade tier or rig module, shows the value change or compatible rig, states that the reward is purchase permission rather than hardware, and previews the later credit-and-catch purchase price. An upgrade schematic card overlays the shared quest-yellow dot when its exact tier is marked in the outfitter. New gear rewards unlock one outfitter purchase rather than handing over hardware or a free level. LocationData is the internal range-data reward; its standard image-with-text card overlays the shared live `FishIcons` silhouette on the mod's transparent item icon, and its rolled cash value turns into that credit payment if the species' range becomes known before handoff. The retained Commodity class is only an old-save shell and converts serialized goods payouts to credits |
 | `FishRewardRoller.java` | Rolls a commodity-free payment scaled to a job's worth and preserves that value on range-data rewards for live redundancy conversion. Cash outcomes pay at five times the internal barter value so ordinary fish jobs compete with sector work without multiplying blueprints; if both reward slots independently land on credits, the offer coalesces them into one payment. Credit figures round to the nearest 1,000 through 100,000 and the nearest 10,000 above it, including a combined two-slot payout. Stocked modules and the next quest-gated upgrade tier enter as purchase-unlock schematics; known plans and plans promised by accepted, non-ending jobs are reserved out of the pool, including across both slots of one roll. Lower upgrade tiers remain ordinary outfitter purchases, and Crablobab's unstocked consumable head stays outside this pool. Neither schematic kind is offered for a rig the player does not hold - the ungrouped catch stats stay open, being the minigame's own |
 | `QuestPond.java` | Claims and releases a pond for a job, hangs vanilla's gold mission marker on it while claimed, and seeds a flagged quest mote into it. Holds are a **set** of job ids, so two errands on one rupture cannot strand each other's marker; `releaseAll` lets go sector-wide and `sweep` is the load-time repair for saves that already have one burned in. A planted mote records its planter, so `clearMotes` takes it back out when the errand ends — a holding specimen never expires by itself |
@@ -607,7 +610,7 @@ The catch itself. Rules are separated from rendering on purpose.
 | File | What it does |
 |---|---|
 | `FishingMinigame.java` | Rules only: bar/fish physics, progress meter, treasure rolls. A hooked legendary skips the treasure lottery: at least three spawns, every one epic-tier. No GL, no input |
-| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; files the per-catch `CatchLogIntel` entry at the readout moment, after treasure resolves, and feeds the same specimen to every tracking `FishRouteIntel`; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus a lightly pitch-varied cue only when the mote leaves the green catch indicator and one-shot cues for each treasure spawn and successful pickup. It reads the click and unified line-loop controls directly from `FishConstants`, plays the click hook on the compile-time-selected press or release edge, and renews one uninterrupted UI loop every running frame while a short asymmetric envelope swells its volume for held input |
+| `FishingMinigamePanel.java` | Draws the track, bar, fish and meter. Until sonar reveals the specimen, the catch is the same rarity-coloured glow as its campaign mote, or the aspect-preserved chicken icon while Crablobab's Chicken Profile is switched on; a Sonar Head always replaces either unidentified marker with the hooked species. The target is drawn after treasure so it keeps visual priority, and the live treasure marker uses the custom closed-chest sprite authored for the bar's small resolution. Handles mouse and keyboard; records first-bycatch discovery only when the fish and its held treasure are actually landed; files the per-catch `CatchLogIntel` entry at the readout moment, after treasure resolves, and feeds the same specimen to every tracking `FishRouteIntel` and to the legendary ledger's caught flag; owns the unconditional, once-per-outcome caught and failed sound hooks independently of the optional celebration (registered behind mod ids, currently using vanilla reputation placeholders), plus a lightly pitch-varied cue only when the mote leaves the green catch indicator and one-shot cues for each treasure spawn and successful pickup. It reads the click and unified line-loop controls directly from `FishConstants`, plays the click hook on the compile-time-selected press or release edge, and renews one uninterrupted UI loop every running frame while a short asymmetric envelope swells its volume for held input |
 | `FishingMinigameDialogPlugin.java` | Hosts it as a custom *visual* dialog; owns the dev controls and records the exact source rupture and campaign timestamp on landed specimens from either drones or harpoons. It keeps that visual/source anchor separate from the caught mote, so a rupture-based drone catch and a direct harpoon catch both carry the planted chart-request identity into cargo. While the interaction host opens, it scopes vanilla's keep-location-music memory flag to that synchronous call and then restores the anchor's prior value and expiry, preserving the already-playing campaign background track without leaving entity state behind. For the dialog lifetime it also feeds vanilla's frame-scoped music suppressor an IDE-configurable multiplier of the player's current music level, then restores the exact prior runtime multiplier on every resolution/reopen path |
 | `FishingMinigameLayout.java` | Per-frame positions for track, meter and result cards |
 | `CatchResultPanel.java` | The catch readout: specimen box, stats revealed line by line, and a banner that prefers a gold first-ever species discovery over the same catch's green personal record. A discovery also borrows the aquarium's restrained blue-white surface-light shafts under its ordinary bubbles; records keep bubbles alone |
@@ -629,7 +632,8 @@ The two forms a fish takes in the world.
 
 | File | What it does |
 |---|---|
-| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow, and the exact source rupture retained for catch provenance. Pond motes let the terrain draw that glow inside its stencil; pondless motes draw themselves |
+| `FishEntityPlugin.java` | The swimming mote: motion archetypes, diving, held/stunned states, glow, and the exact source rupture retained for catch provenance. Pond motes let the terrain draw that glow inside its stencil; pondless motes draw themselves. Its `init` is where a legendary counts as sighted - every spawn path lands there - and a `phantom` mote (a haunt's decoy) skips that note, fails `isAvailable`, and shrugs off blasts, so no harpoon, drone or beam can touch it |
+| `GhostAsteroidEntityPlugin.java` | A rock that is not there: drifts, spins, shimmers additively with the translucent placeholder sprites under `fx/`, holds no interaction. Spawned and removed only by the ghost-asteroid haunt module |
 | `BuriedMoteEntityPlugin.java` | Invisible mote under the fabric; `unearth()` atomically replaces it with an ordinary mote, so the searchlight cannot leave a stationary impression behind while a harpoon shoves the surfaced fish |
 
 ### `campaign/fish/spawner`
@@ -758,6 +762,23 @@ Codex pages for species.
 | `FishCodexEntryState.java` | The central three-state unlock policy (`UNKNOWN`, `RANGE_DATA`, `CAUGHT`): index visibility, link access, description/art, records, range and map action all derive from the landed count and range flag rather than the legacy `hintOnly` field |
 | `FishCodexEntry.java` | One page driven by `FishCodexEntryState`: range-only entries show the species silhouette in list and detail both - the detail draws the shared rimmed `FishIcons` portrait live, while the list uses vanilla's private icon tint for the same alpha-shaped black body - and full colour/description remain catch-locked; every known range, bought or caught, gets the same guarded staged jump to the pre-filtered hyperspace map |
 
+### `campaign/fish/legendary`
+
+The whaling chase: unique fish, one host system each, and the haunting that marks it.
+
+| File | What it does |
+|---|---|
+| `LegendaryChases.java` | The persistent ledger: per legendary, its one host system, the last sighting, and whether it has been landed. A sighting starts the ninety-day relocation clock; the fish re-occurs in its host until caught, moves on when the clock runs out unseen-side (never out from under a player in-system), and once caught never spawns again. `FishRanges` answers every legendary range question from here |
+| `LegendaryHaunt.java` | Stage manager, transient: while the player sits in a living legendary's host system that species' haunt modules run, and on leaving, landing the fish, or the fish moving on, every module is torn down at once. Registration sweeps the haunt tag from every location so a hard exit strands nothing in a save |
+| `HauntModule.java` / `BaseHauntModule.java` | The module contract - advance plus a no-trace cleanup - and the shared base: spawn tracking under the haunt tag, near-player placement, and hard removal that despawns fleets and unhooks entities in the same frame |
+| `DistractionMotesModule.java` | Phantom motes in the legendary's own colours: unhookable, unslowable decoys that dissolve when approached |
+| `InterdictionModule.java` | Sourceless interdiction pulses - burn abilities knocked onto cooldown vanilla-style plus a few seconds of dragging slow, announced with no contact on the plot |
+| `SensorGhostsModule.java` | Vanilla sensor-ghost entities drifting through the sensor bubble, unclickable, fading before anything is made of them |
+| `GhostFleetsModule.java` | A dark-transponder fleet on an intercept course - ignored by all other fleets, unclickable, comm-dead - that despawns the instant it should have arrived |
+| `FakeWrecksModule.java` | Wreck entities seeded around the player's course that fade out at working distance, before any salvage dialog could open |
+| `ChromaticAberrationModule.java` / `CoherenceSurgeModule.java` | The screen effects: full-frame chromatic aberration through `rendering/plugins/ChromaticAberrationOverlay`, and the low-coherence overlay held at full force through the script's haunt floor. Both ease in and cut to nothing on cleanup |
+| `GhostAsteroidsModule.java` | A temporary asteroid field with nothing solid in it: a cluster of `GhostAsteroidEntityPlugin` rocks drifting as one body, topped up while the chase runs |
+
 ### `campaign/fish/coherence`
 The low-coherence overlay: the screen warps purple at its edges while a rig runs, an open pond
 is close, or one of the trade's boats is - whichever of the three pulls hardest, weighted by
@@ -765,7 +786,7 @@ distance for the last two.
 
 | File | What it does |
 |---|---|
-| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
+| `CoherenceOverlayScript.java` | The rules: which of the three sources is loudest, how hard, the ease in and out, the whisper loop, plus a session-only haunt floor a legendary chase can hold at full force. Drawing is `rendering/plugins/CoherenceOverlayRenderer` |
 | `CoherenceTerrain.java` | The terrain-bar line. Invisible terrain covering a whole location whose `containsEntity` is "is the overlay up" rather than a distance — IndEvo's trick, so nothing has to be moved under the fleet |
 
 ### `campaign/fish/constants` · `campaign/fish/intel`
@@ -900,6 +921,7 @@ Shader and GL machinery.
 | `distortion/CampaignDistortionRenderer.java` | GraphicsLib's distortion pass, rebuilt to run on the campaign map |
 | `plugins/MaskedWarpedSpriteRenderer.java` | Fill + alpha mask + optional swirl and well radial warps |
 | `plugins/CoherenceOverlayRenderer.java` | Full-screen post-process: the screen redrawn warped and leaned purple, at a level set from outside. Both warp and tint sit under a screen-edge mask whose uniform rectangular inset advances linearly as coherence fails; high-coherence states remain shallow at the corners instead of inheriting a circle's permanently saturated wedges |
+| `plugins/ChromaticAberrationOverlay.java` | Whole-screen chromatic aberration, UI and tooltips included, through vanilla's above-UI-and-tooltips render hook: the finished frame is copied into a texture and redrawn with red and blue shifted apart. Fixed-function GL, so it survives GraphicsLib's shaders being off. Level-driven from the legendary haunt; at zero it holds no listener registration at all |
 | `plugins/MaskGlowRenderer.java` | Additive glow shaped by a sprite's alpha |
 | `plugins/NoiseMappedCircularRingRenderer.java` | Ring shaped and animated by scrolling noise |
 | `plugins/WarpGrid.java` | The animated vertex grid the warp renderers share; borders pinned |
@@ -1166,12 +1188,15 @@ When the legendaries landed, each wide gated row gave back the one region the sw
 is where the half-sector-less-one shapes come from. Every region keeps at least two commons free of
 star, age and coherence gates so no pond can come up empty.
 
-**The legendaries are quadrant destinations, and their art is pending.** One legendary per quadrant
-(`lantern_jack`, `slipstream_moray`, `quorum`, `false_dawn`), one across the four core regions
-(`longliner`), the manta in the abyss — six in all, and every one of them lamp-only: a legendary is
-a whaling chase, worked with the breach lamps, never handed over by a pond. The five new ones carry `minAberration 0.5`, so
-they exist only where the fabric has nearly gone; `FishRanges`'s three-system floor keeps each one
-somewhere real. The two calm-fabric commons (`nav_bobber`, `plume_remora`) carry `maxAberration
+**A legendary is one fish, one system, one chance — and its art is pending.** One legendary per
+quadrant (`lantern_jack`, `slipstream_moray`, `quorum`, `false_dawn`), one across the four core
+regions (`longliner`), the manta in the abyss — six in all, and every one of them lamp-only: a
+legendary is a whaling chase, worked with the breach lamps, never handed over by a pond. The sheet's
+quadrant and `minAberration 0.5` gates only choose candidates; `LegendaryChases` holds the single
+live host system, the ninety-day post-sighting relocation, and the permanent caught flag — landed
+once, gone forever, and no job may name one. While the player is in a living legendary's host
+system, `LegendaryHaunt` runs that species' interference modules, and a hooked legendary carries at
+least three epic-tier treasures. The two calm-fabric commons (`nav_bobber`, `plume_remora`) carry `maxAberration
 0.4` for the opposite reason — the crowded end of the sweep is the deep end, and they fit the cap
 only by staying out of it. The eight rows that filled the list to its hundred follow the same
 pattern: bounded to calm-or-mid fabric or gated to dead stars, because the deep bands sit at the

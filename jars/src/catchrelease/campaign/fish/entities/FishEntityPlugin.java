@@ -90,12 +90,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient boolean diving = false;
     private transient float diveClock = 0f;
     private SectorEntityToken pond;
+    private boolean phantom;
 
     public static class Params {
 
         public final Vector2f target;
         public final String fishId;
         public final SectorEntityToken pond;
+        public boolean phantom;
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -156,6 +158,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.target = p.target;
         this.fishId = p.fishId;
         this.pond = p.pond;
+        this.phantom = p.phantom;
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
@@ -163,6 +166,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         );
 
         sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+
+        // every spawn path lands here, so this is where a legendary counts as sighted;
+        // a haunt's phantom is a lie about the fish, not the fish
+        if (!phantom) catchrelease.campaign.fish.legendary.LegendaryChases.noteSeen(getFishSpec());
     }
 
     @Override
@@ -354,9 +361,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (mote == null || mote.isExpired()) return false;
         if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) return true;
 
+        if (fish.isPhantom()) return false;
         if (fish.isHeld()) return false;
 
         return reachesUnder || !fish.isDiving();
+    }
+
+    public boolean isPhantom() {
+        return phantom;
     }
 
     protected float getModeWander() {
@@ -422,6 +434,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
+        if (phantom) return;
+
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
 
         if (slowStrength > 0f && slowSeconds > 0f) {

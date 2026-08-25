@@ -1,0 +1,82 @@
+package catchrelease.campaign.fish.legendary;
+
+import catchrelease.campaign.fish.data.FishSpec;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CampaignEventListener.FleetDespawnReason;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
+import org.lazywizard.lazylib.MathUtils;
+import org.lwjgl.util.vector.Vector2f;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public abstract class BaseHauntModule implements HauntModule {
+
+    protected final StarSystemAPI system;
+    protected final FishSpec spec;
+    protected final Random random = new Random();
+    protected final List<SectorEntityToken> spawned = new ArrayList<>();
+
+    protected BaseHauntModule(StarSystemAPI system, FishSpec spec) {
+        this.system = system;
+        this.spec = spec;
+    }
+
+    protected CampaignFleetAPI player() {
+        return Global.getSector().getPlayerFleet();
+    }
+
+    protected Vector2f nearPlayer(float minRange, float maxRange) {
+        CampaignFleetAPI player = player();
+        Vector2f at = player == null ? new Vector2f() : player.getLocation();
+
+        return MathUtils.getPointOnCircumference(at,
+                MathUtils.getRandomNumberInRange(minRange, maxRange),
+                random.nextFloat() * 360f);
+    }
+
+    protected float distanceToPlayer(SectorEntityToken entity) {
+        CampaignFleetAPI player = player();
+        if (player == null || entity == null) return Float.MAX_VALUE;
+
+        return MathUtils.getDistance(player.getLocation(), entity.getLocation());
+    }
+
+    protected <T extends SectorEntityToken> T track(T entity) {
+        entity.addTag(LegendaryHaunt.HAUNT_TAG);
+        spawned.add(entity);
+
+        return entity;
+    }
+
+    protected void prune() {
+        spawned.removeIf(e -> e == null || e.isExpired()
+                || e.getContainingLocation() == null);
+    }
+
+    @Override
+    public void cleanup() {
+        for (SectorEntityToken entity : spawned) {
+            removeHard(entity);
+        }
+        spawned.clear();
+    }
+
+    /** Immediate, unconditional removal - the "no trace" half of the contract. */
+    public static void removeHard(SectorEntityToken entity) {
+        if (entity == null || entity.isExpired()) return;
+
+        if (entity instanceof CampaignFleetAPI fleet) {
+            fleet.despawn(FleetDespawnReason.OTHER, null);
+            return;
+        }
+
+        if (entity.getContainingLocation() != null) {
+            entity.getContainingLocation().removeEntity(entity);
+        }
+        entity.setExpired(true);
+    }
+}

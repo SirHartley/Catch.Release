@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.data;
 
+import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishAsker;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -57,6 +58,11 @@ public class FishRanges {
     public static boolean matches(FishSpec spec, LocationAPI where, CatchImplement how) {
         if (spec == null || where == null) return false;
 
+        // a legendary is one fish in one system; the ledger, not the sheet, says which
+        if (spec.rarity == FishRarity.LEGENDARY) {
+            return LegendaryChases.matches(spec, where) && spec.canBeReachedBy(how);
+        }
+
         Set<String> frozen = getPins().get(spec.id);
         if (frozen != null) return frozen.contains(where.getId()) && spec.canBeReachedBy(how);
 
@@ -77,8 +83,11 @@ public class FishRanges {
         Map<String, Set<String>> pins = getPins();
         Set<String> questSpecies = collectQuestSpecies();
 
-        // freeze against the pre-reassessment world, so a quest keeps the range it was rolled in
+        // freeze against the pre-reassessment world, so a quest keeps the range it was rolled in;
+        // legendaries never pin - their single-host ledger already outranks pins in matches()
         for (String id : questSpecies) {
+            FishSpec spec = FishSpecLoader.getFishSpec(id);
+            if (spec != null && spec.rarity == FishRarity.LEGENDARY) continue;
             if (!pins.containsKey(id)) pins.put(id, snapshotHomes(id));
         }
         pins.keySet().retainAll(questSpecies);
@@ -145,6 +154,13 @@ public class FishRanges {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || pins.containsKey(spec.id)) continue;
             if (spec.regions.contains(SectorRegion.ABYSSAL)) continue;
+
+            // a legendary never relaxes, but its one host still occupies a cap slot
+            if (spec.rarity == FishRarity.LEGENDARY) {
+                String host = LegendaryChases.getHostSystemId(spec);
+                if (host != null) load.merge(host, 1, Integer::sum);
+                continue;
+            }
 
             Set<String> homes = homesAt(spec, systems, FishSpec.RELAX_NONE);
             baseHomes.put(spec.id, homes);

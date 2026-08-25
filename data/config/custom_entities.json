@@ -11,6 +11,18 @@
 		"pluginClass":"catchrelease.campaign.fish.entities.FishEntityPlugin"
 	},
 
+	"catchrelease_GhostAsteroid":{
+		"defaultRadius":24,
+		"showInCampaign":true,
+		"showIconOnMap":false,
+		"showNameOnMap":false,
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"layers":[ASTEROIDS],
+		"tags":["catchrelease_haunt"],
+		"pluginClass":"catchrelease.campaign.fish.entities.GhostAsteroidEntityPlugin"
+	},
+
 	"catchrelease_RodMote":{
 		"defaultRadius":20,
 		"showInCampaign":true,
