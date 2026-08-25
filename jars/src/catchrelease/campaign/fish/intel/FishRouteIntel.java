@@ -266,11 +266,10 @@ public class FishRouteIntel extends BaseIntelPlugin {
                     String.valueOf(total));
         }
 
-        float buttonWidth = Math.min(width, 260f);
         info.addButton("Show route on map", BUTTON_SHOW, Misc.getBasePlayerColor(),
-                Misc.getDarkPlayerColor(), (int) buttonWidth, FishIntelMapButton.HEIGHT, opad * 2f);
+                Misc.getDarkPlayerColor(), (int) width, FishIntelMapButton.HEIGHT, opad * 2f);
         info.addButton("Stop tracking", BUTTON_FORGET, Misc.getBasePlayerColor(),
-                Misc.getDarkPlayerColor(), (int) buttonWidth, FishIntelMapButton.HEIGHT, 6f);
+                Misc.getDarkPlayerColor(), (int) width, FishIntelMapButton.HEIGHT, 6f);
     }
 
     protected String getSavedDate() {
