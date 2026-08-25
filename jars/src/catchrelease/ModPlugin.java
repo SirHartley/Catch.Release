@@ -6,6 +6,7 @@ import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishRanges;
+import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
@@ -77,6 +78,7 @@ public class ModPlugin extends BaseModPlugin {
 
         Aberration.Watcher.register();
         FishRanges.register();
+        LegendaryHaunt.register();
         UpgradeManager.getInstance().updateBaseValues();
         CatchReleaseDistressProvider.register();
         DistressCallFramework.register();

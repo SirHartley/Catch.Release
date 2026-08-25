@@ -4,6 +4,8 @@ import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -25,6 +27,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float GLOW_SIZE = 25f;
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
+
+    private static final float ORBIT_RADIUS = 70f;
+    private static final float ORBIT_DEG_PER_SECOND = 140f;
+    private static final float SHIELD_RADIUS = 52f;
+    private static final float SHIELD_FLASH_SECONDS = 0.6f;
+    private static final Color SHIELD_COLOR = new Color(150, 220, 255);
 
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
@@ -90,12 +98,22 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient boolean diving = false;
     private transient float diveClock = 0f;
     private SectorEntityToken pond;
+    private boolean phantom;
+
+    // legendary defences: escort orbit, flung dash, deflection flash
+    private SectorEntityToken orbitAnchor;
+    private transient float orbitAngle = (float) (Math.random() * 360f);
+    private float dashLeft;
+    private Vector2f dashVelocity;
+    private transient float shieldFlash;
 
     public static class Params {
 
         public final Vector2f target;
         public final String fishId;
         public final SectorEntityToken pond;
+        public boolean phantom;
+        public SectorEntityToken orbitAnchor;
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -156,6 +174,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.target = p.target;
         this.fishId = p.fishId;
         this.pond = p.pond;
+        this.phantom = p.phantom;
+        this.orbitAnchor = p.orbitAnchor;
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
@@ -163,16 +183,34 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         );
 
         sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+
+        // every spawn path lands here, so this is where a legendary counts as sighted;
+        // a haunt's phantom is a lie about the fish, not the fish
+        if (!phantom) catchrelease.campaign.fish.legendary.LegendaryChases.noteSeen(getFishSpec());
     }
 
     @Override
     public void advance(float amount) {
         time += amount;
         flicker.advance(amount);
+        if (shieldFlash > 0f) shieldFlash -= amount;
 
         advanceDive(amount);
 
         if (held) return;
+
+        if (orbitAnchor != null) {
+            advanceOrbit(amount);
+            return;
+        }
+
+        if (dashLeft > 0f) {
+            dashLeft -= amount;
+            entity.setLocation(entity.getLocation().x + dashVelocity.x * amount,
+                    entity.getLocation().y + dashVelocity.y * amount);
+            if (dashLeft <= 0f) Misc.fadeAndExpire(entity, 1f);
+            return;
+        }
 
         if (stunLeft > 0f) {
             stunLeft -= amount;
@@ -181,7 +219,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (slowLeft > 0f) slowLeft -= amount;
 
+        LegendaryShields.maintainSatellites(this);
+        LegendaryShields.advanceEater(this);
+
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
+                * LegendaryShields.getSpeedMult(this)
                 * advanceMode(amount) * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
@@ -354,9 +396,58 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (mote == null || mote.isExpired()) return false;
         if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) return true;
 
+        if (fish.isPhantom()) return false;
         if (fish.isHeld()) return false;
 
         return reachesUnder || !fish.isDiving();
+    }
+
+    public boolean isPhantom() {
+        return phantom;
+    }
+
+    public SectorEntityToken getMote() {
+        return entity;
+    }
+
+    public SectorEntityToken getOrbitAnchor() {
+        return orbitAnchor;
+    }
+
+    public boolean isDashing() {
+        return dashLeft > 0f;
+    }
+
+    public void setSwimTarget(Vector2f target) {
+        this.target = target;
+    }
+
+    public void flashShield() {
+        shieldFlash = SHIELD_FLASH_SECONDS;
+    }
+
+    public void startDash(Vector2f velocity, float seconds) {
+        dashVelocity = velocity;
+        dashLeft = seconds;
+    }
+
+    public void stopDash() {
+        dashLeft = 0f;
+        dashVelocity = null;
+    }
+
+    protected void advanceOrbit(float amount) {
+        if (orbitAnchor == null || orbitAnchor.isExpired()
+                || orbitAnchor.getContainingLocation() != entity.getContainingLocation()) {
+            orbitAnchor = null;
+            Misc.fadeAndExpire(entity, 1f);
+            return;
+        }
+
+        orbitAngle += ORBIT_DEG_PER_SECOND * amount;
+        Vector2f at = MathUtils.getPointOnCircumference(
+                orbitAnchor.getLocation(), ORBIT_RADIUS, orbitAngle);
+        entity.setLocation(at.x, at.y);
     }
 
     protected float getModeWander() {
@@ -422,6 +513,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
+        if (phantom) return;
+
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
 
         if (slowStrength > 0f && slowSeconds > 0f) {
@@ -470,5 +563,40 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (!isFromPond()) externalRender(viewport);
+
+        renderShield(viewport);
+    }
+
+    protected void renderShield(ViewportAPI viewport) {
+        float alpha = viewport.getAlphaMult();
+        if (alpha <= 0f) return;
+
+        Vector2f loc = entity.getLocation();
+
+        // the tether that says the shield is the escort's doing, not the fish's own
+        if (orbitAnchor != null && !orbitAnchor.isExpired()) {
+            float pulse = 0.25f + 0.15f * (float) Math.sin(time * 6f);
+            Disc.draw(loc.x, loc.y, 10f, SHIELD_COLOR, pulse * alpha, 0f, true);
+
+            Vector2f anchorLoc = orbitAnchor.getLocation();
+            Vector2f mid = new Vector2f((loc.x + anchorLoc.x) * 0.5f,
+                    (loc.y + anchorLoc.y) * 0.5f);
+            Disc.draw(mid.x, mid.y, ORBIT_RADIUS * 0.45f, SHIELD_COLOR,
+                    0.08f * alpha, 0f, true);
+        }
+
+        if (LegendaryShields.isShielded(this)) {
+            float pulse = 0.8f + 0.2f * (float) Math.sin(time * 3f);
+            Disc.draw(loc.x, loc.y, SHIELD_RADIUS, SHIELD_COLOR,
+                    0.08f * alpha, 0.22f * alpha * pulse, true);
+            Disc.drawOutline(loc.x, loc.y, SHIELD_RADIUS * pulse, SHIELD_COLOR,
+                    0.55f * alpha, 1.5f);
+        }
+
+        if (shieldFlash > 0f) {
+            float f = shieldFlash / SHIELD_FLASH_SECONDS;
+            float ring = SHIELD_RADIUS * (1f + 1.2f * (1f - f));
+            Disc.drawOutline(loc.x, loc.y, ring, SHIELD_COLOR, f * alpha, 3f);
+        }
     }
 }

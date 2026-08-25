@@ -19,8 +19,20 @@ public class CoherenceOverlayScript implements EveryFrameScript {
     protected float aberration = 0f;
     protected float pull = 0f;
 
+    // session-only: a legendary haunt drives the overlay to full force through this
+    protected static float hauntFloor = 0f;
+
+    public CoherenceOverlayScript() {
+        // the script is rebuilt on every load; a floor from another save must not survive it
+        hauntFloor = 0f;
+    }
+
     public static float getLevel() {
         return CoherenceOverlayRenderer.getLevel();
+    }
+
+    public static void setHauntFloor(float floor) {
+        hauntFloor = MathUtils.clamp(floor, 0f, 1f);
     }
 
     @Override
@@ -58,6 +70,7 @@ public class CoherenceOverlayScript implements EveryFrameScript {
 
         target = Math.max(target, getPondWeight() * levelFor(here()));
         target = Math.max(target, getBoatWeight() * Math.max(levelFor(here()), boatMinimum()));
+        target = Math.max(target, hauntFloor);
 
         return target;
     }
