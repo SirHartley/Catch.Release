@@ -59,6 +59,12 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
     public void renderInUICoordsAboveUIAndTooltips(ViewportAPI viewport) {
         if (level <= 0f) return;
 
+        // dialogs and core tabs pause the game; the haunt does not follow into them
+        if (Global.getSector().getCampaignUI().isShowingDialog()
+                || Global.getSector().getCampaignUI().isShowingMenu()) {
+            return;
+        }
+
         int width = (int) Global.getSettings().getScreenWidthPixels();
         int height = (int) Global.getSettings().getScreenHeightPixels();
         if (width <= 0 || height <= 0) return;

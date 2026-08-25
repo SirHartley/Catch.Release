@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
@@ -52,14 +53,22 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> {
                 if (state.shieldPopped) return HitResult.NONE;
                 fish.flashShield();
-                if (!explosive) return HitResult.DEFLECTED;
+                if (!explosive) {
+                    say("The harpoon glances off the Longliner's shell - nothing short"
+                            + " of a blasting charge will open it.");
+                    return HitResult.DEFLECTED;
+                }
 
                 state.shieldPopped = true;
+                say("The blasting charge cracks the Longliner's shell wide -"
+                        + " and it stays cracked.");
                 return HitResult.POPPED;
             }
             case MOTE_SHIELD_SPECIES -> {
                 if (getShieldUnits(state, MOTE_SHIELD_COUNT) <= 0) return HitResult.NONE;
                 fish.flashShield();
+                say("Turned aside - the splinters wheeling around The Quorum"
+                        + " are holding that shield up.");
                 return HitResult.DEFLECTED;
             }
             case CHARGE_SHIELD_SPECIES -> {
@@ -68,6 +77,7 @@ public class LegendaryShields {
 
                 state.shieldUnits = charges - 1;
                 fish.flashShield();
+                say("Deflected - the Lantern Jack's shell dims a shade with the effort.");
                 return HitResult.DEFLECTED;
             }
             default -> {
@@ -94,6 +104,10 @@ public class LegendaryShields {
                 new FishEntityPlugin.Params(swimTo, fish.getFishSpec().id));
         reborn.setLocation(at.x, at.y);
 
+        String name = fish.getFishSpec().name;
+        if (!name.startsWith("The ")) name = "The " + name;
+        say(name + " dives ahead of the blast - it is somewhere else now.");
+
         return true;
     }
 
@@ -104,6 +118,14 @@ public class LegendaryShields {
         int motes = getShieldUnits(state, MOTE_SHIELD_COUNT);
         state.shieldUnits = Math.max(0, motes - 1);
         state.shieldStampAt = Global.getSector().getClock().getTimestamp();
+
+        if (state.shieldUnits > 0) {
+            say("The Quorum's shield thins - " + state.shieldUnits
+                    + (state.shieldUnits == 1 ? " splinter still orbits."
+                            : " splinters still orbit."));
+        } else {
+            say("The last splinter is aboard - The Quorum swims bare.");
+        }
     }
 
     /** The unpopped Longliner does not fight back yet - it just shrugs and swims. */
@@ -188,6 +210,7 @@ public class LegendaryShields {
                 continue;
             }
             if (meal.getOrbitAnchor() != null) continue;
+            if (QuestPond.isQuestMote(other)) continue;
             FishSpec spec = meal.getFishSpec();
             if (spec == null || spec.rarity == FishRarity.LEGENDARY) continue;
 
@@ -206,7 +229,12 @@ public class LegendaryShields {
             Misc.fadeAndExpire(prey, 0.3f);
             state.shieldUnits = getShieldUnits(state, CHARGE_SHIELD_COUNT) + 1;
             fish.flashShield();
+            say("The Lantern Jack swallows an exposed mote - its shell brightens.");
         }
+    }
+
+    protected static void say(String text) {
+        Global.getSector().getCampaignUI().addMessage(text, Misc.getHighlightColor());
     }
 
     protected static int getShieldUnits(LegendaryChases.Chase state, int cap) {

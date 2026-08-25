@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.legendary;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -95,6 +96,7 @@ public class MoteDashModule extends BaseHauntModule {
                 continue;
             }
             if (fish.getOrbitAnchor() != null) continue;
+            if (QuestPond.isQuestMote(candidate)) continue;
             FishSpec other = fish.getFishSpec();
             if (other == null || other.rarity == FishRarity.LEGENDARY) continue;
 
