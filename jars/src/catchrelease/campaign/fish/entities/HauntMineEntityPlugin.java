@@ -50,16 +50,16 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String MINE_TAG = "catchrelease_haunt_mine";
 
-    public static final float TRIGGER_RANGE = 190f;
-    public static final float EFFECT_RANGE = 600f;
+    public static final float TRIGGER_RANGE = 400f;
+    public static final float EFFECT_RANGE = 700f;
     public static final float ARM_SECONDS = 2f;
     public static final float GLOW_SIZE = 34f;
 
-    public static final float BLAST_PUSH_SPEED = 350f;
-    public static final float BLAST_RADIUS = 220f;
-    public static final float INTERCEPT_SLOW_SECONDS = 2.5f;
-    public static final float PULL_SECONDS = 1.6f;
-    public static final float PULL_ACCEL = 420f;
+    public static final float BLAST_PUSH_SPEED = 700f;
+    public static final float BLAST_RADIUS = 320f;
+    public static final float INTERCEPT_SLOW_SECONDS = 5f;
+    public static final float PULL_SECONDS = 3f;
+    public static final float PULL_ACCEL = 850f;
 
     protected Kind kind = Kind.BLAST;
     protected float time;
@@ -165,8 +165,8 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
                 RippleDistortion ripple = new RippleDistortion(
                         new Vector2f(entity.getLocation()), new Vector2f());
-                ripple.setSize(300f);
-                ripple.setIntensity(60f);
+                ripple.setSize(450f);
+                ripple.setIntensity(90f);
                 ripple.setFrameRate(60f);
                 ripple.flip(true);
                 ripple.setLifetime(PULL_SECONDS);
