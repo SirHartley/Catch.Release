@@ -176,7 +176,7 @@ public class LegendaryHaunt implements EveryFrameScript {
             }
             case "slipstream_moray" -> {
                 out.add(new MoteDashModule(system, spec));
-                out.add(new GhostAsteroidsModule(system, spec));
+                out.add(new SlipDashModule(system, spec));
             }
             // the escort shield is the Quorum's real defence; the haunt stays gentle
             case "quorum" -> out.add(new DistractionMotesModule(system, spec));
