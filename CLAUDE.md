@@ -157,7 +157,10 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
 - **Draft and audit every player-facing line with the Starsector Editor GPT in the ChatGPT app.**
   This is mandatory for dialogue, UI labels and messages, tooltips, intel, species and item prose,
   station, weapon, skill and hullmod descriptions, mission text, console output, and any other text
-  the player can see. Tell the Editor exactly where each line appears and what that surface must do:
+  the player can see. Before sending any request, manually verify that the pinned Starsector Editor
+  chat is set to **High** thinking. Do not use Auto, Standard, Fast, or a lower thinking mode for
+  Catch.Release writing. If High is unavailable, stop instead of accepting a lower-quality pass.
+  Tell the Editor exactly where each line appears and what that surface must do:
   for example, identify it as a button label, hover tooltip, intel entry, fish description, weapon
   description, or transient campaign message, and include the relevant mechanical and space
   constraints. Give the Editor the complete current `docs/LORE.md`, not a summary, before asking it
@@ -165,11 +168,21 @@ This section applies only when ChatGPT is working on Catch.Release in the ChatGP
   stronger characterization or information density is restored rather than flattened by generic
   tightening. Use separate focused passes when different speakers or surfaces need distinct
   treatment, then give the Editor the final integrated copy for voice and context QA. The Editor
-  does not get to alter routes, tokens, mechanics, layout contracts or code behavior. **Never treat
-  the Editor's draft or QA as the lore check:** independently compare every returned line against
-  the complete current `docs/LORE.md` and its stated display context before integration, and send
-  any terminology, mechanics, usability or context conflict back to the Editor for correction.
-  Apply the approved result in the task checkout and push it through the normal Git workflow.
+  does not get to alter routes, tokens, mechanics, layout contracts or code behavior.
+- **Every Editor prompt must explicitly reject hallmark AI prose.** Tell it to preserve focus,
+  concrete information, character voice, and natural sentence variety. Tell it not to use canned
+  contrasts, repetitive sentence templates, excessive triplets, vague abstractions, polished
+  exposition that explains the subtext, faux-poetic ominousness, or filler such as "somehow" and
+  "quietly". Em dashes are not a default punctuation mark; use one only when a real interruption
+  requires it, and prefer a period or comma otherwise. Keep each pass inside the named lines and
+  purpose; do not accept unrelated rewrites. Audit the returned text specifically for these
+  patterns. Send any affected line back for another High-thinking pass rather than trying to
+  normalize the Editor's habits during integration.
+- **Independently perform the lore and context check.** Never treat the Editor's draft or QA as
+  that check. Compare every returned line against the complete current `docs/LORE.md` and its
+  stated display context before integration, and send any terminology, mechanics, usability or
+  context conflict back to the Editor for correction. Apply the approved result in the task
+  checkout and push it through the normal Git workflow.
 
 ## Model assignments
 

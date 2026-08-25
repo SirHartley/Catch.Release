@@ -15,11 +15,10 @@ rest. This map records the current shape, not change history.
 Not mapped below, because none of it is ours: `lib/` holds the game's API source and the three
 dependency mods, zipped, to be read rather than edited.
 
-**Repository boundary:** implementation writes happen only in the current task repository. For
-ChatGPT in the ChatGPT app, that repository is operated remotely through the connected GitHub app;
-every PC checkout remains read-only even when its filesystem sandbox works. Live mod installs and
-other checkouts are read-only audit sources unless the user explicitly asks for a write or
-synchronization; merging a PR never authorizes a post-merge sync. This boundary is defined in
+**Repository boundary:** implementation writes happen only in the current task checkout. ChatGPT
+uses local Git for source work and the connected GitHub app for pull requests and merges. Live mod
+installs and other checkouts are read-only audit sources unless the user explicitly asks for a write
+or synchronization; merging a PR never authorizes a post-merge sync. This boundary is defined in
 `CLAUDE.md`.
 
 **[`LORE.md`](LORE.md) is the setting and writing authority** — what a breach, a pattern, the ROD,
@@ -1440,9 +1439,11 @@ branch on and always returns true, and in a row's *script* a verb does the thing
 it worked. The panels — shop, chart counter, cargo picker — stay Java, because a shelf of cards is
 machinery and there is nothing for a sheet to say about it.
 
-The Starsector Editor is a draft source, not the lore authority: every returned player-facing line
-is independently compared with `docs/LORE.md` and its stated display context before integration,
-and an Editor QA result does not replace that check. The Fisherman's question menu then keeps the
+The Starsector Editor is a draft source, not the lore authority. ChatGPT runs it at High thinking,
+supplies the exact display context, and rejects generic AI patterns and em-dash overuse before
+integration. Every returned player-facing line is independently compared with `docs/LORE.md` and
+its stated display context; an Editor QA result does not replace that check. The Fisherman's
+question menu then keeps the
 same division: sheet rows add unasked topics first and asked topics second, and `addFisherQuestion`
 gives the latter vanilla grey. The
 searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
