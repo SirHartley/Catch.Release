@@ -79,6 +79,15 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     }
 
     @Override
+    public String getSpriteName() {
+        if (Global.getSector() != null && HarpoonEntityPlugin.isExplosive()) {
+            return HarpoonConstants.EXPLOSIVE_ICON;
+        }
+
+        return super.getSpriteName();
+    }
+
+    @Override
     public SkillshotRenderer createReticule() {
         return (SkillshotRenderer) new DirectionReticuleRenderer()
                 .withTrajectory()
