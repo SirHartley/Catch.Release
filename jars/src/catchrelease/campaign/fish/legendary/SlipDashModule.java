@@ -28,17 +28,17 @@ import java.util.List;
  */
 public class SlipDashModule extends BaseHauntModule {
 
-    public static final float TRIGGER_RANGE = 1500f;
-    public static final float COOLDOWN_MIN_SECONDS = 26f;
-    public static final float COOLDOWN_MAX_SECONDS = 42f;
+    public static final float TRIGGER_RANGE = 2000f;
+    public static final float COOLDOWN_MIN_SECONDS = 9f;
+    public static final float COOLDOWN_MAX_SECONDS = 16f;
 
     public static final float DASH_SPEED = 900f;
-    public static final float DASH_MIN_SECONDS = 3.6f;
-    public static final float DASH_MAX_SECONDS = 5.4f;
-    public static final float FLEE_FUZZ_DEG = 45f;
-    public static final float CURVE_MAX_DEG_PER_SECOND = 30f;
-    public static final float CURVE_WAVE_RATE = 0.9f;
-    public static final float REVEAL_SECONDS = 9f;
+    public static final float DASH_MIN_SECONDS = 2.4f;
+    public static final float DASH_MAX_SECONDS = 6.5f;
+    public static final float FLEE_FUZZ_DEG = 60f;
+    public static final float CURVE_MAX_DEG_PER_SECOND = 55f;
+    public static final float CURVE_WAVE_MIN_RATE = 0.6f;
+    public static final float CURVE_WAVE_MAX_RATE = 1.7f;
 
     public static final float STREAM_WIDTH = 420f;
     public static final int STREAM_BURN = 50;
@@ -64,6 +64,7 @@ public class SlipDashModule extends BaseHauntModule {
     protected float bearing;
     protected float curvePhase;
     protected float curveRate;
+    protected float curveWaveRate;
 
     protected final List<Trail> trails = new ArrayList<>();
 
@@ -106,8 +107,8 @@ public class SlipDashModule extends BaseHauntModule {
         curveRate = CURVE_MAX_DEG_PER_SECOND
                 * MathUtils.getRandomNumberInRange(0.4f, 1f)
                 * (random.nextBoolean() ? 1f : -1f);
-
-        fish.revealFor(dashLeft + REVEAL_SECONDS);
+        curveWaveRate = MathUtils.getRandomNumberInRange(
+                CURVE_WAVE_MIN_RATE, CURVE_WAVE_MAX_RATE);
 
         Trail trail = new Trail();
 
@@ -143,7 +144,7 @@ public class SlipDashModule extends BaseHauntModule {
 
         dashLeft -= amount;
         curvePhase += amount;
-        bearing += curveRate * (float) Math.sin(curvePhase * CURVE_WAVE_RATE) * amount;
+        bearing += curveRate * (float) Math.sin(curvePhase * curveWaveRate) * amount;
 
         if (dashLeft <= 0f) {
             endDash(fish, trail);
