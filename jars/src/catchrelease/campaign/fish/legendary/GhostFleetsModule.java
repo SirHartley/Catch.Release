@@ -82,6 +82,12 @@ public class GhostFleetsModule extends BaseHauntModule {
         fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_NO_MILITARY_RESPONSE, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
 
+        // hand-built fleets need the sync vanilla's CustomFleets recipe does, and a
+        // dark frigate pack is invisible at spawn range without a detection bump -
+        // the whole point is being seen bearing down
+        fleet.forceSync();
+        fleet.getStats().getDetectedRangeMod().modifyFlat("catchrelease_ghost", 3000f);
+
         Vector2f at = nearPlayer(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
         fleet.setLocation(at.x, at.y);
         system.addEntity(fleet);
