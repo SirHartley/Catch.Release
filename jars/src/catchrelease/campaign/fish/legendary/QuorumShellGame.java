@@ -28,12 +28,12 @@ public class QuorumShellGame {
 
     public static final int DECOYS = 2;
     public static final float RING_RADIUS = 120f;
-    public static final float SPIN_DEG_PER_SECOND = 16f;
-    public static final float DRIFT_SPEED = 40f;
-    public static final float SWAP_MIN_SECONDS = 2.2f;
-    public static final float SWAP_MAX_SECONDS = 5.5f;
-    public static final float SWAP_SECONDS = 0.9f;
-    public static final float SPLIT_SECONDS = 1.1f;
+    public static final float SPIN_DEG_PER_SECOND = 30f;
+    public static final float DRIFT_SPEED = 65f;
+    public static final float SWAP_MIN_SECONDS = 1.3f;
+    public static final float SWAP_MAX_SECONDS = 3.2f;
+    public static final float SWAP_SECONDS = 0.6f;
+    public static final float SPLIT_SECONDS = 0.8f;
 
     protected static class Body {
 

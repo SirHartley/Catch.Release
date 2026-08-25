@@ -18,8 +18,8 @@ public class DistractionMotesModule extends BaseHauntModule {
     public static final int MAX_ALIVE = 4;
     public static final float SPAWN_MIN_SECONDS = 8f;
     public static final float SPAWN_MAX_SECONDS = 16f;
-    public static final float SPAWN_RANGE_MIN = 250f;
-    public static final float SPAWN_RANGE_MAX = 800f;
+    public static final float SPAWN_RANGE_MIN = 120f;
+    public static final float SPAWN_RANGE_MAX = 450f;
     public static final float FALLBACK_RANGE_MIN = 900f;
     public static final float FALLBACK_RANGE_MAX = 2200f;
     public static final float DISSOLVE_RANGE = 220f;
