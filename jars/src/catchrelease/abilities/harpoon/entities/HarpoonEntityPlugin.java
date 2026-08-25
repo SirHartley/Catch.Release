@@ -242,7 +242,8 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
         CrabWares.recordExplosiveUse(targetName);
 
-        Misc.fadeAndExpire(mote, 0.2f);
+        // a legendary dives and resurfaces far away instead; everything else is just gone
+        if (!LegendaryShields.onExplosiveStrike(mote)) Misc.fadeAndExpire(mote, 0.2f);
 
         detonate(ExplosionFleetDamage.NONE);
     }

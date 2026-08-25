@@ -38,7 +38,7 @@ public class GhostAsteroidsModule extends BaseHauntModule {
         prune();
 
         topUpTimer -= amount;
-        if (topUpTimer <= 0f) {
+        if (topUpTimer <= 0f && atFullIntensity()) {
             topUpTimer = TOP_UP_SECONDS;
 
             if (fieldCenter == null) {

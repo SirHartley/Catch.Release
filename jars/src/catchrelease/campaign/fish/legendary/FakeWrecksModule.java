@@ -48,7 +48,7 @@ public class FakeWrecksModule extends BaseHauntModule {
         life.keySet().removeIf(e -> e == null || e.isExpired());
 
         spawnTimer -= amount;
-        if (spawnTimer <= 0f && life.size() < MAX_ALIVE) {
+        if (spawnTimer <= 0f && life.size() < MAX_ALIVE && atFullIntensity()) {
             spawnTimer = MathUtils.getRandomNumberInRange(
                     SPAWN_MIN_SECONDS, SPAWN_MAX_SECONDS);
             spawnWreck();

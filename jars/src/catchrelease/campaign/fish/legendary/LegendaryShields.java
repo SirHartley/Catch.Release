@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
+import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 /**
@@ -73,6 +74,27 @@ public class LegendaryShields {
                 return HitResult.NONE;
             }
         }
+    }
+
+    /** A blast never kills the one fish: it dives on the spot and resurfaces far away. */
+    public static boolean onExplosiveStrike(SectorEntityToken mote) {
+        FishEntityPlugin fish = asLegendaryMote(mote);
+        if (fish == null || mote.getContainingLocation() == null) return false;
+
+        Misc.fadeAndExpire(mote, 0.2f);
+
+        Vector2f at = MathUtils.getPointOnCircumference(mote.getLocation(),
+                MathUtils.getRandomNumberInRange(2500f, 4500f),
+                MathUtils.getRandomNumberInRange(0f, 360f));
+        Vector2f swimTo = MathUtils.getPointOnCircumference(at, 1000f,
+                MathUtils.getRandomNumberInRange(0f, 360f));
+
+        SectorEntityToken reborn = mote.getContainingLocation().addCustomEntity(
+                Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                new FishEntityPlugin.Params(swimTo, fish.getFishSpec().id));
+        reborn.setLocation(at.x, at.y);
+
+        return true;
     }
 
     public static void onCatch(FishCatch specimen) {

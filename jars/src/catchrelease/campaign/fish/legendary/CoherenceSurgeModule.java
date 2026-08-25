@@ -23,7 +23,7 @@ public class CoherenceSurgeModule extends BaseHauntModule {
     public void advance(float amount) {
         level = Math.min(1f, level + amount / RAMP_SECONDS);
 
-        CoherenceOverlayScript.setHauntFloor(level);
+        CoherenceOverlayScript.setHauntFloor(Math.min(level, intensity));
     }
 
     @Override
