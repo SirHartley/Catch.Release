@@ -873,7 +873,7 @@ Three rigs — searchlight, R.O.D., harpoon. Each is `ability/` (the plugin), `c
 | `searchlight/rendering/SearchlightBreachRenderer.java` | The window under a spot: world-anchored hyperspace under the beam's falloff, with parallax. A zero-duration shutdown marks it expired synchronously rather than waiting for a LunaLib advance. |
 | `searchlight/rendering/SearchlightFanBreachRenderer.java` | The same window cut as the fan's wedge, falloff for falloff. A zero-duration shutdown marks it expired synchronously rather than waiting for a LunaLib advance. |
 | `searchlight/rendering/SearchlightBurnRenderer.java` | The old pond-style burn look — sidelined, nothing uses it |
-| `searchlight/rendering/SearchlightImpressionRenderer.java` | Dents for all beams together: passive bruises near a light, and a beam over a mote reveals its pond self. Bound to the exact owning ability activation and location, and self-expires if either stops matching. |
+| `searchlight/rendering/SearchlightImpressionRenderer.java` | Dents for all beams together: passive bruises near a light, and a beam over a mote reveals its pond self. The tracking upgrade retains that normalized reveal strength and fades the mote and impression together instead of dropping the exposed glow when the beam leaves. Bound to the exact owning ability activation and location, and self-expires if either stops matching. |
 
 ### `distress`
 Reusable distress-call framework. **Has its own README — read that first.**
