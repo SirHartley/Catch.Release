@@ -176,6 +176,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             catchrelease.campaign.fish.intel.CatchLogIntel.record(specimen, where, lootAwards);
             catchrelease.campaign.fish.intel.FishRouteIntel.onCatch(specimen);
             catchrelease.campaign.fish.legendary.LegendaryChases.onCatch(specimen);
+            catchrelease.campaign.fish.legendary.LegendaryShields.onCatch(specimen);
 
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 

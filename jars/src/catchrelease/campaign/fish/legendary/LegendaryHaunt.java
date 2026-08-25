@@ -82,6 +82,8 @@ public class LegendaryHaunt implements EveryFrameScript {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.rarity != FishRarity.LEGENDARY) continue;
             if (LegendaryChases.isCaught(spec.id)) continue;
+            // an unpopped shield keeps the fish complacent: no haunt until the pop
+            if (LegendaryShields.isHauntSuppressed(spec)) continue;
             if (here.getId().equals(LegendaryChases.getHostSystemId(spec))) return spec;
         }
 
@@ -118,12 +120,10 @@ public class LegendaryHaunt implements EveryFrameScript {
                 out.add(new InterdictionModule(system, spec));
                 out.add(new SensorGhostsModule(system, spec));
                 out.add(new GhostAsteroidsModule(system, spec));
+                out.add(new MoteDashModule(system, spec));
             }
-            case "quorum" -> {
-                out.add(new DistractionMotesModule(system, spec));
-                out.add(new SensorGhostsModule(system, spec));
-                out.add(new ChromaticAberrationModule(system, spec));
-            }
+            // the escort shield is the Quorum's real defence; the haunt stays gentle
+            case "quorum" -> out.add(new SensorGhostsModule(system, spec));
             case "false_dawn" -> {
                 out.add(new ChromaticAberrationModule(system, spec));
                 out.add(new CoherenceSurgeModule(system, spec));

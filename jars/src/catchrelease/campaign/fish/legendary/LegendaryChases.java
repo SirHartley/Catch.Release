@@ -33,6 +33,19 @@ public class LegendaryChases {
         public String systemId;
         public long seenAt;
         public boolean caught;
+
+        // shield bookkeeping, semantics per species in LegendaryShields:
+        // units = orbit motes or deflection charges, -1 until first initialised
+        public boolean shieldPopped;
+        public int shieldUnits = -1;
+        public long shieldStampAt;
+    }
+
+    /** Ledger row without host assignment - shield state may be read before a host exists. */
+    public static Chase getState(String speciesId) {
+        if (speciesId == null || Global.getSector() == null) return new Chase();
+
+        return getLedger().computeIfAbsent(speciesId, k -> new Chase());
     }
 
     public static boolean matches(FishSpec spec, LocationAPI where) {

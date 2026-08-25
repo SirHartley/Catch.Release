@@ -97,8 +97,9 @@ public class FishJobAsks {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
             if (spec.tags.contains("abyssal")) continue;
-            // a legendary is one fish, ever - no buyer gets to order it
-            if (spec.rarity == FishRarity.LEGENDARY) continue;
+            // a legendary is one fish, ever - no buyer gets to order it - and a
+            // mechanism row that never spawns on its own is no standing order either
+            if (spec.rarity == FishRarity.LEGENDARY || spec.spawnWeight <= 0f) continue;
 
             if (type != null && !spec.tags.contains(type)) continue;
             if (minRarity != null && spec.rarity.rank < minRarity.rank) continue;

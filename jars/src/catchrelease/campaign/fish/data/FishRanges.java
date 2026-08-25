@@ -154,6 +154,8 @@ public class FishRanges {
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || pins.containsKey(spec.id)) continue;
             if (spec.regions.contains(SectorRegion.ABYSSAL)) continue;
+            // mechanism rows (the Quorum's splinter) never spawn from ranges: no cap slot
+            if (spec.spawnWeight <= 0f) continue;
 
             // a legendary never relaxes, but its one host still occupies a cap slot
             if (spec.rarity == FishRarity.LEGENDARY) {

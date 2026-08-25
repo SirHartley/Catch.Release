@@ -40,7 +40,8 @@ public class InterdictionModule extends BaseHauntModule {
         if (pulseTimer <= 0f) {
             pulseTimer = MathUtils.getRandomNumberInRange(
                     PULSE_MIN_SECONDS, PULSE_MAX_SECONDS);
-            fire(player);
+            pulse(player);
+            slowLeft = SLOW_SECONDS;
         }
 
         if (slowLeft > 0f) {
@@ -49,7 +50,8 @@ public class InterdictionModule extends BaseHauntModule {
         }
     }
 
-    protected void fire(CampaignFleetAPI player) {
+    /** Vanilla-style interdiction with no source: shared with the moray's flung motes. */
+    public static void pulse(CampaignFleetAPI player) {
         for (AbilityPlugin ability : player.getAbilities().values()) {
             if (ability == null || ability.getSpec() == null) continue;
 
@@ -61,8 +63,6 @@ public class InterdictionModule extends BaseHauntModule {
             ability.setCooldownLeft(Math.max(ability.getCooldownLeft(),
                     ABILITY_COOLDOWN_DAYS));
         }
-
-        slowLeft = SLOW_SECONDS;
 
         Global.getSector().getCampaignUI().addMessage(
                 "Interdiction pulse - no source on the plot.",
