@@ -78,6 +78,14 @@ public class FakeWrecksModule extends BaseHauntModule {
                 Misc.genUID(), null, Entities.WRECK, Factions.NEUTRAL, params));
         wreck.addTag(Tags.NON_CLICKABLE);
 
+        // vanilla wrecks get their sensor presence from the salvage generator, which
+        // addCustomEntity bypasses - without this the bait is invisible until inside
+        // its own vanish range
+        wreck.setSensorProfile(1f);
+        wreck.setDiscoverable(false);
+        wreck.getDetectedRangeMod().modifyFlat("catchrelease_wreck", 2500f);
+        wreck.setExtendedDetectedAtRange(3000f);
+
         Vector2f at = nearPlayer(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
         wreck.setLocation(at.x, at.y);
 

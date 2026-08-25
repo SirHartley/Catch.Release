@@ -50,6 +50,25 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float RUN_SURGE_SECONDS = 4f;
     private static final float RUN_SURGE_MULT = 3f;
 
+    private static final float PROWL_MULT = 1.6f;
+    private static final float PROWL_LEG_MIN = 1200f;
+    private static final float PROWL_LEG_MAX = 2200f;
+    private static final float PROWL_TURN_MIN_DEG = 25f;
+    private static final float PROWL_TURN_MAX_DEG = 60f;
+    private static final float PROWL_RETARGET_MIN = 2.5f;
+    private static final float PROWL_RETARGET_MAX = 4.5f;
+    private static final float PROWL_ARRIVE_RANGE = 250f;
+    private static final float HUNT_MULT = 1.9f;
+    private static final float EVADE_SECONDS = 5f;
+    private static final float EVADE_MULT = 2.6f;
+    private static final float EVADE_JINK_MIN = 0.35f;
+    private static final float EVADE_JINK_MAX = 0.7f;
+    private static final float EVADE_LEG = 700f;
+
+    private static final float FLARE_COOLDOWN_SECONDS = 30f;
+    private static final float FLARE_RING_SECONDS = 2f;
+    private static final float LURE_SPEED_MULT = 1.8f;
+
     private static final float DARTER_PAUSE = 1.1f;
     private static final float DARTER_DASH_TIME = 0.7f;
     private static final float DARTER_DASH_MULT = 2.2f;
@@ -130,6 +149,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
+
+    // the Lantern Jack's prowl: sweeping legs between hunts, sharp jinks when struck
+    private transient float prowlLeft;
+    private transient float evasiveLeft;
+    private transient float jinkLeft;
+    private transient float jinkSign = 1f;
+    private transient boolean hunting;
+
+    // the flare call: the Jack's ring vfx and, on any mote, being called in by one
+    private transient float flareCooldown;
+    private transient float flareRing;
+    private transient SectorEntityToken lureTarget;
+    private transient float lureLeft;
 
     // lamp-bound extras fade with the player's beam; the shield gets a lens on top
     private transient float lampFade;
@@ -228,6 +260,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
         if (baseShieldRegen > 0f) baseShieldRegen -= amount;
+        if (flareCooldown > 0f) flareCooldown -= amount;
+        if (flareRing > 0f) flareRing -= amount;
 
         advanceLampFade(amount);
         advanceShieldLens();
@@ -263,11 +297,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
+        if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
+        if (advanceLure(amount)) return;
 
         float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
-                * LegendaryShields.getSpeedMult(this)
+                * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
                 * advanceMode(amount) * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
@@ -527,6 +563,105 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return RUN_MULT;
     }
 
+    /** The Lantern Jack's pace: a burst when struck, a closing rush on prey, and a
+     *  fast loping patrol the rest of the time - it is never standing water. */
+    public float getJackSpeedMult() {
+        if (evasiveLeft > 0f) return EVADE_MULT;
+        if (hunting) return HUNT_MULT;
+
+        return PROWL_MULT;
+    }
+
+    public void setHunting(boolean hunting) {
+        this.hunting = hunting;
+    }
+
+    public void startEvasive() {
+        evasiveLeft = Math.max(evasiveLeft, EVADE_SECONDS);
+        jinkLeft = 0f;
+    }
+
+    /** Low on shells, the Jack rings the water: one call, then a long reload. */
+    public void tryLureFlare() {
+        if (flareCooldown > 0f) return;
+
+        flareCooldown = FLARE_COOLDOWN_SECONDS;
+        flareRing = FLARE_RING_SECONDS;
+        LegendaryShields.lureFlare(this);
+    }
+
+    public void startLure(SectorEntityToken at, float seconds) {
+        lureTarget = at;
+        lureLeft = seconds;
+    }
+
+    public float getLureSpeedMult() {
+        return lureLeft > 0f ? LURE_SPEED_MULT : 1f;
+    }
+
+    /** A called mote runs at the caller and holds just off its jaws - close enough
+     *  for the eater, short of the arrival that would expire a pondless mote. */
+    protected boolean advanceLure(float amount) {
+        if (lureLeft <= 0f) return false;
+
+        lureLeft -= amount;
+        if (lureTarget == null || lureTarget.isExpired()
+                || lureTarget.getContainingLocation() != entity.getContainingLocation()) {
+            lureLeft = 0f;
+            lureTarget = null;
+            return false;
+        }
+
+        if (Misc.getDistance(entity.getLocation(), lureTarget.getLocation())
+                <= LegendaryShields.EAT_RANGE * 0.7f) {
+            return true;
+        }
+
+        setSwimTarget(new Vector2f(lureTarget.getLocation()));
+        return false;
+    }
+
+    /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
+     *  to follow. The hunt (the eater's swim target) takes the wheel by itself. */
+    protected void advanceProwl(float amount) {
+        if (evasiveLeft > 0f) {
+            evasiveLeft -= amount;
+            jinkLeft -= amount;
+            if (jinkLeft > 0f) return;
+
+            jinkLeft = MathUtils.getRandomNumberInRange(EVADE_JINK_MIN, EVADE_JINK_MAX);
+            // flip written out so the transient's post-load zero heals itself
+            jinkSign = jinkSign >= 0f ? -1f : 1f;
+
+            CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+            float away = player != null
+                    && player.getContainingLocation() == entity.getContainingLocation()
+                    ? Misc.getAngleInDegrees(player.getLocation(), entity.getLocation())
+                    : MathUtils.getRandomNumberInRange(0f, 360f);
+            setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
+                    EVADE_LEG,
+                    away + jinkSign * MathUtils.getRandomNumberInRange(50f, 110f)));
+            return;
+        }
+
+        if (hunting) return;
+
+        prowlLeft -= amount;
+        // retarget before arrival: a pondless mote that reaches its target expires
+        if (prowlLeft > 0f && Misc.getDistance(entity.getLocation(), target)
+                > PROWL_ARRIVE_RANGE) {
+            return;
+        }
+
+        prowlLeft = MathUtils.getRandomNumberInRange(
+                PROWL_RETARGET_MIN, PROWL_RETARGET_MAX);
+        float heading = Misc.getAngleInDegrees(entity.getLocation(), target)
+                + (MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f)
+                * MathUtils.getRandomNumberInRange(PROWL_TURN_MIN_DEG, PROWL_TURN_MAX_DEG);
+        setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
+                MathUtils.getRandomNumberInRange(PROWL_LEG_MIN, PROWL_LEG_MAX), heading));
+    }
+
     protected void advanceFleeMode() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null
@@ -773,6 +908,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
             float ring = LegendaryShields.SHIELD_RADIUS * (1f + 1.2f * (1f - f));
             Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
+        }
+
+        // the flare call: a shockwave ring run out to the full pull radius, so the
+        // reach of the summons is drawn rather than told
+        if (alpha > 0f && flareRing > 0f) {
+            float p = 1f - flareRing / FLARE_RING_SECONDS;
+            float radius = LegendaryShields.FLARE_PULL_RANGE * p;
+            float fade = (1f - p) * alpha;
+            Disc.drawOutline(loc.x, loc.y, radius, shieldColor, fade * 0.7f, 3f);
+            Disc.drawOutline(loc.x, loc.y, radius * 0.9f, shieldColor, fade * 0.3f, 1.5f);
+            Disc.draw(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * (1f + 2f * p),
+                    shieldColor, fade * 0.45f, 0f, true);
         }
     }
 }

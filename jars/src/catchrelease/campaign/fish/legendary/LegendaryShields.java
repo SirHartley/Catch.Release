@@ -42,8 +42,10 @@ public class LegendaryShields {
     public static final float BASE_SHIELD_REGEN_SECONDS = 10f;
     public static final float LAZY_SPEED_MULT = 0.4f;
 
-    public static final float EAT_SEEK_RANGE = 2500f;
+    public static final float EAT_SEEK_RANGE = 3500f;
     public static final float EAT_RANGE = 80f;
+    public static final float FLARE_PULL_RANGE = 3000f;
+    public static final float LURE_SECONDS = 20f;
     public static final float SHIELD_RADIUS = 52f;
 
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
@@ -60,6 +62,10 @@ public class LegendaryShields {
 
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
+
+        // any contact sends the Lantern Jack into hard jinks - the follow-up throw
+        // that beats its reknitting shell has to be earned
+        if (CHARGE_SHIELD_SPECIES.equals(id)) fish.startEvasive();
 
         // the first throw of a residency never lands, whatever the head: it wakes the
         // fish - the chase, the speed and the haunt all start here. The Longliner is
@@ -99,10 +105,13 @@ public class LegendaryShields {
                     state.shieldUnits = stacked - 1;
                     fish.flashShield();
                     say(fish.getMote(), "Shell burned");
+                    // the larder just emptied: ring the water for refills
+                    if (state.shieldUnits == 0) fish.tryLureFlare();
                     return HitResult.DEFLECTED;
                 }
                 if (fish.tryBaseShieldDeflect()) {
                     say(fish.getMote(), "Deflected");
+                    fish.tryLureFlare();
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -219,24 +228,25 @@ public class LegendaryShields {
             return LegendaryChases.isProvoked(id) ? 1f : LAZY_SPEED_MULT;
         }
 
+        // the Lantern Jack neither idles nor flees: prowl, hunt and evasion set its pace
+        if (CHARGE_SHIELD_SPECIES.equals(id)) return fish.getJackSpeedMult();
+
         if (isFleeing(fish)) {
             // the moray does not pulse - it runs, and its slip-dashes ride on top
             return MORAY_SPECIES.equals(id)
                     ? fish.getWildRunSpeedMult() : fish.getFleeSpeedMult();
         }
 
-        // the Lantern Jack is a hunter, never placid: full pace on its prey's tail
-        return CHARGE_SHIELD_SPECIES.equals(id) ? 1f : LAZY_SPEED_MULT;
+        return LAZY_SPEED_MULT;
     }
 
     /** How close the fleet must press before flight overrides everything else. The
-     *  Lantern Jack tolerates a much closer fleet - the hunt matters more to it - and
-     *  the moray bolts the moment the fleet is anywhere on its horizon. */
+     *  moray bolts the moment the fleet is anywhere on its horizon. */
     public static float getFleePressureRange(FishEntityPlugin fish) {
-        String id = fish == null || fish.getFishSpec() == null
-                ? null : fish.getFishSpec().id;
-        if (CHARGE_SHIELD_SPECIES.equals(id)) return 1000f;
-        if (MORAY_SPECIES.equals(id)) return 4500f;
+        if (fish != null && fish.getFishSpec() != null
+                && MORAY_SPECIES.equals(fish.getFishSpec().id)) {
+            return 4500f;
+        }
 
         return 3500f;
     }
@@ -251,14 +261,24 @@ public class LegendaryShields {
         return 40f;
     }
 
-    /** Whether this fish is in its active flight stage - sprinting away from the fleet. */
+    /** Whether this fish is in its active flight stage - sprinting away from the fleet.
+     *  The Quorum's fight is the escort and the shell game; the Lantern Jack stands
+     *  its water and answers pressure with jinks, not distance. */
     public static boolean isFleeing(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return false;
 
         String id = fish.getFishSpec().id;
-        if (MOTE_SHIELD_SPECIES.equals(id)) return false;
+        if (MOTE_SHIELD_SPECIES.equals(id) || CHARGE_SHIELD_SPECIES.equals(id)) {
+            return false;
+        }
 
         return POP_SHIELD_SPECIES.equals(id) || LegendaryChases.isProvoked(id);
+    }
+
+    /** The Lantern Jack's movement is its own: patrol legs, hunts and jink bursts. */
+    public static boolean isProwler(FishEntityPlugin fish) {
+        return asLegendaryMote(fish) != null
+                && CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id);
     }
 
     /** Keeps the Quorum's splinter escort matched to the ledger while its mote is up. */
@@ -297,6 +317,8 @@ public class LegendaryShields {
         if (asLegendaryMote(fish) == null) return;
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
 
+        fish.setHunting(false);
+
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
         if (getJackStack(state) >= JACK_STACK_MAX) return;
 
@@ -309,16 +331,7 @@ public class LegendaryShields {
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (other == self || other.isExpired()) continue;
             if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
-
-            // only what the lamps exposed: pond stock, phantoms and anything hidden are
-            // not on the menu, and neither is a legendary or somebody's orbiting shield
-            if (meal.isFromPond() || meal.isPhantom() || meal.isHeld() || meal.isDiving()) {
-                continue;
-            }
-            if (meal.getOrbitAnchor() != null || meal.isDecoy()) continue;
-            if (QuestPond.isQuestMote(other)) continue;
-            FishSpec spec = meal.getFishSpec();
-            if (spec == null || spec.rarity == FishRarity.LEGENDARY) continue;
+            if (!isEdible(other, meal)) continue;
 
             float distance = Misc.getDistance(self.getLocation(), other.getLocation());
             if (distance < best) {
@@ -329,6 +342,7 @@ public class LegendaryShields {
 
         if (prey == null) return;
 
+        fish.setHunting(true);
         fish.setSwimTarget(new Vector2f(prey.getLocation()));
 
         if (best <= EAT_RANGE) {
@@ -337,6 +351,41 @@ public class LegendaryShields {
             fish.flashShield();
             say(self, "Mote consumed. Another shell layers on.");
         }
+    }
+
+    /** The flare call: low on shells, the Jack rings the water and every edible mote
+     *  in the pull radius turns and runs at it - prey delivering itself. */
+    public static void lureFlare(FishEntityPlugin jack) {
+        SectorEntityToken self = jack.getMote();
+        if (self == null || self.getContainingLocation() == null) return;
+
+        for (SectorEntityToken other : self.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (other == self || other.isExpired()) continue;
+            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
+            if (!isEdible(other, meal)) continue;
+            if (Misc.getDistance(self.getLocation(), other.getLocation())
+                    > FLARE_PULL_RANGE) {
+                continue;
+            }
+
+            meal.startLure(self, LURE_SECONDS);
+        }
+
+        say(self, "The lantern flares. Nearby motes turn toward it.");
+    }
+
+    /** Only what the lamps exposed: pond stock, phantoms and anything hidden are not
+     *  on the menu, and neither is a legendary or somebody's orbiting shield. */
+    protected static boolean isEdible(SectorEntityToken mote, FishEntityPlugin meal) {
+        if (meal.isFromPond() || meal.isPhantom() || meal.isHeld() || meal.isDiving()) {
+            return false;
+        }
+        if (meal.getOrbitAnchor() != null || meal.isDecoy()) return false;
+        if (QuestPond.isQuestMote(mote)) return false;
+
+        FishSpec spec = meal.getFishSpec();
+        return spec != null && spec.rarity != FishRarity.LEGENDARY;
     }
 
     // the stack starts empty: stored shells are earned by eating, never granted
