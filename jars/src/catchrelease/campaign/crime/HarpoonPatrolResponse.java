@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -96,6 +97,8 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;
 
         for (String factionId : HarpoonOffence.getOwedFactions()) {
+            // the response never leaves the system the offence happened in
+            if (!HarpoonOffence.isOwedHere(factionId, player.getContainingLocation())) continue;
             if (Global.getSector().getMemoryWithoutUpdate().getBoolean(RETRY_KEY + factionId)) continue;
 
             final FactionAPI faction = Global.getSector().getFaction(factionId);
@@ -115,12 +118,11 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (patrolFaction == null || patrolFaction.isHostileTo(faction)) return false;
 
         // the space polices itself, but not through just anybody: a third party only
-        // collects for a faction it actually favours, and the Church and the Path
-        // never carry water for the fishing trade at all - their own holed fleets
-        // are the one thing their patrols will still come about
+        // collects for a faction it actually favours, and the Path and the pirates -
+        // the antagonists of this trade - never collect for anybody but themselves
         boolean thirdParty = !patrolFaction.getId().equals(faction.getId());
-        if (thirdParty && catchrelease.campaign.fish.FishingTaboo
-                .isTaboo(patrolFaction.getId())) {
+        if (thirdParty && (Factions.LUDDIC_PATH.equals(patrolFaction.getId())
+                || Factions.PIRATES.equals(patrolFaction.getId()))) {
             return false;
         }
         if (thirdParty && !patrolFaction.getRelationshipLevel(faction)

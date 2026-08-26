@@ -27,6 +27,7 @@ public class HarpoonOffence {
 
     public static final String INCIDENTS_KEY = "$catchrelease_harpoonIncidents";
     public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
+    public static final String OFFENCE_SYSTEM_KEY = "$catchrelease_harpoonWhere";
     public static final String EVASIONS_KEY = "$catchrelease_harpoonEvasions";
 
     public static final float EVASION_DELAY_DAYS = 4f;
@@ -76,7 +77,7 @@ public class HarpoonOffence {
         mem.set(HIT_COUNT_KEY, hits, MEMORY_DAYS);
 
         remember(faction.getId());
-        owe(faction.getId());
+        owe(faction.getId(), victim.getContainingLocation());
 
         // after the debt is on the books, because the third one calls a patrol in about it and there has to be something for that patrol to have come about
         escalate(victim, hits);
@@ -416,8 +417,17 @@ public class HarpoonOffence {
         return incidents;
     }
 
-    protected static void owe(String factionId) {
+    protected static void owe(String factionId, LocationAPI where) {
         getOutstanding().put(factionId, Global.getSector().getClock().getTimestamp());
+
+        // the debt is a local matter: it keeps the system it happened in, and the
+        // response never leaves it. A later offence elsewhere moves the whole claim
+        Map<String, String> systems = getMap(OFFENCE_SYSTEM_KEY);
+        if (where == null) {
+            systems.remove(factionId);
+        } else {
+            systems.put(factionId, where.getId());
+        }
     }
 
     public static boolean isOutstanding(String factionId) {
@@ -426,10 +436,20 @@ public class HarpoonOffence {
 
         if (Global.getSector().getClock().getElapsedDaysSince(when) > MEMORY_DAYS) {
             getOutstanding().remove(factionId);
+            getMap(OFFENCE_SYSTEM_KEY).remove(factionId);
             return false;
         }
 
         return true;
+    }
+
+    /** Whether the faction is owed, and owed for something that happened right here. */
+    public static boolean isOwedHere(String factionId, LocationAPI where) {
+        if (!isOutstanding(factionId)) return false;
+
+        String systemId = (String) getMap(OFFENCE_SYSTEM_KEY).get(factionId);
+
+        return systemId == null || (where != null && systemId.equals(where.getId()));
     }
 
     public static List<String> getOwedFactions() {
@@ -445,6 +465,7 @@ public class HarpoonOffence {
 
     public static void settle(String factionId) {
         getOutstanding().remove(factionId);
+        getMap(OFFENCE_SYSTEM_KEY).remove(factionId);
     }
 
     public static boolean wasHarpooned(CampaignFleetAPI fleet) {
