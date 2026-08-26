@@ -9,6 +9,8 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
+import java.util.List;
+
 public class CultJob extends FishJob {
 
     public static final int VALUE = 2800;
@@ -18,6 +20,9 @@ public class CultJob extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
+        List<FishReward> prizes = FishRewardRoller.roll(genRandom, VALUE, false);
+        if (prizes.isEmpty()) return false;
+
         if (!setGlobalReference("$catchrelease_cultRef", "$catchrelease_cultInProgress")) {
             return false;
         }
@@ -38,7 +43,7 @@ public class CultJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, false));
+        addRewards(prizes);
 
         setUpSpine();
 

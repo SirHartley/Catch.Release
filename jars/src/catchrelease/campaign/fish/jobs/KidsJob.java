@@ -12,8 +12,10 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,10 +28,14 @@ public class KidsJob extends FishJob {
     public static final FishGrade BONUS_GRADE = FishGrade.FINE;
 
     protected boolean toLoud = true;
+    protected boolean rewardsChecked;
     protected transient FishHandoffPicker.Selection pendingSelection;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
+        List<FishReward> prizes = FishRewardRoller.roll(genRandom, VALUE, false);
+        if (prizes.isEmpty()) return false;
+
         if (!setGlobalReference("$catchrelease_duelRef", "$catchrelease_duelInProgress")) {
             return false;
         }
@@ -49,7 +55,8 @@ public class KidsJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, false));
+        addRewards(prizes);
+        rewardsChecked = true;
 
         setUpSpine();
 
@@ -153,6 +160,52 @@ public class KidsJob extends FishJob {
         }
 
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+    }
+
+    @Override
+    public List<FishReward> getRewards() {
+        ensureNonCreditRewards();
+
+        return super.getRewards();
+    }
+
+    @Override
+    public String describeRewards() {
+        ensureNonCreditRewards();
+
+        return super.describeRewards();
+    }
+
+    @Override
+    public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
+        ensureNonCreditRewards();
+        super.addDescriptionForNonEndStage(info, width, height);
+    }
+
+    @Override
+    protected void beforePayment(FishCatch offered, MemoryAPI mem) {
+        ensureNonCreditRewards();
+    }
+
+    protected void ensureNonCreditRewards() {
+        if (rewardsChecked) return;
+        rewardsChecked = true;
+
+        int replacements = 0;
+        for (FishReward reward : new ArrayList<>(rewards)) {
+            if (!(reward instanceof FishReward.Credits)
+                    && !(reward instanceof FishReward.LocationData)
+                    && !(reward instanceof FishReward.Commodity)) {
+                continue;
+            }
+
+            rewards.remove(reward);
+            replacements++;
+        }
+
+        for (int i = 0; i < replacements; i++) {
+            addRewards(FishRewardRoller.roll(random(), VALUE, false));
+        }
     }
 
     @Override
