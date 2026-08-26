@@ -83,6 +83,19 @@ public class FishRouteIntel extends BaseIntelPlugin {
         return false;
     }
 
+    /** Drops any tracked copy of this exact route - the map's clear button uses it,
+     *  because a tracked twin draws identically to the live plot and a clear that
+     *  left it standing would read as the button doing nothing. */
+    public static void forget(FishRoute.Saved route) {
+        if (route == null || Global.getSector() == null) return;
+
+        for (FishRouteIntel intel : getAll()) {
+            if (intel.matches(route)) {
+                Global.getSector().getIntelManager().removeIntel(intel);
+            }
+        }
+    }
+
     public static List<FishRouteIntel> getAll() {
         List<FishRouteIntel> out = new ArrayList<>();
         if (Global.getSector() == null) return out;

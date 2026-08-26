@@ -125,6 +125,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             if (event.isLMBDownEvent() && FishRoute.get() != null
                     && isInCloseLabel(event.getX(), event.getY())) {
+                // a tracked copy of the same route draws the same badges, so the
+                // clear takes it too - other saved routes are their own decisions
+                catchrelease.campaign.fish.intel.FishRouteIntel.forget(FishRoute.get());
                 FishRoute.clear();
                 event.consume();
             }
