@@ -21,6 +21,8 @@ import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
+import catchrelease.campaign.fish.legendary.LegendaryChases;
+import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
@@ -248,6 +250,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "ackBycatch":
                 FishermanBycatch.markExplained();
                 return true;
+            case "longlinerEncountered":
+                return LegendaryChases.wasEncountered(LegendaryShields.POP_SHIELD_SPECIES);
 
             case "lampStop":
                 return openLampStop(dialog);

@@ -35,6 +35,9 @@ public class LegendaryChases {
         public long seenAt;
         public boolean caught;
 
+        // permanent memory that the player saw through this particular disguise
+        public boolean encountered;
+
         // the Longliner's disguise is spent for this residency once the lamp finds it
         public boolean revealed;
 
@@ -88,6 +91,14 @@ public class LegendaryChases {
         if (chase == null || chase.caught) return;
 
         chase.revealed = true;
+        chase.encountered = true;
+    }
+
+    public static boolean wasEncountered(String speciesId) {
+        Chase chase = speciesId == null ? null : getLedger().get(speciesId);
+
+        // revealed/caught migrate saves made before the permanent encounter bit existed
+        return chase != null && (chase.encountered || chase.revealed || chase.caught);
     }
 
     public static boolean isRevealed(String speciesId) {
