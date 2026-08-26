@@ -28,6 +28,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotsAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -741,8 +742,6 @@ public class FishingIntro {
             return;
         }
 
-        recordQualifyingCatch(target, caught);
-
         if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
         if (target.needsDeepGear
                 && (caught.method != FishLogEntry.Method.HARPOON
@@ -758,11 +757,12 @@ public class FishingIntro {
     public static FishSpec applyCatchTargetProtection(FishSpec rolled,
                                                        FishLogEntry.Method method,
                                                        CatchImplement implement,
+                                                       LocationAPI where,
                                                        String planterId) {
         Target target = getTarget();
         FishSpec wanted = getProtectedTarget(target);
         if (rolled == null || wanted == null || rolled.rarity != wanted.rarity) return rolled;
-        if (!matchesTargetMethod(target, method, implement)) return rolled;
+        if (!isTargetAvailable(target, wanted, method, implement, where)) return rolled;
         if (planterId != null && !TutorialConstants.TARGET_KEY.equals(planterId)) return rolled;
         if (target.qualifyingCatches < TutorialConstants.TARGET_PROTECTION_CATCHES - 1) {
             return rolled;
@@ -771,12 +771,15 @@ public class FishingIntro {
         return wanted;
     }
 
-    protected static void recordQualifyingCatch(Target target, FishCatch caught) {
+    public static void recordCatchForTargetProtection(FishCatch caught, LocationAPI where) {
+        Target target = getTarget();
+        if (caught == null) return;
+
         FishSpec wanted = getProtectedTarget(target);
         FishSpec landed = caught.getSpec();
         if (wanted == null || landed == null || landed.rarity != wanted.rarity) return;
         if (wanted.id.equals(landed.id)) return;
-        if (!matchesTargetMethod(target, caught.method, caught.implement)) return;
+        if (!isTargetAvailable(target, wanted, caught.method, caught.implement, where)) return;
 
         target.qualifyingCatches = Math.min(
                 TutorialConstants.TARGET_PROTECTION_CATCHES - 1,
@@ -789,6 +792,14 @@ public class FishingIntro {
         if (target.speciesIds == null || target.speciesIds.size() != 1) return null;
 
         return FishSpecLoader.getFishSpec(target.speciesIds.get(0));
+    }
+
+    protected static boolean isTargetAvailable(Target target, FishSpec wanted,
+                                               FishLogEntry.Method method,
+                                               CatchImplement implement,
+                                               LocationAPI where) {
+        return matchesTargetMethod(target, method, implement)
+                && FishRanges.matches(wanted, where, implement);
     }
 
     protected static boolean matchesTargetMethod(Target target,
