@@ -299,7 +299,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","$PersonRank $personName does not appear to be reading from anything this time.
+EndConversation","$PersonRank $personName does not appear to be reading from anything this time.
 
 ""Second one this month. There was a number attached to the first, and you will notice nobody is quoting you one now.""
 
@@ -313,7 +313,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","$PersonRank $personName has the file open and does not read from it.
+EndConversation","$PersonRank $personName has the file open and does not read from it.
 
 ""We have stopped counting out loud. You will have noticed nobody is quoting you a number.""
 
@@ -329,7 +329,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","""The first incident was a fine. The second is deliberate.""
+EndConversation","""The first incident was a fine. The second is deliberate.""
 
 $PersonRank $personName sets the slate face down.
 
@@ -345,7 +345,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
+EndConversation","""The account was settled once and reopened by you."" $PersonName closes the file. ""Accounts that reopen are not renegotiated. They are written off, and then recovered.""",,
 catchrelease_fineDemandRepeatLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -357,7 +357,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
+EndConversation","$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
 catchrelease_fineDemandRepeatLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -369,7 +369,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","There is no greeting. The speaker is already shouting when the channel opens.
+EndConversation","There is no greeting. The speaker is already shouting when the channel opens.
 
 ""Again! Moloch puts a hook in your hand and you cast it into Ludd's children twice?""
 
@@ -387,7 +387,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
+EndConversation","""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
 catchrelease_fineDemandRepeatDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -399,7 +399,7 @@ $entity.catchrelease_harpoonForced = true 1
 unset $entity.catchrelease_fineConv
 ShowDefaultVisual
 $entity.ignorePlayerCommRequests = true 0
-CatchReleaseCMD leaveEncounter","""You were told the penalty was the favourable outcome."" $PersonRank $personName closes the notice. ""It was.""",,
+EndConversation","""You were told the penalty was the favourable outcome."" $PersonRank $personName closes the notice. ""It was.""",,
 catchrelease_patrolPaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1240
 $entity.catchrelease_harpoonFineSettled
 !$entity.isHostile","$menuState = fleetConvMain 0
@@ -411,7 +411,7 @@ The reference closes.
 catchrelease_patrolUnpaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1250
 !$entity.catchrelease_harpoonFineSettled
 $entity.isHostile","ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,"Refused, and still angry about it. Gated on their hostility rather than on the conversation having happened, so this cannot go on refusing to talk to the player for a month after everyone involved has calmed down."
+EndConversation","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,"Refused, and still angry about it. Gated on their hostility rather than on the conversation having happened, so this cannot go on refusing to talk to the player for a month after everyone involved has calmed down."
 catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),"The affordability check greys the option out and explains why, which is vanilla's own handling and better than hiding it - a player who cannot pay should still see what they could not pay. Safe in the script column because options from every matching rule are added before any of their scripts run."
 catchrelease_fineOptTalk,CatchReleaseFineOptions,,"SetStoryOption catchrelease_talkFine 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_talkFine:Talk your way out of it,"Vanilla puts one of these on every patrol stop it writes - the transponder check and the smuggling scan both offer it in exactly this shape, and reusing avoidCargoScan for the bonus XP is deliberate: this is the same kind of thing being talked out of. The option has to exist before SetStoryOption can convert it, which it does, because every matching rule adds its options before any of their scripts run."
 catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,10:catchrelease_refuseFine:Refuse and cut the comm link,
@@ -448,7 +448,7 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 unset $entity.catchrelease_fineConv
 $entity.ignorePlayerCommRequests = true 0
 ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","""So was I, once."" The link closes.
+EndConversation","""So was I, once."" The link closes.
 
 Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
 catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"HideMapMarker
