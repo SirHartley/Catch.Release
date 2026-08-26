@@ -113,6 +113,7 @@ public class MafiaJob extends FishJob {
         PersonAPI giver = getPerson();
         if (giver != null) {
             giver.setName(new FullName(LEFT_FIRST_NAME, "", Gender.MALE));
+            ensureMalePortrait(giver);
             left = giver.getName().getFirst();
         }
 
@@ -126,10 +127,20 @@ public class MafiaJob extends FishJob {
 
         if (partner != null) {
             partner.setName(new FullName(RIGHT_FIRST_NAME, "", Gender.MALE));
+            ensureMalePortrait(partner);
             partner.setRankId(Ranks.CITIZEN);
             partner.setVoice(Voices.VILLAIN);
             right = partner.getName().getFirst();
         }
+    }
+
+    protected void ensureMalePortrait(PersonAPI person) {
+        if (person == null || person.getFaction() == null) return;
+        if (person.getFaction().getPortraits(Gender.MALE).getItems()
+                .contains(person.getPortraitSprite())) return;
+
+        PersonAPI replacement = person.getFaction().createRandomPerson(Gender.MALE, random());
+        if (replacement != null) person.setPortraitSprite(replacement.getPortraitSprite());
     }
 
     @Override
