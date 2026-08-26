@@ -227,7 +227,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         if (applyTutorialProtection) {
             fish = FishingIntro.applyCatchTargetProtection(
-                    fish, method, CatchImplement.of(anchor), QuestPond.getPlanter(catchTarget));
+                    fish, method, CatchImplement.of(anchor),
+                    anchor == null ? null : anchor.getContainingLocation(),
+                    QuestPond.getPlanter(catchTarget));
         }
 
         FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(
@@ -393,6 +395,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (resolved) return;
         resolved = true;
         restoreCampaignMusicVolume();
+
+        if (caught) {
+            FishingIntro.recordCatchForTargetProtection(specimen,
+                    anchor == null ? null : anchor.getContainingLocation());
+        }
 
         // panel closes before the dialog, unless panel-close is what triggered this
         if (!dismissed && delegate != null) delegate.dismissPanel();
