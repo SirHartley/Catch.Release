@@ -57,8 +57,10 @@ public class FishRewardRoller {
 
         coalesceCredits(rewards);
 
-        // Fallback if every other kind was filtered out empty (no upgrades left, no species left, etc).
-        if (rewards.isEmpty()) rewards.add(FishReward.credits(creditPayout(value)));
+        // Cash-enabled jobs still need a payout after every progression reward is exhausted.
+        if (rewards.isEmpty() && allowCredits) {
+            rewards.add(FishReward.credits(creditPayout(value)));
+        }
 
         return rewards;
     }
@@ -81,16 +83,34 @@ public class FishRewardRoller {
 
     protected static FishReward rollOne(Random random, int value, boolean allowCredits,
                                         Set<String> reserved) {
+        if (!allowCredits) return rollNonCredit(random, reserved);
+
         float roll = random.nextFloat();
 
-        if (allowCredits && roll < 0.34f) return FishReward.credits(creditPayout(value));
+        if (roll < 0.34f) return FishReward.credits(creditPayout(value));
         if (roll < 0.52f) return rollUpgrade(random, reserved);
         if (roll < 0.66f) return rollTackle(random, reserved);
         if (roll < 0.78f) return rollLocationData(random, value);
         if (roll < 0.86f) return rollBackdrop(random);
-        if (allowCredits && roll < 0.93f) return FishReward.credits(creditPayout(value));
+        if (roll < 0.93f) return FishReward.credits(creditPayout(value));
 
         return rollBlueprint(random);
+    }
+
+    protected static FishReward rollNonCredit(Random random, Set<String> reserved) {
+        WeightedRandomPicker<FishReward> picker = new WeightedRandomPicker<>(random);
+
+        addIfPresent(picker, rollUpgrade(random, reserved), 0.52f);
+        addIfPresent(picker, rollTackle(random, reserved), 0.14f);
+        addIfPresent(picker, rollBackdrop(random), 0.08f);
+        addIfPresent(picker, rollBlueprint(random), 0.14f);
+
+        return picker.pick();
+    }
+
+    protected static void addIfPresent(WeightedRandomPicker<FishReward> picker,
+                                       FishReward reward, float weight) {
+        if (reward != null) picker.add(reward, weight);
     }
 
     protected static FishReward rollUpgrade(Random random, Set<String> reserved) {
