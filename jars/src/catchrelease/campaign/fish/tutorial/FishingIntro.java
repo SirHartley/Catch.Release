@@ -231,8 +231,7 @@ public class FishingIntro {
 
         @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            LabelAPI title = info.addPara(getName(), getTitleColor(mode), 0f);
-            FishRequirement.highlight(title, getAsks(), getName());
+            info.addPara(getName(), getTitleColor(mode), 0f);
 
             addBulletPoints(info, mode);
         }
@@ -314,7 +313,7 @@ public class FishingIntro {
             Color highlight = Misc.getHighlightColor();
             Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
-            FactionAPI faction = getFactionForUIColors();
+            FactionAPI faction = getFishermanFaction();
             if (target != null) {
                 info.addImages(width, 128, opad, opad,
                         FishermanIdentity.getPortrait(0f), faction.getCrest());
@@ -418,6 +417,10 @@ public class FishingIntro {
 
         @Override
         public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getPlayerFaction();
+        }
+
+        public FactionAPI getFishermanFaction() {
             return Global.getSector().getFaction(FishermanConstants.FACTION);
         }
 

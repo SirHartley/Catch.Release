@@ -171,7 +171,7 @@ public class FishRumors {
 
         @Override
         public FactionAPI getFactionForUIColors() {
-            return Global.getSector().getFaction(FishermanConstants.FACTION);
+            return Global.getSector().getPlayerFaction();
         }
 
         @Override

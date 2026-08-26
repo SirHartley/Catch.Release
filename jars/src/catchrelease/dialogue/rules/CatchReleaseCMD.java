@@ -312,7 +312,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 target == null ? null : target.systemId,
                 intel.getMapLocation(null),
                 title == null ? "Target" : title,
-                intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
+                intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }
 
     protected boolean showWorkMap(InteractionDialogAPI dialog, String title) {
@@ -323,7 +323,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         FishermanQuest.QuestIntel intel = new FishermanQuest.QuestIntel(work);
         return QuestDialogMap.showRemote(dialog, work.systemId, intel.getMapLocation(null),
                 title == null ? "Target" : title,
-                intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
+                intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }
 
     protected boolean showBackdrop(InteractionDialogAPI dialog) {
