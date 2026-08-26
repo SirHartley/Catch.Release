@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.map.FishPresence;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -59,7 +60,7 @@ public class LegendaryChases {
     }
 
     public static boolean matches(FishSpec spec, LocationAPI where) {
-        if (where == null) return false;
+        if (where == null || !FishingIntro.isComplete()) return false;
 
         Chase chase = getChase(spec);
         if (chase == null || chase.caught || chase.systemId == null) return false;
@@ -74,6 +75,8 @@ public class LegendaryChases {
     }
 
     public static String getHostSystemId(FishSpec spec) {
+        if (!FishingIntro.isComplete()) return null;
+
         Chase chase = getChase(spec);
 
         return chase == null || chase.caught ? null : chase.systemId;

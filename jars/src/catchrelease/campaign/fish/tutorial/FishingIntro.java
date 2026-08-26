@@ -471,6 +471,10 @@ public class FishingIntro {
         return getStage() >= stage;
     }
 
+    public static boolean isComplete() {
+        return Global.getSector() != null && isAtLeast(DONE);
+    }
+
     protected static void setStage(int stage) {
         if (getStage() >= stage) return;
 
