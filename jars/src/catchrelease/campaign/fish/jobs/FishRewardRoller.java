@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
+import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -195,6 +196,8 @@ public class FishRewardRoller {
     }
 
     protected static FishReward rollBackdrop(Random random) {
+        if (!CrabWares.hasConservatoryPlans()) return null;
+
         WeightedRandomPicker<Backdrop> picker = new WeightedRandomPicker<>(random);
 
         for (Backdrop backdrop : Backdrops.getUnowned()) {

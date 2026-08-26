@@ -45,6 +45,7 @@ public class CrabBackdrops {
 
     public static List<Backdrop> getPool() {
         List<Backdrop> pool = new ArrayList<>();
+        if (!CrabWares.hasConservatoryPlans()) return pool;
 
         for (Backdrop backdrop : BackdropLoader.getAll()) {
             if (!backdrop.crabStock) continue;
