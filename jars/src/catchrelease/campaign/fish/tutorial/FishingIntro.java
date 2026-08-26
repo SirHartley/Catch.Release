@@ -732,7 +732,13 @@ public class FishingIntro {
 
     public static void onCatchStored(FishCatch caught) {
         Target target = getTarget();
-        if (target == null || caught == null || target.anySpecies) return;
+        if (target == null || caught == null) return;
+        if (target.anySpecies) {
+            if (TutorialConstants.TARGET_KEY.equals(caught.questTargetId)) {
+                setLanded(target, true);
+            }
+            return;
+        }
         if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
         if (target.needsDeepGear
                 && (caught.method != FishLogEntry.Method.HARPOON
@@ -939,7 +945,9 @@ public class FishingIntro {
         Target target = getTarget();
         if (target == null) return false;
 
-        if (target.anySpecies) return findAny(target.needsDeepGear) != null;
+        if (target.anySpecies) {
+            return find(null, target.needsDeepGear, TutorialConstants.TARGET_KEY) != null;
+        }
 
         for (String speciesId : target.speciesIds) {
             if (find(speciesId, target.needsDeepGear) == null) return false;
@@ -948,11 +956,11 @@ public class FishingIntro {
         return true;
     }
 
-    protected static FishCatch findAny(boolean deepGear) {
-        return find(null, deepGear);
+    protected static FishCatch find(String speciesId, boolean deepGear) {
+        return find(speciesId, deepGear, null);
     }
 
-    protected static FishCatch find(String speciesId, boolean deepGear) {
+    protected static FishCatch find(String speciesId, boolean deepGear, String questTargetId) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
@@ -962,6 +970,7 @@ public class FishingIntro {
 
             for (FishCatch entry : FishItems.read(data)) {
                 if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
+                if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) continue;
 
                 if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
                         || entry.method != FishLogEntry.Method.HARPOON)) {
@@ -980,8 +989,10 @@ public class FishingIntro {
         if (target == null || !isTargetMet()) return false;
 
         if (target.anySpecies) {
-            FishCatch any = findAny(target.needsDeepGear);
-            if (any != null) spend(any.speciesId, target.needsDeepGear);
+            FishCatch any = find(null, target.needsDeepGear, TutorialConstants.TARGET_KEY);
+            if (any != null) {
+                spend(any.speciesId, target.needsDeepGear, TutorialConstants.TARGET_KEY);
+            }
         } else {
             for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
         }
@@ -992,6 +1003,10 @@ public class FishingIntro {
     }
 
     protected static boolean spend(String speciesId, boolean deepGear) {
+        return spend(speciesId, deepGear, null);
+    }
+
+    protected static boolean spend(String speciesId, boolean deepGear, String questTargetId) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return false;
 
@@ -1007,6 +1022,7 @@ public class FishingIntro {
             for (int i = 0; i < contents.size(); i++) {
                 FishCatch entry = contents.get(i);
                 if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
+                if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) continue;
 
                 if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
                         || entry.method != FishLogEntry.Method.HARPOON)) {

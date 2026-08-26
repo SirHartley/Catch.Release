@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -291,6 +292,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.specimen.method = method;
         this.specimen.implement = CatchImplement.of(anchor);
         this.specimen.sourceId = getSourceId(anchor);
+        this.specimen.questTargetId = QuestPond.getPlanter(catchTarget);
         // All landed cargo needs a catch time, not only the Fisherman's planted specimen: jobs can ask whether this exact water was worked after their agreement was made.
         this.specimen.caughtAt = Global.getSector().getClock().getTimestamp();
         catchrelease.campaign.fish.fisherman.FishermanQuest.markCatch(
