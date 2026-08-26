@@ -28,7 +28,8 @@ public class CatchReleaseCampaignPlugin extends BaseCampaignPlugin {
 
         CampaignFleetAPI fleet = (CampaignFleetAPI) target;
 
-        if (HarpoonOffence.wasHarpooned(fleet)) {
+        if (HarpoonOffence.wasHarpooned(fleet)
+                || HarpoonedFleetFID.isAutoCommsRequested(fleet)) {
             return new PluginPick<InteractionDialogPlugin>(
                     new HarpoonedFleetFID(), CampaignPlugin.PickPriority.MOD_SPECIFIC);
         }
