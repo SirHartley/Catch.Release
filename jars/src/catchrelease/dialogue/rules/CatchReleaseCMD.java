@@ -65,6 +65,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
+    public static final String CONTINUITY_QUESTION_AVAILABLE =
+            "$catchreleaseContinuityQuestionAvailable";
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
 
@@ -696,9 +698,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(DRIFT, FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(
                 target == null ? null : target.getContainingLocation())), 0);
 
-        local.set(STAGE, FishingIntro.getStage(), 0);
+        int stage = FishingIntro.getStage();
+        boolean targetMet = FishingIntro.isTargetMet();
+        boolean deepHandoff = FishingIntro.isDeepHandoffPending();
+
+        local.set(STAGE, stage, 0);
         local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
-        local.set(DEEP_HANDOFF, FishingIntro.isDeepHandoffPending(), 0);
+        local.set(DEEP_HANDOFF, deepHandoff, 0);
         local.set(OUTFITTER, FishingIntro.isAtLeast(FishingIntro.FISH_TWO), 0);
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
@@ -706,15 +712,24 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         FishingIntro.Target rung = FishingIntro.getTarget();
 
         local.set(TARGET, FishingIntro.describeTarget(), 0);
-        local.set(TARGET_MET, FishingIntro.isTargetMet(), 0);
+        local.set(TARGET_MET, targetMet, 0);
         local.set(TARGET_WHERE, rung == null || rung.systemName == null ? "" : rung.systemName, 0);
         local.set(TARGET_POND, rung != null && rung.atPond, 0);
         local.set(TARGET_DEEP, rung != null && rung.needsDeepGear, 0);
         local.set(TARGET_SET, rung != null, 0);
         local.set(TARGET_PLACED, rung != null && rung.systemName != null, 0);
-        local.set(TARGET_HERE, rung != null && rung.systemId != null && target != null
+        boolean targetHere = rung != null && rung.systemId != null && target != null
                 && target.getContainingLocation() != null
-                && rung.systemId.equals(target.getContainingLocation().getId()), 0);
+                && rung.systemId.equals(target.getContainingLocation().getId());
+
+        local.set(TARGET_HERE, targetHere, 0);
+        local.set(CONTINUITY_QUESTION_AVAILABLE,
+                stage == FishingIntro.FISH_ONE
+                        && !targetMet
+                        && targetHere
+                        && !deepHandoff
+                        && !Global.getSector().getMemoryWithoutUpdate()
+                        .getBoolean("$catchrelease_fisherAsked_fourJumps"), 0);
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);

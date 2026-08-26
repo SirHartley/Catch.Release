@@ -1672,7 +1672,7 @@ $catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight
 catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3
-$global.catchrelease_fisherAsked_fourJumps
+!$catchreleaseContinuityQuestionAvailable
 !$global.catchrelease_fisherAsked_okay","SetOptionColor catchrelease_fisherOkay highlight
 ",,58:catchrelease_fisherOkay:Are you okay?,
 catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
