@@ -87,13 +87,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
 
     @Override
     public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-        LabelAPI title = info.addPara(getName(), getTitleColor(mode), 0f);
-
-        FishSpec spec = getSpec();
-        if (spec != null) {
-            title.setHighlight(getName());
-            title.setHighlightColor(spec.rarity.color);
-        }
+        info.addPara(getName(), getTitleColor(mode), 0f);
 
         addBulletPoints(info, mode);
     }

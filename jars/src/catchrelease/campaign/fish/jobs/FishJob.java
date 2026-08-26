@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.dialogue.rules.QuestDialogMap;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -20,6 +21,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
+import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -29,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public abstract class FishJob extends HubMissionWithBarEvent
         implements catchrelease.campaign.fish.shop.FishAsker {
@@ -304,7 +307,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
                     : "Target";
 
             return QuestDialogMap.showRemote(dialog, systemId, location, title,
-                    getFactionForUIColors(), getIcon(), getIntelTags(null));
+                    getGiverFaction(), getIcon(), getIntelTags(null));
         }
 
         return super.callAction(action, ruleId, dialog, params, memoryMap);
@@ -563,6 +566,24 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return person == null ? null : person.getMarket();
     }
 
+    protected FactionAPI getGiverFaction() {
+        PersonAPI person = getPerson();
+        return person == null ? Global.getSector().getPlayerFaction() : person.getFaction();
+    }
+
+    @Override
+    public FactionAPI getFactionForUIColors() {
+        return Global.getSector().getPlayerFaction();
+    }
+
+    @Override
+    public Set<String> getIntelTags(SectorMapAPI map) {
+        Set<String> tags = super.getIntelTags(map);
+        FactionAPI faction = getGiverFaction();
+        if (faction != null && !faction.isPlayerFaction()) tags.add(faction.getId());
+        return tags;
+    }
+
     protected static boolean hasPlayerFleet() {
         return Global.getSector() != null && Global.getSector().getPlayerFleet() != null;
     }
@@ -573,8 +594,67 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     @Override
-    public Color getTitleColor(ListInfoMode mode) {
-        return getFactionForUIColors().getBaseUIColor();
+    public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
+        float opad = 10f;
+        FactionAPI faction = getGiverFaction();
+        PersonAPI person = getPerson();
+
+        if (person != null) {
+            info.addImages(width, 128, opad, opad, person.getPortraitSprite(), faction.getCrest());
+            String post = "one";
+            if (person.getPost() != null) post = person.getPost().toLowerCase();
+            if (post == null && person.getRank() != null) post = person.getRank().toLowerCase();
+            info.addPara(Misc.ucFirst(getMissionTypeNoun()) + " given by " + post + " "
+                            + person.getNameString() + ", affiliated with "
+                            + faction.getDisplayNameWithArticle() + ".",
+                    opad, faction.getBaseUIColor(),
+                    faction.getDisplayNameWithArticleWithoutArticle());
+        }
+
+        addDescriptionForCurrentStage(info, width, height);
+        addBulletPoints(info, ListInfoMode.IN_DESC);
+        if (abandonStage != null && !isAbandoned() && !isSucceeded() && !isFailed()) {
+            addAbandonButton(info, width);
+        }
+    }
+
+    @Override
+    public void createConfirmationPrompt(Object buttonId, TooltipMakerAPI prompt) {
+        if (buttonId != BUTTON_ABANDON) {
+            super.createConfirmationPrompt(buttonId, prompt);
+            return;
+        }
+
+        boolean loseRepFaction = getRepPenaltyFailureFaction() > 0;
+        boolean loseRepPerson = getRepPenaltyFailurePerson() > 0;
+        if (!loseRepFaction && !loseRepPerson) {
+            prompt.addPara("You can abandon this " + getMissionTypeNoun()
+                    + " without a penalty.", 0f);
+        } else if (canAbandonWithoutPenalty()) {
+            prompt.addPara("It's been less than a day, and you can still abandon this "
+                    + getMissionTypeNoun() + " without a penalty.", 0f);
+        } else {
+            FactionAPI faction = getGiverFaction();
+            if (loseRepFaction && !loseRepPerson) {
+                prompt.addPara("You can abandon this " + getMissionTypeNoun()
+                                + ", but will suffer a reputation penalty with "
+                                + faction.getDisplayNameWithArticle() + ".", 0f,
+                        Misc.getTextColor(), faction.getBaseUIColor(),
+                        faction.getDisplayNameWithArticleWithoutArticle());
+            } else if (!loseRepFaction) {
+                prompt.addPara("You can abandon this " + getMissionTypeNoun()
+                                + ", but will suffer a reputation penalty with "
+                                + getPerson().getNameString() + ".",
+                        Misc.getTextColor(), 0f);
+            } else {
+                prompt.addPara("You can abandon this " + getMissionTypeNoun()
+                                + ", but will suffer a reputation penalty with both "
+                                + getPerson().getNameString() + " and "
+                                + faction.getDisplayNameWithArticle() + ".", 0f,
+                        Misc.getTextColor(), faction.getBaseUIColor(),
+                        faction.getDisplayNameWithArticleWithoutArticle());
+            }
+        }
     }
 
     @Override

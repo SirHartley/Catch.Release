@@ -189,8 +189,7 @@ public class FishermanQuest {
 
         @Override
         public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
-            LabelAPI title = info.addPara(getName(), getTitleColor(mode), 0f);
-            FishRequirement.highlight(title, getAsks(), getName());
+            info.addPara(getName(), getTitleColor(mode), 0f);
 
             addBulletPoints(info, mode);
         }
@@ -258,7 +257,7 @@ public class FishermanQuest {
             float opad = 10f;
             Color text = getBulletColorForMode(ListInfoMode.IN_DESC);
 
-            FactionAPI faction = getFactionForUIColors();
+            FactionAPI faction = getFishermanFaction();
             info.addImages(width, 128, opad, opad,
                     FishermanIdentity.getPortrait(0f), faction.getCrest());
 
@@ -322,6 +321,10 @@ public class FishermanQuest {
 
         @Override
         public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getPlayerFaction();
+        }
+
+        public FactionAPI getFishermanFaction() {
             return Global.getSector().getFaction(FishermanConstants.FACTION);
         }
 
