@@ -1485,7 +1485,10 @@ map. Surveying a world out there instead turns up the one crewman who was put of
 at the catch. In an inhabited system there is already a boat posted, so it simply *is* somewhere
 else the next time anybody looks — `FishermanInterception` teleports it in outside the viewport and
 nobody aboard remarks on it, which is the cheapest way to say what the Fisherman is. And hailing a
-boat works on its own. All of them call `FishingIntro.point()`, which is idempotent.
+boat works on its own. All of them call `FishingIntro.point()`, which is idempotent. The first-hail
+option keeps that provenance: recovered property takes precedence, then a rescued crewman, then the
+rating's market name captured at the bar; direct starts and older saves without an origin keep the
+generic fishing-work label.
 
 **The shelf restocks off the sale, not off a calendar.** A monthly tick pays out to whoever happens
 to ask just after it, which rewards standing still. Every purchase books a replacement due 30 days
