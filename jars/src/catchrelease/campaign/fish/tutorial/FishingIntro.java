@@ -124,6 +124,7 @@ public class FishingIntro {
         public boolean needsDeepGear;
         public boolean anySpecies;
         public boolean landed;
+        public int qualifyingCatches;
     }
 
     public static class Keeper implements com.fs.starfarer.api.EveryFrameScript {
@@ -739,6 +740,9 @@ public class FishingIntro {
             }
             return;
         }
+
+        recordQualifyingCatch(target, caught);
+
         if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
         if (target.needsDeepGear
                 && (caught.method != FishLogEntry.Method.HARPOON
@@ -749,6 +753,50 @@ public class FishingIntro {
         } else if (target.speciesIds.size() > 1) {
             updateIntel();
         }
+    }
+
+    public static FishSpec applyCatchTargetProtection(FishSpec rolled,
+                                                       FishLogEntry.Method method,
+                                                       CatchImplement implement,
+                                                       String planterId) {
+        Target target = getTarget();
+        FishSpec wanted = getProtectedTarget(target);
+        if (rolled == null || wanted == null || rolled.rarity != wanted.rarity) return rolled;
+        if (!matchesTargetMethod(target, method, implement)) return rolled;
+        if (planterId != null && !TutorialConstants.TARGET_KEY.equals(planterId)) return rolled;
+        if (target.qualifyingCatches < TutorialConstants.TARGET_PROTECTION_CATCHES - 1) {
+            return rolled;
+        }
+
+        return wanted;
+    }
+
+    protected static void recordQualifyingCatch(Target target, FishCatch caught) {
+        FishSpec wanted = getProtectedTarget(target);
+        FishSpec landed = caught.getSpec();
+        if (wanted == null || landed == null || landed.rarity != wanted.rarity) return;
+        if (wanted.id.equals(landed.id)) return;
+        if (!matchesTargetMethod(target, caught.method, caught.implement)) return;
+
+        target.qualifyingCatches = Math.min(
+                TutorialConstants.TARGET_PROTECTION_CATCHES - 1,
+                target.qualifyingCatches + 1);
+    }
+
+    protected static FishSpec getProtectedTarget(Target target) {
+        if (target == null || target.landed || target.anySpecies) return null;
+        if (target.stage != FISH_ONE && target.stage != FISH_TWO) return null;
+        if (target.speciesIds == null || target.speciesIds.size() != 1) return null;
+
+        return FishSpecLoader.getFishSpec(target.speciesIds.get(0));
+    }
+
+    protected static boolean matchesTargetMethod(Target target,
+                                                 FishLogEntry.Method method,
+                                                 CatchImplement implement) {
+        return target != null && (!target.needsDeepGear
+                || (method == FishLogEntry.Method.HARPOON
+                && implement == CatchImplement.BREACH_LAMP));
     }
 
     public static boolean isLanded() {

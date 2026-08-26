@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -216,7 +217,18 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     public static boolean open(SectorEntityToken anchor, SectorEntityToken catchTarget,
                                FishSpec fish, FishLogEntry.Method method, Callback callback) {
+        return open(anchor, catchTarget, fish, method, callback, true);
+    }
+
+    protected static boolean open(SectorEntityToken anchor, SectorEntityToken catchTarget,
+                                  FishSpec fish, FishLogEntry.Method method, Callback callback,
+                                  boolean applyTutorialProtection) {
         if (fish == null) return false;
+
+        if (applyTutorialProtection) {
+            fish = FishingIntro.applyCatchTargetProtection(
+                    fish, method, CatchImplement.of(anchor), QuestPond.getPlanter(catchTarget));
+        }
 
         FishingMinigameDialogPlugin plugin = new FishingMinigameDialogPlugin(
                 fish, anchor, catchTarget, method, callback);
@@ -371,7 +383,8 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
                 if (done) return;
 
                 patience -= amount;
-                done = open(anchor, catchTarget, pick, method, callback) || patience <= 0f;
+                done = open(anchor, catchTarget, pick, method, callback, false)
+                        || patience <= 0f;
             }
         });
     }
