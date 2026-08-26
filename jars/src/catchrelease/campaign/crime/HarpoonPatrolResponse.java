@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken.VisibilityLevel;
 import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.campaign.RepLevel;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -110,7 +111,22 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
     protected static boolean canBeSent(CampaignFleetAPI curr, FactionAPI faction,
                                        CampaignFleetAPI player) {
-        if (curr.getFaction() == null || curr.getFaction().isHostileTo(faction)) return false;
+        FactionAPI patrolFaction = curr.getFaction();
+        if (patrolFaction == null || patrolFaction.isHostileTo(faction)) return false;
+
+        // the space polices itself, but not through just anybody: a third party only
+        // collects for a faction it actually favours, and the Church and the Path
+        // never carry water for the fishing trade at all - their own holed fleets
+        // are the one thing their patrols will still come about
+        boolean thirdParty = !patrolFaction.getId().equals(faction.getId());
+        if (thirdParty && catchrelease.campaign.fish.FishingTaboo
+                .isTaboo(patrolFaction.getId())) {
+            return false;
+        }
+        if (thirdParty && !patrolFaction.getRelationshipLevel(faction)
+                .isAtWorst(RepLevel.FAVORABLE)) {
+            return false;
+        }
 
         if (curr.isStationMode()) return false;
 
