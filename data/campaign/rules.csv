@@ -110,35 +110,35 @@ FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsOther,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1050","ShowDefaultVisual
 AddText ""The link is answered by somebody who already has your file open and a more pressing reason to dislike you already on it. The harpoon comes up once, near the end, in a list of things that will be dealt with later.""
-CatchReleaseCMD leaveEncounter",,,"Fallback for a crew you holed who is hostile over something else entirely - the other rows all want the harpoon itself to be the reason. Lowest score here so every one of them outranks it. It exists because the comm link is highlighted on having been harpooned at all, and a highlighted link with nothing behind it is a dead option."
+EndConversation",,,"Fallback for a crew you holed who is hostile over something else entirely - the other rows all want the harpoon itself to be the reason. Lowest score here so every one of them outranks it. It exists because the comm link is highlighted on having been harpooned at all, and a highlighted link with nothing behind it is a dead option."
 catchrelease_harpoonedCommsHostile,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Again.\"" The channel closes.""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == hegemony
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Second discharge confirmed.\"" $PersonRank $personName sets the incident slate aside. \""Weapons free. Disable the launcher.\""""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_harpoonedCommsHostileTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""You were advised once.\"" The claim closes. \""This is no longer a billing matter. Corporate security will recover the loss directly.\""""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_harpoonedCommsHostileLC,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_church
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""We asked you once to keep that machine from crewed hulls.\"" The officer folds their hands. \""You chose otherwise. We will keep it from them for you.\""""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_harpoonedCommsHostileLP,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_path
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-CatchReleaseCMD leaveEncounter","The channel opens on shouting.
+EndConversation","The channel opens on shouting.
 
 ""Again? Again?""
 
@@ -154,13 +154,13 @@ $faction.id == pirates
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""The recovered impact image remains open. \""Once was funny. Twice means I get to see what else comes off your ship.\""""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
 AddText ""\""Deliberate, then.\"" The officer straightens. \""You have fired twice on a vessel of the Sindrian Diktat. We will answer in kind.\""""
-CatchReleaseCMD leaveEncounter",,,
+EndConversation",,,
 catchrelease_patrolStop,BeginFleetEncounter,"$catchrelease_harpoonPatrol score:1100
 !$catchrelease_harpoonPatrolDone
 !$isHostile","$catchrelease_harpoonPatrolDone = true 30
