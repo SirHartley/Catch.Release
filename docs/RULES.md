@@ -196,8 +196,8 @@ hostile and then calls `EndConversation` drops the player back into the fleet
 encounter, where the re-fired `BeginFleetEncounter` — blocked for this mod's own
 hail row by `$catchrelease_harpoonPatrolDone` and `$isHostile` — lands on vanilla's
 hostile greeting and the default hostile fleet actions, with the row's text still
-readable in the panel. The `catchrelease_fineDemandRepeat` family works exactly this
-way; `DismissDialog`/`leaveEncounter` there would eject the player mid-sentence and
+readable in the panel. The `catchrelease_fineDemandRepeat` family and the twice-harpooned crews'
+`catchrelease_harpoonedCommsHostile*` family work exactly this way; `DismissDialog`/`leaveEncounter` there would eject the player mid-sentence and
 make the hostility look like it only starts on the next contact.
 
 **`DismissDialog` is not enough to leave a fleet encounter.**
