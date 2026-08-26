@@ -27,6 +27,11 @@ public final class FishermanBycatch {
                 && !Boolean.TRUE.equals(data.get(EXPLAINED_KEY));
     }
 
+    public static boolean isExplained() {
+        return Global.getSector() != null && Boolean.TRUE.equals(
+                Global.getSector().getPersistentData().get(EXPLAINED_KEY));
+    }
+
     public static void markExplained() {
         if (Global.getSector() == null) return;
 

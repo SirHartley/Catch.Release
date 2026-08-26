@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.map.FishPresence;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -35,6 +36,9 @@ public class LegendaryChases {
         public long seenAt;
         public boolean caught;
 
+        // permanent memory that the player saw through this particular disguise
+        public boolean encountered;
+
         // the Longliner's disguise is spent for this residency once the lamp finds it
         public boolean revealed;
 
@@ -56,7 +60,7 @@ public class LegendaryChases {
     }
 
     public static boolean matches(FishSpec spec, LocationAPI where) {
-        if (where == null) return false;
+        if (where == null || !FishingIntro.isComplete()) return false;
 
         Chase chase = getChase(spec);
         if (chase == null || chase.caught || chase.systemId == null) return false;
@@ -71,6 +75,8 @@ public class LegendaryChases {
     }
 
     public static String getHostSystemId(FishSpec spec) {
+        if (!FishingIntro.isComplete()) return null;
+
         Chase chase = getChase(spec);
 
         return chase == null || chase.caught ? null : chase.systemId;
@@ -88,6 +94,14 @@ public class LegendaryChases {
         if (chase == null || chase.caught) return;
 
         chase.revealed = true;
+        chase.encountered = true;
+    }
+
+    public static boolean wasEncountered(String speciesId) {
+        Chase chase = speciesId == null ? null : getLedger().get(speciesId);
+
+        // revealed/caught migrate saves made before the permanent encounter bit existed
+        return chase != null && (chase.encountered || chase.revealed || chase.caught);
     }
 
     public static boolean isRevealed(String speciesId) {

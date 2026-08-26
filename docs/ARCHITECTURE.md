@@ -359,10 +359,11 @@ The Fisherman's fish-selling option is withheld until stage 3, after the first t
 been handed in; carrying fish before that point does not expose the general sales flow.
 If the rumor roller has no lead, its reply ends there instead of appending the successful-rumor
 seasonal line.
-Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
-offers a highlighted one-time question about what came up with the catch. Selecting it plays the
-existing explanation, consumes the pending state, and returns to the usual menu without entering
-the general question list.
+Landing treasure with a fish records the first bycatch recovery; the next Fisherman question menu
+adds a new topic about what came up with the catch. Selecting it
+plays the existing explanation and consumes the pending state; the topic then remains in the asked
+tail of the question list in vanilla grey, including for saves that explained bycatch before the
+question was moved.
 The safety interception remains higher-scored and therefore still takes precedence.
 Every fish name emitted through a rules token is coloured from its species rarity, including tutorial reminders, cult repetition, stranger rumors, Crablobab's fish references, selected duel/ring contenders, and range-data rewards; the sheet delegates that lookup to the shared command instead of hard-coding species or colours. The command submits mixed rarity and ordinary highlights in the sheet's parameter order, as required by `TextPanelAPI`, so a fish before its system is not dropped. Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
@@ -580,7 +581,7 @@ follows the local five-rung coherence reading, and none of them explains how.
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language. It clears the host interaction's options immediately before opening its custom visual, and hands the Fisherman's sheet back exactly once on every close route |
 | `FishermanMapIcon.java` | The boat's dedicated fisher-hook mark on the system map — one per undetected boat while the player shares its location. It yields to the fleet's own visible sensor contact at detection range, returns if contact is lost, and reconciles old-save duplicates and marks in departed locations away. Its tooltip keeps the authored `The Fisherman` casing with vanilla's `ucFirst` title styling instead of `getNameWithFaction()` lower-casing the named fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin. The five portraits follow `FishItemPlugin`'s canonical coherence bands; `preparePortrait` mutates the shared person only for the boat being hailed, immediately before vanilla draws the comm portrait, so off-screen boats cannot overwrite it. Every identity lookup clears rank and post - vanilla's own rankless presentation: the person card shows one muted None and dedups the post line against the rank by string, so a registered "none" rank label breaks the dedup and prints the label twice. Repairs old saves that persisted either field |
-| `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
+| `FishermanBycatch.java` | The bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then exposes the explained state so the topic remains in the asked tail of the general question list |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` is queued through the shared next-unpaused-frame notification delivery, uses the player faction's base UI colour for its headline and the Fisherman's stable portrait as its intel icon, and can render that same queued-or-active intel card into the rumor dialogue instead of a generic receipt. The entry gives the same lead in precise intel prose with the stranger's name in its rarity colour, counts down against the rumor's own timestamp, and reports expiry only while the player is in hyperspace or the reported system. Stranger-species leads plot a route to that system; loot/rarity leads honestly use **Set autopilot** instead of opening a fish planner with no fish target. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves. Stranger rolls never name a legendary: the rumor's spawn boost bypasses the range gate, and a legendary's one-host residency and caught-forever flag must hold |
 | `FishermanConstants.java` | Every number the above read |
 
@@ -606,6 +607,10 @@ everything downstream. Not a word of what it says is in Java.
 
 `IntroIntel` also uses the shared map action on every rung, handing the current named, multi-species
 or any-species ask to the same request-aware map filter as ordinary jobs.
+
+The any-catch lesson is satisfied only by the specimen planted for that lesson. The planter identity
+travels from mote to cargo, so fish already aboard cannot clear its pond marker; catching the planted
+specimen releases the marker immediately, and hand-in spends that same identified catch.
 
 | File | What it does |
 |---|---|
@@ -781,7 +786,7 @@ The whaling chase: unique fish, one host system each, and the haunting that mark
 
 | File | What it does |
 |---|---|
-| `LegendaryChases.java` | The persistent ledger: per legendary, its one host system, the last sighting, whether a harpoon has provoked it this residency, whether the Longliner's disguise is blown, and whether it has been landed. A row created through `getState` carries no host, so `getChase` self-repairs any null-host row on sight - without that, such a species could never spawn or haunt, silently. A sighting starts the ninety-day relocation clock; the fish re-occurs in its host until caught, moves on when the clock runs out unseen-side (never out from under a player in-system), and once caught never spawns again. A revealed Longliner skips the clock entirely and relocates the moment the player leaves its system. Host picking prefers systems without civilization (`OuterReaches.isPopulated`), falling back to settled space only when no unsettled candidate matches at any relaxation rung. Relocation clears the provoked and revealed flags with the sighting clock. `FishRanges` answers every legendary range question from here |
+| `LegendaryChases.java` | The persistent ledger: per legendary, its one host system, the last sighting, whether a harpoon has provoked it this residency, whether the Longliner's disguise is blown, whether that disguise has ever been exposed, and whether it has been landed. Both range matching and host lookup stay dormant until `FishingIntro.isComplete()`, so ordinary legendary motes and the Longliner's boat cannot spawn before graduation. The permanent encounter bit drives post-Longliner dialogue and migrates old revealed/caught saves. A row created through `getState` carries no host, so `getChase` self-repairs any null-host row on sight - without that, such a species could never spawn or haunt, silently. A sighting starts the ninety-day relocation clock; the fish re-occurs in its host until caught, moves on when the clock runs out unseen-side (never out from under a player in-system), and once caught never spawns again. A revealed Longliner skips the clock entirely and relocates the moment the player leaves its system. Host picking prefers systems without civilization (`OuterReaches.isPopulated`), falling back to settled space only when no unsettled candidate matches at any relaxation rung. Relocation clears the provoked and revealed flags with the sighting clock, but not the permanent encounter memory. `FishRanges` answers every legendary range question from here |
 | `LegendaryHaunt.java` | Stage manager, transient, provocation-and-sighting-driven: a haunt begins only once the fish has been provoked - a harpoon has touched it this residency - and its own mote has been visibly seen near the fleet; it then ramps in over a few seconds, holds for a minute after the fish is lost, fades out, and needs a fresh sighting to restart. Intensity is pushed into every module each frame - spawning modules stop escalating below full, screen effects scale with it. Leaving the system, landing the fish, or the fish moving on still tears everything down at once, and registration sweeps the haunt tag from every location so a hard exit strands nothing in a save. Its narrow testing reset tears down the live modules before `SpawnFish` starts another legendary chase. Each species levies only a couple of modules from the pool, never all of them |
 | `HauntModule.java` / `BaseHauntModule.java` | The module contract - advance plus a no-trace cleanup - and the shared base: spawn tracking under the haunt tag, near-player placement, and hard removal that despawns fleets and unhooks entities in the same frame |
 | `DistractionMotesModule.java` | Phantom motes in the legendary's own colours: unhookable, unslowable decoys that dissolve when approached, clustered around the fish itself while it is in the water and around the player only when it is not |
@@ -1445,9 +1450,13 @@ The Starsector Editor is a draft source, not the lore authority. ChatGPT runs it
 supplies the exact display context, and rejects generic AI patterns and em-dash overuse before
 integration. Every returned player-facing line is independently compared with `docs/LORE.md` and
 its stated display context; an Editor QA result does not replace that check. The Fisherman's
-question menu then keeps the
-same division: sheet rows add unasked topics first and asked topics second, and `addFisherQuestion`
-gives the latter vanilla grey. The
+question menu then keeps the same division: sheet rows add unasked topics first and asked topics
+second, and `addFisherQuestion` gives the latter vanilla grey. The Longliner topic is exposed only
+after breach light burns the boat disguise, then remains available across relocations and after the
+catch; its answer denies the player's conclusion without defining what crossed the fabric. Question
+answers never offer a direct return to business: terminal answers offer only `Something else`, and
+follow-up branches return to the same question menu. The menu's own `I've heard enough.` option
+remains the single route back to the Fisherman's business menu. The
 searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
 `$global.catchrelease_fisherAsked_searchlightDrones`, and returns both its acknowledgement and its
 schematic follow-up to the same menu. It explains the `BREACH_COUPLER` gate without granting it: a
