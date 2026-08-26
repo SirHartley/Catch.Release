@@ -104,7 +104,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     private static final float MIXED_REROLL = 6f;
 
-    private static final FishRarity DIVE_FROM = FishRarity.EPIC;
+    private static final FishRarity DIVE_FROM = FishRarity.RARE;
     private static final float DIVE_INTERVAL = 4.5f;
     private static final float DIVE_TIME = 1.6f;
     private static final float DIVE_FADE = 0.35f;
