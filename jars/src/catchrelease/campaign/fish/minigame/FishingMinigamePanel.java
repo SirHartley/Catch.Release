@@ -430,6 +430,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
+        Disc.draw(centerX, centerY, FishConstants.MINIGAME_CHICKEN_BACKLIGHT_RADIUS,
+                minigame.getPresentedColor(),
+                FishConstants.MINIGAME_CHICKEN_BACKLIGHT_ALPHA * alphaMult, 0f, true);
+
         float scale = Math.min(size / sprite.getWidth(), size / sprite.getHeight());
 
         sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
