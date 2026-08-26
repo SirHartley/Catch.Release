@@ -250,6 +250,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "ackBycatch":
                 FishermanBycatch.markExplained();
                 return true;
+            case "bycatchExplained":
+                return FishermanBycatch.isExplained();
             case "longlinerEncountered":
                 return LegendaryChases.wasEncountered(LegendaryShields.POP_SHIELD_SPECIES);
 

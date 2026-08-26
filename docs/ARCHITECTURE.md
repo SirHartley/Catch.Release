@@ -359,10 +359,11 @@ The Fisherman's fish-selling option is withheld until stage 3, after the first t
 been handed in; carrying fish before that point does not expose the general sales flow.
 If the rumor roller has no lead, its reply ends there instead of appending the successful-rumor
 seasonal line.
-Landing treasure with a fish records the first bycatch recovery; the next Fisherman root menu
-offers a highlighted one-time question about what came up with the catch. Selecting it plays the
-existing explanation, consumes the pending state, and returns to the usual menu without entering
-the general question list.
+Landing treasure with a fish records the first bycatch recovery; the next Fisherman question menu
+adds a new topic about what came up with the catch. Selecting it
+plays the existing explanation and consumes the pending state; the topic then remains in the asked
+tail of the question list in vanilla grey, including for saves that explained bycatch before the
+question was moved.
 The safety interception remains higher-scored and therefore still takes precedence.
 Every fish name emitted through a rules token is coloured from its species rarity, including tutorial reminders, cult repetition, stranger rumors, Crablobab's fish references, selected duel/ring contenders, and range-data rewards; the sheet delegates that lookup to the shared command instead of hard-coding species or colours. The command submits mixed rarity and ordinary highlights in the sheet's parameter order, as required by `TextPanelAPI`, so a fish before its system is not dropped. Every option that completes a fish quest is coloured with rules-engine `SetOptionColor ... highlight`:
 the tutorial swaps its normal work prompt for `I caught a fish.` when its target is aboard, while
@@ -580,7 +581,7 @@ follows the local five-rung coherence reading, and none of them explains how.
 | `FishermanSurveyDialog.java` | The chart counter: the shelf as silhouette cards, component-built in the sidebar's language. It clears the host interaction's options immediately before opening its custom visual, and hands the Fisherman's sheet back exactly once on every close route |
 | `FishermanMapIcon.java` | The boat's dedicated fisher-hook mark on the system map — one per undetected boat while the player shares its location. It yields to the fleet's own visible sensor contact at detection range, returns if contact is lost, and reconciles old-save duplicates and marks in departed locations away. Its tooltip keeps the authored `The Fisherman` casing with vanilla's `ucFirst` title styling instead of `getNameWithFaction()` lower-casing the named fleet |
 | `FishermanIdentity.java` | The one person, kept for the campaign — and how far gone he reads where the fabric is thin. The five portraits follow `FishItemPlugin`'s canonical coherence bands; `preparePortrait` mutates the shared person only for the boat being hailed, immediately before vanilla draws the comm portrait, so off-screen boats cannot overwrite it. Every identity lookup clears rank and post - vanilla's own rankless presentation: the person card shows one muted None and dedups the post line against the rank by string, so a registered "none" rank label breaks the dedup and prints the label twice. Repairs old saves that persisted either field |
-| `FishermanBycatch.java` | The one-shot bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then permanently retires the topic |
+| `FishermanBycatch.java` | The bridge between recovered treasure and dialogue: remembers the first landed bycatch until the player asks the Fisherman about it, then exposes the explained state so the topic remains in the asked tail of the general question list |
 | `FishRumors.java` | One rumor a month — rarer rolls, richer treasure, or a stranger species. It exposes only the saved facts to the rules sheet, which owns the spoken scene; `RumorIntel` is queued through the shared next-unpaused-frame notification delivery, uses the Fisherman's stable portrait as its intel icon, gives the same lead in precise intel prose with the stranger's name in its rarity colour, counts down against the rumor's own timestamp, and reports expiry only while the player is in hyperspace or the reported system. Stranger-species leads plot a route to that system; loot/rarity leads honestly use **Set autopilot** instead of opening a fish planner with no fish target. `ensureTutorialLead` idempotently creates the graduate's first rumor outside the monthly ask gate and migrates already-completed saves. Stranger rolls never name a legendary: the rumor's spawn boost bypasses the range gate, and a legendary's one-host residency and caught-forever flag must hold |
 | `FishermanConstants.java` | Every number the above read |
 

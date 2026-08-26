@@ -1586,9 +1586,7 @@ A metallic impact follows from your left audio channel, though the trawler lies 
 He looks back to you.
 
 ""Captain. What can I do for you?""",,
-catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBycatch,"CatchReleaseCMD ackBycatch
-$menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The Fisherman glances at the salvage manifest attached to your catch log.
+catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBycatch,CatchReleaseCMD ackBycatch,"The Fisherman glances at the salvage manifest attached to your catch log.
 
 ""Bycatch.""
 
@@ -1598,7 +1596,8 @@ He taps the entry once.
 
 He gives the manifest another look before continuing.
 
-""The LYNE can only carry so much. If you want a chance at something bigger, you'll need a modified clamp. Ask around in bars. Somebody may have the schematics.""",,
+""The LYNE can only carry so much. If you want a chance at something bigger, you'll need a modified clamp. Ask around in bars. Somebody may have the schematics.""","0:catchrelease_fisherAskBack:Something else
+100:catchrelease_fisherBack:Back to business",
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
@@ -1666,9 +1665,6 @@ catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFish
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
 $catchreleaseWork",,,50:catchrelease_fisherWork:What do I need to fetch again?,
-catchrelease_fisherOptBycatch,PopulateOptions,"$menuState == catchreleaseFisher
-CatchReleaseCMD tokens
-$catchreleaseBycatchPending",SetOptionColor catchrelease_fisherBycatch highlight,,55:catchrelease_fisherBycatch:Ask about what came up with the catch.,
 catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3
@@ -2331,6 +2327,7 @@ FireAll CatchReleaseFisherQuestionsAsked
 CatchReleaseCMD finishFisherQuestions catchrelease_fisherAskPagePrevious Previous catchrelease_fisherAskPageNext Next catchrelease_fisherBack ""I've heard enough.""
 CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherBack ""ESCAPE""",,,
+catchrelease_fisherOptAsk_bycatch,CatchReleaseFisherQuestionsNew,$catchreleaseBycatchPending,"CatchReleaseCMD addFisherQuestion catchrelease_fisherBycatch ""Ask about what came up with the catch."" false",,,
 catchrelease_fisherOptAsk_howLong,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 1
 !$global.catchrelease_fisherAsked_howLong","CatchReleaseCMD addFisherQuestion catchrelease_ask_howLong ""How long have you been out here?"" false",,,
 catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true,"""Fishing?""
@@ -2479,6 +2476,7 @@ He gives a small shrug.
 
 ""No reason to write two invoices when one will do.""","0:catchrelease_fisherAskBack:Something else
 100:catchrelease_fisherBack:Back to business",
+catchrelease_fisherAsked_bycatch,CatchReleaseFisherQuestionsAsked,CatchReleaseCMD bycatchExplained,"CatchReleaseCMD addFisherQuestion catchrelease_fisherBycatch ""Ask about what came up with the catch."" true",,,
 catchrelease_fisherAsked_howLong,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 1
 $global.catchrelease_fisherAsked_howLong","CatchReleaseCMD addFisherQuestion catchrelease_ask_howLong ""How long have you been out here?"" true",,,
 catchrelease_fisherAsked_baha,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 1
