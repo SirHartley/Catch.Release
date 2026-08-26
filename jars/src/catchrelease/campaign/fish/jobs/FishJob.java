@@ -256,12 +256,21 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     @Override
-    protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
-                                 List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
+    public boolean callEvent(String ruleId, InteractionDialogAPI dialog, List<Misc.Token> params,
+                             Map<String, MemoryAPI> memoryMap) {
+        String action = params.get(0).getString(memoryMap);
+
+        // BaseHubMission treats false from callAction as an unhandled action.
         if ("isContactActive".equals(action)) {
             return isContactActive();
         }
 
+        return super.callEvent(ruleId, dialog, params, memoryMap);
+    }
+
+    @Override
+    protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog,
+                                 List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
         if ("showContactVisual".equals(action)) {
             showContactVisual(dialog);
 
