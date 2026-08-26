@@ -121,7 +121,7 @@ public class HarpoonWitness implements EveryFrameScript {
     }
 
     protected void report() {
-        HarpoonPatrolResponse.clearRetryWait(factionId);
+        HarpoonPatrolResponse.clearRetryWait(factionId, patrol.getContainingLocation());
         HarpoonPatrolResponse.dispatch(patrol, factionId);
 
         release();

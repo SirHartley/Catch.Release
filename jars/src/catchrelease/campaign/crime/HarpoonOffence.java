@@ -27,7 +27,6 @@ public class HarpoonOffence {
 
     public static final String INCIDENTS_KEY = "$catchrelease_harpoonIncidents";
     public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
-    public static final String OFFENCE_SYSTEM_KEY = "$catchrelease_harpoonWhere";
     public static final String EVASIONS_KEY = "$catchrelease_harpoonEvasions";
 
     public static final float EVASION_DELAY_DAYS = 4f;
@@ -76,14 +75,15 @@ public class HarpoonOffence {
         int hits = mem.getInt(HIT_COUNT_KEY) + 1;
         mem.set(HIT_COUNT_KEY, hits, MEMORY_DAYS);
 
-        remember(faction.getId());
+        remember(faction.getId(), victim.getContainingLocation());
         owe(faction.getId(), victim.getContainingLocation());
 
         // after the debt is on the books, because the third one calls a patrol in about it and there has to be something for that patrol to have come about
         escalate(victim, hits);
 
         // a fresh harpooning resets any patrol retry wait, so it isn't silently absorbed into the last one
-        HarpoonPatrolResponse.clearRetryWait(faction.getId());
+        HarpoonPatrolResponse.clearRetryWait(faction.getId(),
+                victim.getContainingLocation());
 
         report(victim, faction.getId(), explosive);
 
@@ -246,7 +246,7 @@ public class HarpoonOffence {
         stopChasing(victim);
 
         FactionAPI faction = victim.getFaction();
-        if (faction != null) settle(faction.getId());
+        if (faction != null) settle(faction.getId(), victim.getContainingLocation());
     }
 
     public static void refuse(CampaignFleetAPI victim) {
@@ -381,32 +381,32 @@ public class HarpoonOffence {
         }
     }
 
-    protected static void remember(String factionId) {
-        getIncidents(factionId).add(Global.getSector().getClock().getTimestamp());
+    // one claim and one count per faction per system: the ledger keys carry both,
+    // so an offence in one place neither escalates nor summons anything elsewhere
+    protected static String ledgerKey(String factionId, LocationAPI where) {
+        return factionId + "|" + (where == null ? "unknown" : where.getId());
     }
 
-    public static int getIncidentCount(String factionId) {
-        return getIncidents(factionId).size();
+    protected static void remember(String factionId, LocationAPI where) {
+        getIncidents(ledgerKey(factionId, where))
+                .add(Global.getSector().getClock().getTimestamp());
     }
 
-    public static boolean isRepeatOffence(String factionId) {
-        return getIncidentCount(factionId) > 1;
+    public static int getIncidentCount(String factionId, LocationAPI where) {
+        return getIncidents(ledgerKey(factionId, where)).size();
     }
 
-    public static float getDaysSinceLast(String factionId) {
-        List<Long> incidents = getIncidents(factionId);
-        if (incidents.isEmpty()) return -1f;
-
-        return Global.getSector().getClock().getElapsedDaysSince(incidents.get(incidents.size() - 1));
+    public static boolean isRepeatOffence(String factionId, LocationAPI where) {
+        return getIncidentCount(factionId, where) > 1;
     }
 
-    protected static List<Long> getIncidents(String factionId) {
+    protected static List<Long> getIncidents(String ledgerKey) {
         Map<String, List<Long>> all = getMap(INCIDENTS_KEY);
 
-        List<Long> incidents = all.get(factionId);
+        List<Long> incidents = all.get(ledgerKey);
         if (incidents == null) {
             incidents = new ArrayList<>();
-            all.put(factionId, incidents);
+            all.put(ledgerKey, incidents);
         }
 
         Iterator<Long> it = incidents.iterator();
@@ -418,54 +418,48 @@ public class HarpoonOffence {
     }
 
     protected static void owe(String factionId, LocationAPI where) {
-        getOutstanding().put(factionId, Global.getSector().getClock().getTimestamp());
-
-        // the debt is a local matter: it keeps the system it happened in, and the
-        // response never leaves it. A later offence elsewhere moves the whole claim
-        Map<String, String> systems = getMap(OFFENCE_SYSTEM_KEY);
-        if (where == null) {
-            systems.remove(factionId);
-        } else {
-            systems.put(factionId, where.getId());
-        }
+        getOutstanding().put(ledgerKey(factionId, where),
+                Global.getSector().getClock().getTimestamp());
     }
 
-    public static boolean isOutstanding(String factionId) {
-        Long when = getOutstanding().get(factionId);
+    public static boolean isOutstanding(String factionId, LocationAPI where) {
+        String key = ledgerKey(factionId, where);
+        Long when = getOutstanding().get(key);
         if (when == null) return false;
 
         if (Global.getSector().getClock().getElapsedDaysSince(when) > MEMORY_DAYS) {
-            getOutstanding().remove(factionId);
-            getMap(OFFENCE_SYSTEM_KEY).remove(factionId);
+            getOutstanding().remove(key);
             return false;
         }
 
         return true;
     }
 
-    /** Whether the faction is owed, and owed for something that happened right here. */
-    public static boolean isOwedHere(String factionId, LocationAPI where) {
-        if (!isOutstanding(factionId)) return false;
-
-        String systemId = (String) getMap(OFFENCE_SYSTEM_KEY).get(factionId);
-
-        return systemId == null || (where != null && systemId.equals(where.getId()));
-    }
-
-    public static List<String> getOwedFactions() {
+    /** The factions owed for something that happened right here. */
+    public static List<String> getOwedFactionsIn(LocationAPI where) {
         List<String> owed = new ArrayList<>();
+        if (where == null) return owed;
 
+        String suffix = "|" + where.getId();
         // copy: isOutstanding() mutates the map it iterates
-        for (String factionId : new ArrayList<>(getOutstanding().keySet())) {
-            if (isOutstanding(factionId)) owed.add(factionId);
+        for (String key : new ArrayList<>(getOutstanding().keySet())) {
+            // pre-composite entries from old saves have no home system to match;
+            // drop them rather than let them sit unservable forever
+            if (!key.contains("|")) {
+                getOutstanding().remove(key);
+                continue;
+            }
+            if (!key.endsWith(suffix)) continue;
+
+            String factionId = key.substring(0, key.length() - suffix.length());
+            if (isOutstanding(factionId, where)) owed.add(factionId);
         }
 
         return owed;
     }
 
-    public static void settle(String factionId) {
-        getOutstanding().remove(factionId);
-        getMap(OFFENCE_SYSTEM_KEY).remove(factionId);
+    public static void settle(String factionId, LocationAPI where) {
+        getOutstanding().remove(ledgerKey(factionId, where));
     }
 
     public static boolean wasHarpooned(CampaignFleetAPI fleet) {

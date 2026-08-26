@@ -96,10 +96,10 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (player == null || !player.isAlive()) return;
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;
 
-        for (String factionId : HarpoonOffence.getOwedFactions()) {
-            // the response never leaves the system the offence happened in
-            if (!HarpoonOffence.isOwedHere(factionId, player.getContainingLocation())) continue;
-            if (Global.getSector().getMemoryWithoutUpdate().getBoolean(RETRY_KEY + factionId)) continue;
+        // the claim is local: only what is owed for this system is served in it
+        for (String factionId : HarpoonOffence.getOwedFactionsIn(player.getContainingLocation())) {
+            if (Global.getSector().getMemoryWithoutUpdate().getBoolean(
+                    retryKey(factionId, player.getContainingLocation()))) continue;
 
             final FactionAPI faction = Global.getSector().getFaction(factionId);
             if (faction == null) continue;
@@ -158,7 +158,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         String factionId = victim.getFaction().getId();
 
         // cleared for the same reason a fresh harpooning clears it: somebody has just asked, and being asked is the point
-        clearRetryWait(factionId);
+        clearRetryWait(factionId, victim.getContainingLocation());
         dispatch(nearest, factionId);
 
         return true;
@@ -212,11 +212,15 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
     protected static boolean hasAnsweredEverything(CampaignFleetAPI patrol, String factionId) {
         return patrol.getMemoryWithoutUpdate().getInt(ANSWERED_KEY)
-                >= HarpoonOffence.getIncidentCount(factionId);
+                >= HarpoonOffence.getIncidentCount(factionId, patrol.getContainingLocation());
     }
 
-    public static void clearRetryWait(String factionId) {
-        Global.getSector().getMemoryWithoutUpdate().unset(RETRY_KEY + factionId);
+    protected static String retryKey(String factionId, LocationAPI where) {
+        return RETRY_KEY + factionId + "_" + (where == null ? "unknown" : where.getId());
+    }
+
+    public static void clearRetryWait(String factionId, LocationAPI where) {
+        Global.getSector().getMemoryWithoutUpdate().unset(retryKey(factionId, where));
     }
 
     protected void send(CampaignFleetAPI patrol, String factionId) {
@@ -238,8 +242,10 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         // computed here rather than in the rules-driven conversation, which can only read a number
         mem.set(FINE_KEY, FINE, CHASE_DAYS);
         mem.set(FINE_TEXT_KEY, Misc.getWithDGS(FINE), CHASE_DAYS);
-        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
-        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId), CHASE_DAYS);
+        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId,
+                patrol.getContainingLocation()), CHASE_DAYS);
+        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId,
+                patrol.getContainingLocation()), CHASE_DAYS);
     }
 
     protected void maintainChase() {
@@ -274,13 +280,16 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         }
 
         String factionId = mem.getString(PATROL_FACTION_KEY);
-        if (factionId == null || !HarpoonOffence.isOutstanding(factionId)) {
+        if (factionId == null || !HarpoonOffence.isOutstanding(factionId,
+                chasing.getContainingLocation())) {
             endChase();
             return;
         }
 
-        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId), CHASE_DAYS);
-        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId), CHASE_DAYS);
+        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId,
+                chasing.getContainingLocation()), CHASE_DAYS);
+        mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId,
+                chasing.getContainingLocation()), CHASE_DAYS);
 
         if (chasing.isHostileTo(player)) {
             endChase();
@@ -299,9 +308,10 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         if (factionId == null) return;
 
         // set before settle() clears what's owed, so it still reflects everything answered for
-        mem.set(ANSWERED_KEY, HarpoonOffence.getIncidentCount(factionId), DEALT_WITH_DAYS);
+        mem.set(ANSWERED_KEY, HarpoonOffence.getIncidentCount(factionId,
+                chasing.getContainingLocation()), DEALT_WITH_DAYS);
 
-        HarpoonOffence.settle(factionId);
+        HarpoonOffence.settle(factionId, chasing.getContainingLocation());
 
         if (mem.getBoolean(PAID_KEY)) {
             mem.unset(PAID_KEY);
@@ -343,7 +353,8 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         // read before the keys below clear it
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId != null) {
-            Global.getSector().getMemoryWithoutUpdate().set(RETRY_KEY + factionId, true, RETRY_DAYS);
+            Global.getSector().getMemoryWithoutUpdate().set(
+                    retryKey(factionId, chasing.getContainingLocation()), true, RETRY_DAYS);
         }
 
         // must be cleared, or the next patrol sent would read it as already dealt with
