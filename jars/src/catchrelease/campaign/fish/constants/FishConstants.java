@@ -71,6 +71,8 @@ public class FishConstants {
     public static final float MINIGAME_FISH_ICON_SIZE = 38f;
     public static final String MINIGAME_CHICKEN_ICON =
             "graphics/catchrelease/icon/chicken.png";
+    public static final float MINIGAME_CHICKEN_BACKLIGHT_RADIUS = 24f;
+    public static final float MINIGAME_CHICKEN_BACKLIGHT_ALPHA = 0.22f;
     public static final float MINIGAME_MOTE_HALO_SIZE = 44f;
     public static final float MINIGAME_MOTE_HALO_ALPHA = 0.24f;
     public static final float MINIGAME_MOTE_GLOW_SIZE = 34f;
