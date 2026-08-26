@@ -28,7 +28,7 @@ public class TutorialConstants {
             "venture_Exploration",
             "apogee_Balanced",
     };
-    public static final float WRECK_ORBIT_RADIUS = 700f;
+    public static final float WRECK_ORBIT_RADIUS = 300f;
     public static final float WRECK_ORBIT_DAYS = 180f;
     public static final float WRECK_SPOT_RANGE = 4000f;
 

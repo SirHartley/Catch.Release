@@ -3097,7 +3097,7 @@ $PersonRank $personName has your sensor signature on another display.
 
 ""Whatever rig you're running is throwing interference across $entity.catchrelease_lampWhere and the inhabited approaches around it.""
 
-""This is the warning. Power it down.""",,
+""I'm warning you. Power it down.""",,
 catchrelease_lampWarnHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_lampConv score:1505
 $entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Hegemony Navy. Shut the device down.""
@@ -3116,8 +3116,6 @@ A clean sensor plot appears beside $personName.
 ""Your equipment is producing effects outside your licensed operating envelope.""
 
 A polite smile.
-
-""There is no licensed operating envelope.""
 
 ""Power down.""",,
 catchrelease_lampWarnLC,OpenCommLink,"$faction.id == luddic_church
@@ -3373,7 +3371,7 @@ EndConversation","$PersonRank $personName does not open with anything.
 
 ""Again. This month.""
 
-The link closes. Across the formation, weapons come up, and every one of them is tracking the lamp mounts rather than the hulls.",,
+The link closes. Across the formation, weapons come up. They are tracking the lamp mounts rather than the hulls.",,
 catchrelease_lampGunsHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_lampConv score:1535
 $entity.catchrelease_lampRung == 4","MakeOtherFleetHostile catchreleaseLamps true 5
@@ -3447,7 +3445,7 @@ unset $entity.catchrelease_lampConv
 ShowDefaultVisual
 EndConversation","Somebody off-screen is still shouting when $PersonRank $personName opens the channel.
 
-""Four. In a month. You've made this my problem, and I don't solve problems the way the Navy does.""
+""Four. In a month. You've made this my problem, and I don't solve problems the way the Heggies do.""
 
 The link closes. They come in fast and low, aimed at the mounts.",,
 catchrelease_lampGunsDiktat,OpenCommLink,"$faction.id == sindrian_diktat
