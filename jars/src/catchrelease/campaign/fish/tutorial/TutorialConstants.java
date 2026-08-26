@@ -36,6 +36,7 @@ public class TutorialConstants {
     public static final String CASTAWAY_HOST_KEY = "$catchrelease_castawayHost";
     public static final String CASTAWAY_RESCUED_KEY = "$catchrelease_castawayRescued";
     public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";
+    public static final String RATING_PLANET_NAME_KEY = "$catchrelease_ratingPlanetName";
 
     public static final float INTERCEPT_SPAWN_DISTANCE = 800f;
     public static final float INTERCEPT_TRIGGER_RANGE = 1400f;

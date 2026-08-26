@@ -49,7 +49,8 @@ public class Castaway {
     }
 
     public static boolean rescue(SectorEntityToken target) {
-        //FishingIntro.point();
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(TutorialConstants.CASTAWAY_RESCUED_KEY, true);
 
         if (target instanceof PlanetAPI planet && planet.getMarket() != null) {
             planet.getMarket().getMemoryWithoutUpdate()

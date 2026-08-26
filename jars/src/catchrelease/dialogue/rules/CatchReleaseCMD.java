@@ -26,6 +26,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -69,6 +70,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             "$catchreleaseContinuityQuestionAvailable";
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
+    public static final String RATING_PLANET_NAME = "$ratingPlanetName";
+    public static final String RATING_PLANET_KNOWN = "$catchreleaseRatingPlanetKnown";
 
     public static final String WORK = "$catchreleaseWork";
     public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
@@ -183,6 +186,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "point":
                 FishingIntro.point();
                 return true;
+            case "rememberRatingPlanet":
+                return rememberRatingPlanet(dialog);
             case "showIntroIntel":
                 return FishingIntro.showCurrentIntel(text(dialog));
             case "giveRod":
@@ -709,6 +714,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
 
+        String ratingPlanetName = Global.getSector().getMemoryWithoutUpdate()
+                .getString(TutorialConstants.RATING_PLANET_NAME_KEY);
+        local.set(RATING_PLANET_NAME, ratingPlanetName == null ? "" : ratingPlanetName, 0);
+        local.set(RATING_PLANET_KNOWN,
+                ratingPlanetName != null && !ratingPlanetName.isBlank(), 0);
+
         FishingIntro.Target rung = FishingIntro.getTarget();
 
         local.set(TARGET, FishingIntro.describeTarget(), 0);
@@ -815,6 +826,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (dialog == null) return false;
 
         Castaway.rescue(dialog.getInteractionTarget());
+
+        return true;
+    }
+
+    protected boolean rememberRatingPlanet(InteractionDialogAPI dialog) {
+        MarketAPI market = getMarket(dialog);
+        if (market == null || market.getName() == null) return false;
+
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(TutorialConstants.RATING_PLANET_NAME_KEY, market.getName());
 
         return true;
     }
