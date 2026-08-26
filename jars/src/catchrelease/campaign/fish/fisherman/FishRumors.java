@@ -169,11 +169,6 @@ public class FishRumors {
         }
 
         @Override
-        public Color getTitleColor(ListInfoMode mode) {
-            return getFactionForUIColors().getBaseUIColor();
-        }
-
-        @Override
         public Set<String> getIntelTags(SectorMapAPI map) {
             Set<String> tags = super.getIntelTags(map);
             tags.add(Tags.INTEL_EXPLORATION);
