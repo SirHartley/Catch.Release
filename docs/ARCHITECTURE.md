@@ -177,9 +177,12 @@ vanilla person options, especially `cutCommLink`, out of job dialogue by constru
 cancel and payout callbacks resume through that same trigger; authored job exits close directly.
 
 Accepted contacts also own a scored `PickGreeting` wrapper. It shows the contact visual, refreshes
-the job's live tokens, fires the one `$missionId`-specific `catchreleaseJobGreeting`, and then builds
-the private option batch. All 14 jobs therefore open from intel with their own rules-authored scene
-instead of a generic vanilla voice greeting.
+the job's live tokens, clears the bar offer's persistent person-memory `$menuState`, fires the one
+`$missionId`-specific `catchreleaseJobGreeting`, and then builds the private option batch. The
+shared accept and decline routes clear that offer state when leaving the bar as well; the greeting
+does it again so accepted jobs from older saves cannot mix their original accept/decline/information
+options into the hand-in/reminder menu. All 14 jobs therefore open from intel with their own
+rules-authored scene instead of a generic vanilla voice greeting.
 
 
 | Id | Class | | Id | Class |

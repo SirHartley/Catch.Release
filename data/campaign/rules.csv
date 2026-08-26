@@ -452,12 +452,14 @@ EndConversation","""So was I, once."" The link closes.
 
 Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
 catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"HideMapMarker
+unset $menuState
 FireBest catchreleaseJobAccepted
 BarCMD accept $missionId
-BarCMD returnFromEvent true",,,"BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
+BarCMD returnFromEvent true",,,"The shared accept clears the persistent person-memory offer submenu before BarCMD returns to the bar. BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
 catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"HideMapMarker
+unset $menuState
 FireBest catchreleaseJobDeclined
-BarCMD returnFromEvent true",,,returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+BarCMD returnFromEvent true",,,The shared decline clears the persistent person-memory offer submenu before returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
 catchrelease_jobDeliverReady,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
@@ -481,9 +483,10 @@ FireAll JobSpecificOptions",,,
 catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
 catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
 catchrelease_jobContactGreeting,PickGreeting,Call $catchrelease_jobRef isContactActive score:1000,"Call $catchrelease_jobRef updateData
+unset $menuState
 Call $catchrelease_jobRef showContactVisual
 FireBest catchreleaseJobGreeting
-FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, then build only the job-owned option batch."
+FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, clear any persistent bar-offer submenu left by an older save, then build only the active job-owned option batch."
 catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
 
 ""Captain. Good timing.""
