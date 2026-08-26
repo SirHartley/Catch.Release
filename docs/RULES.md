@@ -191,6 +191,15 @@ still matches puts a **Continue** button up that walks the player straight back 
 the conversation. To actually leave a fleet encounter from a row, use `DismissDialog`,
 which calls `dialog.dismiss()`. See `catchrelease_fisherLeave`.
 
+The reinit is also the tool, not just the trap: a comm row that turns the fleet
+hostile and then calls `EndConversation` drops the player back into the fleet
+encounter, where the re-fired `BeginFleetEncounter` — blocked for this mod's own
+hail row by `$catchrelease_harpoonPatrolDone` and `$isHostile` — lands on vanilla's
+hostile greeting and the default hostile fleet actions, with the row's text still
+readable in the panel. The `catchrelease_fineDemandRepeat` family works exactly this
+way; `DismissDialog`/`leaveEncounter` there would eject the player mid-sentence and
+make the hostility look like it only starts on the next contact.
+
 **`DismissDialog` is not enough to leave a fleet encounter.**
 `FleetInteractionDialogPluginImpl.init` builds a real `BattleAPI` between the player and the
 other fleet on *every* encounter, fight or no fight, and vanilla only takes it apart in its own
