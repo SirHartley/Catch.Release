@@ -27,7 +27,10 @@ public class PondCreator {
 
         int presentSpots = system.getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID).size();
         int planetAmt = system.getPlanets().size();
-        this.pondsToCreate = PondConstants.MIN_POND_AMT_PER_SYSTEM + (int) Math.floor(planetAmt / PondConstants.PLANETS_PER_ADDITIONAL_POND) - presentSpots;
+        int targetSpots = Math.min(PondConstants.MAX_POND_AMT_PER_SYSTEM,
+                PondConstants.MIN_POND_AMT_PER_SYSTEM
+                        + (int) Math.floor(planetAmt / PondConstants.PLANETS_PER_ADDITIONAL_POND));
+        this.pondsToCreate = targetSpots - presentSpots;
 
         this.random = RandomMemoryHelper.getRandom(system);
     }

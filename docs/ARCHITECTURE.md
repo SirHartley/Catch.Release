@@ -831,7 +831,7 @@ The pond, as terrain.
 | File | What it does |
 |---|---|
 | `terrain/MaskedFishingPondTerrainPlugin.java` | The live pond: activation, motes, depth field, hole rendering, temporary and visual-only ponds; discoverable ponds return the registered unstable-fabric map glyph while look-only ponds remain iconless |
-| `listener/PondCreator.java` | Finds clear spots away from planets, ponds, nebulae and rings; starless procgen systems use the base centre clearance without a stellar-radius offset |
+| `listener/PondCreator.java` | Fills each entered system toward its planet-scaled pond target, capped at two, and finds clear spots away from planets, ponds, nebulae and rings; starless procgen systems use the base centre clearance without a stellar-radius offset |
 | `listener/OnJumpPondSpawner.java` | Triggers pond creation when the player jumps into a system |
 | `scripts/PondCameraFocusScript.java` | Eases the camera onto an open pond and closes it once left behind. The Luna setting can keep the viewport under manual control without disabling the lifecycle half of the script; changing it live releases or reacquires external control while the pond remains open, and missing settings data preserves the default snap. Each acquisition snapshots the live viewport immediately before clearing Free View, then eases that displacement independently of the fleet-visible destination clamp; even a viewport wholly off the fleet therefore begins without a snap, and reacquiring the same pond uses the new camera position rather than stale transition state. An in-range open pond takes control on its first unobscured frame; the near-fleet handback threshold applies only while returning |
 | `renderer/PondDepthField.java` | Motes of light spiralling at depth inside the pond |

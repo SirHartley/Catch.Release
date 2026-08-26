@@ -13,6 +13,7 @@ public class PondConstants {
     public static final float FITTING_ANGLE_STEP = 5f;
     public static final int MAX_FITTING_ATTEMPTS = 120;
     public static final int MIN_POND_AMT_PER_SYSTEM = 1;
+    public static final int MAX_POND_AMT_PER_SYSTEM = 2;
     public static final int PLANETS_PER_ADDITIONAL_POND = 4;
     public static final float POND_INTERACT_RANGE_MULT = 1.5f;
     public static final float MOTE_SPAWN_INSET = 0.85f;
