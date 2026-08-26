@@ -199,6 +199,10 @@ public enum CrabWares {
         return false;
     }
 
+    public static boolean hasConservatoryPlans() {
+        return CONSERVATORY.isOwned();
+    }
+
     public static FishRequirement getFallbackBassCatch() {
         FishRequirement req = new FishRequirement();
         req.tag = "crab";
