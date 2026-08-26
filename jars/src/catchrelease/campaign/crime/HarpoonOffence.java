@@ -55,7 +55,7 @@ public class HarpoonOffence {
     public static final String ANSWERED_PENDING = "$catchrelease_damagesAnswered";
     public static final String REASON = "catchreleaseHarpoon";
     public static final float HOSTILE_DAYS = 15f;
-    public static final float REP_LOSS = 0.05f;
+    public static final float REP_LOSS = 0.03f;
     public static final float OUTMATCHED_MULT = 1.25f;
     public static final float MEMORY_DAYS = 30f;
 
