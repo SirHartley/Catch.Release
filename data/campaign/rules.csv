@@ -2950,9 +2950,9 @@ catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIn
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
+Highlight ""Four additional records transfer:""
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-Highlight ""Four additional records transfer:""
 AddTextSmall ""Range data purchasing unlocked"" highlight","The two catches are checked against their range records.
 
 The Fisherman marks the first entry complete, then the second.
