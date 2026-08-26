@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.GhostAsteroidEntityPlugin;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -14,11 +15,14 @@ import org.lwjgl.util.vector.Vector2f;
  */
 public class GhostAsteroidsModule extends BaseHauntModule {
 
-    public static final int FIELD_SIZE = 26;
-    public static final float TOP_UP_SECONDS = 45f;
-    public static final float FIELD_RANGE_MIN = 1400f;
-    public static final float FIELD_RANGE_MAX = 3000f;
-    public static final float FIELD_RADIUS = 1000f;
+    public static final int FIELD_SIZE = 40;
+    public static final float TOP_UP_SECONDS = 15f;
+    public static final float FIELD_RANGE_MIN = 400f;
+    public static final float FIELD_RANGE_MAX = 900f;
+    public static final float FIELD_RADIUS = 900f;
+    public static final float RESEED_RANGE = 2200f;
+    public static final float FAR_FADE_RANGE = 3000f;
+    public static final float FAR_FADE_SECONDS = 2.5f;
     public static final float ROCK_SIZE_MIN = 26f;
     public static final float ROCK_SIZE_MAX = 90f;
     public static final float SPIN_MAX_DEG = 24f;
@@ -41,7 +45,19 @@ public class GhostAsteroidsModule extends BaseHauntModule {
         if (topUpTimer <= 0f && atFullIntensity()) {
             topUpTimer = TOP_UP_SECONDS;
 
-            if (fieldCenter == null) {
+            // the chase outruns a static field: rocks left far behind fade out to
+            // free the cap, and the field reseeds itself around the fleet - pop-in
+            // is fine, it is a haunt. Checked on the tick so a fading rock is not
+            // handed a new fade script every frame
+            for (SectorEntityToken rock : spawned) {
+                if (!rock.isExpired() && distanceToPlayer(rock) > FAR_FADE_RANGE) {
+                    Misc.fadeAndExpire(rock, FAR_FADE_SECONDS);
+                }
+            }
+
+            CampaignFleetAPI player = player();
+            if (fieldCenter == null || (player != null && MathUtils.getDistance(
+                    player.getLocation(), fieldCenter) > RESEED_RANGE)) {
                 fieldCenter = nearPlayer(FIELD_RANGE_MIN, FIELD_RANGE_MAX);
                 fieldDriftAngle = random.nextFloat() * 360f;
             }

@@ -22,15 +22,15 @@ import java.util.Map;
  */
 public class FakeWrecksModule extends BaseHauntModule {
 
-    public static final int MAX_ALIVE = 2;
-    public static final float SPAWN_MIN_SECONDS = 50f;
-    public static final float SPAWN_MAX_SECONDS = 120f;
-    public static final float SPAWN_RANGE_MIN = 1800f;
-    public static final float SPAWN_RANGE_MAX = 3400f;
+    public static final int MAX_ALIVE = 5;
+    public static final float SPAWN_MIN_SECONDS = 18f;
+    public static final float SPAWN_MAX_SECONDS = 40f;
+    public static final float SPAWN_RANGE_MIN = 600f;
+    public static final float SPAWN_RANGE_MAX = 1100f;
     public static final float VANISH_RANGE = 450f;
     public static final float VANISH_SECONDS = 0.75f;
-    public static final float LIFE_MIN_SECONDS = 240f;
-    public static final float LIFE_MAX_SECONDS = 480f;
+    public static final float LIFE_MIN_SECONDS = 120f;
+    public static final float LIFE_MAX_SECONDS = 240f;
 
     public static final String[] VARIANTS = {
             "buffalo_Standard", "mule_Standard", "hound_Standard"};
@@ -77,6 +77,14 @@ public class FakeWrecksModule extends BaseHauntModule {
         SectorEntityToken wreck = track(system.addCustomEntity(
                 Misc.genUID(), null, Entities.WRECK, Factions.NEUTRAL, params));
         wreck.addTag(Tags.NON_CLICKABLE);
+
+        // vanilla wrecks get their sensor presence from the salvage generator, which
+        // addCustomEntity bypasses - without this the bait is invisible until inside
+        // its own vanish range
+        wreck.setSensorProfile(1f);
+        wreck.setDiscoverable(false);
+        wreck.getDetectedRangeMod().modifyFlat("catchrelease_wreck", 2500f);
+        wreck.setExtendedDetectedAtRange(3000f);
 
         Vector2f at = nearPlayer(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
         wreck.setLocation(at.x, at.y);

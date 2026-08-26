@@ -1632,7 +1632,33 @@ He gestures away from it.
 catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
+$catchreleaseStage != 1
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+catchrelease_fisherOptIntroUnknown,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 1
+!$catchreleaseCarrying
+!$global.catchrelease_castawayRescued
+!$catchreleaseRatingPlanetKnown
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
+catchrelease_fisherOptIntroProperty,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 1
+$catchreleaseCarrying
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I recovered something with your name on it,
+catchrelease_fisherOptIntroCastaway,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 1
+!$catchreleaseCarrying
+$global.catchrelease_castawayRescued
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I got your crewman aboard,
+catchrelease_fisherOptIntroRating,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 1
+!$catchreleaseCarrying
+!$global.catchrelease_castawayRescued
+$catchreleaseRatingPlanetKnown
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Someone on $ratingPlanetName sent me,
 catchrelease_fisherOptIntroHandIn,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
@@ -1667,6 +1693,7 @@ $catchreleaseWork",,,50:catchrelease_fisherWork:What do I need to fetch again?,
 catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3
+!$catchreleaseContinuityQuestionAvailable
 !$global.catchrelease_fisherAsked_okay","SetOptionColor catchrelease_fisherOkay highlight
 ",,58:catchrelease_fisherOkay:Are you okay?,
 catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
@@ -1821,6 +1848,7 @@ $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
 $catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
+CatchReleaseCMD rememberRatingPlanet
 CatchReleaseCMD point
 CatchReleaseCMD showIntroIntel
 FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
@@ -2916,9 +2944,9 @@ catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIn
 CatchReleaseCMD tokens
 $catchreleaseStage == 5
 $catchreleaseTargetMet","CatchReleaseCMD takeTarget
+Highlight ""Four additional records transfer:""
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-Highlight ""Four additional records transfer:""
 AddTextSmall ""Range data purchasing unlocked"" highlight","The two catches are checked against their range records.
 
 The Fisherman marks the first entry complete, then the second.

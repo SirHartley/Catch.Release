@@ -564,6 +564,11 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     @Override
+    public Color getTitleColor(ListInfoMode mode) {
+        return getFactionForUIColors().getBaseUIColor();
+    }
+
+    @Override
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
         float opad = 10f;
         Color highlight = Misc.getHighlightColor();

@@ -28,6 +28,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -67,8 +68,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
     public static final String CARRYING = "$catchreleaseCarrying";
     public static final String DEEP_HANDOFF = "$catchreleaseDeepHandoff";
+    public static final String CONTINUITY_QUESTION_AVAILABLE =
+            "$catchreleaseContinuityQuestionAvailable";
     public static final String OUTFITTER = "$catchreleaseOutfitter";
     public static final String CAN_SKIP = "$catchreleaseCanSkip";
+    public static final String RATING_PLANET_NAME = "$ratingPlanetName";
+    public static final String RATING_PLANET_KNOWN = "$catchreleaseRatingPlanetKnown";
 
     public static final String WORK = "$catchreleaseWork";
     public static final String WORK_AVAILABLE = "$catchreleaseWorkAvailable";
@@ -183,6 +188,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "point":
                 FishingIntro.point();
                 return true;
+            case "rememberRatingPlanet":
+                return rememberRatingPlanet(dialog);
             case "showIntroIntel":
                 return FishingIntro.showCurrentIntel(text(dialog));
             case "giveRod":
@@ -702,25 +709,44 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(DRIFT, FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(
                 target == null ? null : target.getContainingLocation())), 0);
 
-        local.set(STAGE, FishingIntro.getStage(), 0);
+        int stage = FishingIntro.getStage();
+        boolean targetMet = FishingIntro.isTargetMet();
+        boolean deepHandoff = FishingIntro.isDeepHandoffPending();
+
+        local.set(STAGE, stage, 0);
         local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
-        local.set(DEEP_HANDOFF, FishingIntro.isDeepHandoffPending(), 0);
+        local.set(DEEP_HANDOFF, deepHandoff, 0);
         local.set(OUTFITTER, FishingIntro.isAtLeast(FishingIntro.FISH_TWO), 0);
         local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
                 && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
 
+        String ratingPlanetName = Global.getSector().getMemoryWithoutUpdate()
+                .getString(TutorialConstants.RATING_PLANET_NAME_KEY);
+        local.set(RATING_PLANET_NAME, ratingPlanetName == null ? "" : ratingPlanetName, 0);
+        local.set(RATING_PLANET_KNOWN,
+                ratingPlanetName != null && !ratingPlanetName.isBlank(), 0);
+
         FishingIntro.Target rung = FishingIntro.getTarget();
 
         local.set(TARGET, FishingIntro.describeTarget(), 0);
-        local.set(TARGET_MET, FishingIntro.isTargetMet(), 0);
+        local.set(TARGET_MET, targetMet, 0);
         local.set(TARGET_WHERE, rung == null || rung.systemName == null ? "" : rung.systemName, 0);
         local.set(TARGET_POND, rung != null && rung.atPond, 0);
         local.set(TARGET_DEEP, rung != null && rung.needsDeepGear, 0);
         local.set(TARGET_SET, rung != null, 0);
         local.set(TARGET_PLACED, rung != null && rung.systemName != null, 0);
-        local.set(TARGET_HERE, rung != null && rung.systemId != null && target != null
+        boolean targetHere = rung != null && rung.systemId != null && target != null
                 && target.getContainingLocation() != null
-                && rung.systemId.equals(target.getContainingLocation().getId()), 0);
+                && rung.systemId.equals(target.getContainingLocation().getId());
+
+        local.set(TARGET_HERE, targetHere, 0);
+        local.set(CONTINUITY_QUESTION_AVAILABLE,
+                stage == FishingIntro.FISH_ONE
+                        && !targetMet
+                        && targetHere
+                        && !deepHandoff
+                        && !Global.getSector().getMemoryWithoutUpdate()
+                        .getBoolean("$catchrelease_fisherAsked_fourJumps"), 0);
 
         local.set(SHELF, !FishermanShelf.getOffers(target).isEmpty(), 0);
         local.set(HAS_FISH, FishBuyer.hasAnything(), 0);
@@ -806,6 +832,16 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (dialog == null) return false;
 
         Castaway.rescue(dialog.getInteractionTarget());
+
+        return true;
+    }
+
+    protected boolean rememberRatingPlanet(InteractionDialogAPI dialog) {
+        MarketAPI market = getMarket(dialog);
+        if (market == null || market.getName() == null) return false;
+
+        Global.getSector().getMemoryWithoutUpdate()
+                .set(TutorialConstants.RATING_PLANET_NAME_KEY, market.getName());
 
         return true;
     }

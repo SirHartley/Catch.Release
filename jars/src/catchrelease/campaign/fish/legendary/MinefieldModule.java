@@ -15,15 +15,15 @@ import org.lwjgl.util.vector.Vector2f;
  */
 public class MinefieldModule extends BaseHauntModule {
 
-    public static final int MAX_ALIVE = 12;
-    public static final float SPAWN_MIN_SECONDS = 9f;
-    public static final float SPAWN_MAX_SECONDS = 16f;
-    public static final int WAVE_MIN = 2;
-    public static final int WAVE_MAX = 4;
-    public static final float SPAWN_RANGE_MIN = 600f;
-    public static final float SPAWN_RANGE_MAX = 1700f;
+    public static final int MAX_ALIVE = 22;
+    public static final float SPAWN_MIN_SECONDS = 6f;
+    public static final float SPAWN_MAX_SECONDS = 11f;
+    public static final int WAVE_MIN = 3;
+    public static final int WAVE_MAX = 6;
+    public static final float SPAWN_RANGE_MIN = 400f;
+    public static final float SPAWN_RANGE_MAX = 1200f;
 
-    protected float spawnTimer = 3f;
+    protected float spawnTimer = 1.5f;
 
     public MinefieldModule(StarSystemAPI system, FishSpec spec) {
         super(system, spec);

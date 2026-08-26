@@ -420,6 +420,11 @@ public class FishingIntro {
         }
 
         @Override
+        public Color getTitleColor(ListInfoMode mode) {
+            return getFactionForUIColors().getBaseUIColor();
+        }
+
+        @Override
         public String getSortString() {
             return getSortStringNewestFirst();
         }

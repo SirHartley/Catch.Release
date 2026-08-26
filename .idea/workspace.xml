@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="shield colour adjustments">
-      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/ability/HarpoonAbilityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/ability/HarpoonAbilityPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/constants/HarpoonConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/harpoon/constants/HarpoonConstants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/terrain/MaskedFishingPondTerrainPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/ponds/terrain/MaskedFishingPondTerrainPlugin.java" afterDir="false" />
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Shield colours">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +106,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed my shit AGAIN" />
     <MESSAGE value="removed black hole effect&#10;corrected tooltip for reward" />
     <MESSAGE value="changed bass to crab for crabolabob" />
     <MESSAGE value="Fixed crabolabob return option rules&#10;crabolabob portrait" />
@@ -132,7 +129,9 @@
     <MESSAGE value="concept" />
     <MESSAGE value="harpoon explosive head" />
     <MESSAGE value="shield colour adjustments" />
-    <option name="LAST_COMMIT_MESSAGE" value="shield colour adjustments" />
+    <MESSAGE value="fixed harpoon sprite" />
+    <MESSAGE value="Shield colours" />
+    <option name="LAST_COMMIT_MESSAGE" value="Shield colours" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
