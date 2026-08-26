@@ -3,6 +3,7 @@ package catchrelease.abilities.harpoon.entities;
 import catchrelease.abilities.harpoon.ability.HarpoonAbilityPlugin;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.crime.HarpoonedFleetFID;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
@@ -465,12 +466,17 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         Vector2f toAnchor = Vector2f.sub(anchor.getLocation(), pulled.getLocation(), null);
         float distance = toAnchor.length();
+        float contactDistance = anchor.getRadius() + pulled.getRadius();
+        boolean touching = distance <= contactDistance;
+        boolean haulComplete = haulingTarget
+                ? touching
+                : distance <= contactDistance + HarpoonConstants.HAUL_DONE_DISTANCE;
 
-        boolean met = distance <= anchor.getRadius() + pulled.getRadius()
-                + HarpoonConstants.HAUL_DONE_DISTANCE;
-
-        if (met || stateTime >= HarpoonConstants.HAUL_TIME) {
+        if (haulComplete || stateTime >= HarpoonConstants.HAUL_TIME) {
             cutLine();
+
+            if (haulingTarget && touching) HarpoonedFleetFID.openComms(struck);
+
             return;
         }
 
