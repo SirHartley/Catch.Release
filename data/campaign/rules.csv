@@ -1771,7 +1771,7 @@ $catchreleaseRumor","CatchReleaseCMD rumor
 CatchReleaseCMD tokens
 FireBest CatchReleaseRumorText",,100:catchrelease_fisherBack:Continue,
 catchrelease_rumorRarity,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorRarity score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman pulls a grease-marked chart from beneath the control unit.
+$catchreleaseRumorRarity score:10","CatchReleaseCMD showRumorIntel","The Fisherman pulls a grease-marked chart from beneath the control unit.
 
 ""Rarer patterns are turning up in $catchreleaseRumorSystem.""
 
@@ -1779,7 +1779,7 @@ He checks the date in one corner.
 
 ""Fabric's running thin in $catchreleaseRumorSystem. May be stale by the time you arrive.""",,
 catchrelease_rumorLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorLoot score:10","AddTextSmall ""Rumor added to intel"" highlight","The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
+$catchreleaseRumorLoot score:10","CatchReleaseCMD showRumorIntel","The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
 
 ""Crews in $catchreleaseRumorSystem are bringing up more bycatch than usual. Wreckage. Lost cargo.""
 
@@ -1788,7 +1788,7 @@ He closes the manifest.
 ""Leave room in the hold.""",,
 catchrelease_rumorOutsider,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorOutsider score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
-AddTextSmall ""Rumor added to intel"" highlight","The Fisherman turns a range chart until one system sits under his thumb.
+CatchReleaseCMD showRumorIntel","The Fisherman turns a range chart until one system sits under his thumb.
 
 ""$catchreleaseRumorStranger. $catchreleaseRumorSystem.""
 

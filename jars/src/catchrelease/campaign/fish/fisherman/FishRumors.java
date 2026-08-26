@@ -13,7 +13,9 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
@@ -56,6 +58,10 @@ public class FishRumors {
 
         public RumorIntel(Saved rumor) {
             this.rumor = rumor;
+        }
+
+        protected boolean matches(Saved other) {
+            return other != null && rumor.started == other.started;
         }
 
         @Override
@@ -210,6 +216,27 @@ public class FishRumors {
         }
 
         return rumor;
+    }
+
+    public static boolean showCurrentIntel(TextPanelAPI text) {
+        Saved active = getActive();
+        if (text == null || active == null) return false;
+
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        RumorIntel intel = findCurrent(manager.getCommQueue(RumorIntel.class), active);
+        if (intel == null) intel = findCurrent(manager.getIntel(RumorIntel.class), active);
+        if (intel == null) return false;
+
+        FishIntelNotifications.showAdded(intel, text);
+        return true;
+    }
+
+    protected static RumorIntel findCurrent(List<IntelInfoPlugin> entries, Saved active) {
+        for (IntelInfoPlugin entry : entries) {
+            if (entry instanceof RumorIntel intel && intel.matches(active)) return intel;
+        }
+
+        return null;
     }
 
     protected static boolean appliesTo(LocationAPI location, int type) {

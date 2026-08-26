@@ -251,6 +251,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "rumor":
                 return FishingIntro.isAtLeast(FishingIntro.DONE)
                         && FishRumors.isAvailable() && FishRumors.create() != null;
+            case "showRumorIntel":
+                return FishRumors.showCurrentIntel(text(dialog));
 
             case "ackBycatch":
                 FishermanBycatch.markExplained();
