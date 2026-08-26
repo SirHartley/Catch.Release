@@ -1596,8 +1596,7 @@ He taps the entry once.
 
 He gives the manifest another look before continuing.
 
-""The LYNE can only carry so much. If you want a chance at something bigger, you'll need a modified clamp. Ask around in bars. Somebody may have the schematics.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""The LYNE can only carry so much. If you want a chance at something bigger, you'll need a modified clamp. Ask around in bars. Somebody may have the schematics.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
@@ -2338,8 +2337,7 @@ He gives the question some thought.
 
 Another moment.
 
-""Been fishing longer.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Been fishing longer.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_baha,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 1
 !$global.catchrelease_fisherAsked_baha","CatchReleaseCMD addFisherQuestion catchrelease_ask_baha ""Do you have a name?"" false",,,
 catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,$global.catchrelease_fisherAsked_baha = true,"""Registry says Baha.""
@@ -2350,8 +2348,7 @@ The Fisherman takes a drink.
 
 He sets the mug down.
 
-""Fisherman will do.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Fisherman will do.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_why0ut,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_whyOut","CatchReleaseCMD addFisherQuestion catchrelease_ask_why0ut ""Why are you always so far out?"" false",,,
 catchrelease_ask_why0ut,DialogOptionSelected,$option == catchrelease_ask_why0ut,$global.catchrelease_fisherAsked_whyOut = true,"""Fabric's thick where people are.""
@@ -2362,8 +2359,7 @@ He presses one palm flat against the table.
 
 He lifts the hand.
 
-""You want a clean rupture, you go where there's less holding.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""You want a clean rupture, you go where there's less holding.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_looking,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 5
 !$global.catchrelease_fisherAsked_looking","CatchReleaseCMD addFisherQuestion catchrelease_ask_looking ""What happens to somebody who looks at the catch?"" false",,,
 catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,$global.catchrelease_fisherAsked_looking = true,"""They look.""
@@ -2371,16 +2367,14 @@ catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_lookin
 He turns a control unit over in his hands.
 
 ""Don't mistake it for seeing you.""","0:catchrelease_ask_lookingFollow:What's the difference?
-10:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+10:catchrelease_fisherAskBack:Something else",
 catchrelease_ask_lookingFollow,DialogOptionSelected,$option == catchrelease_ask_lookingFollow,,"The Fisherman stops turning the control unit.
 
 ""Good question.""
 
 He sets it down.
 
-""Not one you need answered to get home. Leave it there.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Not one you need answered to get home. Leave it there.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_patterns,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 3
 !$global.catchrelease_fisherAsked_patterns","CatchReleaseCMD addFisherQuestion catchrelease_ask_patterns ""The patterns. What are they, actually?"" false",,,
 catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true,"""Ghost is the old spacer word. Pattern is what the instruments call it once the crossing gives it something to hold onto.""
@@ -2388,10 +2382,8 @@ catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patte
 He turns the display slightly toward you.
 
 ""Fish is what everybody calls it once they're buying or selling.""","0:catchrelease_ask_patternsWhy:Why fish?
-10:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
-catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""Never found an answer that improved the fishing.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+10:catchrelease_fisherAskBack:Something else",
+catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""Never found an answer that improved the fishing.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_deepWater,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_deepWater","CatchReleaseCMD addFisherQuestion catchrelease_ask_deepWater ""Why is the deep water worse?"" false",,,
 catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,$global.catchrelease_fisherAsked_deepWater = true,"""Not water.""
@@ -2402,8 +2394,7 @@ There is no irritation in the correction.
 
 He looks at you.
 
-""Same rule applies to the crew. Keep the trip short. Don't turn it into research.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Same rule applies to the crew. Keep the trip short. Don't turn it into research.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_searchlightDrones,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_searchlightDrones","CatchReleaseCMD addFisherQuestion catchrelease_ask_searchlightDrones ""Why can't I use the drones with the searchlights?"" false",,,
 catchrelease_ask_searchlightDrones,DialogOptionSelected,$option == catchrelease_ask_searchlightDrones,$global.catchrelease_fisherAsked_searchlightDrones = true,"""The lights don't open a full breach. They wear the fabric thin enough for the ROD to reach through, but not enough for a drone to make the trip both ways.""
@@ -2429,15 +2420,12 @@ catchrelease_ask_fishBack,DialogOptionSelected,$option == catchrelease_ask_fishB
 
 Behind him, a crewman reaches through a closed locker door and removes a wrench.
 
-The Fisherman goes on cleaning the control unit.","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+The Fisherman goes on cleaning the control unit.",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_largest,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 6
 !$global.catchrelease_fisherAsked_largest","CatchReleaseCMD addFisherQuestion catchrelease_ask_largest ""What is the largest thing you have landed?"" false",,,
 catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true,"""One I didn't land.""","0:catchrelease_ask_largestFollow:How large?
-10:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
-catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+10:catchrelease_fisherAskBack:Something else",
+catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_longliner,CatchReleaseFisherQuestionsNew,"CatchReleaseCMD longlinerEncountered
 !$global.catchrelease_fisherAsked_longliner","CatchReleaseCMD addFisherQuestion catchrelease_ask_longliner ""I just had you turn into a fish."" false",,,
 catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_longliner,$global.catchrelease_fisherAsked_longliner = true,"The Fisherman looks down, pats his coat pockets, then checks the nearest display.
@@ -2446,8 +2434,7 @@ catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_long
 
 He scrolls back through the return once.
 
-""Busy instruments make poor witnesses. I wouldn’t trouble them further.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Busy instruments make poor witnesses. I wouldn’t trouble them further.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_tackle,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_tackle","CatchReleaseCMD addFisherQuestion catchrelease_ask_tackle ""What are rig modules?"" false",,,
 catchrelease_ask_tackle,DialogOptionSelected,$option == catchrelease_ask_tackle,$global.catchrelease_fisherAsked_tackle = true,"""A rig module is something you buy once. One slot per rig.""
@@ -2456,8 +2443,7 @@ He taps the manifest.
 
 ""Jobs turn up the schematics. Bring one back and that module goes on the invoice.""
 
-""Refit when the work changes. No sense paying twice for the same hardware.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Refit when the work changes. No sense paying twice for the same hardware.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_upgrade,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_upgrade","CatchReleaseCMD addFisherQuestion catchrelease_ask_upgrade ""What is an upgrade?"" false",,,
 catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrade,$global.catchrelease_fisherAsked_upgrade = true,"""Upgrade's permanent.""
@@ -2466,16 +2452,14 @@ He points out the tier listing.
 
 ""Buy the early tiers normally. The final two need a schematic each; jobs turn those up.""
 
-""Once it's fitted, the listed function improves and stays improved.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""Once it's fitted, the listed function improves and stays improved.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_outfitterPayment,CatchReleaseFisherQuestionsNew,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_outfitterPayment","CatchReleaseCMD addFisherQuestion catchrelease_ask_outfitterPayment ""Why does the outfitter take fish for payment?"" false",,,
 catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true,"""Trade buys catch. I sell hardware. Fish move through both ledgers.""
 
 He gives a small shrug.
 
-""No reason to write two invoices when one will do.""","0:catchrelease_fisherAskBack:Something else
-100:catchrelease_fisherBack:Back to business",
+""No reason to write two invoices when one will do.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherAsked_bycatch,CatchReleaseFisherQuestionsAsked,CatchReleaseCMD bycatchExplained,"CatchReleaseCMD addFisherQuestion catchrelease_fisherBycatch ""Ask about what came up with the catch."" true",,,
 catchrelease_fisherAsked_howLong,CatchReleaseFisherQuestionsAsked,"$catchreleaseStage >= 1
 $global.catchrelease_fisherAsked_howLong","CatchReleaseCMD addFisherQuestion catchrelease_ask_howLong ""How long have you been out here?"" true",,,

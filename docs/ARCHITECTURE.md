@@ -1450,7 +1450,9 @@ check. The Fisherman's question menu then keeps the same division: sheet rows ad
 first and asked topics second, and `addFisherQuestion` gives the latter vanilla grey. The
 Longliner topic is exposed only after breach light burns the boat disguise, then remains available
 across relocations and after the catch; its answer denies the player's conclusion without defining
-what crossed the fabric. The
+what crossed the fabric. Question answers never offer a direct return to business: terminal answers
+offer only `Something else`, and follow-up branches return to the same question menu. The menu's own
+`I've heard enough.` option remains the single route back to the Fisherman's business menu. The
 searchlight/drone question joins that framework at `FISH_TWO` (`$catchreleaseStage >= 4`), records
 `$global.catchrelease_fisherAsked_searchlightDrones`, and returns both its acknowledgement and its
 schematic follow-up to the same menu. It explains the `BREACH_COUPLER` gate without granting it: a
