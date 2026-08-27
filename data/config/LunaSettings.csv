@@ -1,4 +1,4 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 catchrelease_harpoonChargeReloadSound,Harpoon reload sound,Radio,Play when relevant,"Never play, Play when relevant, Always play","Plays when the harpoon restores a charge. Relevant means while the breach lamps are lit or the fleet is close to an open pond.",,,Audio
 catchrelease_pondViewportSnap,Snap viewport to open ponds,Boolean,true,,"Centers the viewport on an opening pond to make skillshot aiming easier. Turning this off leaves the camera under manual control; aiming will be harder and the extra motion may be uncomfortable for players sensitive to it.",,,Accessibility
-catchrelease_skipTutorial,Skip tutorial,Boolean,false,,Adds a Fisherman dialogue option to skip the tutorial before you start it. Has no effect after the tutorial begins.,,,Gameplay
+catchrelease_skipTutorialCompleted,Skip tutorial,Boolean,false,,Adds a Fisherman dialogue option to skip the tutorial before you start it. Has no effect after the tutorial begins.,,,Gameplay

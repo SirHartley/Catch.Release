@@ -1552,7 +1552,7 @@ OpenComms",,,"Walking up to a trawler goes straight into the conversation, which
 catchrelease_fisherComms0,OpenCommLink,"$entity.catchrelease_fisherman score:1000
 CatchReleaseCMD tokens
 $catchreleaseDrift == 0","$menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The trawler answers without ceremony.
+FireAll CatchReleaseFisherOptions","The trawler answers without ceremony.
 
 The Fisherman is at a worktable with a mug in one hand and a dismantled control unit under the other.
 
@@ -1560,7 +1560,7 @@ The Fisherman is at a worktable with a mug in one hand and a dismantled control 
 catchrelease_fisherComms1,OpenCommLink,"$entity.catchrelease_fisherman score:1010
 CatchReleaseCMD tokens
 $catchreleaseDrift == 1","$menuState = catchreleaseFisher 0
-FireAll PopulateOptions","""Back again.""
+FireAll CatchReleaseFisherOptions","""Back again.""
 
 The Fisherman shifts a service slate out of his working space.
 
@@ -1570,7 +1570,7 @@ A crewman crosses behind him carrying a sealed crate. Halfway across the compart
 catchrelease_fisherComms2,OpenCommLink,"$entity.catchrelease_fisherman score:1020
 CatchReleaseCMD tokens
 $catchreleaseDrift == 2","$menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The Fisherman's voice reaches the bridge a moment before the comm indicator turns green.
+FireAll CatchReleaseFisherOptions","The Fisherman's voice reaches the bridge a moment before the comm indicator turns green.
 
 ""Evening.""
 
@@ -1580,7 +1580,7 @@ When the picture follows, he is pouring something into the same battered mug.
 catchrelease_fisherComms3,OpenCommLink,"$entity.catchrelease_fisherman score:1030
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3","$menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The link opens on the Fisherman watching somebody work off-screen.
+FireAll CatchReleaseFisherOptions","The link opens on the Fisherman watching somebody work off-screen.
 
 ""Easy with that.""
 
@@ -1604,7 +1604,7 @@ catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman sco
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
 $menuState = catchreleaseFisher 0
-FireAll PopulateOptions","The hail is accepted promptly.
+FireAll CatchReleaseFisherOptions","The hail is accepted promptly.
 
 An older man in patched working clothes studies your transponder return. Grey beard, old scar tissue, the posture of someone who spent enough years on command decks to stop sitting properly in chairs.
 
@@ -1632,97 +1632,114 @@ He gestures away from it.
 
 ""Come alongside.""","0:catchrelease_fisherIntro:Move alongside.
 100:catchrelease_fisherLeave:Leave",
-catchrelease_fisherOptIntro,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntro,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
+$catchreleaseStage >= 2
 $catchreleaseStage < 6
-$catchreleaseStage != 1
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
-catchrelease_fisherOptIntroUnknown,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntroUnknown,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 !$catchreleaseCarrying
 !$global.catchrelease_castawayRescued
 !$catchreleaseRatingPlanetKnown
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Ask about the fishing work,
-catchrelease_fisherOptIntroProperty,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntroProperty,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 $catchreleaseCarrying
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I recovered something with your name on it,
-catchrelease_fisherOptIntroCastaway,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntroCastaway,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 !$catchreleaseCarrying
 $global.catchrelease_castawayRescued
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I got your crewman aboard,
-catchrelease_fisherOptIntroRating,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntroRating,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 !$catchreleaseCarrying
 !$global.catchrelease_castawayRescued
 $catchreleaseRatingPlanetKnown
 !$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Someone on $ratingPlanetName sent me,
-catchrelease_fisherOptIntroHandIn,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptIntroHandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
-$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording and quest-yellow treatment only when the current target is aboard.
-catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
+$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording only when the current target is aboard.
+catchrelease_fisherOptIntroHandInColor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
-$catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,5:catchrelease_introSkip:I've been here before. The fabric calls to me.,
-catchrelease_fisherOptShop,PopulateOptions,"$menuState == catchreleaseFisher
+$catchreleaseStage < 6
+$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,,The producer above must add the option before this later qualifying row can color it.
+catchrelease_introSkipOpt,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseCanSkip",,,5:catchrelease_introSkip:I've been here before. The fabric calls to me.,
+catchrelease_introSkipColor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,,
+catchrelease_fisherOptShop,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
-catchrelease_fisherOptCharts,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptCharts,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
 $catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase range data,
-catchrelease_fisherOptChartsBare,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptChartsBare,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
 !$catchreleaseShelf",,,20:catchrelease_fisherChartsBare:Ask after new range data,
-catchrelease_fisherOptSell,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptSell,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 3
 $catchreleaseHoldHasFish",,,30:catchrelease_fisherSell:Sell fish,
-catchrelease_fisherOptRumor,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptRumor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
-catchrelease_fisherOptWork,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptWork,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
 !$catchreleaseWork
 $catchreleaseWorkAvailable",,,50:catchrelease_fisherWork:Ask about work,
-catchrelease_fisherOptWorkActive,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptWorkActive,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 6
 $catchreleaseWork",,,50:catchrelease_fisherWork:What do I need to fetch again?,
-catchrelease_fisherOptOkay,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptOkay,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseDrift == 3
 !$catchreleaseContinuityQuestionAvailable
-!$global.catchrelease_fisherAsked_okay","SetOptionColor catchrelease_fisherOkay highlight
-",,58:catchrelease_fisherOkay:Are you okay?,
-catchrelease_fisherOptContinuitySystem,PopulateOptions,"$menuState == catchreleaseFisher
+!$global.catchrelease_fisherAsked_okay",,,58:catchrelease_fisherOkay:Are you okay?,
+catchrelease_fisherOptOkayColor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseDrift == 3
+!$catchreleaseContinuityQuestionAvailable
+!$global.catchrelease_fisherAsked_okay",SetOptionColor catchrelease_fisherOkay highlight,,,
+catchrelease_fisherOptContinuitySystem,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_fourJumps","SetOptionColor catchrelease_intro_fourJumps highlight
-",,60:catchrelease_intro_fourJumps:I just left you in another system.,
-#catchrelease_fisherOptContinuityHull,PopulateOptions,"$menuState == catchreleaseFisher
+!$global.catchrelease_fisherAsked_fourJumps",,,60:catchrelease_intro_fourJumps:I just left you in another system.,
+catchrelease_fisherOptContinuitySystemColor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseStage == 3
+!$catchreleaseTargetMet
+$catchreleaseTargetHere
+!$catchreleaseDeepHandoff
+!$global.catchrelease_fisherAsked_fourJumps",SetOptionColor catchrelease_intro_fourJumps highlight,,,
+#catchrelease_fisherOptContinuityHull,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
 !$catchreleaseTargetMet
 $catchreleaseTargetHere
 !$catchreleaseDeepHandoff
 !$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:Is this the same ship?,
-catchrelease_fisherOptLeave,PopulateOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
+catchrelease_fisherOptLeave,CatchReleaseFisherOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,"HideMapMarker
 CatchReleaseCMD leaveEncounter",,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
-FireAll PopulateOptions",,,
+FireAll CatchReleaseFisherOptions",,,
 catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"The Fisherman studies you for a moment, then nods.
 
 ""All right. You don't need the lessons.""
@@ -1753,7 +1770,7 @@ catchrelease_fisherSellRare,DialogOptionSelected,$option == catchrelease_fisherS
 catchrelease_fisherSellEpic,DialogOptionSelected,$option == catchrelease_fisherSellEpic,CatchReleaseCMD sellUpTo EPIC,,,
 catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"HideMapMarker
 $menuState = catchreleaseFisher 0
-FireAll PopulateOptions",,,
+FireAll CatchReleaseFisherOptions",,,
 catchrelease_fisherOkay,DialogOptionSelected,$option == catchrelease_fisherOkay,$global.catchrelease_fisherAsked_okay = true,"""Never better, thank you for asking.""
 
 He studies you for a moment.
@@ -1761,13 +1778,13 @@ He studies you for a moment.
 ""You?""","0:catchrelease_fisherOkayThen:Okay then...
 10:catchrelease_fisherOkayMirror:Are you sure? Got a mirror?",
 catchrelease_fisherOkayThen,DialogOptionSelected,$option == catchrelease_fisherOkayThen,"$menuState = catchreleaseFisher 0
-FireAll PopulateOptions",,,
+FireAll CatchReleaseFisherOptions",,,
 catchrelease_fisherOkayMirror,DialogOptionSelected,$option == catchrelease_fisherOkayMirror,,"The Fisherman doesn't react.
 
 ""Fabric's playing tricks, don't mind it.""","0:catchrelease_fisherOkaySaySo:If you say so.
 10:catchrelease_fisherOkayKnot:This is another one of these knots, isn't it?",
 catchrelease_fisherOkaySaySo,DialogOptionSelected,$option == catchrelease_fisherOkaySaySo,"$menuState = catchreleaseFisher 0
-FireAll PopulateOptions",,,
+FireAll CatchReleaseFisherOptions",,,
 catchrelease_fisherOkayKnot,DialogOptionSelected,$option == catchrelease_fisherOkayKnot,,"""A terribly frayed one, especially here.""
 
 He checks the local return.
@@ -2350,7 +2367,7 @@ catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonL
 catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,,,
 catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,,,
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,,,
-catchrelease_fisherOptAsk,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2",,,60:catchrelease_fisherAsk:Ask about something else,
 catchrelease_fisherAsk,DialogOptionSelected,$option == catchrelease_fisherAsk,"$catchreleaseFisherAskPage = 0 0
@@ -2532,7 +2549,7 @@ catchrelease_fisherAskPageNext,DialogOptionSelected,$option == catchrelease_fish
 FireAll PopulateOptions",,,
 catchrelease_fisherAskPagePrevious,DialogOptionSelected,$option == catchrelease_fisherAskPagePrevious,"$catchreleaseFisherAskPage = 0 0
 FireAll PopulateOptions",,,
-catchrelease_fisherOptTarget,PopulateOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptTarget,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
 $catchreleaseStage < 6
