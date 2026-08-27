@@ -125,7 +125,6 @@ public class UpgradeManager {
             held.upgradeType = loaded.upgradeType;
             held.maxLevel = loaded.maxLevel;
             held.description = loaded.description;
-            held.flavour = loaded.flavour;
             held.icon = loaded.icon;
             held.category = loaded.category;
         }

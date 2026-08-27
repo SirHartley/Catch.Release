@@ -28,7 +28,6 @@ public class UpgradeStat {
     public UpgradeType upgradeType;
     public int maxLevel;
     public String description;
-    public String flavour;
     public String icon;
     public Category category = Category.CAMPAIGN;
     public int level = 0;
