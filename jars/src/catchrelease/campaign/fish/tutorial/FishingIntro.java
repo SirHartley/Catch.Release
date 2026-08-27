@@ -46,6 +46,9 @@ import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
+import lunalib.backend.ui.settings.LunaSettingsLoader;
+import lunalib.lunaSettings.LunaSettings;
+import org.lazywizard.lazylib.JSONUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -507,22 +510,43 @@ public class FishingIntro {
         return player != null && player.hasAbility(abilityId);
     }
 
-    public static void rememberSeen() {
+    public static boolean canSkip() {
+        return Boolean.TRUE.equals(LunaSettings.getBoolean(
+                ModPlugin.MOD_ID, TutorialConstants.SKIP_SETTING))
+                && !isAtLeast(RODDED);
+    }
+
+    public static void migrateLegacySkipSetting() {
         try {
-            Global.getSettings().writeTextFileToCommon(TutorialConstants.SEEN_FILE, "1");
-        } catch (Exception e) {
-            // a shortcut nobody can offer is a slower first hour, not a broken campaign
-            Global.getLogger(FishingIntro.class).warn("Could not record the tutorial as seen", e);
+            String seen = Global.getSettings().readTextFileFromCommon(TutorialConstants.SEEN_FILE);
+            if (!"1".equals(seen == null ? null : seen.trim())) return;
+
+            rememberSeen();
+        } catch (Exception ignored) {
+            // No legacy marker is the normal state for a new installation.
         }
     }
 
-    public static boolean hasSeenBefore() {
+    public static void rememberSeen() {
         try {
-            String seen = Global.getSettings().readTextFileFromCommon(TutorialConstants.SEEN_FILE);
+            JSONUtils.CommonDataJSONObject settings = JSONUtils.loadCommonJSON(
+                    "LunaSettings/" + ModPlugin.MOD_ID + ".json",
+                    "data/config/LunaSettingsDefault.default");
+            if (settings == null) throw new IllegalStateException("Luna settings unavailable");
 
-            return seen != null && !seen.trim().isEmpty();
+            settings.put(TutorialConstants.SKIP_SETTING, true);
+            settings.save();
+
+            // LunaLib exposes setting reads but no public write API, so refresh its cache after saving the backing file.
+            LunaSettingsLoader.INSTANCE.loadSettings(ModPlugin.MOD_ID, true);
+            LunaSettings.reportSettingsChanged(ModPlugin.MOD_ID);
+
+            // A different value marks the old seen-file contract as migrated, so a later manual opt-out stays off.
+            Global.getSettings().writeTextFileToCommon(TutorialConstants.SEEN_FILE, "2");
         } catch (Exception e) {
-            return false;
+            // A shortcut nobody can offer is a slower first hour, not a broken campaign.
+            Global.getLogger(FishingIntro.class).warn(
+                    "Could not enable the tutorial skip setting", e);
         }
     }
 

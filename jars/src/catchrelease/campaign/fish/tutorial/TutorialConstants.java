@@ -12,6 +12,7 @@ public class TutorialConstants {
     public static final int FREE_COMMONS = 2;
     public static final int[] GRADUATION_CHARTS = {2, 1, 1};
     public static final int TARGET_PROTECTION_CATCHES = 5;
+    public static final String SKIP_SETTING = "catchrelease_skipTutorial";
     public static final String SEEN_FILE = "catchrelease_seen.txt";
 
     public static final String WRECK_PLACED_KEY = "$catchrelease_wreckPlaced";

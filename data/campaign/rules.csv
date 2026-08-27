@@ -1666,6 +1666,9 @@ catchrelease_fisherOptIntroHandIn,PopulateOptions,"$menuState == catchreleaseFis
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
 $catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording and quest-yellow treatment only when the current target is aboard.
+catchrelease_introSkipOpt,PopulateOptions,"$menuState == catchreleaseFisher
+CatchReleaseCMD tokens
+$catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,5:catchrelease_introSkip:I've been here before. The fabric calls to me.,
 catchrelease_fisherOptShop,PopulateOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
@@ -1720,6 +1723,13 @@ catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeav
 CatchReleaseCMD leaveEncounter",,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
 FireAll PopulateOptions",,,
+catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"The Fisherman studies you for a moment, then nods.
+
+""All right. You don't need the lessons.""
+
+A crewman adds the transfer to the manifest.
+
+""Take the rig. You're cleared for the rest.""",100:catchrelease_fisherBack:Continue,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
 catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Nothing new yet. What I had, you bought, and I don't redraw charts halfway through a trip.""

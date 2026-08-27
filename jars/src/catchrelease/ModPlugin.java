@@ -56,6 +56,8 @@ public class ModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
         super.onGameLoad(newGame);
 
+        FishingIntro.migrateLegacySkipSetting();
+
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();
         ChargeManager.register();
