@@ -201,6 +201,8 @@ Bar option IDs must begin with the mission ID. `BarCMD` uses that prefix to reta
 
 The encounter enters `$menuState == catchreleaseFisher`. The sheet owns the business menu, tutorial, outfitter questions, fish sales, rumors, chart requests, and all spoken text.
 
+- The business menu uses the dedicated `CatchReleaseFisherOptions` trigger instead of vanilla's broad `PopulateOptions` bucket. Entry and ordinary return rows fire it directly; cancelled picker paths rebuild through `CatchReleaseFisherResume`.
+- A highlighted business option is added by its option row, then coloured by a later condition-matched row in the same trigger. This keeps `SetOptionColor` after the option it mutates.
 - Question topics are paged. Unasked topics appear first; answered topics appear afterward in the Common rarity colour. Previous, Next, and Back keep the menu within the engine's nine-option limit.
 - A terminal answer returns through `Something else`. `I've heard enough.` is the only route from the question menu to business.
 - The name question introduces “Baha” in the answer; the option does not assume the player already knows it.

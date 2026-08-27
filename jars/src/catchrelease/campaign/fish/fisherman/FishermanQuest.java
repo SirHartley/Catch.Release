@@ -528,17 +528,20 @@ public class FishermanQuest {
 
                             FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
                         } else {
-                            FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+                            FireAll.fire(null, dialog, memoryMap,
+                                    "CatchReleaseFisherResume");
                         }
                     }
 
                     @Override
                     public void cancelled() {
-                        FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+                        FireAll.fire(null, dialog, memoryMap, "CatchReleaseFisherResume");
                     }
                 });
 
-        if (!opened) FireAll.fire(null, dialog, memoryMap, "PopulateOptions");
+        if (!opened) {
+            FireAll.fire(null, dialog, memoryMap, "CatchReleaseFisherResume");
+        }
 
         return opened;
     }
