@@ -665,10 +665,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     : entry.isUpgrade() ? "UPGRADE" : "FIT";
 
             boolean dev = Global.getSettings().isDevMode() && !entry.isCurio();
+            ShopPricing.Price price = entry.getPrice();
+            boolean canSelectPayment = entry.isUpgrade()
+                    && price != null && price.fish != null;
             FishHandoffPicker.Selection automaticPayment = entry.isUpgrade()
                     ? getAutomaticPayment(entry) : null;
 
-            CustomPanelAPI row = panel.createCustomPanel(240f + (dev ? 80f : 0f), 30f,
+            float rowWidth = 240f + (canSelectPayment ? 130f : 0f) + (dev ? 80f : 0f);
+            CustomPanelAPI row = panel.createCustomPanel(rowWidth, 30f,
                     new com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin() {
                     });
 
@@ -678,11 +682,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
                             () -> buyClicked(entry, false, automaticPayment)));
             row.addComponent(buy).inTL(0f, 0f);
 
+            if (canSelectPayment) {
+                CustomPanelAPI select = panel.createCustomPanel(120f, 30f,
+                        new PaneWidgets.TextButton(() -> "Select...",
+                                entry::canAfford, () -> manualUpgradeClicked(entry),
+                                PaneWidgets.TextButton.Style.MUTED));
+                row.addComponent(select).inTL(250f, 0f);
+            }
+
             if (dev) {
                 CustomPanelAPI grant = panel.createCustomPanel(70f, 30f,
                         new catchrelease.ui.PaneWidgets.TextButton(() -> "DEV",
                                 () -> true, () -> buyClicked(entry, true, null)));
-                row.addComponent(grant).inTL(250f, 0f);
+                row.addComponent(grant).inTL(canSelectPayment ? 380f : 250f, 0f);
             }
 
             info.addCustom(row, 20f);
@@ -692,14 +704,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         TooltipMakerAPI.TooltipLocation.BELOW);
             }
 
-            ShopPricing.Price price = entry.getPrice();
-            if (entry.isUpgrade() && price != null && price.fish != null) {
-                CustomPanelAPI manual = panel.createCustomPanel(240f, 26f,
-                        new PaneWidgets.TextButton(() -> "MANUAL UPGRADE",
-                                entry::canAfford, () -> manualUpgradeClicked(entry),
-                                PaneWidgets.TextButton.Style.MUTED));
-                info.addCustom(manual, 4f);
-            }
         }
 
         protected FishHandoffPicker.Selection getAutomaticPayment(ShopEntry entry) {
