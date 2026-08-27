@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.crime.HarpoonOffence;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -113,8 +114,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (!interval.intervalElapsed()) return;
 
         if (!canOffer()) return;
-        // the world does not start offering work until the introduction's first errand is done
-        if (!catchrelease.campaign.fish.tutorial.FishingIntro.isOpenForWork()) return;
+        if (!FishingIntro.isComplete()) return;
 
         if (random.nextFloat() > CHANCE) return;
 
