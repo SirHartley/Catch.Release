@@ -22,7 +22,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
 
     @Override
     public boolean isEligible(DistressCallSpec spec, StarSystemAPI system) {
-        if (!FishingIntro.isOpenForWork()) return false;
+        if (!FishingIntro.isComplete()) return false;
         if (!Global.getSector().getIntelManager().getIntel(FleetQuest.class).isEmpty()) return false;
 
         return FleetQuestEncounter.countLive() == 0 && typeFor(spec) != null;

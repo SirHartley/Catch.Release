@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopSchematics;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
@@ -71,6 +72,7 @@ public class FleetQuest extends FishJob {
 
     private static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type,
                                       boolean distressOffer) {
+        if (!FishingIntro.isComplete()) return null;
         if (giver == null || giver.isExpired() || type == null) return null;
         if (isQuestFleet(giver)) return null;
 
