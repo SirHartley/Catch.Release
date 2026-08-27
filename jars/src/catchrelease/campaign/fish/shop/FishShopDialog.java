@@ -5,6 +5,7 @@ import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -32,6 +33,7 @@ import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +70,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     protected InteractionDialogAPI dialog;
     protected Delegate delegate;
     protected boolean closed;
+    protected boolean reopenPending;
     protected final OnClose onClose;
 
     public interface OnClose {
@@ -94,6 +97,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected TooltipMakerAPI detail;
         protected PositionAPI listViewport;
         protected PositionAPI pos;
+
+        protected ShopEntry manualEntry;
+        protected Receipt manualReceipt;
 
         protected class Receipt {
 
@@ -125,6 +131,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
             this.panel = panel;
             this.callbacks = callbacks;
+
+            entries.clear();
+            added.clear();
+            list = null;
+            detail = null;
+            listViewport = null;
+            pos = null;
 
             buildEntries();
             selectFirstVisible();
@@ -304,6 +317,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void selectFirstVisible() {
             List<ShopEntry> visible = getVisible();
+
+            for (ShopEntry entry : visible) {
+                if (entry.getKey().equals(selectedKey)) return;
+            }
 
             selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
         }
@@ -668,6 +685,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
 
             info.addCustom(row, 20f);
+
+            ShopPricing.Price price = entry.getPrice();
+            if (entry.isUpgrade() && price != null && price.fish != null) {
+                CustomPanelAPI manual = panel.createCustomPanel(240f, 26f,
+                        new PaneWidgets.TextButton(() -> "MANUAL UPGRADE",
+                                entry::canAfford, () -> manualUpgradeClicked(entry),
+                                PaneWidgets.TextButton.Style.MUTED));
+                info.addCustom(manual, 4f);
+            }
         }
 
         protected void buyClicked(ShopEntry entry, boolean free) {
@@ -682,6 +708,58 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             refreshWallet();
             rebuild(true);
+        }
+
+        protected void manualUpgradeClicked(ShopEntry entry) {
+            ShopPricing.Price price = entry.getPrice();
+            if (!entry.isUpgrade() || price == null || price.fish == null
+                    || !entry.canAfford() || callbacks == null) return;
+
+            manualEntry = entry;
+            manualReceipt = new Receipt(entry);
+            callbacks.dismissDialog();
+        }
+
+        protected void openManualUpgradePicker() {
+            final ShopEntry entry = manualEntry;
+            final Receipt receipt = manualReceipt;
+            manualEntry = null;
+            manualReceipt = null;
+
+            ShopPricing.Price price = entry == null ? null : entry.getPrice();
+            if (entry == null || receipt == null || price == null || price.fish == null) {
+                if (receipt != null) restoreFish(receipt);
+                reopenPending = true;
+
+                return;
+            }
+
+            boolean opened = FishHandoffPicker.show(dialog, "Select specimens for the upgrade",
+                    "Upgrade", Collections.singletonList(price.fish),
+                    new FishHandoffPicker.Listener() {
+                        @Override
+                        public void picked(FishHandoffPicker.Selection selection) {
+                            if (entry.buyWithFishPayment(selection::spend)) {
+                                purchases.add(receipt);
+                                Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
+                            } else {
+                                restoreFish(receipt);
+                            }
+
+                            reopenPending = true;
+                        }
+
+                        @Override
+                        public void cancelled() {
+                            restoreFish(receipt);
+                            reopenPending = true;
+                        }
+                    });
+
+            if (!opened) {
+                restoreFish(receipt);
+                reopenPending = true;
+            }
         }
 
         protected List<Object[]> snapshotFish() {
@@ -699,11 +777,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return stacks;
         }
 
-        protected void undoClicked() {
-            if (purchases.isEmpty()) return;
-
-            Receipt receipt = purchases.remove(purchases.size() - 1);
-            ShopEntry entry = findEntry(receipt.entryKey);
+        protected void restoreFish(Receipt receipt) {
             CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
 
             for (CargoStackAPI stack : cargo.getStacksCopy()) {
@@ -716,6 +790,16 @@ public class FishShopDialog implements InteractionDialogPlugin {
             for (Object[] stack : receipt.fishAboard) {
                 cargo.addSpecial((SpecialItemData) stack[0], (Integer) stack[1]);
             }
+        }
+
+        protected void undoClicked() {
+            if (purchases.isEmpty()) return;
+
+            Receipt receipt = purchases.remove(purchases.size() - 1);
+            ShopEntry entry = findEntry(receipt.entryKey);
+            CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
+
+            restoreFish(receipt);
             cargo.getCredits().set(receipt.creditsAboard);
 
             if (entry != null && entry.isUpgrade()) {
@@ -799,6 +883,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void reportDismissed(int option) {
+            if (manualEntry != null) {
+                openManualUpgradePicker();
+
+                return;
+            }
+
             FishShopDialog.this.close();
         }
 
@@ -849,6 +939,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
         closed = false;
+        reopenPending = false;
 
         // returns anything a save is still holding in shop storage - that button no longer exists
         ShopStorage.reclaim();
@@ -882,6 +973,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
     @Override
     public void advance(float amount) {
+        if (!reopenPending || closed || dialog == null || delegate == null) return;
+
+        reopenPending = false;
+        dialog.showCustomVisualDialog(WIDTH, HEIGHT, delegate);
     }
 
     @Override

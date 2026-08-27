@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoPickerListener;
@@ -203,7 +204,8 @@ public final class FishHandoffPicker {
                                     Misc.getNegativeHighlightColor());
                         }
 
-                        show(dialog, title, confirm, asks, eligibility, listener);
+                        showNextFrame(() -> show(
+                                dialog, title, confirm, asks, eligibility, listener));
                     }
 
                     @Override
@@ -253,6 +255,31 @@ public final class FishHandoffPicker {
                 });
 
         return true;
+    }
+
+    protected static void showNextFrame(final Runnable action) {
+        Global.getSector().addTransientScript(new EveryFrameScript() {
+
+            protected boolean done;
+
+            @Override
+            public boolean isDone() {
+                return done;
+            }
+
+            @Override
+            public boolean runWhilePaused() {
+                return true;
+            }
+
+            @Override
+            public void advance(float amount) {
+                if (done) return;
+
+                done = true;
+                action.run();
+            }
+        });
     }
 
     public static Selection autoSelect(List<FishRequirement> asks, Eligibility eligibility) {

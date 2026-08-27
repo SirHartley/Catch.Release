@@ -253,7 +253,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | File | Responsibility |
 |---|---|
 | `FishJob.java` | Shared mission base. Handles person and fleet givers, contact visuals, reward cards, exact-specimen hand-in, active and completed intel, player-faction title colours, fishing-map navigation, vanilla acceptance cards, and the `rules.csv` token contract. It implements `FishAsker`. |
-| `FishHandoffPicker.java` | Shows eligible loose fish and validates a non-overlapping assignment on confirm. `autoSelect` chooses the minimum valid set, worst specimens first, across loose fish, crates, and piles. Partial containers are repacked under their original ID. |
+| `FishHandoffPicker.java` | Shows eligible loose fish and validates a non-overlapping assignment on confirm. Invalid selections reopen on the next frame after Starsector releases the picker modal. `autoSelect` chooses the minimum valid set, worst specimens first, across loose fish, crates, and piles. Partial containers are repacked under their original ID. |
 | `FishJobAsks.java` | Rolls species, rarity, grade, quantity, weight, method, and implement requirements. It excludes legendaries and impossible method/implement combinations. |
 | `FishReward.java` | Reward types: credits, compatibility grants, upgrade and tackle schematics, habitat data, backdrops, and blueprints. Location data converts to its stored credit value if learned before hand-in. The commodity type remains only to convert old saves to credits. |
 | `FishRewardRoller.java` | Rolls commodity-free rewards. Two credit rolls merge; credits round to 1,000 through 100,000 and 10,000 above it. Schematics exclude owned plans, active-job plans, invalid rigs, and unavailable upgrade tiers. Backdrops require conservatory-plan ownership. |
@@ -388,8 +388,8 @@ The top-level Outfitter tabs are Upgrades, Equipment, and Extras. Player-facing 
 
 | File | Responsibility |
 |---|---|
-| `FishShopDialog.java` | Outfitter tabs, list, detail panel, purchase, and session undo. Upgrade and module details show the mechanical description first, followed by a separate subdued flavour section. A top-right help mark explains tier stacking, equipment refitting, and automatic catch selection. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
-| `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. Exposes their mechanical description and optional flavour separately, enforces schematic permissions, resolves item or category icons, and keeps unknown modules out of the visible list. |
+| `FishShopDialog.java` | Outfitter tabs, list, detail panel, automatic or manually selected upgrade payment, and session undo. The manual path hands the modal to the shared specimen picker and reopens the Outfitter on the next frame. Upgrade and module details show the mechanical description first, followed by a separate subdued flavour section. A top-right help mark explains tier stacking, equipment refitting, and automatic catch selection. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
+| `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. Exposes their mechanical description and optional flavour separately, enforces schematic permissions, and supports automatic or caller-selected fish payment through the same purchase validation. Resolves item or category icons and keeps unknown modules out of the visible list. |
 | `ShopGroup.java` | Defines shelves, related stats and rigs, tab art, fallback icons, and the player-facing module noun for each rig. |
 | `ShopPricing.java` | Seeded credit-and-fish prices. Breach Coupler is the unique highest module tier; Retrieval Head is one tier below. Exact-tier lookup supports reward previews. |
 | `ShopMarks.java` | Persistent shopping list. Upgrade marks identify an exact tier; module marks identify the module and rig. Learned plans and active `FishAsker` entries drive yellow wanted dots and tooltip reasons. Old whole-ladder keys migrate to the next tier. |
@@ -616,7 +616,7 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 | File | Responsibility |
 |---|---|
 | `ShopUi.java` | Fonts, quads, gradients, clipping, pips, card placement, and the shared panel background. |
-| `PaneWidgets.java` | Type chips, buttons, titles, list headers, help marks, empty states, and text-field placeholders. Each widget owns a fresh sprite instance. |
+| `PaneWidgets.java` | Type chips, standard and muted secondary buttons, titles, list headers, help marks, empty states, and text-field placeholders. Each widget owns a fresh sprite instance. |
 | `ListRow.java` | Clipped, scroll-aware row base used by fish and shop lists. |
 | `FishIcons.java` | Full species art after a catch and live rimmed silhouettes after habitat-data unlock. Uses fresh sprites so colour state cannot leak between screens. |
 
