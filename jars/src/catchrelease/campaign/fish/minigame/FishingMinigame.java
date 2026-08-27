@@ -195,11 +195,13 @@ public class FishingMinigame {
     protected void advanceProgress(float amount) {
         if (isFishInBar()) {
             timeHeld += amount;
-            progress += FishConstants.MINIGAME_CATCH_RATE * progressRateMult * amount
+            progress += FishConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult)
+                    * amount
                     * UpgradeManager.getValue(StatIds.MINIGAME_PROGRESS_RATE, 1f)
                     * tackle.progressMult;
         } else {
-            progress -= FishConstants.MINIGAME_ESCAPE_RATE * escapeRateMult * amount
+            progress -= FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
+                    * amount
                     * UpgradeManager.getValue(StatIds.MINIGAME_ESCAPE_RESIST, 1f)
                     * tackle.escapeMult;
         }
@@ -220,6 +222,12 @@ public class FishingMinigame {
             progress = 0f;
             state = State.ESCAPED;
         }
+    }
+
+    // per-fish rate extremes softened toward baseline for the same reason the
+    // difficulty curve bends: flat player power has no answer to a raw 2x drain
+    protected float compressRate(float mult) {
+        return 1f + (mult - 1f) * FishConstants.MINIGAME_RATE_COMPRESSION;
     }
 
     public boolean isFishInBar() {
@@ -351,8 +359,12 @@ public class FishingMinigame {
     }
 
     protected float getDifficultyMult() {
+        // square root, not linear: the player's power is flat - there are no minigame
+        // upgrades - so the top of the sheet has to compress toward what a bare bar
+        // can still chase, while the sheet's ordering survives untouched
         float scaled = FishConstants.MINIGAME_DIFFICULTY_FLOOR
-                + FishConstants.MINIGAME_DIFFICULTY_SCALE * (difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE);
+                + FishConstants.MINIGAME_DIFFICULTY_SCALE
+                * (float) Math.sqrt(difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE);
 
         return Math.max(0.2f, scaled * FishConstants.MINIGAME_GLOBAL_DIFFICULTY);
     }

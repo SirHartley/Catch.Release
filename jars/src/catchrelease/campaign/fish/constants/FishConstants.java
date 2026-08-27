@@ -137,7 +137,7 @@ public class FishConstants {
     public static final float MINIGAME_BAR_MAX_FRACTION = 0.6f;
     public static final float MINIGAME_BAR_LIFT = 2.8f;
     public static final float MINIGAME_BAR_GRAVITY = 2.0f;
-    public static final float MINIGAME_BAR_MAX_SPEED = 1.1f;
+    public static final float MINIGAME_BAR_MAX_SPEED = 1.25f;
     public static final float MINIGAME_BAR_RESTITUTION = 0.72f;
     public static final float MINIGAME_BAR_REST_SPEED = 0.04f;
     public static final float MINIGAME_FISH_BASE_SPEED = 0.68f;
@@ -165,6 +165,7 @@ public class FishConstants {
     public static final float MINIGAME_DIFFICULTY_BASELINE = 50f;
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
     public static final float MINIGAME_DIFFICULTY_SCALE = 0.3f;
+    public static final float MINIGAME_RATE_COMPRESSION = 0.6f;
     public static final float MINIGAME_DIFFICULTY_MIN = 1f;
     public static final float MINIGAME_DIFFICULTY_MAX = 200f;
     public static final float MINIGAME_SPEED_MIN = 0.1f;
