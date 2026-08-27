@@ -1,205 +1,148 @@
 # Catch.Release
 
-Starsector mod: fishing. Ponds, drones, fish, and a catch minigame.
+Catch.Release is a Starsector fishing mod with unstable-fabric ponds, fishing rigs, collectible species, jobs, and a catch minigame.
 
-## Workflow
+## Required workflow
 
-- **Read this file in full before every Catch.Release task.** Refresh the current remote
-  `CLAUDE.md` at the start of each task; a read from an earlier task does not carry over.
-- **Ask the `starsector-knowledge` skill first, and for anything vanilla ask it only.** It is
-  the full API, the decompiled internals and the whole stock `data/` folder for one exact game
-  build, indexed - and it covers the obfuscated code and the csv formats, which nothing else
-  does. Never answer from memory: the API changes between versions and a remembered signature
-  is the expensive kind of wrong.
-- **Go to the real sources when the skill runs short.** They live in the repo under `lib/`,
-  zipped: `starfarer.api.zip` is the game's own API source, and `GraphicsLib.zip`,
-  `Lazylib_lunalib.zip` and `MagicLib.zip` are the dependency mods, source and jars both. Unzip
-  to a temp directory to read them - do not unpack them into the repo. Two cases earn it: the
-  skill answered but not fully, or the change is knotty enough to want a whole subsystem read
-  end to end. The dependency mods are the exception to the rule above - the skill is vanilla
-  only, so for GraphicsLib, LazyLib, LunaLib and MagicLib `lib/` is not the fallback, it is the
-  only source there is.
-- **Any player-facing line starts in [`docs/LORE.md`](docs/LORE.md).** What the fabric, a breach,
-  a pattern, the ROD and the Fisherman are, who in-universe calls them what, and the one tone rule -
-  whimsy on the surface, nothing good underneath, and never say so. Dialogue, species descriptions,
-  tackle blurbs and intel notes all answer to it. It also lists what the mod does that the fiction
-  has not explained yet; do not invent an answer in a row, settle it there first.
-- **Any work on `rules.csv` starts in [`docs/RULES.md`](docs/RULES.md).** The language as
-  verified against decompiled engine source - triggers, memory scopes, the operator table, the
-  truthiness gate, how scoring actually works - plus an appendix of the traps this repo has
-  already paid for. Two deeper references sit beside it and are quoted verbatim from the modder
-  who wrote them: [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) for the
-  engine end to end, and [`docs/rules/command_table.md`](docs/rules/command_table.md) for the
-  command vocabulary. Read the part you are about to use before writing a row, not after the
-  row misbehaves.
-- **One commit per change.** Several changes, or several things asked for at once, get split
-  into separate commits rather than piled into one.
-- **Keep commit messages short and human.** The entire message is one concise summary of the
-  change, written in plain modder-programmer language. No validation or testing notes, agent or
-  model names, co-author trailers, session metadata, links, formatting, or other fluff. Never
-  include a session link anywhere. This applies equally to ChatGPT, Claude, and any other agent.
-- **Every change updates [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).** Not only when a
-  package gains or loses a file - any change that moves what a file does, what registers it,
-  or how the pieces fit lands in the map in the same commit. A change is not done while the
-  map still describes the old shape.
-- **The mod compiles before merge.** Every runtime-affecting branch must pass the full clean
-  Java 17 compile gate under [Building](#building) against its final remote state. Static checks,
-  token comparisons, IDE state, partial compilation, and a green result from an earlier commit do
-  not count. A missing compiler or dependency is a merge blocker, not permission to skip the gate.
-  Documentation-only changes are exempt.
-- **Never sync or modify a live/local mod copy or another checkout unless the user explicitly
-  requests it.** Work is written only in the current task repository. External installs and
-  checkouts - including `C:\Modding\mods\Catch.Release` - may be inspected read-only for
-  pre-merge auditing, but never pulled, copied into, checked out, cleaned, or otherwise changed
-  as an automatic post-merge step. After a successful merge, leave every external copy untouched;
-  the user owns deployment and synchronization unless they explicitly delegate it.
-- **Always open a pull request and merge it** once work is done. Do not leave finished work
-  sitting on the branch.
-- **Use the connected GitHub app for pull requests and merges.** The `gh` CLI is only a fallback;
-  a missing or invalid CLI login must never block PR creation, inspection, or merging when the app
-  is connected.
-- **A merged branch does not stay standing.** GitHub does this by itself: the repository has
-  *Automatically delete head branches* switched on, so merging a pull request retires its branch
-  without anybody asking. Nothing to do in the ordinary case - merge and it is gone. The rule is
-  written down because it is worth knowing why the repository looks tidy, and because the setting
-  covers exactly one thing: a branch that was the head of a pull request, at the moment that
-  request is merged. It does not touch a branch pushed and never opened as a request, one whose
-  request was closed rather than merged, or anything merged before the setting was turned on.
-  Those are the cases an agent still has to see to, and the one that made them worth a rule: the
-  repository reached a hundred and fifty leftovers, and from the outside a finished branch and one
-  still being worked on look the same, so the pile could only be sorted out by auditing every
-  branch individually. Whoever leaves such a branch behind clears it up in the same session -
-  tidying up after somebody else is nobody's job in particular. The session's own assigned task
-  branch is the standing exception: it is reset onto the new master and reused under the same name.
-  If a deletion is refused, say so in the reply and name the branch. Some sessions hold credentials
-  that can create and update refs but not delete them; the refusal is an HTTP 403 on the delete
-  push, from GitHub rather than the proxy, while an ordinary push still succeeds. That is a
-  permission boundary, not something to route around - report it and leave the branch, so it is a
-  known leftover rather than a silent one.
+Follow these rules for every Catch.Release task.
+
+### Read the current documentation
+
+1. Read the current remote `CLAUDE.md` in full at the start of every task. A read from an earlier task does not count.
+2. Use the `starsector-knowledge` skill before answering or changing anything related to vanilla Starsector. It contains the official API, decompiled internals, and vanilla data for one exact game version. Do not rely on memory.
+3. If the skill is incomplete, inspect the read-only archives under `lib/`. Extract them to a temporary directory, never into the repository.
+   - `starfarer.api.zip` contains the official game API source.
+   - `GraphicsLib.zip`, `Lazylib_lunalib.zip`, and `MagicLib.zip` contain dependency sources and jars.
+   - For GraphicsLib, LazyLib, LunaLib, and MagicLib, `lib/` is the primary source because the Starsector skill covers vanilla only.
+4. Read [`docs/LORE.md`](docs/LORE.md) before editing or adding any player-facing text. It defines terminology, character knowledge, voice, and the setting's unanswered questions. Do not invent an answer to an unresolved lore question in dialogue or UI text.
+5. Read [`docs/RULES.md`](docs/RULES.md) before working on `rules.csv`. Read the relevant parts of [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) and [`docs/rules/command_table.md`](docs/rules/command_table.md) before writing a rule.
+6. Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) before tracing features or files.
+
+### Make and record changes
+
+- Use one task branch for the user's message.
+- Make one commit per requested change. If one message contains several changes, commit them separately in the requested order.
+- Keep each commit message to one short, plain-English summary. Do not include testing notes, agent or model names, co-author trailers, session metadata, links, formatting, or session URLs.
+- Update `docs/ARCHITECTURE.md` in the same commit when a change affects file ownership, registration, lifecycle, contracts, or how systems connect. Replace stale statements; do not append a contradictory correction.
+- Work only in the current task checkout. A live mod installation, including `C:\Modding\mods\Catch.Release`, and every unrelated checkout are read-only unless the user explicitly asks you to change them.
+- Do not deploy or synchronize the mod after merge unless the user explicitly requests it.
+
+### Validate and merge
+
+- Every runtime-affecting final branch must pass the full clean Java 17 build described in [Building](#building).
+- Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis, and static checks do not satisfy the gate.
+- Missing compilers or dependencies are merge blockers. Documentation-only changes do not require a Java build.
+- Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
+- Use the connected GitHub app to create, inspect, and merge pull requests. Use `gh` only if the app is unavailable. A broken `gh` login is not a blocker when the app works.
+- Fetch current remote `master` before branching and again before merging. Integrate intervening changes, push the exact final commit, and verify the merged remote revision.
+
+### Branch cleanup
+
+GitHub normally deletes a pull request's head branch after merge because automatic branch deletion is enabled.
+
+Verify that the branch is gone. Manually remove it when it was pushed without a pull request, its pull request was closed without merging, or it predates the repository setting. If deletion returns HTTP 403, report the branch name and leave it in place; do not work around a credential boundary.
+
+After merge, fast-forward the local task branch to the new `master`. The local task branch may keep its assigned name.
 
 ## Comments and documentation
 
-- **Comment hidden constraints, not visible operations.** Keep the reason that code cannot express:
-  engine or API quirks, required ordering and lifecycle, save or serialization compatibility,
-  reflection and obfuscation, units and invariants, non-obvious math, or cross-file coupling.
-  Delete comments that merely translate the next statement into English.
-- **Let names carry ordinary intent.** Do not add Javadoc to self-explanatory classes, methods,
-  fields, parameters, or return values. Keep necessary comments short, usually one line, in a
-  direct working-programmer voice. Source comments are not essays, tutorials, release notes, or
-  a record of how the implementation was developed.
-- **Do not preserve dead code in comments.** Delete commented-out code. Leave a TODO only when it
-  names a concrete remaining action; include the constraint or blocker when that is not obvious.
-- **Documentation describes the current truth.** Record architecture, contracts, entry points,
-  and live gotchas. Do not turn documentation into a development diary, PR history, bug
-  postmortem, or implementation narrative. Replace stale prose in the same commit instead of
-  appending a correction that contradicts it.
-- **Give each fact one home.** Keep `docs/ARCHITECTURE.md` as the compact file and feature map,
-  and put wider stable context in the relevant focused document. Do not repeat the same
-  explanation across documentation and source comments unless a local warning is needed to keep
-  code safe.
-- **Remove or update stale words with the code.** A changed behavior does not leave behind an old
-  comment or document claim. Player-facing prose and rules still follow the lore and rules
-  workflows above.
+- Comment constraints that code cannot express: engine quirks, required ordering, lifecycle rules, save compatibility, serialization, reflection, obfuscation, units, invariants, non-obvious math, and cross-file coupling.
+- Do not comment visible operations. Prefer clear names and structure.
+- Do not add Javadoc to self-explanatory classes, methods, fields, parameters, or return values.
+- Keep necessary comments short and direct. Comments are not tutorials, release notes, bug histories, or implementation narratives.
+- Delete commented-out code.
+- Keep a TODO only when it names a concrete unfinished action. Include the blocker when it is not obvious.
+- Documentation records current architecture, contracts, entry points, and live hazards. It must not become a development diary, pull-request history, or postmortem.
+- Give each fact one home. `docs/ARCHITECTURE.md` is the compact file and feature map; broader stable explanations belong in focused documents.
+- Update or remove stale comments and documentation in the same commit as the behavior change.
 
 ## Java class layout
 
-- **Order members for the reader, not for a sorter.** The default is nested enums, static fields
-  and initializers, instance fields and initializers, nested types, constructors, lifecycle or
-  public entry points in the order they run or are used, then supporting helpers near their
-  callers. Keep the relative order of initializers when changing it could alter behavior.
-- **Functional flow may beat the default.** A cohesive subsystem can stay together when splitting
-  it across declaration categories would make the class harder to follow. The result should read
-  naturally from setup through operation to details.
-- **Group fields by responsibility.** Within the static and instance sections, keep each
-  subsystem's fields together and put one blank line between groups: sprites, rendering state,
-  locations, lifecycle state, and so on. Use a one-to-three-word header only when names and types
-  do not make the boundary clear.
-- **Keep spacing deliberate.** Leave one blank line immediately after every class, enum,
-  interface, and record opening brace. Use one blank line between field groups, sections, and
-  methods; none between fields in one group or between enum constants; never stack empty lines.
-- **Use section headers sparingly.** A short header such as `// Rendering` is useful when a long
-  class contains distinct subsystems. Do not add one where member names and order already make the
-  grouping obvious.
+- Organize members for reading, not alphabetical sorting.
+- Default order:
+  1. nested enums;
+  2. static fields and initializers;
+  3. instance fields and initializers;
+  4. other nested types;
+  5. constructors;
+  6. lifecycle and public entry points in execution or usage order;
+  7. supporting helpers near their callers.
+- Preserve initializer order when moving code could change behavior.
+- Keep a cohesive subsystem together when strict declaration grouping would make the class harder to follow.
+- Group fields by responsibility. Put one blank line between groups and no blank lines inside one group.
+- Leave one blank line after a class, enum, interface, or record opening brace.
+- Use one blank line between methods and major sections. Do not stack empty lines.
+- Use short section headers such as `// Rendering` only when names and ordering do not make a long class's groups clear.
 
-## ChatGPT app workflow (ChatGPT only)
+## ChatGPT app workflow
 
-This section applies only when ChatGPT is working on Catch.Release in the ChatGPT app. It is
-**not an instruction for Claude**.
+This section applies only to ChatGPT working in the ChatGPT app. It is not an instruction for Claude.
 
-- **Use local and pinned GPTs directly through the ChatGPT app.** ChatGPT can switch to GPTs
-  such as the Starsector Editor inside the app. Do not open `chatgpt.com` or use the browser
-  to reach them.
-- **Use one dedicated task checkout for local repository work.** Normal `git clone`, fetch,
-  branch, checkout, edit, build, commit, integration and push operations are permitted inside
-  that checkout. A task checkout is not a live mod installation or another standing checkout;
-  the generic no-sync rule above still protects both.
-- **Validate a new or suspect filesystem before trusting it.** Clone current remote `master`
-  into a disposable directory, confirm HEAD matches the remote commit, require a clean
-  `git status` and `git fsck --full`, verify a repository file against its remote blob, and
-  exercise a write/read/delete round trip plus local branch creation and switching. Remove the
-  disposable clone after checking its resolved path. If any check fails, keep PC checkouts
-  read-only and return to the GitHub-app-only workflow until the cause is resolved.
-- **Split the repository workflow between local Git and the connected GitHub app.** Use the
-  task checkout for source work and Git history. Use the GitHub app to create, inspect and merge
-  pull requests, and as the remote-only fallback if local Git or the filesystem stops being
-  trustworthy. Do not use the browser for repository work; the `gh` CLI remains only the
-  fallback described by the generic workflow above.
-- **Preserve the repository's task/commit discipline in the task checkout.** One task is one
-  commit. If a message contains several tasks, commit them separately on the same task branch in
-  the requested order, and open and merge the pull request only after the whole message is done.
-- **Work from, and finish against, remote state.** Fetch current remote `master` before
-  branching and again before merging, integrate intervening changes, push the exact final task
-  commit, verify the merged remote commit, and leave every live mod install and unrelated
-  checkout untouched.
-- **Compile the exact final task-branch checkout.** Use a clean, empty output directory and the
-  complete Java 17 dependency set under [Building](#building). Never compile from or write into a
-  live mod installation. If the full compile cannot run, stop before merge.
-- **Draft and audit every player-facing line with the Starsector Editor GPT in the ChatGPT app.**
-  This is mandatory for dialogue, UI labels and messages, tooltips, intel, species and item prose,
-  station, weapon, skill and hullmod descriptions, mission text, console output, and any other text
-  the player can see. Before sending any request, manually verify that the pinned Starsector Editor
-  chat is set to **High** thinking. Do not use Auto, Standard, Fast, or a lower thinking mode for
-  Catch.Release writing. If High is unavailable, stop instead of accepting a lower-quality pass.
-  Tell the Editor exactly where each line appears and what that surface must do:
-  for example, identify it as a button label, hover tooltip, intel entry, fish description, weapon
-  description, or transient campaign message, and include the relevant mechanical and space
-  constraints. Give the Editor the complete current `docs/LORE.md`, not a summary, before asking it
-  to revise a line. For corrective passes, also supply both the pre-regression and current copy so
-  stronger characterization or information density is restored rather than flattened by generic
-  tightening. Use separate focused passes when different speakers or surfaces need distinct
-  treatment, then give the Editor the final integrated copy for voice and context QA. The Editor
-  does not get to alter routes, tokens, mechanics, layout contracts or code behavior.
-- **Every Editor prompt must explicitly reject hallmark AI prose.** Tell it to preserve focus,
-  concrete information, character voice, and natural sentence variety. Tell it not to use canned
-  contrasts, repetitive sentence templates, excessive triplets, vague abstractions, polished
-  exposition that explains the subtext, faux-poetic ominousness, or filler such as "somehow" and
-  "quietly". Em dashes are not a default punctuation mark; use one only when a real interruption
-  requires it, and prefer a period or comma otherwise. Keep each pass inside the named lines and
-  purpose; do not accept unrelated rewrites. Audit the returned text specifically for these
-  patterns. Send any affected line back for another High-thinking pass rather than trying to
-  normalize the Editor's habits during integration.
-- **Independently perform the lore and context check.** Never treat the Editor's draft or QA as
-  that check. Compare every returned line against the complete current `docs/LORE.md` and its
-  stated display context before integration, and send any terminology, mechanics, usability or
-  context conflict back to the Editor for correction. Apply the approved result in the task
-  checkout and push it through the normal Git workflow.
+### Local and GitHub work
 
-## Model assignments
+- Use local and pinned GPTs directly through the ChatGPT app. Do not open `chatgpt.com` or use the browser to reach them.
+- Use one dedicated local task checkout for clone, fetch, branch, edit, build, commit, integration, and push operations.
+- Use local Git for source work and history. Use the connected GitHub app for pull requests, merges, and remote-only fallback when the local filesystem or Git state is unreliable.
+- Do not use the browser for repository work.
+- If one user message contains several tasks, commit each task separately on the same branch and open one pull request after all of them are complete.
+- Compile from a clean output directory in the task checkout. Never compile from or write into a live mod installation.
 
-Opus 5, in the main session, writes the code. Planning and code are the same job here. Clear
-names and structure carry ordinary intent; comments are reserved for the hidden constraints
-listed above.
+### Filesystem validation
 
-Subagents are for legwork that does not produce shipped code:
+Before trusting a new or suspect filesystem:
 
-| Task | Who does it |
+1. Clone current remote `master` into a disposable directory.
+2. Confirm its HEAD matches the remote commit.
+3. Require a clean `git status`.
+4. Run `git fsck --full`.
+5. Compare one repository file with its remote blob.
+6. Test write, read, and delete in the clone.
+7. Create and switch a local branch.
+8. Resolve and verify the disposable path before removing it.
+
+If any check fails, keep local PC checkouts read-only and use the GitHub-app-only workflow until the cause is fixed.
+
+### Player-facing text
+
+Every player-facing line must be drafted and audited with the pinned Starsector Editor GPT. This includes dialogue, options, UI labels, messages, tooltips, intel, species and item text, station, weapon, skill and hullmod descriptions, mission text, console output, and any other text visible to the player.
+
+Before each Editor request:
+
+1. Manually confirm that the pinned Editor chat uses High thinking. Do not use Auto, Standard, Fast, or any lower setting. Stop if High is unavailable.
+2. Provide the full current `docs/LORE.md`, not a summary.
+3. State the exact display context: button, tooltip, intel entry, fish description, weapon description, campaign message, or another named surface.
+4. Include all mechanical, layout, and space constraints.
+5. For corrective work, provide both the pre-regression and current text.
+6. Use separate focused passes for different speakers or surfaces, then request a final integrated voice and context check.
+
+Every Editor prompt must reject hallmark AI prose. Require focused, concrete information, strong character voice, and natural sentence variety. Reject:
+
+- canned contrasts;
+- repeated sentence templates;
+- excessive triplets;
+- vague abstractions;
+- polished exposition that explains the subtext;
+- false ominous or poetic language;
+- filler such as “somehow” and “quietly”;
+- routine use of em dashes.
+
+Keep each pass limited to the specified lines and purpose. The Editor may not change routes, tokens, mechanics, layout contracts, or code behavior. Send weak lines back for another High-thinking pass instead of rewriting around the Editor during integration.
+
+The Editor does not replace the lore and context review. Independently compare every returned line with the full current `docs/LORE.md` and the named display context. Return terminology, mechanics, usability, or context problems to the Editor before integration.
+
+## Claude model assignments
+
+This section applies to Claude sessions, not ChatGPT.
+
+Opus 5 in the main session owns planning and shipped code. Clear names and structure carry ordinary intent; comments remain limited to hidden constraints.
+
+| Work | Model |
 |---|---|
-| Planning and writing code - architecture, sequencing, every Java file | Opus 5, in the main session |
-| Crawling and scoping - finding files, tracing call sites, reading the game sources | Sonnet 5 subagents (`model: sonnet`) |
-| Anything UI or UI-adjacent - panels, dialogs, tooltips, renderers, shaders, sprites | Fable 5 subagents (`model: fable`) |
+| Planning, architecture, sequencing, and all Java changes | Opus 5 in the main session |
+| Repository search, call tracing, and reading game sources | Sonnet 5 subagents using `model: sonnet` |
+| UI and UI-adjacent work, including panels, dialogs, tooltips, renderers, shaders, and sprites | Fable 5 subagents using `model: fable` |
 
-The UI rule still wins where it applies: if a change touches something the player looks at, it
-goes to Fable 5.
+Subagents perform research and scoping, not shipped code. The UI assignment takes precedence whenever the player can see the result.
 
 ## Building
 
@@ -207,81 +150,60 @@ goes to Fable 5.
 
 After the final runtime-affecting commit and before merge:
 
-1. Build from the exact remote task-branch snapshot into a clean, empty output directory.
-2. Compile every `.java` file under `jars/src` with Java 17 and the complete dependency set
-   below. The command must exit successfully with no compile errors.
-3. Record the command, branch commit, Java version, and result in the pull request and final reply.
-4. If the build cannot run or a dependency is missing, do not merge. Report the blocker.
-5. Documentation-only changes do not require a compile.
+1. Fetch and build the exact remote task-branch revision.
+2. Use a clean, empty output directory.
+3. Compile every `.java` file under `jars/src` with Java 17 and the complete dependency set below.
+4. Require a successful exit with no compile errors.
+5. Record the command, branch commit, Java version, and result in the pull request and final reply.
+6. Stop before merge if the build or any dependency is unavailable.
 
-Java 17 (`.idea/misc.xml` sets the language level; the source uses switch expressions).
+Documentation-only changes are exempt.
 
-Compiles against the game and library jars:
+The project uses Java 17; `.idea/misc.xml` sets the language level and the source uses switch expressions.
 
-- `starfarer.api.jar` - in `lib/`; `starfarer_obf.jar` is not, and still comes from the game
-  install's `starsector-core`
-- `Graphics.jar` (GraphicsLib), `LazyLib.jar`, `LunaLib.jar`, `MagicLib.jar` - the declared
-  dependencies in `mod_info.json`, each inside its zip in `lib/`
-- `lw_Console.jar` - Console Commands, in `lib/` directly. A compile dependency only since the
-  console commands moved into `jars/src`; the mod itself still runs without the console installed,
-  because nothing but the console's own loader ever loads those classes
-- `lwjgl-2.9.3.jar`, `lwjgl_util-2.9.3.jar`, `json-20140107.jar`, `log4j-1.2.17.jar` - needed
-  for `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json` and `Global.getLogger`
+Required compile dependencies:
 
+- `lib/starfarer.api.jar`;
+- `starfarer_obf.jar` from the game's `starsector-core` directory;
+- `Graphics.jar` from `lib/GraphicsLib.zip`;
+- `LazyLib.jar` and `LunaLib.jar` from `lib/Lazylib_lunalib.zip`;
+- `MagicLib.jar` from `lib/MagicLib.zip`;
+- `lib/lw_Console.jar`, used only to compile optional Console Commands classes;
+- `lwjgl-2.9.3.jar`;
+- `lwjgl_util-2.9.3.jar`;
+- `json-20140107.jar`;
+- `log4j-1.2.17.jar`.
+
+These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, and MagicLib are also the declared runtime dependencies in `mod_info.json`. `lw_Console.jar` is compile-only because only Console Commands loads those optional classes.
+
+Reference command:
+
+```sh
+javac --release 17 -cp "<all jars above>" -d <empty-output> $(find jars/src -name '*.java')
 ```
-javac --release 17 -cp "<those jars>" -d <out> $(find jars/src -name '*.java')
-```
 
-## Layout
+## Repository layout
 
-**[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the full map** - every package, every file, one
-line each, plus the boot order and the index of what is registered by data rather than by code. Read
-it before going looking for something, and update it with every change - see the workflow rule
-above.
+`docs/ARCHITECTURE.md` contains the complete file and feature map, boot order, data registrations, lifecycle contracts, and known engine constraints.
 
-The short version:
-
-| Path | What lives there |
+| Path | Contents |
 |---|---|
-| `jars/src/catchrelease/campaign/ponds/` | The pond. **Terrain**, not a custom entity - registered in `data/campaign/terrain.json`, plugin under `terrain/`. |
-| `jars/src/catchrelease/campaign/fish/` | Most of the mod: specs, motes, spawning, the catch minigame, jobs, the shop, the map filter, the codex. |
-| `jars/src/catchrelease/campaign/crime/` | What harpooning a fleet costs you, and what running the breach lamps over an inhabited world costs you. |
-| `jars/src/catchrelease/abilities/` | The three rigs - searchlight, R.O.D., harpoon. |
-| `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire ability framework; see its README. |
-| `jars/src/catchrelease/rendering/` | Shader and sprite renderers, stencils, warp grids. |
-| `jars/src/catchrelease/memory/` | Anything that has to survive a save - upgrades, charges, caches. |
-| `data/config/custom_entities.json` | Motes and drones. The pond is **not** here any more. |
+| `jars/src/catchrelease/campaign/ponds/` | Pond terrain and interaction. Ponds are registered in `data/campaign/terrain.json`, with the live plugin under `terrain/`. They are not custom entities. |
+| `jars/src/catchrelease/campaign/fish/` | Species, motes, spawning, minigame, jobs, outfitter, map, Codex, Fisherman, tutorial, and aquarium. |
+| `jars/src/catchrelease/campaign/crime/` | Harpoon and Breach Lights offences and responses. |
+| `jars/src/catchrelease/abilities/` | Breach Lights, R.O.D., and Harpoon rigs. |
+| `jars/src/catchrelease/distress/` | Reusable distress-call framework. Read its README first. |
+| `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire framework. Read its README first. |
+| `jars/src/catchrelease/rendering/` | Campaign shaders, sprite renderers, stencils, and warp grids. |
+| `jars/src/catchrelease/memory/` | Persistent upgrades and charges plus session caches. |
+| `data/config/custom_entities.json` | Motes, drones, harpoons, legendary props, and the Fisherman map icon. Ponds are not registered here. |
 
-## Gotchas
+## Core engine constraints
 
-- **The Church and the Path never like fishing.** A rupture is a hole into hyperspace and the
-  catch comes from the wrong side of it, so neither flag has fishers, buyers or bar jobs - only
-  patrols that stop you and cells that sit on the water. `campaign/fish/FishingTaboo.java` is the
-  one list; do not hardcode the faction ids anywhere else.
-- **A custom entity plugin's `init` must call `super.init`.** `BaseCustomEntityPlugin` keeps the
-  `entity` reference its own `getRenderRange()` reads; shadowing it with a local field leaves the
-  base's copy null and the first render crashes with an NPE. Use the inherited field.
-- **Terrain differs from custom entities.** `getPlugin()` rather than `getCustomPlugin()`,
-  radius only settable through `CampaignTerrainAPI`, `getActiveLayers()` and
-  `getRenderRange()` throw unless overridden, and `BaseTerrain.advance` sweeps local fleets
-  for terrain effects unless the plugin opts out.
-- **`GL_LINE_STIPPLE` is useless for short segments.** GL restarts the pattern at every
-  segment of a `GL_LINES` batch, so anything shorter than one dash draws solid. Dashes are cut
-  as geometry in `SkillshotUtils` instead.
-- **GraphicsLib's distortion works in the campaign.** The shaders were never the problem - only
-  the plumbing: `DistortionShader` keeps its list in `Global.getCombatEngine().getCustomData()`,
-  which does not exist outside a battle. `CampaignDistortionRenderer` rebuilds that plumbing
-  against the campaign and drives GraphicsLib's own `.vert`/`.frag` files directly. Only two
-  ShaderLib helpers are unusable out there - `unitsToUV` and `isOnScreen`, both because they
-  read the zoom off the combat viewport - and both are two lines against the campaign viewport.
-  The screen has to be copied by hand (`ShaderLib.copyScreen`); in combat something else already
-  has.
-- **A camera snapped to a thing kills that thing's parallax.** `ParallaxUtil`'s camera term is
-  computed from the distance to the middle of the screen, which is zero for whatever the camera
-  is centred on. Anything that has to read as deep while centred needs motion of its own - see
-  `PondDepthField` and `computeDriftUvOffsetPx`.
-- **`showCustomDialog` always builds a confirm button.** The delegate can rename it and can
-  drop the cancel button beside it, but cannot ask for neither, and enter and space are wired
-  straight to it. For a panel that wants no buttons use `showCustomVisualDialog` with a
-  `CustomVisualDialogDelegate` - it hands the panel the whole frame and leaves the keyboard
-  alone. Vanilla hosts its own minigame that way (`DuelDialogDelegate`).
+- Church and Path factions do not provide fishers, buyers, or fishing jobs. They provide enforcement and rupture camps. `campaign/fish/FishingTaboo.java` is the only faction list; do not hardcode those IDs elsewhere.
+- A custom entity plugin's `init()` must call `super.init()`. `BaseCustomEntityPlugin` stores the inherited `entity` reference used by `getRenderRange()`. Do not shadow it.
+- Terrain uses `getPlugin()`, not `getCustomPlugin()`. Set radius through `CampaignTerrainAPI`. Override `getActiveLayers()` and `getRenderRange()`. `BaseTerrain.advance()` affects local fleets unless the plugin opts out.
+- `GL_LINE_STIPPLE` restarts for every `GL_LINES` segment, so short segments render solid. `SkillshotUtils` creates dash geometry instead.
+- Campaign distortion uses GraphicsLib's `.vert` and `.frag` shaders with campaign-specific plumbing. `DistortionShader` normally stores its list in `Global.getCombatEngine().getCustomData()`, which is unavailable outside combat. `CampaignDistortionRenderer` replaces that storage, calls `ShaderLib.copyScreen` itself, and supplies campaign versions of `unitsToUV` and `isOnScreen` because the originals read the combat viewport.
+- A camera-centered object has no camera-distance parallax. Effects that must show depth while centered need independent motion; see `PondDepthField` and `computeDriftUvOffsetPx`.
+- `showCustomDialog()` always creates a confirm button and binds Enter and Space to it. Use `showCustomVisualDialog()` with `CustomVisualDialogDelegate` when a panel must have no buttons. Vanilla's `DuelDialogDelegate` uses this pattern.
