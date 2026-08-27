@@ -719,8 +719,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(CARRYING, FishingIntro.isCarryingFisherProperty(), 0);
         local.set(DEEP_HANDOFF, deepHandoff, 0);
         local.set(OUTFITTER, FishingIntro.isAtLeast(FishingIntro.FISH_TWO), 0);
-        local.set(CAN_SKIP, FishingIntro.hasSeenBefore()
-                && !FishingIntro.isAtLeast(FishingIntro.RODDED), 0);
+        local.set(CAN_SKIP, FishingIntro.canSkip(), 0);
 
         String ratingPlanetName = Global.getSector().getMemoryWithoutUpdate()
                 .getString(TutorialConstants.RATING_PLANET_NAME_KEY);
