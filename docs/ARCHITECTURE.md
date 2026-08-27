@@ -388,13 +388,13 @@ The top-level Outfitter tabs are Upgrades, Equipment, and Extras. Player-facing 
 
 | File | Responsibility |
 |---|---|
-| `FishShopDialog.java` | Outfitter tabs, list, detail panel, purchase, and session undo. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
+| `FishShopDialog.java` | Outfitter tabs, list, detail panel, purchase, and session undo. A top-right help mark on the detail panel explains tier stacking, equipment refitting, and automatic catch selection. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
 | `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. Enforces schematic permissions, resolves item or category icons, and keeps unknown modules out of the visible list. |
 | `ShopGroup.java` | Defines shelves, related stats and rigs, tab art, fallback icons, and the player-facing module noun for each rig. |
 | `ShopPricing.java` | Seeded credit-and-fish prices. Breach Coupler is the unique highest module tier; Retrieval Head is one tier below. Exact-tier lookup supports reward previews. |
 | `ShopMarks.java` | Persistent shopping list. Upgrade marks identify an exact tier; module marks identify the module and rig. Learned plans and active `FishAsker` entries drive yellow wanted dots and tooltip reasons. Old whole-ladder keys migrate to the next tier. |
 | `FishAsker.java` | Interface implemented by jobs, tutorial intel, and chart-request intel so the shop, cargo, and route planner can read fish requirements uniformly. |
-| `FishCurrency.java` | Counts and spends fish, using the least valuable valid specimens first. |
+| `FishCurrency.java` | Counts and spends matching fish. Purchases take loose specimens before opening bundled catch; unnamed same-species requirements use the eligible species with the largest count aboard. |
 | `FishRequirement.java` | Describes and evaluates count, rarity, grade, species, region, source rupture, timestamp, coherence, method, and implement. Formats live progress and applies canonical rarity colours. Also tests whether any species could satisfy the requirement. |
 | `ShopStorage.java` | Migration shell for the removed storage counter. |
 | `ShopSchematics.java` | Saves quest-earned permissions for stocked modules and the last two tiers of each upgrade. Tracks fresh plans for `New!` labels, unlocks gated tiers in order, migrates owned gear, and provides a dev-only bulk grant. |
