@@ -49,6 +49,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float ROW_WIDTH = LIST_WIDTH - 6f;
     public static final float ROW_HEIGHT = 26f;
     public static final float DETAIL_GAP = 14f;
+    public static final float DETAIL_HELP_SIZE = 20f;
+    public static final float DETAIL_TOOLTIP_WIDTH = 360f;
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
 
     public static final float TOOLTIP_WIDTH = 320f;
@@ -501,7 +503,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void buildDetailContent(TooltipMakerAPI info, float width, ShopEntry entry) {
             CustomPanelAPI head = panel.createCustomPanel(width - 10f, 84f,
                     new ShopDetailHeaderPlugin(entry));
+
+            CustomPanelAPI help = panel.createCustomPanel(DETAIL_HELP_SIZE, DETAIL_HELP_SIZE,
+                    new PaneWidgets.HelpMark());
+            head.addComponent(help).inTR(0f, 0f);
+
             info.addCustom(head, 0f);
+            info.addTooltipTo(createOutfitterHelpTooltip(), help,
+                    TooltipMakerAPI.TooltipLocation.BELOW);
 
             if (entry.isUpgrade()) {
                 LazyFont titleFont = ShopUi.getTitleFont();
@@ -533,6 +542,37 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             buildPrice(info, entry);
             buildBuyButton(info, entry);
+        }
+
+        protected TooltipMakerAPI.TooltipCreator createOutfitterHelpTooltip() {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return DETAIL_TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    tooltip.addPara("UPGRADES", Misc.getBasePlayerColor(), 0f);
+                    tooltip.addPara("Purchased one tier at a time. Every purchased tier remains"
+                            + " active, and different upgrades can be active together without"
+                            + " limit.", 8f);
+
+                    tooltip.addPara("EQUIPMENT", Misc.getBasePlayerColor(), 12f);
+                    tooltip.addPara("Each fishing ability can fit one item at a time. Owned"
+                            + " equipment may be refitted freely; switching items does not remove"
+                            + " ownership or require another purchase. Separately marked"
+                            + " single-use equipment may still be consumed when used.", 8f);
+
+                    tooltip.addPara("PURCHASING", Misc.getBasePlayerColor(), 12f);
+                    tooltip.addPara("Only specimens matching the displayed catch requirement are"
+                            + " taken. Loose eligible specimens are used first, with bundled catch"
+                            + " opened only if needed. If several specimens of one unnamed species"
+                            + " are required, the eligible species with the largest count aboard"
+                            + " is used.", 8f);
+                }
+            };
         }
 
         protected void buildPrice(TooltipMakerAPI info, ShopEntry entry) {
