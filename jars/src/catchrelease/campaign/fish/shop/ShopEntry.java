@@ -19,7 +19,7 @@ public class ShopEntry {
     public enum Kind {
 
         UPGRADE("Upgrades", "shop_upgrade"),
-        TACKLE("Modifiers", "shop_modifiers"),
+        TACKLE("Equipment", "shop_modifiers"),
         CURIO("Extras", "pane_misc");
 
         public final String tabTitle;
