@@ -48,6 +48,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected float wanderPhase;
 
     protected float returnTime = 0f;
+    protected float chaseTime = 0f;
 
     protected float trailId;
 
@@ -127,7 +128,13 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         // speeds up the longer it's been returning; reset when not returning
         returnTime = mode == Mode.RETURNING ? returnTime + amount : 0f;
 
-        if (mode == Mode.CHASING && !isChaseTargetValid()) returnToOrbit();
+        if (mode == Mode.CHASING) {
+            chaseTime += amount;
+
+            float limit = UpgradeManager.getValue(
+                    StatIds.DRONE_CHASE_TIME, RodConstants.CHASE_TIME_FALLBACK);
+            if (!isChaseTargetValid() || (limit > 0f && chaseTime >= limit)) returnToOrbit();
+        }
 
         if (mode == Mode.ORBITING) {
             flyCircle(amount);
@@ -347,6 +354,8 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         boolean shouldReportLock = isNewTarget
                 && (mode == Mode.ORBITING || returningToPassiveOrbit);
 
+        if (isNewTarget || mode != Mode.CHASING) chaseTime = 0f;
+
         this.chaseTarget = mote;
         this.returningToPassiveOrbit = false;
         this.mode = Mode.CHASING;
@@ -359,6 +368,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     public void returnToOrbit() {
         this.chaseTarget = null;
+        this.chaseTime = 0f;
         this.returningToPassiveOrbit = true;
         this.mode = Mode.LAUNCHING;
     }

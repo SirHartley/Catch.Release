@@ -5,119 +5,143 @@ public enum Tackle {
     NONE("None", Fit.BOTH,
             "Nothing fitted."),
     SPOOL_GOVERNOR("Spool Governor", Fit.DRONE,
-            "Widens the window the drones fly, at the cost of how quickly it answers.") {
+            "Enlarges the catch window, but makes it rise more slowly in response to input.",
+            "The control unit carries a heavier return spring and a very conservative calibration"
+                    + " mark.") {
         {
             barSizeMult = 1.35f;
             barLiftMult = 0.85f;
         }
     },
     INERTIAL_DAMPER("Inertial Damper", Fit.DRONE,
-            "Steadies the window. It falls slower and answers slower - easier to hold, harder to"
-                    + " snap onto something that bolts.") {
+            "Makes the catch window fall more slowly, but also makes it rise more slowly in"
+                    + " response to input.",
+            "The damper block is mounted under the control housing on thick rubber bushings.") {
         {
             barGravityMult = 0.7f;
             barLiftMult = 0.8f;
         }
     },
     HOLDFAST_CLAMP("Holdfast Clamp", Fit.DRONE,
-            "The catch slips away more slowly when the window is off it.") {
+            "Slows the loss of catch progress while the catch window is not covering the pattern.",
+            "The mounting plate is thick enough to take a wrench mark and keep it.") {
         {
             escapeMult = 0.6f;
         }
     },
     SALVAGE_TRAWL("Salvage Trawl", Fit.DRONE,
-            "Drags for wreckage as well. Far more turns up, and none of it is a fish.") {
+            "Increases the chance that a catch includes bycatch. It does not change what that"
+                    + " bycatch contains.",
+            "The trawl comes back with more than the crew remembers sending it after.") {
         {
             treasureChanceMult = 3f;
         }
     },
     LIFTING_RIG("Lifting Rig", Fit.DRONE,
-            "Heavy gear on the drones. What comes up out of a good find can be a hull.") {
+            "Increases the chance of bycatch and allows uncommon or rare bycatch to produce ship"
+                    + " hulls instead of normal loot. Rarer finds can produce larger hulls.",
+            "The handling frame is reinforced for recoveries that should have stayed someone"
+                    + " else's problem.") {
         {
             treasureChanceMult = 1.4f;
             shipTackle = true;
         }
     },
     STASIS_CRADLE("Stasis Cradle", Fit.DRONE,
-            "The drones carry the catch home in a held field rather than a net. What comes aboard is"
-                    + " nearer the shape it had before the crossing got at it.") {
+            "Improves landed specimen coherence by reducing aberration during the catch.",
+            "Padded clamps hold the specimen steady through the last part of retrieval.") {
         {
             coherenceBonus = 0.25f;
         }
     },
     BAITED_RESONATOR("Baited Resonator", Fit.DRONE,
-            "Sings to the deeper things. Rarer specimens surface more often.") {
+            "Biases generated catches toward rarer species while fitted to the ROD.",
+            "The housing carries a maintenance tag with the bait field left blank.") {
         {
             rarityBias = 1.6f;
         }
     },
     BREACH_COUPLER("Breach Coupler", Fit.DRONE,
-            "Couples the LINE to openings cut by breach lamps, letting the drones work open space"
-                    + " around the fleet.") {
+            "Allows ROD drones to operate in open space while Breach Lights are active, where they"
+                    + " pursue patterns currently exposed by the lamps.",
+            "The coupler adds a heavy junction box between the drone rack and the Breach Light"
+                    + " controls.") {
         {
             breachCoupling = true;
         }
     },
     CALIBRATED_GRADER("Calibrated Grader", Fit.BOTH,
-            "Picks the better of what is there. Specimens come up nearer the top of their range.") {
+            "Biases landed specimens toward greater length and weight within their species'"
+                    + " possible range. It does not change coherence or rarity.",
+            "The calibration plate carries separate marks for length and mass.") {
         {
             qualityBias = 0.25f;
         }
     },
     BARBED_HEAD("Barbed Head", Fit.BOTH,
-            "Holds harder. Progress is made faster while the window is on the catch.") {
+            "Makes catch progress build faster while the catch window covers the pattern.",
+            "The protective cap has to be cut off before fitting.") {
         {
             progressMult = 1.35f;
         }
     },
     SONAR_HEAD("Sonar Head", Fit.BOTH,
-            "Reads what is on the line before it is landed. The species is shown on the track.") {
+            "Replaces the unidentified mote on the minigame track with the hooked species' icon"
+                    + " before the catch is landed.",
+            "The head has a compact transducer set into the housing behind the point.") {
         {
             sonar = true;
         }
     },
     FATHOM_HEAD("Fathom Head", Fit.HARPOON,
-            "Reads under the fabric rather than across it. The head takes what has gone below:"
-                    + " a specimen that has dived to shake the line, and anything the lamps"
-                    + " have betrayed as a dent rather than exposed outright.") {
+            "Lets the harpoon strike surfaced patterns while they are diving and buried patterns"
+                    + " revealed only as dents by the Breach Lights.",
+            "The tip's sensor collar is sealed under a layer of dull ceramic compound.") {
         {
             deepStrike = true;
         }
     },
     SHORING_HEAD("Shoring Head", Fit.HARPOON,
-            "The barb holds the specimen to its own shape all the way up the line, instead of letting"
-                    + " the trip back finish what the rupture started.") {
+            "Improves landed specimen coherence by reducing aberration during the catch.",
+            "The head carries extra bracing around the retrieval assembly and arrives with its"
+                    + " tolerances marked by hand.") {
         {
             coherenceBonus = 0.25f;
         }
     },
     RETRIEVAL_HEAD("Retrieval Head", Fit.HARPOON,
-            "Recovers a ready head when the barb finds a pattern. Hitting a fish restores one"
-                    + " harpoon charge, up to the rig's capacity. A miss still costs the shot.") {
+            "Restores a spent harpoon charge immediately when a shot hits a valid pattern, up to"
+                    + " the rig's capacity. A miss still spends the charge.",
+            "A return-feed connector is built into the rear of the head.") {
         {
             retrievesCharge = true;
         }
     },
     EXPLOSIVE_HEAD("Explosive Head", Fit.HARPOON,
-            "A shaped charge behind the barb. Whatever the head reaches goes up with it, and so does"
-                    + " the head - nothing is landed on this, and nothing was ever going to be. Put"
-                    + " one in a hull and the people in it will not be waiting to hear your side.") {
+            "A single-use Harpoon Tip that detonates on contact. It destroys ordinary struck"
+                    + " patterns instead of landing them, damages struck fleets, and is consumed by"
+                    + " the blast. Legendary pattern reactions may differ.",
+            "The safety stencil is larger than the product name.") {
         {
             explosive = true;
             stocked = false;
         }
     },
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
-            "A light that finds something breaks off its sweep and follows it for a few seconds"
-                    + " before carrying on.") {
+            "Pauses a Breach Light sweep when the lamp touches a buried pattern, follows that"
+                    + " pattern for a time, then resumes sweeping. The gimbal must cool down before"
+                    + " it can lock again.",
+            "The gimbal housing has a dedicated cooling jacket around the lock motor.") {
         {
             lockTime = 4f;
         }
     },
     FANNED_ARRAY("Fanned Array", Fit.SEARCHLIGHT,
-            "Throws the lights as fans off the hull rather than as spots out on the deep. Far more"
-                    + " sky is under them at once, and thinly - what they find, they find at a"
-                    + " glance rather than by dwelling on it.") {
+            "Replaces each Breach Light's moving spot with a wide fan-shaped beam. The fans cover"
+                    + " more space at once, but sweep more slowly and expose off-axis or distant"
+                    + " patterns less strongly.",
+            "The lamp head is replaced by a broad segmented frame that fills most of the mounting"
+                    + " bracket.") {
         {
             fanBeam = true;
         }
@@ -138,6 +162,7 @@ public enum Tackle {
     public final String name;
     public final Fit fit;
     public final String description;
+    public final String flavour;
 
     public final String icon;
 
@@ -164,13 +189,18 @@ public enum Tackle {
     public boolean fanBeam = false;
 
     Tackle(String name, Fit fit, String description) {
-        this(name, fit, description, null);
+        this(name, fit, description, "", null);
     }
 
-    Tackle(String name, Fit fit, String description, String icon) {
+    Tackle(String name, Fit fit, String description, String flavour) {
+        this(name, fit, description, flavour, null);
+    }
+
+    Tackle(String name, Fit fit, String description, String flavour, String icon) {
         this.name = name;
         this.fit = fit;
         this.description = description;
+        this.flavour = flavour;
         this.icon = icon;
     }
 

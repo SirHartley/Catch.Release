@@ -525,6 +525,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             info.addPara(entry.getDescription(), 12f);
 
+            String flavour = entry.getFlavour();
+            if (flavour != null && !flavour.isBlank()) {
+                info.addPara("Flavour", Misc.getHighlightColor(), 14f);
+                info.addPara(flavour, Misc.getGrayColor(), 4f);
+            }
+
             if (entry.isUpgrade() && !entry.isMaxed()) {
                 info.addPara("Now %s - next tier %s", 12f, Misc.getHighlightColor(),
                         entry.getValueAt(entry.getLevel()), entry.getValueAt(entry.getLevel() + 1));

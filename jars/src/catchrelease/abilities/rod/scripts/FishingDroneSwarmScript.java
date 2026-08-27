@@ -243,6 +243,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     protected void sortByPriority(List<SectorEntityToken> motes) {
         final float priority = UpgradeManager.getValue(StatIds.DRONE_RARE_PRIORITY, 0f);
         if (priority <= 0f || motes.size() < 2) return;
+        if (Math.random() >= Math.min(1f, priority)) return;
 
         motes.sort(new java.util.Comparator<SectorEntityToken>() {
             @Override

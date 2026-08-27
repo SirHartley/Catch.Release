@@ -16,6 +16,7 @@ public class RodConstants {
     public static final float DRONE_ORBIT_RADIUS = 60f;
     public static final float DRONE_ROAM_RADIUS = 140f;
     public static final float RING_RADIUS_FALLBACK = 150f;
+    public static final float CHASE_TIME_FALLBACK = 8f;
     public static final float CHASE_MARGIN_FALLBACK = 40f;
 
     public static final float DRONE_SPEED = 300f;
