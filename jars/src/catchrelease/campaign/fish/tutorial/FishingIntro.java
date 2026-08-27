@@ -516,18 +516,7 @@ public class FishingIntro {
                 && !isAtLeast(RODDED);
     }
 
-    public static void migrateLegacySkipSetting() {
-        try {
-            String seen = Global.getSettings().readTextFileFromCommon(TutorialConstants.SEEN_FILE);
-            if (!"1".equals(seen == null ? null : seen.trim())) return;
-
-            rememberSeen();
-        } catch (Exception ignored) {
-            // No legacy marker is the normal state for a new installation.
-        }
-    }
-
-    public static void rememberSeen() {
+    public static void enableFutureSkip() {
         try {
             JSONUtils.CommonDataJSONObject settings = JSONUtils.loadCommonJSON(
                     "LunaSettings/" + ModPlugin.MOD_ID + ".json",
@@ -537,12 +526,8 @@ public class FishingIntro {
             settings.put(TutorialConstants.SKIP_SETTING, true);
             settings.save();
 
-            // LunaLib exposes setting reads but no public write API, so refresh its cache after saving the backing file.
-            LunaSettingsLoader.INSTANCE.loadSettings(ModPlugin.MOD_ID, true);
-            LunaSettings.reportSettingsChanged(ModPlugin.MOD_ID);
-
-            // A different value marks the old seen-file contract as migrated, so a later manual opt-out stays off.
-            Global.getSettings().writeTextFileToCommon(TutorialConstants.SEEN_FILE, "2");
+            // LunaLib has no public setter; mirror the saved object without firing its global settings lifecycle.
+            LunaSettingsLoader.getSettings().put(ModPlugin.MOD_ID, settings);
         } catch (Exception e) {
             // A shortcut nobody can offer is a slower first hour, not a broken campaign.
             Global.getLogger(FishingIntro.class).warn(
@@ -565,7 +550,6 @@ public class FishingIntro {
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         dropNote();
-        rememberSeen();
         FishRumors.ensureTutorialLead();
     }
 
@@ -667,7 +651,7 @@ public class FishingIntro {
                     TutorialConstants.GRADUATION_CHARTS[rung], null, text);
         }
 
-        rememberSeen();
+        enableFutureSkip();
         FishRumors.ensureTutorialLead();
     }
 
