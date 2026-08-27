@@ -296,18 +296,31 @@ public final class PaneWidgets {
 
     public static class TextButton extends BaseCustomUIPanelPlugin {
 
+        public enum Style {
+
+            DEFAULT,
+            MUTED
+        }
+
         protected final Supplier<String> label;
         protected final Supplier<Boolean> live;
         protected final Runnable onClick;
+        protected final Style style;
         protected PositionAPI buttonPos;
 
         protected transient LazyFont.DrawableString text;
         protected transient String written;
 
         public TextButton(Supplier<String> label, Supplier<Boolean> live, Runnable onClick) {
+            this(label, live, onClick, Style.DEFAULT);
+        }
+
+        public TextButton(Supplier<String> label, Supplier<Boolean> live, Runnable onClick,
+                          Style style) {
             this.label = label;
             this.live = live;
             this.onClick = onClick;
+            this.style = style == null ? Style.DEFAULT : style;
         }
 
         @Override
@@ -331,8 +344,11 @@ public final class PaneWidgets {
             boolean hovered = on && ShopUi.contains(x, y, w, h,
                     Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
 
-            ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
-                    (on ? (hovered ? 0.45f : 0.32f) : 0.12f) * alphaMult);
+            Color fill = style == Style.MUTED ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
+            float fillAlpha = style == Style.MUTED
+                    ? (on ? (hovered ? 0.18f : 0.1f) : 0.05f)
+                    : (on ? (hovered ? 0.45f : 0.32f) : 0.12f);
+            ShopUi.drawQuad(x, y, w, h, fill, fillAlpha * alphaMult);
 
             String wanted = label.get();
             if (text == null || !wanted.equals(written)) {
@@ -341,9 +357,14 @@ public final class PaneWidgets {
                 text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
             }
 
-            Color color = on
-                    ? (hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor())
-                    : Misc.getGrayColor();
+            Color color;
+            if (style == Style.MUTED) {
+                color = on && hovered ? Misc.getTextColor() : Misc.getGrayColor();
+            } else {
+                color = on
+                        ? (hovered ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor())
+                        : Misc.getGrayColor();
+            }
 
             text.setBaseColor(ShopUi.withAlpha(color, (on ? 1f : 0.6f) * alphaMult));
             text.draw(Math.round(x + (w - text.getWidth()) * 0.5f),

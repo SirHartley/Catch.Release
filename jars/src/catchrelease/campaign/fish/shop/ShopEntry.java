@@ -14,6 +14,8 @@ import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.util.function.BooleanSupplier;
+
 public class ShopEntry {
 
     public enum Kind {
@@ -226,11 +228,26 @@ public class ShopEntry {
     }
 
     public boolean buy() {
+        return buy(null);
+    }
+
+    public boolean buyWithFishPayment(BooleanSupplier spendFish) {
+        ShopPricing.Price price = getPrice();
+        if (spendFish == null || price == null || price.fish == null) return false;
+
+        return buy(spendFish);
+    }
+
+    protected boolean buy(BooleanSupplier spendFish) {
         if (isDone() || isPurchaseLocked() || !canAfford()) return false;
 
         ShopPricing.Price price = getPrice();
         if (price != null) {
-            if (price.fish != null && !FishCurrency.spend(price.fish)) return false;
+            if (price.fish != null) {
+                boolean paid = spendFish == null
+                        ? FishCurrency.spend(price.fish) : spendFish.getAsBoolean();
+                if (!paid) return false;
+            }
             if (price.credits > 0) {
                 Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(price.credits);
             }
