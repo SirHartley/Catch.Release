@@ -112,6 +112,14 @@ public class ShopEntry {
         }
     }
 
+    public String getFlavour() {
+        switch (kind) {
+            case TACKLE: return tackle.flavour;
+            case UPGRADE: return stat.flavour;
+            default: return "";
+        }
+    }
+
     public SpriteAPI getIcon() {
         String path = null;
 
