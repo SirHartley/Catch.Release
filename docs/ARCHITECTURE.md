@@ -384,7 +384,7 @@ The tutorial has six lessons, a returning-player skip, and a developer shortcut.
 
 ### `campaign/fish/shop`
 
-Player-facing text calls upgrade levels “tiers” and calls modules Harpoon Tips, Drone Cores, or Lens Arrays. `Tackle` is an internal and serialized name only.
+The top-level Outfitter tabs are Upgrades, Equipment, and Extras. Player-facing text calls upgrade levels “tiers” and calls modules Harpoon Tips, Drone Cores, or Lens Arrays. `Tackle` is an internal and serialized name only.
 
 | File | Responsibility |
 |---|---|
