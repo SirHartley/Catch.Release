@@ -388,8 +388,8 @@ The top-level Outfitter tabs are Upgrades, Equipment, and Extras. Player-facing 
 
 | File | Responsibility |
 |---|---|
-| `FishShopDialog.java` | Outfitter tabs, list, detail panel, automatic or manually selected upgrade payment, and session undo. The manual path hands the modal to the shared specimen picker and reopens the Outfitter on the next frame. Upgrade and module details show the mechanical description first, followed by a separate subdued flavour section. A top-right help mark explains tier stacking, equipment refitting, and automatic catch selection. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
-| `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. Exposes their mechanical description and optional flavour separately, enforces schematic permissions, and supports automatic or caller-selected fish payment through the same purchase validation. Resolves item or category icons and keeps unknown modules out of the visible list. |
+| `FishShopDialog.java` | Outfitter tabs, list, detail panel, automatic or manually selected upgrade payment, and session undo. The manual path hands the modal to the shared specimen picker and reopens the Outfitter on the next frame. Upgrade and module details show their mechanical descriptions. A top-right help mark explains tier stacking, equipment refitting, and automatic catch selection. Undo restores exact cargo, credits, gear, tiers, and marks. Unknown modules are hidden; gated upgrade tiers remain visible and explain their schematic requirement. Every tier pip has its own tooltip hotspot. Host options are cleared before opening and restored exactly once. |
+| `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. Exposes their mechanical descriptions, enforces schematic permissions, and supports automatic or caller-selected fish payment through the same purchase validation. Resolves item or category icons and keeps unknown modules out of the visible list. |
 | `ShopGroup.java` | Defines shelves, related stats and rigs, tab art, fallback icons, and the player-facing module noun for each rig. |
 | `ShopPricing.java` | Seeded credit-and-fish prices. Breach Coupler is the unique highest module tier; Retrieval Head is one tier below. Exact-tier lookup supports reward previews. |
 | `ShopMarks.java` | Persistent shopping list. Upgrade marks identify an exact tier; module marks identify the module and rig. Learned plans and active `FishAsker` entries drive yellow wanted dots and tooltip reasons. Old whole-ladder keys migrate to the next tier. |
@@ -432,7 +432,7 @@ The five regular wares use credits-and-crabs prices. Switchable curios route thr
 
 | File | Responsibility |
 |---|---|
-| `Tackle.java` | Defines modules, rig compatibility, separate mechanical and flavour text, optional icons, modifiers, and stock state. `BREACH_COUPLER` enables lamp openings for drones; `RETRIEVAL_HEAD` refunds a capped harpoon charge after a confirmed mote hit. |
+| `Tackle.java` | Defines modules, rig compatibility, mechanical descriptions, optional icons, modifiers, and stock state. `BREACH_COUPLER` enables lamp openings for drones; `RETRIEVAL_HEAD` refunds a capped harpoon charge after a confirmed mote hit. |
 | `TackleManager.java` | Separates module ownership from the module fitted to each rig. `get()` never returns null. Consumables are removed from both ownership and the slot. Prerequisite modules stay out of shop and rewards until valid. |
 
 ### `campaign/fish/map`
@@ -648,12 +648,12 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 |---|---|
 | `memory/upgrades/UpgradeManager.java` | Saves purchased levels. `getValue` is the single read path; `updateBaseValues` refreshes sheet-owned values and seeds missing stats on load. |
 | `memory/upgrades/StatIds.java` | Shared upgrade IDs and explicit stat-to-ability mapping. |
-| `memory/upgrades/UpgradeStat.java` | One upgrade row: base, flat/multiplier progression, category, mechanical description, flavour, optional icon, and current value. |
+| `memory/upgrades/UpgradeStat.java` | One upgrade row: base, flat/multiplier progression, category, mechanical description, optional icon, and current value. |
 | `memory/charges/ChargeManager.java` | Persistent fractional charge pools. Regenerates only while unpaused, preserves partial progress, caps explicit gains, and fires one callback when a whole-charge boundary is crossed. |
 | `memory/TransientMemory.java` | Session-only key/value store. Keys still begin with `$`. |
 | `memory/RandomMemoryHelper.java` | Persistent per-system random source. |
 | `helper/loading/FishSpecLoader.java` | Cached `fish.csv` loader. |
-| `helper/loading/UpgradeStatLoader.java` | Cached `UpgradeData.csv` loader with old and new column-name aliases plus optional flavour and icons. |
+| `helper/loading/UpgradeStatLoader.java` | Cached `UpgradeData.csv` loader with old and new column-name aliases plus optional icons. |
 | `helper/loading/BackdropLoader.java` | Cached `backdrops.csv` loader. |
 | `helper/loading/SpriteLoader.java` | Returns a fresh sprite wrapper for an ID or path and caches only success/failure, preventing cross-screen render-state leaks. |
 | `helper/CampaignHelper.java` | Shared “is the player in this location?” check used by Fishermen, tutorial postings, and camps. |
@@ -721,7 +721,6 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 - A null module price can mean an empty slot or an already-owned module. UI text must distinguish them.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
-- `UpgradeData.csv` keeps the functional description and flavour in separate columns. The outfitter must never fold flavour back into the mechanical text.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
 - Retrieval Head refunds one charge only after a confirmed player mote collision. It preserves fractional recharge progress, respects the cap, and uses the ordinary charge-ready callback.
 - Explosive Head never lands a fish. Its blast state is terminal, consumes the head, and can immediately make a fleet hostile. Vanilla's explosion entity supplies fleet damage, visuals, and sound.

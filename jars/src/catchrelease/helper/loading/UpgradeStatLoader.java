@@ -71,7 +71,6 @@ public class UpgradeStatLoader {
 
         s.maxLevel = optInt(row, "maxLevel", 0);
         s.description = optString(row, "description", "");
-        s.flavour = optString(row, "flavour", "");
         s.icon = optString(row, "icon", "");
 
         return s;
