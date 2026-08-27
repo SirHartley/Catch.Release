@@ -3,7 +3,10 @@ package catchrelease.campaign.fish.shop;
 import catchrelease.ui.PaneWidgets;
 import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.crab.CrabWares;
+import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -32,6 +35,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -98,8 +102,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected PositionAPI listViewport;
         protected PositionAPI pos;
 
-        protected ShopEntry manualEntry;
-        protected Receipt manualReceipt;
+        protected ShopEntry selectedPaymentEntry;
+        protected Receipt selectedPaymentReceipt;
 
         protected class Receipt {
 
@@ -661,40 +665,100 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     : entry.isUpgrade() ? "UPGRADE" : "FIT";
 
             boolean dev = Global.getSettings().isDevMode() && !entry.isCurio();
+            ShopPricing.Price price = entry.getPrice();
+            boolean canSelectPayment = !entry.isCurio()
+                    && price != null && price.fish != null;
+            FishHandoffPicker.Selection automaticPayment = entry.isUpgrade()
+                    ? getAutomaticPayment(entry) : null;
 
-            CustomPanelAPI row = panel.createCustomPanel(240f + (dev ? 80f : 0f), 30f,
+            float rowWidth = 240f + (canSelectPayment ? 130f : 0f) + (dev ? 80f : 0f);
+            CustomPanelAPI row = panel.createCustomPanel(rowWidth, 30f,
                     new com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin() {
                     });
 
             CustomPanelAPI buy = panel.createCustomPanel(240f, 30f,
                     new catchrelease.ui.PaneWidgets.TextButton(() -> label,
-                            entry::canAfford, () -> buyClicked(entry, false)));
+                            entry::canAfford,
+                            () -> buyClicked(entry, false, automaticPayment)));
             row.addComponent(buy).inTL(0f, 0f);
+
+            if (canSelectPayment) {
+                CustomPanelAPI select = panel.createCustomPanel(120f, 30f,
+                        new PaneWidgets.TextButton(() -> "Select...",
+                                entry::canAfford, () -> selectedPaymentClicked(entry),
+                                PaneWidgets.TextButton.Style.MUTED));
+                row.addComponent(select).inTL(250f, 0f);
+            }
 
             if (dev) {
                 CustomPanelAPI grant = panel.createCustomPanel(70f, 30f,
                         new catchrelease.ui.PaneWidgets.TextButton(() -> "DEV",
-                                () -> true, () -> buyClicked(entry, true)));
-                row.addComponent(grant).inTL(250f, 0f);
+                                () -> true, () -> buyClicked(entry, true, null)));
+                row.addComponent(grant).inTL(canSelectPayment ? 380f : 250f, 0f);
             }
 
             info.addCustom(row, 20f);
 
-            ShopPricing.Price price = entry.getPrice();
-            if (entry.isUpgrade() && price != null && price.fish != null) {
-                CustomPanelAPI manual = panel.createCustomPanel(240f, 26f,
-                        new PaneWidgets.TextButton(() -> "MANUAL UPGRADE",
-                                entry::canAfford, () -> manualUpgradeClicked(entry),
-                                PaneWidgets.TextButton.Style.MUTED));
-                info.addCustom(manual, 4f);
+            if (automaticPayment != null) {
+                info.addTooltipTo(createAutomaticPaymentTooltip(automaticPayment), buy,
+                        TooltipMakerAPI.TooltipLocation.BELOW);
             }
+
         }
 
-        protected void buyClicked(ShopEntry entry, boolean free) {
+        protected FishHandoffPicker.Selection getAutomaticPayment(ShopEntry entry) {
+            ShopPricing.Price price = entry == null ? null : entry.getPrice();
+            if (price == null || price.fish == null) return null;
+
+            return FishHandoffPicker.autoSelect(Collections.singletonList(price.fish), null);
+        }
+
+        protected BaseTooltipCreator createAutomaticPaymentTooltip(
+                FishHandoffPicker.Selection payment) {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return DETAIL_TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    tooltip.addPara("Automatic payment will remove these specimens:", 0f);
+
+                    for (FishCatch fish : payment.getContents()) {
+                        FishSpec spec = fish.getSpec();
+                        FishGrade grade = fish.getGrade();
+                        String name = fish.getDisplayName();
+                        String length = String.format("%.2f m", fish.length);
+                        String weight = String.format("%.1f kg", fish.weight);
+                        Color rarityColor = spec == null
+                                ? Misc.getHighlightColor() : spec.rarity.color;
+
+                        tooltip.addPara("%s: %s, %s, %s", 4f,
+                                new Color[]{rarityColor, grade.getColor(),
+                                        Misc.getHighlightColor(), Misc.getHighlightColor()},
+                                name, grade.name, length, weight);
+                    }
+                }
+            };
+        }
+
+        protected void buyClicked(ShopEntry entry, boolean free,
+                                  FishHandoffPicker.Selection automaticPayment) {
             Receipt receipt = !free && entry.getPrice() != null
                     ? new Receipt(entry) : null;
 
-            if (!(free ? entry.devBuy() : entry.buy())) return;
+            boolean bought;
+            if (free) {
+                bought = entry.devBuy();
+            } else if (automaticPayment != null) {
+                bought = entry.buyWithFishPayment(automaticPayment::spend);
+            } else {
+                bought = entry.buy();
+            }
+
+            if (!bought) return;
 
             if (receipt != null) purchases.add(receipt);
 
@@ -704,21 +768,21 @@ public class FishShopDialog implements InteractionDialogPlugin {
             rebuild(true);
         }
 
-        protected void manualUpgradeClicked(ShopEntry entry) {
+        protected void selectedPaymentClicked(ShopEntry entry) {
             ShopPricing.Price price = entry.getPrice();
-            if (!entry.isUpgrade() || price == null || price.fish == null
+            if (entry.isCurio() || price == null || price.fish == null
                     || !entry.canAfford() || callbacks == null) return;
 
-            manualEntry = entry;
-            manualReceipt = new Receipt(entry);
+            selectedPaymentEntry = entry;
+            selectedPaymentReceipt = new Receipt(entry);
             callbacks.dismissDialog();
         }
 
-        protected void openManualUpgradePicker() {
-            final ShopEntry entry = manualEntry;
-            final Receipt receipt = manualReceipt;
-            manualEntry = null;
-            manualReceipt = null;
+        protected void openSelectedPaymentPicker() {
+            final ShopEntry entry = selectedPaymentEntry;
+            final Receipt receipt = selectedPaymentReceipt;
+            selectedPaymentEntry = null;
+            selectedPaymentReceipt = null;
 
             ShopPricing.Price price = entry == null ? null : entry.getPrice();
             if (entry == null || receipt == null || price == null || price.fish == null) {
@@ -728,8 +792,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            boolean opened = FishHandoffPicker.show(dialog, "Select specimens for the upgrade",
-                    "Upgrade", Collections.singletonList(price.fish),
+            String confirm = entry.isUpgrade() ? "Upgrade" : "Fit";
+            boolean opened = FishHandoffPicker.show(dialog, "Select specimens for payment",
+                    confirm, Collections.singletonList(price.fish),
                     new FishHandoffPicker.Listener() {
                         @Override
                         public void picked(FishHandoffPicker.Selection selection) {
@@ -877,8 +942,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         @Override
         public void reportDismissed(int option) {
-            if (manualEntry != null) {
-                openManualUpgradePicker();
+            if (selectedPaymentEntry != null) {
+                openSelectedPaymentPicker();
 
                 return;
             }
