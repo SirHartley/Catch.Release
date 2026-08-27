@@ -354,7 +354,7 @@ The tutorial has six lessons, a returning-player skip, and a developer shortcut.
 
 | File | Responsibility |
 |---|---|
-| `FishingMinigame.java` | Physics, progress, escape, and treasure rules. Hooked legendaries skip the normal treasure roll and receive at least three Epic rewards. |
+| `FishingMinigame.java` | Physics, progress, escape, and treasure rules. Tuned for flat player power - there are no minigame upgrades - so the difficulty response is a square root, not a line, and per-fish progress/escape extremes are compressed toward baseline (`compressRate`): the sheet's ordering survives while the top of the ladder stays chaseable by a bare bar. Hooked legendaries skip the normal treasure roll and receive at least three Epic rewards. |
 | `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure; handles input; records bycatch, catch intel, route progress, and legendary completion. Unidentified targets use a rarity glow or the Chicken Profile icon; Sonar shows the species. Owns caught, failed, click, line-loop, treasure-hover, and treasure-pickup sound hooks. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 | `FishingMinigameLayout.java` | Per-frame layout for the track, progress meter, and result cards. |
