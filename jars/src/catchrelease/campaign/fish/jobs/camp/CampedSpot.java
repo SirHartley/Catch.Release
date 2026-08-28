@@ -201,7 +201,28 @@ public class CampedSpot {
         if (camper.isExpired() || !camper.isAlive()) return true;
         if (camper.getContainingLocation() == null) return true;
 
-        return camper.getMemoryWithoutUpdate().getBoolean(CLEARED_FLAG);
+        return isCleared(camper);
+    }
+
+    public static boolean isCleared(CampaignFleetAPI camper) {
+        return camper != null
+                && camper.getMemoryWithoutUpdate().getBoolean(CLEARED_FLAG);
+    }
+
+    public static void returnToSource(CampaignFleetAPI camper) {
+        if (camper == null || camper.isExpired() || !camper.isAlive()) return;
+
+        MemoryAPI mem = camper.getMemoryWithoutUpdate();
+        mem.unset(CAMP_FLAG);
+        mem.unset(CLOSING_FLAG);
+        mem.unset(MemFlags.MEMORY_KEY_NO_JUMP);
+        mem.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
+        mem.unset(MemFlags.MEMORY_KEY_PURSUE_PLAYER);
+        mem.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
+        mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
+
+        Misc.clearTarget(camper, false);
+        Misc.giveStandardReturnToSourceAssignments(camper, true);
     }
 
     public static void despawn(CampaignFleetAPI camper) {

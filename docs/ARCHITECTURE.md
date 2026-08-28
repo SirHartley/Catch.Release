@@ -277,7 +277,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `CampedSpotJob.java` | Requires the camper to be gone and a post-acceptance catch from the exact rupture. It tracks both conditions separately, updates intel, releases the pond once proof is aboard, and repairs older named-species jobs. The fleet and pond claim are created only on acceptance. |
 | `CampType.java` | Pirate, mercenary, and Pather behavior and labels. |
 | `CampSize.java` | Small, medium, and large fleet estimates. |
-| `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
+| `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. Peaceful clearance releases the permanent camp flags and sends the fleet back to its vanilla source before despawning. |
 | `PirateCampJob.java` | Pirate protection-racket version of the camp offer. |
 | `MercCampJob.java` | Mercenary boundary-dispute version of the camp offer. |
 | `PatherCampJob.java` | Pather sabotage version of the camp offer. |
