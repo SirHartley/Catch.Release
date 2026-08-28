@@ -47,7 +47,13 @@ public class ChefJob extends FishJob {
             addAsk(ask);
         }
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), true));
+        List<FishReward> locationData = FishRewardRoller.rollLocationData(
+                genRandom, 2, VALUE_PER_TYPE);
+        if (locationData.size() < 2) return false;
+
+        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), true,
+                locationData));
+        addRewards(locationData);
 
         setUpSpine();
 
