@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Fisherman Tutorial Handoff / Rules">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="longliner sfx">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishReward.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishReward.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,8 +105,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed crabolabob return option rules&#10;crabolabob portrait" />
-    <MESSAGE value="added unlock text indicators" />
     <MESSAGE value="icons" />
     <MESSAGE value="Adjustments" />
     <MESSAGE value="Adjustments &amp; tooltip clarifications" />
@@ -132,7 +128,9 @@
     <MESSAGE value="Shield colours" />
     <MESSAGE value="rules rules I want to kill myself" />
     <MESSAGE value="Fisherman Tutorial Handoff / Rules" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fisherman Tutorial Handoff / Rules" />
+    <MESSAGE value="Rules and desc adjustments" />
+    <MESSAGE value="longliner sfx" />
+    <option name="LAST_COMMIT_MESSAGE" value="longliner sfx" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
