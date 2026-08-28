@@ -12,7 +12,6 @@ import java.util.List;
 public class ChefJob extends FishJob {
 
     public static final int VALUE_PER_TYPE = 2600;
-    public static final float DAYS = 40f;
     protected static final String[] DISHES = {
             "a terrine", "a cold course", "a broth", "a service of three",
             "something the menu calls a study", "a dish with no name yet",
@@ -31,7 +30,6 @@ public class ChefJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
         dish = DISHES[genRandom.nextInt(DISHES.length)];
 
         List<String> types = FishJobAsks.rollTypes(genRandom, 3);
@@ -47,13 +45,17 @@ public class ChefJob extends FishJob {
             addAsk(ask);
         }
 
+        setDurationForAsks(createdAt);
+
+        // the cook's signature payment is charts: two fixed range-data rewards. When
+        // the sector has fewer left to give, the freed budget rolls extra rewards
+        // instead of the job refusing to exist
         List<FishReward> locationData = FishRewardRoller.rollLocationData(
                 genRandom, 2, VALUE_PER_TYPE);
-        if (locationData.size() < 2) return false;
-
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), asks, true,
-                locationData));
-        addRewards(locationData);
+        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                .fixAll(locationData)
+                .exclude(QuestRewards.Kind.RANGE_DATA)
+                .random(genRandom)).rewards);
 
         setUpSpine();
 

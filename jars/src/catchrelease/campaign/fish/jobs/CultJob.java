@@ -13,14 +13,23 @@ import java.util.List;
 
 public class CultJob extends FishJob {
 
-    public static final int VALUE = 2800;
-    public static final float DAYS = 55f;
-
     protected String speciesId;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        List<FishReward> prizes = FishRewardRoller.roll(genRandom, VALUE, false);
+        speciesId = FishJobAsks.rollSpecies(genRandom, FishRarity.UNCOMMON);
+        if (speciesId == null) return false;
+
+        FishRequirement ask = new FishRequirement();
+        ask.speciesId = speciesId;
+        ask.count = 1;
+
+        // the coats never pay in money; rolled before the global slot is claimed so a
+        // sector with nothing left to give fails the job instead of blocking the slot
+        List<FishReward> prizes = QuestRewards.roll(new QuestRewards.Request(
+                java.util.Collections.singletonList(ask))
+                .noCredits().tierFloor(DemandScore.Tier.MEDIUM)
+                .random(genRandom)).rewards;
         if (prizes.isEmpty()) return false;
 
         if (!setGlobalReference("$catchrelease_cultRef", "$catchrelease_cultInProgress")) {
@@ -32,16 +41,8 @@ public class CultJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
-        speciesId = FishJobAsks.rollSpecies(genRandom, FishRarity.UNCOMMON);
-        if (speciesId == null) return false;
-
-        FishRequirement ask = new FishRequirement();
-        ask.speciesId = speciesId;
-        ask.count = 1;
-
         addAsk(ask);
+        setDurationForAsks(createdAt);
 
         addRewards(prizes);
 

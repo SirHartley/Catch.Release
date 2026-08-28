@@ -11,8 +11,6 @@ public class AcademyJob extends FishJob {
     public static final String HOME = "galatia";
 
     public static final int MIN_SIZE = 5;
-    public static final int VALUE_PER_FISH = 2400;
-    public static final float DAYS = 60f;
 
     @Override
     public boolean shouldShowAtMarket(MarketAPI market) {
@@ -33,15 +31,15 @@ public class AcademyJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
         FishRequirement ask = new FishRequirement();
         ask.count = 1 + genRandom.nextInt(3);
         ask.lowCoherence = true;
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, asks, true));
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 

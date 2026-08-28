@@ -57,6 +57,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String PAID_KEY = "$catchreleasePaid";
     public static final String BONUS_KEY = "$catchreleaseBonus";
     public static final String MORE_KEY = "$catchreleaseMore";
+    public static final String DAYS_KEY = "$catchreleaseDays";
+    public static final String DAYS_CAP_KEY = "$catchreleaseDaysCap";
+    public static final String DAYS_LEFT_KEY = "$catchreleaseDaysLeft";
     public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
     public static final String CATCH_PROGRESS_UPDATE = "catchrelease_fish_job_progress";
 
@@ -132,6 +135,26 @@ public abstract class FishJob extends HubMissionWithBarEvent
         deadline = elapsed + days;
 
         setTimeLimit(Stage.FAILED, deadline, null, Stage.DONE);
+    }
+
+    /** The clock sized from where the work actually is: the giver's market to the
+     *  nearest water that could fill every ask, on the shared duration rungs. */
+    protected void setDurationForAsks(MarketAPI from) {
+        days = QuestDuration.forAsks(
+                from == null ? null : from.getPrimaryEntity(), asks).days;
+    }
+
+    /** The deadline as dialogue speaks it - always from the live clock, never authored. */
+    public String describeDays() {
+        return days > 0f ? Math.round(days) + " days" : "no deadline";
+    }
+
+    public String describeDaysLeft() {
+        if (days <= 0f) return "no deadline";
+
+        int left = Math.max(1, (int) Math.ceil(getDaysLeft()));
+
+        return left + (left == 1 ? " day" : " days");
     }
 
     protected float getDaysLeft() {
@@ -570,6 +593,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         token(mem, ASK_CAP_KEY, Misc.ucFirst(ask));
         token(mem, REWARD_KEY, reward);
         token(mem, REWARD_CAP_KEY, Misc.ucFirst(reward));
+        token(mem, DAYS_KEY, describeDays());
+        token(mem, DAYS_CAP_KEY, Misc.ucFirst(describeDays()));
+        token(mem, DAYS_LEFT_KEY, describeDaysLeft());
         token(mem, HAS_FISH_KEY, isSatisfied());
 
         setJobTokens(mem);

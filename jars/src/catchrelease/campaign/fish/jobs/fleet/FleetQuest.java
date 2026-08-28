@@ -1,16 +1,11 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
-import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishJob;
-import catchrelease.campaign.fish.jobs.FishReward;
-import catchrelease.campaign.fish.jobs.FishRewardRoller;
+import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
-import catchrelease.memory.upgrades.StatIds;
-import catchrelease.memory.upgrades.UpgradeManager;
-import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
@@ -49,7 +44,6 @@ public class FleetQuest extends FishJob {
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
     public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
 
-    public static final float DELIVERY_DAYS = 60f;
     public static final float HOLD_DAYS = 100000f;
 
     public static final String OFFER_SPRITE_CATEGORY = "systemMap";
@@ -192,28 +186,17 @@ public class FleetQuest extends FishJob {
 
         setPersonOverride(captain);
 
-        FishRequirement ask = type.rollAsk(random());
+        // opportunist end to end: an ambition is rolled, the type's demand shape is
+        // pushed toward it, and the pay answers what the shape actually produced -
+        // over the odds, because everyone out here is desperate or obsessed
+        float target = FleetQuestType.rollTargetScore(random());
+        FishRequirement ask = type.rollAsk(random(), target);
         addAsk(ask);
 
-        FishRarity askRarity = ask.getDisplayRarity();
-        int worth = type.getBaseCredits() * Math.max(1, ask.count);
-        if (askRarity != null) worth *= 1 + askRarity.rank;
-        if (ask.minGrade != null) worth *= 2;
+        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                .budgetMult(1.15f).random(random())).rewards);
 
-        addReward(FishReward.questCredits(FishRewardRoller.creditPayout(),
-                FishRewardRoller.valueMultiplier(worth, ask.count)));
-
-        if (askRarity != null && askRarity.rank >= FishRarity.RARE.rank) {
-            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);
-            int targetLevel = ShopSchematics.getNextRequiredLevel(stat);
-            String key = ShopSchematics.getKey(stat == null ? null : stat.id, targetLevel);
-            if (targetLevel > 0 && !ShopSchematics.has(stat, targetLevel)
-                    && !FishRewardRoller.isSchematicReserved(key)) {
-                addReward(FishReward.upgradeSchematic(stat.id, targetLevel));
-            }
-        }
-
-        days = DELIVERY_DAYS;
+        days = QuestDuration.forAsks(giver, asks).days;
 
         setUpSpine();
 

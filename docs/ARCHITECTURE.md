@@ -252,21 +252,24 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 
 | File | Responsibility |
 |---|---|
-| `FishJob.java` | Shared mission base. Handles person and fleet givers, contact visuals, reward cards, exact-specimen hand-in, active and completed intel, player-faction title colours, fishing-map navigation, vanilla acceptance cards, post-dialogue reward receipts, and the `rules.csv` token contract. Intel always leads with subclass-provided purpose prose; special terms that do not fit `FishRequirement` appear as natural prose before the exact requirement and reward lists. Exact selected specimens are passed to rewards before the next round is generated. It implements `FishAsker`. |
+| `FishJob.java` | Shared mission base. Handles person and fleet givers, contact visuals, reward cards, exact-specimen hand-in, active and completed intel, player-faction title colours, fishing-map navigation, vanilla acceptance cards, post-dialogue reward receipts, and the `rules.csv` token contract. Intel always leads with subclass-provided purpose prose; special terms that do not fit `FishRequirement` appear as natural prose before the exact requirement and reward lists. Exact selected specimens are passed to rewards before the next round is generated. `setDurationForAsks` sizes the deadline through `QuestDuration` and the tokens `$catchreleaseDays`, `$catchreleaseDaysCap`, and `$catchreleaseDaysLeft` carry it into dialogue. It implements `FishAsker`. |
+| `DemandScore.java` | Prices a set of `FishRequirement`s as a difficulty score: rarity bases (one unmodified common scores 10) times multipliers for specificity, grade, coherence, origin, method, implement, weight and length floors, and same-species; extra specimens add diminishing fractions, and `anyOf` alternatives score as the cheapest branch. Maps scores to the EASY/MEDIUM/HARD/SEVERE tiers that gate rewards. |
+| `QuestRewards.java` | Central reward provider for every quest. A `Request` carries the asks, fixed always-fire rewards, exclusions, a score override, a budget multiplier, a no-credits flag, and a tier floor. Rolling converts the score into a credit budget (600 credits per point, rolled 0.75–1.35 so quests can over- or under-reward), subtracts fixed rewards, picks up to two tier-gated non-credit rewards that fit, and pays any remainder as quest credits. Every reward kind has a credit valuation; habitat data is priced at ten times the species' base value, so expensive charts gate themselves naturally. |
+| `QuestDuration.java` | Deadline rungs of 30/60/90/120/180 days or no limit. Picks the smallest rung covering working days plus a round trip at a per-light-year rate, either to a known target or to the nearest system where the asks are satisfiable; unsatisfiable asks get no limit. |
 | `FishHandoffPicker.java` | Shows eligible loose fish and validates a non-overlapping assignment on confirm. Invalid selections reopen on the next frame after Starsector releases the picker modal. `autoSelect` chooses the minimum valid set, worst specimens first, across loose fish, crates, and piles. Partial containers are repacked under their original ID. |
 | `FishJobAsks.java` | Rolls species, rarity, grade, quantity, weight, method, and implement requirements. It excludes legendaries and impossible method/implement combinations. |
 | `FishReward.java` | Reward types: quest credits, fixed compatibility credits, upgrade and tackle schematics, habitat data, backdrops, and blueprints. Quest credits pay their guaranteed base plus their saved difficulty multiplier times the total value of the exact fish handed in. Each grant captures its actual result before state changes, then supplies one small-font `Gained:` receipt after the hand-in scene. Location data therefore reports either the newly learned range or its stored fixed-credit fallback correctly. The commodity type remains only to convert old saves to fixed credits. |
-| `FishRewardRoller.java` | Rolls commodity-free rewards and can reserve or select distinct habitat-data rewards. New quest-credit rewards use a flat 6,000-credit base and save a half-step difficulty multiplier derived from reckoned request value per required fish; old saves and compatibility conversions remain fixed. Two credit rolls merge their bases. Schematics exclude owned plans, active-job plans, invalid rigs, and unavailable upgrade tiers. Backdrops require conservatory-plan ownership. |
+| `FishRewardRoller.java` | Roll helpers used by `QuestRewards`: individual upgrade, tackle, schematic, backdrop, blueprint, and habitat-data rolls, distinct-data reservation, and credit merging. Schematics exclude owned plans, active-job plans, invalid rigs, and unavailable upgrade tiers. Backdrops require conservatory-plan ownership. Old saves and compatibility conversions keep their fixed credit values. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. `sweep` repairs stale save data. |
-| `StandingOrderJob.java` | Quantity, rarity, and grade order with a 60-day limit. |
+| `StandingOrderJob.java` | Quantity, rarity, and grade order. |
 | `AcademyJob.java` | Low-coherence specimens for Galatia or large Independent markets. Uses the shared fishing-work gate. |
 | `ButlerJob.java` | One specimen above a weight floor, with an offer submenu that reveals the full terms before acceptance. |
-| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade, due in 40 days. Its rolled reward uses the highest default per-requirement valuation in the bar-job set. Every offer also adds two distinct, currently unknown habitat-data rewards through the shared reward type, so either converts to its stored credit fallback if learned before hand-in. The job does not spawn when fewer than two valid data rewards remain. |
-| `CompanionJob.java` | Hegemony-only private order with a weight floor and an upper-size bonus, due in 40 days. |
-| `CultJob.java` | One named species for a non-credit reward, due in 55 days. It does not create an offer when its item pool is empty. |
-| `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence, due in 70 days. |
-| `KidsJob.java` | Two unrestricted fish for a 30-day tournament. Rewards and bonuses cannot be credits. Hand-in compares two selected specimens, then spends only after assignment. Bar entry restores the normal bar image; its comm anchor uses the generic portrait. |
-| `MafiaJob.java` | Two fish for Salvatore and Enzo, due in 35 days. Maintains both people and portraits, displays odds from relative specimen size, and supports a safe payout or a wager. |
+| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade. Every offer fixes up to two distinct, currently unknown habitat-data rewards, so either converts to its stored credit fallback if learned before hand-in; when fewer than two remain, the freed budget rolls extra rewards instead. |
+| `CompanionJob.java` | Hegemony-only private order with a weight floor and an upper-size bonus. |
+| `CultJob.java` | One named species for a non-credit reward. It does not create an offer when its prize roll comes up empty. |
+| `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence. |
+| `KidsJob.java` | Two unrestricted fish for a tournament. Rewards and bonuses cannot be credits or charts; a tier floor keeps the prize pool open. Hand-in compares two selected specimens, then spends only after assignment. Bar entry restores the normal bar image; its comm anchor uses the generic portrait. |
+| `MafiaJob.java` | Two fish for Salvatore and Enzo. Maintains both people and portraits, displays odds from relative specimen size, and supports a safe payout or a wager. |
 | `StartupJob.java` | Three deliveries of increasing quantity. Each round resets its clock and uses a round token in dialogue. |
 | `TuberJob.java` | Fine Uncommon/Rare specimen followed by a low-coherence specimen. |
 
@@ -274,7 +277,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 
 | File | Responsibility |
 |---|---|
-| `CampedSpotJob.java` | Requires the camper to be gone and a post-acceptance catch from the exact rupture. It tracks both conditions separately, updates intel, releases the pond once proof is aboard, and repairs older named-species jobs. The fleet and pond claim are created only on acceptance. |
+| `CampedSpotJob.java` | Requires the camper to be gone and a post-acceptance catch from the exact rupture. It tracks both conditions separately, updates intel, releases the pond once proof is aboard, and repairs older named-species jobs. The fleet and pond claim are created only on acceptance. The camp's credit value converts into reward score on top of the receipt ask, and the deadline covers the trip twice over. |
 | `CampType.java` | Pirate, mercenary, and Pather behavior and labels. |
 | `CampSize.java` | Small, medium, and large fleet estimates. |
 | `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. Peaceful clearance releases the permanent camp flags and sends the fleet back to its vanilla source before despawning. |
@@ -282,16 +285,16 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `MercCampJob.java` | Mercenary boundary-dispute version of the camp offer. |
 | `PatherCampJob.java` | Pather sabotage version of the camp offer. |
 
-All three offers state the camp size, system, clear-then-catch sequence, 70-day deadline, and exact reward.
+All three offers state the camp size, system, clear-then-catch sequence, deadline, and exact reward.
 
 ### `campaign/fish/jobs/fleet`
 
 | File | Responsibility |
 |---|---|
-| `FleetQuest.java` | A `FishJob` attached to a fleet. Every construction path requires tutorial completion. Offers keep the source scavenger from avoiding the player; accepted jobs replace it with a mission-owned copy. Hand-in uses the shared picker, then returns the fleet to its source and despawns it. Distress variants rely on distress intel instead of a second marker. |
+| `FleetQuest.java` | A `FishJob` attached to a fleet. Every construction path requires tutorial completion. Offers keep the source scavenger from avoiding the player; accepted jobs replace it with a mission-owned copy. Rewards come from `QuestRewards` with a small premium, and the deadline is sized from the asks' nearest satisfiable water. Hand-in uses the shared picker, then returns the fleet to its source and despawns it. Distress variants rely on distress intel instead of a second marker. |
 | `FleetQuestSpawner.java` | After tutorial completion, gives one of five local offers to an existing scavenger in the player's system. Natural checks are 7% with one active quest and a 45-day cooldown. The test path creates a normal route-backed scavenger. |
 | `FleetQuestEncounter.java` | Runs one fleet offer, accepts or declines after dialogue closes, resolves distress entities, restores local offer marks after load, and expires old offers. |
-| `FleetQuestType.java` | Seven saved quest types. Five remain local scavenger offers; `STRANDED` and `SCAVENGER_ENGINE` are selected by the distress provider. Specific species pay from their actual rarity. |
+| `FleetQuestType.java` | Seven saved quest types. Five remain local scavenger offers; `STRANDED` and `SCAVENGER_ENGINE` are selected by the distress provider. Demand generation runs off a skewed target score: each type pushes its own demand shape toward the rolled ambition, and the reward is then priced from the ask that actually came out. |
 | `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. Applies tutorial and one-job gates, prepares the quest, and abandons it if the distress fleet expires. |
 
 ### `campaign/fish/colony`

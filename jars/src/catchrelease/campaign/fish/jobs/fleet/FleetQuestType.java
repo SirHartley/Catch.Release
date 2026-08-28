@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -113,38 +114,62 @@ public enum FleetQuestType {
         return pick == null ? null : pick.id;
     }
 
-    public FishRequirement rollAsk(Random random) {
+    /** How ambitious this encounter feels like being: most are modest, a few are big
+     *  scores - the wide, low-weighted roll is the whole opportunist character. */
+    public static float rollTargetScore(Random random) {
+        float skewed = (float) Math.pow(random.nextFloat(), 1.6);
+
+        return DemandScore.COMMON_BASE + skewed * 60f;
+    }
+
+    /** The type keeps its demand shape - the pitch has to stay true - and the rolled
+     *  ambition decides how far that shape is pushed. The reward is then priced off
+     *  what actually came out, so a shape that cannot reach the target underpays
+     *  rather than overcharges. */
+    public FishRequirement rollAsk(Random random, float target) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
             case STRANDED:
             case SCAVENGER_ENGINE:
-                ask.count = 1;
+                // stuck, not shopping: a bigger favour is a second specimen, never exotics
+                ask.count = target >= 24f ? 2 : 1;
                 ask.speciesId = pickSpecies(random, null, FishRarity.UNCOMMON);
                 break;
 
             case STARVING:
-                ask.count = 3 + random.nextInt(4);
+                ask.count = clampCount(countFor(target, DemandScore.COMMON_BASE), 3, 8);
                 break;
 
             case QUOTA:
-                ask.count = 2 + random.nextInt(3);
                 ask.minGrade = FishGrade.FINE;
+                ask.count = clampCount(countFor(target, DemandScore.COMMON_BASE * 1.5f), 2, 6);
                 break;
 
-            case COLLECTOR:
+            case COLLECTOR: {
+                FishRarity shelf = target >= 55f ? FishRarity.EPIC
+                        : target >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
                 ask.count = 1;
-                ask.speciesId = pickSpecies(random, FishRarity.UNCOMMON, null);
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) {
+                    ask.speciesId = pickSpecies(random, FishRarity.UNCOMMON, null);
+                }
+                if (target >= 70f) ask.minGrade = FishGrade.FINE;
                 break;
+            }
 
             case SEEKER:
                 ask.count = 1;
-                ask.minRarity = random.nextFloat() > 0.5f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.minRarity = target >= 45f ? FishRarity.EPIC
+                        : target >= 25f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                if (target >= 60f) ask.minGrade = FishGrade.FINE;
                 break;
 
             case WAGER:
                 ask.count = 2;
                 ask.sameSpecies = true;
+                if (target >= 25f) ask.minGrade = FishGrade.FINE;
+                if (target >= 40f) ask.minRarity = FishRarity.UNCOMMON;
                 break;
 
             default:
@@ -154,16 +179,14 @@ public enum FleetQuestType {
         return ask;
     }
 
-    public int getBaseCredits() {
-        switch (this) {
-            case COLLECTOR: return 14000;
-            case SEEKER: return 11000;
-            case SCAVENGER_ENGINE: return 9000;
-            case STRANDED: return 8000;
-            case WAGER: return 6000;
-            case QUOTA: return 5000;
-            default: return 4000;
-        }
+    // inverts the diminishing-count curve: target = per * (1 + fraction * (n - 1))
+    protected static int countFor(float target, float perSpecimen) {
+        return Math.max(1, Math.round(1f + (target / perSpecimen - 1f)
+                / DemandScore.EXTRA_SPECIMEN_FRACTION));
+    }
+
+    protected static int clampCount(int count, int min, int max) {
+        return Math.max(min, Math.min(max, count));
     }
 
     public String getId() {

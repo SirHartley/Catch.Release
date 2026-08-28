@@ -9,9 +9,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class StandingOrderJob extends FishJob {
 
-    public static final int VALUE_PER_FISH = 900;
-    public static final float DAYS = 60f;
-
     protected boolean catchTermsAsked = false;
 
     @Override
@@ -26,17 +23,13 @@ public class StandingOrderJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
         FishRequirement ask = rollAsk();
         addAsk(ask);
 
-        int worth = VALUE_PER_FISH * ask.count;
-        if (ask.minRarity != null) worth *= 1 + ask.minRarity.rank;
-        if (ask.minGrade != null) worth *= 2;
-        if (catchTermsAsked) worth *= 2;
-
-        addRewards(FishRewardRoller.roll(genRandom, worth, asks, true));
+        // the score already prices count, rarity, grade and catch terms
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 

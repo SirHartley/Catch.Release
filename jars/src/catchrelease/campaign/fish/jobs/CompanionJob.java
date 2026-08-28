@@ -11,8 +11,6 @@ import java.util.List;
 
 public class CompanionJob extends FishJob {
 
-    public static final int VALUE = 3400;
-    public static final float DAYS = 40f;
     public static final float BONUS_FRACTION = 0.6f;
 
     @Override
@@ -31,15 +29,15 @@ public class CompanionJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
         FishRequirement ask = new FishRequirement();
         ask.count = 1;
         ask.minWeight = FishJobAsks.rollWeightFloor(genRandom, 0.35f + genRandom.nextFloat() * 0.35f);
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -50,7 +48,9 @@ public class CompanionJob extends FishJob {
     protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;
 
-        for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, asks, true)) {
+        // the premium is half the job again, rolled fresh
+        for (FishReward extra : QuestRewards.roll(new QuestRewards.Request(asks)
+                .budgetMult(0.5f).random(random())).rewards) {
             grantReward(extra, handedIn);
             rewards.add(extra);
         }

@@ -9,9 +9,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class CuratorJob extends FishJob {
 
-    public static final int VALUE_PER_FISH = 2600;
-    public static final float DAYS = 70f;
-
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
         if (!setGlobalReference("$catchrelease_curatorRef", "$catchrelease_curatorInProgress")) {
@@ -22,8 +19,6 @@ public class CuratorJob extends FishJob {
         setGiverVoice(Voices.SCIENTIST);
 
         if (!setUpGiver(createdAt)) return false;
-
-        days = DAYS;
 
         FishRequirement ask = new FishRequirement();
         ask.count = 1 + genRandom.nextInt(3);
@@ -40,7 +35,9 @@ public class CuratorJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, asks, true));
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
