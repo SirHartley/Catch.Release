@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ChefJob extends FishJob {
 
-    public static final int VALUE_PER_TYPE = 1400;
+    public static final int VALUE_PER_TYPE = 2600;
     public static final float DAYS = 40f;
     protected static final String[] DISHES = {
             "a terrine", "a cold course", "a broth", "a service of three",
@@ -47,7 +47,13 @@ public class ChefJob extends FishJob {
             addAsk(ask);
         }
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), true));
+        List<FishReward> locationData = FishRewardRoller.rollLocationData(
+                genRandom, 2, VALUE_PER_TYPE);
+        if (locationData.size() < 2) return false;
+
+        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), true,
+                locationData));
+        addRewards(locationData);
 
         setUpSpine();
 

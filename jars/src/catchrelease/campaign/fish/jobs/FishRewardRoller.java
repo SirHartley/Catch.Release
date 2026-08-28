@@ -35,23 +35,39 @@ public class FishRewardRoller {
     public static final float SPREAD = 0.35f;
 
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
+        return roll(random, worth, allowCredits, null);
+    }
+
+    static List<FishReward> roll(Random random, int worth, boolean allowCredits,
+                                 List<FishReward> reservedRewards) {
         List<FishReward> rewards = new ArrayList<>();
         Set<String> reserved = getReservedSchematicKeys();
+        Set<String> reservedLocationData = new LinkedHashSet<>();
         if (random == null) random = new Random();
+
+        if (reservedRewards != null) {
+            for (FishReward reward : reservedRewards) {
+                reserve(reward, reserved);
+                reserveLocationData(reward, reservedLocationData);
+            }
+        }
 
         int value = vary(random, worth);
 
-        FishReward main = rollOne(random, value, allowCredits, reserved);
+        FishReward main = rollOne(random, value, allowCredits, reserved, reservedLocationData);
         if (main != null) {
             rewards.add(main);
             reserve(main, reserved);
+            reserveLocationData(main, reservedLocationData);
         }
 
         if (value > VALUE_PER_FISH * 3 && random.nextFloat() > 0.45f) {
-            FishReward extra = rollOne(random, value / 3, allowCredits, reserved);
+            FishReward extra = rollOne(random, value / 3, allowCredits, reserved,
+                    reservedLocationData);
             if (extra != null) {
                 rewards.add(extra);
                 reserve(extra, reserved);
+                reserveLocationData(extra, reservedLocationData);
             }
         }
 
@@ -82,7 +98,8 @@ public class FishRewardRoller {
     }
 
     protected static FishReward rollOne(Random random, int value, boolean allowCredits,
-                                        Set<String> reserved) {
+                                        Set<String> reserved,
+                                        Set<String> reservedLocationData) {
         if (!allowCredits) return rollNonCredit(random, reserved);
 
         float roll = random.nextFloat();
@@ -90,7 +107,7 @@ public class FishRewardRoller {
         if (roll < 0.34f) return FishReward.credits(creditPayout(value));
         if (roll < 0.52f) return rollUpgrade(random, reserved);
         if (roll < 0.66f) return rollTackle(random, reserved);
-        if (roll < 0.78f) return rollLocationData(random, value);
+        if (roll < 0.78f) return rollLocationData(random, value, reservedLocationData);
         if (roll < 0.86f) return rollBackdrop(random);
         if (roll < 0.93f) return FishReward.credits(creditPayout(value));
 
@@ -184,6 +201,12 @@ public class FishRewardRoller {
         if (key != null) reserved.add(key);
     }
 
+    protected static void reserveLocationData(FishReward reward, Set<String> reserved) {
+        if (!(reward instanceof FishReward.LocationData) || reserved == null) return;
+
+        reserved.add(((FishReward.LocationData) reward).speciesId);
+    }
+
     protected static boolean ownsRigFor(Tackle tackle) {
         if (tackle == null || tackle.fit == null) return false;
 
@@ -197,7 +220,31 @@ public class FishRewardRoller {
         }
     }
 
-    protected static FishReward rollLocationData(Random random, int fallbackCredits) {
+    public static List<FishReward> rollLocationData(Random random, int count,
+                                                    int fallbackCredits) {
+        List<FishReward> rewards = new ArrayList<>();
+        List<FishSpec> unknown = getUnknownLocationData(null);
+        if (random == null) random = new Random();
+
+        while (rewards.size() < count && !unknown.isEmpty()) {
+            FishSpec spec = unknown.remove(random.nextInt(unknown.size()));
+            rewards.add(FishReward.locationData(spec.id, fallbackCredits));
+        }
+
+        return rewards;
+    }
+
+    protected static FishReward rollLocationData(Random random, int fallbackCredits,
+                                                 Set<String> reserved) {
+        List<FishSpec> unknown = getUnknownLocationData(reserved);
+
+        if (unknown.isEmpty()) return null;
+
+        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id,
+                fallbackCredits);
+    }
+
+    protected static List<FishSpec> getUnknownLocationData(Set<String> reserved) {
         List<FishSpec> unknown = new ArrayList<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
@@ -205,14 +252,12 @@ public class FishRewardRoller {
             if (!spec.hasHabitat()) continue;
             if (spec.rarity == FishRarity.LEGENDARY) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;
+            if (reserved != null && reserved.contains(spec.id)) continue;
 
             unknown.add(spec);
         }
 
-        if (unknown.isEmpty()) return null;
-
-        return FishReward.locationData(unknown.get(random.nextInt(unknown.size())).id,
-                fallbackCredits);
+        return unknown;
     }
 
     protected static FishReward rollBackdrop(Random random) {
