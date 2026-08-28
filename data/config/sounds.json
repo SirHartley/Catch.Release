@@ -71,6 +71,12 @@
 	{"file":"sounds/catchrelease/overlay/whispers.ogg","pitch":1,"volume":1},
 	],
 
+	#legendary
+
+	"catchrelease_longliner_found":[
+		{"file":"sounds/catchrelease/sfx/longliner_found.ogg","pitch":1,"volume":1},
+	],
+
 	#minigame
 
 	"catchrelease_minigame_loop":[
