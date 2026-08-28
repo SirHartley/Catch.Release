@@ -612,7 +612,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         addDescriptionForCurrentStage(info, width, height);
-        addBulletPoints(info, ListInfoMode.IN_DESC);
+        //addBulletPoints(info, ListInfoMode.IN_DESC);
+
         if (abandonStage != null && !isAbandoned() && !isSucceeded() && !isFailed()) {
             addAbandonButton(info, width);
         }

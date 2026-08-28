@@ -59,7 +59,7 @@ public final class FishIntelMapButton {
         if (info == null || destination == null
                 || Global.getCurrentState() != GameState.CAMPAIGN) return;
 
-        float buttonWidth = Math.min(width, 260f);
+        float buttonWidth = Math.max(width, 260f);
         info.addButton("Plot route", PLOT_ROUTE_BUTTON_ID, Misc.getBasePlayerColor(),
                 Misc.getDarkPlayerColor(), (int) buttonWidth, HEIGHT, 18f);
 
