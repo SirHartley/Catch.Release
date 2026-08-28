@@ -164,6 +164,10 @@ public abstract class CampedSpotJob extends FishJob {
             return;
         }
 
+        if (CampedSpot.isCleared(camper)) {
+            CampedSpot.returnToSource(camper);
+        }
+
         CampedSpot.setPondBlocked(pond, false);
         cleared = true;
 
