@@ -21,6 +21,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
@@ -32,9 +33,43 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
+import java.util.Collection;
 import java.util.Collections;
 
 public abstract class FishReward {
+
+    /**
+     * Captured before a reward is granted so stateful rewards, such as range data that can turn
+     * into credits, report what the player actually received.
+     */
+    public static class Receipt {
+
+        public final String description;
+        public final String highlight;
+        public final Color highlightColor;
+
+        public Receipt(String description) {
+            this(description, description, Misc.getHighlightColor());
+        }
+
+        public Receipt(String description, String highlight, Color highlightColor) {
+            this.description = description;
+            this.highlight = highlight;
+            this.highlightColor = highlightColor;
+        }
+
+        public void addTo(TextPanelAPI text) {
+            if (text == null || description == null || description.isEmpty()) return;
+
+            text.setFontSmallInsignia();
+            text.addParagraph("Gained: " + description, Misc.getPositiveHighlightColor());
+            if (highlight != null && !highlight.isEmpty() && highlightColor != null) {
+                text.highlightInLastPara(highlightColor, highlight);
+            }
+            text.setFontInsignia();
+        }
+    }
 
     public static class Credits extends FishReward {
 
@@ -278,6 +313,16 @@ public abstract class FishReward {
         }
 
         @Override
+        public Receipt receipt() {
+            if (isRedundant()) return new Credits(getFallbackCredits()).receipt();
+
+            FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
+            if (spec == null) return super.receipt();
+
+            return new Receipt(describe(), spec.getDisplayName(), spec.rarity.color);
+        }
+
+        @Override
         public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
             FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
             if (tooltip == null || spec == null || isRedundant()) return false;
@@ -425,6 +470,23 @@ public abstract class FishReward {
     public abstract String describe();
 
     public abstract void grant();
+
+    public Receipt receipt() {
+        return new Receipt(describe());
+    }
+
+    public Receipt grantWithReceipt() {
+        Receipt receipt = receipt();
+        grant();
+        return receipt;
+    }
+
+    public static void showReceipts(TextPanelAPI text, Collection<Receipt> receipts) {
+        if (text == null || receipts == null) return;
+        for (Receipt receipt : receipts) {
+            if (receipt != null) receipt.addTo(text);
+        }
+    }
 
     public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
         return false;

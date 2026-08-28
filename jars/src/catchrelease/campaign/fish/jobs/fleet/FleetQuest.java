@@ -320,6 +320,7 @@ public class FleetQuest extends FishJob {
         token(local, "$catchreleaseFleetHandoffPaid", true);
 
         FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
+        showRewardReceipts(dialog);
 
         setCurrentStage(Stage.DONE, dialog, memoryMap);
     }

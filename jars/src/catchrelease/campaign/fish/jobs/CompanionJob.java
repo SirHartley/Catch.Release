@@ -49,7 +49,7 @@ public class CompanionJob extends FishJob {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;
 
         for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, true)) {
-            extra.grant();
+            grantReward(extra);
             rewards.add(extra);
         }
 
