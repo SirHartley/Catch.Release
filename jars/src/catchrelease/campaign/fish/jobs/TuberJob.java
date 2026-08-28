@@ -32,7 +32,7 @@ public class TuberJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, true));
+        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
 
         setUpSpine();
 
@@ -51,7 +51,7 @@ public class TuberJob extends FishJob {
         grim.lowCoherence = true;
 
         addAsk(grim);
-        addRewards(FishRewardRoller.roll(random(), (int) (VALUE * 1.6f), true));
+        addRewards(FishRewardRoller.roll(random(), (int) (VALUE * 1.6f), asks, true));
 
         return true;
     }

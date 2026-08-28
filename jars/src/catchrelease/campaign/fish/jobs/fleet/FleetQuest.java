@@ -200,7 +200,8 @@ public class FleetQuest extends FishJob {
         if (askRarity != null) worth *= 1 + askRarity.rank;
         if (ask.minGrade != null) worth *= 2;
 
-        addReward(FishReward.credits(worth));
+        addReward(FishReward.questCredits(FishRewardRoller.creditPayout(),
+                FishRewardRoller.valueMultiplier(worth, ask.count)));
 
         if (askRarity != null && askRarity.rank >= FishRarity.RARE.rank) {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(StatIds.HARPOON_SPEED);

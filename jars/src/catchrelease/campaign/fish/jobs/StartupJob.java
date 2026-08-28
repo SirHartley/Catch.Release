@@ -43,7 +43,8 @@ public class StartupJob extends FishJob {
         addAsk(ask);
 
         // pays 20% over VALUE_PER_FISH - he's buying proof of supply, not the fish
-        addRewards(FishRewardRoller.roll(genRandom, (int) (VALUE_PER_FISH * count * 1.2f), true));
+        addRewards(FishRewardRoller.roll(genRandom,
+                (int) (VALUE_PER_FISH * count * 1.2f), asks, true));
     }
 
     @Override

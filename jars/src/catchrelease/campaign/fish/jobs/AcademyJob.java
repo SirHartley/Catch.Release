@@ -41,7 +41,7 @@ public class AcademyJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, true));
+        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_FISH * ask.count, asks, true));
 
         setUpSpine();
 

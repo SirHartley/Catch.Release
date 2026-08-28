@@ -7,6 +7,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
+import java.util.List;
+
 public class CompanionJob extends FishJob {
 
     public static final int VALUE = 3400;
@@ -37,7 +39,7 @@ public class CompanionJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, true));
+        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
 
         setUpSpine();
 
@@ -45,11 +47,11 @@ public class CompanionJob extends FishJob {
     }
 
     @Override
-    protected boolean payBonus(FishCatch offered) {
+    protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;
 
-        for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, true)) {
-            grantReward(extra);
+        for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, asks, true)) {
+            grantReward(extra, handedIn);
             rewards.add(extra);
         }
 

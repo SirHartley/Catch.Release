@@ -225,7 +225,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
             if (!FishCurrency.spend(ask)) return false;
         }
 
-        grantRewards(rewards);
+        grantRewards(rewards, Collections.emptyList());
 
         round++;
 
@@ -462,7 +462,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         token(mem, PAID_KEY, true);
-        token(mem, BONUS_KEY, payBonus(offered));
+        token(mem, BONUS_KEY, payBonus(offered, Collections.emptyList()));
 
         boolean more = onDelivered();
 
@@ -495,12 +495,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
             return false;
         }
 
+        List<FishCatch> handedIn = new ArrayList<>(selection.getContents());
         beginRewardReceipts();
-        grantRewards(rewards);
+        grantRewards(rewards, handedIn);
         round++;
 
         token(mem, PAID_KEY, true);
-        token(mem, BONUS_KEY, payBonus(offered));
+        token(mem, BONUS_KEY, payBonus(offered, handedIn));
 
         boolean more = onDelivered();
         if (more) setClock();
@@ -522,7 +523,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
     }
 
-    protected boolean payBonus(FishCatch offered) {
+    protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         return false;
     }
 
@@ -531,15 +532,19 @@ public abstract class FishJob extends HubMissionWithBarEvent
         else pendingRewardReceipts.clear();
     }
 
-    protected void grantRewards(List<FishReward> granted) {
+    protected void grantRewards(List<FishReward> granted, List<FishCatch> handedIn) {
         if (granted == null) return;
-        for (FishReward reward : granted) grantReward(reward);
+        for (FishReward reward : granted) grantReward(reward, handedIn);
     }
 
     protected void grantReward(FishReward reward) {
+        grantReward(reward, Collections.emptyList());
+    }
+
+    protected void grantReward(FishReward reward, List<FishCatch> handedIn) {
         if (reward == null) return;
         if (pendingRewardReceipts == null) pendingRewardReceipts = new ArrayList<>();
-        pendingRewardReceipts.add(reward.grantWithReceipt());
+        pendingRewardReceipts.add(reward.grantWithReceipt(handedIn));
     }
 
     protected void showRewardReceipts(InteractionDialogAPI dialog) {

@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.BackdropLoader;
@@ -36,6 +37,7 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class FishReward {
 
@@ -74,13 +76,25 @@ public abstract class FishReward {
     public static class Credits extends FishReward {
 
         public final int amount;
+        public final float valueMultiplier;
 
         public Credits(int amount) {
+            this(amount, 0f);
+        }
+
+        public Credits(int amount, float valueMultiplier) {
             this.amount = amount;
+            this.valueMultiplier = Math.max(0f, valueMultiplier);
         }
 
         @Override
         public String describe() {
+            if (valueMultiplier > 0f) {
+                return Misc.getWithDGS(amount) + " credits guaranteed, plus "
+                        + formatMultiplier(valueMultiplier)
+                        + "x the total value of the fish handed in";
+            }
+
             return Misc.getWithDGS(amount) + " credits";
         }
 
@@ -88,6 +102,41 @@ public abstract class FishReward {
         public void grant() {
             CargoAPI cargo = getPlayerCargo();
             if (cargo != null) cargo.getCredits().add(amount);
+        }
+
+        @Override
+        public Receipt grantWithReceipt() {
+            return grantWithReceipt(Collections.emptyList());
+        }
+
+        @Override
+        public Receipt grantWithReceipt(List<FishCatch> handedIn) {
+            int payout = amount + Math.round(totalValue(handedIn) * valueMultiplier);
+            CargoAPI cargo = getPlayerCargo();
+            if (cargo != null) cargo.getCredits().add(payout);
+
+            String description = Misc.getWithDGS(payout) + " credits";
+            return new Receipt(description);
+        }
+
+        protected static float totalValue(List<FishCatch> handedIn) {
+            float total = 0f;
+
+            if (handedIn != null) {
+                for (FishCatch fish : handedIn) {
+                    if (fish != null) total += fish.getValue();
+                }
+            }
+
+            return total;
+        }
+
+        protected static String formatMultiplier(float multiplier) {
+            int tenths = Math.round(multiplier * 10f);
+
+            return tenths % 10 == 0
+                    ? String.valueOf(tenths / 10)
+                    : (tenths / 10) + "." + Math.abs(tenths % 10);
         }
     }
 
@@ -481,6 +530,10 @@ public abstract class FishReward {
         return receipt;
     }
 
+    public Receipt grantWithReceipt(List<FishCatch> handedIn) {
+        return grantWithReceipt();
+    }
+
     public static void showReceipts(TextPanelAPI text, Collection<Receipt> receipts) {
         if (text == null || receipts == null) return;
         for (Receipt receipt : receipts) {
@@ -522,6 +575,10 @@ public abstract class FishReward {
 
     public static FishReward credits(int amount) {
         return new Credits(amount);
+    }
+
+    public static FishReward questCredits(int amount, float valueMultiplier) {
+        return new Credits(amount, valueMultiplier);
     }
 
     public static FishReward upgrade(String statId, int levels) {
