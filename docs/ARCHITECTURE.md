@@ -130,7 +130,7 @@ The framework creates the distress entity, vanilla-style breadcrumb intel, and r
 
 ### Other registrations
 
-- `data/characters/default_ranks.json` contains display labels only.
+- `data/world/factions/default_ranks.json` registers the Sub-Butler and Crab Merchant display ranks.
 - Terrain CSVs register the pond and coherence terrain. `BaseTerrain` does not add the terrain ID as an entity tag.
 - `data/campaign/special_items.csv` registers fish cargo items.
 - `data/campaign/industries.csv` registers the Breach Conservatory.
