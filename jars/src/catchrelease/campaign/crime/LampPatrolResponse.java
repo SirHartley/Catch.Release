@@ -114,7 +114,7 @@ public class LampPatrolResponse implements EveryFrameScript {
             if (curr.getInteractionTarget() instanceof CampaignFleetAPI) return false;
         }
 
-        if (!LampOffence.isIllegalHere(player, faction.getId())) return false;
+        if (!LampOffence.isIllegalHere(player)) return false;
 
         // last, because it is the only test that asks the sensor model anything
         return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
@@ -148,6 +148,13 @@ public class LampPatrolResponse implements EveryFrameScript {
 
         if (!SearchlightAbilityPlugin.isBreaching()) lit = false;
 
+        if (player != null && !LampOffence.isIllegalHere(player)) {
+            for (CampaignFleetAPI patrol : new ArrayList<>(stopping)) {
+                end(patrol, false);
+            }
+            return;
+        }
+
         for (CampaignFleetAPI patrol : new ArrayList<>(stopping)) {
             if (!patrol.getMemoryWithoutUpdate().getBoolean(LampOffence.STOPPED_KEY)) continue;
 
@@ -178,6 +185,10 @@ public class LampPatrolResponse implements EveryFrameScript {
     }
 
     protected void end(CampaignFleetAPI patrol) {
+        end(patrol, true);
+    }
+
+    protected void end(CampaignFleetAPI patrol, boolean allowRetry) {
         if (patrol == null) return;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -209,7 +220,7 @@ public class LampPatrolResponse implements EveryFrameScript {
         if (retryKey != null) {
             MemoryAPI sector = Global.getSector().getMemoryWithoutUpdate();
 
-            if (lampsStillBurning && !LampOffence.isRunResolved()) {
+            if (allowRetry && lampsStillBurning && !LampOffence.isRunResolved()) {
                 sector.set(retryKey, true, RETRY_DAYS);
             } else {
                 sector.unset(retryKey);
