@@ -210,7 +210,7 @@ public class KidsJob extends FishJob {
     }
 
     @Override
-    protected boolean payBonus(FishCatch offered) {
+    protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (offered == null || offered.getGrade().rank < BONUS_GRADE.rank) return false;
 
         for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {

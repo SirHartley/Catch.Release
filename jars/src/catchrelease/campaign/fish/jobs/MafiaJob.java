@@ -67,7 +67,7 @@ public class MafiaJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, true));
+        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
 
         setUpSpine();
 
@@ -245,7 +245,9 @@ public class MafiaJob extends FishJob {
 
         rewards.clear();
 
-        if (won) addRewards(FishRewardRoller.roll(random(), (int) (VALUE * WIN_MULT), true));
+        if (won) {
+            addRewards(FishRewardRoller.roll(random(), (int) (VALUE * WIN_MULT), asks, true));
+        }
     }
 
     @Override

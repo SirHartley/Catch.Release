@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.shop.ShopSchematics;
@@ -31,15 +32,32 @@ import java.util.Set;
 public class FishRewardRoller {
 
     public static final int VALUE_PER_FISH = 1200;
+    public static final int CREDIT_BASE = 6000;
     public static final float CREDIT_PAYOUT_MULT = 5f;
     public static final float SPREAD = 0.35f;
 
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
-        return roll(random, worth, allowCredits, null);
+        return roll(random, worth, 1, allowCredits, null);
+    }
+
+    public static List<FishReward> roll(Random random, int worth,
+                                        List<FishRequirement> asks, boolean allowCredits) {
+        return roll(random, worth, requestedFish(asks), allowCredits, null);
     }
 
     static List<FishReward> roll(Random random, int worth, boolean allowCredits,
                                  List<FishReward> reservedRewards) {
+        return roll(random, worth, 1, allowCredits, reservedRewards);
+    }
+
+    static List<FishReward> roll(Random random, int worth, List<FishRequirement> asks,
+                                 boolean allowCredits, List<FishReward> reservedRewards) {
+        return roll(random, worth, requestedFish(asks), allowCredits, reservedRewards);
+    }
+
+    protected static List<FishReward> roll(Random random, int worth, int requestedFish,
+                                           boolean allowCredits,
+                                           List<FishReward> reservedRewards) {
         List<FishReward> rewards = new ArrayList<>();
         Set<String> reserved = getReservedSchematicKeys();
         Set<String> reservedLocationData = new LinkedHashSet<>();
@@ -53,8 +71,10 @@ public class FishRewardRoller {
         }
 
         int value = vary(random, worth);
+        float valueMultiplier = valueMultiplier(worth, requestedFish);
 
-        FishReward main = rollOne(random, value, allowCredits, reserved, reservedLocationData);
+        FishReward main = rollOne(random, value, valueMultiplier, allowCredits, reserved,
+                reservedLocationData);
         if (main != null) {
             rewards.add(main);
             reserve(main, reserved);
@@ -62,8 +82,8 @@ public class FishRewardRoller {
         }
 
         if (value > VALUE_PER_FISH * 3 && random.nextFloat() > 0.45f) {
-            FishReward extra = rollOne(random, value / 3, allowCredits, reserved,
-                    reservedLocationData);
+            FishReward extra = rollOne(random, value / 3, valueMultiplier, allowCredits,
+                    reserved, reservedLocationData);
             if (extra != null) {
                 rewards.add(extra);
                 reserve(extra, reserved);
@@ -75,7 +95,7 @@ public class FishRewardRoller {
 
         // Cash-enabled jobs still need a payout after every progression reward is exhausted.
         if (rewards.isEmpty() && allowCredits) {
-            rewards.add(FishReward.credits(creditPayout(value)));
+            rewards.add(FishReward.questCredits(creditPayout(), valueMultiplier));
         }
 
         return rewards;
@@ -84,32 +104,38 @@ public class FishRewardRoller {
     protected static void coalesceCredits(List<FishReward> rewards) {
         int first = -1;
         int total = 0;
+        float valueMultiplier = 0f;
 
         for (int i = rewards.size() - 1; i >= 0; i--) {
             FishReward reward = rewards.get(i);
             if (!(reward instanceof FishReward.Credits)) continue;
 
             first = i;
-            total += ((FishReward.Credits) reward).amount;
+            FishReward.Credits credits = (FishReward.Credits) reward;
+            total += credits.amount;
+            valueMultiplier = Math.max(valueMultiplier, credits.valueMultiplier);
             rewards.remove(i);
         }
 
-        if (first >= 0) rewards.add(first, FishReward.credits(roundCreditReward(total)));
+        if (first >= 0) {
+            rewards.add(first, FishReward.questCredits(roundCreditReward(total), valueMultiplier));
+        }
     }
 
-    protected static FishReward rollOne(Random random, int value, boolean allowCredits,
+    protected static FishReward rollOne(Random random, int value, float valueMultiplier,
+                                        boolean allowCredits,
                                         Set<String> reserved,
                                         Set<String> reservedLocationData) {
         if (!allowCredits) return rollNonCredit(random, reserved);
 
         float roll = random.nextFloat();
 
-        if (roll < 0.34f) return FishReward.credits(creditPayout(value));
+        if (roll < 0.34f) return FishReward.questCredits(creditPayout(), valueMultiplier);
         if (roll < 0.52f) return rollUpgrade(random, reserved);
         if (roll < 0.66f) return rollTackle(random, reserved);
         if (roll < 0.78f) return rollLocationData(random, value, reservedLocationData);
         if (roll < 0.86f) return rollBackdrop(random);
-        if (roll < 0.93f) return FishReward.credits(creditPayout(value));
+        if (roll < 0.93f) return FishReward.questCredits(creditPayout(), valueMultiplier);
 
         return rollBlueprint(random);
     }
@@ -303,6 +329,10 @@ public class FishRewardRoller {
                 options.get(random.nextInt(options.size())));
     }
 
+    public static int creditPayout() {
+        return CREDIT_BASE;
+    }
+
     public static int creditPayout(int value) {
         int payout = Math.max(500, Math.round(Math.max(0, value) * CREDIT_PAYOUT_MULT));
 
@@ -313,6 +343,25 @@ public class FishRewardRoller {
         int step = amount > 100_000 ? 10_000 : 1_000;
 
         return Math.round(amount / (float) step) * step;
+    }
+
+    public static float valueMultiplier(int worth, int requestedFish) {
+        float perFish = Math.max(0, worth) / (float) Math.max(1, requestedFish);
+        float raw = perFish / VALUE_PER_FISH;
+
+        return Math.max(1f, Math.round(raw * 2f) * 0.5f);
+    }
+
+    protected static int requestedFish(List<FishRequirement> asks) {
+        int total = 0;
+
+        if (asks != null) {
+            for (FishRequirement ask : asks) {
+                if (ask != null) total += Math.max(1, ask.count);
+            }
+        }
+
+        return Math.max(1, total);
     }
 
     protected static int vary(Random random, int worth) {

@@ -51,7 +51,7 @@ public class ChefJob extends FishJob {
                 genRandom, 2, VALUE_PER_TYPE);
         if (locationData.size() < 2) return false;
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), true,
+        addRewards(FishRewardRoller.roll(genRandom, VALUE_PER_TYPE * asks.size(), asks, true,
                 locationData));
         addRewards(locationData);
 

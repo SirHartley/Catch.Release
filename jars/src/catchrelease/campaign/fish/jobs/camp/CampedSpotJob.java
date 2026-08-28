@@ -71,7 +71,7 @@ public abstract class CampedSpotJob extends FishJob {
         days = DAYS;
 
         setReceiptAsk();
-        addRewards(FishRewardRoller.roll(genRandom, size.value, true));
+        addRewards(FishRewardRoller.roll(genRandom, size.value, asks, true));
 
         setUpSpine();
 

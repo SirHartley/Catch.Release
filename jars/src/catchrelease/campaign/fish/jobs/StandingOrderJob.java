@@ -36,7 +36,7 @@ public class StandingOrderJob extends FishJob {
         if (ask.minGrade != null) worth *= 2;
         if (catchTermsAsked) worth *= 2;
 
-        addRewards(FishRewardRoller.roll(genRandom, worth, true));
+        addRewards(FishRewardRoller.roll(genRandom, worth, asks, true));
 
         setUpSpine();
 
