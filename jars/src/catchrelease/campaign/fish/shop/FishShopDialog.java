@@ -684,7 +684,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (canSelectPayment) {
                 CustomPanelAPI select = panel.createCustomPanel(120f, 30f,
-                        new PaneWidgets.TextButton(() -> "Select...",
+                        new PaneWidgets.TextButton(() -> "SELECT",
                                 entry::canAfford, () -> selectedPaymentClicked(entry),
                                 PaneWidgets.TextButton.Style.MUTED));
                 row.addComponent(select).inTL(250f, 0f);

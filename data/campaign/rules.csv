@@ -1648,20 +1648,20 @@ catchrelease_fisherOptIntroProperty,CatchReleaseFisherOptions,"$menuState == cat
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 $catchreleaseCarrying
-!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I recovered something with your name on it,
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I recovered something with your name on it.,
 catchrelease_fisherOptIntroCastaway,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 !$catchreleaseCarrying
 $global.catchrelease_castawayRescued
-!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I got your crewman aboard,
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I got your crewman aboard.,
 catchrelease_fisherOptIntroRating,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage == 1
 !$catchreleaseCarrying
 !$global.catchrelease_castawayRescued
 $catchreleaseRatingPlanetKnown
-!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Someone on $ratingPlanetName sent me,
+!$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:Someone on $ratingPlanetName sent me.,
 catchrelease_fisherOptIntroHandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
@@ -2616,7 +2616,8 @@ When the crane clears your hull, the Fisherman is still on the channel.
 
 He scratches at the grey along his jaw.
 
-""Might as well learn the trade.""","0:catchrelease_introHello:Ask about fishing
+""Might as well learn the trade.""","0:catchrelease_introWantWork:I'm up for some work.
+10:catchrelease_introCurious:The trade? What trade?
 100:catchrelease_fisherBack:Another time.",
 catchrelease_introHarpoonAsk,DialogOptionSelected,$option == catchrelease_introHarpoonAsk,,"""LYNE service frame. Docking gear, transponder, half the things people kick when the drone won't answer.""
 
@@ -2624,6 +2625,21 @@ He looks past the camera.
 
 ""Missing the useful half.""","0:catchrelease_introHarpoonReturn:Return it
 100:catchrelease_fisherBack:Leave it there",
+catchrelease_introCastawayAsk,DialogOptionSelected,"$option == catchrelease_fisherIntro score:52
+$global.catchrelease_castawayRescued
+CatchReleaseCMD tokens
+$catchreleaseStage < 2
+!$catchreleaseCarrying",,"“Oh. Yes.”
+
+He checks a slightly yellowed paper calendar hanging on the back wall, then signals someone off-feed.
+
+“A shuttle will be over in a second. Time to come home.”
+
+He pauses for half a second.
+
+""What now, Captain?""","0:catchrelease_introWantWork:I'm looking for work.
+10:catchrelease_introCurious:I want to know what you're doing out here.
+100:catchrelease_fisherBack:Nothing, really.",
 catchrelease_introHelloIntercept,DialogOptionSelected,"$option == catchrelease_fisherIntro score:51
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
@@ -2639,7 +2655,7 @@ $catchreleaseStage < 2
 !$catchreleaseCarrying
 $global.catchrelease_metRating",,"The Fisherman glances over your transponder return, then sets the manifest aside.
 
-""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
+""All right, captain. You were sent for, and you came. What next?","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
 20:catchrelease_introRodQuestion:The rating said something about a ROD.
 100:catchrelease_fisherBack:Not today.",

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Shield colours">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="rules rules I want to kill myself">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/TutorialConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/TutorialConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishShopDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishShopDialog.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +108,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="removed black hole effect&#10;corrected tooltip for reward" />
     <MESSAGE value="changed bass to crab for crabolabob" />
     <MESSAGE value="Fixed crabolabob return option rules&#10;crabolabob portrait" />
     <MESSAGE value="added unlock text indicators" />
@@ -132,7 +132,8 @@
     <MESSAGE value="shield colour adjustments" />
     <MESSAGE value="fixed harpoon sprite" />
     <MESSAGE value="Shield colours" />
-    <option name="LAST_COMMIT_MESSAGE" value="Shield colours" />
+    <MESSAGE value="rules rules I want to kill myself" />
+    <option name="LAST_COMMIT_MESSAGE" value="rules rules I want to kill myself" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
