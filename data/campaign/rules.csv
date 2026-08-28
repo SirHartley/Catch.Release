@@ -596,7 +596,7 @@ The fisher checks the doorway once, then brings up the camp marker.
 
 ""What have you got?""",,
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
-catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
+catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Talk to the provisioner with the delivery manifests,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing.""
 
@@ -616,7 +616,7 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The pro
 
 $catchreleaseRewardCap is transferred to your account.",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three ingredient cards laid beneath the name of one dish. Two supplier names have already been crossed out.,,
-catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Ask about the menu.,
+catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Talk to the cook with the ingredient cards,
 catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""I'm putting $catchreleaseDish on the menu. It needs three different catch components.""
 
@@ -636,7 +636,7 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The coo
 
 $catchreleaseRewardCap is transferred.",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on $hisOrHer slate. A half-finished drink sits at one corner of the table.,,
-catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch.,
+catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch from the young factor in the expensive jacket,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
 FireAll JobSpecificOptions","""You fish. Good.""
 
@@ -734,7 +734,7 @@ Then $heOrShe adds three rows to the business case: PILOT, SCALE, PRODUCTION.
 
 $HeOrShe is already opening the demand projections.",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A $manOrWoman in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
-catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Ask about the commission.,
+catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Talk to the $manOrWoman in the well-cut coat,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
 FireAll JobSpecificOptions","The $manOrWoman stands before you reach the table and indicates the chair opposite.
 
@@ -801,7 +801,7 @@ $catchreleaseRewardCap changes hands.
 
 The $manOrWoman has already turned to $hisOrHer next entry.",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A curator with an academic lanyard is updating accession records beside photographs of a public aquarium. Several entries are marked DISPLAY; others are marked RECORD.,,
-catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
+catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Talk to the curator with the aquarium photographs,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""I'm filling gaps in a public collection.""
 
@@ -823,7 +823,7 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrSh
 
 $catchreleaseRewardCap is transferred.",,
 catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have taken over a corner table with an empty bucket and a hand-drawn tournament bracket. Several names have been crossed out and written back in.,,
-catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask what they're doing.,
+catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask the children about the tournament bracket,
 catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"Call $catchrelease_jobRef showBarBackdrop
 $menuState = catchreleaseDuelOffer 0
 FireAll JobSpecificOptions","The loud child turns the bracket around so you can see it.
@@ -976,7 +976,7 @@ The loud child immediately reaches under the bucket.
 Received: $catchreleaseReward.",catchrelease_duelClose:Leave.,
 catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
-catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask whether the tank is taking bets.,
+catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask the men with the transport tank about the bets,
 catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"Call $catchrelease_jobRef showContactVisual
 $menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The older man looks you over. The younger keeps writing on a slate.
@@ -1134,7 +1134,7 @@ $personFirstName draws one line through the amount beside your name.
 
 No payment.",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in a conservative suit has a private purchase contract open beside a nearly finished drink. The buyer field is masked; the specification is not.,,
-catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract.,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
@@ -1177,7 +1177,7 @@ $catchreleaseRewardCap changes hands.
 
 $HeOrShe doesn't shake your hand and turns to the next task on $HisOrHer list.",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is comparing retrieval logs against sensor plots. Every confirmed match goes into the smaller of two piles.,,
-catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what $heOrShe is studying.,
+catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask the Academy researcher what $heOrShe is studying,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","""Low-coherence retrievals. I have plenty of stable controls.""
 
@@ -1199,7 +1199,7 @@ One measurement is taken twice. $HeOrShe enters the second result beside the fir
 
 $catchreleaseRewardCap is transferred.",,
 catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. $HeOrShe is recording the same six-second introduction for the fourth time.",,
-catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask what $heOrShe is filming.,
+catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask the $manOrWoman at the recording set what $heOrShe is filming,
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","$HeOrShe taps the lens awake before answering.
 
@@ -1298,7 +1298,7 @@ $HeOrShe points at the frozen image.
 
 $HeOrShe authorizes the payment without looking up.",,
 catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,Three people in matching plain coats share a table. One drink sits untouched between them.,,
-catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask what they are waiting for.,
+catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask the three people in matching coats what they are waiting for,
 catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseCultOffer 0
@@ -1876,7 +1876,7 @@ He checks the old mark.
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
-$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the deckhand about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
+$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the spacer in faded deck coveralls about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
 CatchReleaseCMD rememberRatingPlanet
 CatchReleaseCMD point
@@ -3610,13 +3610,13 @@ CatchReleaseCMD leaveEncounter","You cut the link. The lamps keep burning.
 
 Weapons come up across the formation.",,
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
-catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask about the account.,
+catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask the fisher about the account sheet,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
-catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask about the claim.,
+catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask the fisher with the survey charts about the claim,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits facing the door with a damaged power coupler beside the licence slate. Each time the door opens, the inspection of the coupler stops.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
-catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask what happened to the equipment.,
+catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask the fisher about the damaged equipment,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pirates found our rupture. Now they collect protection on it.""
