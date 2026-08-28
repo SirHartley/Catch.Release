@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
+import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -518,7 +519,8 @@ public class FishermanQuest {
                 java.util.Collections.singletonList(ask), new FishHandoffPicker.Listener() {
                     @Override
                     public void picked(FishHandoffPicker.Selection selection) {
-                        if (turnIn(dialog == null ? null : dialog.getTextPanel(), selection)) {
+                        List<FishReward.Receipt> receipts = turnIn(selection);
+                        if (receipts != null) {
                             MemoryAPI local = memoryMap == null
                                     ? null : memoryMap.get(MemKeys.LOCAL);
                             if (local != null) {
@@ -527,6 +529,8 @@ public class FishermanQuest {
                             }
 
                             FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
+                            FishReward.showReceipts(dialog == null ? null : dialog.getTextPanel(),
+                                    receipts);
                         } else {
                             FireAll.fire(null, dialog, memoryMap,
                                     "CatchReleaseFisherResume");
@@ -581,24 +585,28 @@ public class FishermanQuest {
         Saved quest = getActive();
         if (quest == null || !spend(quest)) return false;
 
-        return finishTurnIn(quest, text);
+        FishReward.showReceipts(text, finishTurnIn(quest));
+        return true;
     }
 
-    protected static boolean turnIn(TextPanelAPI text, FishHandoffPicker.Selection selection) {
+    protected static List<FishReward.Receipt> turnIn(FishHandoffPicker.Selection selection) {
         Saved quest = getActive();
         FishRequirement ask = getAsk(quest);
         FishCatch selected = selection == null ? null : selection.getBestForFirstAsk();
         if (quest == null || ask == null || !ask.matches(selected) || !selection.spend()) {
-            return false;
+            return null;
         }
 
-        return finishTurnIn(quest, text);
+        return finishTurnIn(quest);
     }
 
-    protected static boolean finishTurnIn(Saved quest, TextPanelAPI text) {
-        Global.getSector().getPlayerFleet().getCargo().getCredits().add(quest.credits);
+    protected static List<FishReward.Receipt> finishTurnIn(Saved quest) {
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        receipts.add(FishReward.credits(quest.credits).grantWithReceipt());
 
         FishermanShelf.widen(SLOTS_PER_JOB);
+        receipts.add(new FishReward.Receipt(
+                "one additional range-data listing in the Fisherman's stock"));
 
         Global.getSector().getMemoryWithoutUpdate().set(ROUND_KEY, quest.round + 1);
         Global.getSector().getPersistentData().put(LAST_COMPLETED_KEY,
@@ -612,17 +620,7 @@ public class FishermanQuest {
             Global.getSector().getIntelManager().removeIntel(intel);
         }
 
-        if (text != null) {
-            text.setFontSmallInsignia();
-            String credits = Misc.getDGSCredits(quest.credits);
-            text.addPara("Gained " + credits, Misc.getPositiveHighlightColor());
-            text.highlightLastInLastPara(credits, Misc.getHighlightColor());
-            text.addPara("The Fisherman now stocks an additional range data entry.",
-                    Misc.getPositiveHighlightColor());
-            text.setFontInsignia();
-        }
-
-        return true;
+        return receipts;
     }
 
     protected static boolean spend(Saved quest) {

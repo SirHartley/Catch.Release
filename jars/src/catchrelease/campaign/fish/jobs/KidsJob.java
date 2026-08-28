@@ -160,6 +160,7 @@ public class KidsJob extends FishJob {
         }
 
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+        showRewardReceipts(dialog);
     }
 
     @Override
@@ -213,7 +214,7 @@ public class KidsJob extends FishJob {
         if (offered == null || offered.getGrade().rank < BONUS_GRADE.rank) return false;
 
         for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {
-            extra.grant();
+            grantReward(extra);
             rewards.add(extra);
         }
 

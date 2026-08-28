@@ -62,6 +62,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
     protected List<FishRequirement> asks = new ArrayList<>();
     protected List<FishReward> rewards = new ArrayList<>();
+    protected transient List<FishReward.Receipt> pendingRewardReceipts = new ArrayList<>();
     protected String factionId = null;
     protected float days = 0f;
     protected float deadline = 0f;
@@ -218,13 +219,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public boolean turnIn() {
         if (!isSatisfied()) return false;
 
+        beginRewardReceipts();
+
         for (FishRequirement ask : asks) {
             if (!FishCurrency.spend(ask)) return false;
         }
 
-        for (FishReward reward : rewards) {
-            reward.grant();
-        }
+        grantRewards(rewards);
 
         round++;
 
@@ -433,6 +434,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+        showRewardReceipts(dialog);
         FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
 
@@ -493,7 +495,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
             return false;
         }
 
-        for (FishReward reward : rewards) reward.grant();
+        beginRewardReceipts();
+        grantRewards(rewards);
         round++;
 
         token(mem, PAID_KEY, true);
@@ -521,6 +524,29 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
     protected boolean payBonus(FishCatch offered) {
         return false;
+    }
+
+    protected void beginRewardReceipts() {
+        if (pendingRewardReceipts == null) pendingRewardReceipts = new ArrayList<>();
+        else pendingRewardReceipts.clear();
+    }
+
+    protected void grantRewards(List<FishReward> granted) {
+        if (granted == null) return;
+        for (FishReward reward : granted) grantReward(reward);
+    }
+
+    protected void grantReward(FishReward reward) {
+        if (reward == null) return;
+        if (pendingRewardReceipts == null) pendingRewardReceipts = new ArrayList<>();
+        pendingRewardReceipts.add(reward.grantWithReceipt());
+    }
+
+    protected void showRewardReceipts(InteractionDialogAPI dialog) {
+        if (dialog != null) {
+            FishReward.showReceipts(dialog.getTextPanel(), pendingRewardReceipts);
+        }
+        if (pendingRewardReceipts != null) pendingRewardReceipts.clear();
     }
 
     protected boolean onDelivered() {
