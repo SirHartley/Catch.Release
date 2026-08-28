@@ -8,7 +8,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class StartupJob extends FishJob {
 
-    public static final int VALUE_PER_FISH = 800;
     public static final int ROUNDS = 3;
     public static final float GROWTH = 2f;
 
@@ -42,9 +41,9 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        // pays 20% over VALUE_PER_FISH - he's buying proof of supply, not the fish
-        addRewards(FishRewardRoller.roll(genRandom,
-                (int) (VALUE_PER_FISH * count * 1.2f), asks, true));
+        // pays 20% over the going rate - he's buying proof of supply, not the fish
+        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                .budgetMult(1.2f).random(genRandom)).rewards);
     }
 
     @Override

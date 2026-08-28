@@ -7,8 +7,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 public class ButlerJob extends FishJob {
 
     public static final String GIVER_RANK = "catchrelease_subButler";
-    public static final int VALUE_PER_KILO = 45;
-    public static final float DAYS = 45f;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -21,17 +19,17 @@ public class ButlerJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
         FishRequirement ask = new FishRequirement();
         ask.count = 1;
         ask.minWeight = FishJobAsks.rollWeightFloor(genRandom, 0.55f + genRandom.nextFloat() * 0.4f);
 
         addAsk(ask);
 
-        // priced off the floor rather than off the count, since the floor is the entire job
-        addRewards(FishRewardRoller.roll(genRandom,
-                (int) (VALUE_PER_KILO * ask.minWeight) + 2000, asks, true));
+        // the floor is the entire job, and the score prices it by how much of the
+        // sheet the floor excludes
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 

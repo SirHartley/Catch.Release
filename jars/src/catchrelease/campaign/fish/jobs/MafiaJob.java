@@ -25,8 +25,6 @@ public class MafiaJob extends FishJob {
 
     public static final String BET_FLAG = "$catchrelease_ringBet";
 
-    public static final int VALUE = 3000;
-    public static final float DAYS = 35f;
     public static final float BASE_ODDS = 0.38f;
     public static final float QUALITY_SWING = 0.30f;
     public static final float WIN_MULT = 2f;
@@ -57,8 +55,6 @@ public class MafiaJob extends FishJob {
         if (!setUpGiver(createdAt)) return false;
         setUpPeople(createdAt);
 
-        days = DAYS;
-
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
 
@@ -67,7 +63,9 @@ public class MafiaJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -246,7 +244,8 @@ public class MafiaJob extends FishJob {
         rewards.clear();
 
         if (won) {
-            addRewards(FishRewardRoller.roll(random(), (int) (VALUE * WIN_MULT), asks, true));
+            addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                    .budgetMult(WIN_MULT).random(random())).rewards);
         }
     }
 

@@ -9,9 +9,6 @@ import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class TuberJob extends FishJob {
 
-    public static final int VALUE = 1600;
-    public static final float DAYS = 45f;
-
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
         if (!setGlobalReference("$catchrelease_tuberRef", "$catchrelease_tuberInProgress")) {
@@ -23,8 +20,6 @@ public class TuberJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        days = DAYS;
-
         FishRequirement ask = new FishRequirement();
         ask.count = 1;
         ask.minRarity = genRandom.nextFloat() > 0.5f ? FishRarity.RARE : FishRarity.UNCOMMON;
@@ -32,7 +27,9 @@ public class TuberJob extends FishJob {
 
         addAsk(ask);
 
-        addRewards(FishRewardRoller.roll(genRandom, VALUE, asks, true));
+        setDurationForAsks(createdAt);
+        addRewards(QuestRewards.roll(
+                new QuestRewards.Request(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -51,7 +48,9 @@ public class TuberJob extends FishJob {
         grim.lowCoherence = true;
 
         addAsk(grim);
-        addRewards(FishRewardRoller.roll(random(), (int) (VALUE * 1.6f), asks, true));
+        // the reveal shoot pays over its score - the second clip is the whole point
+        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                .budgetMult(1.6f).random(random())).rewards);
 
         return true;
     }

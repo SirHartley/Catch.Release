@@ -23,8 +23,6 @@ public class KidsJob extends FishJob {
 
     public static final String GROUP_PORTRAIT_ID = "catchrelease_duel_group";
     public static final String CHOICE_FLAG = "$catchrelease_duelChoice";
-    public static final int VALUE = 2200;
-    public static final float DAYS = 30f;
     public static final FishGrade BONUS_GRADE = FishGrade.FINE;
 
     protected boolean toLoud = true;
@@ -33,7 +31,12 @@ public class KidsJob extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        List<FishReward> prizes = FishRewardRoller.roll(genRandom, VALUE, false);
+        // the ask exists before the prize roll so the bracket's demand prices its pot
+        FishRequirement ask = new FishRequirement();
+        ask.count = 2;
+        addAsk(ask);
+
+        List<FishReward> prizes = QuestRewards.roll(prizeRequest(genRandom)).rewards;
         if (prizes.isEmpty()) return false;
 
         if (!setGlobalReference("$catchrelease_duelRef", "$catchrelease_duelInProgress")) {
@@ -48,12 +51,7 @@ public class KidsJob extends FishJob {
         getPerson().setPortraitSprite(Global.getSettings()
                 .getSpriteName("characters", GROUP_PORTRAIT_ID));
 
-        days = DAYS;
-
-        FishRequirement ask = new FishRequirement();
-        ask.count = 2;
-
-        addAsk(ask);
+        setDurationForAsks(createdAt);
 
         addRewards(prizes);
         rewardsChecked = true;
@@ -188,6 +186,16 @@ public class KidsJob extends FishJob {
         ensureNonCreditRewards();
     }
 
+    // the prize is a thing, never money or paper: no credits, no charts, and the tier
+    // floor keeps the toybox open however light the bracket's ask is
+    protected QuestRewards.Request prizeRequest(java.util.Random random) {
+        return new QuestRewards.Request(asks)
+                .noCredits()
+                .exclude(QuestRewards.Kind.RANGE_DATA)
+                .tierFloor(DemandScore.Tier.MEDIUM)
+                .random(random);
+    }
+
     protected void ensureNonCreditRewards() {
         if (rewardsChecked) return;
         rewardsChecked = true;
@@ -205,7 +213,7 @@ public class KidsJob extends FishJob {
         }
 
         for (int i = 0; i < replacements; i++) {
-            addRewards(FishRewardRoller.roll(random(), VALUE, false));
+            addRewards(QuestRewards.roll(prizeRequest(random())).rewards);
         }
     }
 
@@ -213,7 +221,8 @@ public class KidsJob extends FishJob {
     protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (offered == null || offered.getGrade().rank < BONUS_GRADE.rank) return false;
 
-        for (FishReward extra : FishRewardRoller.roll(random(), VALUE / 2, false)) {
+        for (FishReward extra : QuestRewards.roll(
+                prizeRequest(random()).budgetMult(0.5f)).rewards) {
             grantReward(extra);
             rewards.add(extra);
         }

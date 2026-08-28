@@ -261,15 +261,15 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `FishReward.java` | Reward types: quest credits, fixed compatibility credits, upgrade and tackle schematics, habitat data, backdrops, and blueprints. Quest credits pay their guaranteed base plus their saved difficulty multiplier times the total value of the exact fish handed in. Each grant captures its actual result before state changes, then supplies one small-font `Gained:` receipt after the hand-in scene. Location data therefore reports either the newly learned range or its stored fixed-credit fallback correctly. The commodity type remains only to convert old saves to fixed credits. |
 | `FishRewardRoller.java` | Roll helpers used by `QuestRewards`: individual upgrade, tackle, schematic, backdrop, blueprint, and habitat-data rolls, distinct-data reservation, and credit merging. Schematics exclude owned plans, active-job plans, invalid rigs, and unavailable upgrade tiers. Backdrops require conservatory-plan ownership. Old saves and compatibility conversions keep their fixed credit values. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. `sweep` repairs stale save data. |
-| `StandingOrderJob.java` | Quantity, rarity, and grade order with a 60-day limit. |
+| `StandingOrderJob.java` | Quantity, rarity, and grade order. |
 | `AcademyJob.java` | Low-coherence specimens for Galatia or large Independent markets. Uses the shared fishing-work gate. |
 | `ButlerJob.java` | One specimen above a weight floor, with an offer submenu that reveals the full terms before acceptance. |
-| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade, due in 40 days. Its rolled reward uses the highest default per-requirement valuation in the bar-job set. Every offer also adds two distinct, currently unknown habitat-data rewards through the shared reward type, so either converts to its stored credit fallback if learned before hand-in. The job does not spawn when fewer than two valid data rewards remain. |
-| `CompanionJob.java` | Hegemony-only private order with a weight floor and an upper-size bonus, due in 40 days. |
-| `CultJob.java` | One named species for a non-credit reward, due in 55 days. It does not create an offer when its item pool is empty. |
-| `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence, due in 70 days. |
-| `KidsJob.java` | Two unrestricted fish for a 30-day tournament. Rewards and bonuses cannot be credits. Hand-in compares two selected specimens, then spends only after assignment. Bar entry restores the normal bar image; its comm anchor uses the generic portrait. |
-| `MafiaJob.java` | Two fish for Salvatore and Enzo, due in 35 days. Maintains both people and portraits, displays odds from relative specimen size, and supports a safe payout or a wager. |
+| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade. Every offer fixes up to two distinct, currently unknown habitat-data rewards, so either converts to its stored credit fallback if learned before hand-in; when fewer than two remain, the freed budget rolls extra rewards instead. |
+| `CompanionJob.java` | Hegemony-only private order with a weight floor and an upper-size bonus. |
+| `CultJob.java` | One named species for a non-credit reward. It does not create an offer when its prize roll comes up empty. |
+| `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence. |
+| `KidsJob.java` | Two unrestricted fish for a tournament. Rewards and bonuses cannot be credits or charts; a tier floor keeps the prize pool open. Hand-in compares two selected specimens, then spends only after assignment. Bar entry restores the normal bar image; its comm anchor uses the generic portrait. |
+| `MafiaJob.java` | Two fish for Salvatore and Enzo. Maintains both people and portraits, displays odds from relative specimen size, and supports a safe payout or a wager. |
 | `StartupJob.java` | Three deliveries of increasing quantity. Each round resets its clock and uses a round token in dialogue. |
 | `TuberJob.java` | Fine Uncommon/Rare specimen followed by a low-coherence specimen. |
 
