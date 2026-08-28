@@ -30,6 +30,8 @@ public enum QuestDuration {
     public static final float WORKING_DAYS = 12f;
     /** Rough days per light-year for a fleet that is neither racing nor crawling. */
     public static final float DAYS_PER_LY = 0.45f;
+    /** Reach beyond which an offer stops making sense, however generous its clock. */
+    public static final float MAX_SENSIBLE_LY = 30f;
 
     public final float days;
 
@@ -75,6 +77,21 @@ public enum QuestDuration {
         }
 
         return forTravelLY(worst);
+    }
+
+    /** Whether every ask could be filled somewhere within the given reach of the giver.
+     *  Species ranges move monthly, so a demand rolled today can point at water that no
+     *  longer exists or sits across the sector; such an offer should not be made. */
+    public static boolean satisfiableWithin(SectorEntityToken from,
+                                            List<FishRequirement> asks, float maxLY) {
+        if (from == null || asks == null || asks.isEmpty()) return true;
+
+        for (FishRequirement ask : asks) {
+            float nearest = nearestSatisfiableLY(from, ask);
+            if (nearest < 0f || nearest > maxLY) return false;
+        }
+
+        return true;
     }
 
     /** Nearest system in whose water the ask could be filled, or -1 for nowhere. */

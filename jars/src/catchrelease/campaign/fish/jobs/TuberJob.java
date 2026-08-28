@@ -27,7 +27,7 @@ public class TuberJob extends FishJob {
 
         addAsk(ask);
 
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
                 new QuestRewards.Request(asks).random(genRandom)).rewards);
 
