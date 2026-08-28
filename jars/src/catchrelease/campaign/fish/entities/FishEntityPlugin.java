@@ -180,6 +180,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         public boolean phantom;
         public SectorEntityToken orbitAnchor;
         public SectorEntityToken decoyAnchor;
+        public float movementDelay;
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -246,6 +247,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.phantom = p.phantom;
         this.orbitAnchor = p.orbitAnchor;
         this.decoyAnchor = p.decoyAnchor;
+        this.stunLeft = Math.max(0f, p.movementDelay);
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
                 MAX_SINE_VARIANCE * 0.3f,
