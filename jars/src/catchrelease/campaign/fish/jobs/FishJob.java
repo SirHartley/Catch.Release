@@ -637,12 +637,22 @@ public abstract class FishJob extends HubMissionWithBarEvent
                     faction.getDisplayNameWithArticleWithoutArticle());
         }
 
+        String purpose = getIntelPurpose();
+        if (purpose != null && !purpose.isEmpty()) {
+            LabelAPI line = info.addPara(purpose, opad);
+            FishRequirement.highlightFishNames(line, purpose);
+        }
+
         addDescriptionForCurrentStage(info, width, height);
         //addBulletPoints(info, ListInfoMode.IN_DESC);
 
         if (abandonStage != null && !isAbandoned() && !isSucceeded() && !isFailed()) {
             addAbandonButton(info, width);
         }
+    }
+
+    protected String getIntelPurpose() {
+        return null;
     }
 
     @Override

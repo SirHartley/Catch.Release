@@ -257,6 +257,13 @@ public class MafiaJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "Salvatore and Enzo are arranging a private fish fight around the submitted pair. "
+                + "Enzo handles the tank and the book while Salvatore settles the house's "
+                + "obligations.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
 

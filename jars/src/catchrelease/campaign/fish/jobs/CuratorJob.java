@@ -48,6 +48,12 @@ public class CuratorJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "A public collection is filling gaps in its display and accession record. Either "
+                + "kind of useful specimen can justify a place in the collection.";
+    }
+
+    @Override
     public String getBaseName() {
         return "Something Worth Glass";
     }

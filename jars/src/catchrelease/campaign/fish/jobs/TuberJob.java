@@ -68,6 +68,12 @@ public class TuberJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "A TriTuber has commissioned catches for a pair of short clips. Each is meant to "
+                + "give the feed a strong opening and a reveal.";
+    }
+
+    @Override
     public String getBaseName() {
         return "Content";
     }

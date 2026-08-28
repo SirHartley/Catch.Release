@@ -63,6 +63,13 @@ public class StartupJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "A young factor is using the deliveries to prove that a fish supply line can "
+                + "scale. Each shipment goes into the business case as evidence that the model "
+                + "works.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseRound", getRound());
     }

@@ -228,6 +228,12 @@ public class KidsJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "Two children have turned a hand-drawn tournament bracket into binding procedure. "
+                + "The submitted fish serve as the next contenders.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseKid", toLoud ? "the loud one" : "the quiet one");
         token(mem, "$catchreleaseKidCap", toLoud ? "The loud one" : "The quiet one");
