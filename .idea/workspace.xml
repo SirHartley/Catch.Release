@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="longliner sfx">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Intel edits">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishJob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/camp/CampedSpot.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/camp/CampedSpot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishermanInterception.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishermanInterception.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +106,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="icons" />
     <MESSAGE value="Adjustments" />
     <MESSAGE value="Adjustments &amp; tooltip clarifications" />
     <MESSAGE value="rules adjustments - one drone to start, fisherman voice" />
@@ -133,7 +130,8 @@
     <MESSAGE value="Fisherman Tutorial Handoff / Rules" />
     <MESSAGE value="Rules and desc adjustments" />
     <MESSAGE value="longliner sfx" />
-    <option name="LAST_COMMIT_MESSAGE" value="longliner sfx" />
+    <MESSAGE value="Intel edits" />
+    <option name="LAST_COMMIT_MESSAGE" value="Intel edits" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

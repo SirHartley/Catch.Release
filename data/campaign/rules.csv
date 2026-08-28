@@ -1322,9 +1322,7 @@ CatchReleaseCMD highlightJobText $catchreleaseSpecies","""$catchreleaseSpecies,"
 
 ""$catchreleaseSpecies,"" says the second.
 
-The third gives you the same answer.
-
-""$catchreleaseSpecies.""",,
+""$catchreleaseSpecies."" closes the third.",,
 catchrelease_cult_accepted,catchreleaseJobAccepted,$missionId == catchrelease_cult,,"""Good.""
 
 The three remain where they are.",,
