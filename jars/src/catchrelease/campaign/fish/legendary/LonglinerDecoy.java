@@ -33,7 +33,9 @@ public class LonglinerDecoy implements EveryFrameScript {
 
     public static final String DECOY_FLAG = "$catchrelease_longliner_decoy";
     public static final String BOAT_KEY = "$catchrelease_longliner_boat";
+    public static final String SOUND_FOUND = "catchrelease_longliner_found";
     public static final float CHECK_SECONDS = 0.5f;
+    public static final float REVEAL_PAUSE_SECONDS = 1f;
     public static final float RUN_TARGET_RANGE = 7000f;
 
     protected float checkTimer;
@@ -177,14 +179,19 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         Vector2f runTo = MathUtils.getPointOnCircumference(loc, RUN_TARGET_RANGE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
+        FishEntityPlugin.Params params = new FishEntityPlugin.Params(
+                runTo, LegendaryShields.POP_SHIELD_SPECIES);
+        params.movementDelay = REVEAL_PAUSE_SECONDS;
+
         SectorEntityToken mote = where.addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(runTo, LegendaryShields.POP_SHIELD_SPECIES));
+                params);
         mote.setLocation(loc.x, loc.y);
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
 
-        LegendaryShields.say(mote, "Lamp exposure breaks the false sensor return.");
+        Global.getSoundPlayer().playUISound(SOUND_FOUND, 1f, 1f);
+        mote.addFloatingText("!", Misc.getHighlightColor(), REVEAL_PAUSE_SECONDS);
     }
 
     protected void retire(CampaignFleetAPI boat) {

@@ -99,7 +99,7 @@ Keep compiler output outside `jars/`. Otherwise stale classes or an old jar can 
 - registers portraits, icons, and UI sprites;
 - sets `catchreleaseBlackHoleSpiralWarpRange`, which defaults to 6000 and is disabled at zero.
 
-Minigame sound IDs are compile-time constants in `FishConstants.java`. Ability sound IDs are registered in `abilities.csv`. `data/config/sounds.json` contains 32 sound IDs: 29 mod sounds, the skillshot-denied sound, and two low-volume vanilla character sounds. The minigame success and failure hooks currently use vanilla placeholders.
+Minigame sound IDs are compile-time constants in `FishConstants.java`. Ability sound IDs are registered in `abilities.csv`. `data/config/sounds.json` contains 31 sound IDs: 28 mod sounds, the skillshot-denied sound, and two low-volume vanilla character sounds. Minigame success and failure use dedicated mod cues.
 
 LunaLib exposes the harpoon charge-ready sound policy, the pond camera-snap setting, and the returning-player tutorial skip. Tutorial skipping defaults off. Completing the tutorial enables and saves it for later campaigns.
 
@@ -485,7 +485,7 @@ Legendary fish are unique, lamp-only targets with one host system and no purchas
 | `CoherenceSurgeModule.java` | Holds the coherence overlay at full strength for the False Dawn. |
 | `SlipDashModule.java` | Gives the moray frequent curved escape dashes and builds a moving vanilla slipstream behind it. Segments fade rather than being removed so texture offsets remain valid. |
 | `QuorumShellGame.java` | Rebuildable three-body endgame after the escort is gone. One body is real; decoys use splinter catches and presented Quorum colours. Results reveal the body only after landing. |
-| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Longliner's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. |
+| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Longliner's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. Revelation holds the replacement mote for one second with a discovery sting and alert floaty before its existing escape begins. |
 | `GhostAsteroidsModule.java` | Moving field of harmless ghost asteroids that reseeds near the chase. |
 | `LegendaryShields.java` | Shared shield radius, state, visuals, and per-species defense rules. Handles the Longliner explosive-only shield, Quorum escort and regeneration, Lantern Jack stored shells and prey lure, ordinary regrowing shells, first-hit provocation, flee/prowl exceptions, status text, and persistent defense state. |
 | `MoteDashModule.java` | Moray countermeasure that throws nearby ordinary motes at the fleet. Contact interdicts; missing ammunition is replaced by temporary common props. Quest and shell-game motes are excluded. |
