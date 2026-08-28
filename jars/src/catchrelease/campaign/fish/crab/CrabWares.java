@@ -23,9 +23,9 @@ import java.util.Set;
 public enum CrabWares {
 
     CELEBRATION("Celebration Charges", 15000, 3,
-            "Goes off over the catch card when something is landed: a flash behind it, the specimen"
-                    + " thrown up over its own box, paper everywhere, and the word for it at an"
-                    + " angle. Says nothing the readout beside it does not already say.") {
+            "A landed catch gets the full treatment: flash, confetti, the specimen kicked upward,"
+                    + " and a slanted celebration label across the card. Pure spectacle; the catch"
+                    + " and its information stay exactly the same.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -42,8 +42,9 @@ public enum CrabWares {
         }
     },
     EARMUFFS("Earmuffs", 8000, 2,
-            "Worn out where the fabric is thin, against the sound that comes with it. Thick, warm,"
-                    + " and by all accounts very comfortable. You stop hearing it.") {
+            "Thick enough for cold decks, comfortable enough for a long watch. In sufficiently thin"
+                    + " fabric, the wearer no longer hears the whispering, though the sound itself"
+                    + " continues.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -60,8 +61,8 @@ public enum CrabWares {
         }
     },
     CHICKEN_PROFILE("Chicken Profile", 12000, 3,
-            "Replaces the unidentified catch marker in the fishing minigame with a chicken. A"
-                    + " Sonar Head still shows the hooked species instead.") {
+            "Swaps the generic unidentified-pattern marker for a chicken. If a Sonar Head has"
+                    + " identified the hooked species, the chicken loses the argument.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -78,8 +79,10 @@ public enum CrabWares {
         }
     },
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
-            "A shaped charge behind the barb. Fitted in the harpoon's own slot until it goes off;"
-                    + " an unfired one can still be taken off and put back on.") {
+            "A single-use Harpoon Tip containing a shaped charge. It detonates on contact,"
+                    + " destroying ordinary struck patterns instead of landing them and damaging"
+                    + " struck fleets. Legendary patterns may react differently. An unfired tip can"
+                    + " be fitted or removed normally. Detonation consumes it.") {
         @Override
         public boolean isOwned() {
             return TackleManager.isOwned(Tackle.EXPLOSIVE_HEAD);
@@ -91,8 +94,10 @@ public enum CrabWares {
         }
     },
     CONSERVATORY("Breach Conservatory Plans", 60000, 8,
-            "A blueprint chip for a hall of pressure glass and dim water. Half fish market, half"
-                    + " public aquarium, and the only way a colony gets into the trade at all.") {
+            "A blueprint chip for a Breach Conservatory: a civic pressure-glass aquarium with a"
+                    + " local fishing outfitter and trade desk. It lets the colony join the fishing"
+                    + " trade and display specimens from the administrator's own catch. You are"
+                    + " buying the plans, not the building.") {
         @Override
         public boolean isOwned() {
             return isBought(name())
