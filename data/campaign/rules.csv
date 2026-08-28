@@ -604,13 +604,13 @@ The provisioner turns the open order toward you.
 
 ""$catchreleaseAskCap. Meet the line as written.""
 
-""Sixty days. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Sixty days. $catchreleaseRewardCap on delivery."">> now <<""$catchreleaseDaysCap. $catchreleaseRewardCap on delivery."">> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good.""
 
 Your comm ID goes into the next empty line under FRESH CATCH.",,
 catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The provisioner closes the entry and opens the next name on the supplier list.,,
-catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same sixty-day order.""",,
+catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same order, $catchreleaseDaysLeft left.""",,"DIFF [duration framework]: was <<Same sixty-day order.>> now <<Same order, $catchreleaseDaysLeft left.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_standingOrder
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The provisioner checks the containers against the manifest and closes the order.
 
@@ -624,11 +624,11 @@ The cook taps the three ingredient cards.
 
 ""$catchreleaseAsk. Each line is separate.""
 
-""Forty days. After that I change the dish. $catchreleaseRewardCap when the full order reaches my kitchen.""","catchrelease_jobAccept:Take the order.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. After that I change the dish. $catchreleaseRewardCap when the full order reaches my kitchen.""","catchrelease_jobAccept:Take the order.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Forty days. After that I change the dish.>> now <<""$catchreleaseDaysCap. After that I change the dish.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Leave the handling tags on. I don't want the prep crew guessing which line is which.""",,
 catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,The cook removes your name from the supplier list and returns to the three ingredient cards.,,
-catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. All three lines. Same forty-day order.""",,
+catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. All three lines. Same order, $catchreleaseDaysLeft left.""",,"DIFF [duration framework]: was <<Same forty-day order.>> now <<Same order, $catchreleaseDaysLeft left.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_chef_paid,catchreleaseJobPaid,"$missionId == catchrelease_chef
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The cook matches each handling tag to an ingredient card before handing the containers to the prep crew.
 
@@ -811,11 +811,11 @@ $HeOrShe turns an accession list toward you.
 
 ""Fine-grade specimens can go on display. Low-coherence specimens go into the comparative record. Either qualifies.""
 
-""Seventy days. $catchreleaseRewardCap on accession.""","catchrelease_jobAccept:Agree to supply the collection.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. $catchreleaseRewardCap on accession.""","catchrelease_jobAccept:Agree to supply the collection.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Seventy days. $catchreleaseRewardCap on accession."">> now <<""$catchreleaseDaysCap. $catchreleaseRewardCap on accession."">> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease_curator,,"""Good. Keep the transport and retrieval records with the containers. I can work with either condition; I can't catalogue an unlabelled specimen.""",,
 catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,$HeOrShe returns to the accession records and moves to the next blank entry.,,
-catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Fine grade or low coherence. Same seventy-day commission.""",,
+catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Fine grade or low coherence. Same commission, $catchreleaseDaysLeft left.""",,"DIFF [duration framework]: was <<Same seventy-day commission.>> now <<Same commission, $catchreleaseDaysLeft left.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_curator_paid,catchreleaseJobPaid,"$missionId == catchrelease_curator
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe matches each seal to an accession entry before the first container is moved to the collection transport.
 
@@ -884,7 +884,7 @@ FireAll JobSpecificOptions","The quiet child checks the bracket.
 ""They should be.""
 
 The quiet child ignores him.
-""Bring them back in thirty days.""
+""Bring them back in $catchreleaseDays.""
 
 They show you the prize: $catchreleaseRewardCap.
 
@@ -892,7 +892,7 @@ They show you the prize: $catchreleaseRewardCap.
 
 The quiet child points at the two empty spaces.
 
-""When you come back, you pick which two we're using. Then you pick who gets the better one.""",,
+""When you come back, you pick which two we're using. Then you pick who gets the better one.""",,"DIFF [duration framework]: was <<Bring them back in thirty days.>> now <<Bring them back in $catchreleaseDays.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_duel_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
 catchrelease_duel_termsDeclineOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name at the top of the bracket.
@@ -910,9 +910,9 @@ catchrelease_duel_remind,catchreleaseJobRemind,$missionId == catchrelease_duel s
 
 The quiet child points to the empty spaces.
 
-""And we need them before thirty days are up.""
+""And we need them before $catchreleaseDaysLeft are up.""
 ""I remember,"" says the loud child.
-""I'm telling the captain.""",,
+""I'm telling the captain.""",,"DIFF [duration framework]: was <<And we need them before thirty days are up.>> now <<And we need them before $catchreleaseDaysLeft are up.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_duelHandOver,JobSpecificOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
@@ -1025,7 +1025,7 @@ Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingTerms 0
 FireAll JobSpecificOptions","$personFirstName turns over a drink coaster. The job is already written on the back.
 
-""$catchreleaseAskCap. Thirty-five days.""
+""$catchreleaseAskCap. $catchreleaseDaysCap.""
 
 He taps the last line.
 
@@ -1033,7 +1033,7 @@ He taps the last line.
 
 $catchreleaseRight draws a bracket beneath it.
 
-""Take the sure payment and go home, or leave it in my book behind one of the pair. Winner gets a fresh purse worth twice the job. Loser gets nothing.""",,
+""Take the sure payment and go home, or leave it in my book behind one of the pair. Winner gets a fresh purse worth twice the job. Loser gets nothing.""",,"DIFF [duration framework]: was <<""$catchreleaseAskCap. Thirty-five days."">> now <<""$catchreleaseAskCap. $catchreleaseDaysCap."">> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_ring_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,30:catchrelease_jobAccept:Take the job.,
 catchrelease_ring_termsDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,40:catchrelease_jobDecline:Walk away.,
 catchrelease_ring_termsBackOption,JobSpecificOptions,$menuState == catchreleaseRingTerms,,,50:catchrelease_ring_termsBack:Ask something else.,
@@ -1041,9 +1041,9 @@ catchrelease_ring_termsBack,DialogOptionSelected,$option == catchrelease_ring_te
 FireAll JobSpecificOptions",,,
 catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,,"$personFirstName folds the coaster once and slides it across.
 
-""Good. We hold a place on the card for thirty-five days.""
+""Good. We hold a place on the card for $catchreleaseDays.""
 
-$catchreleaseRight does not look up from his slate. ""After that, I fill it.""",,
+$catchreleaseRight does not look up from his slate. ""After that, I fill it.""",,"DIFF [duration framework]: was <<We hold a place on the card for thirty-five days.>> now <<We hold a place on the card for $catchreleaseDays.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"$personFirstName nods once.
 
 ""Then you were only asking after the tank.""
@@ -1051,11 +1051,11 @@ catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ri
 $catchreleaseRight turns his slate away. The bartender collects the empty glass between you and them.",,
 catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"$personFirstName does not look at a calendar.
 
-""$catchreleaseAskCap. Thirty-five days from when you said yes.""
+""$catchreleaseAskCap. $catchreleaseDaysCap from when you said yes.""
 
 $catchreleaseRight raps one knuckle against the empty side of the tank.
 
-""The room is waiting.""",,
+""The room is waiting.""",,"DIFF [duration framework]: was <<""$catchreleaseAskCap. Thirty-five days from when you said yes."">> now <<""$catchreleaseAskCap. $catchreleaseDaysCap from when you said yes."">> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
@@ -1137,7 +1137,7 @@ $HeOrShe turns the specification toward you.
 
 ""$catchreleaseAskCap. The stated figure is the minimum.""
 
-""Forty days. $catchreleaseRewardCap on delivery. A separate premium applies if it falls in the upper two-fifths of its recorded size range.""",,
+""$catchreleaseDaysCap. $catchreleaseRewardCap on delivery. A separate premium applies if it falls in the upper two-fifths of its recorded size range.""",,"DIFF [duration framework]: was <<""Forty days. $catchreleaseRewardCap on delivery.>> now <<""$catchreleaseDaysCap. $catchreleaseRewardCap on delivery.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_client_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseClientOffer
 !$catchreleaseClientAskedPurpose",,,10:catchrelease_client_purpose:What does the buyer want it for?,
 catchrelease_client_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
@@ -1153,7 +1153,7 @@ catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_
 catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""
 
 $HeOrShe closes the contract and reopens $hisOrHer supplier list.",,
-catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same forty-day contract. The buyer has not revised it.""",,
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same contract, $catchreleaseDaysLeft left. The buyer has not revised it.""",,"DIFF [duration framework]: was <<Same forty-day contract.>> now <<Same contract, $catchreleaseDaysLeft left.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe weighs the sealed container, signs the receipt and closes the contract.
 
@@ -1176,15 +1176,15 @@ Call $catchrelease_jobRef showRewardDetails","""Low-coherence retrievals. I have
 
 $HeOrShe turns the current request toward you.
 
-""$catchreleaseAskCap. Sixty days. I need the original retrieval records with the shipment.""
+""$catchreleaseAskCap. $catchreleaseDaysCap. I need the original retrieval records with the shipment.""
 
 $HeOrShe indicates three columns: coherence, mass return, structural variance.
 
 ""$catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the research commission.
-catchrelease_jobDecline:Decline.",
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""$catchreleaseAskCap. Sixty days. I need the original retrieval records>> now <<""$catchreleaseAskCap. $catchreleaseDaysCap. I need the original retrieval records>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Good. Keep each retrieval record with its container. A port relabel is useless to me.""",,
 catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,$HeOrShe returns to matching retrieval logs against the plots.,,
-catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, with the original retrieval records. Same sixty-day commission.""",,
+catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, with the original retrieval records. Same commission, $catchreleaseDaysLeft left.""",,"DIFF [duration framework]: was <<Same sixty-day commission.>> now <<Same commission, $catchreleaseDaysLeft left.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe checks the retrieval records before opening a container.
 
@@ -1303,7 +1303,7 @@ The second names what they are offering in return.
 
 ""$catchreleaseRewardCap.""
 
-The third says, ""One specimen. Fifty-five days.""",,
+The third says, ""One specimen. $catchreleaseDaysCap.""",,"DIFF [duration framework]: was <<""One specimen. Fifty-five days."">> now <<""One specimen. $catchreleaseDaysCap."">> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_cult_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseCultOffer
 !$catchreleaseCultAskedPurpose",,,10:catchrelease_cult_purpose:What is it for?,
 catchrelease_cult_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseCultOffer,,,30:catchrelease_jobAccept:Agree to bring it.,
@@ -3620,8 +3620,8 @@ The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 
 ""Once we're agreed, get them off the rupture first. Pay them, scare them, fight them; I don't care. After they're gone, catch any fish from that exact rupture and bring it back. Nothing already in your hold proves the spot works.""
 
-""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Seventy days. Bring me $catchreleaseAsk from the cleared rupture and you get>> now <<""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture and you get>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.
@@ -3634,8 +3634,8 @@ The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMa
 
 ""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after the agreement; old cargo proves nothing about whether I can work the claim now.""
 
-""Seventy days. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Seventy days. $catchreleaseAsk as proof.>> now <<""$catchreleaseDaysCap. $catchreleaseAsk as proof.>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack.""
@@ -3648,8 +3648,8 @@ The transponder record shows $catchreleaseCampMany in the $catchreleaseCampWhere
 
 ""Once we're agreed, get them away from the rupture first. After they're gone, catch any fish from that exact rupture and bring it back. Nothing you already have aboard counts. I need to know the spot can be worked again before I send crews out.""
 
-""Seventy days. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:Decline.",
+""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+catchrelease_jobDecline:Decline.","DIFF [duration framework]: was <<""Seventy days. Bring me $catchreleaseAsk from the cleared rupture. Payment is>> now <<""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is>> -- Day counts now come from the duration framework (QuestDuration rungs 30/60/90/120/180/none, sized from travel distance) through the tokens $catchreleaseDays / $catchreleaseDaysCap (total allowance) and $catchreleaseDaysLeft (remaining). Replacement wording is placeholder - please rewrite around the token."
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"The camp coordinates and pirate transponder codes are transferred.
 
 ""Whatever gets them off it. Just don't leave me owing them afterward.""",,
