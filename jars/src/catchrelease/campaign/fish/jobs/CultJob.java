@@ -42,7 +42,7 @@ public class CultJob extends FishJob {
         if (!setUpGiver(createdAt)) return false;
 
         addAsk(ask);
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
 
         addRewards(prizes);
 

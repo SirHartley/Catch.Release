@@ -27,7 +27,7 @@ public class ButlerJob extends FishJob {
 
         // the floor is the entire job, and the score prices it by how much of the
         // sheet the floor excludes
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
                 new QuestRewards.Request(asks).random(genRandom)).rewards);
 

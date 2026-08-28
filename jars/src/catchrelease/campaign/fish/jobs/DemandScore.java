@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * One number for how hard a demand is to fill, shared by every quest kind. The unit is
@@ -40,6 +41,11 @@ public final class DemandScore {
 
     // each specimen past the first costs a fraction: two commons are one-and-a-bit
     public static final float EXTRA_SPECIMEN_FRACTION = 0.6f;
+
+    // the ambition roll for generated demands: skewed low, so most are modest and a
+    // few are big scores
+    public static final float TARGET_SPAN = 60f;
+    public static final float TARGET_SKEW = 1.6f;
 
     public enum Tier {
 
@@ -175,5 +181,21 @@ public final class DemandScore {
         if (score >= MEDIUM_FROM) return Tier.MEDIUM;
 
         return Tier.EASY;
+    }
+
+    /** How ambitious a generated demand feels like being. */
+    public static float rollTarget(Random random) {
+        float skewed = (float) Math.pow(random.nextFloat(), TARGET_SKEW);
+
+        return COMMON_BASE + skewed * TARGET_SPAN;
+    }
+
+    /** The specimen count that reaches the target, clamped: inverts the
+     *  diminishing-count curve target = perSpecimen * (1 + fraction * (n - 1)). */
+    public static int countFor(float target, float perSpecimen, int min, int max) {
+        int count = Math.max(1, Math.round(1f + (target / perSpecimen - 1f)
+                / EXTRA_SPECIMEN_FRACTION));
+
+        return Math.max(min, Math.min(max, count));
     }
 }

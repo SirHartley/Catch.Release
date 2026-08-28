@@ -45,7 +45,7 @@ public class ChefJob extends FishJob {
             addAsk(ask);
         }
 
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
 
         // the cook's signature payment is charts: two fixed range-data rewards. When
         // the sector has fewer left to give, the freed budget rolls extra rewards

@@ -51,7 +51,7 @@ public class KidsJob extends FishJob {
         getPerson().setPortraitSprite(Global.getSettings()
                 .getSpriteName("characters", GROUP_PORTRAIT_ID));
 
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
 
         addRewards(prizes);
         rewardsChecked = true;

@@ -138,10 +138,18 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     /** The clock sized from where the work actually is: the giver's market to the
-     *  nearest water that could fill every ask, on the shared duration rungs. */
-    protected void setDurationForAsks(MarketAPI from) {
-        days = QuestDuration.forAsks(
-                from == null ? null : from.getPrimaryEntity(), asks).days;
+     *  nearest water that could fill every ask, on the shared duration rungs. Returns
+     *  false when some ask cannot be filled within sensible reach - such an offer
+     *  should not be made, so callers bail out of create(). */
+    protected boolean setDurationForAsks(MarketAPI from) {
+        SectorEntityToken at = from == null ? null : from.getPrimaryEntity();
+        if (!QuestDuration.satisfiableWithin(at, asks, QuestDuration.MAX_SENSIBLE_LY)) {
+            return false;
+        }
+
+        days = QuestDuration.forAsks(at, asks).days;
+
+        return true;
     }
 
     /** The deadline as dialogue speaks it - always from the live clock, never authored. */

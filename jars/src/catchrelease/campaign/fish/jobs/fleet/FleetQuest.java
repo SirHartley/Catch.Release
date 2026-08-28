@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestRewards;
@@ -189,8 +190,9 @@ public class FleetQuest extends FishJob {
         // opportunist end to end: an ambition is rolled, the type's demand shape is
         // pushed toward it, and the pay answers what the shape actually produced -
         // over the odds, because everyone out here is desperate or obsessed
-        float target = FleetQuestType.rollTargetScore(random());
-        FishRequirement ask = type.rollAsk(random(), target);
+        float target = DemandScore.rollTarget(random());
+        FishRequirement ask = rollFillableAsk(target);
+        if (ask == null) return false;
         addAsk(ask);
 
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
@@ -205,6 +207,21 @@ public class FleetQuest extends FishJob {
         offer();
 
         return true;
+    }
+
+    // a rolled species can point at water that moved or vanished under the monthly
+    // reassessment; a few rerolls give the shape another chance before the encounter
+    // is dropped entirely
+    protected FishRequirement rollFillableAsk(float target) {
+        for (int i = 0; i < 4; i++) {
+            FishRequirement ask = type.rollAsk(random(), target);
+            if (QuestDuration.satisfiableWithin(giver, List.of(ask),
+                    QuestDuration.MAX_SENSIBLE_LY)) {
+                return ask;
+            }
+        }
+
+        return null;
     }
 
     protected void offer() {

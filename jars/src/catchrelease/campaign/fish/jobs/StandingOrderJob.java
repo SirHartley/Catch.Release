@@ -27,7 +27,7 @@ public class StandingOrderJob extends FishJob {
         addAsk(ask);
 
         // the score already prices count, rarity, grade and catch terms
-        setDurationForAsks(createdAt);
+        if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
                 new QuestRewards.Request(asks).random(genRandom)).rewards);
 
