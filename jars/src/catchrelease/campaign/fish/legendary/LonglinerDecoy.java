@@ -190,7 +190,8 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
 
-        Global.getSoundPlayer().playUISound(SOUND_FOUND, 1f, 1f);
+        Global.getSoundPlayer().playSound(
+                SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
         mote.addFloatingText("!", Misc.getHighlightColor(), REVEAL_PAUSE_SECONDS);
     }
 
