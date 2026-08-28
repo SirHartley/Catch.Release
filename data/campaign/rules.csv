@@ -1,7 +1,7 @@
 id,trigger,conditions,script,text,options,notes
 catchrelease_hitmanEncounter,BeginFleetEncounter,"$catchrelease_harpoonHitman score:1200
 !$catchrelease_harpoonHitmanHailed","FleetDesc
-HailPlayer",,,The hunters force a hail before vanilla's hostile encounter options. Their contract is still a fight; this only makes its origin and cause legible first.
+HailPlayer",,,
 catchrelease_hitmanHail,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1600
 !$entity.catchrelease_harpoonHitmanHailed
 !$entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
@@ -13,7 +13,7 @@ $entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in 
 The officer closes the report.
 
 ""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
-100:cutCommLinkNoText:Cut the comm link","Every displayed fact was captured when the original fleet was struck, rather than inferred from wherever the witness or hunters happen to be now."
+100:cutCommLinkNoText:Cut the comm link",
 catchrelease_hitmanHailFromGrave,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1610
 !$entity.catchrelease_harpoonHitmanHailed
 $entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
@@ -27,19 +27,19 @@ The officer closes the report.
 ""Client's gone. Escrow cleared before they did. We have the file under Call From The Grave.""
 
 ""We're here to settle the account.""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
-100:cutCommLinkNoText:Cut the comm link",A funded contract survives the client faction. The mercenary names that fact in the same dry account language as the ordinary hail rather than changing into a separate horror voice.
+100:cutCommLinkNoText:Cut the comm link",
 catchrelease_hitmanBribeAskSel,DialogOptionSelected,$option == catchrelease_hitmanBribeAsk,"Highlight $entity.catchrelease_harpoonHitmanBribeDGS
 FireAll CatchReleaseHitmanBribeOptions","The officer glances at the contract.
 
-""Cancellation is permitted. $entity.catchrelease_harpoonHitmanBribeDGS credits. Cleared funds, now.""",100:cutCommLinkNoText:Cut the comm link,"The hired mercenaries treat the player as another party to the contract, following the vanilla Tri-Tachyon hired-command interaction while keeping this exchange short and transactional."
-catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,Vanilla's affordability check leaves the price visible but greys it out and explains a shortfall.
+""Cancellation is permitted. $entity.catchrelease_harpoonHitmanBribeDGS credits. Cleared funds, now.""",100:cutCommLinkNoText:Cut the comm link,
+catchrelease_hitmanBribeOptPay,CatchReleaseHitmanBribeOptions,,DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay,,0:catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits,
 catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitmanBribePay,"AddCredits -$entity.catchrelease_harpoonHitmanBribe
 CatchReleaseCMD bribeHitman
 FireAll CatchReleaseFleetResolutionOptions","The transfer clears. The officer closes your file.
 
 ""Contract cancelled.""",,
-catchrelease_fleetResolutionOpt,CatchReleaseFleetResolutionOptions,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",,100:catchrelease_fleetResolutionLeave:Leave,Shared terminal option for a resolved fleet conversation. The outcome remains on-screen until the player leaves; hostile outcomes and options that explicitly cut the comm link do not use this trigger.
-catchrelease_fleetResolutionLeaveSel,DialogOptionSelected,$option == catchrelease_fleetResolutionLeave,CatchReleaseCMD leaveEncounter,,,The actual exit still goes through vanilla fleet-encounter cleanup rather than merely dismissing the window.
+catchrelease_fleetResolutionOpt,CatchReleaseFleetResolutionOptions,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",,100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_fleetResolutionLeaveSel,DialogOptionSelected,$option == catchrelease_fleetResolutionLeave,CatchReleaseCMD leaveEncounter,,,
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
@@ -110,7 +110,7 @@ FireAll PopulateOptions",,,
 catchrelease_harpoonedCommsOther,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1050","ShowDefaultVisual
 AddText ""The link is answered by somebody who already has your file open and a more pressing reason to dislike you already on it. The harpoon comes up once, near the end, in a list of things that will be dealt with later.""
-EndConversation",,,"Fallback for a crew you holed who is hostile over something else entirely - the other rows all want the harpoon itself to be the reason. Lowest score here so every one of them outranks it. It exists because the comm link is highlighted on having been harpooned at all, and a highlighted link with nothing behind it is a dead option."
+EndConversation",,,
 catchrelease_harpoonedCommsHostile,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
@@ -168,7 +168,7 @@ MakeOtherFleetPreventDisengage catchreleasePatrol true 5
 unset $ignorePlayerCommRequests
 $catchrelease_fineConv = true 0
 AddText ""You're being hailed by the $faction $otherShipOrFleet."" $faction.baseColor
-OpenComms",,,"The patrol sent about a harpooning, arriving. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. Marked as had here rather than at each ending, as the cargo scan does: the patrol is still pursuing while the dialog is open, so a conversation that only counted once it was finished would be reopened the instant the player closed it."
+OpenComms",,,
 catchrelease_fineDemand,OpenCommLink,"$entity.catchrelease_fineConv score:1300
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
@@ -317,7 +317,7 @@ EndConversation","$PersonRank $personName has the file open and does not read fr
 
 ""We have stopped counting out loud. You will have noticed nobody is quoting you a number.""
 
-The link closes. Your sensors officer reports the formation spreading before you have finished turning to ask.",,"Scored below the second-time rows rather than above them, which is the whole trick: those are gated on the count being exactly two, so on a third they stop matching and this is what is left. Above them it would have won on the second as well, and the bug being fixed here is a patrol saying ""second"" when it is the fifth."
+The link closes. Your sensors officer reports the formation spreading before you have finished turning to ask.",,
 catchrelease_fineDemandRepeatHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -407,13 +407,13 @@ FireAll PopulateOptions","$PersonRank $personName checks a reference. ""Paid and
 
 The reference closes.
 
-""Try to keep the line clear of registered hulls.""",,"Paid, and still on speaking terms - so this adds a line and hands the screen to the ordinary conversation menu rather than closing it. Keyed on a second flag from the paying rule rather than the one the script reads, because that one is consumed the moment it is read and this line has to keep working afterwards."
+""Try to keep the line clear of registered hulls.""",,
 catchrelease_patrolUnpaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1250
 !$entity.catchrelease_harpoonFineSettled
 $entity.isHostile","ShowDefaultVisual
-EndConversation","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,"Refused, and still angry about it. Gated on their hostility rather than on the conversation having happened, so this cannot go on refusing to talk to the player for a month after everyone involved has calmed down."
-catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),"The affordability check greys the option out and explains why, which is vanilla's own handling and better than hiding it - a player who cannot pay should still see what they could not pay. Safe in the script column because options from every matching rule are added before any of their scripts run."
-catchrelease_fineOptTalk,CatchReleaseFineOptions,,"SetStoryOption catchrelease_talkFine 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_talkFine:Talk your way out of it,"Vanilla puts one of these on every patrol stop it writes - the transponder check and the smuggling scan both offer it in exactly this shape, and reusing avoidCargoScan for the bonus XP is deliberate: this is the same kind of thing being talked out of. The option has to exist before SetStoryOption can convert it, which it does, because every matching rule adds its options before any of their scripts run."
+EndConversation","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,
+catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),
+catchrelease_fineOptTalk,CatchReleaseFineOptions,,"SetStoryOption catchrelease_talkFine 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_talkFine:Talk your way out of it,
 catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,10:catchrelease_refuseFine:Refuse and cut the comm link,
 catchrelease_finePaySel,DialogOptionSelected,$option == catchrelease_payFine,"AddRemoveCommodity credits -$entity.catchrelease_harpoonFine true
 $entity.catchrelease_harpoonFinePaid = true 1
@@ -450,78 +450,78 @@ $entity.ignorePlayerCommRequests = true 0
 ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
-Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,"Refusing is not an exit. It is filed as an evasion, which costs reputation a few days later whether the fight is won, lost, or never happened."
+Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,
 catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"HideMapMarker
 unset $menuState
 FireBest catchreleaseJobAccepted
 BarCMD accept $missionId
-BarCMD returnFromEvent true",,,"The shared accept clears the persistent person-memory offer submenu before BarCMD returns to the bar. BarCMD matches the wrapper by mission id, so $missionId has to be set - the job sets it in updateInteractionData, where it expires with the conversation."
+BarCMD returnFromEvent true",,,
 catchrelease_jobDecline,DialogOptionSelected,$option == catchrelease_jobDecline,"HideMapMarker
 unset $menuState
 FireBest catchreleaseJobDeclined
-BarCMD returnFromEvent true",,,The shared decline clears the persistent person-memory offer submenu before returnFromEvent aborts every un-accepted bar mission on its way back to the bar.
+BarCMD returnFromEvent true",,,
 catchrelease_jobDeliverReady,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_jobTurnIn highlight
 SetOptionColor catchrelease_jobTurnInPick highlight",,"catchrelease_jobTurnIn:Hand in your catch.
-catchrelease_jobTurnInPick:Pick what to hand in.",updateData sits in the conditions to refresh the tokens before they are read. It is not a test - an action that answered false would throw rather than fail.
+catchrelease_jobTurnInPick:Pick what to hand in.",
 catchrelease_jobDeliverShort,JobSpecificOptions,"$catchrelease_jobDeliver
 Call $catchrelease_jobRef updateData
-!$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,"The other half of the pair, so the giver is always worth talking to."
-catchrelease_jobLeaveOption,JobSpecificOptions,Call $catchrelease_jobRef isContactActive,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,Accepted contacts use a neutral exit owned by the job menu; the bar-event offer has its own decline routes.
+!$catchreleaseHasFish",,,catchrelease_jobShort:Ask about the order.,
+catchrelease_jobLeaveOption,JobSpecificOptions,Call $catchrelease_jobRef isContactActive,"SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,
 catchrelease_jobPaidExit,JobSpecificOptions,"$catchreleasePaid
-!$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,A completed hand-in gets one authored exit after the mission reference and deliver flag are removed.
+!$catchreleaseMore","SetShortcut catchrelease_jobClose ""ESCAPE""",,100:catchrelease_jobClose:Leave.,
 catchrelease_jobCloseSel,DialogOptionSelected,$option == catchrelease_jobClose,"HideMapMarker
-EndConversation NO_CONTINUE",,,Person and market conversations can close directly; no fleet encounter cleanup is involved.
+EndConversation NO_CONTINUE",,,
 catchrelease_jobTurnInSel,DialogOptionSelected,$option == catchrelease_jobTurnIn,"HideMapMarker
-Call $catchrelease_jobRef turnIn",,,The hands-off hand-in: the job auto-picks the minimum that covers the order and confirms it before anything moves.
+Call $catchrelease_jobRef turnIn",,,
 catchrelease_jobTurnInPickSel,DialogOptionSelected,$option == catchrelease_jobTurnInPick,"HideMapMarker
-Call $catchrelease_jobRef turnInPick",,,"The by-hand route: the specimen picker, with the order's asks ticked off live beside it."
+Call $catchrelease_jobRef turnInPick",,,
 catchrelease_jobShortSel,DialogOptionSelected,$option == catchrelease_jobShort,"Call $catchrelease_jobRef updateData
 FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
-catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,"The catch-all, scored above every job's own line. Reachable only if the hold empties between the option being drawn and the option being taken."
-catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,"No conditions and no score, so every job's own reminder outscores it. It speaks only for a job that has not written one. A bare score: line would be a condition with no tokens left after the score is stripped, which throws on load."
+catchrelease_jobPaidShort,catchreleaseJobPaid,!$catchreleasePaid score:1000,,"The count comes up short, and the matter is left there.",,
+catchrelease_jobRemindGeneric,catchreleaseJobRemind,,CatchReleaseCMD highlightJobText $catchreleaseAsk,You are still owed for $catchreleaseAsk.,,
 catchrelease_jobContactGreeting,PickGreeting,Call $catchrelease_jobRef isContactActive score:1000,"Call $catchrelease_jobRef updateData
 unset $menuState
 Call $catchrelease_jobRef showContactVisual
 FireBest catchreleaseJobGreeting
-FireAll JobSpecificOptions",,,"Accepted FishJob contacts replace vanilla voice greetings, refresh their live tokens, clear any persistent bar-offer submenu left by an older save, then build only the active job-owned option batch."
+FireAll JobSpecificOptions",,,
 catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
 
 ""Captain. Good timing.""
 
 A supplier line is pulled to the front of the slate, your comm ID already attached to it.
 
-""Let's see where the order stands.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Let's see where the order stands.""",,
 catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The cook answers from somewhere just off the kitchen floor, wipes one hand on an apron and props a slate against a stack of ingredient cards.
 
 ""Captain. You're back.""
 
 Three separate lines sit under the name of the dish.
 
-""All right. Let's see what we're working with.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""All right. Let's see what we're working with.""",,
 catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with his supply diagram already open.
 
 ""Captain. Excellent. I was just updating the inbound model.""
 
 He moves your supplier box to the center of the display. CONSOLIDATE, GRADE and DISPATCH are still waiting downstream.
 
-""Where are we?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Where are we?""",,
 catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The man answers promptly. A household schedule remains open on his slate, though your supplier entry has already been brought to the front.
 
 ""Captain. Good day.""
 
 He sets the slate down on his side of the desk.
 
-""You wished to discuss the commission.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""You wished to discuss the commission.""",,
 catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
 
 ""Captain. Good to hear from you.""
 
 She marks her place in the current record and brings your commission onto the main display.
 
-""Let's have a look at where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Let's have a look at where things stand.""",,
 catchrelease_duel_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_duel score:100,,"The loud child appears first, leaning so close to the pickup that only half a face fits in frame.
 
 ""Captain!""
@@ -532,28 +532,28 @@ The quiet child pulls the comm unit back and puts the tournament bracket in fron
 
 ""I said we would.""
 
-""You also tried to write somebody else in it.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""You also tried to write somebody else in it.""",,
 catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"$personFirstName takes the call from the same table. $catchreleaseRight has the book open beside the tank and does not stop writing.
 
 ""Captain,"" $personFirstName says. ""You're still on the card.""
 
 $catchreleaseRight turns one page, finds your line and rests a finger beside it.
 
-""Go ahead.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Go ahead.""",,
 catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
 
 ""Captain.""
 
 The buyer field remains masked. She scrolls directly to your specification and the delivery line beneath it.
 
-""What do you need from me?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""What do you need from me?""",,
 catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens.
 
 ""Captain. Good.""
 
 She saves one comparison, then brings your retrieval commission onto the screen beside an empty record slot.
 
-""Tell me where things stand.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Tell me where things stand.""",,
 catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
 
 ""Wait. Captain's on comms.""
@@ -564,7 +564,7 @@ The lens swings toward the display before the sentence is finished.
 
 He checks the recording indicator.
 
-""All right. Talk to me.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""All right. Talk to me.""",,
 catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"All three plain-coated buyers are present when the connection opens.
 
 The first looks at you.
@@ -573,28 +573,28 @@ The second brings up the purchase entry.
 
 The third says, ""Captain.""
 
-They wait.",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+They wait.",,
 catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
 
 ""Captain.""
 
 He pushes the figures aside and brings up the job marker.
 
-""Tell me you've got something worth changing next month's numbers for.""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Tell me you've got something worth changing next month's numbers for.""",,
 catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
 
 ""Captain.""
 
 She closes a fresh message from the claims office without reading it twice.
 
-""Any movement on your end?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""Any movement on your end?""",,
 catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
 
 ""Captain.""
 
 The fisher checks the doorway once, then brings up the camp marker.
 
-""What have you got?""",,Greeting prose authored by the pinned Starsector Editor from the complete definitive lore and existing mission dialogue.
+""What have you got?""",,
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Ask about the standing order.,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -754,9 +754,7 @@ $catchreleaseButlerTerms",,,30:catchrelease_jobAccept:Accept the commission.,
 catchrelease_butler_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_butler_who,DialogOptionSelected,$option == catchrelease_butler_who,"$catchreleaseButlerAskedWho = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","""The household's butler.""
-
-A message marked HOUSEHOLD BUTLER — PRIVATE SERVICE opens on his slate. He clears it without reading.
+FireAll JobSpecificOptions","""The household's chief butler.""
 
 ""I keep his rooms and schedule. This purchase was passed to me.""",,
 catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
@@ -765,7 +763,7 @@ FireAll JobSpecificOptions","""Display.""
 
 He turns a slate toward you but leaves it on his side of the table. It shows a tank fitted into an office.
 
-""For the household butler's receiving room. The space has been measured. The specimen will not enter the kitchens. Species and condition are not material to the purchase.""",,
+""For the sir butler's receiving room. The space has been measured. The specimen will not enter the kitchens. Species and condition are not material to the purchase.""",,
 catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_terms,"$catchreleaseButlerTerms = true 0
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
@@ -801,7 +799,7 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock 
 
 $catchreleaseRewardCap changes hands.
 
-The porter receives a routing code: HOUSEHOLD BUTLER — PRIVATE ROOMS. The man has already turned to his next entry.",,
+The man has already turned to his next entry.",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A curator with an academic lanyard is updating accession records beside photographs of a public aquarium. Several entries are marked DISPLAY; others are marked RECORD.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Ask about the collection.,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -919,7 +917,7 @@ catchrelease_duelHandOver,JobSpecificOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
 !$catchreleaseDuelSelectionReady",,,"catchrelease_duelPick:Pick two fish for the tournament.
-catchrelease_duelWait:Not yet.",The specimen picker selects exactly two qualifying fish without removing either from cargo.
+catchrelease_duelWait:Not yet.",
 catchrelease_duelShortOpt,JobSpecificOptions,"$catchrelease_duelChoice
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_duelWait:Not yet.,
@@ -939,7 +937,7 @@ $catchreleaseDuelSelectionReady","SetOptionColor catchrelease_duelLoud highlight
 SetOptionColor catchrelease_duelQuiet highlight",,"catchrelease_duelLoud:Give the better fish to the loud child.
 catchrelease_duelQuiet:Give the better fish to the quiet child.
 catchrelease_duelReselect:Choose different fish.
-catchrelease_duelAllocationWait:Not yet.",No fish is removed until an allocation option is confirmed.
+catchrelease_duelAllocationWait:Not yet.",
 catchrelease_duelLoudSel,DialogOptionSelected,$option == catchrelease_duelLoud,Call $catchrelease_jobRef turnInLoud,,,
 catchrelease_duelQuietSel,DialogOptionSelected,$option == catchrelease_duelQuiet,Call $catchrelease_jobRef turnInQuiet,,,
 catchrelease_duelReselectSel,DialogOptionSelected,$option == catchrelease_duelReselect,Call $catchrelease_jobRef chooseContenders,,,
@@ -1065,7 +1063,7 @@ catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
 !$catchreleaseRingSelectionReady",,,"catchrelease_ringPick:Bring out two fighters.
-catchrelease_ringWait:Not yet.",Picker-first hand-in. No specimen is consumed here.
+catchrelease_ringWait:Not yet.",
 catchrelease_ringShortOpt,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Not yet.,
@@ -1090,7 +1088,7 @@ SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Take th
 catchrelease_ringLeft:Put it on $catchreleaseLeft ($catchreleaseLeftOdds).
 catchrelease_ringRight:Put it on $catchreleaseRight ($catchreleaseRightOdds).
 catchrelease_ringReselect:Choose different fighters.
-catchrelease_ringAssignmentWait:Not yet.","No selected fish is consumed until flat, left, or right is confirmed."
+catchrelease_ringAssignmentWait:Not yet.",
 catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,Call $catchrelease_jobRef turnInFlat,,,
 catchrelease_ringLeftSel,DialogOptionSelected,$option == catchrelease_ringLeft,Call $catchrelease_jobRef turnInLeft,,,
 catchrelease_ringRightSel,DialogOptionSelected,$option == catchrelease_ringRight,Call $catchrelease_jobRef turnInRight,,,
@@ -1175,7 +1173,9 @@ She checks the specimen's recorded size range against the premium schedule.
 
 ""Upper two-fifths.""
 
-$catchreleaseRewardCap changes hands.",,
+$catchreleaseRewardCap changes hands.
+
+$HeOrShe doesn't shake your hand and turns to the next task on $HisOrHer list.",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is comparing retrieval logs against sensor plots. Every confirmed match goes into the smaller of two piles.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask what she is studying.,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -1343,7 +1343,7 @@ catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:
 !$catchrelease_fleetQuestHailed
 !$distressFramework","$catchrelease_fleetQuestHailed = true
 FleetDesc
-HailPlayer",,,They open the link themselves the first time and never again - being asked once is a distress call and being asked on every pass is a toll. Unprefixed keys because there is no active person at this trigger.
+HailPlayer",,,
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
 !$entity.isHostile
@@ -1352,7 +1352,7 @@ Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestP
 
 Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
 5:catchrelease_fqAcceptNoPromise:No promises.
-10:catchrelease_fqDecline:Decline",Two acceptance phrasings intentionally converge
+10:catchrelease_fqDecline:Decline",
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
 Call $catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
@@ -1362,13 +1362,13 @@ catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_f
 Call $catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
 
-No formal contract follows.",,Technical routing twin for the supplied second acceptance phrasing.
+No formal contract follows.",,
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,FireAll CatchReleaseFleetResolutionOptions,"""Fair enough.""
 
 The channel closes.",,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1300
 !$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
-FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,One-shot acknowledgement after a completed fleet order.
+FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk
@@ -1379,7 +1379,7 @@ catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_flee
 Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_fqTurnIn highlight
 SetOptionColor catchrelease_fqTurnInPick highlight",,"0:catchrelease_fqTurnIn:Hand in your catch
-5:catchrelease_fqTurnInPick:Pick what to hand in",The option exists only when the hold can pay for it - updateData counts it and the flag it sets is what this row is really asking about.
+5:catchrelease_fqTurnInPick:Pick what to hand in",
 catchrelease_fqLeaveOpt,CatchReleaseFleetQuestTurnIn,,,,10:catchrelease_fqLeave:Leave them to it,
 catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnIn,,,
@@ -1400,7 +1400,7 @@ catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:
 unset $ignorePlayerCommRequests
 $catchrelease_damagesConv = true 0
 AddText ""Your sensors officer calls the $faction $otherShipOrFleet long before it is close enough to matter, and watches it come alongside without hurrying. It hails you."" $faction.baseColor
-OpenComms",,,"A holed crew that has come to be paid rather than to fight. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. The done flag is a day rather than the patrol's thirty: this is not enforcement, so a player who breaks off is hailed again next time rather than never again - the day is only there to stop the encounter reopening the comm the instant it is closed. Paying or refusing sets the long one through the command."
+OpenComms",,,
 catchrelease_damagesDemand,OpenCommLink,$entity.catchrelease_damagesConv score:1300,"SetTextHighlights $entity.catchrelease_harpoonDamagesDGS
 FireAll CatchReleaseDamagesOptions","""You are the ship with the fishing harpoon.""
 
@@ -1411,8 +1411,8 @@ $PersonRank $personName keeps the damage image on-screen.
 ""$entity.catchrelease_harpoonDamagesDGS credits. Pay the repair and your transponder code stays out of the claim.""
 
 Behind $himOrHer, a damage-control crew is still working.",,
-catchrelease_damagesOptPay,CatchReleaseDamagesOptions,,DoCanAffordCheck $entity.catchrelease_harpoonDamages catchrelease_payDamages,,0:catchrelease_payDamages:Pay for the repair ($entity.catchrelease_harpoonDamagesDGS credits),"Same affordability handling as the patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
-catchrelease_damagesOptTalk,CatchReleaseDamagesOptions,,"SetStoryOption catchrelease_talkDamages 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a repair bill""",,5:catchrelease_talkDamages:Talk your way out of it,"The same escape the patrol's fine offers. A hauler has no enforcement behind it, so this is the one place in the tree where talking your way out is the likeliest thing to work and the least likely to be worth a point."
+catchrelease_damagesOptPay,CatchReleaseDamagesOptions,,DoCanAffordCheck $entity.catchrelease_harpoonDamages catchrelease_payDamages,,0:catchrelease_payDamages:Pay for the repair ($entity.catchrelease_harpoonDamagesDGS credits),
+catchrelease_damagesOptTalk,CatchReleaseDamagesOptions,,"SetStoryOption catchrelease_talkDamages 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a repair bill""",,5:catchrelease_talkDamages:Talk your way out of it,
 catchrelease_damagesOptRefuse,CatchReleaseDamagesOptions,,,,10:catchrelease_refuseDamages:Refuse and cut the comm link,
 catchrelease_damagesPaySel,DialogOptionSelected,$option == catchrelease_payDamages,"AddRemoveCommodity credits -$entity.catchrelease_harpoonDamages true
 $entity.catchrelease_harpoonDamagesPaid = true 1
@@ -1451,7 +1451,7 @@ catchrelease_harpoonedCommsFleeing,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
-CatchReleaseCMD leaveEncounter",,,"Third hole. They have stopped talking to you and started talking about you - the call to whatever patrol is in the system goes out with the harpooning itself, so this is only what it looks like from your end."
+CatchReleaseCMD leaveEncounter",,,
 ,,,,,,
 catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
 SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
@@ -1490,7 +1490,7 @@ Your crew lash it down.","catchrelease_wreckExplore:Explore the derelict
 catchrelease_wreckLeave:Leave",
 catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExplore,"SalvageGenFromSeed
 FireBest ShowSalvageEntityDetails
-FireBest SalvageCheckHostile",,,Chains into vanilla's own salvage flow - the same three commands the stock sal_ rows run on any salvageable.
+FireBest SalvageCheckHostile",,,
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
 ,,,,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
@@ -1498,13 +1498,13 @@ catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarket
 CatchReleaseCMD castawayEligible score:1000","CatchReleaseCMD startCastaway
 $catchrelease_castawaySeen = true 0
 $option = catchrelease_castawayPlanetOpen 0
-FireBest DialogOptionSelected",,,"The rating's scene takes an eligible planet's own interaction over, vanilla's mission-target way (a score-boosted OpenInteractionDialog row, like aem_target); the seen flag expires with the pause, so the hold lasts one dialog and he hails again next visit until given a berth."
+FireBest DialogOptionSelected",,,
 catchrelease_castawayPlanetOpen,DialogOptionSelected,$option == catchrelease_castawayPlanetOpen,"ShowDefaultVisual
 FireAll CRCastawayPlanetOptions","Your comms officer catches a personal beacon running on emergency power.
 
 The source is a prefabricated cache dug into the surface. Most of it is storage, but somebody has converted one compartment into living space.
 
-The occupant is thin, dirty, and extremely pleased to see a ship.",,The scene itself; entered only through the interaction hijack above.
+The occupant is thin, dirty, and extremely pleased to see a ship.",,
 catchrelease_ratingBegs,CRCastawayPlanetOptions,"$global.catchrelease_ratingAsked
 $option == catchrelease_castawayPlanetOpen",,"A garbled transmission calls out almost immediately.
 
@@ -1538,17 +1538,17 @@ catchrelease_ratingMuder,DialogOptionSelected,$option == catchrelease_ratingMude
 
 It falls silent with a single shot.",0:catchrelease_castawayToPlanet:See to the planet,
 catchrelease_castawayBack,DialogOptionSelected,$option == catchrelease_castawayBack,"ShowDefaultVisual
-FireAll CRCastawayPlanetOptions",,,Technical menu return for the supplied castaway branches.
+FireAll CRCastawayPlanetOptions",,,
 catchrelease_ratingRescue,DialogOptionSelected,$option == catchrelease_ratingRescue,CatchReleaseCMD rescueCastaway,"He accepts before you finish the sentence.
 
 Your personnel officer finds a spare berth.","0:catchrelease_castawayToPlanet:See to the planet
 100:catchrelease_castawayLeave:Leave",
-catchrelease_castawayToPlanet,DialogOptionSelected,$option == catchrelease_castawayToPlanet,FireBest OpenInteractionDialog,,,Hands the dialog back to the planet's ordinary interaction; the seen flag or the rescue keeps the scene from re-firing inside it.
+catchrelease_castawayToPlanet,DialogOptionSelected,$option == catchrelease_castawayToPlanet,FireBest OpenInteractionDialog,,,
 catchrelease_castawayLeave,DialogOptionSelected,$option == catchrelease_castawayLeave,DismissDialog,,,
 ,,,,,,
 catchrelease_fisherEncounter,BeginFleetEncounter,"$catchrelease_fisherman score:1000
 !$isHostile","unset $ignorePlayerCommRequests
-OpenComms",,,"Walking up to a trawler goes straight into the conversation, which is what OpenComms is for - it sets the flag the encounter reads at the end of its own init and takes the OPEN_COMM branch instead of building the fleet screen. Without this row the boat gets the ordinary engage/disengage/leave screen with an unlabelled comm link at the bottom of it, and everything the boat is for sits behind a line that reads like every hauler in the sector."
+OpenComms",,,
 catchrelease_fisherComms0,OpenCommLink,"$entity.catchrelease_fisherman score:1000
 CatchReleaseCMD tokens
 $catchreleaseDrift == 0","$menuState = catchreleaseFisher 0
@@ -1665,11 +1665,11 @@ $catchreleaseRatingPlanetKnown
 catchrelease_fisherOptIntroHandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
-$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I caught a fish.,The tutorial uses the same routing option id for reminders and hand-ins; this mutually exclusive producer supplies the completion wording only when the current target is aboard.
+$catchreleaseTargetMet",,,0:catchrelease_fisherIntro:I caught a fish.,
 catchrelease_fisherOptIntroHandInColor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage < 6
-$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,,The producer above must add the option before this later qualifying row can color it.
+$catchreleaseTargetMet",SetOptionColor catchrelease_fisherIntro highlight,,,
 catchrelease_introSkipOpt,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseCanSkip",,,5:catchrelease_introSkip:I've been here before. The fabric calls to me.,
@@ -1737,7 +1737,7 @@ $catchreleaseTargetHere
 catchrelease_fisherOptLeave,CatchReleaseFisherOptions,$menuState == catchreleaseFisher,"CatchReleaseCMD dropCutComm
 SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,"HideMapMarker
-CatchReleaseCMD leaveEncounter",,,"Not DismissDialog. The encounter builds a BattleAPI in init whether or not anybody fights, and only vanilla's own Leave takes it down again - closing the window without that leaves the battle attached to both hulls, and the next approach opens on the join-battle screen. See CatchReleaseCMD.leaveEncounter."
+CatchReleaseCMD leaveEncounter",,,
 catchrelease_fisherResume,CatchReleaseFisherResume,,"$menuState = catchreleaseFisher 0
 FireAll CatchReleaseFisherOptions",,,
 catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,CatchReleaseCMD skipIntro,"The Fisherman studies you for a moment, then nods.
@@ -1892,10 +1892,10 @@ They nod vaguely upward.
 A pause.
 
 ""Ask for the Fisherman.""",,
-catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,Shared local menu: asked flags exist only for this bar conversation.
+catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,
 catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:What exactly is a rating?,
 catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:Fishing. In space.,
-catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,"Always present, including after all three questions have been consumed, so the event never has an empty option panel."
+catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,
 catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
 FireAll CatchReleaseRatingQuestions","""Ship's crew.""
 
@@ -2553,7 +2553,7 @@ catchrelease_fisherOptTarget,CatchReleaseFisherOptions,"$menuState == catchrelea
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2
 $catchreleaseStage < 6
-!$catchreleaseTargetMet",,,,The intro option already owns the tutorial target reminder and its highlighted formatting; this retained supplied row no longer adds a duplicate option.
+!$catchreleaseTargetMet",,,,
 catchrelease_askTargetPond,DialogOptionSelected,"$option == catchrelease_askTarget score:10
 CatchReleaseCMD tokens
 $catchreleaseTargetPond","CatchReleaseCMD highlightIntroText ""$catchreleaseTarget"" ""$catchreleaseTargetWhere""
@@ -2573,7 +2573,7 @@ He forwards the system data.
 
 ""Fabric runs thinner there. Still near the Core. Same drone, same ROD.""
 
-""Take the catch and come back. Don't make a long watch of it.""",100:catchrelease_fisherBack:Continue,Technical fallback for a stage-three target placed in open space; it reuses the supplied stage-three briefing verbatim and never names gear the player receives later.
+""Take the catch and come back. Don't make a long watch of it.""",100:catchrelease_fisherBack:Continue,
 catchrelease_askTargetOpen,DialogOptionSelected,"$option == catchrelease_askTarget score:8
 CatchReleaseCMD tokens
 $catchreleaseStage >= 4
@@ -2667,20 +2667,20 @@ $catchreleaseStage < 2
 
 ""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-100:catchrelease_fisherBack:Not today.",Technical routing twin for players who reached the Fisherman without the bar rating.
+100:catchrelease_fisherBack:Not today.",
 catchrelease_introHelloFromPropertyRating,DialogOptionSelected,"$option == catchrelease_introHello
 $global.catchrelease_metRating",,"The Fisherman glances over your transponder return, then sets the manifest aside.
 
 ""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
 20:catchrelease_introRodQuestion:The rating said something about a ROD.
-100:catchrelease_fisherBack:Not today.",Technical routing twin for the recovered-property introduction after meeting the bar rating.
+100:catchrelease_fisherBack:Not today.",
 catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
 !$global.catchrelease_metRating",,"The Fisherman glances over your transponder return, then sets the manifest aside.
 
 ""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-100:catchrelease_fisherBack:Not today.",Technical routing twin for the recovered-property introduction without the bar rating.
+100:catchrelease_fisherBack:Not today.",
 catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""Good. Work's the easy part to explain.""
 
 He calls up a handling manifest.
@@ -2693,7 +2693,7 @@ He lets the answer sit long enough to see whether it satisfies you.
 
 It does not.
 
-""Fair question. Easier to show you than talk around it.""",catchrelease_intro_rod:Continue,Technical routing twin: the rupture interception has already delivered the same final line.
+""Fair question. Easier to show you than talk around it.""",catchrelease_intro_rod:Continue,
 catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
 !$entity.catchrelease_intercepted",,"""Fishing.""
 
@@ -2812,7 +2812,7 @@ FireBest CatchReleaseIntroBrief
 CatchReleaseCMD showIntroIntel",,,
 catchrelease_introFirstDoneAlready,DialogOptionSelected,"$option == catchrelease_introFirstDone
 CatchReleaseCMD tokens
-$catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,A stale or repeated Continue may replay the current brief but cannot call sendOut again and replace the assigned target.
+$catchreleaseStage >= 3",FireBest CatchReleaseIntroBrief,,,
 catchrelease_introTurnIn3Distinct,DialogOptionSelected,"$option == catchrelease_fisherIntro score:64
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -2833,7 +2833,7 @@ He closes both.
 
 A new service connection appears in your fleet systems.","0:catchrelease_introShopLook:What's an outfitter?
 10:catchrelease_introShopLater2:Got it.
-100:catchrelease_introShopLater:I'll look later.","Live hand-in twin: the second assignment deliberately asks for a distinct species, so the comparison cannot call it the same pattern. It also names the two real outfitter entrances without granting the removed ability-bar shortcut."
+100:catchrelease_introShopLater:I'll look later.",
 catchrelease_introDeepResume,DialogOptionSelected,"$option == catchrelease_fisherIntro score:66
 CatchReleaseCMD tokens
 $catchreleaseStage == 3
@@ -2847,7 +2847,7 @@ The Fisherman watches your crew guide the first frame into place.
 
 He points at the projector rig.
 
-""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,Technical resume for an interrupted basic-outfitter/deep-rig handoff. The assignment option is added only after the three safety questions have been answered.
+""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,
 catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""Outfitter's simple enough. Keep the drones flying, keep the return clean, fit the right core for the work. Mostly, it's a place to get better gear.""","0:catchrelease_introAskTackle:What are modifiers?
 10:catchrelease_introAskUpgrade:What is an upgrade?
 100:catchrelease_introDeepGear:Continue",
@@ -2891,7 +2891,7 @@ The Fisherman watches your crew guide the first frame into place.
 
 He points at the projector rig.
 
-""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,The assignment option is added only after the three safety questions have been answered.
+""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,
 catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,,"He points at the second rig.
 
 ""That's a harpoon. Name's apt, this time.""
@@ -2911,14 +2911,14 @@ The Fisherman brings up the local plot.
 
 He closes it again.
 
-""Run them away from people.""",0:catchrelease_introLightQuestion_continue:Why?,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+""Run them away from people.""",0:catchrelease_introLightQuestion_continue:Why?,
 catchrelease_introLightQuestion_continue,DialogOptionSelected,$option == catchrelease_introLightQuestion_continue,FireAll CatchReleaseIntroDeepQuestions,"""The lights put out readings patrols don't care for. Use them well clear of planets and inhabited traffic.""",,
 catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,"$catchreleaseIntroHarpoonAsked = true 0
 FireAll CatchReleaseIntroDeepQuestions","""Return trace.""
 
 He wipes a thumb across the display.
 
-""Looks like rope. Isn't. Don't build procedures around the picture.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+""Looks like rope. Isn't. Don't build procedures around the picture.""",,
 catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,"$catchreleaseIntroWeaponAsked = true 0
 FireAll CatchReleaseIntroDeepQuestions","""It can put forty tonnes of bad judgment through a hull.""
 
@@ -2928,13 +2928,13 @@ He considers the launcher.
 
 A beat.
 
-""Don't shoot either one at people.""",,The supplied answer is unchanged; its routing returns to the remaining equipment questions.
+""Don't shoot either one at people.""",,
 catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,0:catchrelease_introLightQuestion:The lights make a rupture?,
 catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,10:catchrelease_introHarpoonQuestion:And the line behind the harpoon?,
 catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,20:catchrelease_introWeaponQuestion:This is a weapon.,
 catchrelease_introDeepQuestionsDone,CatchReleaseIntroDeepQuestions,"$catchreleaseIntroLightAsked
 $catchreleaseIntroHarpoonAsked
-$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:What do you want caught?,The assignment continuation appears after all three equipment and safety questions have been covered.
+$catchreleaseIntroWeaponAsked",,,100:catchrelease_introDeepDone:What do you want caught?,
 catchrelease_introDeepDone,DialogOptionSelected,$option == catchrelease_introDeepDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseIntroBrief
 CatchReleaseCMD showIntroIntel",,,
@@ -2947,7 +2947,7 @@ $catchreleaseTargetMet","AddTextSmall ""Advanced outfitter unlocked"" highlight"
 
 He makes two small entries in the service ledger.
 
-""Harpoon and lens upgrades are open to you now.""",0:catchrelease_introTurnIn4_continue:Continue,"The planner question is the required, highlighted route onward; the tutorial cannot advance before its supplied explanation is shown."
+""Harpoon and lens upgrades are open to you now.""",0:catchrelease_introTurnIn4_continue:Continue,
 catchrelease_introTurnIn4_continue,DialogOptionSelected,$option == catchrelease_introTurnIn4_continue,"Highlight ""range data""
 CatchReleaseCMD takeTarget
 CatchReleaseCMD giveCharts
@@ -2974,7 +2974,7 @@ FireAll CatchReleaseRangeDataBrief","""Surveys.""
 
 The Fisherman considers the question for a moment.
 
-""That's the useful answer, captain. Leave the rest with the chart crews.""",,The optional survey-source answer returns to the required planner question rather than skipping it.
+""That's the useful answer, captain. Leave the rest with the chart crews.""",,
 catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,"Highlight ""your map""","""One of each.""
 
 He brings up your map and marks the fishing-planner control.
@@ -3035,7 +3035,7 @@ He forwards the system data.
 
 A pause.
 
-""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,The first outbound briefing ends the Fisherman encounter; a repeated Continue can replay this brief without rolling a new target and still has a real exit.
+""Don't stay over the rupture longer than you need.""",100:catchrelease_fisherBack:Continue,
 catchrelease_briefTwo,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 4
@@ -3135,7 +3135,7 @@ MakeOtherFleetPreventDisengage catchreleaseLamps true 5
 unset $ignorePlayerCommRequests
 AddText ""You're being hailed by the $faction $otherShipOrFleet."" $faction.baseColor
 CatchReleaseCMD lampStop
-OpenComms",,,"A patrol that has seen the lamps lit somewhere they are not allowed, arriving. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope. Marked as had here rather than at each ending, as the cargo scan does: the patrol is still pursuing while the dialog is open, so a conversation that only counted once it was finished would reopen the instant the player closed it. The command runs after the hail so the standing it costs is printed under that line rather than over it."
+OpenComms",,,
 catchrelease_lampWarn,OpenCommLink,"$entity.catchrelease_lampConv score:1500
 $entity.catchrelease_lampRung == 1",FireAll CatchReleaseLampWarnOptions,"""Cut the lights.""
 
@@ -3540,8 +3540,8 @@ EndConversation","The incident count is open beside $PersonRank $personName.
 The link closes.",,
 catchrelease_lampWarnOptOut,CatchReleaseLampWarnOptions,,,,0:catchrelease_lampsOut:Cut power to the lamps,
 catchrelease_lampWarnOptRefuse,CatchReleaseLampWarnOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
-catchrelease_lampFineOptPay,CatchReleaseLampFineOptions,,DoCanAffordCheck $entity.catchrelease_lampFine catchrelease_lampPayFine,,0:catchrelease_lampPayFine:Pay the fine and cut the lamps ($entity.catchrelease_lampFineDGS credits),"Same affordability handling as the harpoon patrol's fine - greyed out with a reason rather than hidden, so a player who cannot pay still sees what they could not pay."
-catchrelease_lampFineOptTalk,CatchReleaseLampFineOptions,,"SetStoryOption catchrelease_lampTalk 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_lampTalk:Talk your way out of it,"The same escape vanilla puts on the transponder stop and the smuggling scan, on the two rungs where there is something to be talked out of. The warning does not get one: putting the lamps out is already free, and a point spent to avoid doing something free is not an option, it is a trap."
+catchrelease_lampFineOptPay,CatchReleaseLampFineOptions,,DoCanAffordCheck $entity.catchrelease_lampFine catchrelease_lampPayFine,,0:catchrelease_lampPayFine:Pay the fine and cut the lamps ($entity.catchrelease_lampFineDGS credits),
+catchrelease_lampFineOptTalk,CatchReleaseLampFineOptions,,"SetStoryOption catchrelease_lampTalk 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_lampTalk:Talk your way out of it,
 catchrelease_lampFineOptRefuse,CatchReleaseLampFineOptions,,,,10:catchrelease_lampRefuse:Refuse and cut the comm link,
 catchrelease_lampScanOptSubmit,CatchReleaseLampScanOptions,,,,0:catchrelease_lampInspect:Cut the lamps and submit to the inspection,
 catchrelease_lampScanOptTalk,CatchReleaseLampScanOptions,,"SetStoryOption catchrelease_lampTalk 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of an inspection""",,5:catchrelease_lampTalk:Talk your way out of it,
@@ -3583,7 +3583,7 @@ unset $entity.catchrelease_lampConv","Your lamps go dark.
 
 A shuttle crosses. For the better part of an hour there are strangers in the hold with lists.",0:catchrelease_lampSeized:Continue,
 catchrelease_lampSeizedSel,DialogOptionSelected,$option == catchrelease_lampSeized,"CatchReleaseCMD seizeFish
-FireBest CatchReleaseLampSeized",,,"No text of its own: the command prints the losses, and the fired rows say what was said over them."
+FireBest CatchReleaseLampSeized",,,
 catchrelease_lampSeizedFull,CatchReleaseLampSeized,$entity.catchrelease_lampHaul score:10,"ShowDefaultVisual
 FireAll CatchReleaseFleetResolutionOptions","The patrol inventory team removes the relevant catch.
 
@@ -3608,7 +3608,7 @@ unset $entity.catchrelease_lampConv
 ShowDefaultVisual
 CatchReleaseCMD leaveEncounter","You cut the link. The lamps keep burning.
 
-Weapons come up across the formation.",,"Refusing is not an exit at any rung - the lamps are still lit and still visible, which is the whole of what they came about."
+Weapons come up across the formation.",,
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask about the account.,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
@@ -3668,7 +3668,7 @@ catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrel
 
 The fisher checks the camp marker.
 
-""Raised the weekly number again, too.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+""Raised the weekly number again, too.""",,
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Camp's gone. Good.""
@@ -3693,7 +3693,7 @@ catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelea
 
 She checks the fleet code against the claim file.
 
-""My appeal has acquired another case number.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+""My appeal has acquired another case number.""",,
 catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
@@ -3718,7 +3718,7 @@ catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelea
 
 The fisher checks a message from the yard crew.
 
-""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,"Two reminders rather than one, because there are two things outstanding and being told about the wrong one is worse than not being told."
+""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
@@ -3734,7 +3734,7 @@ Someone at the yard is already signing off the repaired rack.
 Received: $catchreleaseReward.",,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
-HailPlayer",,,"Vanilla's own shape for a fleet camping something the player wants - the gate-sitting pirates in the Galatia arc open exactly like this. HailPlayer rather than OpenComms because the hail is what opens the link regardless of the relationship, which is the only reason a conversation with a hostile pirate pack is possible at all. Unprefixed keys because there is no active person at this trigger, which puts the fleet's own memory in the local scope."
+HailPlayer",,,
 catchrelease_campFirstHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
@@ -3743,7 +3743,7 @@ FireAll CatchReleaseCampOptions","""This spot's off limits.""
 
 The pirate glances toward the rupture.
 
-""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,The first hail is the end of the camp's one-time intercept. The memory flag sends it back to its passive hold; later contacts fall through to the ordinary camp conversation.
+""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,
 catchrelease_campFirstHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
@@ -3809,9 +3809,9 @@ She points toward the rupture.
 The payment figure appears.
 
 ""$entity.catchrelease_campBribeDGS credits buys our absence. It does not make you clean.""",,
-catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),"Greyed out with a reason rather than hidden, the way vanilla handles a bribe the player cannot cover."
-catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them to move on,"The third way through, for a fleet that can neither win the fight nor cover the bribe. Same bonus XP key the enforcement stops use - it is the same kind of thing being talked out of."
-catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLinkNoText:Cut the comm link,"Vanilla's no-continue comm exit returns directly to the fleet menu. Leaving is a real answer here: nothing about the job says the camp has to be dealt with today, and the fourth way through is coming back later with a bigger fleet."
+catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),
+catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them to move on,
+catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLinkNoText:Cut the comm link,
 catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
 $entity.catchrelease_campCleared = true
 ShowDefaultVisual","The transfer clears.
@@ -3836,9 +3836,9 @@ CatchReleaseCMD leaveEncounter",,,
 distress_framework_hail,BeginFleetEncounter,"!$isHostile
 $distressFramework score:1300
 !$distressNoHail","AddText ""You're being hailed."" $faction.baseColor
-$hailing = true 0",,,Generic vanilla-style hail for framework-owned distress entities
+$hailing = true 0",,,
 distress_framework_open,OpenCommLink,"!$isHostile
-$entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,The instance fires the event row's external dialogue trigger
+$entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,
 catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
 !$entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
@@ -3846,4 +3846,4 @@ Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestP
 
 Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
 5:catchrelease_fqAcceptNoPromise:No promises.
-10:catchrelease_fqDecline:Decline",Distress framework entry; dialogue and sequencing are copied from the ordinary fleet offer
+10:catchrelease_fqDecline:Decline",
