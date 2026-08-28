@@ -2,11 +2,11 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
 public class ButlerJob extends FishJob {
 
+    public static final String GIVER_RANK = "catchrelease_subButler";
     public static final int VALUE_PER_KILO = 45;
     public static final float DAYS = 45f;
 
@@ -16,7 +16,7 @@ public class ButlerJob extends FishJob {
             return false;
         }
 
-        setGiverRank(Ranks.CITIZEN);
+        setGiverRank(GIVER_RANK);
         setGiverVoice(Voices.ARISTO);
 
         if (!setUpGiver(createdAt)) return false;
