@@ -49,6 +49,13 @@ public class AcademyJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "An Academy researcher is comparing low-coherence retrieval records against sensor "
+                + "plots. The catches are needed with their provenance intact so the records can "
+                + "be checked against the original retrievals.";
+    }
+
+    @Override
     public String getBaseName() {
         return "Something That Came Up Wrong";
     }

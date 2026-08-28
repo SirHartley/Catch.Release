@@ -402,8 +402,6 @@ public class FleetQuest extends FishJob {
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
         float pad = 10f;
 
-        info.addPara(type.note, pad);
-
         String ask = describeAsks();
         String reward = describeRewards();
         LabelAPI terms = info.addPara("They want %s, and are offering %s.", pad,
@@ -418,6 +416,11 @@ public class FleetQuest extends FishJob {
             addDays(info, "They will not wait forever, though - ", "left.", getDaysLeft(),
                     getBulletColorForMode(ListInfoMode.IN_DESC), pad);
         }
+    }
+
+    @Override
+    protected String getIntelPurpose() {
+        return type == null ? null : type.note;
     }
 
     @Override

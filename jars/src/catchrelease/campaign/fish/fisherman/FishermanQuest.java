@@ -266,7 +266,10 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
-            info.addPara("The Fisherman is waiting for the requested specimen.", opad);
+            info.addPara("The Fisherman wants the coherence reading as much as the specimen, with "
+                    + "whatever comes through preserved as recovered rather than improved for "
+                    + "appearance. Fulfilling the request also increases the number of range-data "
+                    + "listings he keeps available at once.", opad);
 
             info.addPara("What is wanted:", opad);
             bullet(info);

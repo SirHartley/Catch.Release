@@ -66,6 +66,13 @@ public class ChefJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        String planned = dish == null ? "the planned dish" : dish;
+        return String.format("A cook is sourcing the separate ingredient lines for %s. Each catch "
+                + "has its place in the preparation.", planned);
+    }
+
+    @Override
     public String getBaseName() {
         return "Three for the Plate";
     }

@@ -222,6 +222,18 @@ public class KidsJob extends FishJob {
     }
 
     @Override
+    protected String getIntelSpecialTerms() {
+        return "The bracket needs two contenders, and ordinary catches qualify. If either "
+                + "submitted fish is Fine grade or better, the children add an extra prize.";
+    }
+
+    @Override
+    protected String getIntelPurpose() {
+        return "Two children have turned a hand-drawn tournament bracket into binding procedure. "
+                + "The submitted fish serve as the next contenders.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseKid", toLoud ? "the loud one" : "the quiet one");
         token(mem, "$catchreleaseKidCap", toLoud ? "The loud one" : "The quiet one");

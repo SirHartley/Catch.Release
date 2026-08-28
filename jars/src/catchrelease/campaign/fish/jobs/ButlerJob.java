@@ -39,6 +39,12 @@ public class ButlerJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "A household under-butler is arranging a controlled private display purchase for "
+                + "the household.";
+    }
+
+    @Override
     public String getBaseName() {
         return "For the Household";
     }

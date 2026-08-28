@@ -68,6 +68,12 @@ public class StandingOrderJob extends FishJob {
     }
 
     @Override
+    protected String getIntelPurpose() {
+        return "A local provisioner is filling open supplier lines against a stack of delivery "
+                + "manifests. The catch goes straight into existing orders.";
+    }
+
+    @Override
     public String getBaseName() {
         return "Standing Order for Fish";
     }

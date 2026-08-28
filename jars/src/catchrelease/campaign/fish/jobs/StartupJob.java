@@ -56,6 +56,20 @@ public class StartupJob extends FishJob {
     }
 
     @Override
+    protected String getIntelSpecialTerms() {
+        return "This order is one stage of a planned three-delivery scale-up. Each successful "
+                + "shipment leads directly to a larger follow-up order, and there is no deadline "
+                + "on the sequence.";
+    }
+
+    @Override
+    protected String getIntelPurpose() {
+        return "A young factor is using the deliveries to prove that a fish supply line can "
+                + "scale. Each shipment goes into the business case as evidence that the model "
+                + "works.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseRound", getRound());
     }
