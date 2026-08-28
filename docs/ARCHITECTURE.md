@@ -261,7 +261,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `StandingOrderJob.java` | Quantity, rarity, and grade order with a 60-day limit. |
 | `AcademyJob.java` | Low-coherence specimens for Galatia or large Independent markets. Uses the shared fishing-work gate. |
 | `ButlerJob.java` | One specimen above a weight floor, with an offer submenu that reveals the full terms before acceptance. |
-| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade, due in 40 days. Every offer adds two distinct, currently unknown habitat-data rewards through the shared reward type, so either converts to its stored credit fallback if learned before hand-in. The job does not spawn when fewer than two valid data rewards remain. |
+| `ChefJob.java` | Three distinct ingredient requirements, sometimes Fine grade, due in 40 days. Its rolled reward uses the highest default per-requirement valuation in the bar-job set. Every offer also adds two distinct, currently unknown habitat-data rewards through the shared reward type, so either converts to its stored credit fallback if learned before hand-in. The job does not spawn when fewer than two valid data rewards remain. |
 | `CompanionJob.java` | Hegemony-only private order with a weight floor and an upper-size bonus, due in 40 days. |
 | `CultJob.java` | One named species for a non-credit reward, due in 55 days. It does not create an offer when its item pool is empty. |
 | `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence, due in 70 days. |
