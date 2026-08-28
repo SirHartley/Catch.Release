@@ -277,7 +277,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 
 | File | Responsibility |
 |---|---|
-| `CampedSpotJob.java` | Requires the camper to be gone and a post-acceptance catch from the exact rupture. It tracks both conditions separately, updates intel, releases the pond once proof is aboard, and repairs older named-species jobs. The fleet and pond claim are created only on acceptance. |
+| `CampedSpotJob.java` | Requires the camper to be gone and a post-acceptance catch from the exact rupture. It tracks both conditions separately, updates intel, releases the pond once proof is aboard, and repairs older named-species jobs. The fleet and pond claim are created only on acceptance. The camp's credit value converts into reward score on top of the receipt ask, and the deadline covers the trip twice over. |
 | `CampType.java` | Pirate, mercenary, and Pather behavior and labels. |
 | `CampSize.java` | Small, medium, and large fleet estimates. |
 | `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. Peaceful clearance releases the permanent camp flags and sends the fleet back to its vanilla source before despawning. |
@@ -285,16 +285,16 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `MercCampJob.java` | Mercenary boundary-dispute version of the camp offer. |
 | `PatherCampJob.java` | Pather sabotage version of the camp offer. |
 
-All three offers state the camp size, system, clear-then-catch sequence, 70-day deadline, and exact reward.
+All three offers state the camp size, system, clear-then-catch sequence, deadline, and exact reward.
 
 ### `campaign/fish/jobs/fleet`
 
 | File | Responsibility |
 |---|---|
-| `FleetQuest.java` | A `FishJob` attached to a fleet. Every construction path requires tutorial completion. Offers keep the source scavenger from avoiding the player; accepted jobs replace it with a mission-owned copy. Hand-in uses the shared picker, then returns the fleet to its source and despawns it. Distress variants rely on distress intel instead of a second marker. |
+| `FleetQuest.java` | A `FishJob` attached to a fleet. Every construction path requires tutorial completion. Offers keep the source scavenger from avoiding the player; accepted jobs replace it with a mission-owned copy. Rewards come from `QuestRewards` with a small premium, and the deadline is sized from the asks' nearest satisfiable water. Hand-in uses the shared picker, then returns the fleet to its source and despawns it. Distress variants rely on distress intel instead of a second marker. |
 | `FleetQuestSpawner.java` | After tutorial completion, gives one of five local offers to an existing scavenger in the player's system. Natural checks are 7% with one active quest and a 45-day cooldown. The test path creates a normal route-backed scavenger. |
 | `FleetQuestEncounter.java` | Runs one fleet offer, accepts or declines after dialogue closes, resolves distress entities, restores local offer marks after load, and expires old offers. |
-| `FleetQuestType.java` | Seven saved quest types. Five remain local scavenger offers; `STRANDED` and `SCAVENGER_ENGINE` are selected by the distress provider. Specific species pay from their actual rarity. |
+| `FleetQuestType.java` | Seven saved quest types. Five remain local scavenger offers; `STRANDED` and `SCAVENGER_ENGINE` are selected by the distress provider. Demand generation runs off a skewed target score: each type pushes its own demand shape toward the rolled ambition, and the reward is then priced from the ask that actually came out. |
 | `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. Applies tutorial and one-job gates, prepares the quest, and abandons it if the distress fleet expires. |
 
 ### `campaign/fish/colony`

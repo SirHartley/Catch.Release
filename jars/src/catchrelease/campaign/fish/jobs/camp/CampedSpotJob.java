@@ -2,7 +2,9 @@ package catchrelease.campaign.fish.jobs.camp;
 
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
-import catchrelease.campaign.fish.jobs.FishRewardRoller;
+import catchrelease.campaign.fish.jobs.DemandScore;
+import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
@@ -35,7 +37,6 @@ public abstract class CampedSpotJob extends FishJob {
 
     public static final String REF_KEY = "$catchrelease_campRef";
     public static final String IN_PROGRESS_KEY = "$catchrelease_campInProgress";
-    public static final float DAYS = 70f;
     public static final float MAX_LY = 14f;
 
     protected CampSize size;
@@ -68,10 +69,19 @@ public abstract class CampedSpotJob extends FishJob {
         speciesId = null;
         systemName = system.getName();
 
-        days = DAYS;
-
         setReceiptAsk();
-        addRewards(FishRewardRoller.roll(genRandom, size.value, asks, true));
+
+        // the pay answers the camp, not the fish: its credit value converts straight
+        // into score, so a raiding pack opens the reward tiers a receipt never would.
+        // The clock covers the trip twice over - one fight and one catch
+        float score = size.value / QuestRewards.CREDITS_PER_POINT + DemandScore.of(asks);
+        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+                .score(score).random(genRandom)).rewards);
+
+        float ly = Misc.getDistanceLY(createdAt.getLocationInHyperspace(),
+                system.getLocation());
+        days = QuestDuration.forDays(QuestDuration.WORKING_DAYS * 2f
+                + ly * QuestDuration.DAYS_PER_LY * 2f).days;
 
         setUpSpine();
 
