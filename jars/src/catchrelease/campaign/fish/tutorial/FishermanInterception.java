@@ -104,9 +104,6 @@ public class FishermanInterception implements EveryFrameScript {
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true, 10f);
         boat.getMemoryWithoutUpdate().set(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER, true, 10f);
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_ALLOW_LONG_PURSUIT, true, 10f);
-
-        Global.getSector().getCampaignUI().addMessage(boat.getName()
-                + " is closing on your position.", Misc.getHighlightColor());
     }
 
     public static boolean isClosing(CampaignFleetAPI fleet) {

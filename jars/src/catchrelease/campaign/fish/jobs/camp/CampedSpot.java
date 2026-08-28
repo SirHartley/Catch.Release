@@ -135,8 +135,6 @@ public class CampedSpot {
 
         if (!mem.getBoolean(CLOSING_FLAG)) {
             mem.set(CLOSING_FLAG, true);
-            Global.getSector().getCampaignUI().addMessage(fleet.getName()
-                    + " is closing on your position.", Misc.getHighlightColor());
         }
     }
 
