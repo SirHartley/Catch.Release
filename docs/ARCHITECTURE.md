@@ -230,7 +230,7 @@ Peaceful fleet resolutions use `CatchReleaseFleetResolutionOptions` and one Esca
 | File | Responsibility |
 |---|---|
 | `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. Bar jobs, fleet jobs, standing Fishermen, and lamp enforcement use it. |
-| `FishSpec.java` | One species row: identity, minigame values, size and price ranges, habitat, and valid catch implements. |
+| `FishSpec.java` | One species row: stable save ID, current display name and description, minigame values, size and price ranges, habitat, and valid catch implements. Display copy may change without renaming the ID used by existing catches and logs. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. Its encoded tail is backward compatible. |
 | `FishGrade.java` | Five quality grades, size-to-value multipliers, and colours. Comparisons use explicit `rank` values, never enum ordinals. |
 | `FishRarity.java` | Canonical rarity colours, movement values, and explicit ranks. Common uses its own beige colour rather than standard text or disabled grey. |
