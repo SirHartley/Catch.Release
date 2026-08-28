@@ -56,6 +56,13 @@ public class StartupJob extends FishJob {
     }
 
     @Override
+    protected String getIntelSpecialTerms() {
+        return "This order is one stage of a planned three-delivery scale-up. Each successful "
+                + "shipment leads directly to a larger follow-up order, and there is no deadline "
+                + "on the sequence.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         token(mem, "$catchreleaseRound", getRound());
     }

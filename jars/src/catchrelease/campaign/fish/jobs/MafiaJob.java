@@ -249,6 +249,14 @@ public class MafiaJob extends FishJob {
     }
 
     @Override
+    protected String getIntelSpecialTerms() {
+        return "Salvatore will honor the promised payment, or Enzo can assign the pair, price "
+                + "each fish against the other by where its size falls within its own species "
+                + "range, and put the fee on either entrant. Win and the ordinary payment is "
+                + "replaced by a larger payout; lose and the house keeps it.";
+    }
+
+    @Override
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
 

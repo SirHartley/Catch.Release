@@ -698,6 +698,11 @@ public abstract class FishJob extends HubMissionWithBarEvent
                     person.getNameString(), market.getName());
         }
 
+        String specialTerms = getIntelSpecialTerms();
+        if (specialTerms != null && !specialTerms.isEmpty()) {
+            info.addPara(specialTerms, opad);
+        }
+
         info.addPara("What is wanted:", opad);
 
         bullet(info);
@@ -720,6 +725,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
             FishRequirement.highlightFishNames(line, description);
         }
         unindent(info);
+    }
+
+    protected String getIntelSpecialTerms() {
+        return null;
     }
 
     @Override

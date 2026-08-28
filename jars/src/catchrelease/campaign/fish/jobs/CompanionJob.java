@@ -57,6 +57,12 @@ public class CompanionJob extends FishJob {
     }
 
     @Override
+    protected String getIntelSpecialTerms() {
+        return "The contract sets a minimum weight. A qualifying specimen that is large for its "
+                + "species earns an additional premium.";
+    }
+
+    @Override
     public String getBaseName() {
         return "A Client's Preference";
     }
