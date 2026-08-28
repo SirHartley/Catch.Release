@@ -114,14 +114,6 @@ public enum FleetQuestType {
         return pick == null ? null : pick.id;
     }
 
-    /** How ambitious this encounter feels like being: most are modest, a few are big
-     *  scores - the wide, low-weighted roll is the whole opportunist character. */
-    public static float rollTargetScore(Random random) {
-        float skewed = (float) Math.pow(random.nextFloat(), 1.6);
-
-        return DemandScore.COMMON_BASE + skewed * 60f;
-    }
-
     /** The type keeps its demand shape - the pitch has to stay true - and the rolled
      *  ambition decides how far that shape is pushed. The reward is then priced off
      *  what actually came out, so a shape that cannot reach the target underpays
@@ -138,12 +130,12 @@ public enum FleetQuestType {
                 break;
 
             case STARVING:
-                ask.count = clampCount(countFor(target, DemandScore.COMMON_BASE), 3, 8);
+                ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE, 3, 8);
                 break;
 
             case QUOTA:
                 ask.minGrade = FishGrade.FINE;
-                ask.count = clampCount(countFor(target, DemandScore.COMMON_BASE * 1.5f), 2, 6);
+                ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE * 1.5f, 2, 6);
                 break;
 
             case COLLECTOR: {
@@ -177,16 +169,6 @@ public enum FleetQuestType {
         }
 
         return ask;
-    }
-
-    // inverts the diminishing-count curve: target = per * (1 + fraction * (n - 1))
-    protected static int countFor(float target, float perSpecimen) {
-        return Math.max(1, Math.round(1f + (target / perSpecimen - 1f)
-                / DemandScore.EXTRA_SPECIMEN_FRACTION));
-    }
-
-    protected static int clampCount(int count, int min, int max) {
-        return Math.max(min, Math.min(max, count));
     }
 
     public String getId() {
