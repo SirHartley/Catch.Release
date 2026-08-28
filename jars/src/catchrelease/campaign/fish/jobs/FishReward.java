@@ -122,7 +122,7 @@ public abstract class FishReward {
             UpgradeStat stat = UpgradeManager.getInstance().getAll().get(statId);
             String name = stat == null ? statId : ShopEntry.of(stat).getName();
 
-            return "a schematic for " + name + " tier " + targetLevel;
+            return "a schematic for " + name.toLowerCase() + " tier " + targetLevel;
         }
 
         @Override
@@ -137,13 +137,10 @@ public abstract class FishReward {
 
             ShopEntry entry = ShopEntry.of(stat);
             TooltipMakerAPI item = tooltip.beginImageWithText(entry.getIconName(), 48f);
-            item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
-            item.addPara("%s — Tier %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
+            item.addPara("Fishing Outfitter schematic", Misc.getBasePlayerColor(), 0f);
+            item.addPara("%s - Tier %s", 3f, Misc.getTextColor(), Misc.getHighlightColor(),
                     entry.getName(), String.valueOf(targetLevel));
             item.addPara(stat.description, 6f);
-            item.addPara("This tier: %s → %s", 3f, Misc.getGrayColor(),
-                    Misc.getPositiveHighlightColor(), entry.getValueAt(targetLevel - 1),
-                    entry.getValueAt(targetLevel));
             addSchematicPurchase(item, ShopPricing.getPrice(stat, targetLevel), "upgrade tier");
             UIPanelAPI card = tooltip.addImageWithText(pad);
             CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f,
@@ -445,8 +442,7 @@ public abstract class FishReward {
                                                String thing) {
         if (item == null) return;
 
-        item.addPara("This unlocks %s for purchase at the Fishing Outfitter. It does not include"
-                        + " the %s itself.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
+        item.addPara("Unlocks the %s for purchase at the Fishing Outfitter.", 6f, Misc.getGrayColor(), Misc.getHighlightColor(),
                 thing, thing);
     }
 
