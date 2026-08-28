@@ -229,7 +229,7 @@ Peaceful fleet resolutions use `CatchReleaseFleetResolutionOptions` and one Esca
 
 | File | Responsibility |
 |---|---|
-| `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. Bar jobs, fleet jobs, standing Fishermen, and lamp enforcement use it. |
+| `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. Bar jobs, fleet jobs, and standing Fishermen use it. |
 | `FishSpec.java` | One species row: stable save ID, current display name and description, minigame values, size and price ranges, habitat, and valid catch implements. Display copy may change without renaming the ID used by existing catches and logs. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. Its encoded tail is backward compatible. |
 | `FishGrade.java` | Five quality grades, size-to-value multipliers, and colours. Comparisons use explicit `rank` values, never enum ordinals. |
@@ -530,8 +530,8 @@ The associated `entities/HauntMineEntityPlugin.java` implements mine behavior. `
 
 | File | Responsibility |
 |---|---|
-| `LampOffence.java` | Defines where lamps are illegal, consequences, and per-faction/per-system warning history. Any patrol objects near an inhabited planet; elsewhere only a faction with local holdings enforces, and only Church/Path object on principle. The four-step ladder is warning, fine, inspection, and guns. |
-| `LampPatrolResponse.java` | While lamps are on, every eligible patrol that sees the player pushes an intercept ahead of its current assignments. The first patrol to open dialogue claims the incident; all others remove only the temporary intercept and resume. Turning lamps off ends the burn but does not cancel committed stops. |
+| `LampOffence.java` | Defines the inhabited-world distance gate, consequences, and per-faction/per-system warning history. Every faction enforces only while the player is within 3,000 units of an inhabited market. The four-step ladder is warning, fine, inspection, and guns. |
+| `LampPatrolResponse.java` | While lamps are on and the player remains inside the inhabited-world radius, every eligible patrol that sees the player pushes an intercept ahead of its current assignments. Leaving that radius cancels the temporary intercept without delaying a response on re-entry. The first patrol to open dialogue claims the incident; all others remove only the temporary intercept and resume. Turning lamps off ends the burn but does not cancel committed stops. |
 | `HarpoonOffence.java` | Per-faction, per-system hit history, debts, reputation loss, witness state, and response ladders. Combat fleets turn hostile on the second hit. Outmatched civilized crews report immediately; other civilians progress through warning, repair demand, and reporting. Once hostile, strong fleets intercept and weak fleets flee. |
 | `HarpoonPatrolResponse.java` | Sends one collector at a time in the incident system. The offended faction or a faction with at least favorable relations may collect, except Path and pirates collect only their own claims. |
 | `HarpoonWitness.java` | Makes a civilian seek a patrol. The report occurs only on arrival and keeps the original revenge-contract eligibility. Replacement responses cancel the witness task without clearing new assignments. |
@@ -695,7 +695,7 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 - Vanilla has no flee assignment. Civilian flight uses `MEMORY_KEY_AVOID_PLAYER_SLOWLY` plus Emergency Burn when available.
 - A hostile fleet can still hail the player. `HailPlayer` on `BeginFleetEncounter` opens comms regardless of relationship; `MakeOtherFleetGoAway` handles a negotiated departure.
 - The Fisherman uses vanilla `OpenComms` on `BeginFleetEncounter` so the player never sees a combat-oriented fleet screen.
-- Lamp enforcement follows vanilla transponder logic. All seeing patrols may interrupt their assignments; the first dialogue claimant releases only the temporary intercepts of the others. Turning the lights off does not erase an already observed offence.
+- Lamp enforcement follows vanilla transponder logic. All seeing patrols may interrupt their assignments only while the player is within 3,000 units of an inhabited market; leaving that radius cancels their temporary intercepts. The first dialogue claimant releases only the temporary intercepts of the others. Turning the lights off does not erase an already observed offence.
 - Harpoon incidents are stored per faction and system. Patrol collectors are local; one system cannot escalate another.
 - Civilian harpoon responses depend on fleet role, relationship, and vanilla's reciprocal 1.25× strength threshold. A convoy remains civilian even when heavily escorted.
 - Repair bills and fines return their outcomes through memory. The global pending marker prevents repeated sector-wide searches when the original fleet is no longer nearby.

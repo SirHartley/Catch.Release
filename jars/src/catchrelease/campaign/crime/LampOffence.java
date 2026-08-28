@@ -1,7 +1,5 @@
 package catchrelease.campaign.crime;
 
-import catchrelease.campaign.fish.FishingTaboo;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -35,19 +33,8 @@ public class LampOffence {
     public static final float REP_LOSS = 0.03f;
     public static final float REP_REFUSE = 0.06f;
 
-    public static boolean hatesLampsAnywhere(String factionId) {
-        return FishingTaboo.isTaboo(factionId);
-    }
-
-    public static boolean isIllegalHere(CampaignFleetAPI player, String factionId) {
-        if (player == null) return false;
-
-        LocationAPI where = player.getContainingLocation();
-        if (!(where instanceof StarSystemAPI)) return false;
-
-        if (getNearbyInhabited(player) != null) return true;
-
-        return ownsSystem((StarSystemAPI) where, factionId) && hatesLampsAnywhere(factionId);
+    public static boolean isIllegalHere(CampaignFleetAPI player) {
+        return getNearbyInhabited(player) != null;
     }
 
     public static MarketAPI getNearbyInhabited(CampaignFleetAPI player) {
@@ -87,16 +74,6 @@ public class LampOffence {
         }
 
         return closest == null ? player.getContainingLocation().getName() : closest.getName();
-    }
-
-    public static boolean ownsSystem(StarSystemAPI system, String factionId) {
-        if (system == null || factionId == null) return false;
-
-        for (MarketAPI market : Misc.getMarketsInLocation(system)) {
-            if (factionId.equals(market.getFactionId())) return true;
-        }
-
-        return false;
     }
 
     protected static MemoryAPI getHistoryMemory(CampaignFleetAPI player) {
