@@ -134,6 +134,47 @@ public enum FleetQuestType {
                             + "\"We're back to the written offer: {reward}. Anything higher goes"
                             + " through Tri-Tachyon Legal, and I'm not pretending that improves"
                             + " either of our day.\"\n\n\"Those are the terms.\"")),
+    INTERMENT("The Interment",
+            FleetTypes.TRADE_SMALL,
+            "The link opens on the lead freighter. An escort keeps station nearby under the same"
+                    + " fishing guild pennant.\n\n"
+                    + "\"We're carrying one of our guild elders to interment. Old colleague of"
+                    + " mine.\"\n\n"
+                    + "The convoy master brings up a scanned will.\n\n"
+                    + "\"There's a line requiring the first species they ever landed to be sealed"
+                    + " into the casket. We don't carry a fishing rig, and a port call would put us"
+                    + " outside the appointed window.\"\n\n"
+                    + "\"We need {ask}. The estate authorizes {reward}. We have {days}.\"",
+            "Burial convoy {fleet} needs the first species named in a guild elder's will before the"
+                    + " appointed interment. The convoy has no fishing rig and cannot make a port"
+                    + " stop without missing the window.",
+            "Holding for interment",
+            "\"The casket is complete. We can make the interment window.\"\n\n"
+                    + "The convoy master checks the departure order.\n\n"
+                    + "\"We're getting underway. Safe passage, captain.\"",
+            1f,
+            new Dialogue(
+                    "\"Burial convoy {fleet}. Convoy master speaking. We have a time-sensitive"
+                            + " request.\"",
+                    "I'll do it.",
+                    "No promises. Send me the details.",
+                    "\"Thank you. I'll transmit the will extract and the species record.\"\n\n"
+                            + "The files arrive under the convoy's guild seal.",
+                    "\"Understood. No commitment.\"\n\n"
+                            + "The master transmits the same will extract and species record.\n\n"
+                            + "\"If you find one before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll make other arrangements.\"\n\n"
+                            + "The convoy master closes the channel.",
+                    "\"{fleet} here. We're still holding position, and the interment window is"
+                            + " getting shorter.\"\n\n\"We still need {ask}.\"",
+                    "A deckhand receives the specimen with both hands and carries it to a cleared"
+                            + " section of the hold.\n\nThe container is wrapped, sealed, and marked"
+                            + " with the elder's name from the will.",
+                    "Why does a fish go in the casket?",
+                    "\"It's in the will.\"\n\nThe master glances at the document.\n\n"
+                            + "\"First catch goes with them, last catch closes the log.\"",
+                    "The estate will accept delivery on the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -195,6 +236,7 @@ public enum FleetQuestType {
     private static final FleetQuestType[] LOCAL_OFFERS = {
             LAST_ENTRY,
             ESCROW,
+            INTERMENT,
             SEEKER,
             QUOTA,
             STARVING,
@@ -373,6 +415,14 @@ public enum FleetQuestType {
                 break;
             }
 
+            case INTERMENT: {
+                FishRarity shelf = target >= 52f ? FishRarity.EPIC
+                        : target >= 28f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -443,7 +493,7 @@ public enum FleetQuestType {
     }
 
     public boolean requiresIndependentFleet() {
-        return this == LAST_ENTRY || this == ESCROW;
+        return this == LAST_ENTRY || this == ESCROW || this == INTERMENT;
     }
 
     public float getMaximumTravelLY() {

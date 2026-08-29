@@ -8,6 +8,8 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
+import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.OptionalFleetData;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
@@ -17,6 +19,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RuinsFleetRouteManager;
+import com.fs.starfarer.api.impl.campaign.procgen.themes.RouteFleetAssignmentAI;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.ScavengerFleetAssignmentAI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -57,11 +60,26 @@ public class FleetQuestSpawner implements EveryFrameScript {
         @Override
         public CampaignFleetAPI spawnFleet(RouteData route) {
             Random random = route.getRandom();
-            CampaignFleetAPI fleet = RuinsFleetRouteManager.createScavenger(
-                    null, system.getLocation(), route, route.getMarket(), false, random);
+            CampaignFleetAPI fleet;
+            if (type == FleetQuestType.INTERMENT) {
+                FleetParamsV3 params = new FleetParamsV3(route.getMarket(), null,
+                        Factions.INDEPENDENT, null, FleetTypes.TRADE_SMALL,
+                        8f, 10f, 0f, 0f, 0f, 0f, 0f);
+                params.maxShipSize = 2;
+                params.random = random;
+                fleet = FleetFactoryV3.createFleet(params);
+            } else {
+                fleet = RuinsFleetRouteManager.createScavenger(
+                        null, system.getLocation(), route, route.getMarket(), false, random);
+            }
             if (fleet == null) return null;
 
-            fleet.addScript(new ScavengerFleetAssignmentAI(fleet, route, false));
+            if (type == FleetQuestType.INTERMENT) {
+                fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_TRADE_FLEET, true);
+                fleet.addScript(new RouteFleetAssignmentAI(fleet, route));
+            } else {
+                fleet.addScript(new ScavengerFleetAssignmentAI(fleet, route, false));
+            }
 
             CampaignFleetAPI player = Global.getSector().getPlayerFleet();
             if (player != null && player.getContainingLocation() == system) {
@@ -179,7 +197,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         List<CampaignFleetAPI> matching = new ArrayList<>();
 
         for (CampaignFleetAPI fleet : location.getFleets()) {
-            if (!canCarryAnOffer(fleet)) continue;
+            if (!canCarryAnOffer(fleet, type)) continue;
             if (type.requiresIndependentFleet()
                     && !Factions.INDEPENDENT.equals(fleet.getFaction().getId())) continue;
 
@@ -213,8 +231,17 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 || FleetTypes.SCAVENGER_LARGE.equals(type);
     }
 
-    protected boolean canCarryAnOffer(CampaignFleetAPI fleet) {
-        if (!isScavenger(fleet)) return false;
+    protected boolean canCarryAnOffer(CampaignFleetAPI fleet, FleetQuestType type) {
+        String fleetType = fleet == null ? null : fleet.getMemoryWithoutUpdate()
+                .getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
+        if (type == FleetQuestType.INTERMENT) {
+            if (!FleetTypes.TRADE_SMALL.equals(fleetType)) return false;
+            if (!fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_TRADE_FLEET)) {
+                return false;
+            }
+        } else if (!isScavenger(fleet)) {
+            return false;
+        }
 
         if (catchrelease.campaign.fish.fisherman.FishermanSpawner.isFisherman(fleet)) return false;
 
