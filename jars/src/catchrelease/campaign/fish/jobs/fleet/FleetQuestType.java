@@ -1181,13 +1181,59 @@ public enum FleetQuestType {
                                     + "\n\nThey turn the pickup back."))),
     WAGER("Settling a Bet",
             FleetTypes.SCAVENGER_SMALL,
-            "There is a disagreement aboard about what is actually down there and it has stopped"
-                    + " being funny. Go and settle it. Whoever is wrong is paying, and it will not"
-                    + " be coming out of our pocket either way.",
-            "An argument aboard that has outlasted everyone's patience for it.",
+            "The captain brings up two survey logs covering the same patch of water.\n\n"
+                    + "\"One watch says the returns prove a particular species runs there. The"
+                    + " other logged the same returns as nothing worth naming.\"\n\n"
+                    + "\"It started over a bottle. Then came the side bets. There's serious money"
+                    + " in the pot now, and they're getting close to wagering a share of the"
+                    + " ship.\"\n\n"
+                    + "\"I don't care which watch is right. I care that this gets settled before"
+                    + " it starts costing me crew.\"\n\n"
+                    + "\"Bring me {ask}. One fish is luck. Two are evidence.\"\n\n"
+                    + "\"The pot pays {reward}. We have {days}.\"",
+            "The crew of {fleet} recorded conflicting watch logs for the same fishing ground and"
+                    + " has asked for {ask} to settle the wager. The captain needs the pair within"
+                    + " {days}.",
             "Arguing",
-            "That settled it. Half the crew owes the other half money, and both halves owe you"
-                    + " thanks.");
+            "\"Half the crew owes the other half money, and both halves owe you thanks.\"\n\n"
+                    + "The captain glances toward the passage outside the bridge.\n\n"
+                    + "\"They've started arguing about whether this proves the old log or only"
+                    + " today's water.\"",
+            1.15f,
+            new Dialogue(
+                    "\"Scavenger fleet {fleet}. Captain speaking. I've got two watches, two"
+                            + " logs, and one argument. If you fish, I'd like a neutral hand.\"",
+                    "I'll take the job.", "No promises. Send me the logs.",
+                    "\"Good. I'll send both logs and the terms of the wager.\"\n\n"
+                            + "The files arrive from {fleet}.\n\n"
+                            + "\"Bring me the pair and I'll record what you caught.\"",
+                    "\"Fair enough. No commitment.\"\n\n"
+                            + "The captain transmits the same logs and wager terms.\n\n"
+                            + "\"If you find what we need within {days}, hail us.\"",
+                    "Decline.",
+                    "\"Understood. I'll keep them from wagering the ship as long as I can.\""
+                            + "\n\n\"{fleet} out.\"",
+                    "\"Side bets are frozen until you return. Someone tried to register a wager"
+                            + " on how long the freeze lasts. I rejected it.\"\n\n"
+                            + "\"We still need {ask}. We have {days}.\"",
+                    "Representatives from both watches examine the pair in silence.\n\n"
+                            + "The captain checks each specimen, then enters the result beside"
+                            + " both logs.\n\n"
+                            + "\"No winner announced. Settle the books from the evidence.\"\n\n"
+                            + "They authorize the pot transfer.",
+                    "What does each side claim?",
+                    "\"First watch says the same return profile repeated often enough to show"
+                            + " the species is running there.\"\n\n"
+                            + "\"Second watch says it's ordinary water, ordinary luck, and nothing"
+                            + " in the returns worth naming.\"\n\n"
+                            + "The captain closes both logs.\n\n"
+                            + "\"I've read them. I'm not ranking them.\"",
+                    "The wager is recorded on the following terms.",
+                    new Question("For the record: which side am I proving?",
+                            "\"Neither.\"\n\n"
+                                    + "The captain taps the empty result line between the two"
+                                    + " watch logs.\n\n"
+                                    + "\"You're the instrument, and instruments do not bet.\"")));
 
     private static final FleetQuestType[] LOCAL_OFFERS = {
             LAST_ENTRY,
