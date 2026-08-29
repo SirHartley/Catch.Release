@@ -48,7 +48,7 @@ public class TuberJob extends FishJob {
         grim.lowCoherence = true;
 
         addAsk(grim);
-        // the reveal shoot pays over its score - the second clip is the whole point
+        // The second shoot pays a 60% premium.
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
                 .budgetMult(1.6f).random(random())).rewards);
 
@@ -58,18 +58,17 @@ public class TuberJob extends FishJob {
     @Override
     protected String getIntelSpecialTerms() {
         if (getRound() < 1) {
-            return "This is the first of two shoots. The first calls for a Fine specimen of the "
-                    + "requested rarity; the second will call for a low-coherence catch.";
+            return "This is the first of two shoots. The current clip needs a Fine specimen of "
+                    + "the requested rarity; the second will call for a low-coherence catch.";
         }
 
-        return "This is the final shoot. The remaining request is the promised low-coherence "
-                + "catch, and completing it closes out the arrangement.";
+        return "This is the final shoot. The remaining request is the promised low-coherence catch.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "A TriTuber has commissioned catches for a pair of short clips. Each is meant to "
-                + "give the feed a strong opening and a reveal.";
+        return "A TriTuber has commissioned catches for two short clips, each built around a "
+                + "strong opening and reveal.";
     }
 
     @Override

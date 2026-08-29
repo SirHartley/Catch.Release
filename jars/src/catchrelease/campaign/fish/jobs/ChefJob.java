@@ -47,9 +47,7 @@ public class ChefJob extends FishJob {
 
         if (!setDurationForAsks(createdAt)) return false;
 
-        // the cook's signature payment is charts: two fixed range-data rewards. When
-        // the sector has fewer left to give, the freed budget rolls extra rewards
-        // instead of the job refusing to exist
+        // Reserve up to two unknown ranges; missing entries return to the roll budget.
         List<FishReward> locationData = FishRewardRoller.rollLocationData(
                 genRandom, 2, VALUE_PER_TYPE);
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
@@ -70,8 +68,8 @@ public class ChefJob extends FishJob {
     @Override
     protected String getIntelPurpose() {
         String planned = dish == null ? "the planned dish" : dish;
-        return String.format("A cook is sourcing the separate ingredient lines for %s. Each catch "
-                + "has its place in the preparation.", planned);
+        return String.format("A cook is sourcing the catch needed for %s. Each specimen has a "
+                + "place in the preparation.", planned);
     }
 
     @Override

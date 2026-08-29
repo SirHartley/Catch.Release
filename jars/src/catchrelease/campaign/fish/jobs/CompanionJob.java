@@ -48,7 +48,6 @@ public class CompanionJob extends FishJob {
     protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (offered == null || offered.getSizeFraction() < BONUS_FRACTION) return false;
 
-        // the premium is half the job again, rolled fresh
         for (FishReward extra : QuestRewards.roll(new QuestRewards.Request(asks)
                 .budgetMult(0.5f).random(random())).rewards) {
             grantReward(extra, handedIn);
@@ -60,14 +59,14 @@ public class CompanionJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "The contract sets a minimum weight. A qualifying specimen that is large for its "
-                + "species earns an additional premium.";
+        return "The contract sets a minimum weight. A qualifying specimen that is especially "
+                + "large for its species earns an additional premium.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "A discreet private purchase contract calls for a specimen matching the buyer's "
-                + "stated preference. The client's purpose is not part of the brief.";
+        return "A discreet private buyer wants a specimen matching the terms of the purchase "
+                + "contract. What it is for is outside the brief.";
     }
 
     @Override

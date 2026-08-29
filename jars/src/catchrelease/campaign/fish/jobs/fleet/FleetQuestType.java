@@ -104,8 +104,7 @@ public enum FleetQuestType {
 
     public static final float HOME_SPECIES_WEIGHT = 4f;
 
-    /** A species swimming where the giver already is, or failing that in the single
-     *  nearest neighbouring system - null when neither has anything eligible. */
+    /** Picks from the home system or its nearest neighbour, preferring home. */
     protected static String pickNearbySpecies(Random random, StarSystemAPI home,
                                               FishRarity maximum) {
         if (home == null) return pickSpecies(random, null, maximum);
@@ -162,20 +161,14 @@ public enum FleetQuestType {
         return pick == null ? null : pick.id;
     }
 
-    /** The type keeps its demand shape - the pitch has to stay true - and the rolled
-     *  ambition decides how far that shape is pushed. The reward is then priced off
-     *  what actually came out, so a shape that cannot reach the target underpays
-     *  rather than overcharges. Returns null when the shape cannot be filled at all
-     *  from where the giver sits. */
+    /** Shapes this quest type around the target score, or returns null if it cannot. */
     public FishRequirement rollAsk(Random random, float target, StarSystemAPI home) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
             case STRANDED:
             case SCAVENGER_ENGINE:
-                // stuck means stuck: both pitches say the water is local, so the fish
-                // lives in this system or the one next door, never a detour - and a
-                // bigger favour is a second specimen, never exotics
+                // Distress jobs add quantity instead of asking for distant or rarer fish.
                 ask.count = target >= 24f ? 2 : 1;
                 ask.speciesId = pickNearbySpecies(random, home, FishRarity.UNCOMMON);
                 if (ask.speciesId == null) return null;

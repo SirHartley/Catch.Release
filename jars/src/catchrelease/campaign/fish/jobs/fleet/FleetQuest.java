@@ -191,9 +191,6 @@ public class FleetQuest extends FishJob {
 
         setPersonOverride(captain);
 
-        // opportunist end to end: an ambition is rolled, the type's demand shape is
-        // pushed toward it, and the pay answers what the shape actually produced -
-        // over the odds, because everyone out here is desperate or obsessed
         float target = DemandScore.rollTarget(random());
         FishRequirement ask = rollFillableAsk(target);
         if (ask == null) return false;
@@ -211,11 +208,7 @@ public class FleetQuest extends FishJob {
         return true;
     }
 
-    // a rolled species can point at water that moved or vanished under the monthly
-    // reassessment; failed attempts retry with shrinking ambition, so a collector who
-    // cannot have an epic settles for a rare instead of the encounter being dropped.
-    // The reward is priced off the ask that came out, so settling also pays less.
-    // The one satisfiability scan also sizes the clock.
+    // Retry at lower difficulty when a rolled ask has no reachable habitat.
     protected FishRequirement rollFillableAsk(float target) {
         StarSystemAPI home = giver.getContainingLocation() instanceof StarSystemAPI
                 ? (StarSystemAPI) giver.getContainingLocation() : null;

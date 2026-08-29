@@ -71,9 +71,8 @@ public abstract class CampedSpotJob extends FishJob {
 
         setReceiptAsk();
 
-        // the pay answers the camp, not the fish: its credit value converts straight
-        // into score, so a raiding pack opens the reward tiers a receipt never would.
-        // The clock covers the trip twice over - one fight and one catch
+        // Add the camp's value to the receipt ask when scoring rewards.
+        // Allow time for both the confrontation and the catch.
         float score = size.value / QuestRewards.CREDITS_PER_POINT + DemandScore.of(asks);
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
                 .score(score).random(genRandom)).rewards);
@@ -328,9 +327,8 @@ public abstract class CampedSpotJob extends FishJob {
     @Override
     protected String getIntelPurpose() {
         return "A fisher wants a productive rupture put back into service after another fleet "
-                + "drove the crews off the site. Clearing the obstruction is only part of the "
-                + "job; a fresh catch from that exact rupture is the proof that the spot can be "
-                + "worked again.";
+                + "forced the crews off the site. A fresh catch from that exact rupture is the "
+                + "proof that it can be worked again.";
     }
 
     @Override
