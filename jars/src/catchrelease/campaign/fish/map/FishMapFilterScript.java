@@ -723,6 +723,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         overlayPanel = Global.getSettings().createCustom(
                 scrollerPos.getWidth(), scrollerPos.getHeight(), overlay);
+        overlay.mountTooltips(overlayPanel);
         ReflectionUtils.invoke(scroller, "addToOverlay", overlayPanel);
     }
 

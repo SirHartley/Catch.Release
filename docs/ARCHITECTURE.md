@@ -448,7 +448,7 @@ The five regular wares use credits-and-crabs prices. Switchable curios route thr
 | `FishMapPane.java` | Search, type filters, species list, coherence toggle, request restrictions, and no-data/reset states. Intel handoffs replace stale pane state and can show a restricted union for broad requirements. |
 | `FishPresence.java` | Authoritative visibility of species and systems. Normal play uses caught or learned range data; dev mode computes the full chart without changing the save. Optional allowlists constrain intel requests. |
 | `FishPresenceField.java` | Builds smoothed metaball range meshes. |
-| `FishPresenceOverlay.java` | Draws range meshes, overlap stripes, route badges, saved and current routes, clear/track controls, and the coherence heat map. Uncharted focused species show a centered red `NO DATA` state. |
+| `FishPresenceOverlay.java` | Draws range meshes, overlap stripes, route badges, saved and current routes, clear/track controls, and the coherence heat map. Clearing the live plot leaves tracked route intel intact; a transparent hotspot gives the hand-drawn clear control a stock tooltip. Uncharted focused species show a centered red `NO DATA` state. |
 | `CoherenceHeatField.java` | Samples `Aberration` on a light-year grid over the exact sector bounds. Uses uncapped abyss depth and the same colony stability fields as gameplay. |
 | `FishSystemPane.java` | System-view fish list and handoff to the main fishing map. |
 | `FishHolderPlugin.java` | Reusable circular species holder with rarity ring, art or silhouette, and wanted mark. |
@@ -513,7 +513,7 @@ The associated `entities/HauntMineEntityPlugin.java` implements mine behavior. `
 | `FishIntelMapButton.java` | Shared navigation contracts: open the fishing map for habitat targets, plot a route for known systems, or set autopilot for non-fish objectives. |
 | `FishIntelNotifications.java` | Queues new tutorial, chart, rumor, and custom fish intel for the first unpaused frame after dialogue. Updates use a zero-day delayed script. Inline rendering shows the same vanilla card without consuming the queue. |
 | `CatchLogIntel.java` | One silent entry per landed specimen under `Catch log`. Uses player-faction title colours and records grade, dimensions, coherence, gear, date, system, value, chart provenance, and bycatch. |
-| `FishRouteIntel.java` | Persistent tracked route with name, note, saved stops, caught counts, methods, live relevant requests, map arrows, replot, and stop-tracking actions. Catch progress uses shared delayed intel updates. |
+| `FishRouteIntel.java` | Persistent, independent copy of a tracked route with name, note, saved stops, caught counts, methods, live relevant requests, map arrows, replot, and stop-tracking actions. Clearing or replacing the live planner route does not remove the copy. Catch progress uses shared delayed intel updates. |
 | `FishMapIntel.java` | Dead save-compatibility shell. |
 
 ### `campaign/ponds`

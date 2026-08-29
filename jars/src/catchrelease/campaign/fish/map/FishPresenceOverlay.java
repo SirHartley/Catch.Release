@@ -9,7 +9,10 @@ import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
+import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
@@ -55,6 +58,9 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     protected Object savedStateFor;
     protected boolean savedState;
 
+    protected transient CustomPanelAPI tooltipPanel;
+    protected transient UIComponentAPI clearTooltipHost;
+
     protected transient CoherenceHeatField heat;
     protected boolean coherenceShown = false;
 
@@ -93,6 +99,11 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
         saveRouteRequested = listener;
     }
 
+    public void mountTooltips(CustomPanelAPI panel) {
+        tooltipPanel = panel;
+        syncClearTooltip();
+    }
+
     public void noteRouteSaved() {
         savedStateFor = FishRoute.get();
         savedState = true;
@@ -114,6 +125,60 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
     }
 
     @Override
+    public void advance(float amount) {
+        syncClearTooltip();
+    }
+
+    protected void syncClearTooltip() {
+        if (tooltipPanel == null) return;
+
+        if (FishRoute.get() == null) {
+            if (clearTooltipHost != null) {
+                tooltipPanel.removeComponent(clearTooltipHost);
+                clearTooltipHost = null;
+            }
+            return;
+        }
+
+        if (clearTooltipHost != null) return;
+
+        LazyFont small = ShopUi.getSmallFont();
+        float labelWidth = 160f;
+        float gap = 8f;
+        float labelHeight = (small == null ? 14f : small.getBaseHeight()) + 10f;
+        float totalWidth = saveRouteRequested == null
+                ? labelWidth : labelWidth * 2f + gap;
+
+        TooltipMakerAPI tooltips = tooltipPanel.createUIElement(
+                totalWidth, labelHeight, false);
+        CustomPanelAPI row = tooltipPanel.createCustomPanel(totalWidth, labelHeight,
+                new BaseCustomUIPanelPlugin() {
+                });
+        CustomPanelAPI clear = tooltipPanel.createCustomPanel(labelWidth, labelHeight,
+                new BaseCustomUIPanelPlugin() {
+                });
+
+        row.addComponent(clear).inTR(0f, 0f);
+        tooltips.addCustom(row, 0f);
+        tooltips.addTooltipTo(new BaseTooltipCreator() {
+            @Override
+            public float getTooltipWidth(Object tooltipParam) {
+                return 320f;
+            }
+
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                      Object tooltipParam) {
+                tooltip.addPara("Clear the current plotted route so you can plan another."
+                        + " Tracked route intel remains available in the intel screen.", 0f);
+            }
+        }, clear, TooltipMakerAPI.TooltipLocation.BELOW);
+
+        clearTooltipHost = tooltips;
+        tooltipPanel.addUIElement(tooltips).inTMid(8f);
+    }
+
+    @Override
     public void processInput(List<InputEventAPI> events) {
         for (InputEventAPI event : events) {
             if (event.isConsumed()) continue;
@@ -125,9 +190,6 @@ public class FishPresenceOverlay extends BaseCustomUIPanelPlugin {
 
             if (event.isLMBDownEvent() && FishRoute.get() != null
                     && isInCloseLabel(event.getX(), event.getY())) {
-                // a tracked copy of the same route draws the same badges, so the
-                // clear takes it too - other saved routes are their own decisions
-                catchrelease.campaign.fish.intel.FishRouteIntel.forget(FishRoute.get());
                 FishRoute.clear();
                 event.consume();
             }
