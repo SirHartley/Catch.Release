@@ -47,6 +47,9 @@ public class FleetQuest extends FishJob {
 
     public static final float HOLD_DAYS = 100000f;
 
+    public static final int ASK_ATTEMPTS = 5;
+    public static final float ASK_BACKOFF = 0.7f;
+
     public static final String OFFER_SPRITE_CATEGORY = "systemMap";
     public static final String OFFER_SPRITE = "mission_indicator";
     public static final Color OFFER_COLOR = new Color(95, 200, 215);
@@ -208,10 +211,12 @@ public class FleetQuest extends FishJob {
     }
 
     // a rolled species can point at water that moved or vanished under the monthly
-    // reassessment; a few rerolls give the shape another chance before the encounter
-    // is dropped entirely. The one satisfiability scan also sizes the clock.
+    // reassessment; failed attempts retry with shrinking ambition, so a collector who
+    // cannot have an epic settles for a rare instead of the encounter being dropped.
+    // The reward is priced off the ask that came out, so settling also pays less.
+    // The one satisfiability scan also sizes the clock.
     protected FishRequirement rollFillableAsk(float target) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < ASK_ATTEMPTS; i++, target *= ASK_BACKOFF) {
             FishRequirement ask = type.rollAsk(random(), target);
 
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
