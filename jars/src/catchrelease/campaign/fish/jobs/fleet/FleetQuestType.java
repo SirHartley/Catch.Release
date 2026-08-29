@@ -455,6 +455,65 @@ public enum FleetQuestType {
                             + "They straighten a stack of work orders.\n\n"
                             + "\"It helps.\"",
                     "The chief's request has the following terms.")),
+    EXHIBIT("The Exhibit",
+            FleetTypes.TRADE_SMALL,
+            "The operator comes on with a Hegemony evidence log open beside the comm pickup.\n\n"
+                    + "\"We're bonded to carry a confiscated specimen to a prosecution. Exhibit"
+                    + " {exhibit}. It left impound matching the evidence log. During transit, it"
+                    + " stopped matching the documented measurements.\"\n\n"
+                    + "They bring up the custody bond.\n\n"
+                    + "\"Bond language calls that 'custodial variance attributable to carrier"
+                    + " handling.' If it fails inspection, bond {bond} is forfeit. {company}"
+                    + " folds.\"\n\n"
+                    + "\"The delivery date is fixed. I need {ask}. I can offer {reward}, cleared"
+                    + " against the bond and impound manifest. We have {days}.\"",
+            "Bonded hauler {fleet}, operated by {company}, is carrying Hegemony exhibit"
+                    + " {exhibit}, which no longer matches its documented measurements. The"
+                    + " operator needs a replacement before the delivery deadline to avoid"
+                    + " forfeiting custody bond {bond}.",
+            "Holding for evidence delivery",
+            "\"Bond cleared. {company} keeps {fleet}.\"\n\n"
+                    + "The operator closes the custody file.\n\n"
+                    + "\"I had my tools priced for sale. Glad that list's useless now.\"\n\n"
+                    + "\"{fleet} out.\"",
+            1.15f,
+            new Dialogue(
+                    "\"This is {company}, owner-operator aboard {fleet}. I've got a custody"
+                            + " problem and not much time. Private channel?\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"All right. I'll send the custody extract, evidence log, and hand-in"
+                            + " code.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fine. No commitment recorded.\"\n\n"
+                            + "The operator sends the same custody extract, evidence log, and"
+                            + " hand-in code.\n\n"
+                            + "\"If you get what we need before delivery, hail us.\"",
+                    "Decline.",
+                    "\"Understood. I need to keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"Delivery date didn't move. {days} left.\"\n\n"
+                            + "\"I still need {ask}.\"",
+                    "The operator measures the replacement against the evidence log. A deckhand"
+                            + " seals the container under exhibit {exhibit} and enters the new"
+                            + " custody transfer.\n\n"
+                            + "The original handling report goes into the same folder. The bond"
+                            + " requires it to travel with the exhibit.",
+                    "What happened to the original?",
+                    "The operator opens the handling report.\n\n"
+                            + "\"Exhibit {exhibit}. Container nominal. Mass return {massReturn}:"
+                            + " inconsistent. Configuration not retained. Equipment-failure code"
+                            + " {failureCode}.\"\n\n"
+                            + "They close the report.\n\n"
+                            + "\"That's what I've got.\"",
+                    "The operator's replacement request has the following terms.",
+                    new Question(
+                            "You're asking me to help fake Navy evidence.",
+                            "\"The confiscation is real. The prosecution is real. We took custody"
+                                    + " of the exhibit, and our storage failed.\"\n\n"
+                                    + "The operator taps the bond entry.\n\n"
+                                    + "\"That makes the failure ours to answer for. If the chain"
+                                    + " doesn't pass inspection, the contractual fault is ours. So"
+                                    + " is the criminal exposure.\""))),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -522,6 +581,7 @@ public enum FleetQuestType {
             TRIBUTE,
             REFERENCE_SPECIMEN,
             QUIET_SHIP,
+            EXHIBIT,
             SEEKER,
             QUOTA,
             STARVING,
@@ -591,6 +651,7 @@ public enum FleetQuestType {
         public final String sourOption;
         public final String sourResponse;
         public final Followup followup;
+        public final Question extraQuestion;
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
                         String acceptNoPromise, String declineOption, String decline,
@@ -598,7 +659,7 @@ public enum FleetQuestType {
                         String questionResponse, String intelTerms) {
             this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
                     decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
-                    null, null, null, null, null);
+                    null, null, null, null, null, null);
         }
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
@@ -607,7 +668,16 @@ public enum FleetQuestType {
                         String questionResponse, String intelTerms, Followup followup) {
             this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
                     decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
-                    null, null, null, null, followup);
+                    null, null, null, null, followup, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, Question extraQuestion) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    null, null, null, null, null, extraQuestion);
         }
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
@@ -617,7 +687,7 @@ public enum FleetQuestType {
                         String haggleResponse, String sourOption, String sourResponse) {
             this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
                     decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
-                    haggleOption, haggleResponse, sourOption, sourResponse, null);
+                    haggleOption, haggleResponse, sourOption, sourResponse, null, null);
         }
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
@@ -625,7 +695,7 @@ public enum FleetQuestType {
                         String waiting, String turnIn, String questionOption,
                         String questionResponse, String intelTerms, String haggleOption,
                         String haggleResponse, String sourOption, String sourResponse,
-                        Followup followup) {
+                        Followup followup, Question extraQuestion) {
             this.hail = hail;
             this.acceptOption = acceptOption;
             this.noPromiseOption = noPromiseOption;
@@ -643,6 +713,18 @@ public enum FleetQuestType {
             this.sourOption = sourOption;
             this.sourResponse = sourResponse;
             this.followup = followup;
+            this.extraQuestion = extraQuestion;
+        }
+    }
+
+    public static class Question {
+
+        public final String option;
+        public final String response;
+
+        public Question(String option, String response) {
+            this.option = option;
+            this.response = response;
         }
     }
 
@@ -874,6 +956,20 @@ public enum FleetQuestType {
                 if (target >= 24f) ask.minGrade = FishGrade.AVERAGE;
                 break;
 
+            case EXHIBIT: {
+                ask.speciesId = pickSpecies(random, FishRarity.UNCOMMON, FishRarity.UNCOMMON);
+                FishSpec spec = FishSpecLoader.getFishSpec(ask.speciesId);
+                if (spec == null) return null;
+
+                if (target >= 26f) {
+                    float fraction = 0.65f + Math.min(0.2f, (target - 26f) / 100f);
+                    float floor = Math.round(spec.lengthMax * fraction * 10f) / 10f;
+                    ask.minLength = Math.max(spec.lengthMin,
+                            Math.min(spec.lengthMax, floor));
+                }
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -948,6 +1044,7 @@ public enum FleetQuestType {
         if (this == REFERENCE_SPECIMEN) {
             request.exclude(QuestRewards.Kind.BACKDROP, QuestRewards.Kind.BLUEPRINT);
         }
+        if (this == EXHIBIT) request.exclude(QuestRewards.Kind.BACKDROP);
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
                 && asks.get(0).lowCoherence) {
@@ -964,7 +1061,7 @@ public enum FleetQuestType {
     }
 
     public boolean usesTradeConvoy() {
-        return this == INTERMENT || counteroffer != null;
+        return this == INTERMENT || this == EXHIBIT || counteroffer != null;
     }
 
     public boolean usesBosunContact() {
@@ -974,7 +1071,7 @@ public enum FleetQuestType {
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
                 || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
-                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP;
+                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP || this == EXHIBIT;
     }
 
     public float getMaximumTravelLY() {
