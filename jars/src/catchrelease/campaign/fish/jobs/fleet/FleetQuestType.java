@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -357,6 +358,57 @@ public enum FleetQuestType {
                             + "The quartermaster checks the deadline again.\n\n"
                             + "\"Early delivery would suit us.\"",
                     "{fleet} will pay from its salvage hold on the following terms.")),
+    REFERENCE_SPECIMEN("The Reference Specimen",
+            FleetTypes.SCAVENGER_SMALL,
+            "The handler comes on with a League release form open on a slate.\n\n"
+                    + "\"We're working through the impound backlog. One sealed hauler has catch"
+                    + " that doesn't match its origin stamps. Bad manifest, most likely.\"\n\n"
+                    + "\"Form L-17C requires an outside reference before they'll release the ship."
+                    + " Our license covers handling, not fishing, so I can't provide the reference"
+                    + " under my own contract.\"\n\n"
+                    + "\"We need {ask}. The service allocation is {reward}. I've got {days} before"
+                    + " the release window closes.\"",
+            "Independent handling contractor {company} is clearing an impounded hauler under"
+                    + " League contract {contract}. An origin-stamp discrepancy requires the"
+                    + " requested reference specimen before the hauler can be released, and the"
+                    + " filing window is limited.",
+            "Clearing the impound",
+            "\"The League closed {contract}. That means {company} gets paid.\"\n\n"
+                    + "The freed hauler is already moving away from the impound berth.\n\n"
+                    + "The handler opens the next file on the slate.\n\n"
+                    + "\"One less. {fleet} out.\"",
+            1f,
+            new Dialogue(
+                    "\"This is {company}, Independent handling contractor aboard {fleet}, working"
+                            + " League contract {contract}. We have a subcontract available.\"",
+                    "I'll take the subcontract.",
+                    "No promises. Send me the paperwork.",
+                    "\"Good. I'll send the release procedure, reference profile, and our contract"
+                            + " authorization.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fine. No commitment recorded.\"\n\n"
+                            + "The handler transmits the same procedure, profile, and authorization."
+                            + "\n\n\"If you get what the form calls for before the window closes,"
+                            + " hail us.\"",
+                    "Decline.",
+                    "\"Understood. Back to the backlog.\"\n\n\"{fleet} out.\"",
+                    "\"The release window's getting narrow. There's an L-14B extension form"
+                            + " involved now, and my fee has not increased.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "A technician logs the reference beside the sealed hauler's sample record."
+                            + " The handler checks the comparison, completes the release form, and"
+                            + " adds their contract seal.\n\n"
+                            + "Behind them, dock crew remove the impound tags from the hauler. Its"
+                            + " tug lights come on.\n\n"
+                            + "\"Released.\"",
+                    "What's wrong with the cargo?",
+                    "The handler opens the discrepancy page.\n\n"
+                            + "\"Origin stamp: {originStamp}. Sample profile: {profileOrigin}."
+                            + " Registry volume {registryVolume} isn't in the League database. Case"
+                            + " code {discrepancyCode}.\"\n\n"
+                            + "They return to the release form.\n\n"
+                            + "\"That's what we're clearing.\"",
+                    "The League service line authorizes the following subcontract terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -422,6 +474,7 @@ public enum FleetQuestType {
             CALIBRATION_PAIR,
             MUTINY_POT,
             TRIBUTE,
+            REFERENCE_SPECIMEN,
             SEEKER,
             QUOTA,
             STARVING,
@@ -649,12 +702,18 @@ public enum FleetQuestType {
     }
 
     protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {
+        return pickSpecies(random, minimum, maximum, null);
+    }
+
+    protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum,
+                                        CatchImplement implement) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
             if (minimum != null && spec.rarity.rank < minimum.rank) continue;
             if (maximum != null && spec.rarity.rank > maximum.rank) continue;
+            if (!spec.canBeReachedBy(implement)) continue;
 
             picker.add(spec, 1f);
         }
@@ -728,6 +787,14 @@ public enum FleetQuestType {
                 break;
             }
 
+            case REFERENCE_SPECIMEN: {
+                FishRarity shelf = target >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf, CatchImplement.POND);
+                if (ask.speciesId == null) return null;
+                ask.implement = CatchImplement.POND;
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -798,6 +865,9 @@ public enum FleetQuestType {
         if (this == ESCROW) {
             request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }
+        if (this == REFERENCE_SPECIMEN) {
+            request.exclude(QuestRewards.Kind.BACKDROP, QuestRewards.Kind.BLUEPRINT);
+        }
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
                 && asks.get(0).lowCoherence) {
@@ -823,7 +893,8 @@ public enum FleetQuestType {
 
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
-                || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE;
+                || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
+                || this == REFERENCE_SPECIMEN;
     }
 
     public float getMaximumTravelLY() {

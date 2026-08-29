@@ -107,6 +107,11 @@ public class FleetQuest extends FishJob {
     protected String coordinates;
     protected String signature;
     protected String contract;
+    protected String company;
+    protected String originStamp;
+    protected String profileOrigin;
+    protected String registryVolume;
+    protected String discrepancyCode;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -269,6 +274,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
             contact.setVoice(Voices.SPACER);
+        } else if (type == FleetQuestType.REFERENCE_SPECIMEN) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
+            contact.setVoice(Voices.BUSINESS);
         }
 
         setPersonOverride(contact);
@@ -318,6 +330,31 @@ public class FleetQuest extends FishJob {
                     Global.getSector().getClock().getCycle(), random().nextInt(1000));
             liabilityBase = 120000 + random().nextInt(180001);
             liabilityPerDay = 1800 + random().nextInt(2201);
+            return;
+        }
+        if (type == FleetQuestType.REFERENCE_SPECIMEN) {
+            String surname = getPerson() == null ? null : getPerson().getName().getLast();
+            company = surname == null || surname.isEmpty()
+                    ? "Independent Impound Handling" : surname + " Handling";
+            contract = String.format(Locale.ROOT, "PL-IMP-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+
+            List<MarketAPI> markets = new ArrayList<>(
+                    Global.getSector().getEconomy().getMarketsCopy());
+            markets.removeIf(market -> market == null || market.isHidden());
+            if (!markets.isEmpty()) {
+                MarketAPI stamped = markets.remove(random().nextInt(markets.size()));
+                originStamp = stamped.getName();
+            }
+            if (!markets.isEmpty()) {
+                MarketAPI profiled = markets.get(random().nextInt(markets.size()));
+                profileOrigin = profiled.getName();
+            }
+            if (originStamp == null) originStamp = "Kazeron bonded quay";
+            if (profileOrigin == null) profileOrigin = "Rasalhague transfer station";
+            registryVolume = String.format(Locale.ROOT, "LR-%02d-%04d",
+                    random().nextInt(100), random().nextInt(10000));
+            discrepancyCode = String.format(Locale.ROOT, "OS-%02d", 10 + random().nextInt(90));
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -471,6 +508,11 @@ public class FleetQuest extends FishJob {
                 .replace("{coordinates}", value(coordinates))
                 .replace("{signature}", value(signature))
                 .replace("{contract}", value(contract))
+                .replace("{company}", value(company))
+                .replace("{originStamp}", value(originStamp))
+                .replace("{profileOrigin}", value(profileOrigin))
+                .replace("{registryVolume}", value(registryVolume))
+                .replace("{discrepancyCode}", value(discrepancyCode))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
