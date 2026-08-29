@@ -154,6 +154,7 @@ public class FleetQuest extends FishJob {
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
+    protected int rationDay = -1;
     protected boolean haggled;
     protected boolean soured;
     protected List<FishReward> originalRewards = new ArrayList<>();
@@ -335,6 +336,13 @@ public class FleetQuest extends FishJob {
 
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
+            contact.setVoice(Voices.SPACER);
+        } else if (type == FleetQuestType.STARVING) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_CREW_BOSS);
             contact.setVoice(Voices.SPACER);
         } else if (type.usesBosunContact()) {
             contact = giver.getFaction().createRandomPerson(random());
@@ -673,6 +681,7 @@ public class FleetQuest extends FishJob {
         if (soured) memory.set(SOURED_FLAG, true);
         else memory.unset(SOURED_FLAG);
         if (type == FleetQuestType.ESCROW) liabilityDay = elapsedDay();
+        if (type == FleetQuestType.STARVING) rationDay = elapsedDay();
 
         setOrUnset(memory, FOLLOWUP_PITCH_KEY,
                 followup == null ? null : render(followup.pitch));
@@ -753,6 +762,7 @@ public class FleetQuest extends FishJob {
                 .replace("{manualSection}", value(manualSection))
                 .replace("{coilCondition}", value(coilCondition))
                 .replace("{filingDate}", value(filingDate))
+                .replace("{rationDays}", Integer.toString(19 + elapsedDay()))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
@@ -850,10 +860,18 @@ public class FleetQuest extends FishJob {
         }
 
         if (Stage.WANTED.equals(currentStage)) {
-            if (giver != null && !giver.getMemoryWithoutUpdate().contains(ACCEPT_OPTION_KEY)) {
-                writeDialogueMemory();
+            if (giver != null) {
+                MemoryAPI memory = giver.getMemoryWithoutUpdate();
+                if (!memory.contains(ACCEPT_OPTION_KEY)
+                        || (type == FleetQuestType.STARVING
+                                && !memory.contains(QUESTION_OPTION_KEY))) {
+                    writeDialogueMemory();
+                }
             }
             if (type == FleetQuestType.ESCROW && elapsedDay() != liabilityDay) {
+                writeDialogueMemory();
+            }
+            if (type == FleetQuestType.STARVING && elapsedDay() != rationDay) {
                 writeDialogueMemory();
             }
             keepStanding();
