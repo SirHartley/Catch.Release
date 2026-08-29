@@ -32,6 +32,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
     public static final float BUTTON_WIDTH = 120f;
     public static final float BUTTON_HEIGHT = 25f;
     public static final float BUTTON_PAD = 3f;
+    public static final int VANILLA_ROW_BUTTONS = 6;
+    public static final int MAX_SHORTCUT_SLOT = 10;
 
     public static final float PANE_GAP = 8f;
     public static final float BLOB_RADIUS = 3200f;
@@ -655,17 +657,22 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         if (checkboxCtor == null) throw new IllegalStateException("no checkbox renderer to clone");
 
+        // the number key continues the row's own sequence, so a button another mod put
+        // there first shifts ours to the next digit instead of double-binding its key
+        int slot = countRowButtons(filterRow) + 1;
+        String digit = slot <= MAX_SHORTCUT_SLOT ? String.valueOf(slot % 10) : null;
+
         // bracketed key written into the label by hand - vanilla's auto-append only covers its own rebindable keys
         FactionAPI player = Global.getSector().getPlayerFaction();
-        Object checkbox = checkboxCtor.newInstance("Fish [7]",
+        Object checkbox = checkboxCtor.newInstance(digit == null ? "Fish" : "Fish [" + digit + "]",
                 Global.getSettings().getString("defaultFont"),
                 player.getColor(), player.getDarkUIColor(), player.getBrightUIColor());
 
         // the key digit in the highlight colour, the way vanilla's own row wears its numbers
         Object title = ReflectionUtils.invokeIfExists(checkbox, "getTitle");
-        if (title instanceof LabelAPI) {
+        if (digit != null && title instanceof LabelAPI) {
             ((LabelAPI) title).setHighlightColor(Misc.getHighlightColor());
-            ((LabelAPI) title).setHighlight("7");
+            ((LabelAPI) title).setHighlight(digit);
         }
 
         fishButton = null;
@@ -703,7 +710,8 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         fishButton.setHighlightBrightness(0.8f);
         fishButton.setQuickMode(true);
 
-        fishButton.setShortcut(Keyboard.KEY_7, true);
+        // LWJGL's digit keycodes run contiguously KEY_1..KEY_9 then KEY_0
+        if (digit != null) fishButton.setShortcut(Keyboard.KEY_1 + (slot - 1), true);
 
         ((UIPanelAPI) filterRow).addComponent((UIComponentAPI) fishButton)
                 .setSize(BUTTON_WIDTH, BUTTON_HEIGHT)
@@ -719,12 +727,11 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         Object children = ReflectionUtils.invokeIfExists(filterRow, "getChildrenCopy");
         if (!(children instanceof List)) return anchor;
 
+        PositionAPI row = ((UIComponentAPI) filterRow).getPosition();
         for (Object child : (List<?>) children) {
-            if (!(child instanceof UIComponentAPI) || child == fishButton) continue;
+            if (!isInRowBand(child, row)) continue;
 
             PositionAPI pos = ((UIComponentAPI) child).getPosition();
-            if (pos == null || pos.getWidth() <= 0f) continue;
-
             float right = pos.getX() + pos.getWidth();
             if (right > best) {
                 best = right;
@@ -733,6 +740,36 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
         }
 
         return anchor;
+    }
+
+    /** Buttons the row actually shows; falls back to vanilla's six when the children
+     *  cannot be enumerated, which restores the fixed [7] behaviour. */
+    protected int countRowButtons(Object filterRow) {
+        Object children = ReflectionUtils.invokeIfExists(filterRow, "getChildrenCopy");
+        if (!(children instanceof List)) return VANILLA_ROW_BUTTONS;
+
+        PositionAPI row = ((UIComponentAPI) filterRow).getPosition();
+        int count = 0;
+        for (Object child : (List<?>) children) {
+            if (isInRowBand(child, row)) count++;
+        }
+
+        return count == 0 ? VANILLA_ROW_BUTTONS : count;
+    }
+
+    // vanilla parks two never-laid-out checkboxes at the origin as children of the same
+    // row; the band test keeps them, and anything similar from other mods, out of both
+    // the count and the anchor pick
+    protected boolean isInRowBand(Object child, PositionAPI row) {
+        if (!(child instanceof UIComponentAPI) || child == fishButton) return false;
+
+        PositionAPI pos = ((UIComponentAPI) child).getPosition();
+        if (pos == null || pos.getWidth() <= 0f) return false;
+
+        float centerY = pos.getCenterY();
+
+        return centerY >= row.getY() && centerY <= row.getY() + row.getHeight()
+                && pos.getX() + pos.getWidth() > row.getX();
     }
 
     protected void mountOverlay() {
