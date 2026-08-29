@@ -707,7 +707,32 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
 
         ((UIPanelAPI) filterRow).addComponent((UIComponentAPI) fishButton)
                 .setSize(BUTTON_WIDTH, BUTTON_HEIGHT)
-                .rightOfMid((UIComponentAPI) template, BUTTON_PAD);
+                .rightOfMid(findRowAnchor(filterRow, (UIComponentAPI) template), BUTTON_PAD);
+    }
+
+    // another mod may have put its own button after vanilla's last one, so the anchor
+    // is the rightmost thing actually in the row, not the constellations checkbox
+    protected UIComponentAPI findRowAnchor(Object filterRow, UIComponentAPI fallback) {
+        UIComponentAPI anchor = fallback;
+        float best = anchor.getPosition().getX() + anchor.getPosition().getWidth();
+
+        Object children = ReflectionUtils.invokeIfExists(filterRow, "getChildrenCopy");
+        if (!(children instanceof List)) return anchor;
+
+        for (Object child : (List<?>) children) {
+            if (!(child instanceof UIComponentAPI) || child == fishButton) continue;
+
+            PositionAPI pos = ((UIComponentAPI) child).getPosition();
+            if (pos == null || pos.getWidth() <= 0f) continue;
+
+            float right = pos.getX() + pos.getWidth();
+            if (right > best) {
+                best = right;
+                anchor = (UIComponentAPI) child;
+            }
+        }
+
+        return anchor;
     }
 
     protected void mountOverlay() {
