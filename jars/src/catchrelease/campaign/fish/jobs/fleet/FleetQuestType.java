@@ -310,6 +310,53 @@ public enum FleetQuestType {
                             + " counteroffer for the same specimen. They intend to present it as"
                             + " their own catch.",
                     "The captain's counteroffer has the following terms.")),
+    TRIBUTE("The Tribute",
+            FleetTypes.SCAVENGER_SMALL,
+            "The quartermaster comes on from a cramped cargo office with the salvage ledger open"
+                    + " behind the comm pickup.\n\n"
+                    + "\"We work a claim inside a pirate ring's territory. Once a year we pay them"
+                    + " for permission to keep working. This year the boss wants a display specimen"
+                    + " for his tank.\"\n\n"
+                    + "\"We sent a courier out for it. Courier didn't come back. The enforcers"
+                    + " arrived ahead of schedule.\"\n\n"
+                    + "They check the deadline.\n\n"
+                    + "\"We need {ask}. We can put up {reward} from the salvage hold. We have"
+                    + " {days}.\"",
+            "Independent salvage crew {fleet} owes a pirate ring its annual protection tribute"
+                    + " and lost the courier sent to secure it. They need the requested display"
+                    + " specimen before the deadline.",
+            "Holding for tribute",
+            "\"Your payment's cleared. The ring marked the tribute received, so the claim stays"
+                    + " ours.\"\n\n"
+                    + "The quartermaster closes the protection ledger.\n\n"
+                    + "\"Back to salvage. {fleet} out.\"",
+            1.25f,
+            new Dialogue(
+                    "\"Independent freighter {fleet}. Quartermaster here. Got a payment problem"
+                            + " that's becoming time-sensitive. Mind a private channel?\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the display instructions and our hand-in code.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fair enough. No commitment on the ledger.\"\n\n"
+                            + "The quartermaster transmits the same display instructions and"
+                            + " hand-in code.\n\n"
+                            + "\"If you get one in time, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"Claim's still working. We've got {days} left, and somebody aboard reminds"
+                            + " me of that every watch.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The quartermaster checks the specimen against a creased set of display"
+                            + " instructions and initials the handling line.\n\n"
+                            + "\"Good. I know that tank's paperwork better than our own cargo"
+                            + " codes.\"",
+                    "What happens if it's late?",
+                    "\"They come aboard. We clear the work deck, open the books, and lose a shift"
+                            + " while they decide what late costs this year.\"\n\n"
+                            + "The quartermaster checks the deadline again.\n\n"
+                            + "\"Early delivery would suit us.\"",
+                    "{fleet} will pay from its salvage hold on the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -374,6 +421,7 @@ public enum FleetQuestType {
             INTERMENT,
             CALIBRATION_PAIR,
             MUTINY_POT,
+            TRIBUTE,
             SEEKER,
             QUOTA,
             STARVING,
@@ -671,6 +719,15 @@ public enum FleetQuestType {
                 break;
             }
 
+            case TRIBUTE: {
+                FishRarity shelf = target >= 55f ? FishRarity.EPIC
+                        : target >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                if (target >= 22f) ask.minGrade = FishGrade.FINE;
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -766,7 +823,7 @@ public enum FleetQuestType {
 
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
-                || this == CALIBRATION_PAIR || this == MUTINY_POT;
+                || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE;
     }
 
     public float getMaximumTravelLY() {
