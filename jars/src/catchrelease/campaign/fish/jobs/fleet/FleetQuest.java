@@ -75,6 +75,16 @@ public class FleetQuest extends FishJob {
     public static final String FOLLOWUP_DECLINE_OPTION_KEY =
             "$catchrelease_fleetQuestFollowupDeclineOption";
     public static final String FOLLOWUP_DECLINE_KEY = "$catchrelease_fleetQuestFollowupDecline";
+    public static final String COUNTER_OPTION_KEY = "$catchrelease_fleetQuestCounterOption";
+    public static final String COUNTER_PITCH_KEY = "$catchrelease_fleetQuestCounterPitch";
+    public static final String COUNTER_REWARD_KEY = "$catchrelease_fleetQuestCounterReward";
+    public static final String COUNTER_ACCEPT_OPTION_KEY =
+            "$catchrelease_fleetQuestCounterAcceptOption";
+    public static final String COUNTER_ACCEPT_KEY = "$catchrelease_fleetQuestCounterAccept";
+    public static final String COUNTER_RETURN_OPTION_KEY =
+            "$catchrelease_fleetQuestCounterReturnOption";
+    public static final String COUNTER_RETURN_KEY = "$catchrelease_fleetQuestCounterReturn";
+    public static final String POT_CAPTAIN_FLAG = "$catchrelease_potCaptain";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -106,6 +116,8 @@ public class FleetQuest extends FishJob {
     protected String followupSpeciesId;
     protected boolean followupPending;
     protected boolean declinedFollowup;
+    protected List<FishReward> counterRewards = new ArrayList<>();
+    protected boolean potCaptain;
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         return startOn(giver, type, false);
@@ -243,6 +255,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SCIENTIST);
             contact.setVoice(Voices.SCIENTIST);
+        } else if (type.usesBosunContact()) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_CREW_BOSS);
+            contact.setVoice(Voices.SPACER);
         }
 
         setPersonOverride(contact);
@@ -254,6 +273,7 @@ public class FleetQuest extends FishJob {
         addAsk(ask);
 
         addRewards(QuestRewards.roll(type.createRewardRequest(asks, random())).rewards);
+        if (type.counteroffer != null) rollCounterRewards();
 
         setUpSpine();
 
@@ -368,13 +388,16 @@ public class FleetQuest extends FishJob {
         memory.set(DECLINE_KEY, render(dialogue.decline));
 
         FleetQuestType.Followup followup = round > 0 ? dialogue.followup : null;
-        String waiting = followup != null ? followup.waiting : dialogue.waiting;
+        FleetQuestType.Counteroffer counter = potCaptain ? type.counteroffer : null;
+        String waiting = counter != null ? counter.waiting
+                : followup != null ? followup.waiting : dialogue.waiting;
         waiting = waiting == null
                 ? "The fleet is still where you left it.\n\nThey still need {ask}."
                 : waiting;
         memory.set(WAITING_KEY, render(waiting));
 
-        String turnIn = followup != null ? followup.turnIn : dialogue.turnIn;
+        String turnIn = counter != null ? counter.turnIn
+                : followup != null ? followup.turnIn : dialogue.turnIn;
         turnIn = turnIn == null
                 ? "The cargo goes across.\n\nSomeone on the receiving ship checks the containers"
                 + " and calls something away from the microphone.\n\nSeveral voices answer.\n\n"
@@ -407,6 +430,23 @@ public class FleetQuest extends FishJob {
                 followup == null ? null : render(followup.decline));
         if (followupPending) memory.set(FOLLOWUP_PENDING_FLAG, true);
         else memory.unset(FOLLOWUP_PENDING_FLAG);
+
+        FleetQuestType.Counteroffer offered = type.counteroffer;
+        setOrUnset(memory, COUNTER_OPTION_KEY, offered == null ? null : offered.option);
+        setOrUnset(memory, COUNTER_PITCH_KEY,
+                offered == null ? null : render(offered.pitch));
+        setOrUnset(memory, COUNTER_REWARD_KEY,
+                offered == null ? null : describeCounterRewards());
+        setOrUnset(memory, COUNTER_ACCEPT_OPTION_KEY,
+                offered == null ? null : offered.acceptOption);
+        setOrUnset(memory, COUNTER_ACCEPT_KEY,
+                offered == null ? null : render(offered.accept));
+        setOrUnset(memory, COUNTER_RETURN_OPTION_KEY,
+                offered == null ? null : offered.returnOption);
+        setOrUnset(memory, COUNTER_RETURN_KEY,
+                offered == null ? null : render(offered.returnResponse));
+        if (potCaptain) memory.set(POT_CAPTAIN_FLAG, true);
+        else memory.unset(POT_CAPTAIN_FLAG);
     }
 
     protected void setOrUnset(MemoryAPI memory, String key, String value) {
@@ -426,6 +466,7 @@ public class FleetQuest extends FishJob {
                 .replace("{contract}", value(contract))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
+                .replace("{counterReward}", describeCounterRewards())
                 .replace("{reward}", describeRewards())
                 .replace("{days}", describeDays());
     }
@@ -441,6 +482,39 @@ public class FleetQuest extends FishJob {
     protected String currentLiability() {
         long liability = liabilityBase + (long) liabilityPerDay * elapsedDay();
         return Misc.getDGSCredits(Math.max(0L, liability)) + " credits";
+    }
+
+    protected String describeCounterRewards() {
+        List<String> parts = new ArrayList<>();
+        for (FishReward reward : counterRewards) parts.add(reward.describe());
+        return join(parts);
+    }
+
+    protected void rollCounterRewards() {
+        int primaryValue = rewardValue(rewards);
+        List<FishReward> lowest = null;
+        int lowestValue = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 20; i++) {
+            List<FishReward> candidate = QuestRewards.roll(
+                    type.createCounterRewardRequest(asks, random())).rewards;
+            int value = rewardValue(candidate);
+            if (value < lowestValue) {
+                lowest = candidate;
+                lowestValue = value;
+            }
+            if (value < primaryValue) break;
+        }
+
+        if (lowest != null) counterRewards.addAll(lowest);
+    }
+
+    protected int rewardValue(List<FishReward> offered) {
+        int value = 0;
+        if (offered != null) {
+            for (FishReward reward : offered) value += QuestRewards.valueOf(reward);
+        }
+        return value;
     }
 
     protected void keepStanding() {
@@ -519,6 +593,21 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
+        if ("showCounterparty".equals(action)) {
+            showCounterparty(dialog);
+            return true;
+        }
+
+        if ("showCounterRewardDetails".equals(action)) {
+            showRewardDetails(dialog, counterRewards);
+            return true;
+        }
+
+        if ("selectCounteroffer".equals(action)) {
+            selectCounteroffer();
+            return true;
+        }
+
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
@@ -569,6 +658,44 @@ public class FleetQuest extends FishJob {
         followupPending = false;
         declinedFollowup = true;
         setCurrentStage(Stage.DONE, dialog, memoryMap);
+    }
+
+    @Override
+    protected void showContactVisual(InteractionDialogAPI dialog) {
+        if (potCaptain) {
+            showCounterparty(dialog);
+        } else {
+            super.showContactVisual(dialog);
+        }
+    }
+
+    protected void showCounterparty(InteractionDialogAPI dialog) {
+        if (dialog == null || giver == null || giver.getCommander() == null) return;
+        dialog.getVisualPanel().showPersonInfo(giver.getCommander(), false);
+    }
+
+    protected void showRewardDetails(InteractionDialogAPI dialog, List<FishReward> offered) {
+        if (dialog == null || dialog.getTextPanel() == null || offered == null) return;
+
+        TooltipMakerAPI tooltip = null;
+        for (FishReward reward : offered) {
+            if (reward == null || !reward.hasOfferDetails()) continue;
+            if (tooltip == null) tooltip = dialog.getTextPanel().beginTooltip();
+            reward.addOfferDetails(tooltip, 10f);
+        }
+        if (tooltip != null) dialog.getTextPanel().addTooltip();
+    }
+
+    protected void selectCounteroffer() {
+        if (type.counteroffer == null || takenUp || potCaptain) return;
+
+        potCaptain = true;
+        rewards.clear();
+        rewards.addAll(counterRewards);
+        if (giver != null && giver.getCommander() != null) {
+            setPersonOverride(giver.getCommander());
+        }
+        writeDialogueMemory();
     }
 
     @Override
@@ -683,6 +810,14 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(FOLLOWUP_ACCEPT_KEY);
         giver.getMemoryWithoutUpdate().unset(FOLLOWUP_DECLINE_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(FOLLOWUP_DECLINE_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_PITCH_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_REWARD_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_ACCEPT_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_ACCEPT_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_RETURN_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(COUNTER_RETURN_KEY);
+        giver.getMemoryWithoutUpdate().unset(POT_CAPTAIN_FLAG);
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
                 MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
@@ -713,7 +848,9 @@ public class FleetQuest extends FishJob {
             return;
         }
 
-        giver.getMemoryWithoutUpdate().set(THANKS_KEY, render(type.thanks));
+        String thanks = potCaptain && type.counteroffer != null
+                ? type.counteroffer.thanks : type.thanks;
+        giver.getMemoryWithoutUpdate().set(THANKS_KEY, render(thanks));
         if (type.dialogue.hail != null) {
             giver.getMemoryWithoutUpdate().set(DETAILED_THANKS_FLAG, true);
         }
@@ -751,9 +888,10 @@ public class FleetQuest extends FishJob {
         String reward = describeRewards();
         String specialTerms = null;
         if (type != null) {
-            specialTerms = round > 0 && type.dialogue.followup != null
-                    ? render(type.dialogue.followup.intelTerms)
-                    : render(type.dialogue.intelTerms);
+            specialTerms = potCaptain && type.counteroffer != null
+                    ? render(type.counteroffer.intelTerms)
+                    : round > 0 && type.dialogue.followup != null
+                    ? render(type.dialogue.followup.intelTerms) : render(type.dialogue.intelTerms);
         }
         if (specialTerms != null && !specialTerms.isEmpty()) info.addPara(specialTerms, pad);
 
@@ -774,6 +912,9 @@ public class FleetQuest extends FishJob {
     @Override
     protected String getIntelPurpose() {
         if (type == null) return null;
+        if (potCaptain && type.counteroffer != null) {
+            return render(type.counteroffer.purpose);
+        }
         if (round > 0 && type.dialogue.followup != null) {
             return render(type.dialogue.followup.purpose);
         }
