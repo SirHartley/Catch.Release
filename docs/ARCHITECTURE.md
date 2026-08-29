@@ -301,6 +301,8 @@ All three offers state the camp size, system, clear-then-catch sequence, deadlin
 
 `STARVING` uses an Independent galley-chief contact, requests three to eight specimens of any species, and pays 1.1 times the generated request value from the full reward pool. Its dialogue and intel update the printed-protein day count throughout the offer, waiting, and accepted states.
 
+`COLLECTOR` uses an Independent business contact, requests one exact Uncommon, Rare, or Epic species with a Fine-grade floor at target 70, and pays 1.3 times the generated request value from the full reward pool. Its two looping questions expose the saved broker record and prepared display tank, while accepted intel records the direct-catch commission.
+
 `SCAVENGER_ENGINE` keeps its nearby one-or-two-specimen demand, pays 1.2 from the full salvage reward pool, replaces the captain with a coil technician, and carries a looping repair-procedure question plus complete distress dialogue and intel. Its manual revision and live coil-condition readout are saved case details rendered consistently across repeat contact.
 
 `SEEKER` now rolls one exact Uncommon, Rare, or Epic species according to ambition, adds a Fine-grade floor at target 60, and pays 1.25 from the full reward pool. Its guarded captain, missing-collection question, and all offer/intel states use Editor-authored copy while the existing single-stage fleet workflow remains unchanged.

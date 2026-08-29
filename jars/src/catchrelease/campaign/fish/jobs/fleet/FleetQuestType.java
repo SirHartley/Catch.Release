@@ -1127,12 +1127,58 @@ public enum FleetQuestType {
                     + " request is running on the local trade band."),
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
-            "I am not in distress and I would like that on the record. I am in want. There is a"
-                    + " specimen I have been trying to buy for two years and nobody will sell me"
-                    + " one. Catch it and the price stops being a problem.",
-            "A private collector who has run out of people willing to sell to them.",
+            "\"I am not in distress and I would like that on the record. I am in want.\"\n\n"
+                    + "The collector brings up a purchase ledger.\n\n"
+                    + "\"I have spent two years trying to acquire {ask}. Three brokers accepted"
+                    + " deposits, returned them, and reassigned each specimen before transfer.\""
+                    + "\n\n\"I suspect another collector is bidding through agents. I will not"
+                    + " name them. A direct catch keeps the transaction out of that market.\"\n\n"
+                    + "\"Price is not the difficulty. I am offering {reward}. I need delivery"
+                    + " within {days}.\"",
+            "A private collector aboard {fleet} needs {ask} after repeated brokered purchases"
+                    + " were reassigned before transfer. They are commissioning a direct catch"
+                    + " to bypass the market and require delivery within {days}.",
             "Waiting",
-            "Two years of refusals, and there it is. You have my thanks."),
+            "\"Two years of refusals, and there it is.\"\n\n"
+                    + "The collector checks the tank once more.\n\n"
+                    + "\"Whoever was buying through the agents can keep the brokers.\"",
+            1.3f,
+            new Dialogue(
+                    "\"Private vessel {fleet}. I have a collection commission to place, if you"
+                            + " are taking work.\"",
+                    "I'll take the commission.", "No promises. Send me the details.",
+                    "\"Very good. I will transmit the collection entry and receiving"
+                            + " requirements.\"\n\nThe files arrive from {fleet}.",
+                    "\"Understood. I will record no commitment.\"\n\n"
+                            + "The collector transmits the same collection entry and receiving"
+                            + " requirements.\n\n"
+                            + "\"If you obtain {ask} within the window, hail {fleet}.\"",
+                    "Decline.",
+                    "\"Understood. I will continue the search.\"\n\n\"{fleet} out.\"",
+                    "\"The tank is still running. I checked the water chemistry this morning;"
+                            + " it remains within the holding profile.\"\n\n"
+                            + "\"I still require {ask}. There are {days} remaining.\"",
+                    "The collector receives the container personally and takes it to the display"
+                            + " tank.\n\nThey compare the holding temperatures, set the acclimation"
+                            + " flow, and wait beside the tank until the transfer is complete.\n\n"
+                            + "The specimen settles behind the glass beneath the engraved"
+                            + " nameplate.",
+                    "Why won't anyone sell to you?",
+                    "\"Carthen & Vale, Morrow Exchange, and Silex Acquisitions. Dates:"
+                            + " {brokerDates}.\"\n\n"
+                            + "The collector opens the three transaction records.\n\n"
+                            + "\"Each accepted my deposit. Each returned it when the specimen was"
+                            + " reallocated immediately before transfer. The records suggest the"
+                            + " same outside buyer acting through agents.\"\n\n"
+                            + "They close the files.\n\n"
+                            + "\"I will not name the buyer. I have had enough of brokers.\"",
+                    "The private commission is recorded on the following terms.",
+                    new Question("What's it for?",
+                            "The collector turns the pickup toward a display tank. It is empty,"
+                                    + " lit, and filtered; an engraved nameplate is fixed beneath"
+                                    + " the glass.\n\n"
+                                    + "\"Eighteen point five Celsius. Ten-hour display cycle.\""
+                                    + "\n\nThey turn the pickup back."))),
     WAGER("Settling a Bet",
             FleetTypes.SCAVENGER_SMALL,
             "There is a disagreement aboard about what is actually down there and it has stopped"
