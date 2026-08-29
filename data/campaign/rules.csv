@@ -1371,10 +1371,32 @@ FireAll CatchReleaseFleetQuestOfferOptions","""$entity.catchrelease_fleetQuestPi
 Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.",,
 catchrelease_fqOfferOptions,CatchReleaseFleetQuestOfferOptions,,,,"0:catchrelease_fqAccept:$entity.catchrelease_fleetQuestAcceptOption
 5:catchrelease_fqAcceptNoPromise:$entity.catchrelease_fleetQuestNoPromiseOption",
+catchrelease_fqHaggleOpt,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestHaggleOption,,,6:catchrelease_fqHaggle:$entity.catchrelease_fleetQuestHaggleOption,
+catchrelease_fqSourOpt,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestSourOption,,,6:catchrelease_fqSour:$entity.catchrelease_fleetQuestSourOption,
 catchrelease_fqQuestionOpt,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestQuestionOption,,,7:catchrelease_fqQuestion:$entity.catchrelease_fleetQuestQuestionOption,
+catchrelease_fqCounterOpt,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestCounterOption,,,8:catchrelease_fqCounter:$entity.catchrelease_fleetQuestCounterOption,
 catchrelease_fqDeclineOpt,CatchReleaseFleetQuestOfferOptions,,,,10:catchrelease_fqDecline:$entity.catchrelease_fleetQuestDeclineOption,
 catchrelease_fqQuestionSel,DialogOptionSelected,"$option == catchrelease_fqQuestion
-$entity.catchrelease_fleetQuestQuestionResponse",FireAll CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestQuestionResponse,,
+$entity.catchrelease_fleetQuestQuestionResponse","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+FireAll CatchReleaseFleetQuestOfferOptions",$entity.catchrelease_fleetQuestQuestionResponse,,
+catchrelease_fqHaggleSel,DialogOptionSelected,$option == catchrelease_fqHaggle,"Call $entity.catchrelease_jobRef haggle
+FireAll CatchReleaseFleetQuestOfferOptions",,,
+catchrelease_fqSourSel,DialogOptionSelected,$option == catchrelease_fqSour,"Call $entity.catchrelease_jobRef sour
+FireAll CatchReleaseFleetQuestOfferOptions",,,
+catchrelease_fqCounterSel,DialogOptionSelected,$option == catchrelease_fqCounter,"Call $entity.catchrelease_jobRef showCounterparty
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestCounterReward
+Call $entity.catchrelease_jobRef showCounterRewardDetails
+FireAll CatchReleaseFleetQuestCounterOptions",$entity.catchrelease_fleetQuestCounterPitch,,
+catchrelease_fqCounterAcceptOpt,CatchReleaseFleetQuestCounterOptions,,,,0:catchrelease_fqCounterAccept:$entity.catchrelease_fleetQuestCounterAcceptOption,
+catchrelease_fqCounterReturnOpt,CatchReleaseFleetQuestCounterOptions,,,,10:catchrelease_fqCounterReturn:$entity.catchrelease_fleetQuestCounterReturnOption,
+catchrelease_fqCounterAcceptSel,DialogOptionSelected,$option == catchrelease_fqCounterAccept,"Call $entity.catchrelease_jobRef selectCounteroffer
+$entity.catchrelease_fleetQuestTaken = true
+Call $entity.catchrelease_jobRef showIntelAdded
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestCounterAccept,,
+catchrelease_fqCounterReturnSel,DialogOptionSelected,$option == catchrelease_fqCounterReturn,"Call $entity.catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $entity.catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions",$entity.catchrelease_fleetQuestCounterReturn,,
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
 Call $catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestAccept,,
@@ -1398,6 +1420,13 @@ FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThank
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1300
 !$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
 FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
+catchrelease_fleetQuestFollowup,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
+$entity.catchrelease_fleetQuestTaken
+$entity.catchrelease_fleetQuestFollowupPending
+!$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $entity.catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestFollowupOptions",$entity.catchrelease_fleetQuestFollowupPitch,,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
@@ -1416,6 +1445,12 @@ catchrelease_fqTurnInPickSel,DialogOptionSelected,"$option == catchrelease_fqTur
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 $catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,$entity.catchrelease_fleetQuestTurnIn,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
+catchrelease_fqFollowupAcceptOpt,CatchReleaseFleetQuestFollowupOptions,,,,0:catchrelease_fqFollowupAccept:$entity.catchrelease_fleetQuestFollowupAcceptOption,
+catchrelease_fqFollowupDeclineOpt,CatchReleaseFleetQuestFollowupOptions,,,,10:catchrelease_fqFollowupDecline:$entity.catchrelease_fleetQuestFollowupDeclineOption,
+catchrelease_fqFollowupAcceptSel,DialogOptionSelected,$option == catchrelease_fqFollowupAccept,"Call $entity.catchrelease_jobRef acceptFollowup
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestFollowupAccept,,
+catchrelease_fqFollowupDeclineSel,DialogOptionSelected,$option == catchrelease_fqFollowupDecline,"Call $entity.catchrelease_jobRef declineFollowup
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestFollowupDecline,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
 !$isHostile","$catchrelease_harpoonDemandDone = true 1

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -7,6 +8,7 @@ import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -75,6 +77,384 @@ public enum FleetQuestType {
                             + "They close the personnel index.\n\n"
                             + "\"We still need the specimen to close the entry.\"",
                     "The expedition will accept delivery on the following terms.")),
+    ESCROW("The Escrow",
+            FleetTypes.SCAVENGER_SMALL,
+            "The skipper comes on with a contract slate open beside the comm pickup.\n\n"
+                    + "\"Contract {contract}. Client sold a specimen two cycles ago. The carrier"
+                    + " went missing with it aboard, so they put recovery out to us.\"\n\n"
+                    + "They scroll past a column of charges.\n\n"
+                    + "\"Current liability is {liability}, and it's still collecting interest. My"
+                    + " completion bonus gets smaller every day this stays open.\"\n\n"
+                    + "\"Contract allows substitute performance. Their phrase. Means I can buy"
+                    + " the right specimen elsewhere and turn an open liability into a known"
+                    + " delivery.\"\n\n"
+                    + "The client field is masked. The specification beneath it is not.\n\n"
+                    + "\"I need {ask}. Current offer is {reward}. You've got {days}.\"",
+            "Recovery contractor {fleet} is trying to close contract {contract} after the original"
+                    + " specimen and its carrier were lost. A qualifying substitute will satisfy"
+                    + " the outstanding delivery and stop the liability from continuing to accrue.",
+            "Closing contract",
+            "\"Account's closed. My completion bonus survived.\"\n\n"
+                    + "The skipper clears the contract from the slate.\n\n"
+                    + "\"Appreciate the delivery, captain. {fleet} out.\"",
+            1.3f,
+            new Dialogue(
+                    "\"Recovery vessel {fleet}. Commercial matter under clause 17.4... 17.3."
+                            + " Requesting a channel.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll mark you against {contract} as an outside supplier.\"\n\n"
+                            + "The contract extract and specification arrive over the comm link."
+                            + "\n\n\"Bring it here before the window closes.\"",
+                    "\"Fair enough. No commitment recorded.\"\n\n"
+                            + "The skipper transmits the same contract extract and specification."
+                            + "\n\n\"If you have it before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. I'll keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"You're back. Liability's at {liability} now. Interest is still running, and"
+                            + " my bonus is getting the same treatment.\"\n\n"
+                            + "\"I still need {ask}.\"",
+                    "The skipper checks the specimen against the contract. A deckhand seals the"
+                            + " container while the transfer record comes up on the slate.\n\n"
+                            + "They sign beneath your transponder ID.\n\n\"Transfer accepted.\"",
+                    "Who's the client?",
+                    "The skipper turns the slate far enough for you to see the masked client field."
+                            + "\n\n\"That's all I've ever seen there. Contract came to us with the"
+                            + " field masked.\"\n\nThey tap the visible specification.\n\n"
+                            + "\"I can tell you what they're buying: {ask}.\"",
+                    "The contractor will accept a substitute delivery on the following terms.",
+                    "Their exposure is bigger than your offer.",
+                    "The skipper goes back through the contract, slower this time.\n\n"
+                            + "\"There's a discretionary settlement line. Knew I'd seen one.\"\n\n"
+                            + "They read it twice before looking back at you.\n\n"
+                            + "\"Fine. I can raise the offer to {reward} without asking anyone."
+                            + " That's the room I've got.\"",
+                    "Still not enough.",
+                    "The skipper closes the slate.\n\n"
+                            + "\"No. Discretionary authority has a ceiling.\"\n\n"
+                            + "\"We're back to the written offer: {reward}. Anything higher goes"
+                            + " through Tri-Tachyon Legal, and I'm not pretending that improves"
+                            + " either of our day.\"\n\n\"Those are the terms.\"")),
+    INTERMENT("The Interment",
+            FleetTypes.TRADE_SMALL,
+            "The link opens on the lead freighter. An escort keeps station nearby under the same"
+                    + " fishing guild pennant.\n\n"
+                    + "\"We're carrying one of our guild elders to interment. Old colleague of"
+                    + " mine.\"\n\n"
+                    + "The convoy master brings up a scanned will.\n\n"
+                    + "\"There's a line requiring the first species they ever landed to be sealed"
+                    + " into the casket. We don't carry a fishing rig, and a port call would put us"
+                    + " outside the appointed window.\"\n\n"
+                    + "\"We need {ask}. The estate authorizes {reward}. We have {days}.\"",
+            "Burial convoy {fleet} needs the first species named in a guild elder's will before the"
+                    + " appointed interment. The convoy has no fishing rig and cannot make a port"
+                    + " stop without missing the window.",
+            "Holding for interment",
+            "\"The casket is complete. We can make the interment window.\"\n\n"
+                    + "The convoy master checks the departure order.\n\n"
+                    + "\"We're getting underway. Safe passage, captain.\"",
+            1f,
+            new Dialogue(
+                    "\"Burial convoy {fleet}. Convoy master speaking. We have a time-sensitive"
+                            + " request.\"",
+                    "I'll do it.",
+                    "No promises. Send me the details.",
+                    "\"Thank you. I'll transmit the will extract and the species record.\"\n\n"
+                            + "The files arrive under the convoy's guild seal.",
+                    "\"Understood. No commitment.\"\n\n"
+                            + "The master transmits the same will extract and species record.\n\n"
+                            + "\"If you find one before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll make other arrangements.\"\n\n"
+                            + "The convoy master closes the channel.",
+                    "\"{fleet} here. We're still holding position, and the interment window is"
+                            + " getting shorter.\"\n\n\"We still need {ask}.\"",
+                    "A deckhand receives the specimen with both hands and carries it to a cleared"
+                            + " section of the hold.\n\nThe container is wrapped, sealed, and marked"
+                            + " with the elder's name from the will.",
+                    "Why does a fish go in the casket?",
+                    "\"It's in the will.\"\n\nThe master glances at the document.\n\n"
+                            + "\"First catch goes with them, last catch closes the log.\"",
+                    "The estate will accept delivery on the following terms.")),
+    CALIBRATION_PAIR("The Calibration Pair",
+            FleetTypes.SCAVENGER_SMALL,
+            "The researcher has a calibration record open when the link comes through.\n\n"
+                    + "\"We passed through worn fabric on the last leg. Since then, two of our"
+                    + " meters have been giving different results from the same standards.\"\n\n"
+                    + "\"Procedure calls for a matched local pair before we recalibrate either"
+                    + " instrument. We need {ask}.\"\n\n"
+                    + "\"The contract authorizes {reward}. Calibration window is {days}.\"",
+            "Under an Academy field contract, survey vessel {fleet} needs a matched local specimen"
+                    + " pair to calibrate instruments that began disagreeing after transit through"
+                    + " worn fabric.",
+            "Calibrating instruments",
+            "\"That's enough. I can file the calibration certificate.\"\n\n"
+                    + "The researcher signs the final sheet.\n\n"
+                    + "\"If the Academy wants a fourth column, they can issue a new contract."
+                    + " {fleet} out.\"",
+            1f,
+            new Dialogue(
+                    "\"Survey vessel {fleet}, operating under Academy field contract. Research"
+                            + " lead requesting a brief channel for calibration assistance.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll transmit the calibration procedure and our current record.\""
+                            + "\n\nThe files arrive from {fleet}.",
+                    "\"Understood. No commitment recorded.\"\n\n"
+                            + "The researcher transmits the same procedure and calibration record."
+                            + "\n\n\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll continue with the calibration schedule.\"\n\n"
+                            + "The researcher closes the channel.",
+                    "\"The meters still disagree. I've started marking one 'probably correct,'"
+                            + " and I dislike writing 'probably' in a calibration record.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The researcher has both specimens transferred to the calibration bench. The"
+                            + " pair goes through the instrument set together, then through a second"
+                            + " time.\n\nBoth sets of readings are entered into the record.",
+                    "What do you mean, they disagree?",
+                    "\"The same certified mass produces one number on one meter and another on the"
+                            + " other.\"\n\nThe researcher brings up both entries.\n\n"
+                            + "\"We keep both results. That's why procedure calls for the reference"
+                            + " pair.\"",
+                    "The Academy field contract offers the following terms.",
+                    new Followup(
+                            "The researcher studies the completed table.\n\n"
+                                    + "\"One specimen returned a different number on the second"
+                                    + " pass.\"\n\nThey open the next line of the procedure.\n\n"
+                                    + "\"That calls for a tiebreaker. One more specimen of the same"
+                                    + " species.\"\n\n\"We need {ask}. The follow-up pays {reward}."
+                                    + " Window is {days}.\"",
+                            "I'll get the tiebreaker.",
+                            "\"Good. I'll transmit the amended calibration request.\"\n\n"
+                                    + "The new reference line is added to the existing record.",
+                            "Decline.",
+                            "\"Understood. The first pair remains accepted and paid.\"\n\n"
+                                    + "The researcher closes the additional request.\n\n"
+                                    + "\"We'll handle the remaining calibration from here.\"",
+                            "\"The calibration certificate is still sitting in drafts. We need"
+                                    + " {ask}.\"",
+                            "All three specimens go through the same instrument sequence.\n\n"
+                                    + "The researcher checks the readings and enters them in three"
+                                    + " columns on the calibration sheet.",
+                            "One reference specimen on {fleet} returned a different result on its"
+                                    + " second pass. Procedure requires a third specimen of the same"
+                                    + " species as a tiebreaker.",
+                            "The follow-up calibration request has the following terms."))),
+    MUTINY_POT("The Mutiny Pot",
+            FleetTypes.TRADE_SMALL,
+            "The bosun waits for the channel security check to clear before speaking.\n\n"
+                    + "\"We've been putting crew shares into a buyout pot for three years. Every"
+                    + " contributor is on the ledger. Pot's finally enough to buy {fleet} from the"
+                    + " captain.\"\n\nThey open a copy of the sale agreement.\n\n"
+                    + "\"Captain agreed. One condition: the pot plus the fish from a cargo wager he"
+                    + " lost decades ago. Still tells the story.\"\n\n"
+                    + "\"We need {ask}. This stays off the ship's open channels until it's aboard."
+                    + " Crew offer is {reward}; that includes discretion. We have {days} to"
+                    + " complete the sale.\"",
+            "The crew of {fleet} has pooled shares for three years to buy out its captain. They"
+                    + " hired you privately to supply the specimen required by the sale agreement.",
+            "Holding the buyout",
+            "\"The ship's ours.\"\n\n"
+                    + "The bosun has the new registry filing open beside the duty roster.\n\n"
+                    + "\"Watches stay as posted until next port. Thanks, captain. {fleet} out.\"",
+            1.1f,
+            new Dialogue(
+                    "\"Bosun of {fleet}. Requesting a private word on ship's business.\"",
+                    "I'll take the crew's offer.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the sale clause and the old wager entry.\"\n\n"
+                            + "The files arrive under the crew's account.\n\n"
+                            + "\"Keep this between us until you hail back.\"",
+                    "\"Understood. I won't record a commitment.\"\n\n"
+                            + "The bosun transmits the same sale clause and wager entry.\n\n"
+                            + "\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. Appreciate the discretion.\"\n\n\"{fleet} out.\"",
+                    "\"Bosun here. Buyout fund's still locked and the clock's getting tight.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The bosun authorizes your payment before the specimen leaves your cargo bay."
+                            + "\n\nA deckhand takes the container and enters it against the sale"
+                            + " agreement.\n\n\"That's our clause satisfied. Once the captain signs,"
+                            + " {fleet} gets a new registry name.\"",
+                    "Why does the sale need a fish?",
+                    "The bosun finds the line in the sale agreement.\n\n"
+                            + "\"'Purchase price: crew fund, plus delivery of the wager fish"
+                            + " specified in the attached schedule.'\"\n\n"
+                            + "\"Captain tells that wager differently every year. Nobody aboard"
+                            + " has a better answer.\"",
+                    "The crew's private offer has the following terms."),
+            new Counteroffer(
+                    "Put your captain on.",
+                    "The captain replaces the bosun on the link. A cargo manifest is open on the"
+                            + " console beside them.\n\n\"A captain reads his own manifest. I know"
+                            + " about the pot.\"\n\nThey glance at the sale agreement.\n\n"
+                            + "\"Bring me {ask}. Privately. I'll pay {counterReward} from my own"
+                            + " account.\"\n\n\"When the papers come out, I landed it.\"",
+                    "I'll take your offer.",
+                    "\"Done.\"\n\nThe captain transmits the wager entry and a private hand-in code."
+                            + "\n\n\"Bring it to me. Don't route the container through general"
+                            + " cargo.\"",
+                    "Put the bosun back on.",
+                    "\"Fair enough.\"\n\nThe captain hands the channel back.\n\n"
+                            + "The bosun returns with the buyout ledger still open.\n\n"
+                            + "\"You had our terms.\"",
+                    "\"Captain here. Purchase papers are still waiting on the last line.\"\n\n"
+                            + "\"I still need {ask}.\"",
+                    "The captain takes the container through a side lock and checks it against the"
+                            + " old wager entry. They seal it and sign the private transfer.\n\n"
+                            + "\"There. Wager settled.\"",
+                    "\"Sale's signed. Crew got their ship.\"\n\n"
+                            + "The captain gives you a small nod.\n\n"
+                            + "\"Fair trade. Safe flying.\"",
+                    "The captain of {fleet} knows about the crew's buyout and has made a private"
+                            + " counteroffer for the same specimen. They intend to present it as"
+                            + " their own catch.",
+                    "The captain's counteroffer has the following terms.")),
+    TRIBUTE("The Tribute",
+            FleetTypes.SCAVENGER_SMALL,
+            "The quartermaster comes on from a cramped cargo office with the salvage ledger open"
+                    + " behind the comm pickup.\n\n"
+                    + "\"We work a claim inside a pirate ring's territory. Once a year we pay them"
+                    + " for permission to keep working. This year the boss wants a display specimen"
+                    + " for his tank.\"\n\n"
+                    + "\"We sent a courier out for it. Courier didn't come back. The enforcers"
+                    + " arrived ahead of schedule.\"\n\n"
+                    + "They check the deadline.\n\n"
+                    + "\"We need {ask}. We can put up {reward} from the salvage hold. We have"
+                    + " {days}.\"",
+            "Independent salvage crew {fleet} owes a pirate ring its annual protection tribute"
+                    + " and lost the courier sent to secure it. They need the requested display"
+                    + " specimen before the deadline.",
+            "Holding for tribute",
+            "\"Your payment's cleared. The ring marked the tribute received, so the claim stays"
+                    + " ours.\"\n\n"
+                    + "The quartermaster closes the protection ledger.\n\n"
+                    + "\"Back to salvage. {fleet} out.\"",
+            1.25f,
+            new Dialogue(
+                    "\"Independent freighter {fleet}. Quartermaster here. Got a payment problem"
+                            + " that's becoming time-sensitive. Mind a private channel?\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the display instructions and our hand-in code.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fair enough. No commitment on the ledger.\"\n\n"
+                            + "The quartermaster transmits the same display instructions and"
+                            + " hand-in code.\n\n"
+                            + "\"If you get one in time, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"Claim's still working. We've got {days} left, and somebody aboard reminds"
+                            + " me of that every watch.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The quartermaster checks the specimen against a creased set of display"
+                            + " instructions and initials the handling line.\n\n"
+                            + "\"Good. I know that tank's paperwork better than our own cargo"
+                            + " codes.\"",
+                    "What happens if it's late?",
+                    "\"They come aboard. We clear the work deck, open the books, and lose a shift"
+                            + " while they decide what late costs this year.\"\n\n"
+                            + "The quartermaster checks the deadline again.\n\n"
+                            + "\"Early delivery would suit us.\"",
+                    "{fleet} will pay from its salvage hold on the following terms.")),
+    REFERENCE_SPECIMEN("The Reference Specimen",
+            FleetTypes.SCAVENGER_SMALL,
+            "The handler comes on with a League release form open on a slate.\n\n"
+                    + "\"We're working through the impound backlog. One sealed hauler has catch"
+                    + " that doesn't match its origin stamps. Bad manifest, most likely.\"\n\n"
+                    + "\"Form L-17C requires an outside reference before they'll release the ship."
+                    + " Our license covers handling, not fishing, so I can't provide the reference"
+                    + " under my own contract.\"\n\n"
+                    + "\"We need {ask}. The service allocation is {reward}. I've got {days} before"
+                    + " the release window closes.\"",
+            "Independent handling contractor {company} is clearing an impounded hauler under"
+                    + " League contract {contract}. An origin-stamp discrepancy requires the"
+                    + " requested reference specimen before the hauler can be released, and the"
+                    + " filing window is limited.",
+            "Clearing the impound",
+            "\"The League closed {contract}. That means {company} gets paid.\"\n\n"
+                    + "The freed hauler is already moving away from the impound berth.\n\n"
+                    + "The handler opens the next file on the slate.\n\n"
+                    + "\"One less. {fleet} out.\"",
+            1f,
+            new Dialogue(
+                    "\"This is {company}, Independent handling contractor aboard {fleet}, working"
+                            + " League contract {contract}. We have a subcontract available.\"",
+                    "I'll take the subcontract.",
+                    "No promises. Send me the paperwork.",
+                    "\"Good. I'll send the release procedure, reference profile, and our contract"
+                            + " authorization.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fine. No commitment recorded.\"\n\n"
+                            + "The handler transmits the same procedure, profile, and authorization."
+                            + "\n\n\"If you get what the form calls for before the window closes,"
+                            + " hail us.\"",
+                    "Decline.",
+                    "\"Understood. Back to the backlog.\"\n\n\"{fleet} out.\"",
+                    "\"The release window's getting narrow. There's an L-14B extension form"
+                            + " involved now, and my fee has not increased.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "A technician logs the reference beside the sealed hauler's sample record."
+                            + " The handler checks the comparison, completes the release form, and"
+                            + " adds their contract seal.\n\n"
+                            + "Behind them, dock crew remove the impound tags from the hauler. Its"
+                            + " tug lights come on.\n\n"
+                            + "\"Released.\"",
+                    "What's wrong with the cargo?",
+                    "The handler opens the discrepancy page.\n\n"
+                            + "\"Origin stamp: {originStamp}. Sample profile: {profileOrigin}."
+                            + " Registry volume {registryVolume} isn't in the League database. Case"
+                            + " code {discrepancyCode}.\"\n\n"
+                            + "They return to the release form.\n\n"
+                            + "\"That's what we're clearing.\"",
+                    "The League service line authorizes the following subcontract terms.")),
+    QUIET_SHIP("The Quiet Ship",
+            FleetTypes.SCAVENGER_SMALL,
+            "The chief has the duty board open behind the comm pickup.\n\n"
+                    + "\"We're on {relayRun}. Long rotation, thin fabric for most of it. The"
+                    + " technicians' logs keep recording whispering we haven't been able to"
+                    + " place.\"\n\n"
+                    + "They shift the duty board aside.\n\n"
+                    + "\"There's an old run custom. Ships on this contract keep a catch aboard,"
+                    + " more or less like a ship's cat. The last rotation took ours with them, and"
+                    + " we sailed without replacing it.\"\n\n"
+                    + "\"We need {ask}. I've got {reward} cleared for it. We have {days}.\"",
+            "Maintenance tender {fleet} is working {relayRun} and wants to replace the catch its"
+                    + " crews traditionally keep aboard. The current window closes in {days}.",
+            "Maintaining the relay run",
+            "The chief has the regular maintenance board open again. Two technicians are"
+                    + " disputing a parts allotment off-screen.\n\n"
+                    + "\"Crew's settled back into the run. That's enough for me.\"\n\n"
+                    + "They turn back to the board.\n\n"
+                    + "\"I've got a relay to keep alive. {fleet} out.\"",
+            0.9f,
+            new Dialogue(
+                    "\"Maintenance tender {fleet}. Chief here. I've got a private request. Bit"
+                            + " outside the usual stores list.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Right. Good.\"\n\n"
+                            + "The chief transmits the request and hand-in instructions.\n\n"
+                            + "\"Hail us when you have it.\"",
+                    "\"Fair. I won't put you down as committed.\"\n\n"
+                            + "The chief sends the same request and hand-in instructions.\n\n"
+                            + "\"If you find one in time, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep asking around.\"\n\n\"{fleet} out.\"",
+                    "\"We're still on {relayRun}. {days} left in the window.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "A technician carries the specimen into the mess and settles it into a"
+                            + " bracketed tank built against the bulkhead.\n\n"
+                            + "The locking slots are worn bright. Older names are painted beneath"
+                            + " the current stencil.",
+                    "What does it actually do?",
+                    "The chief looks over at the maintenance board.\n\n"
+                            + "\"Long run. Fabric stays thin for most of it. Crews on this route"
+                            + " have kept one aboard longer than anyone serving can remember.\"\n\n"
+                            + "They straighten a stack of work orders.\n\n"
+                            + "\"It helps.\"",
+                    "The chief's request has the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -135,6 +515,13 @@ public enum FleetQuestType {
 
     private static final FleetQuestType[] LOCAL_OFFERS = {
             LAST_ENTRY,
+            ESCROW,
+            INTERMENT,
+            CALIBRATION_PAIR,
+            MUTINY_POT,
+            TRIBUTE,
+            REFERENCE_SPECIMEN,
+            QUIET_SHIP,
             SEEKER,
             QUOTA,
             STARVING,
@@ -150,6 +537,7 @@ public enum FleetQuestType {
     public final String thanks;
     public final float rewardBudgetMult;
     public final Dialogue dialogue;
+    public final Counteroffer counteroffer;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks) {
@@ -158,6 +546,12 @@ public enum FleetQuestType {
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks, float rewardBudgetMult, Dialogue dialogue) {
+        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue, null);
+    }
+
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks, float rewardBudgetMult, Dialogue dialogue,
+                   Counteroffer counteroffer) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
@@ -166,6 +560,7 @@ public enum FleetQuestType {
         this.thanks = thanks;
         this.rewardBudgetMult = rewardBudgetMult;
         this.dialogue = dialogue;
+        this.counteroffer = counteroffer;
     }
 
     public static class Dialogue {
@@ -191,11 +586,46 @@ public enum FleetQuestType {
         public final String questionOption;
         public final String questionResponse;
         public final String intelTerms;
+        public final String haggleOption;
+        public final String haggleResponse;
+        public final String sourOption;
+        public final String sourResponse;
+        public final Followup followup;
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
                         String acceptNoPromise, String declineOption, String decline,
                         String waiting, String turnIn, String questionOption,
                         String questionResponse, String intelTerms) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    null, null, null, null, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, Followup followup) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    null, null, null, null, followup);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, String haggleOption,
+                        String haggleResponse, String sourOption, String sourResponse) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    haggleOption, haggleResponse, sourOption, sourResponse, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, String haggleOption,
+                        String haggleResponse, String sourOption, String sourResponse,
+                        Followup followup) {
             this.hail = hail;
             this.acceptOption = acceptOption;
             this.noPromiseOption = noPromiseOption;
@@ -208,11 +638,76 @@ public enum FleetQuestType {
             this.questionOption = questionOption;
             this.questionResponse = questionResponse;
             this.intelTerms = intelTerms;
+            this.haggleOption = haggleOption;
+            this.haggleResponse = haggleResponse;
+            this.sourOption = sourOption;
+            this.sourResponse = sourResponse;
+            this.followup = followup;
+        }
+    }
+
+    public static class Followup {
+
+        public final String pitch;
+        public final String acceptOption;
+        public final String accept;
+        public final String declineOption;
+        public final String decline;
+        public final String waiting;
+        public final String turnIn;
+        public final String purpose;
+        public final String intelTerms;
+
+        public Followup(String pitch, String acceptOption, String accept, String declineOption,
+                        String decline, String waiting, String turnIn, String purpose,
+                        String intelTerms) {
+            this.pitch = pitch;
+            this.acceptOption = acceptOption;
+            this.accept = accept;
+            this.declineOption = declineOption;
+            this.decline = decline;
+            this.waiting = waiting;
+            this.turnIn = turnIn;
+            this.purpose = purpose;
+            this.intelTerms = intelTerms;
+        }
+    }
+
+    public static class Counteroffer {
+
+        public final String option;
+        public final String pitch;
+        public final String acceptOption;
+        public final String accept;
+        public final String returnOption;
+        public final String returnResponse;
+        public final String waiting;
+        public final String turnIn;
+        public final String thanks;
+        public final String purpose;
+        public final String intelTerms;
+
+        public Counteroffer(String option, String pitch, String acceptOption, String accept,
+                            String returnOption, String returnResponse, String waiting,
+                            String turnIn, String thanks, String purpose, String intelTerms) {
+            this.option = option;
+            this.pitch = pitch;
+            this.acceptOption = acceptOption;
+            this.accept = accept;
+            this.returnOption = returnOption;
+            this.returnResponse = returnResponse;
+            this.waiting = waiting;
+            this.turnIn = turnIn;
+            this.thanks = thanks;
+            this.purpose = purpose;
+            this.intelTerms = intelTerms;
         }
     }
 
     public static final float HOME_SPECIES_WEIGHT = 4f;
     public static final float LAST_ENTRY_MAX_LY = 75f;
+    public static final float QUIET_SHIP_COOLDOWN_DAYS = 120f;
+    public static final List<String> BODY_TYPE_TAGS = List.of("fish", "crab", "mollusc");
 
     /** Picks from the home system or its nearest neighbour, preferring home. */
     protected static String pickNearbySpecies(Random random, StarSystemAPI home,
@@ -256,12 +751,18 @@ public enum FleetQuestType {
     }
 
     protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {
+        return pickSpecies(random, minimum, maximum, null);
+    }
+
+    protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum,
+                                        CatchImplement implement) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
             if (minimum != null && spec.rarity.rank < minimum.rank) continue;
             if (maximum != null && spec.rarity.rank > maximum.rank) continue;
+            if (!spec.canBeReachedBy(implement)) continue;
 
             picker.add(spec, 1f);
         }
@@ -271,8 +772,33 @@ public enum FleetQuestType {
         return pick == null ? null : pick.id;
     }
 
+    protected static String pickBodyType(Random random, StarSystemAPI home) {
+        List<String> available = bodyTypesIn(home);
+        if (available.isEmpty()) available = bodyTypesIn(nearestSystemTo(home));
+        if (available.isEmpty()) available = BODY_TYPE_TAGS;
+
+        return available.get(random.nextInt(available.size()));
+    }
+
+    protected static List<String> bodyTypesIn(StarSystemAPI system) {
+        if (system == null) return List.of();
+
+        List<String> available = new java.util.ArrayList<>();
+        for (String tag : BODY_TYPE_TAGS) {
+            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+                if (spec == null || !spec.hasHabitat() || !spec.tags.contains(tag)) continue;
+                if (!FishRanges.matches(spec, system, null)) continue;
+
+                available.add(tag);
+                break;
+            }
+        }
+
+        return available;
+    }
+
     /** Shapes this quest type around the target score, or returns null if it cannot. */
-    public FishRequirement rollAsk(Random random, float target, StarSystemAPI home) {
+    public FishRequirement rollAsk(Random random, float target, StarSystemAPI home, int attempt) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
@@ -284,6 +810,69 @@ public enum FleetQuestType {
                 ask.minGrade = FishGrade.AVERAGE;
                 break;
             }
+
+            case ESCROW: {
+                float rarityTarget = attempt == 1 ? target / FleetQuest.ASK_BACKOFF : target;
+                FishRarity shelf = rarityTarget >= 55f ? FishRarity.EPIC
+                        : rarityTarget >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                if (attempt == 0 && target >= 30f) ask.minGrade = FishGrade.FINE;
+                break;
+            }
+
+            case INTERMENT: {
+                FishRarity shelf = target >= 52f ? FishRarity.EPIC
+                        : target >= 28f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                break;
+            }
+
+            case CALIBRATION_PAIR:
+                ask.count = 2;
+                ask.sameSpecies = true;
+                if (target >= 30f) ask.lowCoherence = true;
+                break;
+
+            case MUTINY_POT: {
+                float rarityTarget = attempt == 1 ? target / FleetQuest.ASK_BACKOFF : target;
+                FishRarity shelf = rarityTarget >= 58f ? FishRarity.EPIC
+                        : rarityTarget >= 32f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                FishSpec spec = FishSpecLoader.getFishSpec(ask.speciesId);
+                if (spec == null) return null;
+
+                if (attempt == 0 && target >= 25f) {
+                    float fraction = 0.55f + Math.min(0.3f, (target - 25f) / 100f);
+                    float floor = Math.round(spec.weightMax * fraction * 10f) / 10f;
+                    ask.minWeight = Math.max(spec.weightMin,
+                            Math.min(spec.weightMax, floor));
+                }
+                break;
+            }
+
+            case TRIBUTE: {
+                FishRarity shelf = target >= 55f ? FishRarity.EPIC
+                        : target >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                if (target >= 22f) ask.minGrade = FishGrade.FINE;
+                break;
+            }
+
+            case REFERENCE_SPECIMEN: {
+                FishRarity shelf = target >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf, CatchImplement.POND);
+                if (ask.speciesId == null) return null;
+                ask.implement = CatchImplement.POND;
+                break;
+            }
+
+            case QUIET_SHIP:
+                ask.tag = pickBodyType(random, home);
+                if (target >= 24f) ask.minGrade = FishGrade.AVERAGE;
+                break;
 
             case STRANDED:
             case SCAVENGER_ENGINE:
@@ -335,14 +924,68 @@ public enum FleetQuestType {
         return ask;
     }
 
-    public List<FishReward> rollFixedRewards(Random random) {
-        if (this != LAST_ENTRY) return List.of();
+    public List<FishReward> rollFixedRewards(Random random, int round) {
+        if (this == QUIET_SHIP) return FishRewardRoller.rollSchematic(random);
+        if (this != LAST_ENTRY && !(this == CALIBRATION_PAIR && round == 0)) return List.of();
 
         return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
     }
 
+    public QuestRewards.Request createRewardRequest(List<FishRequirement> asks, Random random) {
+        return createRewardRequest(asks, random, 0);
+    }
+
+    public QuestRewards.Request createRewardRequest(List<FishRequirement> asks, Random random,
+                                                    int round) {
+        QuestRewards.Request request = new QuestRewards.Request(asks)
+                .fixAll(rollFixedRewards(random, round))
+                .budgetMult(rewardBudgetMult)
+                .random(random);
+
+        if (this == ESCROW) {
+            request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
+        }
+        if (this == REFERENCE_SPECIMEN) {
+            request.exclude(QuestRewards.Kind.BACKDROP, QuestRewards.Kind.BLUEPRINT);
+        }
+        if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
+        if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
+                && asks.get(0).lowCoherence) {
+            request.tierFloor(DemandScore.Tier.HARD);
+        }
+
+        return request;
+    }
+
+    public QuestRewards.Request createCounterRewardRequest(List<FishRequirement> asks,
+                                                           Random random) {
+        return new QuestRewards.Request(asks).budgetMult(0.7f)
+                .exclude(QuestRewards.Kind.BLUEPRINT).random(random);
+    }
+
+    public boolean usesTradeConvoy() {
+        return this == INTERMENT || counteroffer != null;
+    }
+
+    public boolean usesBosunContact() {
+        return counteroffer != null;
+    }
+
+    public boolean requiresIndependentFleet() {
+        return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
+                || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
+                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP;
+    }
+
     public float getMaximumTravelLY() {
-        return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY : QuestDuration.MAX_SENSIBLE_LY;
+        return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY
+                : this == CALIBRATION_PAIR ? Float.MAX_VALUE
+                : QuestDuration.MAX_SENSIBLE_LY;
+    }
+
+    public float getOfferCooldownDays() {
+        return this == QUIET_SHIP ? QUIET_SHIP_COOLDOWN_DAYS
+                : FleetQuestSpawner.COOLDOWN_DAYS;
     }
 
     public String getId() {
