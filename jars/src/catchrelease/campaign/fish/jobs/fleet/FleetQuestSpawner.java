@@ -61,7 +61,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         public CampaignFleetAPI spawnFleet(RouteData route) {
             Random random = route.getRandom();
             CampaignFleetAPI fleet;
-            if (type == FleetQuestType.INTERMENT) {
+            if (type.usesTradeConvoy()) {
                 FleetParamsV3 params = new FleetParamsV3(route.getMarket(), null,
                         Factions.INDEPENDENT, null, FleetTypes.TRADE_SMALL,
                         8f, 10f, 0f, 0f, 0f, 0f, 0f);
@@ -74,7 +74,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
             }
             if (fleet == null) return null;
 
-            if (type == FleetQuestType.INTERMENT) {
+            if (type.usesTradeConvoy()) {
                 fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_TRADE_FLEET, true);
                 fleet.addScript(new RouteFleetAssignmentAI(fleet, route));
             } else {
@@ -234,7 +234,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
     protected boolean canCarryAnOffer(CampaignFleetAPI fleet, FleetQuestType type) {
         String fleetType = fleet == null ? null : fleet.getMemoryWithoutUpdate()
                 .getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
-        if (type == FleetQuestType.INTERMENT) {
+        if (type.usesTradeConvoy()) {
             if (!FleetTypes.TRADE_SMALL.equals(fleetType)) return false;
             if (!fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_TRADE_FLEET)) {
                 return false;

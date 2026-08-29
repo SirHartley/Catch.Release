@@ -240,6 +240,76 @@ public enum FleetQuestType {
                                     + " second pass. Procedure requires a third specimen of the same"
                                     + " species as a tiebreaker.",
                             "The follow-up calibration request has the following terms."))),
+    MUTINY_POT("The Mutiny Pot",
+            FleetTypes.TRADE_SMALL,
+            "The bosun waits for the channel security check to clear before speaking.\n\n"
+                    + "\"We've been putting crew shares into a buyout pot for three years. Every"
+                    + " contributor is on the ledger. Pot's finally enough to buy {fleet} from the"
+                    + " captain.\"\n\nThey open a copy of the sale agreement.\n\n"
+                    + "\"Captain agreed. One condition: the pot plus the fish from a cargo wager he"
+                    + " lost decades ago. Still tells the story.\"\n\n"
+                    + "\"We need {ask}. This stays off the ship's open channels until it's aboard."
+                    + " Crew offer is {reward}; that includes discretion. We have {days} to"
+                    + " complete the sale.\"",
+            "The crew of {fleet} has pooled shares for three years to buy out its captain. They"
+                    + " hired you privately to supply the specimen required by the sale agreement.",
+            "Holding the buyout",
+            "\"The ship's ours.\"\n\n"
+                    + "The bosun has the new registry filing open beside the duty roster.\n\n"
+                    + "\"Watches stay as posted until next port. Thanks, captain. {fleet} out.\"",
+            1.1f,
+            new Dialogue(
+                    "\"Bosun of {fleet}. Requesting a private word on ship's business.\"",
+                    "I'll take the crew's offer.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the sale clause and the old wager entry.\"\n\n"
+                            + "The files arrive under the crew's account.\n\n"
+                            + "\"Keep this between us until you hail back.\"",
+                    "\"Understood. I won't record a commitment.\"\n\n"
+                            + "The bosun transmits the same sale clause and wager entry.\n\n"
+                            + "\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. Appreciate the discretion.\"\n\n\"{fleet} out.\"",
+                    "\"Bosun here. Buyout fund's still locked and the clock's getting tight.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The bosun authorizes your payment before the specimen leaves your cargo bay."
+                            + "\n\nA deckhand takes the container and enters it against the sale"
+                            + " agreement.\n\n\"That's our clause satisfied. Once the captain signs,"
+                            + " {fleet} gets a new registry name.\"",
+                    "Why does the sale need a fish?",
+                    "The bosun finds the line in the sale agreement.\n\n"
+                            + "\"'Purchase price: crew fund, plus delivery of the wager fish"
+                            + " specified in the attached schedule.'\"\n\n"
+                            + "\"Captain tells that wager differently every year. Nobody aboard"
+                            + " has a better answer.\"",
+                    "The crew's private offer has the following terms."),
+            new Counteroffer(
+                    "Put your captain on.",
+                    "The captain replaces the bosun on the link. A cargo manifest is open on the"
+                            + " console beside them.\n\n\"A captain reads his own manifest. I know"
+                            + " about the pot.\"\n\nThey glance at the sale agreement.\n\n"
+                            + "\"Bring me {ask}. Privately. I'll pay {counterReward} from my own"
+                            + " account.\"\n\n\"When the papers come out, I landed it.\"",
+                    "I'll take your offer.",
+                    "\"Done.\"\n\nThe captain transmits the wager entry and a private hand-in code."
+                            + "\n\n\"Bring it to me. Don't route the container through general"
+                            + " cargo.\"",
+                    "Put the bosun back on.",
+                    "\"Fair enough.\"\n\nThe captain hands the channel back.\n\n"
+                            + "The bosun returns with the buyout ledger still open.\n\n"
+                            + "\"You had our terms.\"",
+                    "\"Captain here. Purchase papers are still waiting on the last line.\"\n\n"
+                            + "\"I still need {ask}.\"",
+                    "The captain takes the container through a side lock and checks it against the"
+                            + " old wager entry. They seal it and sign the private transfer.\n\n"
+                            + "\"There. Wager settled.\"",
+                    "\"Sale's signed. Crew got their ship.\"\n\n"
+                            + "The captain gives you a small nod.\n\n"
+                            + "\"Fair trade. Safe flying.\"",
+                    "The captain of {fleet} knows about the crew's buyout and has made a private"
+                            + " counteroffer for the same specimen. They intend to present it as"
+                            + " their own catch.",
+                    "The captain's counteroffer has the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -303,6 +373,7 @@ public enum FleetQuestType {
             ESCROW,
             INTERMENT,
             CALIBRATION_PAIR,
+            MUTINY_POT,
             SEEKER,
             QUOTA,
             STARVING,
@@ -318,6 +389,7 @@ public enum FleetQuestType {
     public final String thanks;
     public final float rewardBudgetMult;
     public final Dialogue dialogue;
+    public final Counteroffer counteroffer;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks) {
@@ -326,6 +398,12 @@ public enum FleetQuestType {
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks, float rewardBudgetMult, Dialogue dialogue) {
+        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue, null);
+    }
+
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks, float rewardBudgetMult, Dialogue dialogue,
+                   Counteroffer counteroffer) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
@@ -334,6 +412,7 @@ public enum FleetQuestType {
         this.thanks = thanks;
         this.rewardBudgetMult = rewardBudgetMult;
         this.dialogue = dialogue;
+        this.counteroffer = counteroffer;
     }
 
     public static class Dialogue {
@@ -446,6 +525,37 @@ public enum FleetQuestType {
         }
     }
 
+    public static class Counteroffer {
+
+        public final String option;
+        public final String pitch;
+        public final String acceptOption;
+        public final String accept;
+        public final String returnOption;
+        public final String returnResponse;
+        public final String waiting;
+        public final String turnIn;
+        public final String thanks;
+        public final String purpose;
+        public final String intelTerms;
+
+        public Counteroffer(String option, String pitch, String acceptOption, String accept,
+                            String returnOption, String returnResponse, String waiting,
+                            String turnIn, String thanks, String purpose, String intelTerms) {
+            this.option = option;
+            this.pitch = pitch;
+            this.acceptOption = acceptOption;
+            this.accept = accept;
+            this.returnOption = returnOption;
+            this.returnResponse = returnResponse;
+            this.waiting = waiting;
+            this.turnIn = turnIn;
+            this.thanks = thanks;
+            this.purpose = purpose;
+            this.intelTerms = intelTerms;
+        }
+    }
+
     public static final float HOME_SPECIES_WEIGHT = 4f;
     public static final float LAST_ENTRY_MAX_LY = 75f;
 
@@ -544,6 +654,23 @@ public enum FleetQuestType {
                 if (target >= 30f) ask.lowCoherence = true;
                 break;
 
+            case MUTINY_POT: {
+                float rarityTarget = attempt == 1 ? target / FleetQuest.ASK_BACKOFF : target;
+                FishRarity shelf = rarityTarget >= 58f ? FishRarity.EPIC
+                        : rarityTarget >= 32f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                FishSpec spec = FishSpecLoader.getFishSpec(ask.speciesId);
+                if (spec == null) return null;
+
+                if (attempt == 0 && target >= 25f) {
+                    float fraction = 0.55f + Math.min(0.3f, (target - 25f) / 100f);
+                    float floor = Math.round(spec.weightMax * fraction * 10f) / 10f;
+                    ask.minWeight = Math.max(spec.weightMin,
+                            Math.min(spec.weightMax, floor));
+                }
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -623,9 +750,23 @@ public enum FleetQuestType {
         return request;
     }
 
+    public QuestRewards.Request createCounterRewardRequest(List<FishRequirement> asks,
+                                                           Random random) {
+        return new QuestRewards.Request(asks).budgetMult(0.7f)
+                .exclude(QuestRewards.Kind.BLUEPRINT).random(random);
+    }
+
+    public boolean usesTradeConvoy() {
+        return this == INTERMENT || counteroffer != null;
+    }
+
+    public boolean usesBosunContact() {
+        return counteroffer != null;
+    }
+
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
-                || this == CALIBRATION_PAIR;
+                || this == CALIBRATION_PAIR || this == MUTINY_POT;
     }
 
     public float getMaximumTravelLY() {
