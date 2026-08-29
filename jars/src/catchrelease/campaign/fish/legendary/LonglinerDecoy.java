@@ -275,10 +275,8 @@ public class LonglinerDecoy implements EveryFrameScript {
     protected void retire(CampaignFleetAPI boat) {
         FishermanShelf.releaseFor(boat);
         FishermanMapIcon.removeFor(boat);
-        boat.despawn();
         boat.setAI(null);
-        boat.setLocation(0f, 0f);
-        Misc.fadeAndExpire(boat);
+        boat.despawn();
 
         Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
     }
