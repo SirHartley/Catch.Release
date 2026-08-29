@@ -392,7 +392,7 @@ The tutorial has six lessons, a returning-player skip, and a developer shortcut.
 
 | File | Responsibility |
 |---|---|
-| `FishEntityPlugin.java` | World fish mote: movement, depth, held and stunned states, glow, source rupture, and legendary behavior. Phantom and shell-game motes are unavailable to ordinary gear. Legendary defenses delegate to `LegendaryShields`. |
+| `FishEntityPlugin.java` | World fish mote: movement, depth, held and stunned states, glow, source rupture, and legendary behavior. Lamp-only patterns and legendary constructs fade with the Breach Lights and cannot be targeted in darkness. Phantom motes remain unavailable to ordinary gear. Legendary defenses delegate to `LegendaryShields`. |
 | `GhostAsteroidEntityPlugin.java` | Non-interactive drifting haunt asteroid. |
 | `HauntMineEntityPlugin.java` | False Dawn mine. Red shoves, blue interdicts and drags, yellow pulls. Mines trigger by proximity or harpoon and clean themselves up after firing. |
 | `BuriedMoteEntityPlugin.java` | Invisible open-water fish. `unearth()` atomically replaces it with a normal mote. |
@@ -502,7 +502,7 @@ Legendary fish are unique, lamp-only targets with one host system and no purchas
 | `CoherenceSurgeModule.java` | Holds the coherence overlay at full strength for the False Dawn. |
 | `SlipDashModule.java` | Gives the moray frequent curved escape dashes and builds a moving vanilla slipstream behind it. Segments fade rather than being removed so texture offsets remain valid. |
 | `QuorumShellGame.java` | Rebuildable three-body endgame after the escort is gone. One body is real; decoys use splinter catches and presented Quorum colours. Results reveal the body only after landing. |
-| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Longliner's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. Revelation replaces the boat with a mote that drifts for one second along the boat's travel direction under the alert floaty; the positional discovery sting then marks the start of its existing escape. |
+| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Longliner's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. Revelation replaces the boat with a mote that drifts for one second along the boat's travel direction under the alert floaty; the positional discovery sting then marks the start of its existing escape. The retired disguise stays at its last position and uses the fleet's own despawn fade. |
 | `GhostAsteroidsModule.java` | Moving field of harmless ghost asteroids that reseeds near the chase. |
 | `LegendaryShields.java` | Shared shield radius, state, visuals, and per-species defense rules. Handles the Longliner explosive-only shield, Quorum escort and regeneration, Lantern Jack stored shells and prey lure, ordinary regrowing shells, first-hit provocation, flee/prowl exceptions, status text, and persistent defense state. |
 | `MoteDashModule.java` | Moray countermeasure that throws nearby ordinary motes at the fleet. Contact interdicts; missing ammunition is replaced by temporary common props. Quest and shell-game motes are excluded. |
@@ -717,7 +717,7 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 - Civilian harpoon responses depend on fleet role, relationship, and vanilla's reciprocal 1.25× strength threshold. A convoy remains civilian even when heavily escorted.
 - Repair bills and fines return their outcomes through memory. The global pending marker prevents repeated sector-wide searches when the original fleet is no longer nearby.
 - Camp completion is polled because destruction, bribery, dialogue, and departure do not share a callback.
-- `despawn()` reports fleet removal to managers but does not immediately remove the entity. For a supplanted fleet, clear AI, move it away, and call `Misc.fadeAndExpire()`.
+- `despawn()` reports fleet removal to managers and starts the fleet's own fade. `FleetQuest` replacements additionally clear AI, move the original away, and call `Misc.fadeAndExpire()` so the replacement can occupy the same position immediately. Other retiring fleets must not move their still-rendering token during that fade.
 - A local fleet-job offer adds state and a cyan drawn marker to an existing scavenger; it does not create or rename a fleet. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
 - `$missionImportant` is not used for fleet-job offer markers because it changes both colour and story behavior. `FleetQuestMarker` copies vanilla placement and changes only tint.
 

@@ -1,9 +1,10 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
-import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
@@ -485,6 +486,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (fish.isPhantom()) return false;
         if (fish.isHeld()) return false;
+        if (!fish.isLampVisible()) return false;
 
         return reachesUnder || !fish.isDiving();
     }
@@ -694,9 +696,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 entity.getLocation(), FLEE_LEG, away));
     }
 
-    /** Phantoms, shell-game bodies and shield escorts exist only in the lamp light. */
+    /** Lamp-only catches and legendary constructs exist only in the lamp light. */
     protected boolean isLampBound() {
-        return phantom || decoyAnchor != null || orbitAnchor != null;
+        FishSpec spec = getFishSpec();
+
+        return phantom || decoyAnchor != null || orbitAnchor != null
+                || (spec != null && spec.reachedBy.size() == 1
+                && spec.reachedBy.contains(CatchImplement.BREACH_LAMP));
+    }
+
+    protected boolean isLampVisible() {
+        return !isLampBound() || lampFade > 0.05f;
     }
 
     protected void advanceLampFade(float amount) {
@@ -848,7 +858,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 entity.getSensorContactFaderBrightness();
 
         alpha *= getVisibility();
-        // the school's lies live only in the lamp light; the real fish keeps its glow
+        // lamp-only patterns and their legendary constructs disappear with the beam
         if (isLampBound()) alpha *= lampFade;
         if (alpha <= 0f) return;
 
