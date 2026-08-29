@@ -53,7 +53,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     protected float trailId;
 
     protected SectorEntityToken chaseTarget;
-    protected boolean returningToPassiveOrbit = false;
     protected SectorEntityToken carried;
     protected boolean arrivedHome = false;
 
@@ -195,7 +194,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         currentRadius = Misc.getDistance(center, entity.getLocation());
         facingOffset = getAngleDifference(getHeading(), currentAngle + 90f);
 
-        returningToPassiveOrbit = false;
         mode = Mode.ORBITING;
     }
 
@@ -351,13 +349,11 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
 
     public void chase(SectorEntityToken mote) {
         boolean isNewTarget = mote != null && mote != chaseTarget;
-        boolean shouldReportLock = isNewTarget
-                && (mode == Mode.ORBITING || returningToPassiveOrbit);
+        boolean shouldReportLock = isNewTarget && mode == Mode.ORBITING;
 
         if (isNewTarget || mode != Mode.CHASING) chaseTime = 0f;
 
         this.chaseTarget = mote;
-        this.returningToPassiveOrbit = false;
         this.mode = Mode.CHASING;
 
         if (shouldReportLock) {
@@ -369,7 +365,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
     public void returnToOrbit() {
         this.chaseTarget = null;
         this.chaseTime = 0f;
-        this.returningToPassiveOrbit = true;
         this.mode = Mode.LAUNCHING;
     }
 
@@ -379,7 +374,6 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.carried = carried;
         setCarriedHeld(true);
         this.chaseTarget = null;
-        this.returningToPassiveOrbit = false;
         this.mode = Mode.RETURNING;
     }
 
