@@ -133,6 +133,11 @@ public class FleetQuest extends FishJob {
     protected String stationOffset;
     protected String reacquisition;
     protected String course;
+    protected String caseSystemName;
+    protected String charter;
+    protected String competitorLoiter;
+    protected String competitorEndurance;
+    protected String writeoff;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -192,6 +197,7 @@ public class FleetQuest extends FishJob {
         // the rows reach the job through the hull's own memory, and this is a different hull
         setEntityMissionRef(giver, REF_KEY);
 
+        stampAcceptedCatchConstraints();
         mark();
         hold();
 
@@ -253,6 +259,13 @@ public class FleetQuest extends FishJob {
         Misc.fadeAndExpire(original);
 
         return copy;
+    }
+
+    protected void stampAcceptedCatchConstraints() {
+        if (type != FleetQuestType.CLAIM_ASSAY || Global.getSector() == null) return;
+
+        long acceptedAt = Global.getSector().getClock().getTimestamp();
+        for (FishRequirement ask : asks) ask.minCaughtAt = acceptedAt;
     }
 
     public void abandon() {
@@ -451,6 +464,18 @@ public class FleetQuest extends FishJob {
             reacquisition = 8 + random().nextInt(13) + " minutes after active paint ends";
             return;
         }
+        if (type == FleetQuestType.CLAIM_ASSAY) {
+            StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
+                    ? (StarSystemAPI) giver.getContainingLocation() : null;
+            caseSystemName = system == null ? "the current system" : system.getName();
+            charter = String.format(Locale.ROOT, "TT-XSR-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+            competitorLoiter = String.format(Locale.ROOT, "%.1f days",
+                    3f + random().nextFloat() * 5f);
+            competitorEndurance = 14 + random().nextInt(15) + " days at present burn";
+            writeoff = Misc.getDGSCredits(30000 + random().nextInt(70001)) + " credits";
+            return;
+        }
         if (type != FleetQuestType.LAST_ENTRY) return;
 
         registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
@@ -638,6 +663,11 @@ public class FleetQuest extends FishJob {
                 .replace("{stationOffset}", value(stationOffset))
                 .replace("{reacquisition}", value(reacquisition))
                 .replace("{course}", value(course))
+                .replace("{system}", value(caseSystemName))
+                .replace("{charter}", value(charter))
+                .replace("{competitorLoiter}", value(competitorLoiter))
+                .replace("{competitorEndurance}", value(competitorEndurance))
+                .replace("{writeoff}", value(writeoff))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
@@ -647,6 +677,10 @@ public class FleetQuest extends FishJob {
 
     protected String value(String text) {
         return text == null || text.isEmpty() ? "unavailable" : text;
+    }
+
+    public String getDistressIntel() {
+        return type == null ? null : render(type.distressIntel);
     }
 
     protected int elapsedDay() {

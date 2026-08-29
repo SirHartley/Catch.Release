@@ -690,6 +690,74 @@ public enum FleetQuestType {
             "A Sindrian Diktat protocol vessel is broadcasting an urgent procurement request"
                     + " under official seal. The request concerns an official function scheduled"
                     + " for this evening."),
+    CLAIM_ASSAY("The Claim Assay",
+            FleetTypes.SCAVENGER_MEDIUM,
+            "The contract officer has claim file {charter} open beside the comm pickup.\n\n"
+                    + "\"We hold exclusive survey rights in {system}. Those rights lapse within"
+                    + " {days} unless the claim file demonstrates biological viability.\"\n\n"
+                    + "\"The clause was written for terrestrial claims. Legal's position is that"
+                    + " a live local specimen is the cheapest valid proof.\"\n\n"
+                    + "They bring up the filing requirements.\n\n"
+                    + "\"The specimen must be caught in {system} after you accept this"
+                    + " subcontract. The capture timestamp and system coordinates go into the"
+                    + " claim file. Anything already in your hold does not qualify.\"\n\n"
+                    + "\"Our own retrieval attempt has been written off. Personnel are unharmed."
+                    + " There is another survey ship at the jump point waiting for the rights to"
+                    + " lapse.\"\n\n"
+                    + "\"We need {ask}. Compensation is {reward}. You have {days}.\"",
+            "Tri-Tachyon prospecting fleet {fleet} needs a live local specimen to preserve its"
+                    + " survey rights under claim file {charter}. The specimen must be caught in"
+                    + " {system} after you accepted the subcontract and delivered within {days}.",
+            "Holding for claim renewal",
+            "\"Claim file {charter} has cleared review. Our exclusive survey rights in {system}"
+                    + " are renewed.\"\n\n"
+                    + "The unaffiliated survey ship leaves the jump point shortly after the"
+                    + " renewal posts.\n\n"
+                    + "\"That closes the exposure. {fleet} out.\"",
+            1.25f,
+            new Dialogue(
+                    "\"Tri-Tachyon prospecting fleet {fleet}. Priority commercial request"
+                            + " regarding claim file {charter}. Open a contract channel.\"",
+                    "I'll take the contract.",
+                    "No promises. Send me the requirements.",
+                    "\"Accepted. I'll transmit the claim extract and capture logging"
+                            + " requirements.\"\n\n"
+                            + "The contract packet arrives from {fleet}.",
+                    "\"Understood. No commitment recorded.\"\n\n"
+                            + "The officer transmits the same claim extract and capture logging"
+                            + " requirements.\n\n"
+                            + "\"If you make the required catch before the rights lapse, hail"
+                            + " {fleet}.\"",
+                    "Decline.",
+                    "\"Understood. We'll source elsewhere.\"\n\n\"{fleet} out.\"",
+                    "\"Claim file {charter} lapses in {days}. The other survey ship is still at"
+                            + " the jump point, and the countdown is now on every internal"
+                            + " message.\"\n\n"
+                            + "\"We still need {ask}. It must be caught in {system} under this"
+                            + " subcontract.\"",
+                    "The prospecting crew photographs the specimen beside the capture record."
+                            + " The contract officer verifies the timestamp and {system}"
+                            + " coordinates, then appends both to claim file {charter}.\n\n"
+                            + "The updated file is transmitted before the specimen is moved to"
+                            + " storage.",
+                    "What happened to your retrieval attempt?",
+                    "The officer opens the loss entry.\n\n"
+                            + "\"Field equipment failure. Write-off: {writeoff}. Personnel"
+                            + " unharmed.\"\n\n"
+                            + "They close the entry.\n\n"
+                            + "\"We've moved the requirement to vendor supply.\"",
+                    "The subcontract is recorded on the following terms.",
+                    new Question(
+                            "Who's the other survey ship?",
+                            "\"We're not naming them. They are unaffiliated and have not breached"
+                                    + " our survey rights.\"\n\n"
+                                    + "The officer opens the traffic record.\n\n"
+                                    + "\"Recorded loiter time: {competitorLoiter}. Estimated fuel"
+                                    + " endurance: {competitorEndurance}.\"\n\n"
+                                    + "\"They can afford to wait.\"")),
+            "A Tri-Tachyon survey formation is holding position in {system} while an unaffiliated"
+                    + " survey ship waits at the jump point. A priority commercial request is"
+                    + " being broadcast on open channels."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -1073,6 +1141,17 @@ public enum FleetQuestType {
         return available;
     }
 
+    protected static boolean canBeSatisfiedIn(FishRequirement ask, StarSystemAPI system) {
+        if (ask == null || system == null) return false;
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || !spec.hasHabitat() || !ask.couldBeSatisfiedBy(spec)) continue;
+            if (FishRanges.matches(spec, system, ask.implement)) return true;
+        }
+
+        return false;
+    }
+
     /** Shapes this quest type around the target score, or returns null if it cannot. */
     public FishRequirement rollAsk(Random random, float target, StarSystemAPI home, int attempt) {
         FishRequirement ask = new FishRequirement();
@@ -1190,6 +1269,13 @@ public enum FleetQuestType {
                 if (target >= 35f) ask.minGrade = FishGrade.FINE;
                 break;
 
+            case CLAIM_ASSAY:
+                if (home == null) return null;
+                ask.caughtSystemId = home.getId();
+                if (target >= 30f) ask.minRarity = FishRarity.UNCOMMON;
+                if (!canBeSatisfiedIn(ask, home)) return null;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -1277,6 +1363,9 @@ public enum FleetQuestType {
         if (this == STATE_DINNER) {
             request.exclude(QuestRewards.Kind.BLUEPRINT);
             request.tierFloor(DemandScore.Tier.MEDIUM);
+        }
+        if (this == CLAIM_ASSAY) {
+            request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()

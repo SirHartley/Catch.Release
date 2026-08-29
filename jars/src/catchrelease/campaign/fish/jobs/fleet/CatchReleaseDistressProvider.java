@@ -17,6 +17,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     public static final String DEAD_ENGINE_ID = "catchrelease_dead_engine";
     public static final String FOLLOWER_ID = "catchrelease_follower";
     public static final String STATE_DINNER_ID = "catchrelease_state_dinner";
+    public static final String CLAIM_ASSAY_ID = "catchrelease_claim_assay";
 
     public static void register() {
         DistressCallFramework.registerProvider(PROVIDER_ID, new CatchReleaseDistressProvider());
@@ -53,6 +54,11 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
 
     @Override
     public String getIntelText(DistressCallInstance instance, CampaignFleetAPI fleet) {
+        if (fleet != null) {
+            Object ref = fleet.getMemoryWithoutUpdate().get(FishJob.REF_KEY);
+            if (ref instanceof FleetQuest) return ((FleetQuest) ref).getDistressIntel();
+        }
+
         FleetQuestType type = instance == null ? null : typeFor(instance.getSpec());
         return type == null ? null : type.distressIntel;
     }
@@ -63,6 +69,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (DEAD_ENGINE_ID.equals(spec.id)) return FleetQuestType.SCAVENGER_ENGINE;
         if (FOLLOWER_ID.equals(spec.id)) return FleetQuestType.FOLLOWER;
         if (STATE_DINNER_ID.equals(spec.id)) return FleetQuestType.STATE_DINNER;
+        if (CLAIM_ASSAY_ID.equals(spec.id)) return FleetQuestType.CLAIM_ASSAY;
 
         return null;
     }
