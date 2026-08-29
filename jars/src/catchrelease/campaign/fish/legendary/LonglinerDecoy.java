@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -35,10 +36,56 @@ public class LonglinerDecoy implements EveryFrameScript {
     public static final String BOAT_KEY = "$catchrelease_longliner_boat";
     public static final String SOUND_FOUND = "catchrelease_longliner_found";
     public static final float CHECK_SECONDS = 0.5f;
-    public static final float REVEAL_PAUSE_SECONDS = 1f;
+    public static final float REVEAL_DRIFT_SECONDS = 1f;
+    public static final float REVEAL_DRIFT_SPEED = 35f;
     public static final float RUN_TARGET_RANGE = 7000f;
 
     protected float checkTimer;
+
+    protected static class RevealDrift implements EveryFrameScript {
+
+        protected final SectorEntityToken mote;
+        protected final Vector2f velocity;
+        protected float timeLeft = REVEAL_DRIFT_SECONDS;
+        protected boolean done;
+
+        protected RevealDrift(SectorEntityToken mote, Vector2f velocity) {
+            this.mote = mote;
+            this.velocity = velocity;
+        }
+
+        @Override
+        public boolean isDone() {
+            return done;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return false;
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (done) return;
+            if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) {
+                done = true;
+                return;
+            }
+
+            float step = Math.min(amount, timeLeft);
+            Vector2f at = mote.getLocation();
+            mote.setLocation(at.x + velocity.x * step, at.y + velocity.y * step);
+
+            timeLeft -= amount;
+            if (timeLeft > 0f) return;
+
+            if (mote.isInCurrentLocation()) {
+                Global.getSoundPlayer().playSound(
+                        SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
+            }
+            done = true;
+        }
+    }
 
     public static void register() {
         Global.getSector().addTransientScript(new LonglinerDecoy());
@@ -174,6 +221,7 @@ public class LonglinerDecoy implements EveryFrameScript {
         LocationAPI where = boat.getContainingLocation();
         if (where == null) return;
         Vector2f loc = new Vector2f(boat.getLocation());
+        Vector2f driftVelocity = getRevealDriftVelocity(boat);
 
         retire(boat);
 
@@ -181,18 +229,47 @@ public class LonglinerDecoy implements EveryFrameScript {
                 MathUtils.getRandomNumberInRange(0f, 360f));
         FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                 runTo, LegendaryShields.POP_SHIELD_SPECIES);
-        params.movementDelay = REVEAL_PAUSE_SECONDS;
+        params.movementDelay = REVEAL_DRIFT_SECONDS;
 
         SectorEntityToken mote = where.addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 params);
         mote.setLocation(loc.x, loc.y);
+        mote.addScript(new RevealDrift(mote, driftVelocity));
+        mote.addFloatingText("!", Misc.getHighlightColor(), REVEAL_DRIFT_SECONDS);
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
+    }
 
-        Global.getSoundPlayer().playSound(
-                SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
-        mote.addFloatingText("!", Misc.getHighlightColor(), REVEAL_PAUSE_SECONDS);
+    protected Vector2f getRevealDriftVelocity(CampaignFleetAPI boat) {
+        Vector2f direction = boat.getVelocity() == null
+                ? new Vector2f() : new Vector2f(boat.getVelocity());
+
+        if (direction.lengthSquared() < 1f) {
+            Vector2f destination = boat.getMoveDestination();
+            if (destination != null) {
+                direction.set(destination.x - boat.getLocation().x,
+                        destination.y - boat.getLocation().y);
+            }
+        }
+
+        if (direction.lengthSquared() < 1f) {
+            FleetAssignmentDataAPI assignment = boat.getCurrentAssignment();
+            SectorEntityToken target = assignment == null ? null : assignment.getTarget();
+            if (target != null) {
+                direction.set(target.getLocation().x - boat.getLocation().x,
+                        target.getLocation().y - boat.getLocation().y);
+            }
+        }
+
+        if (direction.lengthSquared() < 1f) {
+            direction = MathUtils.getPointOnCircumference(
+                    null, 1f, boat.getFacing());
+        }
+
+        direction.normalise();
+        direction.scale(REVEAL_DRIFT_SPEED);
+        return direction;
     }
 
     protected void retire(CampaignFleetAPI boat) {
