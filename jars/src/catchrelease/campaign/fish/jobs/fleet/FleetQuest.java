@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -216,8 +217,12 @@ public class FleetQuest extends FishJob {
     // The reward is priced off the ask that came out, so settling also pays less.
     // The one satisfiability scan also sizes the clock.
     protected FishRequirement rollFillableAsk(float target) {
+        StarSystemAPI home = giver.getContainingLocation() instanceof StarSystemAPI
+                ? (StarSystemAPI) giver.getContainingLocation() : null;
+
         for (int i = 0; i < ASK_ATTEMPTS; i++, target *= ASK_BACKOFF) {
-            FishRequirement ask = type.rollAsk(random(), target);
+            FishRequirement ask = type.rollAsk(random(), target, home);
+            if (ask == null) continue;
 
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
                     QuestDuration.MAX_SENSIBLE_LY);
