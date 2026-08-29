@@ -49,7 +49,7 @@ public class FishRouteSaveDialog extends BaseCustomUIPanelPlugin {
         TooltipMakerAPI content = panel.createUIElement(innerWidth, HEIGHT - PAD * 2f, false);
 
         CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                new PaneWidgets.TitleRow("TRACK ROUTE"));
+                new PaneWidgets.TitleRow("SAVE AS INTEL"));
         CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
                 new PaneWidgets.TextButton(() -> "X", () -> true, host::onRouteSaveClosed));
         titleRow.addComponent(close).inTR(0f, 0f);
