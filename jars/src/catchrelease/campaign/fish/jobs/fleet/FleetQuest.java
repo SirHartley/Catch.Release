@@ -430,8 +430,7 @@ public class FleetQuest extends FishJob {
                     type.getMaximumTravelLY());
             if (nearest < 0f) continue;
 
-            days = distressOffer ? QuestDuration.SHORT.days
-                    : QuestDuration.forTravelLY(nearest).days;
+            days = QuestDuration.forTravelLY(nearest).days;
             if (type == FleetQuestType.HEADLINER) {
                 replacementPlan = i == 0 ? "So we hire a replacement."
                         : "Fine. We promote a strong supporting act to the headline and hire for"
