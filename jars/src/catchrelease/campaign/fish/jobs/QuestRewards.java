@@ -43,8 +43,11 @@ public class QuestRewards {
     /** The least money a chart arrives with when it cannot bring a second chart. */
     public static final int LONE_CHART_CREDITS = 2000;
 
-    /** What a species' range data is worth in credits: the fish's value, times ten. */
-    public static final float RANGE_DATA_VALUE_MULT = 10f;
+    /** What a species' range data is worth in credits, by rarity. */
+    public static final int RANGE_DATA_COMMON = 5000;
+    public static final int RANGE_DATA_UNCOMMON = 10000;
+    public static final int RANGE_DATA_RARE = 15000;
+    public static final int RANGE_DATA_EPIC = 20000;
     public static final float SCHEMATIC_VALUE_MULT = 0.5f;
     public static final int SCHEMATIC_VALUE_FLOOR = 3000;
     public static final int BACKDROP_VALUE_BASE = 3000;
@@ -280,7 +283,12 @@ public class QuestRewards {
 
         if (fitting.isEmpty()) return null;
 
-        return FishReward.locationData(fitting.get(random.nextInt(fitting.size())).id, 0);
+        FishSpec pick = fitting.get(random.nextInt(fitting.size()));
+
+        // the stored fallback reproduces the chart's full worth through the payout
+        // multiplier, so learning the range early does not shrink the reward
+        return FishReward.locationData(pick.id,
+                Math.round(rangeDataValue(pick) / FishRewardRoller.CREDIT_PAYOUT_MULT));
     }
 
     /** Every reward kind priced in credits, so budgets and picks share one currency. */
@@ -293,8 +301,7 @@ public class QuestRewards {
         if (reward instanceof FishReward.LocationData) {
             FishSpec spec = FishSpecLoader.getFishSpec(
                     ((FishReward.LocationData) reward).speciesId);
-            return spec == null ? Math.round(FishRewardRoller.VALUE_PER_FISH
-                    * RANGE_DATA_VALUE_MULT / 4f) : rangeDataValue(spec);
+            return rangeDataValue(spec);
         }
         if (reward instanceof FishReward.UpgradeSchematic) {
             FishReward.UpgradeSchematic schematic = (FishReward.UpgradeSchematic) reward;
@@ -332,7 +339,15 @@ public class QuestRewards {
     }
 
     public static int rangeDataValue(FishSpec spec) {
-        return Math.round(Math.max(60f, spec.baseValue) * RANGE_DATA_VALUE_MULT);
+        if (spec == null || spec.rarity == null) return RANGE_DATA_COMMON;
+
+        switch (spec.rarity) {
+            case UNCOMMON: return RANGE_DATA_UNCOMMON;
+            case RARE: return RANGE_DATA_RARE;
+            case EPIC:
+            case LEGENDARY: return RANGE_DATA_EPIC;
+            default: return RANGE_DATA_COMMON;
+        }
     }
 
     protected static int schematicValue(ShopPricing.Price price) {
