@@ -172,17 +172,13 @@ public enum FleetQuestType {
 
         switch (this) {
             case STRANDED:
-                // stranded means stranded: the pitch says the rupture is nearby, so the
-                // fish lives in this system or the one next door, never a detour
+            case SCAVENGER_ENGINE:
+                // stuck means stuck: both pitches say the water is local, so the fish
+                // lives in this system or the one next door, never a detour - and a
+                // bigger favour is a second specimen, never exotics
                 ask.count = target >= 24f ? 2 : 1;
                 ask.speciesId = pickNearbySpecies(random, home, FishRarity.UNCOMMON);
                 if (ask.speciesId == null) return null;
-                break;
-
-            case SCAVENGER_ENGINE:
-                // stuck, not shopping: a bigger favour is a second specimen, never exotics
-                ask.count = target >= 24f ? 2 : 1;
-                ask.speciesId = pickSpecies(random, null, FishRarity.UNCOMMON);
                 break;
 
             case STARVING:
