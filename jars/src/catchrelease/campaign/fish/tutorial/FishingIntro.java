@@ -387,19 +387,20 @@ public class FishingIntro {
 
         protected String getIntelPurpose(Target target) {
             if (target.stage == RODDED) {
-                return "Use the ROD/LYNE rig to land a catch, then bring it back to the Fisherman.";
+                return "The first lesson covers basic ROD/LYNE retrieval: land any catch and "
+                        + "bring it back to the Fisherman.";
             }
             if (target.stage == FISH_THREE) {
-                return "Use the supplied range data and planner to find both charted patterns, "
-                        + "catch them, and bring them back.";
+                return "The final lesson works from range data: use the planner to locate both "
+                        + "charted patterns, catch them, and bring them back.";
             }
             if (target.needsDeepGear) {
-                return "Use Breach Lights and the Harpoon to make the assigned catch in open "
-                        + "space, then bring it back.";
+                return "This lesson moves to open space: use Breach Lights and the Harpoon to "
+                        + "make the assigned catch, then bring it back.";
             }
 
-            return "Work the marked rupture with the ROD/LYNE rig, land the assigned catch, and "
-                    + "bring it back.";
+            return "This lesson covers a natural rupture: use the ROD/LYNE rig to land the "
+                    + "assigned catch and bring it back.";
         }
 
         @Override

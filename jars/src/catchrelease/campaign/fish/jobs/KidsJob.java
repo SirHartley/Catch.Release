@@ -231,13 +231,13 @@ public class KidsJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "Any two fish will fill the bracket. If either is Fine grade or better, the "
+        return "Any two fish can fill the bracket. If either is Fine grade or better, the "
                 + "children add an extra prize.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "Two children need contenders for a hand-drawn tournament bracket.";
+        return "Two children need a pair of contenders for a hand-drawn tournament bracket.";
     }
 
     @Override

@@ -326,9 +326,9 @@ public abstract class CampedSpotJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A fisher wants a productive rupture put back into service after another fleet "
-                + "forced the crews off the site. A fresh catch from that exact rupture is the "
-                + "proof that it can be worked again.";
+        return "A fisher wants a productive rupture back in service after another fleet forced "
+                + "the crews off it. A fresh catch from that exact rupture proves the spot can "
+                + "be worked again.";
     }
 
     @Override

@@ -57,13 +57,14 @@ public class StartupJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "This order is part of a three-delivery run. Each successful shipment leads to a "
-                + "larger follow-up order, with no deadline on the sequence.";
+        return "This order is the current step in a three-delivery run. Each successful shipment "
+                + "leads to a larger follow-up order, and there is no deadline.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "A young factor wants the deliveries as proof that a fish supply line can scale.";
+        return "A young factor is using the deliveries to prove a fish supply line can scale. "
+                + "Each shipment goes into the business case.";
     }
 
     @Override

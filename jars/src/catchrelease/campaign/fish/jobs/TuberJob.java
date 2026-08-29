@@ -58,17 +58,17 @@ public class TuberJob extends FishJob {
     @Override
     protected String getIntelSpecialTerms() {
         if (getRound() < 1) {
-            return "This is the first of two shoots. The current clip needs a Fine specimen of "
-                    + "the requested rarity; the second will call for a low-coherence catch.";
+            return "The first shoot needs a Fine specimen of the requested rarity. After that, "
+                    + "the second clip calls for a low-coherence catch.";
         }
 
-        return "This is the final shoot. The remaining request is the promised low-coherence catch.";
+        return "The second shoot is the last. It needs the promised low-coherence catch.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "A TriTuber has commissioned catches for two short clips, each built around a "
-                + "strong opening and reveal.";
+        return "A TriTuber has commissioned catches for two short clips, each planned around a "
+                + "specimen reveal.";
     }
 
     @Override

@@ -61,7 +61,8 @@ public class StandingOrderJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A local provisioner is filling open orders from an existing supplier list.";
+        return "A local provisioner is filling open orders from delivery manifests and an "
+                + "existing supplier list.";
     }
 
     @Override

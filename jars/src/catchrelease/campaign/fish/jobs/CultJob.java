@@ -64,7 +64,7 @@ public class CultJob extends FishJob {
     @Override
     protected String getIntelPurpose() {
         return String.format("Three people in matching plain coats commissioned exactly one %s. "
-                + "They gave no purpose beyond the species itself.", getSpeciesName());
+                + "Asked what it is for, they repeat the species name.", getSpeciesName());
     }
 
     @Override
