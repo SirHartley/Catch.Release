@@ -303,6 +303,8 @@ All three offers state the camp size, system, clear-then-catch sequence, deadlin
 
 `SEEKER` now rolls one exact Uncommon, Rare, or Epic species according to ambition, adds a Fine-grade floor at target 60, and pays 1.25 from the full reward pool. Its guarded captain, missing-collection question, and all offer/intel states use Editor-authored copy while the existing single-stage fleet workflow remains unchanged.
 
+`QUOTA` remains the real fishing-crew offer with its Fine-grade two-to-six-specimen demand. It now uses a purser contact, a 1.0 operating-margin reward multiplier with blueprints excluded, saved contract/filing details, and Editor-authored occupational dialogue, looping range question, and accepted intel.
+
 ### `campaign/fish/colony`
 
 | File | Responsibility |

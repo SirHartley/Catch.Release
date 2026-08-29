@@ -984,12 +984,45 @@ public enum FleetQuestType {
                     "The captain's offer is recorded on the following terms.")),
     QUOTA("Short of Quota",
             FleetTypes.TRADE_SMALL,
-            "Our quota is due, our nets came up light, and the difference between filed and short"
-                    + " is a hearing neither of us wants to attend. Make up the numbers and we will"
-                    + " pay out of the margin.",
-            "Their filed quota is short and the deadline is not moving.",
+            "The purser comes on from the working deck with the quota ledger open beside the comm"
+                    + " pickup.\n\n"
+                    + "\"We're short exactly {ask} on contract {contract}. Filing date is"
+                    + " {filingDate}.\"\n\n"
+                    + "\"If we file short, it goes to arbitration. That can reopen our rates for"
+                    + " every season after this one.\"\n\n"
+                    + "They check the operating ledger.\n\n"
+                    + "\"I can pay {reward} out of our margin. We have {days}.\"",
+            "Fishing fleet {fleet} is short {ask} on station provisioning contract {contract}."
+                    + " The quota must be filled within {days}, before the {filingDate} filing.",
             "Filling quota",
-            "Filed and balanced. Nobody has to explain the shortfall now. Thank you."),
+            "\"Filed and balanced. Nobody has to explain the shortfall now.\"\n\n"
+                    + "The purser closes the contract ledger.\n\n"
+                    + "\"Good fish. I'd work alongside you again.\"",
+            1f,
+            new Dialogue(
+                    "\"Fishing fleet {fleet}. We're working station provisioning contract"
+                            + " {contract}, and you've got the gear for a business proposition.\"",
+                    "I'll take the job.", "No promises. Send me the details.",
+                    "\"Good. I'll send the contract line and our grade record.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Fair enough. No commitment goes in the book.\"\n\n"
+                            + "The purser transmits the same contract line and grade record.\n\n"
+                            + "\"If you can fill the short before filing, hail us.\"",
+                    "Decline.", "\"Understood. We'll keep fishing.\"\n\n\"{fleet} out.\"",
+                    "\"I've recounted the hold twice. Filing date is still {filingDate}, and we're"
+                            + " still short {ask}.\"\n\n\"We have {days}.\"",
+                    "The purser meets the transfer at the working deck and counts the catch as it"
+                            + " crosses.\n\nEach specimen gets a quick grade check before the next"
+                            + " container opens. One earns a brief second look, then goes straight"
+                            + " onto the quota tally.\n\nThe final line balances.",
+                    "Why is the water short?",
+                    "\"Ranges moved. New charts cost money, and spots we could rely on stopped"
+                            + " producing.\"\n\nThe purser brings up the previous seasons.\n\n"
+                            + "\"Every earlier ledger says the quota was reachable. This season"
+                            + " isn't matching them.\"\n\nThey glance toward the deck.\n\n"
+                            + "\"We're rigged to work known spots. You've got better gear for"
+                            + " going after one short line.\"",
+                    "The crew's quota offer is recorded on the following terms.")),
     STARVING("Hungry Fleet",
             FleetTypes.TRADE_SMALL,
             "We have been on printed protein for nineteen days. Nobody is dying. Everybody is"
@@ -1641,6 +1674,7 @@ public enum FleetQuestType {
             request.exclude(QuestRewards.Kind.BLUEPRINT);
             request.tierFloor(DemandScore.Tier.MEDIUM);
         }
+        if (this == QUOTA) request.exclude(QuestRewards.Kind.BLUEPRINT);
         if (this == CLAIM_ASSAY) {
             request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }

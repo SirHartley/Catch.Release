@@ -149,6 +149,7 @@ public class FleetQuest extends FishJob {
     protected String feedstockCode;
     protected String manualSection;
     protected String coilCondition;
+    protected String filingDate;
     protected boolean parleyCatchAboard;
     protected int liabilityBase;
     protected int liabilityPerDay;
@@ -327,6 +328,13 @@ public class FleetQuest extends FishJob {
 
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SPACER);
+            contact.setVoice(Voices.SPACER);
+        } else if (type == FleetQuestType.QUOTA) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
             contact.setVoice(Voices.SPACER);
         } else if (type.usesBosunContact()) {
             contact = giver.getFaction().createRandomPerson(random());
@@ -537,6 +545,12 @@ public class FleetQuest extends FishJob {
             coilCondition = 18 + random().nextInt(23) + "%";
             return;
         }
+        if (type == FleetQuestType.QUOTA) {
+            contract = String.format(Locale.ROOT, "SP-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+            filingDate = "cycle " + Global.getSector().getClock().getCycle() + " month-end";
+            return;
+        }
         if (type != FleetQuestType.LAST_ENTRY) return;
 
         registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
@@ -738,6 +752,7 @@ public class FleetQuest extends FishJob {
                 .replace("{feedstockCode}", value(feedstockCode))
                 .replace("{manualSection}", value(manualSection))
                 .replace("{coilCondition}", value(coilCondition))
+                .replace("{filingDate}", value(filingDate))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
