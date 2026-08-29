@@ -68,7 +68,7 @@ public class ChefJob extends FishJob {
     @Override
     protected String getIntelPurpose() {
         String planned = dish == null ? "the planned dish" : dish;
-        return String.format("A cook is sourcing the catch needed for %s. Each specimen has a "
+        return String.format("A cook is sourcing the separate catches needed for %s. Each has a "
                 + "place in the preparation.", planned);
     }
 

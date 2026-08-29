@@ -46,7 +46,8 @@ public class CuratorJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A public collection is looking to fill a gap in either its display or its records.";
+        return "A public collection is looking to fill a gap in either its display or its "
+                + "accession record.";
     }
 
     @Override

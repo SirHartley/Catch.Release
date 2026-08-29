@@ -48,8 +48,8 @@ public class AcademyJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "An Academy researcher wants low-coherence catches with their retrieval records "
-                + "intact for comparison against sensor plots.";
+        return "An Academy researcher needs low-coherence catches with their original retrieval "
+                + "records for comparison against sensor plots.";
     }
 
     @Override
