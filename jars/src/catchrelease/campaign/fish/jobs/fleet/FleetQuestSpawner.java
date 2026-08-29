@@ -13,6 +13,7 @@ import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.OptionalFleetData;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteData;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteFleetSpawner;
 import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteSegment;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RuinsFleetRouteManager;
@@ -179,6 +180,8 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         for (CampaignFleetAPI fleet : location.getFleets()) {
             if (!canCarryAnOffer(fleet)) continue;
+            if (type == FleetQuestType.LAST_ENTRY
+                    && !Factions.INDEPENDENT.equals(fleet.getFaction().getId())) continue;
 
             any.add(fleet);
 
@@ -188,7 +191,8 @@ public class FleetQuestSpawner implements EveryFrameScript {
             }
         }
 
-        List<CampaignFleetAPI> pool = matching.isEmpty() ? any : matching;
+        List<CampaignFleetAPI> pool = type == FleetQuestType.LAST_ENTRY
+                ? matching : (matching.isEmpty() ? any : matching);
         if (pool.isEmpty()) return false;
 
         CampaignFleetAPI chosen = pool.get(random.nextInt(pool.size()));

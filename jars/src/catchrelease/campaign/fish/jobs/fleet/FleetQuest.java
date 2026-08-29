@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.jobs.fleet;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
+import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -24,6 +25,8 @@ import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.ids.Ranks;
+import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.ui.LabelAPI;
@@ -33,6 +36,7 @@ import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class FleetQuest extends FishJob {
@@ -45,6 +49,18 @@ public class FleetQuest extends FishJob {
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
     public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
+    public static final String DETAILED_THANKS_FLAG = "$catchrelease_fleetQuestDetailedThanks";
+    public static final String HAIL_KEY = "$catchrelease_fleetQuestHail";
+    public static final String ACCEPT_OPTION_KEY = "$catchrelease_fleetQuestAcceptOption";
+    public static final String NO_PROMISE_OPTION_KEY = "$catchrelease_fleetQuestNoPromiseOption";
+    public static final String ACCEPT_KEY = "$catchrelease_fleetQuestAccept";
+    public static final String ACCEPT_NO_PROMISE_KEY = "$catchrelease_fleetQuestAcceptNoPromise";
+    public static final String DECLINE_OPTION_KEY = "$catchrelease_fleetQuestDeclineOption";
+    public static final String DECLINE_KEY = "$catchrelease_fleetQuestDecline";
+    public static final String WAITING_KEY = "$catchrelease_fleetQuestWaiting";
+    public static final String TURN_IN_KEY = "$catchrelease_fleetQuestTurnIn";
+    public static final String QUESTION_OPTION_KEY = "$catchrelease_fleetQuestQuestionOption";
+    public static final String QUESTION_RESPONSE_KEY = "$catchrelease_fleetQuestQuestionResponse";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -60,6 +76,12 @@ public class FleetQuest extends FishJob {
     protected transient FleetMarkerRenderer marker;
     protected boolean takenUp = false;
     protected boolean distressOffer = false;
+    protected String fleetName;
+    protected String registry;
+    protected String expedition;
+    protected String entryDate;
+    protected String coordinates;
+    protected String signature;
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         return startOn(giver, type, false);
@@ -189,7 +211,18 @@ public class FleetQuest extends FishJob {
         PersonAPI captain = giver.getCommander();
         if (captain == null) return false;
 
-        setPersonOverride(captain);
+        PersonAPI contact = captain;
+        if (type == FleetQuestType.LAST_ENTRY) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SCIENTIST);
+            contact.setVoice(Voices.SCIENTIST);
+        }
+
+        setPersonOverride(contact);
+        prepareCaseDetails();
 
         float target = DemandScore.rollTarget(random());
         FishRequirement ask = rollFillableAsk(target);
@@ -197,7 +230,9 @@ public class FleetQuest extends FishJob {
         addAsk(ask);
 
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
-                .budgetMult(1.15f).random(random())).rewards);
+                .fixAll(type.rollFixedRewards(random()))
+                .budgetMult(type.rewardBudgetMult)
+                .random(random())).rewards);
 
         setUpSpine();
 
@@ -218,7 +253,7 @@ public class FleetQuest extends FishJob {
             if (ask == null) continue;
 
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
-                    QuestDuration.MAX_SENSIBLE_LY);
+                    type.getMaximumTravelLY());
             if (nearest < 0f) continue;
 
             days = QuestDuration.forTravelLY(nearest).days;
@@ -228,11 +263,40 @@ public class FleetQuest extends FishJob {
         return null;
     }
 
+    protected void prepareCaseDetails() {
+        fleetName = giver.getName();
+        if (type != FleetQuestType.LAST_ENTRY) return;
+
+        registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
+        expedition = String.format(Locale.ROOT, "SX-%03d", random().nextInt(1000));
+        entryDate = Global.getSector().getClock().getDateString();
+        coordinates = String.format(Locale.ROOT, "%+.1f / %+.1f",
+                giver.getLocation().x, giver.getLocation().y);
+
+        for (int i = 0; i < 10; i++) {
+            PersonAPI loggedBy = giver.getFaction().createRandomPerson(random());
+            if (loggedBy == null || isOnRoster(loggedBy.getNameString())) continue;
+
+            signature = loggedBy.getNameString();
+            break;
+        }
+        if (signature == null) signature = "unregistered";
+    }
+
+    protected boolean isOnRoster(String name) {
+        if (name == null) return false;
+        if (getPerson() != null && name.equals(getPerson().getNameString())) return true;
+
+        for (FleetMemberAPI member : giver.getFleetData().getMembersListCopy()) {
+            PersonAPI memberCaptain = member.getCaptain();
+            if (memberCaptain != null && name.equals(memberCaptain.getNameString())) return true;
+        }
+
+        return false;
+    }
+
     protected void offer() {
-        giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
-        giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
-        giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
-        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
+        writeDialogueMemory();
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(), MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE,
                 IMPORTANT_REASON, true, HOLD_DAYS);
@@ -244,10 +308,7 @@ public class FleetQuest extends FishJob {
     protected void mark() {
         Misc.makeImportant(giver, IMPORTANT_REASON);
 
-        giver.getMemoryWithoutUpdate().set(QUEST_FLAG, true);
-        giver.getMemoryWithoutUpdate().set(PITCH_KEY, type.pitch);
-        giver.getMemoryWithoutUpdate().set(ASK_KEY, describeAsks());
-        giver.getMemoryWithoutUpdate().set(REWARD_KEY, describeRewards());
+        writeDialogueMemory();
 
         // carried over rather than re-derived: the answer was given to the hull that is now gone, and without it the copy would open by making the same offer over again
         giver.getMemoryWithoutUpdate().set(TAKEN_FLAG, true);
@@ -259,6 +320,63 @@ public class FleetQuest extends FishJob {
         giver.setName(type.title);
 
         keepStanding();
+    }
+
+    protected void writeDialogueMemory() {
+        if (giver == null) return;
+
+        MemoryAPI memory = giver.getMemoryWithoutUpdate();
+        FleetQuestType.Dialogue dialogue = type.dialogue;
+
+        memory.set(QUEST_FLAG, true);
+        memory.set(PITCH_KEY, render(type.pitch));
+        memory.set(ASK_KEY, describeAsks());
+        memory.set(REWARD_KEY, describeRewards());
+        memory.set(ACCEPT_OPTION_KEY, dialogue.acceptOption);
+        memory.set(NO_PROMISE_OPTION_KEY, dialogue.noPromiseOption);
+        memory.set(ACCEPT_KEY, render(dialogue.accept));
+        memory.set(ACCEPT_NO_PROMISE_KEY, render(dialogue.acceptNoPromise));
+        memory.set(DECLINE_OPTION_KEY, dialogue.declineOption);
+        memory.set(DECLINE_KEY, render(dialogue.decline));
+
+        String waiting = dialogue.waiting == null
+                ? "The fleet is still where you left it.\n\nThey still need {ask}."
+                : dialogue.waiting;
+        memory.set(WAITING_KEY, render(waiting));
+
+        String turnIn = dialogue.turnIn == null
+                ? "The cargo goes across.\n\nSomeone on the receiving ship checks the containers"
+                + " and calls something away from the microphone.\n\nSeveral voices answer.\n\n"
+                + "Payment follows."
+                : dialogue.turnIn;
+        memory.set(TURN_IN_KEY, render(turnIn));
+
+        setOrUnset(memory, HAIL_KEY, render(dialogue.hail));
+        setOrUnset(memory, QUESTION_OPTION_KEY, dialogue.questionOption);
+        setOrUnset(memory, QUESTION_RESPONSE_KEY, render(dialogue.questionResponse));
+    }
+
+    protected void setOrUnset(MemoryAPI memory, String key, String value) {
+        if (value == null || value.isEmpty()) memory.unset(key);
+        else memory.set(key, value);
+    }
+
+    protected String render(String text) {
+        if (text == null) return null;
+
+        return text.replace("{fleet}", value(fleetName))
+                .replace("{registry}", value(registry))
+                .replace("{expedition}", value(expedition))
+                .replace("{entryDate}", value(entryDate))
+                .replace("{coordinates}", value(coordinates))
+                .replace("{signature}", value(signature))
+                .replace("{ask}", describeAsks())
+                .replace("{reward}", describeRewards())
+                .replace("{days}", describeDays());
+    }
+
+    protected String value(String text) {
+        return text == null || text.isEmpty() ? "unavailable" : text;
     }
 
     protected void keepStanding() {
@@ -289,7 +407,12 @@ public class FleetQuest extends FishJob {
     protected void advanceImpl(float amount) {
         super.advanceImpl(amount);
 
-        if (Stage.WANTED.equals(currentStage)) keepStanding();
+        if (Stage.WANTED.equals(currentStage)) {
+            if (giver != null && !giver.getMemoryWithoutUpdate().contains(ACCEPT_OPTION_KEY)) {
+                writeDialogueMemory();
+            }
+            keepStanding();
+        }
     }
 
     @Override
@@ -341,6 +464,14 @@ public class FleetQuest extends FishJob {
         FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestTurnIn");
     }
 
+    @Override
+    protected void showRewardReceipts(InteractionDialogAPI dialog) {
+        if (dialog != null) {
+            FishReward.showReceipts(dialog.getTextPanel(), pendingRewardReceipts, "Received");
+        }
+        if (pendingRewardReceipts != null) pendingRewardReceipts.clear();
+    }
+
     protected void release() {
         if (giver == null) return;
 
@@ -351,7 +482,18 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(ASK_KEY);
         giver.getMemoryWithoutUpdate().unset(REWARD_KEY);
         giver.getMemoryWithoutUpdate().unset(TAKEN_FLAG);
-        giver.getMemoryWithoutUpdate().unset(REF_KEY);
+        if (!Stage.DONE.equals(currentStage)) giver.getMemoryWithoutUpdate().unset(REF_KEY);
+        giver.getMemoryWithoutUpdate().unset(HAIL_KEY);
+        giver.getMemoryWithoutUpdate().unset(ACCEPT_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(NO_PROMISE_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(ACCEPT_KEY);
+        giver.getMemoryWithoutUpdate().unset(ACCEPT_NO_PROMISE_KEY);
+        giver.getMemoryWithoutUpdate().unset(DECLINE_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(DECLINE_KEY);
+        giver.getMemoryWithoutUpdate().unset(WAITING_KEY);
+        giver.getMemoryWithoutUpdate().unset(TURN_IN_KEY);
+        giver.getMemoryWithoutUpdate().unset(QUESTION_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(QUESTION_RESPONSE_KEY);
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
                 MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
@@ -377,7 +519,10 @@ public class FleetQuest extends FishJob {
 
         if (!Stage.DONE.equals(currentStage) || giver == null) return;
 
-        giver.getMemoryWithoutUpdate().set(THANKS_KEY, type.thanks);
+        giver.getMemoryWithoutUpdate().set(THANKS_KEY, render(type.thanks));
+        if (type.dialogue.hail != null) {
+            giver.getMemoryWithoutUpdate().set(DETAILED_THANKS_FLAG, true);
+        }
         release();
     }
 
@@ -386,6 +531,7 @@ public class FleetQuest extends FishJob {
         super.notifyEnded();
 
         release();
+        if (giver != null) giver.getMemoryWithoutUpdate().unset(REF_KEY);
     }
 
     public FleetQuestType getType() {
@@ -409,6 +555,9 @@ public class FleetQuest extends FishJob {
 
         String ask = describeAsks();
         String reward = describeRewards();
+        String specialTerms = type == null ? null : render(type.dialogue.intelTerms);
+        if (specialTerms != null && !specialTerms.isEmpty()) info.addPara(specialTerms, pad);
+
         LabelAPI terms = info.addPara("They want %s, and are offering %s.", pad,
                 Misc.getHighlightColor(), ask, reward);
         FishRequirement.highlight(terms, asks, ask, reward);
@@ -425,7 +574,7 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return type == null ? null : type.note;
+        return type == null ? null : render(type.note);
     }
 
     @Override
