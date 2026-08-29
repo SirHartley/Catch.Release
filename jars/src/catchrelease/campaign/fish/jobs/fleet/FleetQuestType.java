@@ -1025,11 +1025,54 @@ public enum FleetQuestType {
                     "The crew's quota offer is recorded on the following terms.")),
     STARVING("Hungry Fleet",
             FleetTypes.TRADE_SMALL,
-            "We have been on printed protein for nineteen days. Nobody is dying. Everybody is"
-                    + " furious. Bring us something that was recently alive and name a price.",
-            "Nineteen days of printed protein and a crew about to mutiny over it.",
+            "The galley chief comes on from the mess with a provisioning slate in hand.\n\n"
+                    + "\"We've been on printed protein for {rationDays} days. Nutritionally"
+                    + " adequate. Professionally humiliating.\"\n\n"
+                    + "\"The crew gave command a signed petition this morning. No demands. Just"
+                    + " a proposed menu, itemized by watch.\"\n\n"
+                    + "They set the petition beside the slate.\n\n"
+                    + "\"Command decided nobody trusts them to negotiate dinner anymore, so here"
+                    + " I am.\"\n\n"
+                    + "\"We need {ask}. I can authorize {reward}. We have {days}.\"",
+            "The crew of {fleet} has spent {rationDays} days on printed protein, and galley"
+                    + " morale is failing. Their cook needs {ask} within {days} to put fresh food"
+                    + " back on the menu.",
             "Rationing",
-            "The galley has stopped threatening mutiny. You have our thanks."),
+            "\"The galley has stopped threatening mutiny.\"\n\n"
+                    + "The chief reads from the crew's proposed menu.\n\n"
+                    + "\"Roasted catch, proper stock, fresh portions for night watch.\"\n\n"
+                    + "They fold the petition.\n\n"
+                    + "\"That's your thank-you.\"",
+            1.1f,
+            new Dialogue(
+                    "\"Galley chief aboard {fleet}. I'm the cook, and command has wisely left"
+                            + " this negotiation to me.\"",
+                    "I'll take the job.", "No promises. Send me the order.",
+                    "\"Good. I'll send the order and receiving instructions.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Understood. No commitment.\"\n\n"
+                            + "The galley chief transmits the same order and receiving"
+                            + " instructions.\n\n"
+                            + "\"If you can fill it before the window closes, hail us.\"",
+                    "Decline.", "\"Understood. I'll keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"We're at {rationDays} days on printed protein.\"\n\n"
+                            + "The galley chief holds up the petition.\n\n"
+                            + "\"It has an appendix now.\"\n\n"
+                            + "\"We still need {ask}. We have {days}.\"",
+                    "The galley chief inspects the delivery container by container, checking"
+                            + " each specimen before waving it through to prep.\n\n"
+                            + "Their shoulders finally come down.\n\n"
+                            + "\"Good. Cold storage, second rack. Knives out. Somebody get the"
+                            + " large pans hot.\"\n\n"
+                            + "The galley erupts into motion.",
+                    "Nobody's actually starving?",
+                    "\"Nutrition is acceptable.\"\n\n"
+                            + "The galley chief looks back into the mess.\n\n"
+                            + "\"Last meal, thirty people sat through the entire watch change"
+                            + " chewing in silence and looking at the printer.\"\n\n"
+                            + "They turn back to you.\n\n"
+                            + "\"Morale is not acceptable.\"",
+                    "The galley chief's provisioning offer is recorded on the following terms.")),
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
             "The technician has a yard manual open beside the drive diagnostics.\n\n"
