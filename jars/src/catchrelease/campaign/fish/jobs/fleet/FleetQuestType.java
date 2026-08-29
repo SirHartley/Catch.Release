@@ -409,6 +409,52 @@ public enum FleetQuestType {
                             + "They return to the release form.\n\n"
                             + "\"That's what we're clearing.\"",
                     "The League service line authorizes the following subcontract terms.")),
+    QUIET_SHIP("The Quiet Ship",
+            FleetTypes.SCAVENGER_SMALL,
+            "The chief has the duty board open behind the comm pickup.\n\n"
+                    + "\"We're on {relayRun}. Long rotation, thin fabric for most of it. The"
+                    + " technicians' logs keep recording whispering we haven't been able to"
+                    + " place.\"\n\n"
+                    + "They shift the duty board aside.\n\n"
+                    + "\"There's an old run custom. Ships on this contract keep a catch aboard,"
+                    + " more or less like a ship's cat. The last rotation took ours with them, and"
+                    + " we sailed without replacing it.\"\n\n"
+                    + "\"We need {ask}. I've got {reward} cleared for it. We have {days}.\"",
+            "Maintenance tender {fleet} is working {relayRun} and wants to replace the catch its"
+                    + " crews traditionally keep aboard. The current window closes in {days}.",
+            "Maintaining the relay run",
+            "The chief has the regular maintenance board open again. Two technicians are"
+                    + " disputing a parts allotment off-screen.\n\n"
+                    + "\"Crew's settled back into the run. That's enough for me.\"\n\n"
+                    + "They turn back to the board.\n\n"
+                    + "\"I've got a relay to keep alive. {fleet} out.\"",
+            0.9f,
+            new Dialogue(
+                    "\"Maintenance tender {fleet}. Chief here. I've got a private request. Bit"
+                            + " outside the usual stores list.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Right. Good.\"\n\n"
+                            + "The chief transmits the request and hand-in instructions.\n\n"
+                            + "\"Hail us when you have it.\"",
+                    "\"Fair. I won't put you down as committed.\"\n\n"
+                            + "The chief sends the same request and hand-in instructions.\n\n"
+                            + "\"If you find one in time, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep asking around.\"\n\n\"{fleet} out.\"",
+                    "\"We're still on {relayRun}. {days} left in the window.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "A technician carries the specimen into the mess and settles it into a"
+                            + " bracketed tank built against the bulkhead.\n\n"
+                            + "The locking slots are worn bright. Older names are painted beneath"
+                            + " the current stencil.",
+                    "What does it actually do?",
+                    "The chief looks over at the maintenance board.\n\n"
+                            + "\"Long run. Fabric stays thin for most of it. Crews on this route"
+                            + " have kept one aboard longer than anyone serving can remember.\"\n\n"
+                            + "They straighten a stack of work orders.\n\n"
+                            + "\"It helps.\"",
+                    "The chief's request has the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -475,6 +521,7 @@ public enum FleetQuestType {
             MUTINY_POT,
             TRIBUTE,
             REFERENCE_SPECIMEN,
+            QUIET_SHIP,
             SEEKER,
             QUOTA,
             STARVING,
@@ -659,6 +706,8 @@ public enum FleetQuestType {
 
     public static final float HOME_SPECIES_WEIGHT = 4f;
     public static final float LAST_ENTRY_MAX_LY = 75f;
+    public static final float QUIET_SHIP_COOLDOWN_DAYS = 120f;
+    public static final List<String> BODY_TYPE_TAGS = List.of("fish", "crab", "mollusc");
 
     /** Picks from the home system or its nearest neighbour, preferring home. */
     protected static String pickNearbySpecies(Random random, StarSystemAPI home,
@@ -721,6 +770,31 @@ public enum FleetQuestType {
         FishSpec pick = picker.pick();
 
         return pick == null ? null : pick.id;
+    }
+
+    protected static String pickBodyType(Random random, StarSystemAPI home) {
+        List<String> available = bodyTypesIn(home);
+        if (available.isEmpty()) available = bodyTypesIn(nearestSystemTo(home));
+        if (available.isEmpty()) available = BODY_TYPE_TAGS;
+
+        return available.get(random.nextInt(available.size()));
+    }
+
+    protected static List<String> bodyTypesIn(StarSystemAPI system) {
+        if (system == null) return List.of();
+
+        List<String> available = new java.util.ArrayList<>();
+        for (String tag : BODY_TYPE_TAGS) {
+            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+                if (spec == null || !spec.hasHabitat() || !spec.tags.contains(tag)) continue;
+                if (!FishRanges.matches(spec, system, null)) continue;
+
+                available.add(tag);
+                break;
+            }
+        }
+
+        return available;
     }
 
     /** Shapes this quest type around the target score, or returns null if it cannot. */
@@ -795,6 +869,11 @@ public enum FleetQuestType {
                 break;
             }
 
+            case QUIET_SHIP:
+                ask.tag = pickBodyType(random, home);
+                if (target >= 24f) ask.minGrade = FishGrade.AVERAGE;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -846,6 +925,7 @@ public enum FleetQuestType {
     }
 
     public List<FishReward> rollFixedRewards(Random random, int round) {
+        if (this == QUIET_SHIP) return FishRewardRoller.rollSchematic(random);
         if (this != LAST_ENTRY && !(this == CALIBRATION_PAIR && round == 0)) return List.of();
 
         return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
@@ -894,13 +974,18 @@ public enum FleetQuestType {
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
                 || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
-                || this == REFERENCE_SPECIMEN;
+                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP;
     }
 
     public float getMaximumTravelLY() {
         return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY
                 : this == CALIBRATION_PAIR ? Float.MAX_VALUE
                 : QuestDuration.MAX_SENSIBLE_LY;
+    }
+
+    public float getOfferCooldownDays() {
+        return this == QUIET_SHIP ? QUIET_SHIP_COOLDOWN_DAYS
+                : FleetQuestSpawner.COOLDOWN_DAYS;
     }
 
     public String getId() {

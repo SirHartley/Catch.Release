@@ -112,6 +112,7 @@ public class FleetQuest extends FishJob {
     protected String profileOrigin;
     protected String registryVolume;
     protected String discrepancyCode;
+    protected String relayRun;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -281,6 +282,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
             contact.setVoice(Voices.BUSINESS);
+        } else if (type == FleetQuestType.QUIET_SHIP) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
+            contact.setVoice(Voices.SPACER);
         }
 
         setPersonOverride(contact);
@@ -355,6 +363,11 @@ public class FleetQuest extends FishJob {
             registryVolume = String.format(Locale.ROOT, "LR-%02d-%04d",
                     random().nextInt(100), random().nextInt(10000));
             discrepancyCode = String.format(Locale.ROOT, "OS-%02d", 10 + random().nextInt(90));
+            return;
+        }
+        if (type == FleetQuestType.QUIET_SHIP) {
+            relayRun = String.format(Locale.ROOT, "relay maintenance run RM-%02d-%03d",
+                    Global.getSector().getClock().getCycle() % 100, random().nextInt(1000));
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -513,6 +526,7 @@ public class FleetQuest extends FishJob {
                 .replace("{profileOrigin}", value(profileOrigin))
                 .replace("{registryVolume}", value(registryVolume))
                 .replace("{discrepancyCode}", value(discrepancyCode))
+                .replace("{relayRun}", value(relayRun))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())

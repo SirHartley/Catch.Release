@@ -140,7 +140,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         FleetQuestType type = FleetQuestType.rollAny(random);
         if (type == null) return;
 
-        if (adopt(type)) markOffered();
+        if (adopt(type)) markOffered(type);
     }
 
     protected boolean canOffer() {
@@ -154,8 +154,9 @@ public class FleetQuestSpawner implements EveryFrameScript {
         return countActive() < MAX_ACTIVE;
     }
 
-    protected void markOffered() {
-        Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true, COOLDOWN_DAYS);
+    protected void markOffered(FleetQuestType type) {
+        Global.getSector().getMemoryWithoutUpdate().set(COOLDOWN_KEY, true,
+                type == null ? COOLDOWN_DAYS : type.getOfferCooldownDays());
     }
 
     public static int countActive() {

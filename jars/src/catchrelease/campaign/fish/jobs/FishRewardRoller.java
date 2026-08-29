@@ -198,6 +198,16 @@ public class FishRewardRoller {
         return FishReward.tackleSchematic(options.get(random.nextInt(options.size())));
     }
 
+    public static List<FishReward> rollSchematic(Random random) {
+        Set<String> reserved = getReservedSchematicKeys();
+        WeightedRandomPicker<FishReward> picker = new WeightedRandomPicker<>(random);
+        addIfPresent(picker, rollUpgrade(random, reserved), 1f);
+        addIfPresent(picker, rollTackle(random, reserved), 1f);
+
+        FishReward reward = picker.pick();
+        return reward == null ? List.of() : List.of(reward);
+    }
+
     public static Set<String> getReservedSchematicKeys() {
         Set<String> reserved = new LinkedHashSet<>();
         if (Global.getSector() == null || Global.getSector().getIntelManager() == null) {
