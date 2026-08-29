@@ -15,24 +15,21 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.fisherman.FishRumors;
-import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
-import com.fs.starfarer.api.campaign.CargoAPI;
-import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotAPI;
 import com.fs.starfarer.api.campaign.PersistentUIDataAPI.AbilitySlotsAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
-import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
@@ -121,6 +118,8 @@ public class FishingIntro {
 
         public String systemId;
         public String systemName;
+        public String sourceId;
+        public long assignedAt;
 
         public float x;
         public float y;
@@ -184,27 +183,8 @@ public class FishingIntro {
             implements catchrelease.campaign.fish.shop.FishAsker {
 
         @Override
-        public List<catchrelease.campaign.fish.shop.FishRequirement> getAsks() {
-            List<catchrelease.campaign.fish.shop.FishRequirement> out = new ArrayList<>();
-
-            Target target = getTarget();
-            if (target == null || target.anySpecies) return out;
-
-            for (String speciesId : target.speciesIds) {
-                catchrelease.campaign.fish.shop.FishRequirement ask =
-                        new catchrelease.campaign.fish.shop.FishRequirement();
-
-                ask.speciesId = speciesId;
-
-                if (target.needsDeepGear) {
-                    ask.implement = CatchImplement.BREACH_LAMP;
-                    ask.method = FishLogEntry.Method.HARPOON;
-                }
-
-                out.add(ask);
-            }
-
-            return out;
+        public List<FishRequirement> getAsks() {
+            return FishingIntro.getAsks(getTarget());
         }
 
         @Override
@@ -275,14 +255,15 @@ public class FishingIntro {
         protected float addProgressLines(TooltipMakerAPI info, Target target, Color text,
                                          float pad) {
             if (target.anySpecies) {
-                int aboard = target.landed ? 1 : 0;
+                List<FishRequirement> asks = getAsks();
+                int aboard = asks.isEmpty() ? 0 : Math.min(1, FishCurrency.count(asks.get(0)));
                 info.addPara("%s anything you can land", pad, text, Misc.getHighlightColor(),
                         aboard + "/1");
                 return 0f;
             }
 
-            for (catchrelease.campaign.fish.shop.FishRequirement ask : getAsks()) {
-                int aboard = find(ask.speciesId, target.needsDeepGear) == null ? 0 : 1;
+            for (FishRequirement ask : getAsks()) {
+                int aboard = Math.min(ask.count, FishCurrency.count(ask));
                 String progress = ask.describeProgress(aboard);
                 LabelAPI line = info.addPara(progress, text, pad);
                 FishRequirement.highlight(line,
@@ -744,9 +725,11 @@ public class FishingIntro {
             SectorEntityToken pond = QuestPond.findPondAt(system, target.x, target.y,
                     TutorialConstants.SPOT_SPREAD);
 
-            if (pond != null && !QuestPond.isClaimedBy(
-                    pond, TutorialConstants.TARGET_KEY)) {
-                QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+            if (pond != null) {
+                target.sourceId = pond.getId();
+                if (!QuestPond.isClaimedBy(pond, TutorialConstants.TARGET_KEY)) {
+                    QuestPond.claim(pond, TutorialConstants.TARGET_KEY);
+                }
             }
             return;
         }
@@ -765,21 +748,20 @@ public class FishingIntro {
     public static void onCatchStored(FishCatch caught) {
         Target target = getTarget();
         if (target == null || caught == null) return;
-        if (target.anySpecies) {
-            if (TutorialConstants.TARGET_KEY.equals(caught.questTargetId)) {
-                setLanded(target, true);
-            }
-            return;
-        }
 
-        if (target.speciesIds == null || !target.speciesIds.contains(caught.speciesId)) return;
-        if (target.needsDeepGear
-                && (caught.method != FishLogEntry.Method.HARPOON
-                || caught.implement != CatchImplement.BREACH_LAMP)) return;
+        List<FishRequirement> asks = getAsks(target);
+        boolean relevant = false;
+        for (FishRequirement ask : asks) {
+            if (!ask.matches(caught)) continue;
+
+            relevant = true;
+            break;
+        }
+        if (!relevant) return;
 
         if (isTargetMet()) {
             setLanded(target, true);
-        } else if (target.speciesIds.size() > 1) {
+        } else if (asks.size() > 1) {
             updateIntel();
         }
     }
@@ -861,6 +843,7 @@ public class FishingIntro {
         target.stage = stage;
         target.systemId = system.getId();
         target.systemName = system.getName();
+        target.assignedAt = Global.getSector().getClock().getTimestamp();
         target.needsDeepGear = stage == FISH_TWO;
         target.anySpecies = stage == RODDED;
 
@@ -895,6 +878,7 @@ public class FishingIntro {
 
         if (pond != null) {
             target.atPond = true;
+            target.sourceId = pond.getId();
             target.x = pond.getLocation().x;
             target.y = pond.getLocation().y;
         } else {
@@ -1034,56 +1018,21 @@ public class FishingIntro {
         Target target = getTarget();
         if (target == null) return false;
 
-        if (target.anySpecies) {
-            return find(null, target.needsDeepGear, TutorialConstants.TARGET_KEY) != null;
-        }
-
-        for (String speciesId : target.speciesIds) {
-            if (find(speciesId, target.needsDeepGear) == null) return false;
+        List<FishRequirement> asks = getAsks(target);
+        if (asks.isEmpty()) return false;
+        for (FishRequirement ask : asks) {
+            if (FishCurrency.count(ask) < ask.count) return false;
         }
 
         return true;
-    }
-
-    protected static FishCatch find(String speciesId, boolean deepGear) {
-        return find(speciesId, deepGear, null);
-    }
-
-    protected static FishCatch find(String speciesId, boolean deepGear, String questTargetId) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return null;
-
-        for (CargoStackAPI stack : player.getCargo().getStacksCopy()) {
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (!FishItems.isCatch(data)) continue;
-
-            for (FishCatch entry : FishItems.read(data)) {
-                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
-                if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) continue;
-
-                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
-                        || entry.method != FishLogEntry.Method.HARPOON)) {
-                    continue;
-                }
-
-                return entry;
-            }
-        }
-
-        return null;
     }
 
     public static boolean takeTarget() {
         Target target = getTarget();
         if (target == null || !isTargetMet()) return false;
 
-        if (target.anySpecies) {
-            FishCatch any = find(null, target.needsDeepGear, TutorialConstants.TARGET_KEY);
-            if (any != null) {
-                spend(any.speciesId, target.needsDeepGear, TutorialConstants.TARGET_KEY);
-            }
-        } else {
-            for (String speciesId : target.speciesIds) spend(speciesId, target.needsDeepGear);
+        for (FishRequirement ask : getAsks(target)) {
+            if (!FishCurrency.spend(ask)) return false;
         }
 
         clearTarget();
@@ -1091,55 +1040,56 @@ public class FishingIntro {
         return true;
     }
 
-    protected static boolean spend(String speciesId, boolean deepGear) {
-        return spend(speciesId, deepGear, null);
-    }
+    protected static List<FishRequirement> getAsks(Target target) {
+        List<FishRequirement> asks = new ArrayList<>();
+        if (target == null) return asks;
 
-    protected static boolean spend(String speciesId, boolean deepGear, String questTargetId) {
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return false;
+        if (target.anySpecies) {
+            FishRequirement ask = new FishRequirement();
+            ask.method = FishLogEntry.Method.DRONE;
+            ask.implement = CatchImplement.POND;
 
-        CargoAPI cargo = player.getCargo();
-
-        for (CargoStackAPI stack : cargo.getStacksCopy()) {
-            SpecialItemData data = stack.getSpecialDataIfSpecial();
-            if (!FishItems.isCatch(data)) continue;
-
-            List<FishCatch> contents = FishItems.read(data);
-
-            int found = -1;
-            for (int i = 0; i < contents.size(); i++) {
-                FishCatch entry = contents.get(i);
-                if (speciesId != null && !speciesId.equals(entry.speciesId)) continue;
-                if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) continue;
-
-                if (deepGear && (entry.implement != CatchImplement.BREACH_LAMP
-                        || entry.method != FishLogEntry.Method.HARPOON)) {
-                    continue;
-                }
-
-                found = i;
-                break;
-            }
-            if (found < 0) continue;
-
-            if (!FishItems.isContainer(data)) {
-                cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
-                return true;
+            String sourceId = getTargetSourceId(target);
+            if (sourceId != null) {
+                ask.sourceId = sourceId;
+                if (target.assignedAt > 0L) ask.minCaughtAt = target.assignedAt;
+            } else {
+                ask.questTargetId = TutorialConstants.TARGET_KEY;
             }
 
-            contents.remove(found);
-            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, data, 1);
-
-            // a container's contents are its identity, so a part-spent one is a different item
-            if (!contents.isEmpty()) {
-                cargo.addSpecial(FishItems.repack(data.getId(), contents), 1);
-            }
-
-            return true;
+            asks.add(ask);
+            return asks;
         }
 
-        return false;
+        for (String speciesId : target.speciesIds) {
+            FishRequirement ask = new FishRequirement();
+            ask.speciesId = speciesId;
+
+            if (target.needsDeepGear) {
+                ask.implement = CatchImplement.BREACH_LAMP;
+                ask.method = FishLogEntry.Method.HARPOON;
+            }
+
+            asks.add(ask);
+        }
+
+        return asks;
+    }
+
+    protected static String getTargetSourceId(Target target) {
+        if (target == null || !target.atPond || target.systemId == null) return null;
+        if (target.sourceId != null) return target.sourceId;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!target.systemId.equals(system.getId())) continue;
+
+            SectorEntityToken pond = QuestPond.findPondAt(system, target.x, target.y,
+                    TutorialConstants.SPOT_SPREAD);
+            if (pond != null) target.sourceId = pond.getId();
+            return target.sourceId;
+        }
+
+        return null;
     }
 
     public static void giveCharts(int count, List<String> givenOut) {
