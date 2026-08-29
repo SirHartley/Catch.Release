@@ -183,37 +183,34 @@ public class QuestRewards {
             left = Math.max(0, left - valueOf(pick));
         }
 
-        if (request.allowCredits && left >= MIN_CREDIT_REMAINDER) {
-            rewards.add(FishReward.questCredits(FishRewardRoller.roundCreditReward(left),
-                    multiplier));
-        }
+        if (request.allowCredits) {
+            int amount = left >= MIN_CREDIT_REMAINDER
+                    ? FishRewardRoller.roundCreditReward(left) : 0;
 
-        // a chart is too cheap a reward to come alone: it brings money with it, or
-        // failing that a second chart
-        if (countCharts(rewards) == 1 && !hasCredits(rewards)) {
-            if (request.allowCredits) {
-                rewards.add(FishReward.questCredits(FishRewardRoller.roundCreditReward(
-                        Math.max(left, LONE_CHART_CREDITS)), multiplier));
-            } else if (!request.excluded.contains(Kind.RANGE_DATA)) {
-                FishReward pair = rollFittingLocationData(random, Integer.MAX_VALUE / 2,
-                        reservedData);
-                if (pair != null) {
-                    rewards.add(pair);
-                    reserve(pair, reservedSchematics, reservedData);
-                }
+            // a chart is too cheap a reward to come alone: it brings real money
+            if (amount < LONE_CHART_CREDITS && countCharts(rewards) == 1) {
+                amount = LONE_CHART_CREDITS;
+            }
+
+            // the guaranteed sum answers the budget; the multiplier rides on top so
+            // the hand-in itself is always worth money - the player's way to offload
+            // a prize specimen at a better price than any market pays
+            rewards.add(FishReward.questCredits(amount, multiplier));
+        } else if (countCharts(rewards) == 1
+                && !request.excluded.contains(Kind.RANGE_DATA)) {
+            // no money allowed, so a lone chart brings a second chart instead
+            FishReward pair = rollFittingLocationData(random, Integer.MAX_VALUE / 2,
+                    reservedData);
+            if (pair != null) {
+                rewards.add(pair);
+                reserve(pair, reservedSchematics, reservedData);
             }
         }
 
         // a no-credit quest whose every pick failed still owes something for the work
         if (rewards.isEmpty()) {
             FishReward fallback = FishRewardRoller.rollNonCredit(random, reservedSchematics);
-            if (fallback != null) {
-                rewards.add(fallback);
-            } else if (request.allowCredits) {
-                rewards.add(FishReward.questCredits(
-                        FishRewardRoller.roundCreditReward(Math.max(budget,
-                                MIN_CREDIT_REMAINDER)), 1f));
-            }
+            if (fallback != null) rewards.add(fallback);
         }
 
         FishRewardRoller.coalesceCredits(rewards);
@@ -349,14 +346,6 @@ public class QuestRewards {
                                   Set<String> reservedData) {
         FishRewardRoller.reserve(reward, reservedSchematics);
         FishRewardRoller.reserveLocationData(reward, reservedData);
-    }
-
-    protected static boolean hasCredits(List<FishReward> rewards) {
-        for (FishReward reward : rewards) {
-            if (reward instanceof FishReward.Credits) return true;
-        }
-
-        return false;
     }
 
     protected static int countCharts(List<FishReward> rewards) {

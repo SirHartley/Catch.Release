@@ -90,9 +90,11 @@ public abstract class FishReward {
         @Override
         public String describe() {
             if (valueMultiplier > 0f) {
-                return Misc.getWithDGS(amount) + " credits guaranteed, plus "
-                        + formatMultiplier(valueMultiplier)
+                String onTop = formatMultiplier(valueMultiplier)
                         + "x the total value of the fish handed in";
+                if (amount <= 0) return onTop;
+
+                return Misc.getWithDGS(amount) + " credits guaranteed, plus " + onTop;
             }
 
             return Misc.getWithDGS(amount) + " credits";
