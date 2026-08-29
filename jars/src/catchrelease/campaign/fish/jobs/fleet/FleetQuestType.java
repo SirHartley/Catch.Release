@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
@@ -15,6 +16,7 @@ import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
@@ -758,6 +760,61 @@ public enum FleetQuestType {
             "A Tri-Tachyon survey formation is holding position in {system} while an unaffiliated"
                     + " survey ship waits at the jump point. A priority commercial request is"
                     + " being broadcast on open channels."),
+    MANDATE("The Mandate",
+            FleetTypes.ACADEMY_FLEET,
+            "The principal investigator has the mandate's deliverables sheet open beside the"
+                    + " comm pickup.\n\n"
+                    + "\"We've spent years on this expedition. Mandate {mandate} has one"
+                    + " deliverables line left open: a specimen with abyssal provenance.\"\n\n"
+                    + "\"Our retrieval rig was lost at the site. The escort's fuel window is"
+                    + " fixed, and an incomplete mandate will not renew.\"\n\n"
+                    + "They check the departure schedule.\n\n"
+                    + "\"We need {ask}. Contingency allocation is {reward}. We have {days}.\"",
+            "Science expedition {fleet} needs {ask} to close the final deliverable under mandate"
+                    + " {mandate}. The convoy must depart within {days} when its escort fuel"
+                    + " window closes.",
+            "Closing the expedition mandate",
+            "\"Mandate {mandate} is complete. The convoy can make its fuel window, and renewal"
+                    + " can proceed.\"\n\n"
+                    + "The escort begins forming the return order.\n\n"
+                    + "\"I'm going to sleep through part of the trip home.\"\n\n"
+                    + "\"{fleet} out.\"",
+            1.1f,
+            new Dialogue(
+                    "\"Science expedition {fleet}, operating under mandate {mandate}. Requesting"
+                            + " a civilian research channel.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the requirements.",
+                    "\"Good. I'll transmit the mandate extract and provenance requirements.\""
+                            + "\n\nThe files arrive from {fleet}.",
+                    "\"Understood. No commitment entered.\"\n\n"
+                            + "The principal investigator transmits the same mandate extract and"
+                            + " provenance requirements.\n\n"
+                            + "\"If you obtain a qualifying specimen before departure, hail"
+                            + " {fleet}.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep the deliverable open while the fuel window"
+                            + " allows.\"\n\n\"{fleet} out.\"",
+                    "\"When we first spoke, the fuel margin was a departure date. Now it's a"
+                            + " departure time.\"\n\n"
+                            + "\"We have {days}. We still need {ask}.\"",
+                    "The principal investigator checks the specimen's provenance against the"
+                            + " expedition telemetry, then signs the final deliverables line"
+                            + " under mandate {mandate}.\n\n"
+                            + "The completed mandate file is transmitted to the member-state"
+                            + " review office.\n\n"
+                            + "They hand you a worn physical folder containing the surviving"
+                            + " drawings from the lost rig.",
+                    "What happened to your rig?",
+                    "The principal investigator opens the equipment-loss report.\n\n"
+                            + "\"Deployment nominal at {deploymentDepth}. Last telemetry ended"
+                            + " {telemetryEnd}. No recovery attempt remained inside the"
+                            + " {safetyMargin} safety margin.\"\n\n"
+                            + "They close the report.\n\n\"The rig was written off.\"",
+                    "The expedition's contingency request is recorded on the following terms."),
+            "A Persean League member-state science convoy is inbound from the deep fringe and"
+                    + " holding at the edge of the system. {fleet} is broadcasting an urgent"
+                    + " research request."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -1094,6 +1151,18 @@ public enum FleetQuestType {
         return best;
     }
 
+    public static boolean isNearAbyssal(StarSystemAPI home) {
+        if (home == null || Global.getSector() == null) return false;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system == null || !system.hasTag(Tags.SYSTEM_ABYSSAL)) continue;
+            if (Misc.getDistanceLY(home.getLocation(), system.getLocation())
+                    <= QuestDuration.MAX_SENSIBLE_LY) return true;
+        }
+
+        return false;
+    }
+
     protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {
         return pickSpecies(random, minimum, maximum, null);
     }
@@ -1276,6 +1345,11 @@ public enum FleetQuestType {
                 if (!canBeSatisfiedIn(ask, home)) return null;
                 break;
 
+            case MANDATE:
+                ask.origin = SectorRegion.ABYSSAL;
+                if (target >= 40f) ask.minRarity = FishRarity.UNCOMMON;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -1328,7 +1402,9 @@ public enum FleetQuestType {
 
     public List<FishReward> rollFixedRewards(Random random, int round) {
         if (this == HEADLINER) return FishRewardRoller.rollBackdropReward(random);
-        if (this == QUIET_SHIP) return FishRewardRoller.rollSchematic(random);
+        if (this == QUIET_SHIP || this == MANDATE) {
+            return FishRewardRoller.rollSchematic(random);
+        }
         if (this != LAST_ENTRY && !(this == CALIBRATION_PAIR && round == 0)) return List.of();
 
         return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
@@ -1367,6 +1443,7 @@ public enum FleetQuestType {
         if (this == CLAIM_ASSAY) {
             request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }
+        if (this == MANDATE) request.tierFloor(DemandScore.Tier.MEDIUM);
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
                 && asks.get(0).lowCoherence) {

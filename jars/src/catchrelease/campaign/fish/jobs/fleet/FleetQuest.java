@@ -138,6 +138,10 @@ public class FleetQuest extends FishJob {
     protected String competitorLoiter;
     protected String competitorEndurance;
     protected String writeoff;
+    protected String mandate;
+    protected String deploymentDepth;
+    protected String telemetryEnd;
+    protected String safetyMargin;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -298,7 +302,8 @@ public class FleetQuest extends FishJob {
         if (captain == null) return false;
 
         PersonAPI contact = captain;
-        if (type == FleetQuestType.LAST_ENTRY || type == FleetQuestType.CALIBRATION_PAIR) {
+        if (type == FleetQuestType.LAST_ENTRY || type == FleetQuestType.CALIBRATION_PAIR
+                || type == FleetQuestType.MANDATE) {
             contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
 
@@ -474,6 +479,16 @@ public class FleetQuest extends FishJob {
                     3f + random().nextFloat() * 5f);
             competitorEndurance = 14 + random().nextInt(15) + " days at present burn";
             writeoff = Misc.getDGSCredits(30000 + random().nextInt(70001)) + " credits";
+            return;
+        }
+        if (type == FleetQuestType.MANDATE) {
+            mandate = String.format(Locale.ROOT, "PL-MSE-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+            deploymentDepth = String.format(Locale.ROOT, "abyssal index %.2f",
+                    0.65f + random().nextFloat() * 0.25f);
+            telemetryEnd = 35 + random().nextInt(51) + " seconds after bottom lock";
+            safetyMargin = String.format(Locale.ROOT, "mandated %.2f coherence",
+                    0.25f + random().nextFloat() * 0.2f);
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -668,6 +683,10 @@ public class FleetQuest extends FishJob {
                 .replace("{competitorLoiter}", value(competitorLoiter))
                 .replace("{competitorEndurance}", value(competitorEndurance))
                 .replace("{writeoff}", value(writeoff))
+                .replace("{mandate}", value(mandate))
+                .replace("{deploymentDepth}", value(deploymentDepth))
+                .replace("{telemetryEnd}", value(telemetryEnd))
+                .replace("{safetyMargin}", value(safetyMargin))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
