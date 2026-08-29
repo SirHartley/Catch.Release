@@ -137,10 +137,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         setTimeLimit(Stage.FAILED, deadline, null, Stage.DONE);
     }
 
-    /** The clock sized from where the work actually is: the giver's market to the
-     *  nearest water that could fill every ask, on the shared duration rungs. Returns
-     *  false when some ask cannot be filled within sensible reach - such an offer
-     *  should not be made, so callers bail out of create(). */
+    /** Sets a travel-sized deadline; false if any ask has no habitat within range. */
     protected boolean setDurationForAsks(MarketAPI from) {
         SectorEntityToken at = from == null ? null : from.getPrimaryEntity();
         if (at == null || asks.isEmpty()) {
@@ -156,7 +153,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         return true;
     }
 
-    /** The deadline as dialogue speaks it - always from the live clock, never authored. */
     public String describeDays() {
         return days > 0f ? Math.round(days) + " days" : "no deadline";
     }

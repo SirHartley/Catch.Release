@@ -8,44 +8,8 @@ import catchrelease.helper.loading.FishSpecLoader;
 import java.util.List;
 import java.util.Random;
 
-/**
- * One number for how hard a demand is to fill, shared by every quest kind. The unit is
- * anchored so one unmodified common scores {@link #COMMON_BASE}; everything else is a
- * multiplier on that. Reward budgets are derived from this score, so the anchor also
- * fixes the economy: score 10 pays what one requested fish always paid.
- */
+/** Scores fish requirements for rewards and generated demand targets. */
 public final class DemandScore {
-
-    public static final float COMMON_BASE = 10f;
-
-    // per-specimen base by the rarity actually demanded
-    public static final float UNCOMMON_BASE = 16f;
-    public static final float RARE_BASE = 26f;
-    public static final float EPIC_BASE = 42f;
-    public static final float LEGENDARY_BASE = 70f;
-
-    // a named species is harder to find than any-of-its-rarity; a type only narrows
-    public static final float SPECIFIC_SPECIES_MULT = 1.3f;
-    public static final float TYPE_MULT = 1.1f;
-
-    public static final float LOW_COHERENCE_MULT = 1.35f;
-    public static final float ORIGIN_MULT = 1.25f;
-    public static final float METHOD_MULT = 1.15f;
-    public static final float IMPLEMENT_MULT = 1.15f;
-    // a weight floor scores by how much of the sheet it excludes, so a floor only the
-    // heaviest species clear costs far more than one most fish stroll over
-    public static final float WEIGHT_FLOOR_BASE = 1.1f;
-    public static final float WEIGHT_FLOOR_SPAN = 0.7f;
-    public static final float LENGTH_FLOOR_MULT = 1.25f;
-    public static final float SAME_SPECIES_MULT = 1.2f;
-
-    // each specimen past the first costs a fraction: two commons are one-and-a-bit
-    public static final float EXTRA_SPECIMEN_FRACTION = 0.6f;
-
-    // the ambition roll for generated demands: skewed low, so most are modest and a
-    // few are big scores
-    public static final float TARGET_SPAN = 60f;
-    public static final float TARGET_SKEW = 1.6f;
 
     public enum Tier {
 
@@ -56,6 +20,33 @@ public final class DemandScore {
         }
     }
 
+    // Rarity
+    public static final float COMMON_BASE = 10f;
+    public static final float UNCOMMON_BASE = 16f;
+    public static final float RARE_BASE = 26f;
+    public static final float EPIC_BASE = 42f;
+    public static final float LEGENDARY_BASE = 70f;
+
+    // Modifiers
+    public static final float SPECIFIC_SPECIES_MULT = 1.3f;
+    public static final float TYPE_MULT = 1.1f;
+    public static final float LOW_COHERENCE_MULT = 1.35f;
+    public static final float ORIGIN_MULT = 1.25f;
+    public static final float METHOD_MULT = 1.15f;
+    public static final float IMPLEMENT_MULT = 1.15f;
+    public static final float WEIGHT_FLOOR_BASE = 1.1f;
+    public static final float WEIGHT_FLOOR_SPAN = 0.7f;
+    public static final float LENGTH_FLOOR_MULT = 1.25f;
+    public static final float SAME_SPECIES_MULT = 1.2f;
+
+    // Quantity
+    public static final float EXTRA_SPECIMEN_FRACTION = 0.6f;
+
+    // Generation
+    public static final float TARGET_SPAN = 60f;
+    public static final float TARGET_SKEW = 1.6f;
+
+    // Tiers
     public static final float MEDIUM_FROM = 18f;
     public static final float HARD_FROM = 32f;
     public static final float SEVERE_FROM = 55f;
@@ -78,7 +69,7 @@ public final class DemandScore {
     public static float of(FishRequirement ask) {
         if (ask == null) return 0f;
 
-        // a choice of alternatives is only as hard as its easiest branch
+        // Alternatives are scored by their easiest valid branch.
         if (!ask.anyOf.isEmpty()) {
             float easiest = Float.MAX_VALUE;
             for (FishRequirement alternative : ask.anyOf) {
@@ -164,8 +155,7 @@ public final class DemandScore {
     protected static float gradeMult(FishGrade grade) {
         if (grade == null) return 1f;
 
-        // minGrade is a floor: demanding at-least-terrible costs nothing, at-least-
-        // exceptional is a top-of-the-size-roll ask and doubles the specimen
+        // Higher grade floors exclude more of the grade roll.
         switch (grade) {
             case POOR: return 1.05f;
             case AVERAGE: return 1.2f;
@@ -183,15 +173,13 @@ public final class DemandScore {
         return Tier.EASY;
     }
 
-    /** How ambitious a generated demand feels like being. */
     public static float rollTarget(Random random) {
         float skewed = (float) Math.pow(random.nextFloat(), TARGET_SKEW);
 
         return COMMON_BASE + skewed * TARGET_SPAN;
     }
 
-    /** The specimen count that reaches the target, clamped: inverts the
-     *  diminishing-count curve target = perSpecimen * (1 + fraction * (n - 1)). */
+    /** Inverts the diminishing specimen-count curve and clamps the result. */
     public static int countFor(float target, float perSpecimen, int min, int max) {
         int count = Math.max(1, Math.round(1f + (target / perSpecimen - 1f)
                 / EXTRA_SPECIMEN_FRACTION));

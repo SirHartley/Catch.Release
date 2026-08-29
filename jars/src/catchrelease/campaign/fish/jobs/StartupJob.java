@@ -41,7 +41,7 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        // pays 20% over the going rate - he's buying proof of supply, not the fish
+        // Each proof-of-scale delivery pays a 20% premium.
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
                 .budgetMult(1.2f).random(genRandom)).rewards);
     }
@@ -57,16 +57,13 @@ public class StartupJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "This order is one stage of a planned three-delivery scale-up. Each successful "
-                + "shipment leads directly to a larger follow-up order, and there is no deadline "
-                + "on the sequence.";
+        return "This order is part of a three-delivery run. Each successful shipment leads to a "
+                + "larger follow-up order, with no deadline on the sequence.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "A young factor is using the deliveries to prove that a fish supply line can "
-                + "scale. Each shipment goes into the business case as evidence that the model "
-                + "works.";
+        return "A young factor wants the deliveries as proof that a fish supply line can scale.";
     }
 
     @Override

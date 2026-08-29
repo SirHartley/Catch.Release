@@ -25,8 +25,6 @@ public class ButlerJob extends FishJob {
 
         addAsk(ask);
 
-        // the floor is the entire job, and the score prices it by how much of the
-        // sheet the floor excludes
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
                 new QuestRewards.Request(asks).random(genRandom)).rewards);
@@ -38,7 +36,7 @@ public class ButlerJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A household under-butler is arranging a controlled private display purchase for "
+        return "A household under-butler is arranging a private display purchase on behalf of "
                 + "the household.";
     }
 

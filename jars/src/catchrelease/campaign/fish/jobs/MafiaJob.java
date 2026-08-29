@@ -251,17 +251,15 @@ public class MafiaJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "Salvatore will honor the promised payment, or Enzo can assign the pair, price "
-                + "each fish against the other by where its size falls within its own species "
-                + "range, and put the fee on either entrant. Win and the ordinary payment is "
-                + "replaced by a larger payout; lose and the house keeps it.";
+        return "Salvatore will settle the agreed fee, or Enzo can assign the pair, quote odds "
+                + "from their relative size, and let you wager the fee on either fish. A win "
+                + "pays more; a loss pays nothing.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "Salvatore and Enzo are arranging a private fish fight around the submitted pair. "
-                + "Enzo handles the tank and the book while Salvatore settles the house's "
-                + "obligations.";
+        return "Salvatore and Enzo are arranging a private fish fight using the submitted pair. "
+                + "Enzo runs the tank and the book.";
     }
 
     @Override

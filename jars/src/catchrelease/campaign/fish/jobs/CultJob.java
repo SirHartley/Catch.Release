@@ -24,8 +24,7 @@ public class CultJob extends FishJob {
         ask.speciesId = speciesId;
         ask.count = 1;
 
-        // the coats never pay in money; rolled before the global slot is claimed so a
-        // sector with nothing left to give fails the job instead of blocking the slot
+        // Roll first so an empty prize pool does not block future offers.
         List<FishReward> prizes = QuestRewards.roll(new QuestRewards.Request(
                 java.util.Collections.singletonList(ask))
                 .noCredits().tierFloor(DemandScore.Tier.MEDIUM)
@@ -65,8 +64,7 @@ public class CultJob extends FishJob {
     @Override
     protected String getIntelPurpose() {
         return String.format("Three people in matching plain coats commissioned exactly one %s. "
-                + "When asked what it is for, they give no explanation beyond the species "
-                + "itself.", getSpeciesName());
+                + "They gave no purpose beyond the species itself.", getSpeciesName());
     }
 
     @Override

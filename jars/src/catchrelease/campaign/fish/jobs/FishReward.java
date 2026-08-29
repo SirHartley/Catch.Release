@@ -91,7 +91,7 @@ public abstract class FishReward {
         public String describe() {
             if (valueMultiplier > 0f) {
                 String onTop = formatMultiplier(valueMultiplier)
-                        + "x the total value of the fish handed in";
+                        + "x the value of the fish handed in";
                 if (amount <= 0) return onTop;
 
                 return Misc.getWithDGS(amount) + " credits guaranteed, plus " + onTop;

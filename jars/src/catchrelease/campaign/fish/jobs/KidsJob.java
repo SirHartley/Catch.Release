@@ -31,7 +31,7 @@ public class KidsJob extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        // the ask exists before the prize roll so the bracket's demand prices its pot
+        // Build the demand before rolling its score-based prize.
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
         addAsk(ask);
@@ -186,8 +186,7 @@ public class KidsJob extends FishJob {
         ensureNonCreditRewards();
     }
 
-    // the prize is a thing, never money or paper: no credits, no charts, and the tier
-    // floor keeps the toybox open however light the bracket's ask is
+    // No credits or range data; the tier floor keeps low-score asks eligible for prizes.
     protected QuestRewards.Request prizeRequest(java.util.Random random) {
         return new QuestRewards.Request(asks)
                 .noCredits()
@@ -232,14 +231,13 @@ public class KidsJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "The bracket needs two contenders, and ordinary catches qualify. If either "
-                + "submitted fish is Fine grade or better, the children add an extra prize.";
+        return "Any two fish will fill the bracket. If either is Fine grade or better, the "
+                + "children add an extra prize.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "Two children have turned a hand-drawn tournament bracket into binding procedure. "
-                + "The submitted fish serve as the next contenders.";
+        return "Two children need contenders for a hand-drawn tournament bracket.";
     }
 
     @Override

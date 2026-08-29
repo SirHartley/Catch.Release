@@ -191,6 +191,8 @@ Important job tokens:
 | `$catchreleaseHasFish` | Cargo can satisfy the request |
 | `$catchreleaseAsk` / `…AskCap` | Requirement text |
 | `$catchreleaseReward` / `…RewardCap` | Reward text |
+| `$catchreleaseDays` / `…DaysCap` | Total deadline text |
+| `$catchreleaseDaysLeft` | Remaining deadline text |
 | `$catchreleasePaid` | Payout completed |
 | `$catchreleaseBonus` | Bonus condition |
 | `$catchreleaseMore` | Multi-round job continues |
@@ -258,7 +260,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `QuestDuration.java` | Deadline rungs of 30/60/90/120/180 days or no limit. Picks the smallest rung covering working days plus a round trip at a per-light-year rate. Also the satisfiability gate: one prefiltered pass per ask finds the nearest system with matching water, both sizing the clock and vetoing offers whose asks cannot be filled within sensible reach - species ranges move monthly, so a rolled demand can point at water that no longer exists. |
 | `FishHandoffPicker.java` | Shows eligible loose fish and validates a non-overlapping assignment on confirm. Invalid selections reopen on the next frame after Starsector releases the picker modal. `autoSelect` chooses the minimum valid set, worst specimens first, across loose fish, crates, and piles. Partial containers are repacked under their original ID. |
 | `FishJobAsks.java` | Rolls species, rarity, grade, quantity, weight, method, and implement requirements. It excludes legendaries and impossible method/implement combinations. |
-| `FishReward.java` | Reward types: quest credits, fixed compatibility credits, upgrade and tackle schematics, habitat data, backdrops, and blueprints. Quest credits pay their guaranteed base plus their saved difficulty multiplier times the total value of the exact fish handed in. Each grant captures its actual result before state changes, then supplies one small-font `Gained:` receipt after the hand-in scene. Location data therefore reports either the newly learned range or its stored fixed-credit fallback correctly. The commodity type remains only to convert old saves to fixed credits. |
+| `FishReward.java` | Reward types: quest credits, fixed compatibility credits, upgrade and tackle schematics, habitat data, backdrops, and blueprints. Reward descriptions are lowercase modular phrases shared by dialogue and intel. Quest credits pay their guaranteed base plus their saved difficulty multiplier times the value of the exact fish handed in. Each grant captures its actual result before state changes, then supplies one small-font `Gained:` receipt after the hand-in scene. Location data therefore reports either the newly learned range or its stored fixed-credit fallback correctly. The commodity type remains only to convert old saves to fixed credits. |
 | `FishRewardRoller.java` | Roll helpers used by `QuestRewards`: individual upgrade, tackle, schematic, backdrop, blueprint, and habitat-data rolls, distinct-data reservation, and credit merging. Schematics exclude owned plans, active-job plans, invalid rigs, and unavailable upgrade tiers. Backdrops require conservatory-plan ownership. Old saves and compatibility conversions keep their fixed credit values. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. `sweep` repairs stale save data. |
 | `StandingOrderJob.java` | Quantity, rarity, and grade order. |

@@ -26,7 +26,6 @@ public class StandingOrderJob extends FishJob {
         FishRequirement ask = rollAsk();
         addAsk(ask);
 
-        // the score already prices count, rarity, grade and catch terms
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
                 new QuestRewards.Request(asks).random(genRandom)).rewards);
@@ -62,8 +61,7 @@ public class StandingOrderJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A local provisioner is filling open supplier lines against a stack of delivery "
-                + "manifests. The catch goes straight into existing orders.";
+        return "A local provisioner is filling open orders from an existing supplier list.";
     }
 
     @Override

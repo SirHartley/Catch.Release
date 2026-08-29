@@ -18,41 +18,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * The one place quest rewards come from. A quest states what it demands (scored by
- * {@link DemandScore}), what always fires, and what may never appear; this rolls the
- * rest against a credit budget derived from the score, so hard demands pay well by
- * construction and a windfall or a stingy day is a die roll, not an authoring bug.
- * Good rewards gate on the tier: schematics and backdrops need a medium ask, rare
- * blueprints a hard one, and expensive range data prices itself out of small budgets.
- */
+/** Rolls quest rewards from demand score and per-quest restrictions. */
 public class QuestRewards {
-
-    /** Credits owed per point of demand score: one common (score 10) pays 6000. */
-    public static final float CREDITS_PER_POINT = 600f;
-    /** Worth units per score point, for the legacy value-multiplier maths. */
-    public static final float WORTH_PER_POINT = 120f;
-
-    public static final float ROLL_MIN = 0.75f;
-    public static final float ROLL_MAX = 1.35f;
-    /** One non-credit item is rolled; a second is a lucky day, never the norm. */
-    public static final float SECOND_ITEM_CHANCE = 0.25f;
-    /** A pick may overshoot the remaining budget by this much - generosity, bounded. */
-    public static final float OVERSHOOT = 1.3f;
-    public static final int MIN_CREDIT_REMAINDER = 1000;
-    /** The least money a chart arrives with when it cannot bring a second chart. */
-    public static final int LONE_CHART_CREDITS = 2000;
-
-    /** What a species' range data is worth in credits, by rarity. */
-    public static final int RANGE_DATA_COMMON = 5000;
-    public static final int RANGE_DATA_UNCOMMON = 10000;
-    public static final int RANGE_DATA_RARE = 15000;
-    public static final int RANGE_DATA_EPIC = 20000;
-    public static final float SCHEMATIC_VALUE_MULT = 0.5f;
-    public static final int SCHEMATIC_VALUE_FLOOR = 3000;
-    public static final int BACKDROP_VALUE_BASE = 3000;
-    public static final int BACKDROP_VALUE_PER_RANK = 4000;
-    public static final int BLUEPRINT_VALUE = 25000;
 
     public enum Kind {
 
@@ -69,6 +36,29 @@ public class QuestRewards {
             this.gate = gate;
         }
     }
+
+    // Budget
+    public static final float CREDITS_PER_POINT = 600f;
+    /** Used by the fish-value multiplier. */
+    public static final float WORTH_PER_POINT = 120f;
+    public static final float ROLL_MIN = 0.75f;
+    public static final float ROLL_MAX = 1.35f;
+    public static final float SECOND_ITEM_CHANCE = 0.25f;
+    /** Maximum reward value relative to the remaining budget. */
+    public static final float OVERSHOOT = 1.3f;
+    public static final int MIN_CREDIT_REMAINDER = 1000;
+    public static final int LONE_CHART_CREDITS = 2000;
+
+    // Reward values
+    public static final int RANGE_DATA_COMMON = 5000;
+    public static final int RANGE_DATA_UNCOMMON = 10000;
+    public static final int RANGE_DATA_RARE = 15000;
+    public static final int RANGE_DATA_EPIC = 20000;
+    public static final float SCHEMATIC_VALUE_MULT = 0.5f;
+    public static final int SCHEMATIC_VALUE_FLOOR = 3000;
+    public static final int BACKDROP_VALUE_BASE = 3000;
+    public static final int BACKDROP_VALUE_PER_RANK = 4000;
+    public static final int BLUEPRINT_VALUE = 25000;
 
     public static class Request {
 
@@ -118,8 +108,6 @@ public class QuestRewards {
             return this;
         }
 
-        /** Treat the quest as at least this tier for reward gating - for quests whose
-         *  whole character is a good prize regardless of how light the ask is. */
         public Request tierFloor(DemandScore.Tier floor) {
             tierFloor = floor;
             return this;
@@ -190,18 +178,16 @@ public class QuestRewards {
             int amount = left >= MIN_CREDIT_REMAINDER
                     ? FishRewardRoller.roundCreditReward(left) : 0;
 
-            // a chart is too cheap a reward to come alone: it brings real money
+            // Range data is never the only reward.
             if (amount < LONE_CHART_CREDITS && countCharts(rewards) == 1) {
                 amount = LONE_CHART_CREDITS;
             }
 
-            // the guaranteed sum answers the budget; the multiplier rides on top so
-            // the hand-in itself is always worth money - the player's way to offload
-            // a prize specimen at a better price than any market pays
+            // Fish value is paid on top of the rolled budget.
             rewards.add(FishReward.questCredits(amount, multiplier));
         } else if (countCharts(rewards) == 1
                 && !request.excluded.contains(Kind.RANGE_DATA)) {
-            // no money allowed, so a lone chart brings a second chart instead
+            // Pair a lone chart when credits are excluded.
             FishReward pair = rollFittingLocationData(random, Integer.MAX_VALUE / 2,
                     reservedData);
             if (pair != null) {
@@ -210,7 +196,7 @@ public class QuestRewards {
             }
         }
 
-        // a no-credit quest whose every pick failed still owes something for the work
+        // Last resort for non-credit jobs.
         if (rewards.isEmpty()) {
             FishReward fallback = FishRewardRoller.rollNonCredit(random, reservedSchematics);
             if (fallback != null) rewards.add(fallback);
@@ -271,7 +257,6 @@ public class QuestRewards {
         }
     }
 
-    /** Range data whose own price fits the budget - epic charts need an epic ask. */
     protected static FishReward rollFittingLocationData(Random random, int budgetLeft,
                                                         Set<String> reservedData) {
         List<FishSpec> unknown = FishRewardRoller.getUnknownLocationData(reservedData);
@@ -285,13 +270,12 @@ public class QuestRewards {
 
         FishSpec pick = fitting.get(random.nextInt(fitting.size()));
 
-        // the stored fallback reproduces the chart's full worth through the payout
-        // multiplier, so learning the range early does not shrink the reward
+        // Preserve full value if the range is learned before hand-in.
         return FishReward.locationData(pick.id,
                 Math.round(rangeDataValue(pick) / FishRewardRoller.CREDIT_PAYOUT_MULT));
     }
 
-    /** Every reward kind priced in credits, so budgets and picks share one currency. */
+    /** Values every reward in credits for budget comparison. */
     public static int valueOf(FishReward reward) {
         if (reward == null) return 0;
 

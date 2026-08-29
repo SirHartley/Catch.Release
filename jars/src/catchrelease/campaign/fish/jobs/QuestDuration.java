@@ -14,12 +14,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The fixed rungs every quest clock sits on, picked from how far the work actually is:
- * a target ninety days out cannot carry a forty-five-day clock. The estimate is a round
- * trip at an ordinary burn plus time to fish, rounded UP to the next rung - a clock
- * should run out because the player dawdled, never because the map was big.
- */
+/** Shared deadline rungs and habitat reach checks. */
 public enum QuestDuration {
 
     SHORT(30f),
@@ -29,11 +24,12 @@ public enum QuestDuration {
     GRAND(180f),
     OPEN(0f);
 
-    /** Days of fishing and docking assumed on top of the travel itself. */
+    // Travel estimate
+    /** Fixed allowance for fishing and docking. */
     public static final float WORKING_DAYS = 12f;
-    /** Rough days per light-year for a fleet that is neither racing nor crawling. */
+    /** One-way travel days per light-year at ordinary burn. */
     public static final float DAYS_PER_LY = 0.45f;
-    /** Reach beyond which an offer stops making sense, however generous its clock. */
+    /** Maximum one-way distance for a valid offer. */
     public static final float MAX_SENSIBLE_LY = 30f;
 
     public final float days;
@@ -46,7 +42,6 @@ public enum QuestDuration {
         return days > 0f;
     }
 
-    /** The smallest rung that comfortably covers the given work estimate. */
     public static QuestDuration forDays(float daysNeeded) {
         for (QuestDuration tier : values()) {
             if (tier.isLimited() && tier.days >= daysNeeded) return tier;
@@ -59,8 +54,7 @@ public enum QuestDuration {
         return forDays(WORKING_DAYS + Math.max(0f, oneWayLY) * DAYS_PER_LY * 2f);
     }
 
-    /** The farthest of the per-ask nearest satisfiable systems, or -1 when some ask
-     *  cannot be filled within maxLY - such an offer should not be made. */
+    /** Returns the farthest nearest match, or -1 if any ask has none within maxLY. */
     public static float worstNearestLY(SectorEntityToken from, List<FishRequirement> asks,
                                        float maxLY) {
         float worst = 0f;
@@ -77,9 +71,7 @@ public enum QuestDuration {
         return worst;
     }
 
-    /** Nearest system in whose water the ask could be filled, or -1 for none within
-     *  maxLY. Species ranges move monthly, so a demand rolled today can point at water
-     *  that no longer exists or sits across the sector. */
+    /** Returns the nearest matching system in LY, or -1 if none is within maxLY. */
     public static float nearestSatisfiableLY(SectorEntityToken from, FishRequirement ask,
                                              float maxLY) {
         if (from == null || ask == null || Global.getSector() == null) return -1f;
@@ -87,7 +79,6 @@ public enum QuestDuration {
         List<FishRequirement> branches = new ArrayList<>();
         collectBranches(ask, branches);
 
-        // candidate species gathered once, so the system loop only tests ranges
         List<FishSpec> specs = new ArrayList<>();
         List<CatchImplement> implementFor = new ArrayList<>();
         for (FishRequirement branch : branches) {

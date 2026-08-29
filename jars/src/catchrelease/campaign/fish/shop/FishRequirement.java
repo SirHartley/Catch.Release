@@ -297,9 +297,7 @@ public class FishRequirement {
         label.setHighlightColors(colors.toArray(new Color[0]));
     }
 
-    /** A slug that names a fish is split around the names, so the surrounding text
-     *  keeps the standard highlight while each name shows its rarity colour. The
-     *  pieces are added in textual order because label highlights match forward. */
+    /** Splits fish names from surrounding text so each can use its own highlight colour. */
     protected static void addSplit(String text, List<RarityHighlight> fishNames,
                                    List<String> strings, List<Color> colors,
                                    Set<String> namesInline) {
