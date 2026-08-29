@@ -392,7 +392,7 @@ The tutorial has six lessons, a returning-player skip, and a developer shortcut.
 
 | File | Responsibility |
 |---|---|
-| `FishEntityPlugin.java` | World fish mote: movement, depth, held and stunned states, glow, source rupture, and legendary behavior. Phantom and shell-game motes are unavailable to ordinary gear. Legendary defenses delegate to `LegendaryShields`. |
+| `FishEntityPlugin.java` | World fish mote: movement, depth, held and stunned states, glow, source rupture, and legendary behavior. Lamp-only patterns and legendary constructs fade with the Breach Lights and cannot be targeted in darkness. Phantom motes remain unavailable to ordinary gear. Legendary defenses delegate to `LegendaryShields`. |
 | `GhostAsteroidEntityPlugin.java` | Non-interactive drifting haunt asteroid. |
 | `HauntMineEntityPlugin.java` | False Dawn mine. Red shoves, blue interdicts and drags, yellow pulls. Mines trigger by proximity or harpoon and clean themselves up after firing. |
 | `BuriedMoteEntityPlugin.java` | Invisible open-water fish. `unearth()` atomically replaces it with a normal mote. |
