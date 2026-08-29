@@ -501,11 +501,11 @@ catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrel
 Three separate lines sit under the name of the dish.
 
 ""All right. Let's see what we're working with.""",,
-catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with $hisOrHer supply diagram already open.
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open. It appears as a solid line among several dotted forecasts.
 
-""Captain. Excellent. I was just updating the inbound model.""
+""Captain. Good. I've been updating the model from the committed volume.""
 
-$HeOrShe moves your supplier box to the center of the display. CONSOLIDATE, GRADE and DISPATCH are still waiting downstream.
+$HeOrShe brings your order to the center of the display.
 
 ""Where are we?""",,
 catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule remains open on $hisOrHer slate, though your supplier entry has already been brought to the front.
@@ -638,13 +638,15 @@ The agreed transfer clears.",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on $hisOrHer slate. A half-finished drink sits at one corner of the table.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch from the young factor in the expensive jacket,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""You fish. Good.""
+FireAll JobSpecificOptions","""You fish. Good. That's the difficult side.""
 
-$HeOrShe closes three projections and opens a fourth.
+$HeOrShe closes three projections and opens another, packed with margins and rising curves.
 
-""Fresh catch has demand. Demand is not the problem. The problem is demonstrated inbound.""
+""I have ten pages proving people buy fresh catch. What I don't have is one supplier line I can point at and say, there, that works.""
 
-$HeOrShe turns the slate enough for you to see a diagram headed SUPPLY.",,
+$HeOrShe taps the first empty figure in the model.
+
+""You give me that, I can build from something real.""",,
 catchrelease_startup_offerDemandOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupAskedDemand",,,10:catchrelease_startup_demand:Who is buying?,
 catchrelease_startup_offerOperationsOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
@@ -656,59 +658,69 @@ $catchreleaseStartupTerms",,,30:catchrelease_jobAccept:Agree to the trial shipme
 catchrelease_startup_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseStartupOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_startup_demand,DialogOptionSelected,$option == catchrelease_startup_demand,"$catchreleaseStartupAskedDemand = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""Restaurants. Clubs. Conservatories. That's the initial demand pool.""
+FireAll JobSpecificOptions","""Restaurant kitchens already buy fresh catch, and between the private clubs and conservatories I have enough projected demand to fill several pages.""
 
-$HeOrShe opens a page of projections broken down by population, income and prevailing catch prices.
+$HeOrShe flicks through sales projections tied to population and prevailing catch prices.
 
-""I've modeled purchasing volume across the addressable markets. Buyers are easy once you can show reliable inbound.""",,
+""The demand case is finished. What I need now is a shipment I can put on the other side of it.""",,
 catchrelease_startup_operations,DialogOptionSelected,$option == catchrelease_startup_operations,"$catchreleaseStartupAskedOperations = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","$HeOrShe enlarges the supply diagram. Between SUPPLIER and CUSTOMER are boxes marked CONSOLIDATE, GRADE and DISPATCH. None has a name beside it.
+FireAll JobSpecificOptions","$HeOrShe opens a flow diagram running from your delivery to a projected customer handoff. Every stage has a margin and turnaround estimate. The operator fields are blank.
 
-""You deliver here. From there it's consolidation, grading and dispatch. Standard functions.""
+""That's downstream execution.""
 
-$HeOrShe moves back to the supplier box.
+You indicate the empty fields.
 
-""First I need inbound.""",,
+""Of course they're empty. There isn't any volume yet.""
+
+$HeOrShe enlarges the first stage instead.
+
+""Once you prove the catch is coming in, I have something to negotiate around. The rest is capacity, and capacity is purchasable.""
+
+$HeOrShe taps your end of the flow.
+
+""First, I need the part that isn't a projection.""",,
 catchrelease_startup_terms,DialogOptionSelected,$option == catchrelease_startup_terms,"$catchreleaseStartupTerms = true 0
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""Pilot run. $catchreleaseAskCap.""
+FireAll JobSpecificOptions","""Pilot shipment. $catchreleaseAskCap.""
 
 $HeOrShe brings up the payment line.
 
 ""$catchreleaseRewardCap on delivery. No deadline. I need the completed shipment and the receipt.""
 
-$HeOrShe closes the terms sheet.
+A larger second order is already modeled beneath the first.
 
-""If the pilot works, we increase volume.""",,
+""If this one closes, we raise the volume.""",,
 catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent.""
 
-A supplier brief arrives in your inbox. The first page contains the quantity you just agreed to. The remaining pages are projections.
+A supplier brief arrives in your inbox. The agreed quantity is on the first page. The rest is projections built around it.
 
-""I'll mark inbound as active.""",,
+""Now I have an active supplier line.""",,
 catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""Understood. I have other supplier conversations.""
 
 $HeOrShe opens $hisOrHer contact list and starts again from the top.",,
 catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Current run is $catchreleaseAskCap.""
 
-$HeOrShe checks the quantity against $hisOrHer model.
+$HeOrShe checks the quantity against a page of revised projections.
 
-""Bring me that and we keep moving.""",,
+""Bring me that and everything downstream has a number to work from.""",,
 catchrelease_startup_paid,catchreleaseJobPaid,"$missionId == catchrelease_startup
-$catchreleasePaid",,"$HeOrShe checks the delivery receipt against the current order.
-
-""Good.""
+$catchreleasePaid",,"$HeOrShe matches the delivery receipt to the current order and nods.
 
 The agreed transfer clears.",,
 catchrelease_startup_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
 $catchreleaseMore
 $catchreleaseRound == 1 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. The signed receipt goes straight into the presentation. The page title changes from PILOT to DEMONSTRATED INBOUND.
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe folds the signed receipt into the model, replacing one of the projected figures with an actual one.
 
-""There. Now we scale.""
+""There. That's a baseline.""
+
+The surrounding forecasts change immediately.
+
+""Now I can price growth against something that exists.""
 
 $HeOrShe sends the next order.
 
@@ -717,22 +729,26 @@ catchrelease_startup_paidScale,catchreleaseJobPaid,"$missionId == catchrelease_s
 $catchreleasePaid
 $catchreleaseMore
 $catchreleaseRound == 2 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe checks the second receipt, then duplicates the first two entries into a table headed REPEATABLE SUPPLY.
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe lays the second receipt beside the first and compares the quantities, dates and payment lines.
 
-""Good. Volume held.""
+""Twice means repeatable.""
 
-Another order appears.
+A much larger forecast opens behind them.
 
-""$catchreleaseAskCap. $catchreleaseRewardCap. This is the production run.""",,
+""That changes the financing case considerably.""
+
+$HeOrShe sends the next order.
+
+""$catchreleaseAskCap. $catchreleaseRewardCap. One more run.""",,
 catchrelease_startup_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
 !$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The agreed transfer clears. $HeOrShe reads the final delivery receipt twice.
 
-Then $heOrShe adds three rows to the business case: PILOT, SCALE, PRODUCTION.
+The three receipts take up half a page in the business case. A distribution network spreads across the rest in pale forecast lines.
 
-""That's the supply chain proven.""
+""Three completed runs. That's the supply chain proven.""
 
-$HeOrShe is already opening the demand projections.",,
+$HeOrShe is already revising the demand projections.",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A $manOrWoman in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Talk to the $manOrWoman in the well-cut coat,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
