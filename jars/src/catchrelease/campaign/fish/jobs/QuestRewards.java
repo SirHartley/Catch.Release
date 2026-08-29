@@ -35,10 +35,13 @@ public class QuestRewards {
 
     public static final float ROLL_MIN = 0.75f;
     public static final float ROLL_MAX = 1.35f;
-    public static final int MAX_ROLLED_EXTRAS = 2;
+    /** One non-credit item is rolled; a second is a lucky day, never the norm. */
+    public static final float SECOND_ITEM_CHANCE = 0.25f;
     /** A pick may overshoot the remaining budget by this much - generosity, bounded. */
     public static final float OVERSHOOT = 1.3f;
     public static final int MIN_CREDIT_REMAINDER = 1000;
+    /** The least money a chart arrives with when it cannot bring a second chart. */
+    public static final int LONE_CHART_CREDITS = 2000;
 
     /** What a species' range data is worth in credits: the fish's value, times ten. */
     public static final float RANGE_DATA_VALUE_MULT = 10f;
@@ -166,7 +169,11 @@ public class QuestRewards {
         }
         left = Math.max(0, left);
 
-        for (int i = 0; i < MAX_ROLLED_EXTRAS && left > MIN_CREDIT_REMAINDER; i++) {
+        float multiplier = FishRewardRoller.valueMultiplier(
+                Math.round(score * WORTH_PER_POINT), requestedFish(request.asks));
+
+        int itemRolls = random.nextFloat() < SECOND_ITEM_CHANCE ? 2 : 1;
+        for (int i = 0; i < itemRolls && left > MIN_CREDIT_REMAINDER; i++) {
             FishReward pick = rollOne(random, request, tier, left,
                     reservedSchematics, reservedData);
             if (pick == null) break;
@@ -178,8 +185,23 @@ public class QuestRewards {
 
         if (request.allowCredits && left >= MIN_CREDIT_REMAINDER) {
             rewards.add(FishReward.questCredits(FishRewardRoller.roundCreditReward(left),
-                    FishRewardRoller.valueMultiplier(Math.round(score * WORTH_PER_POINT),
-                            requestedFish(request.asks))));
+                    multiplier));
+        }
+
+        // a chart is too cheap a reward to come alone: it brings money with it, or
+        // failing that a second chart
+        if (countCharts(rewards) == 1 && !hasCredits(rewards)) {
+            if (request.allowCredits) {
+                rewards.add(FishReward.questCredits(FishRewardRoller.roundCreditReward(
+                        Math.max(left, LONE_CHART_CREDITS)), multiplier));
+            } else if (!request.excluded.contains(Kind.RANGE_DATA)) {
+                FishReward pair = rollFittingLocationData(random, Integer.MAX_VALUE / 2,
+                        reservedData);
+                if (pair != null) {
+                    rewards.add(pair);
+                    reserve(pair, reservedSchematics, reservedData);
+                }
+            }
         }
 
         // a no-credit quest whose every pick failed still owes something for the work
@@ -327,6 +349,23 @@ public class QuestRewards {
                                   Set<String> reservedData) {
         FishRewardRoller.reserve(reward, reservedSchematics);
         FishRewardRoller.reserveLocationData(reward, reservedData);
+    }
+
+    protected static boolean hasCredits(List<FishReward> rewards) {
+        for (FishReward reward : rewards) {
+            if (reward instanceof FishReward.Credits) return true;
+        }
+
+        return false;
+    }
+
+    protected static int countCharts(List<FishReward> rewards) {
+        int count = 0;
+        for (FishReward reward : rewards) {
+            if (reward instanceof FishReward.LocationData) count++;
+        }
+
+        return count;
     }
 
     protected static int requestedFish(List<FishRequirement> asks) {
