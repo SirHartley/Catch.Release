@@ -815,6 +815,70 @@ public enum FleetQuestType {
             "A Persean League member-state science convoy is inbound from the deep fringe and"
                     + " holding at the edge of the system. {fleet} is broadcasting an urgent"
                     + " research request."),
+    PARLEY_FISH("The Parley Fish",
+            FleetTypes.PATROL_MEDIUM,
+            "The captain is already pulling up a chart of {rupture} when the link opens.\n\n"
+                    + "\"Good timing. Another crew says {rupture} is theirs to protect. We say it"
+                    + " isn't. We traded fire over the point and agreed to a parley before"
+                    + " somebody starts losing useful hulls.\"\n\n"
+                    + "\"Parley's on a neutral ship in a few days. Custom says the crew claiming"
+                    + " the water opens with a fresh catch from the claim. Proves you can work"
+                    + " what you're charging people to work.\"\n\n"
+                    + "They tap the rupture marker.\n\n"
+                    + "\"It has to come from {rupture}, caught after you take this job. Something"
+                    + " already sitting in your hold doesn't count.\"\n\n"
+                    + "\"My grandmother's crew did it that way. Good enough for me.\"\n\n"
+                    + "\"We need {ask}. Pay is {reward}. You've got {days}.\"",
+            "Pirate fleet {fleet} needs {ask} from {rupture} for an upcoming parley over"
+                    + " protection rights. The specimen must be caught from that exact rupture"
+                    + " after you accepted the job and delivered within {days}; an earlier catch"
+                    + " does not qualify.",
+            "Holding for the parley",
+            "\"The parley held. Nobody fired on the way out.\"\n\n"
+                    + "The captain clears the engagement markers from the plot.\n\n"
+                    + "\"Cheaper than the other version. Safe flying.\"",
+            1.2f,
+            new Dialogue(
+                    "\"Pirate fleet {fleet}. If you've got a working fishing rig, I want a"
+                            + " private channel.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the rupture fix and the parley terms.\"\n\n"
+                            + "The files arrive from {fleet}.\n\n"
+                            + "\"Catch it after this timestamp and bring it back here.\"",
+                    "\"Fair enough. No promise goes in the book.\"\n\n"
+                            + "The captain transmits the same rupture fix and parley terms.\n\n"
+                            + "\"If you pull what we need from {rupture} before the parley, hail"
+                            + " us.\"",
+                    "Decline.",
+                    "\"Your call. We'll find another way to open the meeting.\"\n\n"
+                            + "\"{fleet} out.\"",
+                    "\"Both fleets are still here. The other lot have started broadcasting music"
+                            + " at us, which tells you how negotiations are going.\"\n\n"
+                            + "\"We've got {days}. Still need {ask} from {rupture}.\"",
+                    "The captain has the parley container brought onto the bridge before the"
+                            + " specimen leaves your custody.\n\n"
+                            + "\"Catch from {rupture}. Timestamp {catchTimestamp}.\"\n\n"
+                            + "A crewman checks the entry against the contract, closes the"
+                            + " container, and fixes the captain's seal over the latch.\n\n"
+                            + "\"That goes to the parley unopened.\"",
+                    "What if the parley fails?",
+                    "\"Then we start shooting again.\"\n\n"
+                            + "The captain brings up the two fleet estimates.\n\n"
+                            + "\"Best case, two or three hulls crippled, crews to replace, a few"
+                            + " weeks before anybody works {rupture} again. That's fuel, repairs,"
+                            + " wages, and lost protection money.\"\n\n"
+                            + "They close the display.\n\n\"Fish is cheaper.\"",
+                    "The parley contract is recorded on the following terms.",
+                    new Question(
+                            "You're paying me to legitimize a protection racket.",
+                            "\"I prefer 'licensing.' Our fees are posted honestly.\"\n\n"
+                                    + "The captain gives you a thin grin.\n\n"
+                                    + "\"Could be worse. We don't seal your hauler for six weeks"
+                                    + " because somebody filed the wrong form.\"\n\n"
+                                    + "\"Still need the fish.\"")),
+            "A pirate combat formation is holding near an in-system rupture. An open trade-band"
+                    + " broadcast is requesting a fishing crew."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -1348,6 +1412,11 @@ public enum FleetQuestType {
             case MANDATE:
                 ask.origin = SectorRegion.ABYSSAL;
                 if (target >= 40f) ask.minRarity = FishRarity.UNCOMMON;
+                break;
+
+            case PARLEY_FISH:
+                if (home == null) return null;
+                if (target >= 26f) ask.minGrade = FishGrade.AVERAGE;
                 break;
 
             case STRANDED:

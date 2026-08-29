@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -142,6 +143,10 @@ public class FleetQuest extends FishJob {
     protected String deploymentDepth;
     protected String telemetryEnd;
     protected String safetyMargin;
+    protected SectorEntityToken questPond;
+    protected String rupture;
+    protected String catchTimestamp;
+    protected boolean parleyCatchAboard;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -202,6 +207,7 @@ public class FleetQuest extends FishJob {
         setEntityMissionRef(giver, REF_KEY);
 
         stampAcceptedCatchConstraints();
+        claimQuestPond();
         mark();
         hold();
 
@@ -266,7 +272,8 @@ public class FleetQuest extends FishJob {
     }
 
     protected void stampAcceptedCatchConstraints() {
-        if (type != FleetQuestType.CLAIM_ASSAY || Global.getSector() == null) return;
+        if ((type != FleetQuestType.CLAIM_ASSAY && type != FleetQuestType.PARLEY_FISH)
+                || Global.getSector() == null) return;
 
         long acceptedAt = Global.getSector().getClock().getTimestamp();
         for (FishRequirement ask : asks) ask.minCaughtAt = acceptedAt;
@@ -349,10 +356,12 @@ public class FleetQuest extends FishJob {
 
         setPersonOverride(contact);
         prepareCaseDetails();
+        if (type == FleetQuestType.PARLEY_FISH && questPond == null) return false;
 
         float target = DemandScore.rollTarget(random());
         FishRequirement ask = rollFillableAsk(target);
         if (ask == null) return false;
+        if (type == FleetQuestType.PARLEY_FISH) ask.sourceId = questPond.getId();
         addAsk(ask);
 
         addRewards(QuestRewards.roll(type.createRewardRequest(asks, random())).rewards);
@@ -360,7 +369,13 @@ public class FleetQuest extends FishJob {
 
         setUpSpine();
 
-        if (!setEntityMissionRef(giver, REF_KEY)) return false;
+        if (type == FleetQuestType.PARLEY_FISH && !QuestPond.claim(questPond, REF_KEY)) {
+            return false;
+        }
+        if (!setEntityMissionRef(giver, REF_KEY)) {
+            releaseQuestPond();
+            return false;
+        }
 
         offer();
 
@@ -489,6 +504,14 @@ public class FleetQuest extends FishJob {
             telemetryEnd = 35 + random().nextInt(51) + " seconds after bottom lock";
             safetyMargin = String.format(Locale.ROOT, "mandated %.2f coherence",
                     0.25f + random().nextFloat() * 0.2f);
+            return;
+        }
+        if (type == FleetQuestType.PARLEY_FISH) {
+            StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
+                    ? (StarSystemAPI) giver.getContainingLocation() : null;
+            questPond = QuestPond.findFreePond(system);
+            rupture = system == null ? "the marked rupture"
+                    : "the " + system.getName() + " rupture";
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -687,6 +710,8 @@ public class FleetQuest extends FishJob {
                 .replace("{deploymentDepth}", value(deploymentDepth))
                 .replace("{telemetryEnd}", value(telemetryEnd))
                 .replace("{safetyMargin}", value(safetyMargin))
+                .replace("{rupture}", value(rupture))
+                .replace("{catchTimestamp}", value(catchTimestamp))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
@@ -771,6 +796,17 @@ public class FleetQuest extends FishJob {
     @Override
     protected void advanceImpl(float amount) {
         super.advanceImpl(amount);
+
+        if (type == FleetQuestType.PARLEY_FISH && takenUp) {
+            boolean aboard = isSatisfied();
+            if (aboard != parleyCatchAboard) {
+                parleyCatchAboard = aboard;
+                if (aboard) releaseQuestPond();
+                else claimQuestPond();
+            } else if (!aboard && !QuestPond.isClaimedBy(questPond, REF_KEY)) {
+                claimQuestPond();
+            }
+        }
 
         if (Stage.WANTED.equals(currentStage)) {
             if (giver != null && !giver.getMemoryWithoutUpdate().contains(ACCEPT_OPTION_KEY)) {
@@ -930,6 +966,11 @@ public class FleetQuest extends FishJob {
         if (type == FleetQuestType.CALIBRATION_PAIR && round == 0 && offered != null) {
             followupSpeciesId = offered.speciesId;
         }
+        if (type == FleetQuestType.PARLEY_FISH && offered != null && offered.caughtAt > 0L) {
+            catchTimestamp = Global.getSector().getClock()
+                    .createClock(offered.caughtAt).getDateString();
+            writeDialogueMemory();
+        }
     }
 
     @Override
@@ -1006,6 +1047,7 @@ public class FleetQuest extends FishJob {
     }
 
     protected void release() {
+        releaseQuestPond();
         if (giver == null) return;
 
         dropMarker();
@@ -1102,11 +1144,33 @@ public class FleetQuest extends FishJob {
         return giver;
     }
 
+    public SectorEntityToken getQuestPond() {
+        return type == FleetQuestType.PARLEY_FISH ? questPond : null;
+    }
+
+    protected void claimQuestPond() {
+        if (type == FleetQuestType.PARLEY_FISH) QuestPond.claim(questPond, REF_KEY);
+    }
+
+    protected void releaseQuestPond() {
+        if (type == FleetQuestType.PARLEY_FISH) QuestPond.release(questPond, REF_KEY);
+    }
+
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
         if (giver != null && !giver.isExpired()) return giver;
 
         return super.getMapLocation(map);
+    }
+
+    @Override
+    protected SectorEntityToken getFishRequestRouteTarget() {
+        if (type == FleetQuestType.PARLEY_FISH) {
+            if (isSatisfied()) return giver != null && !giver.isExpired() ? giver : null;
+            if (questPond != null && !questPond.isExpired()) return questPond;
+        }
+
+        return super.getFishRequestRouteTarget();
     }
 
     @Override

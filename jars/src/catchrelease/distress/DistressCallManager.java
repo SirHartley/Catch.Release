@@ -349,9 +349,15 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
             return null;
         }
 
-        fleet.setLocation(data.jumpPoint.getLocation().x + 400f + random.nextFloat() * 200f,
-                data.jumpPoint.getLocation().y);
-        fleet.addScript(new DistressCallNormalAssignmentAI(fleet, data.system, data.jumpPoint));
+        SectorEntityToken anchor = provider.getFleetAnchor(instance, fleet, data.jumpPoint);
+        if (anchor == null || anchor.isExpired() || anchor.getContainingLocation() != data.system) {
+            anchor = data.jumpPoint;
+        }
+
+        float offset = anchor == data.jumpPoint ? 400f + random.nextFloat() * 200f
+                : anchor.getRadius() + 400f;
+        fleet.setLocation(anchor.getLocation().x + offset, anchor.getLocation().y);
+        fleet.addScript(new DistressCallNormalAssignmentAI(fleet, data.system, anchor));
 
         DistressCallIntel intel = new DistressCallIntel(data.system);
         String intelText = provider.getIntelText(instance, fleet);

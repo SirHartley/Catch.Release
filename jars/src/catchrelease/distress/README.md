@@ -28,8 +28,9 @@ the game's order for duplicate non-master rows is undefined.
 `dialogTrigger` is fired when the comm link opens. `tags` are opaque to the framework and available
 to the provider.
 
-The provider decides whether a row is eligible and attaches its own quest state to the supplied
-fleet. It owns all dialogue, rewards, acceptance and completion. Call
+The provider decides whether a row is eligible, attaches its own quest state to the supplied
+fleet, and may replace the default jump-point orbit anchor with another token in the same system.
+It owns all dialogue, rewards, acceptance and completion. Call
 `DistressCallFramework.resolve(fleet)` when the encounter has reached a final answer.
 
 ## Vanilla integration
