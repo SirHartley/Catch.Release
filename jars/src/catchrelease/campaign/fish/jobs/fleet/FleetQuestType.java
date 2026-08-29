@@ -514,6 +514,59 @@ public enum FleetQuestType {
                                     + "\"That makes the failure ours to answer for. If the chain"
                                     + " doesn't pass inspection, the contractual fault is ours. So"
                                     + " is the criminal exposure.\""))),
+    HEADLINER("The Headliner",
+            FleetTypes.SCAVENGER_SMALL,
+            "The impresario appears with a stack of show bills beside the comm pickup.\n\n"
+                    + "\"We're on tour. Next booking is {bookedPort}, advance tickets sold, and"
+                    + " I am not cancelling a house I've already sold.\"\n\n"
+                    + "He consults the stock sheet.\n\n"
+                    + "\"Headliner manifest entry is present. Tank readings are nominal. Tank"
+                    + " inventory is empty.\"\n\n"
+                    + "\"{replacementPlan} I need {ask}. Fee is {reward}. We have"
+                    + " {days}.\"",
+            "Licensed exhibition boat {fleet} has lost the headline specimen for {show} before"
+                    + " its booked appearance at {bookedPort}. The impresario needs a replacement"
+                    + " within {days}.",
+            "Holding for the show date",
+            "\"{show} goes on at {bookedPort}. Tickets honored, booking intact.\"\n\n"
+                    + "The impresario is already writing new poster copy as the channel closes.",
+            1.15f,
+            new Dialogue(
+                    "\"This is {show}, aboard licensed exhibition vessel {fleet}. Captain, I have"
+                            + " a vacancy in the top billing and very little time to fill it.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Excellent. You're on the call sheet.\"\n\n"
+                            + "The specification and hand-in instructions arrive from {fleet}."
+                            + "\n\n\"Bring me the star before curtain.\"",
+                    "\"Sensible. I won't print your name on anything yet.\"\n\n"
+                            + "He transmits the same specification and hand-in instructions."
+                            + "\n\n\"If you find what we need in time, hail us.\"",
+                    "Decline.",
+                    "\"A professional knows when the booking isn't theirs.\"\n\n"
+                            + "The impresario reaches for another comm channel.\n\n"
+                            + "\"{fleet} out.\"",
+                    "The latest poster for {show} now reads \"To Be Announced\" in an expensive"
+                            + " typeface.\n\n"
+                            + "\"I have {days} left before {bookedPort}. We still need {ask}.\"",
+                    "Two handlers meet the container at the exhibition tank while the impresario"
+                            + " checks the specimen against the booking sheet.\n\n"
+                            + "He removes the old nameplate and hands it off.\n\n"
+                            + "\"Welcome to {show}.\"\n\n"
+                            + "The replacement is entered on the manifest under the headline"
+                            + " slot.",
+                    "The backdrop, plus the fee, or no show.",
+                    "The impresario puts a hand to his chest.\n\n"
+                            + "\"Captain, you've seen my concession: {reward}. At those terms,"
+                            + " you're practically family.\"",
+                    "The replacement booking offers the following terms.",
+                    new Question(
+                            "Where did your headliner go?",
+                            "\"Last season I had a headliner refuse food for six straight days"
+                                    + " before a sold-out opening. A critic called it 'a"
+                                    + " challenging performance.' We put that on the poster.\""
+                                    + "\n\nHe gestures toward the tank.\n\n"
+                                    + "\"Critics. Never waste a usable sentence.\""))),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -582,6 +635,7 @@ public enum FleetQuestType {
             REFERENCE_SPECIMEN,
             QUIET_SHIP,
             EXHIBIT,
+            HEADLINER,
             SEEKER,
             QUOTA,
             STARVING,
@@ -970,6 +1024,11 @@ public enum FleetQuestType {
                 break;
             }
 
+            case HEADLINER:
+                ask.minRarity = attempt == 0 ? FishRarity.RARE : FishRarity.UNCOMMON;
+                if (attempt == 0 && target >= 45f) ask.minGrade = FishGrade.FINE;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -1021,6 +1080,7 @@ public enum FleetQuestType {
     }
 
     public List<FishReward> rollFixedRewards(Random random, int round) {
+        if (this == HEADLINER) return FishRewardRoller.rollBackdropReward(random);
         if (this == QUIET_SHIP) return FishRewardRoller.rollSchematic(random);
         if (this != LAST_ENTRY && !(this == CALIBRATION_PAIR && round == 0)) return List.of();
 
@@ -1045,6 +1105,10 @@ public enum FleetQuestType {
             request.exclude(QuestRewards.Kind.BACKDROP, QuestRewards.Kind.BLUEPRINT);
         }
         if (this == EXHIBIT) request.exclude(QuestRewards.Kind.BACKDROP);
+        if (this == HEADLINER) {
+            request.exclude(QuestRewards.Kind.BACKDROP);
+            request.tierFloor(DemandScore.Tier.HARD);
+        }
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
                 && asks.get(0).lowCoherence) {
@@ -1071,7 +1135,8 @@ public enum FleetQuestType {
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
                 || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
-                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP || this == EXHIBIT;
+                || this == REFERENCE_SPECIMEN || this == QUIET_SHIP || this == EXHIBIT
+                || this == HEADLINER;
     }
 
     public float getMaximumTravelLY() {

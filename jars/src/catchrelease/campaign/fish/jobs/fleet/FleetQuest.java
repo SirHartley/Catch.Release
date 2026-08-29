@@ -22,6 +22,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
@@ -121,6 +122,9 @@ public class FleetQuest extends FishJob {
     protected String exhibit;
     protected String massReturn;
     protected String failureCode;
+    protected String show;
+    protected String bookedPort;
+    protected String replacementPlan;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -132,6 +136,17 @@ public class FleetQuest extends FishJob {
     protected boolean declinedFollowup;
     protected List<FishReward> counterRewards = new ArrayList<>();
     protected boolean potCaptain;
+
+    protected static final String[] SHOW_NAMES = {
+            "The Grand Catch Exhibition",
+            "The Sector Specimen Showcase",
+            "The Captain's Catch Revue",
+            "The Prize Tank Circuit",
+            "The Persean Catch Parade",
+            "The Trophy Specimen Tour",
+            "The Great Portside Exhibition",
+            "The Licensed Catch Spectacular"
+    };
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         return startOn(giver, type, false);
@@ -297,6 +312,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
             contact.setVoice(Voices.SPACER);
+        } else if (type == FleetQuestType.HEADLINER) {
+            contact = giver.getFaction().createRandomPerson(FullName.Gender.MALE, random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_INVESTOR);
+            contact.setVoice(Voices.BUSINESS);
         }
 
         setPersonOverride(contact);
@@ -333,6 +355,11 @@ public class FleetQuest extends FishJob {
             if (nearest < 0f) continue;
 
             days = QuestDuration.forTravelLY(nearest).days;
+            if (type == FleetQuestType.HEADLINER) {
+                replacementPlan = i == 0 ? "So we hire a replacement."
+                        : "Fine. We promote a strong supporting act to the headline and hire for"
+                        + " the slot they leave open.";
+            }
             return ask;
         }
 
@@ -388,6 +415,18 @@ public class FleetQuest extends FishJob {
             massReturn = String.format(Locale.ROOT, "%.1f%% of recorded mass",
                     35f + random().nextFloat() * 45f);
             failureCode = String.format(Locale.ROOT, "CT-EQ-%02d", 10 + random().nextInt(90));
+            return;
+        }
+        if (type == FleetQuestType.HEADLINER) {
+            show = SHOW_NAMES[random().nextInt(SHOW_NAMES.length)];
+
+            List<MarketAPI> markets = new ArrayList<>(
+                    Global.getSector().getEconomy().getMarketsCopy());
+            markets.removeIf(market -> market == null || market.isHidden());
+            if (!markets.isEmpty()) {
+                bookedPort = markets.get(random().nextInt(markets.size())).getName();
+            }
+            if (bookedPort == null) bookedPort = "Kazeron";
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -555,6 +594,9 @@ public class FleetQuest extends FishJob {
                 .replace("{exhibit}", value(exhibit))
                 .replace("{massReturn}", value(massReturn))
                 .replace("{failureCode}", value(failureCode))
+                .replace("{show}", value(show))
+                .replace("{bookedPort}", value(bookedPort))
+                .replace("{replacementPlan}", value(replacementPlan))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
