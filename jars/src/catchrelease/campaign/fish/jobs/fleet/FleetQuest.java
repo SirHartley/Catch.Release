@@ -125,6 +125,10 @@ public class FleetQuest extends FishJob {
     protected String show;
     protected String bookedPort;
     protected String replacementPlan;
+    protected String contactDesignation;
+    protected String returnStrength;
+    protected String stationOffset;
+    protected String reacquisition;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -354,7 +358,8 @@ public class FleetQuest extends FishJob {
                     type.getMaximumTravelLY());
             if (nearest < 0f) continue;
 
-            days = QuestDuration.forTravelLY(nearest).days;
+            days = distressOffer ? QuestDuration.SHORT.days
+                    : QuestDuration.forTravelLY(nearest).days;
             if (type == FleetQuestType.HEADLINER) {
                 replacementPlan = i == 0 ? "So we hire a replacement."
                         : "Fine. We promote a strong supporting act to the headline and hire for"
@@ -427,6 +432,16 @@ public class FleetQuest extends FishJob {
                 bookedPort = markets.get(random().nextInt(markets.size())).getName();
             }
             if (bookedPort == null) bookedPort = "Kazeron";
+            return;
+        }
+        if (type == FleetQuestType.FOLLOWER) {
+            contactDesignation = String.format(Locale.ROOT, "UC-%02d-%03d",
+                    Global.getSector().getClock().getCycle() % 100, random().nextInt(1000));
+            returnStrength = String.format(Locale.ROOT, "%.2f of standard frigate return",
+                    0.08f + random().nextFloat() * 0.17f);
+            stationOffset = String.format(Locale.ROOT, "%,d SU on our aft quarter",
+                    900 + random().nextInt(10) * 100);
+            reacquisition = 8 + random().nextInt(13) + " minutes after active paint ends";
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -597,6 +612,10 @@ public class FleetQuest extends FishJob {
                 .replace("{show}", value(show))
                 .replace("{bookedPort}", value(bookedPort))
                 .replace("{replacementPlan}", value(replacementPlan))
+                .replace("{contactDesignation}", value(contactDesignation))
+                .replace("{returnStrength}", value(returnStrength))
+                .replace("{stationOffset}", value(stationOffset))
+                .replace("{reacquisition}", value(reacquisition))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
