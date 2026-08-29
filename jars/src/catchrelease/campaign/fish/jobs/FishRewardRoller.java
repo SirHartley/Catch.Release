@@ -208,6 +208,11 @@ public class FishRewardRoller {
         return reward == null ? List.of() : List.of(reward);
     }
 
+    public static List<FishReward> rollBackdropReward(Random random) {
+        FishReward reward = rollBackdrop(random);
+        return reward == null ? List.of() : List.of(reward);
+    }
+
     public static Set<String> getReservedSchematicKeys() {
         Set<String> reserved = new LinkedHashSet<>();
         if (Global.getSector() == null || Global.getSector().getIntelManager() == null) {
