@@ -146,6 +146,7 @@ public class FleetQuest extends FishJob {
     protected SectorEntityToken questPond;
     protected String rupture;
     protected String catchTimestamp;
+    protected String feedstockCode;
     protected boolean parleyCatchAboard;
     protected int liabilityBase;
     protected int liabilityPerDay;
@@ -317,6 +318,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SCIENTIST);
             contact.setVoice(Voices.SCIENTIST);
+        } else if (type == FleetQuestType.STRANDED) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SPACER);
+            contact.setVoice(Voices.SPACER);
         } else if (type.usesBosunContact()) {
             contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
@@ -512,6 +520,11 @@ public class FleetQuest extends FishJob {
             questPond = QuestPond.findFreePond(system);
             rupture = system == null ? "the marked rupture"
                     : "the " + system.getName() + " rupture";
+            return;
+        }
+        if (type == FleetQuestType.STRANDED) {
+            feedstockCode = String.format(Locale.ROOT, "DFT-FC-%02d",
+                    10 + random().nextInt(90));
             return;
         }
         if (type != FleetQuestType.LAST_ENTRY) return;
@@ -712,6 +725,7 @@ public class FleetQuest extends FishJob {
                 .replace("{safetyMargin}", value(safetyMargin))
                 .replace("{rupture}", value(rupture))
                 .replace("{catchTimestamp}", value(catchTimestamp))
+                .replace("{feedstockCode}", value(feedstockCode))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())

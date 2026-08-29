@@ -881,12 +881,64 @@ public enum FleetQuestType {
                     + " broadcast is requesting a fishing crew."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
-            "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
-                    + " it has not got. There is a rupture nearby - bring us something out of it and we"
-                    + " will make it worth the detour.",
-            "They need something living out of a nearby rupture before the printer will run again.",
-            "Holding position",
-            "Printer's running. That bought us the trip home. Thank you."),
+            "The engineer has a maintenance slate open when the link connects.\n\n"
+                    + "\"Drive output is intermittent. That should be first priority.\"\n\n"
+                    + "They glance toward the passage outside engineering.\n\n"
+                    + "\"The ration printer is failing too. Crew made their preference clear, so"
+                    + " dinner goes first.\"\n\n"
+                    + "\"We only have the parts and work time to stabilize one system before the"
+                    + " other gets worse. The printer manual gives us another option. Domain"
+                    + " feedstock table, commodity code {feedstockCode}: fresh catch.\"\n\n"
+                    + "They turn the manual toward the pickup.\n\n"
+                    + "\"Catch from this system or an adjacent one will do. We need {ask}. We can"
+                    + " pay {reward}. We have {days}.\"",
+            "A stranded ship has both drive and ration-printer failures and can only address one"
+                    + " at a time. Its engineer needs {ask}, sourced from this system or an"
+                    + " adjacent one, to restore the printer within {days}.",
+            "Stabilizing ship systems",
+            "\"Printer's running. That bought us the trip home.\"\n\n"
+                    + "The engineer brings the drive repair schedule back onto the slate.\n\n"
+                    + "\"I can give the drive my full attention now.\"",
+            1.15f,
+            new Dialogue(
+                    "\"Engineering here. We need supplies and we need them soon. Open a"
+                            + " channel.\"",
+                    "I'll get what you need.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the feedstock entry and receiving instructions.\"\n\n"
+                            + "The files arrive over the comm link.",
+                    "\"Understood. No commitment.\"\n\n"
+                            + "The engineer transmits the same feedstock entry and receiving"
+                            + " instructions.\n\n"
+                            + "\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep working the problem.\"\n\n"
+                            + "The channel closes.",
+                    "\"Printer queue is still paused. Every watch sends somebody down to ask when"
+                            + " it comes back.\"\n\n"
+                            + "\"We still need {ask}. We have {days}.\"",
+                    "The specimen is transferred directly to the ration printer's feedstock"
+                            + " intake. The engineer checks the commodity code, closes the access"
+                            + " panel, and starts the processing cycle.\n\n"
+                            + "The printer status changes from FEEDSTOCK FAULT to PROCESSING.\n\n"
+                            + "The whole deck hears the machine start.",
+                    "Your printer eats fish?",
+                    "The engineer opens the feedstock table.\n\n"
+                            + "\"Code {feedstockCode}. Fresh catch. Handling note says remove"
+                            + " external packaging before processing.\"\n\n"
+                            + "They scroll one line up, then one line down.\n\n"
+                            + "\"Above it is rendered protein stock. Below it is agricultural"
+                            + " slurry.\"\n\nThe manual closes.",
+                    "The engineer's supply request is recorded on the following terms.",
+                    new Question(
+                            "Why not just eat the fish?",
+                            "\"One fish through the printer becomes weeks of usable"
+                                    + " feedstock.\"\n\n"
+                                    + "The engineer checks the figures again.\n\n"
+                                    + "\"Cook it directly and we get one good meal and a worse"
+                                    + " morning. I checked both.\"")),
+            "A stranded ship is broadcasting a standard distress call. Its drive plume cuts in"
+                    + " and out as the vessel tries to hold position."),
     SEEKER("Fleet on a Hunt",
             FleetTypes.SCAVENGER_SMALL,
             "We have been out here eleven weeks looking for one specific thing and we are not"
