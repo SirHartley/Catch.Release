@@ -1405,6 +1405,13 @@ FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThank
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1300
 !$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
 FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
+catchrelease_fleetQuestFollowup,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
+$entity.catchrelease_fleetQuestTaken
+$entity.catchrelease_fleetQuestFollowupPending
+!$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $entity.catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestFollowupOptions",$entity.catchrelease_fleetQuestFollowupPitch,,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
@@ -1423,6 +1430,12 @@ catchrelease_fqTurnInPickSel,DialogOptionSelected,"$option == catchrelease_fqTur
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 $catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,$entity.catchrelease_fleetQuestTurnIn,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
+catchrelease_fqFollowupAcceptOpt,CatchReleaseFleetQuestFollowupOptions,,,,0:catchrelease_fqFollowupAccept:$entity.catchrelease_fleetQuestFollowupAcceptOption,
+catchrelease_fqFollowupDeclineOpt,CatchReleaseFleetQuestFollowupOptions,,,,10:catchrelease_fqFollowupDecline:$entity.catchrelease_fleetQuestFollowupDeclineOption,
+catchrelease_fqFollowupAcceptSel,DialogOptionSelected,$option == catchrelease_fqFollowupAccept,"Call $entity.catchrelease_jobRef acceptFollowup
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestFollowupAccept,,
+catchrelease_fqFollowupDeclineSel,DialogOptionSelected,$option == catchrelease_fqFollowupDecline,"Call $entity.catchrelease_jobRef declineFollowup
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestFollowupDecline,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
 !$isHostile","$catchrelease_harpoonDemandDone = true 1
