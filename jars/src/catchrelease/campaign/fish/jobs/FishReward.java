@@ -62,10 +62,14 @@ public abstract class FishReward {
         }
 
         public void addTo(TextPanelAPI text) {
+            addTo(text, "Gained");
+        }
+
+        public void addTo(TextPanelAPI text, String verb) {
             if (text == null || description == null || description.isEmpty()) return;
 
             text.setFontSmallInsignia();
-            text.addParagraph("Gained: " + description, Misc.getPositiveHighlightColor());
+            text.addParagraph(verb + ": " + description, Misc.getPositiveHighlightColor());
             if (highlight != null && !highlight.isEmpty() && highlightColor != null) {
                 text.highlightInLastPara(highlightColor, highlight);
             }
@@ -537,9 +541,13 @@ public abstract class FishReward {
     }
 
     public static void showReceipts(TextPanelAPI text, Collection<Receipt> receipts) {
+        showReceipts(text, receipts, "Gained");
+    }
+
+    public static void showReceipts(TextPanelAPI text, Collection<Receipt> receipts, String verb) {
         if (text == null || receipts == null) return;
         for (Receipt receipt : receipts) {
-            if (receipt != null) receipt.addTo(text);
+            if (receipt != null) receipt.addTo(text, verb);
         }
     }
 

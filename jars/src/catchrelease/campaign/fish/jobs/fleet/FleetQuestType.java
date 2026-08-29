@@ -4,6 +4,9 @@ import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.DemandScore;
+import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
+import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -19,6 +22,59 @@ import java.util.Random;
 
 public enum FleetQuestType {
 
+    LAST_ENTRY("The Last Entry",
+            FleetTypes.SCAVENGER_SMALL,
+            "The data officer appears with a slate already open beside the comm pickup.\n\n"
+                    + "\"Expedition {expedition} has finished its survey. Telemetry is in. Every"
+                    + " accession record but one is closed.\"\n\n"
+                    + "They bring up the open entry.\n\n"
+                    + "\"If I file the catalogue incomplete, it voids the expedition's survey"
+                    + " classification. So I'm holding it open. Berth and specimen-holding fees"
+                    + " keep running while I do.\"\n\n"
+                    + "\"We need {ask}. Compensation is {reward}. I can hold the filing for"
+                    + " {days}.\"",
+            "Expedition {expedition} has completed its survey, but one specimen entry remains open."
+                    + " {fleet} needs the requested specimen to close the entry and file the"
+                    + " catalogue without voiding the expedition's survey classification.",
+            "Holding for catalogue filing",
+            "\"That's the complete catalogue filed.\"\n\n"
+                    + "The officer checks the submission receipt, then returns to the original"
+                    + " sighting record.\n\n"
+                    + "\"We'll retain the original entry with the expedition archive.\"\n\n"
+                    + "\"Good work, captain. {fleet} out.\"",
+            1f,
+            new Dialogue(
+                    "\"Survey vessel {fleet}, registry {registry}, expedition {expedition}."
+                            + " Requesting a channel regarding an outstanding catalogue entry.\"",
+                    "I'll take the job.",
+                    "No promises, but send me the details.",
+                    "\"Good. I'll transmit the catalogue entry and the relevant range references"
+                            + " now.\"\n\nThe files arrive under expedition {expedition}.",
+                    "\"Understood. No commitment recorded.\"\n\n"
+                            + "They send the same catalogue entry and range references.\n\n"
+                            + "\"If you bring us a qualifying specimen before the filing window"
+                            + " closes, we'll take it.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep the entry open and continue looking.\"\n\n"
+                            + "The officer closes the channel.",
+                    "\"Survey vessel {fleet}, registry {registry}. Catalogue is still open. Berth"
+                            + " and specimen-holding fees are still running.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The expedition staff take custody of the specimen. It goes first to the scale,"
+                            + " then beneath a fixed imaging rig while the data officer checks the"
+                            + " accession number against the open catalogue entry.\n\n"
+                            + "\"Measurements accepted. Photographs attached.\"\n\n"
+                            + "They enter the final field and close the record.\n\n"
+                            + "\"Catalogue filed.\"",
+                    "Who logged the sighting?",
+                    "The officer opens the original sighting entry.\n\n"
+                            + "\"Entry date {entryDate}. Coordinates {coordinates}. Signature"
+                            + " {signature}.\"\n\n"
+                            + "They check the name against the personnel index.\n\n"
+                            + "\"No crew member by that name has ever served aboard {fleet}.\"\n\n"
+                            + "They close the personnel index.\n\n"
+                            + "\"We still need the specimen to close the entry.\"",
+                    "The expedition will accept delivery on the following terms.")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -78,6 +134,7 @@ public enum FleetQuestType {
                     + " thanks.");
 
     private static final FleetQuestType[] LOCAL_OFFERS = {
+            LAST_ENTRY,
             SEEKER,
             QUOTA,
             STARVING,
@@ -91,18 +148,71 @@ public enum FleetQuestType {
     public final String note;
     public final String actionText;
     public final String thanks;
+    public final float rewardBudgetMult;
+    public final Dialogue dialogue;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks) {
+        this(title, fleetType, pitch, note, actionText, thanks, 1.15f, Dialogue.DEFAULT);
+    }
+
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks, float rewardBudgetMult, Dialogue dialogue) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
         this.note = note;
         this.actionText = actionText;
         this.thanks = thanks;
+        this.rewardBudgetMult = rewardBudgetMult;
+        this.dialogue = dialogue;
+    }
+
+    public static class Dialogue {
+
+        public static final Dialogue DEFAULT = new Dialogue(null,
+                "We'll see what we can find.", "No promises.",
+                "They transmit their logs and the local range references.\n\n"
+                        + "No formal contract follows.",
+                "They transmit their logs and the local range references.\n\n"
+                        + "No formal contract follows.",
+                "Decline", "\"Fair enough.\"\n\nThe channel closes.", null, null,
+                null, null, null);
+
+        public final String hail;
+        public final String acceptOption;
+        public final String noPromiseOption;
+        public final String accept;
+        public final String acceptNoPromise;
+        public final String declineOption;
+        public final String decline;
+        public final String waiting;
+        public final String turnIn;
+        public final String questionOption;
+        public final String questionResponse;
+        public final String intelTerms;
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms) {
+            this.hail = hail;
+            this.acceptOption = acceptOption;
+            this.noPromiseOption = noPromiseOption;
+            this.accept = accept;
+            this.acceptNoPromise = acceptNoPromise;
+            this.declineOption = declineOption;
+            this.decline = decline;
+            this.waiting = waiting;
+            this.turnIn = turnIn;
+            this.questionOption = questionOption;
+            this.questionResponse = questionResponse;
+            this.intelTerms = intelTerms;
+        }
     }
 
     public static final float HOME_SPECIES_WEIGHT = 4f;
+    public static final float LAST_ENTRY_MAX_LY = 75f;
 
     /** Picks from the home system or its nearest neighbour, preferring home. */
     protected static String pickNearbySpecies(Random random, StarSystemAPI home,
@@ -166,6 +276,15 @@ public enum FleetQuestType {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
+            case LAST_ENTRY: {
+                FishRarity shelf = target >= 60f ? FishRarity.EPIC
+                        : target >= 35f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                ask.minGrade = FishGrade.AVERAGE;
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -214,6 +333,16 @@ public enum FleetQuestType {
         }
 
         return ask;
+    }
+
+    public List<FishReward> rollFixedRewards(Random random) {
+        if (this != LAST_ENTRY) return List.of();
+
+        return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
+    }
+
+    public float getMaximumTravelLY() {
+        return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY : QuestDuration.MAX_SENSIBLE_LY;
     }
 
     public String getId() {

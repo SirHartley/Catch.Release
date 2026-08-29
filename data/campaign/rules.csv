@@ -1351,37 +1351,58 @@ catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:
 !$distressFramework","$catchrelease_fleetQuestHailed = true
 FleetDesc
 HailPlayer",,,
+catchrelease_fleetQuestDetailedPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
+!$entity.catchrelease_fleetQuestTaken
+!$entity.isHostile
+!$entity.distressFramework
+$entity.catchrelease_fleetQuestHail","Call $catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions","$entity.catchrelease_fleetQuestHail
+
+$entity.catchrelease_fleetQuestPitch",,
 catchrelease_fleetQuestPitch,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 !$entity.catchrelease_fleetQuestTaken
 !$entity.isHostile
 !$entity.distressFramework","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
-Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestPitch""
+Call $catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions","""$entity.catchrelease_fleetQuestPitch""
 
-Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
-5:catchrelease_fqAcceptNoPromise:No promises.
-10:catchrelease_fqDecline:Decline",
+Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.",,
+catchrelease_fqOfferOptions,CatchReleaseFleetQuestOfferOptions,,,,"0:catchrelease_fqAccept:$entity.catchrelease_fleetQuestAcceptOption
+5:catchrelease_fqAcceptNoPromise:$entity.catchrelease_fleetQuestNoPromiseOption",
+catchrelease_fqQuestionOpt,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestQuestionOption,,,7:catchrelease_fqQuestion:$entity.catchrelease_fleetQuestQuestionOption,
+catchrelease_fqDeclineOpt,CatchReleaseFleetQuestOfferOptions,,,,10:catchrelease_fqDecline:$entity.catchrelease_fleetQuestDeclineOption,
+catchrelease_fqQuestionSel,DialogOptionSelected,"$option == catchrelease_fqQuestion
+$entity.catchrelease_fleetQuestQuestionResponse",FireAll CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestQuestionResponse,,
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"$entity.catchrelease_fleetQuestTaken = true
 Call $catchrelease_jobRef showIntelAdded
-FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
-
-No formal contract follows.",,
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestAccept,,
 catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_fqAcceptNoPromise,"$entity.catchrelease_fleetQuestTaken = true
 Call $catchrelease_jobRef showIntelAdded
-FireAll CatchReleaseFleetResolutionOptions","They transmit their logs and the local range references.
-
-No formal contract follows.",,
-catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,FireAll CatchReleaseFleetResolutionOptions,"""Fair enough.""
-
-The channel closes.",,
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestAcceptNoPromise,,
+catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,FireAll CatchReleaseFleetResolutionOptions,$entity.catchrelease_fleetQuestDecline,,
+catchrelease_fleetQuestThanksWithContact,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1320
+$entity.catchrelease_fleetQuestDetailedThanks
+$entity.catchrelease_jobRef
+!$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
+unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestDetailedThanks
+unset $entity.catchrelease_jobRef
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
+catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1310
+$entity.catchrelease_fleetQuestDetailedThanks
+!$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestDetailedThanks
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1300
 !$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
 FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
 catchrelease_fleetQuestWaiting,OpenCommLink,"$entity.catchrelease_fleetQuest score:1200
 $entity.catchrelease_fleetQuestTaken
-!$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk
-FireAll CatchReleaseFleetQuestTurnIn","The fleet is still where you left it.
-
-They still need $entity.catchrelease_fleetQuestAsk.",,
+!$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk
+FireAll CatchReleaseFleetQuestTurnIn",$entity.catchrelease_fleetQuestWaiting,,
 catchrelease_fqTurnInOpt,CatchReleaseFleetQuestTurnIn,"$entity.catchrelease_fleetQuestDeliver
 Call $entity.catchrelease_jobRef updateData
 $catchreleaseHasFish","SetOptionColor catchrelease_fqTurnIn highlight
@@ -1393,13 +1414,7 @@ catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurn
 catchrelease_fqTurnInPickSel,DialogOptionSelected,"$option == catchrelease_fqTurnInPick
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnInPick,,,
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
-$catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,"The cargo goes across.
-
-Someone on the receiving ship checks the containers and calls something away from the microphone.
-
-Several voices answer.
-
-Payment follows.",,
+$catchreleaseFleetHandoffPaid",FireAll CatchReleaseFleetResolutionOptions,$entity.catchrelease_fleetQuestTurnIn,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
@@ -3843,8 +3858,7 @@ $entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,
 catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
 !$entity.catchrelease_fleetQuestTaken
 !$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
-Call $catchrelease_jobRef showRewardDetails","""$entity.catchrelease_fleetQuestPitch""
+Call $catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions","""$entity.catchrelease_fleetQuestPitch""
 
-Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.","0:catchrelease_fqAccept:We'll see what we can find.
-5:catchrelease_fqAcceptNoPromise:No promises.
-10:catchrelease_fqDecline:Decline",
+Their request comes down to $entity.catchrelease_fleetQuestAsk. Their offer is $entity.catchrelease_fleetQuestReward.",,
