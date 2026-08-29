@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -75,6 +76,64 @@ public enum FleetQuestType {
                             + "They close the personnel index.\n\n"
                             + "\"We still need the specimen to close the entry.\"",
                     "The expedition will accept delivery on the following terms.")),
+    ESCROW("The Escrow",
+            FleetTypes.SCAVENGER_SMALL,
+            "The skipper comes on with a contract slate open beside the comm pickup.\n\n"
+                    + "\"Contract {contract}. Client sold a specimen two cycles ago. The carrier"
+                    + " went missing with it aboard, so they put recovery out to us.\"\n\n"
+                    + "They scroll past a column of charges.\n\n"
+                    + "\"Current liability is {liability}, and it's still collecting interest. My"
+                    + " completion bonus gets smaller every day this stays open.\"\n\n"
+                    + "\"Contract allows substitute performance. Their phrase. Means I can buy"
+                    + " the right specimen elsewhere and turn an open liability into a known"
+                    + " delivery.\"\n\n"
+                    + "The client field is masked. The specification beneath it is not.\n\n"
+                    + "\"I need {ask}. Current offer is {reward}. You've got {days}.\"",
+            "Recovery contractor {fleet} is trying to close contract {contract} after the original"
+                    + " specimen and its carrier were lost. A qualifying substitute will satisfy"
+                    + " the outstanding delivery and stop the liability from continuing to accrue.",
+            "Closing contract",
+            "\"Account's closed. My completion bonus survived.\"\n\n"
+                    + "The skipper clears the contract from the slate.\n\n"
+                    + "\"Appreciate the delivery, captain. {fleet} out.\"",
+            1.3f,
+            new Dialogue(
+                    "\"Recovery vessel {fleet}. Commercial matter under clause 17.4... 17.3."
+                            + " Requesting a channel.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll mark you against {contract} as an outside supplier.\"\n\n"
+                            + "The contract extract and specification arrive over the comm link."
+                            + "\n\n\"Bring it here before the window closes.\"",
+                    "\"Fair enough. No commitment recorded.\"\n\n"
+                            + "The skipper transmits the same contract extract and specification."
+                            + "\n\n\"If you have it before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. I'll keep looking.\"\n\n\"{fleet} out.\"",
+                    "\"You're back. Liability's at {liability} now. Interest is still running, and"
+                            + " my bonus is getting the same treatment.\"\n\n"
+                            + "\"I still need {ask}.\"",
+                    "The skipper checks the specimen against the contract. A deckhand seals the"
+                            + " container while the transfer record comes up on the slate.\n\n"
+                            + "They sign beneath your transponder ID.\n\n\"Transfer accepted.\"",
+                    "Who's the client?",
+                    "The skipper turns the slate far enough for you to see the masked client field."
+                            + "\n\n\"That's all I've ever seen there. Contract came to us with the"
+                            + " field masked.\"\n\nThey tap the visible specification.\n\n"
+                            + "\"I can tell you what they're buying: {ask}.\"",
+                    "The contractor will accept a substitute delivery on the following terms.",
+                    "Their exposure is bigger than your offer.",
+                    "The skipper goes back through the contract, slower this time.\n\n"
+                            + "\"There's a discretionary settlement line. Knew I'd seen one.\"\n\n"
+                            + "They read it twice before looking back at you.\n\n"
+                            + "\"Fine. I can raise the offer to {reward} without asking anyone."
+                            + " That's the room I've got.\"",
+                    "Still not enough.",
+                    "The skipper closes the slate.\n\n"
+                            + "\"No. Discretionary authority has a ceiling.\"\n\n"
+                            + "\"We're back to the written offer: {reward}. Anything higher goes"
+                            + " through Tri-Tachyon Legal, and I'm not pretending that improves"
+                            + " either of our day.\"\n\n\"Those are the terms.\"")),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -135,6 +194,7 @@ public enum FleetQuestType {
 
     private static final FleetQuestType[] LOCAL_OFFERS = {
             LAST_ENTRY,
+            ESCROW,
             SEEKER,
             QUOTA,
             STARVING,
@@ -191,11 +251,25 @@ public enum FleetQuestType {
         public final String questionOption;
         public final String questionResponse;
         public final String intelTerms;
+        public final String haggleOption;
+        public final String haggleResponse;
+        public final String sourOption;
+        public final String sourResponse;
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
                         String acceptNoPromise, String declineOption, String decline,
                         String waiting, String turnIn, String questionOption,
                         String questionResponse, String intelTerms) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    null, null, null, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, String haggleOption,
+                        String haggleResponse, String sourOption, String sourResponse) {
             this.hail = hail;
             this.acceptOption = acceptOption;
             this.noPromiseOption = noPromiseOption;
@@ -208,6 +282,10 @@ public enum FleetQuestType {
             this.questionOption = questionOption;
             this.questionResponse = questionResponse;
             this.intelTerms = intelTerms;
+            this.haggleOption = haggleOption;
+            this.haggleResponse = haggleResponse;
+            this.sourOption = sourOption;
+            this.sourResponse = sourResponse;
         }
     }
 
@@ -272,7 +350,7 @@ public enum FleetQuestType {
     }
 
     /** Shapes this quest type around the target score, or returns null if it cannot. */
-    public FishRequirement rollAsk(Random random, float target, StarSystemAPI home) {
+    public FishRequirement rollAsk(Random random, float target, StarSystemAPI home, int attempt) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
@@ -282,6 +360,16 @@ public enum FleetQuestType {
                 ask.speciesId = pickSpecies(random, shelf, shelf);
                 if (ask.speciesId == null) return null;
                 ask.minGrade = FishGrade.AVERAGE;
+                break;
+            }
+
+            case ESCROW: {
+                float rarityTarget = attempt == 1 ? target / FleetQuest.ASK_BACKOFF : target;
+                FishRarity shelf = rarityTarget >= 55f ? FishRarity.EPIC
+                        : rarityTarget >= 30f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
+                if (attempt == 0 && target >= 30f) ask.minGrade = FishGrade.FINE;
                 break;
             }
 
@@ -339,6 +427,23 @@ public enum FleetQuestType {
         if (this != LAST_ENTRY) return List.of();
 
         return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
+    }
+
+    public QuestRewards.Request createRewardRequest(List<FishRequirement> asks, Random random) {
+        QuestRewards.Request request = new QuestRewards.Request(asks)
+                .fixAll(rollFixedRewards(random))
+                .budgetMult(rewardBudgetMult)
+                .random(random);
+
+        if (this == ESCROW) {
+            request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
+        }
+
+        return request;
+    }
+
+    public boolean requiresIndependentFleet() {
+        return this == LAST_ENTRY || this == ESCROW;
     }
 
     public float getMaximumTravelLY() {

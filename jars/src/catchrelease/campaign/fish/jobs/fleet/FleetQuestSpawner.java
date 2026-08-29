@@ -180,7 +180,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         for (CampaignFleetAPI fleet : location.getFleets()) {
             if (!canCarryAnOffer(fleet)) continue;
-            if (type == FleetQuestType.LAST_ENTRY
+            if (type.requiresIndependentFleet()
                     && !Factions.INDEPENDENT.equals(fleet.getFaction().getId())) continue;
 
             any.add(fleet);
@@ -191,7 +191,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
             }
         }
 
-        List<CampaignFleetAPI> pool = type == FleetQuestType.LAST_ENTRY
+        List<CampaignFleetAPI> pool = type.requiresIndependentFleet()
                 ? matching : (matching.isEmpty() ? any : matching);
         if (pool.isEmpty()) return false;
 

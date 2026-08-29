@@ -35,6 +35,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,6 +62,10 @@ public class FleetQuest extends FishJob {
     public static final String TURN_IN_KEY = "$catchrelease_fleetQuestTurnIn";
     public static final String QUESTION_OPTION_KEY = "$catchrelease_fleetQuestQuestionOption";
     public static final String QUESTION_RESPONSE_KEY = "$catchrelease_fleetQuestQuestionResponse";
+    public static final String HAGGLE_OPTION_KEY = "$catchrelease_fleetQuestHaggleOption";
+    public static final String SOUR_OPTION_KEY = "$catchrelease_fleetQuestSourOption";
+    public static final String HAGGLED_FLAG = "$catchrelease_fqHaggled";
+    public static final String SOURED_FLAG = "$catchrelease_fqSoured";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -82,6 +87,13 @@ public class FleetQuest extends FishJob {
     protected String entryDate;
     protected String coordinates;
     protected String signature;
+    protected String contract;
+    protected int liabilityBase;
+    protected int liabilityPerDay;
+    protected int liabilityDay = -1;
+    protected boolean haggled;
+    protected boolean soured;
+    protected List<FishReward> originalRewards = new ArrayList<>();
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         return startOn(giver, type, false);
@@ -229,10 +241,7 @@ public class FleetQuest extends FishJob {
         if (ask == null) return false;
         addAsk(ask);
 
-        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
-                .fixAll(type.rollFixedRewards(random()))
-                .budgetMult(type.rewardBudgetMult)
-                .random(random())).rewards);
+        addRewards(QuestRewards.roll(type.createRewardRequest(asks, random())).rewards);
 
         setUpSpine();
 
@@ -249,7 +258,7 @@ public class FleetQuest extends FishJob {
                 ? (StarSystemAPI) giver.getContainingLocation() : null;
 
         for (int i = 0; i < ASK_ATTEMPTS; i++, target *= ASK_BACKOFF) {
-            FishRequirement ask = type.rollAsk(random(), target, home);
+            FishRequirement ask = type.rollAsk(random(), target, home, i);
             if (ask == null) continue;
 
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
@@ -265,6 +274,13 @@ public class FleetQuest extends FishJob {
 
     protected void prepareCaseDetails() {
         fleetName = giver.getName();
+        if (type == FleetQuestType.ESCROW) {
+            contract = String.format(Locale.ROOT, "TT-RC-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+            liabilityBase = 120000 + random().nextInt(180001);
+            liabilityPerDay = 1800 + random().nextInt(2201);
+            return;
+        }
         if (type != FleetQuestType.LAST_ENTRY) return;
 
         registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
@@ -354,6 +370,15 @@ public class FleetQuest extends FishJob {
         setOrUnset(memory, HAIL_KEY, render(dialogue.hail));
         setOrUnset(memory, QUESTION_OPTION_KEY, dialogue.questionOption);
         setOrUnset(memory, QUESTION_RESPONSE_KEY, render(dialogue.questionResponse));
+        setOrUnset(memory, HAGGLE_OPTION_KEY,
+                !haggled && !soured ? dialogue.haggleOption : null);
+        setOrUnset(memory, SOUR_OPTION_KEY,
+                haggled && !soured ? dialogue.sourOption : null);
+        if (haggled) memory.set(HAGGLED_FLAG, true);
+        else memory.unset(HAGGLED_FLAG);
+        if (soured) memory.set(SOURED_FLAG, true);
+        else memory.unset(SOURED_FLAG);
+        if (type == FleetQuestType.ESCROW) liabilityDay = elapsedDay();
     }
 
     protected void setOrUnset(MemoryAPI memory, String key, String value) {
@@ -370,6 +395,8 @@ public class FleetQuest extends FishJob {
                 .replace("{entryDate}", value(entryDate))
                 .replace("{coordinates}", value(coordinates))
                 .replace("{signature}", value(signature))
+                .replace("{contract}", value(contract))
+                .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{reward}", describeRewards())
                 .replace("{days}", describeDays());
@@ -377,6 +404,15 @@ public class FleetQuest extends FishJob {
 
     protected String value(String text) {
         return text == null || text.isEmpty() ? "unavailable" : text;
+    }
+
+    protected int elapsedDay() {
+        return Math.max(0, (int) Math.floor(elapsed));
+    }
+
+    protected String currentLiability() {
+        long liability = liabilityBase + (long) liabilityPerDay * elapsedDay();
+        return Misc.getDGSCredits(Math.max(0L, liability)) + " credits";
     }
 
     protected void keepStanding() {
@@ -411,6 +447,9 @@ public class FleetQuest extends FishJob {
             if (giver != null && !giver.getMemoryWithoutUpdate().contains(ACCEPT_OPTION_KEY)) {
                 writeDialogueMemory();
             }
+            if (type == FleetQuestType.ESCROW && elapsedDay() != liabilityDay) {
+                writeDialogueMemory();
+            }
             keepStanding();
         }
     }
@@ -432,7 +471,49 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
+        if ("haggle".equals(action)) {
+            haggle(dialog);
+            return true;
+        }
+
+        if ("sour".equals(action)) {
+            sour(dialog);
+            return true;
+        }
+
         return super.callAction(action, ruleId, dialog, params, memoryMap);
+    }
+
+    protected void haggle(InteractionDialogAPI dialog) {
+        if (type != FleetQuestType.ESCROW || haggled || soured) return;
+
+        originalRewards = new ArrayList<>(rewards);
+        rewards.clear();
+        QuestRewards.Request request = type.createRewardRequest(asks, random()).budgetMult(1.45f);
+        rewards.addAll(QuestRewards.roll(request).rewards);
+        haggled = true;
+        writeDialogueMemory();
+
+        if (dialog != null && dialog.getTextPanel() != null) {
+            LabelAPI response = dialog.getTextPanel().addPara(render(type.dialogue.haggleResponse));
+            FishRequirement.highlight(response, asks, describeAsks(), describeRewards());
+            showRewardDetails(dialog);
+        }
+    }
+
+    protected void sour(InteractionDialogAPI dialog) {
+        if (type != FleetQuestType.ESCROW || !haggled || soured) return;
+
+        rewards.clear();
+        rewards.addAll(originalRewards);
+        soured = true;
+        writeDialogueMemory();
+
+        if (dialog != null && dialog.getTextPanel() != null) {
+            LabelAPI response = dialog.getTextPanel().addPara(render(type.dialogue.sourResponse));
+            FishRequirement.highlight(response, asks, describeAsks(), describeRewards());
+            showRewardDetails(dialog);
+        }
     }
 
     @Override
@@ -494,6 +575,10 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(TURN_IN_KEY);
         giver.getMemoryWithoutUpdate().unset(QUESTION_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(QUESTION_RESPONSE_KEY);
+        giver.getMemoryWithoutUpdate().unset(HAGGLE_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(SOUR_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(HAGGLED_FLAG);
+        giver.getMemoryWithoutUpdate().unset(SOURED_FLAG);
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
                 MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
