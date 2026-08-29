@@ -1,6 +1,7 @@
 package catchrelease.distress;
 
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 
 public interface DistressCallProvider {
@@ -13,6 +14,12 @@ public interface DistressCallProvider {
 
     default String getIntelText(DistressCallInstance instance, CampaignFleetAPI fleet) {
         return null;
+    }
+
+    default SectorEntityToken getFleetAnchor(DistressCallInstance instance,
+                                              CampaignFleetAPI fleet,
+                                              SectorEntityToken defaultAnchor) {
+        return defaultAnchor;
     }
 
     default void onExpired(DistressCallInstance instance, CampaignFleetAPI fleet) {
