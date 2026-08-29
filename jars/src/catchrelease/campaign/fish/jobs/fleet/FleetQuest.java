@@ -262,6 +262,13 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_CREW_BOSS);
             contact.setVoice(Voices.SPACER);
+        } else if (type == FleetQuestType.TRIBUTE) {
+            contact = giver.getFaction().createRandomPerson(random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
+            contact.setVoice(Voices.SPACER);
         }
 
         setPersonOverride(contact);
