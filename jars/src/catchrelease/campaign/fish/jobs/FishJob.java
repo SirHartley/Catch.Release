@@ -23,6 +23,7 @@ import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
+import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.Color;
@@ -70,6 +71,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected float days = 0f;
     protected float deadline = 0f;
     protected int round = 0;
+    protected List<Integer> displayedProgress = null;
+    protected int displayedProgressRound = -1;
+    protected transient IntervalUtil progressCheckInterval = null;
 
     protected void addAsk(FishRequirement ask) {
         if (ask != null) asks.add(ask);
@@ -209,26 +213,57 @@ public abstract class FishJob extends HubMissionWithBarEvent
             if (!(intel instanceof FishJob)) continue;
 
             FishJob job = (FishJob) intel;
-            if (!Stage.WANTED.equals(job.currentStage) || job.getRequestedCount() <= 1) continue;
-
-            boolean advanced = false;
-            for (FishRequirement ask : job.asks) {
-                if (ask == null || !ask.matches(caught)) continue;
-
-                int aboard = FishCurrency.count(ask);
-                if (aboard > 0 && aboard <= ask.count) advanced = true;
-            }
-
-            if (advanced) FishIntelNotifications.update(job, CATCH_PROGRESS_UPDATE);
+            job.checkDisplayedProgress();
         }
     }
 
-    protected int getRequestedCount() {
-        int total = 0;
-        for (FishRequirement ask : asks) {
-            if (ask != null) total += Math.max(0, ask.count);
+    @Override
+    public void accept(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        super.accept(dialog, memoryMap);
+        resetDisplayedProgress();
+    }
+
+    @Override
+    protected void advanceImpl(float amount) {
+        super.advanceImpl(amount);
+
+        if (!Stage.WANTED.equals(currentStage)) return;
+
+        if (progressCheckInterval == null) progressCheckInterval = new IntervalUtil(0.5f, 0.5f);
+        progressCheckInterval.advance(amount);
+        if (progressCheckInterval.intervalElapsed()) checkDisplayedProgress();
+    }
+
+    protected void resetDisplayedProgress() {
+        displayedProgress = captureDisplayedProgress();
+        displayedProgressRound = round;
+    }
+
+    protected void checkDisplayedProgress() {
+        if (!Stage.WANTED.equals(currentStage)) return;
+
+        List<Integer> current = captureDisplayedProgress();
+        if (displayedProgress == null || displayedProgressRound != round) {
+            displayedProgress = current;
+            displayedProgressRound = round;
+            return;
         }
-        return total;
+        if (displayedProgress.equals(current)) return;
+
+        Object updateParam = getDisplayedProgressUpdate(displayedProgress, current);
+        displayedProgress = current;
+        FishIntelNotifications.update(this, updateParam);
+    }
+
+    protected List<Integer> captureDisplayedProgress() {
+        List<Integer> current = new ArrayList<>();
+        for (FishRequirement ask : asks) current.add(getProgress(ask));
+
+        return current;
+    }
+
+    protected Object getDisplayedProgressUpdate(List<Integer> previous, List<Integer> current) {
+        return CATCH_PROGRESS_UPDATE;
     }
 
     protected int getProgress(FishRequirement ask) {

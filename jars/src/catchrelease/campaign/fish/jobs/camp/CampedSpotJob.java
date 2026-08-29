@@ -24,6 +24,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract class CampedSpotJob extends FishJob {
@@ -200,8 +201,14 @@ public abstract class CampedSpotJob extends FishJob {
         }
 
         updateInteractionDataImpl();
-        FishIntelNotifications.update(this,
-                aboard ? Update.RECEIPT_CAUGHT : Update.RECEIPT_LOST);
+    }
+
+    @Override
+    protected Object getDisplayedProgressUpdate(List<Integer> previous, List<Integer> current) {
+        int before = previous.isEmpty() ? 0 : previous.get(0);
+        int after = current.isEmpty() ? 0 : current.get(0);
+
+        return after > before ? Update.RECEIPT_CAUGHT : Update.RECEIPT_LOST;
     }
 
     @Override
