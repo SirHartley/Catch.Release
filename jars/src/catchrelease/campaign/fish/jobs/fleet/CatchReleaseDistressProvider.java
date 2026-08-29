@@ -70,8 +70,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
             if (ref instanceof FleetQuest) return ((FleetQuest) ref).getDistressIntel();
         }
 
-        FleetQuestType type = instance == null ? null : typeFor(instance.getSpec());
-        return type == null ? null : type.distressIntel;
+        return null;
     }
 
     @Override
