@@ -63,6 +63,10 @@ public class FleetQuest extends FishJob {
     public static final String TURN_IN_KEY = "$catchrelease_fleetQuestTurnIn";
     public static final String QUESTION_OPTION_KEY = "$catchrelease_fleetQuestQuestionOption";
     public static final String QUESTION_RESPONSE_KEY = "$catchrelease_fleetQuestQuestionResponse";
+    public static final String EXTRA_QUESTION_OPTION_KEY =
+            "$catchrelease_fleetQuestExtraQuestionOption";
+    public static final String EXTRA_QUESTION_RESPONSE_KEY =
+            "$catchrelease_fleetQuestExtraQuestionResponse";
     public static final String HAGGLE_OPTION_KEY = "$catchrelease_fleetQuestHaggleOption";
     public static final String SOUR_OPTION_KEY = "$catchrelease_fleetQuestSourOption";
     public static final String HAGGLED_FLAG = "$catchrelease_fqHaggled";
@@ -113,6 +117,10 @@ public class FleetQuest extends FishJob {
     protected String registryVolume;
     protected String discrepancyCode;
     protected String relayRun;
+    protected String bond;
+    protected String exhibit;
+    protected String massReturn;
+    protected String failureCode;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -370,6 +378,18 @@ public class FleetQuest extends FishJob {
                     Global.getSector().getClock().getCycle() % 100, random().nextInt(1000));
             return;
         }
+        if (type == FleetQuestType.EXHIBIT) {
+            String surname = getPerson() == null ? null : getPerson().getName().getLast();
+            company = surname == null || surname.isEmpty()
+                    ? "Independent Bonded Freight" : surname + " Bonded Freight";
+            bond = String.format(Locale.ROOT, "HB-CUST-%04d-%03d",
+                    Global.getSector().getClock().getCycle(), random().nextInt(1000));
+            exhibit = String.format(Locale.ROOT, "HX-%05d", random().nextInt(100000));
+            massReturn = String.format(Locale.ROOT, "%.1f%% of recorded mass",
+                    35f + random().nextFloat() * 45f);
+            failureCode = String.format(Locale.ROOT, "CT-EQ-%02d", 10 + random().nextInt(90));
+            return;
+        }
         if (type != FleetQuestType.LAST_ENTRY) return;
 
         registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
@@ -465,6 +485,10 @@ public class FleetQuest extends FishJob {
         setOrUnset(memory, HAIL_KEY, render(dialogue.hail));
         setOrUnset(memory, QUESTION_OPTION_KEY, dialogue.questionOption);
         setOrUnset(memory, QUESTION_RESPONSE_KEY, render(dialogue.questionResponse));
+        setOrUnset(memory, EXTRA_QUESTION_OPTION_KEY,
+                dialogue.extraQuestion == null ? null : dialogue.extraQuestion.option);
+        setOrUnset(memory, EXTRA_QUESTION_RESPONSE_KEY,
+                dialogue.extraQuestion == null ? null : render(dialogue.extraQuestion.response));
         setOrUnset(memory, HAGGLE_OPTION_KEY,
                 !haggled && !soured ? dialogue.haggleOption : null);
         setOrUnset(memory, SOUR_OPTION_KEY,
@@ -527,6 +551,10 @@ public class FleetQuest extends FishJob {
                 .replace("{registryVolume}", value(registryVolume))
                 .replace("{discrepancyCode}", value(discrepancyCode))
                 .replace("{relayRun}", value(relayRun))
+                .replace("{bond}", value(bond))
+                .replace("{exhibit}", value(exhibit))
+                .replace("{massReturn}", value(massReturn))
+                .replace("{failureCode}", value(failureCode))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
@@ -863,6 +891,8 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(TURN_IN_KEY);
         giver.getMemoryWithoutUpdate().unset(QUESTION_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(QUESTION_RESPONSE_KEY);
+        giver.getMemoryWithoutUpdate().unset(EXTRA_QUESTION_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(EXTRA_QUESTION_RESPONSE_KEY);
         giver.getMemoryWithoutUpdate().unset(HAGGLE_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(SOUR_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(HAGGLED_FLAG);
