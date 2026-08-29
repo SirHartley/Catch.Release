@@ -16,6 +16,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     public static final String STRANDED_ID = "catchrelease_stranded_fleet";
     public static final String DEAD_ENGINE_ID = "catchrelease_dead_engine";
     public static final String FOLLOWER_ID = "catchrelease_follower";
+    public static final String STATE_DINNER_ID = "catchrelease_state_dinner";
 
     public static void register() {
         DistressCallFramework.registerProvider(PROVIDER_ID, new CatchReleaseDistressProvider());
@@ -61,6 +62,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (STRANDED_ID.equals(spec.id)) return FleetQuestType.STRANDED;
         if (DEAD_ENGINE_ID.equals(spec.id)) return FleetQuestType.SCAVENGER_ENGINE;
         if (FOLLOWER_ID.equals(spec.id)) return FleetQuestType.FOLLOWER;
+        if (STATE_DINNER_ID.equals(spec.id)) return FleetQuestType.STATE_DINNER;
 
         return null;
     }

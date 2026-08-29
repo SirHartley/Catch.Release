@@ -635,6 +635,61 @@ public enum FleetQuestType {
             "A Hegemony logistics formation is holding off-lane, its escort facing an empty"
                     + " section of the sensor plot. An auxiliary-band request is asking passing"
                     + " civilian ships for trade services."),
+    STATE_DINNER("The State Dinner",
+            FleetTypes.TRADE_LINER,
+            "The protocol officer appears beside a formal dinner schedule already marked for"
+                    + " revision.\n\n"
+                    + "\"We are hosting an official dinner this evening. The guest of honor"
+                    + " specifically requested {course}. The supplier delivered the main course"
+                    + " and omitted the required accompaniment.\"\n\n"
+                    + "\"Removing the course now would constitute a direct insult to the guest."
+                    + " That is not an acceptable amendment to the program.\"\n\n"
+                    + "\"We require {ask}. Authorized compensation is {reward}. Delivery must be"
+                    + " completed within {days}.\"",
+            "Diktat protocol vessel {fleet} needs {ask} for an official dinner scheduled this"
+                    + " evening. Delivery is required before the current {days} window expires.",
+            "Holding for the official dinner",
+            "The official dinner proceeds according to the revised schedule.\n\n"
+                    + "\"Your assistance has been entered in the protocol record. Captain, I will"
+                    + " add that it was exceptionally timely.\"\n\n"
+                    + "The officer closes the channel.\n\n"
+                    + "\"{fleet} out.\"",
+            1.15f,
+            new Dialogue(
+                    "\"Protocol vessel {fleet}, under official seal of the Sindrian Diktat. Open"
+                            + " a procurement channel immediately.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the requisition.",
+                    "\"Accepted. I will transmit the procurement order and galley receiving"
+                            + " instructions.\"\n\n"
+                            + "The documents arrive under the vessel's official seal.",
+                    "\"Understood. No delivery commitment will be entered.\"\n\n"
+                            + "The officer transmits the same procurement order and receiving"
+                            + " instructions.\n\n"
+                            + "\"If you obtain the required stock within the window, contact us"
+                            + " immediately.\"",
+                    "Decline.",
+                    "\"Understood. Procurement will continue through other channels.\"\n\n"
+                            + "\"{fleet} out.\"",
+                    "\"Preparations are continuing. The seating chart has been revised"
+                            + " again.\"\n\n"
+                            + "\"We have {days}. We still require {ask}.\"",
+                    "Galley staff receive the delivery against the procurement order, verify the"
+                            + " containers, and move them directly to the preparation station."
+                            + "\n\nThe chef appears long enough to inspect the lot.\n\n"
+                            + "\"This goes to the head table. Nobody improvises.\"\n\n"
+                            + "He leaves. The protocol officer signs the galley receipt.",
+                    "What happens if they eat it without?",
+                    "The officer opens the attending physician's memorandum.\n\n"
+                            + "\"'Onset is expected during the meal. Effects persist for"
+                            + " approximately three days. Affected guests are to be considered"
+                            + " unfit for scheduled public appearances for the duration.'\"\n\n"
+                            + "They close the memorandum.\n\n"
+                            + "\"The course remains on the menu.\"",
+                    "The emergency procurement order offers the following terms."),
+            "A Sindrian Diktat protocol vessel is broadcasting an urgent procurement request"
+                    + " under official seal. The request concerns an official function scheduled"
+                    + " for this evening."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -1128,6 +1183,13 @@ public enum FleetQuestType {
                 break;
             }
 
+            case STATE_DINNER:
+                ask.speciesId = pickNearbySpecies(random, home, FishRarity.COMMON);
+                if (ask.speciesId == null) return null;
+                ask.count = DemandScore.countFor(target, DemandScore.UNCOMMON_BASE, 2, 6);
+                if (target >= 35f) ask.minGrade = FishGrade.FINE;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -1210,6 +1272,10 @@ public enum FleetQuestType {
         }
         if (this == FOLLOWER) {
             request.exclude(QuestRewards.Kind.BACKDROP);
+            request.tierFloor(DemandScore.Tier.MEDIUM);
+        }
+        if (this == STATE_DINNER) {
+            request.exclude(QuestRewards.Kind.BLUEPRINT);
             request.tierFloor(DemandScore.Tier.MEDIUM);
         }
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
