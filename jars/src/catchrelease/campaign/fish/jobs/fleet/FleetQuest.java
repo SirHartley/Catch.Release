@@ -150,6 +150,7 @@ public class FleetQuest extends FishJob {
     protected String manualSection;
     protected String coilCondition;
     protected String filingDate;
+    protected String brokerDates;
     protected boolean parleyCatchAboard;
     protected int liabilityBase;
     protected int liabilityPerDay;
@@ -374,6 +375,13 @@ public class FleetQuest extends FishJob {
             contact.setVoice(Voices.SPACER);
         } else if (type == FleetQuestType.HEADLINER) {
             contact = giver.getFaction().createRandomPerson(FullName.Gender.MALE, random());
+            if (contact == null) return false;
+
+            contact.setRankId(Ranks.CITIZEN);
+            contact.setPostId(Ranks.POST_INVESTOR);
+            contact.setVoice(Voices.BUSINESS);
+        } else if (type == FleetQuestType.COLLECTOR) {
+            contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
 
             contact.setRankId(Ranks.CITIZEN);
@@ -762,6 +770,7 @@ public class FleetQuest extends FishJob {
                 .replace("{manualSection}", value(manualSection))
                 .replace("{coilCondition}", value(coilCondition))
                 .replace("{filingDate}", value(filingDate))
+                .replace("{brokerDates}", getBrokerDates())
                 .replace("{rationDays}", Integer.toString(19 + elapsedDay()))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
@@ -785,6 +794,15 @@ public class FleetQuest extends FishJob {
     protected String currentLiability() {
         long liability = liabilityBase + (long) liabilityPerDay * elapsedDay();
         return Misc.getDGSCredits(Math.max(0L, liability)) + " credits";
+    }
+
+    protected String getBrokerDates() {
+        if (brokerDates == null || brokerDates.isEmpty()) {
+            int cycle = Global.getSector().getClock().getCycle();
+            brokerDates = "cycle " + (cycle - 2) + ", month 4; cycle " + (cycle - 1)
+                    + ", month 2; cycle " + (cycle - 1) + ", month 10";
+        }
+        return brokerDates;
     }
 
     protected String describeCounterRewards() {
@@ -863,8 +881,10 @@ public class FleetQuest extends FishJob {
             if (giver != null) {
                 MemoryAPI memory = giver.getMemoryWithoutUpdate();
                 if (!memory.contains(ACCEPT_OPTION_KEY)
-                        || (type == FleetQuestType.STARVING
-                                && !memory.contains(QUESTION_OPTION_KEY))) {
+                        || (type.dialogue.questionOption != null
+                                && !memory.contains(QUESTION_OPTION_KEY))
+                        || (type.dialogue.extraQuestion != null
+                                && !memory.contains(EXTRA_QUESTION_OPTION_KEY))) {
                     writeDialogueMemory();
                 }
             }
