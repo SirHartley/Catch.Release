@@ -965,12 +965,56 @@ public enum FleetQuestType {
             "The galley has stopped threatening mutiny. You have our thanks."),
     SCAVENGER_ENGINE("Scavenger with a Dead Engine",
             FleetTypes.SCAVENGER_SMALL,
-            "Coil's going and the gel that packs it is not something you can synthesise out here."
-                    + " You can fish it out of the local water, apparently. We looked it up. Bring"
-                    + " us one and we will pay in what we have been pulling out of the hulks.",
-            "Their drive coil needs a packing gel that is easier to catch than to synthesise.",
-            "Holding position",
-            "The gel packed cleanly. Coil is holding. We can move. Thank you."),
+            "The technician has a yard manual open beside the drive diagnostics.\n\n"
+                    + "\"One of our drive coils is failing. We can save it if we repack the"
+                    + " winding before the insulation goes.\"\n\n"
+                    + "\"What we don't have is packing gel. Yard manual section {manualSection}"
+                    + " lists an approved substitute compound rendered from fresh local catch."
+                    + " Apparently.\"\n\n"
+                    + "They tap the relevant line.\n\n"
+                    + "\"Catch from this system or an adjacent one is acceptable. We need {ask}."
+                    + " We can pay {reward} out of the salvage haul. We have {days}.\"",
+            "The scavenger {fleet} needs {ask} to produce substitute packing gel for a failing"
+                    + " drive coil. Catch from the current system or an adjacent one will qualify"
+                    + " if delivered within {days}.",
+            "Repacking the drive coil",
+            "\"The gel packed cleanly. Coil is holding.\"\n\n"
+                    + "The technician glances at the open copy of {manualSection}.\n\n"
+                    + "\"Manual was right.\"",
+            1.2f,
+            new Dialogue(
+                    "\"Coil technician aboard the scavenger {fleet}. We've got a drive repair"
+                            + " held up for lack of one consumable. Requesting a supply channel.\"",
+                    "I'll get what you need.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send the manual extract and receiving instructions.\"\n\n"
+                            + "The files arrive from {fleet}.",
+                    "\"Understood. No commitment.\"\n\n"
+                            + "The technician transmits the same manual extract and receiving"
+                            + " instructions.\n\n"
+                            + "\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll keep looking for another supply.\"\n\n"
+                            + "\"{fleet} out.\"",
+                    "\"Coil condition is {coilCondition}. It was better yesterday.\"\n\n"
+                            + "\"We still need {ask}. We have {days}.\"",
+                    "The specimen is transferred to engineering.\n\n"
+                            + "Some time later, the repaired drive comes up to a steady tone."
+                            + " Conversation on the working deck stops for a few seconds while"
+                            + " the crew listens.\n\n"
+                            + "A deckhand starts the salvage invoice, reaches the description"
+                            + " field, and leaves the cursor blinking.",
+                    "How does a fish pack a drive coil?",
+                    "The technician opens {manualSection} again.\n\n"
+                            + "\"Rendered fraction, eighteen to twenty-two percent by mass."
+                            + " Stable from minus forty to two hundred ten Celsius.\"\n\n"
+                            + "They continue down the procedure.\n\n"
+                            + "\"Render, filter, bring to working temperature, pack the winding"
+                            + " voids, then cycle the coil twice under low load.\"\n\n"
+                            + "The manual closes.\n\n\"I didn't write it.\"",
+                    "The repair supply request is recorded on the following terms."),
+            "A scavenger vessel is holding position with its drive cold. A standard assistance"
+                    + " request is running on the local trade band."),
     COLLECTOR("Collector's Commission",
             FleetTypes.TRADE_SMALL,
             "I am not in distress and I would like that on the record. I am in want. There is a"

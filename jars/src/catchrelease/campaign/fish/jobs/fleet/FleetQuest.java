@@ -147,6 +147,8 @@ public class FleetQuest extends FishJob {
     protected String rupture;
     protected String catchTimestamp;
     protected String feedstockCode;
+    protected String manualSection;
+    protected String coilCondition;
     protected boolean parleyCatchAboard;
     protected int liabilityBase;
     protected int liabilityPerDay;
@@ -318,7 +320,8 @@ public class FleetQuest extends FishJob {
             contact.setRankId(Ranks.CITIZEN);
             contact.setPostId(Ranks.POST_SCIENTIST);
             contact.setVoice(Voices.SCIENTIST);
-        } else if (type == FleetQuestType.STRANDED) {
+        } else if (type == FleetQuestType.STRANDED
+                || type == FleetQuestType.SCAVENGER_ENGINE) {
             contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
 
@@ -527,6 +530,13 @@ public class FleetQuest extends FishJob {
                     10 + random().nextInt(90));
             return;
         }
+        if (type == FleetQuestType.SCAVENGER_ENGINE) {
+            manualSection = String.format(Locale.ROOT, "%d.%02d, revision %c",
+                    4 + random().nextInt(8), random().nextInt(100),
+                    (char) ('B' + random().nextInt(5)));
+            coilCondition = 18 + random().nextInt(23) + "%";
+            return;
+        }
         if (type != FleetQuestType.LAST_ENTRY) return;
 
         registry = String.format(Locale.ROOT, "ISV-%05d", random().nextInt(100000));
@@ -726,6 +736,8 @@ public class FleetQuest extends FishJob {
                 .replace("{rupture}", value(rupture))
                 .replace("{catchTimestamp}", value(catchTimestamp))
                 .replace("{feedstockCode}", value(feedstockCode))
+                .replace("{manualSection}", value(manualSection))
+                .replace("{coilCondition}", value(coilCondition))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
