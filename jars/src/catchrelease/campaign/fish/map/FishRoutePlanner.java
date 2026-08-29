@@ -11,7 +11,6 @@ import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
-import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -99,7 +98,7 @@ public class FishRoutePlanner {
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (system.getLocation() == null) continue;
-            if (!isPlannable(system)) continue;
+            if (!FishPresence.isChartable(system)) continue;
 
             Set<String> hosted = null;
 
@@ -166,19 +165,6 @@ public class FishRoutePlanner {
         return route;
     }
 
-    protected static boolean isPlannable(StarSystemAPI system) {
-        // the standing exception, same as vanilla carves it out of its own skips: Limbo is hand-made and abyssal and stays a destination anyway
-        if ("Limbo".equals(system.getBaseName())) return true;
-
-        if (!system.isProcgen()) return false;
-        if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
-        if (system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
-        if (system.hasTag(Tags.THEME_SPECIAL)) return false;
-        if (system.hasTag(Tags.THEME_HIDDEN)) return false;
-
-        return true;
-    }
-
     public static List<String> getUnplaceable(List<String> speciesIds) {
         List<String> out = new ArrayList<>();
         if (speciesIds == null || Global.getSector() == null) return out;
@@ -193,7 +179,7 @@ public class FishRoutePlanner {
 
             boolean placed = false;
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-                if (system.getLocation() == null || !isPlannable(system)) continue;
+                if (system.getLocation() == null || !FishPresence.isChartable(system)) continue;
 
                 if (FishPresence.livesIn(spec, system)) {
                     placed = true;

@@ -454,7 +454,7 @@ The five regular wares use credits-and-crabs prices. Switchable curios route thr
 | `FishHolderPlugin.java` | Reusable circular species holder with rarity ring, art or silhouette, and wanted mark. |
 | `FishListRow.java` | Shared species row with caught state, wanted tooltip, and F2 Codex link. |
 | `FishRoute.java` | Ordered live route and saved stop representation. |
-| `FishRoutePlanner.java` | Builds route suggestions from every `FishAsker` and shop mark, expands broad requirements, and orders stops using stability and slipstreams. All suggestions require visible range data, except computed dev data. |
+| `FishRoutePlanner.java` | Builds route suggestions from every `FishAsker` and shop mark, expands broad requirements, and orders stops using stability and slipstreams. All suggestions require visible range data, except computed dev data. Route stops use the same chartable-system policy as the sidebar, so reachable hand-authored systems remain valid parts of a known range. |
 | `FishRoutePopup.java` | Sidebar route builder with search, filters, up to five species, and plot action. |
 | `FishRouteSaveDialog.java` | Names and optionally annotates a route before creating `FishRouteIntel`. |
 | `FishTooltips.java` | Shared species tooltip. |
