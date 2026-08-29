@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
@@ -9,6 +11,7 @@ import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEventListener;
@@ -129,6 +132,7 @@ public class FleetQuest extends FishJob {
     protected String returnStrength;
     protected String stationOffset;
     protected String reacquisition;
+    protected String course;
     protected int liabilityBase;
     protected int liabilityPerDay;
     protected int liabilityDay = -1;
@@ -365,6 +369,9 @@ public class FleetQuest extends FishJob {
                         : "Fine. We promote a strong supporting act to the headline and hire for"
                         + " the slot they leave open.";
             }
+            if (type == FleetQuestType.STATE_DINNER) {
+                course = pickCourseName(ask.speciesId);
+            }
             return ask;
         }
 
@@ -460,6 +467,20 @@ public class FleetQuest extends FishJob {
             break;
         }
         if (signature == null) signature = "unregistered";
+    }
+
+    protected String pickCourseName(String excludedSpeciesId) {
+        List<FishSpec> courses = new ArrayList<>();
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || spec.id.equals(excludedSpeciesId)) continue;
+            if (spec.rarity == FishRarity.LEGENDARY) continue;
+            if (!spec.tags.contains("fish") || spec.tags.contains("abyssal")) continue;
+
+            courses.add(spec);
+        }
+
+        return courses.isEmpty() ? "Red Snapper"
+                : courses.get(random().nextInt(courses.size())).getDisplayName();
     }
 
     protected boolean isOnRoster(String name) {
@@ -616,6 +637,7 @@ public class FleetQuest extends FishJob {
                 .replace("{returnStrength}", value(returnStrength))
                 .replace("{stationOffset}", value(stationOffset))
                 .replace("{reacquisition}", value(reacquisition))
+                .replace("{course}", value(course))
                 .replace("{liability}", currentLiability())
                 .replace("{ask}", describeAsks())
                 .replace("{counterReward}", describeCounterRewards())
