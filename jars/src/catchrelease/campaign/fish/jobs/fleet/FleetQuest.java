@@ -198,8 +198,6 @@ public class FleetQuest extends FishJob {
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
                 .budgetMult(1.15f).random(random())).rewards);
 
-        days = QuestDuration.forAsks(giver, asks).days;
-
         setUpSpine();
 
         if (!setEntityMissionRef(giver, REF_KEY)) return false;
@@ -211,14 +209,17 @@ public class FleetQuest extends FishJob {
 
     // a rolled species can point at water that moved or vanished under the monthly
     // reassessment; a few rerolls give the shape another chance before the encounter
-    // is dropped entirely
+    // is dropped entirely. The one satisfiability scan also sizes the clock.
     protected FishRequirement rollFillableAsk(float target) {
         for (int i = 0; i < 4; i++) {
             FishRequirement ask = type.rollAsk(random(), target);
-            if (QuestDuration.satisfiableWithin(giver, List.of(ask),
-                    QuestDuration.MAX_SENSIBLE_LY)) {
-                return ask;
-            }
+
+            float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
+                    QuestDuration.MAX_SENSIBLE_LY);
+            if (nearest < 0f) continue;
+
+            days = QuestDuration.forTravelLY(nearest).days;
+            return ask;
         }
 
         return null;
