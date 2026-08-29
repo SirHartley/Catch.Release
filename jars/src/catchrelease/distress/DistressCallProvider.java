@@ -11,6 +11,10 @@ public interface DistressCallProvider {
 
     boolean onFleetSpawned(DistressCallInstance instance, CampaignFleetAPI fleet);
 
+    default String getIntelText(DistressCallInstance instance, CampaignFleetAPI fleet) {
+        return null;
+    }
+
     default void onExpired(DistressCallInstance instance, CampaignFleetAPI fleet) {
     }
 

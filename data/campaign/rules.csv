@@ -3894,9 +3894,19 @@ $distressFramework score:1300
 $hailing = true 0",,,
 distress_framework_open,OpenCommLink,"!$isHostile
 $entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,
+catchrelease_distressFleetQuestDetailedPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
+!$entity.catchrelease_fleetQuestTaken
+!$entity.isHostile
+$entity.catchrelease_fleetQuestHail score:1250","Call $catchrelease_jobRef showContactVisual
+CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+Call $catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions","$entity.catchrelease_fleetQuestHail
+
+$entity.catchrelease_fleetQuestPitch",,
 catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
 !$entity.catchrelease_fleetQuestTaken
-!$entity.isHostile","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
+!$entity.isHostile
+!$entity.catchrelease_fleetQuestHail score:1200","CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward
 Call $catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions","""$entity.catchrelease_fleetQuestPitch""
 

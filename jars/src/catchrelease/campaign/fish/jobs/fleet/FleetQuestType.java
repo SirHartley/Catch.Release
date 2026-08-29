@@ -567,6 +567,74 @@ public enum FleetQuestType {
                                     + " challenging performance.' We put that on the poster.\""
                                     + "\n\nHe gestures toward the tank.\n\n"
                                     + "\"Critics. Never waste a usable sentence.\""))),
+    FOLLOWER("The Follower",
+            FleetTypes.SUPPLY_FLEET,
+            "The escort commander brings up three days of sensor records.\n\n"
+                    + "\"We acquired an unidentified contact three days ago. Passive return"
+                    + " strength is {returnStrength}. It holds {stationOffset} from the"
+                    + " formation.\"\n\n"
+                    + "\"Paint it with active sensors and the return drops out. When we go"
+                    + " passive, we reacquire it at the same station. Course changes haven't"
+                    + " shaken it.\"\n\n"
+                    + "The commander closes the maneuver record.\n\n"
+                    + "\"Standing orders don't permit me to fire on an unclassified contact. I"
+                    + " am also not taking this logistics train toward inhabited space with it"
+                    + " in trail.\"\n\n"
+                    + "\"One of my ratings used to fish. He says fishing crews deal with"
+                    + " persistent contacts by releasing a specimen they're known to follow. I"
+                    + " do not enjoy having that sentence in the incident log, but it is the"
+                    + " only course with precedent.\"\n\n"
+                    + "\"On his recommendation, we need {ask}. Navy service voucher is {reward}."
+                    + " We can hold here for {days}.\"",
+            "Hegemony logistics formation {fleet} is holding off-lane with an unidentified sensor"
+                    + " contact maintaining station nearby. The commander has requested {ask} and"
+                    + " will hold position for {days}.",
+            "Holding off-lane",
+            "The logistics train forms up on its original course.\n\n"
+                    + "\"Incident filed under the nearest available category. Navigational"
+                    + " interference, source unclassified.\"\n\n"
+                    + "The commander looks across the compartment.\n\n"
+                    + "\"Good call, rating.\"\n\n"
+                    + "They turn back to the convoy plot.\n\n"
+                    + "\"We're resuming assigned course. {fleet} out.\"",
+            1.2f,
+            new Dialogue(
+                    "\"Hegemony logistics formation {fleet}. Requesting a civilian trade channel"
+                            + " for auxiliary services.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the request.",
+                    "\"Accepted. I'll transmit the request and service voucher authorization.\""
+                            + "\n\nThe files arrive from {fleet}.\n\n"
+                            + "\"Hail us when you have it.\"",
+                    "\"Understood. No commitment entered.\"\n\n"
+                            + "The commander transmits the same request and service voucher"
+                            + " authorization.\n\n"
+                            + "\"If you obtain it within the window, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll maintain position and seek another contractor.\"\n\n"
+                            + "\"{fleet} out.\"",
+                    "\"The contact remains at station. It has a permanent line on the watch log"
+                            + " now.\"\n\n"
+                            + "\"We have {days}. We still need {ask}.\"",
+                    "The rating comes up from the working deck to handle the release. He checks"
+                            + " the specimen against the request, then has the container moved"
+                            + " clear of the formation.\n\n"
+                            + "On the sensor plot, {contactDesignation} breaks station and takes"
+                            + " the release bearing. The return weakens until it drops below"
+                            + " tracking threshold.\n\n"
+                            + "The commander enters the time and signs the watch log.",
+                    "What exactly is following you?",
+                    "The commander opens the contact record.\n\n"
+                            + "\"Designation: {contactDesignation}. Return strength:"
+                            + " {returnStrength}. Station-keeping offset: {stationOffset}."
+                            + " Reacquisition: {reacquisition}.\"\n\n"
+                            + "\"The first sensor entry is one watch before our recorded arrival"
+                            + " in-system. Time-sync query closed unresolved.\"\n\n"
+                            + "They return to the current watch log.",
+                    "The Navy service request is recorded on the following terms."),
+            "A Hegemony logistics formation is holding off-lane, its escort facing an empty"
+                    + " section of the sensor plot. An auxiliary-band request is asking passing"
+                    + " civilian ships for trade services."),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -652,6 +720,7 @@ public enum FleetQuestType {
     public final float rewardBudgetMult;
     public final Dialogue dialogue;
     public final Counteroffer counteroffer;
+    public final String distressIntel;
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks) {
@@ -660,12 +729,27 @@ public enum FleetQuestType {
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks, float rewardBudgetMult, Dialogue dialogue) {
-        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue, null);
+        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue, null,
+                null);
     }
 
     FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
                    String thanks, float rewardBudgetMult, Dialogue dialogue,
                    Counteroffer counteroffer) {
+        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue,
+                counteroffer, null);
+    }
+
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks, float rewardBudgetMult, Dialogue dialogue,
+                   String distressIntel) {
+        this(title, fleetType, pitch, note, actionText, thanks, rewardBudgetMult, dialogue, null,
+                distressIntel);
+    }
+
+    FleetQuestType(String title, String fleetType, String pitch, String note, String actionText,
+                   String thanks, float rewardBudgetMult, Dialogue dialogue,
+                   Counteroffer counteroffer, String distressIntel) {
         this.title = title;
         this.fleetType = fleetType;
         this.pitch = pitch;
@@ -675,6 +759,7 @@ public enum FleetQuestType {
         this.rewardBudgetMult = rewardBudgetMult;
         this.dialogue = dialogue;
         this.counteroffer = counteroffer;
+        this.distressIntel = distressIntel;
     }
 
     public static class Dialogue {
@@ -1029,6 +1114,20 @@ public enum FleetQuestType {
                 if (attempt == 0 && target >= 45f) ask.minGrade = FishGrade.FINE;
                 break;
 
+            case FOLLOWER: {
+                ask.speciesId = pickNearbySpecies(random, home, FishRarity.RARE);
+                FishSpec spec = FishSpecLoader.getFishSpec(ask.speciesId);
+                if (spec == null) return null;
+
+                if (target >= 28f) {
+                    float fraction = 0.55f + Math.min(0.3f, (target - 28f) / 100f);
+                    float floor = Math.round(spec.weightMax * fraction * 10f) / 10f;
+                    ask.minWeight = Math.max(spec.weightMin,
+                            Math.min(spec.weightMax, floor));
+                }
+                break;
+            }
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -1108,6 +1207,10 @@ public enum FleetQuestType {
         if (this == HEADLINER) {
             request.exclude(QuestRewards.Kind.BACKDROP);
             request.tierFloor(DemandScore.Tier.HARD);
+        }
+        if (this == FOLLOWER) {
+            request.exclude(QuestRewards.Kind.BACKDROP);
+            request.tierFloor(DemandScore.Tier.MEDIUM);
         }
         if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()

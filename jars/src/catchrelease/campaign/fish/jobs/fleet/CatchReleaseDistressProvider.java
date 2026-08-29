@@ -15,6 +15,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     public static final String PROVIDER_ID = "catchrelease_fleet_quests";
     public static final String STRANDED_ID = "catchrelease_stranded_fleet";
     public static final String DEAD_ENGINE_ID = "catchrelease_dead_engine";
+    public static final String FOLLOWER_ID = "catchrelease_follower";
 
     public static void register() {
         DistressCallFramework.registerProvider(PROVIDER_ID, new CatchReleaseDistressProvider());
@@ -49,10 +50,17 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (ref instanceof FleetQuest) ((FleetQuest) ref).abandon();
     }
 
+    @Override
+    public String getIntelText(DistressCallInstance instance, CampaignFleetAPI fleet) {
+        FleetQuestType type = instance == null ? null : typeFor(instance.getSpec());
+        return type == null ? null : type.distressIntel;
+    }
+
     private FleetQuestType typeFor(DistressCallSpec spec) {
         if (spec == null) return null;
         if (STRANDED_ID.equals(spec.id)) return FleetQuestType.STRANDED;
         if (DEAD_ENGINE_ID.equals(spec.id)) return FleetQuestType.SCAVENGER_ENGINE;
+        if (FOLLOWER_ID.equals(spec.id)) return FleetQuestType.FOLLOWER;
 
         return null;
     }

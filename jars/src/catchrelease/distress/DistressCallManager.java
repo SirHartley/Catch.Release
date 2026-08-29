@@ -354,6 +354,8 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         fleet.addScript(new DistressCallNormalAssignmentAI(fleet, data.system, data.jumpPoint));
 
         DistressCallIntel intel = new DistressCallIntel(data.system);
+        String intelText = provider.getIntelText(instance, fleet);
+        if (intelText != null && !intelText.isEmpty()) intel.setText(intelText);
         instance.intel = intel;
         Global.getSector().getIntelManager().addIntel(intel);
 
